@@ -1,6 +1,6 @@
 # TorUsage
 
-This project aims to visualize current and past usage of the tor network.
+This project aims to visualize current and past usage of the Tor network. Our first goal is to display the amount of public Tor nodes per country.
 
 ## Development
 
