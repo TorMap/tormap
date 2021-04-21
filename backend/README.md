@@ -16,5 +16,6 @@ On `Linux` systems you can use the main install script `./install`, also describ
 ## CLI Commands
 
 - `./gradlew`: Installs dependencies
+- `./gradlew bootRun`:  creates build, runs it and listens on http://localhost:8080/
 - `./gradlew build`: build, test, and analyze the project
 - On `Windows` replace `./gradlew` with `./gradlew.bat` for all commands mentioned above
