@@ -2,3 +2,4 @@
 .vscode/
 yarn.lock
 node_modules/
+*.iml
