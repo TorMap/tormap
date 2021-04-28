@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit
 
 
 @Service
-class OnionooClient(
-    @Value("\${onionoo.baseurl}") private val onionooBaseurl: String,
+class OnionooApiClient(
+    @Value("\${onionoo.api.baseurl}") private val onionooBaseurl: String,
     webClientBuilder: WebClient.Builder
 ) {
     private val webClient: WebClient = webClientBuilder.baseUrl(onionooBaseurl).build()
@@ -27,8 +27,7 @@ class OnionooClient(
         seenSinceUTCDate: Date? = null,
         torNodeType: TorNodeType? = null
     ): OnionooDetailsResponse {
-
-        val uriBuilder: UriBuilder = UriComponentsBuilder.fromPath("/details")
+        val uriBuilder: UriBuilder = UriComponentsBuilder.fromUriString("$onionooBaseurl/details")
             .queryParamIfPresent("limit", Optional.ofNullable(limit))
             .queryParamIfPresent("type", Optional.ofNullable(torNodeType?.apiName))
 
