@@ -1,8 +1,0 @@
-{
-  "properties": [
-    {
-      "name": "onionoo.baseurl",
-      "type": "java.lang.String",
-      "description": "Description for onionoo.baseurl."
-  }
-] }

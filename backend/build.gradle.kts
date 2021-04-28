@@ -23,7 +23,6 @@ dependencies {
     // Spring Boot
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
-    implementation("org.springframework.boot:spring-boot-configuration-processor")
 
     // Serialization & Deserialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
