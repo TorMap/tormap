@@ -1,6 +1,4 @@
-create schema data;
-
-create table data.relays
+create table public.relays
 (
     nickname varchar(19),
     fingerprint char(40),
@@ -30,5 +28,5 @@ create table data.relays
     hibernating bool
 );
 
-comment on table data.relays is 'relay information from onionoo/details query';
+comment on table public.relays is 'relay information from onionoo/details query';
 

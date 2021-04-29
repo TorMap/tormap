@@ -30,7 +30,7 @@ dependencies {
 
     // Database Stuff
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
-
+    implementation("org.postgresql:postgresql")
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
