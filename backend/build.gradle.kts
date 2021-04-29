@@ -28,6 +28,9 @@ dependencies {
     // Serialization & Deserialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
+    // Database Stuff
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
