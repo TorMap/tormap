@@ -1,6 +1,4 @@
-create schema data;
-
-create table data.relays
+create table public.relays
 (
     nickname varchar(19),
     fingerprint char(40),

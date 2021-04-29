@@ -1,6 +1,7 @@
 package com.torusage
 
 import com.torusage.common.logger
+import com.torusage.database.DatabaseController
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -13,17 +14,13 @@ import java.time.ZonedDateTime
 
 
 @SpringBootApplication
-class TorUsageApplication: ApplicationRunner {
+class TorUsageApplication(
+    val dbController: DatabaseController
+) : ApplicationRunner {
 
     override fun run(args: ApplicationArguments) {
         logger().info("TorUsage backend started successfully, running in timezone: " + ZonedDateTime.now().zone)
-        logger().info("Get test data from Onionoo Service:")
-        val client = HttpClient.newBuilder().build();
-        val request = HttpRequest.newBuilder()
-            .uri(URI.create("https://onionoo.torproject.org/summary?limit=5"))
-            .build();
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        logger().info(response.body())
+        dbController.run()
     }
 
 }
