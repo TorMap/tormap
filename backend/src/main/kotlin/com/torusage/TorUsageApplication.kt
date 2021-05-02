@@ -1,6 +1,7 @@
 package com.torusage
 
 import com.torusage.adapter.OnionooApiClient
+import com.torusage.adapter.TorNodeType
 import com.torusage.common.logger
 import com.torusage.database.DatabaseController
 import org.springframework.boot.ApplicationArguments
@@ -16,7 +17,7 @@ import java.time.ZonedDateTime
 
 @SpringBootApplication
 class TorUsageApplication(
-    private val dbController: DatabaseController,
+    //private val dbController: DatabaseController,
     private val onionooApiClient: OnionooApiClient
 ) : ApplicationRunner {
 
@@ -26,7 +27,9 @@ class TorUsageApplication(
         val response = onionooApiClient.getTorNodeDetails(limit = 15)
         logger().info("Relays count: ${response.relays.size}")
         logger().info("Bridges count: ${response.bridges.size}")
-        dbController.run()
+        val summaryResponse = onionooApiClient.getTorNodeSummary(limit = 4)
+        logger().info("${summaryResponse.relays.size}")
+        //dbController.run()
     }
 
 }
