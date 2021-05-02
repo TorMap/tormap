@@ -1,6 +1,7 @@
 package com.torusage.adapter
 
 import com.torusage.model.OnionooDetailsResponse
+import com.torusage.model.OnionooSummaryResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -42,6 +43,36 @@ class OnionooApiClient(
             .retrieve()
             .bodyToMono(
                 OnionooDetailsResponse::class.java
+            )
+
+        return response.block(Duration.ofSeconds(60))
+            ?: throw Exception("Could not get tor node details!")
+    }
+
+    /**
+     * Get the historic summary of Tor relays
+     * @param
+     */
+    fun getTorNodeSummary(
+        limit: Int? = null,
+        seenSinceUTCDate: Date? = null,
+        torNodeType: TorNodeType? = null
+    ): OnionooSummaryResponse {
+        val uriBuilder: UriBuilder = UriComponentsBuilder.fromUriString("$onionooBaseurl/summary")
+            .queryParamIfPresent("limit", Optional.ofNullable(limit))
+            .queryParamIfPresent("type", Optional.ofNullable(torNodeType?.apiName))
+
+        if(seenSinceUTCDate != null) {
+            val millisecondsDifference = Date().time - seenSinceUTCDate.time
+            val dayDifference = TimeUnit.DAYS.convert(millisecondsDifference, TimeUnit.MILLISECONDS)
+            uriBuilder.queryParam("last_seen_days", "0-$dayDifference")
+        }
+
+        val response = webClient.get()
+            .uri { uriBuilder.build() }
+            .retrieve()
+            .bodyToMono(
+                OnionooSummaryResponse::class.java
             )
 
         return response.block(Duration.ofSeconds(60))
