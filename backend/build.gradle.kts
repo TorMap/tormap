@@ -5,6 +5,8 @@ plugins {
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     kotlin("jvm") version "1.4.32"
     kotlin("plugin.spring") version "1.4.32"
+    kotlin("plugin.allopen") version "1.4.32"
+    kotlin("plugin.jpa") version "1.4.32"
 }
 
 group = "com.torusage"
@@ -30,12 +32,16 @@ dependencies {
     // Database Stuff
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.postgresql:postgresql")
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+
+allOpen {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.Embeddable")
+    annotation("javax.persistence.MappedSuperclass")
 }
 
 tasks.withType<KotlinCompile> {
