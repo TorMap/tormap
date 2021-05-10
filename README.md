@@ -47,10 +47,10 @@ It’s OK if `apt-get` reports that none of these packages are installed.
 
 ### Setup postgres database in Docker
 Setup a container with a postgres database  
-`docker run --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -d postgres -p 5432:5432`  
+`docker run --name tor-usage-postgres -e POSTGRES_PASSWORD=mysecretpassword -d postgres -p 5432:5432`  
 Port is localhost:5432  
 User: postgres  
 Password: mysecretpassword
 
 ### remove existing container
-`docker rm -f some-postgres`
+`docker rm -f tor-usage-postgres`
