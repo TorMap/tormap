@@ -1,8 +1,12 @@
 package com.torusage.model
 
-data class RelaySummary (
-    val n: String,
-    val f: String,
-    val a: List<String>,
-    val r: Boolean,
+import javax.persistence.*
+
+@Entity
+class RelaySummary (
+    var n: String,
+    var f: String,
+    var a: String,
+    var r: Boolean,
+    @Id @GeneratedValue var id: Long? = null
 )
