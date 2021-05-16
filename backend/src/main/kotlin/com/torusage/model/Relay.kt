@@ -1,48 +1,78 @@
 package com.torusage.model
 
-data class Relay(
-    val nickname: String,
-    val fingerprint: String,
-    val or_addresses: List<String>,
-    val exit_addresses: List<String>?,
-    val dir_address: String?,
-    val last_seen: String,
-    val last_changed_address_or_port: String,
-    val first_seen: String,
-    val running: Boolean,
-    val flags: List<String>?,
-    val country: String?,
-    val country_name: String?,
-    val region_name: String?,
-    val city_name: String?,
-    val latitude: Double?,
-    val longitude: Double?,
-    val `as`: String?,
-    val as_name: String?,
-    val consensus_weight: Int,
-    val verified_host_names: List<String>?,
-    val last_restarted: String?,
-    val bandwidth_rate: Int?,
-    val bandwidth_burst: Int?,
-    val observed_bandwidth: Int?,
-    val advertised_bandwidth: Int?,
-    val exit_policy: List<String>?,
-    val exit_policy_summary: ExitPolicySummary?,
-    val exit_policy_v6_summary: ExitPolicySummary?,
-    val platform: String?,
-    val version: String?,
-    val version_status: String?,
-    val effective_family: List<String>?,
-    val recommended_version: Boolean?,
-    val measured: Boolean?,
-    val contact: String?,
-    val alleged_family: List<String>?,
-    val indirect_family: List<String>?,
-    val consensus_weight_fraction: Double?,
-    val guard_probability: Double?,
-    val middle_probability: Double?,
-    val exit_probability: Double?,
-    val hibernating: Boolean?,
-    val unverified_host_names: List<String>?,
-    val unreachable_or_addresses: List<String>?,
+import javax.persistence.*
+
+@Entity
+class Relay(
+    var nickname: String,
+    @Id
+    var fingerprint: String,
+
+    @ElementCollection
+    var or_addresses: List<String>,
+
+    @ElementCollection
+    var exit_addresses: List<String>?,
+    var dir_address: String?,
+    var last_seen: String,
+    var last_changed_address_or_port: String,
+    var first_seen: String,
+    var running: Boolean,
+
+    @ElementCollection
+    var flags: List<String>?,
+    var country: String?,
+    var country_name: String?,
+    var region_name: String?,
+    var city_name: String?,
+    var latitude: Double?,
+    var longitude: Double?,
+    var `as`: String?,
+    var as_name: String?,
+    var consensus_weight: Int,
+
+    @ElementCollection
+    var verified_host_names: List<String>?,
+    var last_restarted: String?,
+    var bandwidth_rate: Int?,
+    var bandwidth_burst: Int?,
+    var observed_bandwidth: Int?,
+    var advertised_bandwidth: Int?,
+
+    @ElementCollection
+    var exit_policy: List<String>?,
+
+    @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name = "exit_policy_summary_id", referencedColumnName = "id")
+    var exit_policy_summary: ExitPolicySummary?,
+
+    @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name = "exit_policy_v6_summary_id", referencedColumnName = "id")
+    var exit_policy_v6_summary: ExitPolicySummary?,
+    var platform: String?,
+    var version: String?,
+    var version_status: String?,
+
+    @ElementCollection
+    var effective_family: List<String>?,
+    var recommended_version: Boolean?,
+    var measured: Boolean?,
+    var contact: String?,
+
+    @ElementCollection
+    var alleged_family: List<String>?,
+
+    @ElementCollection
+    var indirect_family: List<String>?,
+    var consensus_weight_fraction: Double?,
+    var guard_probability: Double?,
+    var middle_probability: Double?,
+    var exit_probability: Double?,
+    var hibernating: Boolean?,
+
+    @ElementCollection
+    var unverified_host_names: List<String>?,
+
+    @ElementCollection
+    var unreachable_or_addresses: List<String>?,
 )
