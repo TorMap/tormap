@@ -4,7 +4,7 @@ import com.torusage.model.Relay
 import com.torusage.model.RelaySummary
 import org.springframework.data.repository.CrudRepository
 
-interface RelayRepositories : CrudRepository<Relay, Long>{
-    fun findByN(n: String): Relay?
+interface RelaySummaryRepositories : CrudRepository<RelaySummary, Long>{
+    fun findByN(n: String): RelaySummary?
     //fun findAllByOOrderByN(): Iterable<RelaySummary>
 }

@@ -6,7 +6,10 @@ import javax.persistence.*
 class RelaySummary (
     var n: String,
     var f: String,
-    var a: String,
+
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    var a: List<String>,
     var r: Boolean,
     @Id @GeneratedValue var id: Long? = null
 )

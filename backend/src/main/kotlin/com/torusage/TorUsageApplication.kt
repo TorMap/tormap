@@ -25,8 +25,12 @@ class TorUsageApplication(
 
     override fun run(args: ApplicationArguments) {
         logger().info("TorUsage backend started successfully, running in timezone: " + ZonedDateTime.now().zone)
-        val test = RelaySummary("test","test", "test", true)
+        val testList = listOf("a","b")
+        val test = RelaySummary("test","test", a = testList, true)
         relaySummaryRepositories.save(test)
+        logger().info(relaySummaryRepositories.findByN("test")!!.f)
+        var a = relaySummaryRepositories.findByN("test")!!.a
+        var testrepo = relaySummaryRepositories.findAll()
     }
 
 }
