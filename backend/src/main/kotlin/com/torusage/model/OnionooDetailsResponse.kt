@@ -8,7 +8,7 @@ data class OnionooDetailsResponse(
     val version: String,
     val build_revision: String?,
     val relays_published: String,
-  //  val relays: List<Relay>,
+    val relays: List<Relay>,
     val bridges_published: String,
-   // val bridges: List<Bridge>
+    val bridges: List<Bridge>
 )

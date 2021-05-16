@@ -11,5 +11,8 @@ class RelaySummary (
     @ElementCollection(fetch = FetchType.EAGER)
     var a: List<String>,
     var r: Boolean,
-    @Id @GeneratedValue var id: Long? = null
+
+    @Id
+    @GeneratedValue
+    var id: Long? = null
 )
