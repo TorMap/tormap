@@ -49,7 +49,6 @@ class OnionooApiClient(
      * If no [torNodeType] but a [limitCount] is set, relays are returned first.
      * If all limits are set null, all historic nodes provided by the
      * [Onionoo API](https://metrics.torproject.org/onionoo.html) are downloaded.
-     *
      */
     private fun <T> getOnionnoResponse(
         apiEndpoint: String,
