@@ -2,7 +2,7 @@ package com.torusage
 
 import com.torusage.common.logger
 import com.torusage.database.RelaySummaryRepositories
-import com.torusage.model.RelaySummary
+import com.torusage.database.entities.RelaySummary
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
