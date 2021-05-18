@@ -1,17 +1,17 @@
-package com.torusage.model
+package com.torusage.database.entities
 
 import javax.persistence.*
 
 @Entity
 class Relay(
-    //identification
+    // Identification
     @Column(length = 19)
     var nickname: String,
 
     @Id @Column(length = 40)
     var fingerprint: String,
 
-    //networking
+    // Networking
     @ElementCollection
     var or_addresses: List<String>,
 

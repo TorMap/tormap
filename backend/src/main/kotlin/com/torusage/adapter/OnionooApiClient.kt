@@ -1,7 +1,7 @@
 package com.torusage.adapter
 
-import com.torusage.model.OnionooDetailsResponse
-import com.torusage.model.OnionooSummaryResponse
+import com.torusage.adapter.model.OnionooDetailsResponse
+import com.torusage.adapter.model.OnionooSummaryResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient

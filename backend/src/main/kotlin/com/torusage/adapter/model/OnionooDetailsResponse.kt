@@ -1,8 +1,10 @@
-package com.torusage.model
+package com.torusage.adapter.model
+
+import com.torusage.database.entities.Bridge
+import com.torusage.database.entities.Relay
 
 /**
- * A response by the Onionoo API service of the Torproject
- * @see [Onionoo API Documentation](https://metrics.torproject.org/onionoo.html)
+ * A details response by the [Onionoo API](https://metrics.torproject.org/onionoo.html) of the Torproject.
  */
 data class OnionooDetailsResponse(
     val version: String,
