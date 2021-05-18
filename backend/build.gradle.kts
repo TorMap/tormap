@@ -1,10 +1,18 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    // Spring
     id("org.springframework.boot") version "2.4.5"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
+
+    // Kotlin extensions
     kotlin("jvm") version "1.4.32"
     kotlin("plugin.spring") version "1.4.32"
+    kotlin("plugin.allopen") version "1.4.32"
+    kotlin("plugin.jpa") version "1.4.32"
+
+    // Code documentation
+    id("org.jetbrains.dokka") version "1.4.32"
 }
 
 group = "com.torusage"
@@ -27,8 +35,22 @@ dependencies {
     // Serialization & Deserialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
+    // Database
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    runtimeOnly("com.h2database:h2")
+
+    // Code documentation
+    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.4.32")
+
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+
+allOpen {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.Embeddable")
+    annotation("javax.persistence.MappedSuperclass")
 }
 
 tasks.withType<KotlinCompile> {
