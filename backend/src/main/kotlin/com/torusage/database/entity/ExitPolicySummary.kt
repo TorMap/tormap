@@ -1,4 +1,4 @@
-package com.torusage.database.entities
+package com.torusage.database.entity
 
 import javax.persistence.*
 
@@ -14,7 +14,4 @@ class ExitPolicySummary(
 
     @ElementCollection
     var accept: List<String>?,
-
-    @OneToOne(mappedBy = "exit_policy_summary")
-    var relay: Relay
 )

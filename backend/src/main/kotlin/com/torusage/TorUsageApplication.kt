@@ -1,8 +1,8 @@
 package com.torusage
 
 import com.torusage.common.logger
-import com.torusage.database.RelaySummaryRepositories
-import com.torusage.database.entities.RelaySummary
+import com.torusage.database.repository.RelaySummaryRepository
+import com.torusage.database.entity.RelaySummary
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -15,7 +15,7 @@ import javax.persistence.EntityManager
 @SpringBootApplication
 @EnableScheduling
 class TorUsageApplication(
-    val relaySummaryRepositories: RelaySummaryRepositories,
+    val relaySummaryRepository: RelaySummaryRepository,
     val entityManager: EntityManager
 ) : ApplicationRunner {
 
@@ -23,10 +23,10 @@ class TorUsageApplication(
         logger().info("TorUsage backend started successfully, running in timezone: " + ZonedDateTime.now().zone)
         val testList = listOf("a","b")
         val test = RelaySummary("test","test", a = testList, true)
-        relaySummaryRepositories.save(test)
-        logger().info(relaySummaryRepositories.findByN("test")!!.f)
-        var a = relaySummaryRepositories.findByN("test")!!.a
-        var testrepo = relaySummaryRepositories.findAll()
+        relaySummaryRepository.save(test)
+        logger().info(relaySummaryRepository.findByN("test")!!.f)
+        var a = relaySummaryRepository.findByN("test")!!.a
+        var testrepo = relaySummaryRepository.findAll()
     }
 
 }

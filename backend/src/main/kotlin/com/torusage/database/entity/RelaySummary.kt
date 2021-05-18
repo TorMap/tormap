@@ -1,4 +1,4 @@
-package com.torusage.database.entities
+package com.torusage.database.entity
 
 import javax.persistence.*
 
