@@ -1,7 +1,5 @@
 package com.torusage
 
-import com.torusage.adapter.OnionooApiClient
-import com.torusage.adapter.TorNodeType
 import com.torusage.common.logger
 import com.torusage.database.RelaySummaryRepositories
 import com.torusage.model.RelaySummary
@@ -10,10 +8,6 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.scheduling.annotation.EnableScheduling
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.time.ZonedDateTime
 import javax.persistence.EntityManager
 

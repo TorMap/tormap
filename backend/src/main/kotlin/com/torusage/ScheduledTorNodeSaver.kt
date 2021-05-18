@@ -12,7 +12,6 @@ class ScheduledTorNodeSaver(
     val relaySummaryRepositories: RelaySummaryRepositories,
     val onionooApiClient: OnionooApiClient,
 ) {
-
     /**
      * Fetches Tor node data every 30 seconds and saves corresponding entities in DB.
      */
