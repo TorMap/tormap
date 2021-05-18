@@ -51,7 +51,7 @@ class OnionooApiClient(
      * [Onionoo API](https://metrics.torproject.org/onionoo.html) are downloaded.
      *
      */
-    fun <T> getOnionnoResponse(
+    private fun <T> getOnionnoResponse(
         apiEndpoint: String,
         responseClass: Class<T>,
         limitCount: Int?,
