@@ -9,6 +9,7 @@ import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.scheduling.annotation.EnableScheduling
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -18,6 +19,7 @@ import javax.persistence.EntityManager
 
 
 @SpringBootApplication
+@EnableScheduling
 class TorUsageApplication(
     val relaySummaryRepositories: RelaySummaryRepositories,
     val entityManager: EntityManager
