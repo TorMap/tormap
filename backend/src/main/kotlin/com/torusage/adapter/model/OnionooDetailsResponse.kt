@@ -1,7 +1,7 @@
 package com.torusage.adapter.model
 
-import com.torusage.database.entities.Bridge
-import com.torusage.database.entities.Relay
+import com.torusage.database.entity.Bridge
+import com.torusage.database.entity.Relay
 
 /**
  * A details response by the [Onionoo API](https://metrics.torproject.org/onionoo.html) of the Torproject.
