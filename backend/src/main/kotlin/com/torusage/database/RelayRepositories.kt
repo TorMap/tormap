@@ -1,6 +1,6 @@
 package com.torusage.database
 
-import com.torusage.model.Relay
+import com.torusage.database.entities.Relay
 import org.springframework.data.repository.CrudRepository
 
 interface RelayRepositories : CrudRepository<Relay, Long>{

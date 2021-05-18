@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 
 
 @Component
-class ScheduledTorNodeSaver(
+class ScheduledTorNodeManager(
     val relaySummaryRepositories: RelaySummaryRepositories,
     val onionooApiClient: OnionooApiClient,
 ) {

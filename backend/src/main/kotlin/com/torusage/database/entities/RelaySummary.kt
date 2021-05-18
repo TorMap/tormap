@@ -1,18 +1,14 @@
-package com.torusage.model
+package com.torusage.database.entities
 
 import javax.persistence.*
 
 @Entity
 class RelaySummary (
-    var n: String,
+    @Id
     var f: String,
-
+    var n: String,
 
     @ElementCollection(fetch = FetchType.EAGER)
     var a: List<String>,
     var r: Boolean,
-
-    @Id
-    @GeneratedValue
-    var id: Long? = null
 )
