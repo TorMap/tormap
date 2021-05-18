@@ -1,4 +1,4 @@
-package com.torusage.database.entities
+package com.torusage.database.entity
 
 import javax.persistence.*
 
@@ -68,6 +68,8 @@ class Relay(
     var version_status: String?,
     var recommended_version: Boolean?,
     var measured: Boolean?,
+
+    @Column(length = 100000)
     var contact: String?,
     var consensus_weight_fraction: Double?,
     var guard_probability: Double?,
