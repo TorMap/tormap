@@ -10,9 +10,11 @@ import javax.persistence.*
 class RelaySummary (
     @Id
     var f: String,
+
     var n: String,
 
     @ElementCollection(fetch = FetchType.EAGER)
     var a: List<String>,
+
     var r: Boolean,
 )
