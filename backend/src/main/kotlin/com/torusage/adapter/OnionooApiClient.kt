@@ -11,7 +11,10 @@ import java.time.Duration
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-
+/**
+ * This is an client for downloading data regarding the Tor network from the
+ * [Onionoo API](https://metrics.torproject.org/onionoo.html).
+ */
 @Service
 class OnionooApiClient(
     @Value("\${onionoo.api.baseurl}") private val onionooBaseurl: String,
@@ -80,6 +83,10 @@ class OnionooApiClient(
     }
 }
 
+/**
+ * Tor nodes fetched from the Onionoo API belong in one of the categories "relay" or "bridge".
+ * [See differences](https://community.torproject.org/relay/types-of-relays/)
+ */
 enum class TorNodeType(val apiReferenceName: String) {
     RELAY("relay"),
     BRIDGE("bridge"),
