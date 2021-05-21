@@ -4,7 +4,7 @@ import com.torusage.database.entity.BridgeSummary
 import com.torusage.database.entity.RelaySummary
 
 /**
- * A summary response by the [Onionoo API](https://metrics.torproject.org/onionoo.html) of the Torproject.
+ * A summary response by the [Onionoo API](https://metrics.torproject.org/onionoo.html#responses) of the Torproject.
  */
 data class OnionooSummaryResponse(
     val version: String,
