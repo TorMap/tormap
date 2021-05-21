@@ -1,16 +1,16 @@
 package com.torusage
 
 import com.torusage.adapter.OnionooApiClient
-import com.torusage.common.logger
 import com.torusage.database.repository.BridgeRepository
 import com.torusage.database.repository.BridgeSummaryRepository
 import com.torusage.database.repository.RelayRepository
 import com.torusage.database.repository.RelaySummaryRepository
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
-
+/**
+ * This scheduler defines reoccurring events to process data about Tor nodes.
+ */
 @Component
 class ScheduledTorNodeManager(
     val onionooApiClient: OnionooApiClient,
@@ -20,7 +20,7 @@ class ScheduledTorNodeManager(
     val bridgeSummaryRepository: BridgeSummaryRepository,
 ) {
     /**
-     * Fetches Tor node summary every hour and stores corresponding entities in DB.
+     * Fetches Tor node summary every hour and stores corresponding entities in DB
      */
     @Scheduled(fixedRate = 3600000)
     fun fetchAndStoreTorNodeSummary() {
@@ -32,7 +32,7 @@ class ScheduledTorNodeManager(
     }
 
     /**
-     * Fetches Tor node details every hour and stores corresponding entities in DB.
+     * Fetches Tor node details every hour and stores corresponding entities in DB
      */
     @Scheduled(fixedRate = 3600000)
     fun fetchAndStoreTorNodeDetails() {

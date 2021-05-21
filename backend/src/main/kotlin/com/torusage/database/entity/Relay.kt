@@ -2,6 +2,10 @@ package com.torusage.database.entity
 
 import javax.persistence.*
 
+/**
+ * This entity matches the [Relay details object](https://metrics.torproject.org/onionoo.html#details_relay)
+ * of the Onionoo API and is also used to generate the DB structure.
+ */
 @Entity
 class Relay(
     // Identification

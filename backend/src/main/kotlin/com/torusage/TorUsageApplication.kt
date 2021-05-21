@@ -1,6 +1,5 @@
 package com.torusage
 
-import com.torusage.common.logger
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -8,10 +7,12 @@ import org.springframework.boot.runApplication
 import org.springframework.scheduling.annotation.EnableScheduling
 import java.time.ZonedDateTime
 
-
+/**
+ * Configure basic Spring Boot application
+ */
 @SpringBootApplication
 @EnableScheduling
-class TorUsageApplication() : ApplicationRunner {
+class TorUsageApplication : ApplicationRunner {
 
     override fun run(args: ApplicationArguments) {
         logger().info("TorUsage backend started successfully, running in timezone: " + ZonedDateTime.now().zone)
@@ -19,6 +20,9 @@ class TorUsageApplication() : ApplicationRunner {
 
 }
 
+/**
+ * Main method to start backend application
+ */
 fun main(args: Array<String>) {
     runApplication<TorUsageApplication>(*args)
 }
