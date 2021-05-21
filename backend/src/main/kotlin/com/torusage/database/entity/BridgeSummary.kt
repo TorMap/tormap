@@ -10,6 +10,8 @@ import javax.persistence.*
 class BridgeSummary (
     @Id
     var h: String,
+
     var n: String,
+
     var r: Boolean,
 )
