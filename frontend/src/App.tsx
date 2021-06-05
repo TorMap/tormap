@@ -5,14 +5,17 @@ import * as test_data from './Example-data-details.json';
 
 function App() {
   return (
-        <MapContainer center={[0,0]} zoom={3} scrollWheelZoom={false}>
+        <MapContainer center={[15,0]} zoom={3} scrollWheelZoom={false} >
             <TileLayer
-                attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                subdomains="abcd"
+                maxZoom={19}
+                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+
             />
             {
                 test_data.relays.map(relay => {
-                    if (!(isNaN(relay.latitude))) {
+                    if (relay.latitude !== undefined) {
                         return  (<Marker
                                     key={relay.nickname}
                                     position={[relay.latitude, relay.longitude]}
