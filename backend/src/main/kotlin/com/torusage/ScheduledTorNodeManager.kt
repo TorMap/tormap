@@ -1,10 +1,8 @@
 package com.torusage
 
 import com.torusage.adapter.OnionooApiClient
-import com.torusage.database.repository.BridgeRepository
-import com.torusage.database.repository.BridgeSummaryRepository
-import com.torusage.database.repository.RelayRepository
-import com.torusage.database.repository.RelaySummaryRepository
+import com.torusage.database.repository.*
+import com.torusage.database.view.RelayView
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
