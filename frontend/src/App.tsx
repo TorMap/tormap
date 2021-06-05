@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
 import {MapContainer, Marker, TileLayer} from "react-leaflet";
-import * as test_data from './Example-data-details.json';
+import * as test_data from './relays.json';
 
 function App() {
   return (
@@ -17,10 +17,10 @@ function App() {
                 test_data.relays.map(relay => {
                     if (relay.latitude !== undefined) {
                         return  (<Marker
-                                    key={relay.nickname}
+                                    key={relay.fingerprint}
                                     position={[relay.latitude, relay.longitude]}
                                 />)
-                    } else {return -1};
+                    } else {return -1}
                 })
             }
         </MapContainer>
