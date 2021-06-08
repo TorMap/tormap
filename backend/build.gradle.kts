@@ -1,18 +1,18 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    val kotlinVersion = "1.4.32"
+    kotlin("jvm") version kotlinVersion
+    kotlin("plugin.spring") version kotlinVersion
+    kotlin("plugin.allopen") version kotlinVersion
+    kotlin("plugin.jpa") version kotlinVersion
+
+    // Code documentation
+    id("org.jetbrains.dokka") version kotlinVersion
+
     // Spring
     id("org.springframework.boot") version "2.4.5"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-
-    // Kotlin extensions
-    kotlin("jvm") version "1.4.32"
-    kotlin("plugin.spring") version "1.4.32"
-    kotlin("plugin.allopen") version "1.4.32"
-    kotlin("plugin.jpa") version "1.4.32"
-
-    // Code documentation
-    id("org.jetbrains.dokka") version "1.4.32"
 }
 
 group = "com.torusage"
@@ -25,14 +25,14 @@ repositories {
 
 dependencies {
     // Kotlin
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    kotlin("reflect")
+    kotlin("stdlib-jdk8")
 
     // Spring Boot
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-    // Serialization & Deserialization
+    // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     // Database
@@ -41,7 +41,7 @@ dependencies {
     runtimeOnly("com.h2database:h2")
 
     // Code documentation
-    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.4.32")
+    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin")
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
