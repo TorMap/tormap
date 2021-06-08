@@ -6,13 +6,15 @@ export const WorldMap = () => {
     const [relays, setRelays] = useState<Relay[]>([])
 
     useEffect(() => {
+        console.log("Fetching relays")
         fetch('http://localhost:8080/node/relays')
         .then(res => res.json())
         .then((data) => {
             setRelays(data)
+            console.log("Fetched relays")
         })
         .catch(console.log)
-    });
+    }, []);
 
     return (
         <MapContainer center={[15,0]} zoom={3} scrollWheelZoom={false}>
