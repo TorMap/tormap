@@ -1,10 +1,10 @@
 import React from 'react';
 import './App.css';
-import {Map} from "./components/Map";
+import {WorldMap} from "./components/world-map";
 
 function App() {
   return (
-      <Map/>
+      <WorldMap/>
   );
 }
 
