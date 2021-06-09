@@ -1,7 +1,7 @@
 export interface Relay {
     fingerprint: string;
-    first_seen: string;
-    last_seen: string;
+    firstSeen: string;
+    lastSeen: string;
     latitude: number;
     longitude: number;
 }
