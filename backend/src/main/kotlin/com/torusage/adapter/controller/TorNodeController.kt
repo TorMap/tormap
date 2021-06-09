@@ -21,8 +21,8 @@ class TorNodeController(
         return relays.filter { it.longitude != null && it.latitude != null }.map { RelayView(it) }
     }
 
-    @GetMapping("/relay/{fingerprint}")
-    fun getRelay(@PathVariable fingerprint: String): Relay {
-        return relayRepository.findByFingerprint(fingerprint) ?: throw NodeNotFoundException()
+    @GetMapping("/relay/{id}")
+    fun getRelay(@PathVariable id: Long): Relay {
+        return relayRepository.findById(id) ?: throw NodeNotFoundException()
     }
 }

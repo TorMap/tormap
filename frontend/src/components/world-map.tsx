@@ -1,6 +1,6 @@
 import {MapContainer, TileLayer} from "react-leaflet";
 import React, {useEffect, useState} from "react";
-import {RelayView} from "../types/relay-view";
+import {RelayView} from "../types/relay";
 import {apiBaseUrl} from "../util/constants";
 import {circleMarker, LeafletMouseEvent, Map} from "leaflet";
 import {PopupModal} from "./popup-modal";
@@ -12,8 +12,8 @@ export const WorldMap = () => {
 
     const onMarkerClick = (click: LeafletMouseEvent) => {
         console.log("Marker clicked, show node details")
-        const fingerprint = click.sourceTarget.options.className
-        fetch(apiBaseUrl + "/node/relay/" + fingerprint)
+        const relayId = click.sourceTarget.options.className
+        fetch(apiBaseUrl + "/node/relay/" + relayId)
             .then(response => response.json())
             .then((data: any) => {
                 setNodePopupContent(JSON.stringify(data))
@@ -29,10 +29,10 @@ export const WorldMap = () => {
             .then((relays: RelayView[]) => {
                 relays.forEach(relay => {
                     circleMarker(
-                        [relay.latitude, relay.longitude],
+                        [relay.lat, relay.long],
                         {
                             radius: 2,
-                            className: relay.fingerprint,
+                            className: relay.id,
                         },
                     )
                         .on("click", onMarkerClick)

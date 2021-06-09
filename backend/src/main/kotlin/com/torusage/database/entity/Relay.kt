@@ -6,12 +6,20 @@ import javax.persistence.*
  * This entity matches the [Relay details object](https://metrics.torproject.org/onionoo.html#details_relay)
  * of the Onionoo API and is also used to generate the DB structure.
  */
+@Suppress("unused")
 @Entity
 class Relay(
     /** Identification */
     @Id
     @Column(length = 40)
     var fingerprint: String,
+
+    @Column(
+        columnDefinition = "int8 DEFAULT nextval('hibernate_sequence')",
+        insertable = false,
+        unique = true,
+    )
+    var id: Long,
 
     @Column(length = 19)
     var nickname: String,
