@@ -6,4 +6,4 @@ import org.springframework.data.repository.CrudRepository
 /**
  * Repository to interact with DB table "BRIDGE"
  */
-interface BridgeRepository : CrudRepository<Bridge, Long>
+interface BridgeRepository : CrudRepository<Bridge, String>
