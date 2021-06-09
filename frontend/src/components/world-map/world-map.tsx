@@ -1,9 +1,10 @@
 import {MapContainer, TileLayer} from "react-leaflet";
 import React, {useEffect, useState} from "react";
-import {RelayView} from "../types/relay-view";
-import {apiBaseUrl} from "../util/constants";
+import {RelayView} from "../../types/relay-view";
+import {apiBaseUrl} from "../../util/constants";
 import {circleMarker, LeafletMouseEvent, Map} from "leaflet";
-import {PopupModal} from "./popup-modal";
+import {PopupModal} from "../popup-modal";
+import "./world-map.css"
 
 export const WorldMap = () => {
     const [showNodePopup, setShowNodePopup] = useState(false)
