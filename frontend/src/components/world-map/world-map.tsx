@@ -1,6 +1,6 @@
 import {MapContainer, TileLayer} from "react-leaflet";
 import React, {useEffect, useState} from "react";
-import {RelayView} from "../../types/relay-view";
+import {RelayView} from "../../types/relay";
 import {apiBaseUrl} from "../../util/constants";
 import {circleMarker, LeafletMouseEvent, Map} from "leaflet";
 import {PopupModal} from "../popup-modal";
