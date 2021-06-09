@@ -6,6 +6,7 @@ import javax.persistence.*
  * This entity matches the [Bridge details object](https://metrics.torproject.org/onionoo.html#details_bridge)
  * of the Onionoo API and is also used to generate the DB structure.
  */
+@Suppress("unused")
 @Entity
 data class Bridge(
     /** Identification */
