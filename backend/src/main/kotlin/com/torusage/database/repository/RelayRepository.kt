@@ -9,4 +9,5 @@ import org.springframework.data.repository.CrudRepository
  */
 interface RelayRepository : CrudRepository<Relay, String> {
     fun findById(id: Long): Relay?
+    fun findAllByLatitudeNotNullAndLongitudeNotNull(): Iterable<Relay>
 }
