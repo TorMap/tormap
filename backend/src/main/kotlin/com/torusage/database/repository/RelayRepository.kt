@@ -7,4 +7,6 @@ import org.springframework.data.repository.CrudRepository
 /**
  * Repository to interact with DB table "RELAY"
  */
-interface RelayRepository : CrudRepository<Relay, Long>
+interface RelayRepository : CrudRepository<Relay, Long> {
+    fun findByFingerprint(fingerprint: String): Relay?
+}
