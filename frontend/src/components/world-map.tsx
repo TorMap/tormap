@@ -1,32 +1,25 @@
-
-import {CircleMarker, MapContainer, TileLayer} from "react-leaflet";
+import {MapContainer, TileLayer} from "react-leaflet";
 import React, {useEffect, useState} from "react";
 import {RelayView} from "../types/relay-view";
 import {apiBaseUrl} from "../util/constants";
-import {LeafletEventHandlerFnMap, LeafletMouseEvent, Map} from "leaflet";
+import {circleMarker, LeafletMouseEvent, Map} from "leaflet";
 import {PopupModal} from "./popup-modal";
 
 export const WorldMap = () => {
-    const [relays, setRelays] = useState<RelayView[]>([])
     const [showNodePopup, setShowNodePopup] = useState(false)
     const [nodePopupContent, setNodePopupContent] = useState("")
+    let leafletMap: Map;
 
-    const onMapCreated = (map: Map) => {
-        // TODO configure map further if necessary
-    }
-
-    const markerEventHandlers: LeafletEventHandlerFnMap = {
-        click: (click: LeafletMouseEvent) => {
-            console.log("Marker clicked, show node details")
-            const fingerprint = click.sourceTarget.options.className
-            fetch(apiBaseUrl + "/node/relay/" + fingerprint)
-                .then(response => response.json())
-                .then((data: any) => {
-                    setNodePopupContent(JSON.stringify(data))
-                    setShowNodePopup(true)
-                })
-                .catch(console.log)
-        }
+    const onMarkerClick = (click: LeafletMouseEvent) => {
+        console.log("Marker clicked, show node details")
+        const fingerprint = click.sourceTarget.options.className
+        fetch(apiBaseUrl + "/node/relay/" + fingerprint)
+            .then(response => response.json())
+            .then((data: any) => {
+                setNodePopupContent(JSON.stringify(data))
+                setShowNodePopup(true)
+            })
+            .catch(console.log)
     }
 
     useEffect(() => {
@@ -34,10 +27,20 @@ export const WorldMap = () => {
         fetch(apiBaseUrl + "/node/relays")
             .then(response => response.json())
             .then((relays: RelayView[]) => {
-                setRelays(relays)
-                console.log("Fetched relays")
+                relays.forEach(relay => {
+                    circleMarker(
+                        [relay.latitude, relay.longitude],
+                        {
+                            radius: 2,
+                            className: relay.fingerprint,
+                        },
+                    )
+                        .on("click", onMarkerClick)
+                        .addTo(leafletMap);
+                });
             })
             .catch(console.log)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -50,7 +53,9 @@ export const WorldMap = () => {
             zoomDelta={0.5}
             wheelPxPerZoomLevel={200}
             preferCanvas={true}
-            whenCreated={onMapCreated}
+            whenCreated={(newMap: Map) => {
+                leafletMap = newMap
+            }}
         >
             <PopupModal
                 show={showNodePopup}
@@ -64,15 +69,6 @@ export const WorldMap = () => {
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                 noWrap={true}
             />
-            {relays.map(relay =>
-                <CircleMarker
-                    key={relay.fingerprint}
-                    className={relay.fingerprint}
-                    center={[relay.latitude, relay.longitude]}
-                    radius={1}
-                    eventHandlers={markerEventHandlers}
-                />
-            )}
         </MapContainer>
     );
 };
