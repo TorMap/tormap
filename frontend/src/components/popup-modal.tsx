@@ -1,6 +1,5 @@
 import React from 'react';
 import Popup from 'reactjs-popup';
-import 'reactjs-popup/dist/index.css';
 
 interface Props {
     /**
@@ -19,6 +18,6 @@ interface Props {
 
 export const PopupModal: React.FunctionComponent<Props> = ({show, onClose, content}) => (
     <Popup open={show} modal={true} onClose={onClose}>
-        <span>{content}</span>
+            <span>{content}</span>
     </Popup>
 );
