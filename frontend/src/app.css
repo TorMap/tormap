@@ -1,0 +1,6 @@
+.MuiButtonBase-root {
+    background-color: white;
+    position: fixed;
+    bottom: 10px;
+    lef: 50%;
+}
