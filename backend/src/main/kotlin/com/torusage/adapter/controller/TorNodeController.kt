@@ -17,8 +17,8 @@ class TorNodeController(
 
     @GetMapping("/relays")
     fun getRelays(): List<RelayView> {
-        val relays = relayRepository.findAll()
-        return relays.filter { it.longitude != null && it.latitude != null }.map { RelayView(it) }
+        val relays = relayRepository.findAllByLatitudeNotNullAndLongitudeNotNull()
+        return relays.map { RelayView(it) }
     }
 
     @GetMapping("/relay/{id}")

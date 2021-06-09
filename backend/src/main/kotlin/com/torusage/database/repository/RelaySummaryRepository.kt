@@ -6,4 +6,4 @@ import org.springframework.data.repository.CrudRepository
 /**
  * Repository to interact with DB table "relay_summary"
  */
-interface RelaySummaryRepository : CrudRepository<RelaySummary, Long>
+interface RelaySummaryRepository : CrudRepository<RelaySummary, String>
