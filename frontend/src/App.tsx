@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {WorldMap} from "./components/world-map/world-map";
 import ReactSlidingPane from "react-sliding-pane";
-import {Button, FormControlLabel, makeStyles, Switch, FormGroup, Checkbox, Slider} from "@material-ui/core";
+import {Button, FormControlLabel, makeStyles, Switch, FormGroup, Checkbox, Slider, Typography} from "@material-ui/core";
 import "@material-ui/styles"
 
 function App() {
@@ -11,7 +11,7 @@ function App() {
         checkBox: true,
         checkBox2: false,
     })
-    const [sliderValue, setSliderValue] = useState<number[]>([20, 37]);
+    const [sliderValue, setSliderValue] = useState<number[]>([1, monthsSinceBeginning()]);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setState({ ...state, [event.target.name]: event.target.checked });
@@ -34,6 +34,19 @@ function App() {
     });
     const style = css();
 
+    function monthsSinceBeginning(){
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth();
+        return (currentYear-2007)*12-10 + currentMonth;
+    }
+
+    function mapValueToDateString(value:number){
+        value += 10;
+        const month = value % 12;
+        const year = (value - month) / 12;
+        return (2007 + year) + "-" + (month + 1);
+    }
 
   return (
       <div>
@@ -51,8 +64,14 @@ function App() {
                           valueLabelDisplay={"auto"}
                           aria-labelledby={"range-slider"}
                           name={"slider"}
+                          min={1}
+                          max={monthsSinceBeginning()}
+                          getAriaValueText={mapValueToDateString}
                       />
                   } label={"test Slider"} className={style.slider}/>
+                  <Typography>
+                      {"Von " + mapValueToDateString(sliderValue[0]) + " bis " + mapValueToDateString(sliderValue[1])}
+                  </Typography>
               </FormGroup>
           </ReactSlidingPane>
 
