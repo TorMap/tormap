@@ -37,7 +37,7 @@ function App() {
 
   return (
       <div>
-          <WorldMap/>
+          <WorldMap dateRangeToDisplay={{startDate: new Date("2021-05-01"), endDate: new Date("2021-06-01")}}/>
           <Button className={style.optionPaneButton} onClick={() => setShowOptionPane(!showOptionPane)}>toggle overlay</Button>
           <ReactSlidingPane width={"100%"} isOpen={showOptionPane} onRequestClose={() => setShowOptionPane(false)} from={"bottom"} title={"Optionen"}>
               <FormGroup >
