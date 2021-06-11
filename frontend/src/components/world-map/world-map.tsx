@@ -1,15 +1,24 @@
 import {MapContainer, TileLayer} from "react-leaflet";
-import React, {useEffect, useState} from "react";
+import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
 import {RelayView} from "../../types/relay";
 import {apiBaseUrl} from "../../util/constants";
-import {circleMarker, LeafletMouseEvent, Map} from "leaflet";
+import {CircleMarker, circleMarker, LeafletMouseEvent, Map} from "leaflet";
 import {PopupModal} from "../popup-modal";
 import "./world-map.css"
 
-export const WorldMap = () => {
+interface Props {
+    /**
+     * This range is used to select nodes which will be displayed on the map
+     */
+    dateRangeToDisplay: { startDate: Date, endDate: Date }
+}
+
+export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
     const [showNodePopup, setShowNodePopup] = useState(false)
     const [nodePopupContent, setNodePopupContent] = useState("")
-    let leafletMap: Map;
+    const [relays, setRelays] = useState<RelayView[]>([])
+    const [leafletMap, setLeafletMap] = useState<Map>()
+    const [activeMarkers, setActiveMarkers] = useState<CircleMarker[]>([])
 
     const onMarkerClick = (click: LeafletMouseEvent) => {
         console.log("Marker clicked, show node details")
@@ -23,13 +32,22 @@ export const WorldMap = () => {
             .catch(console.log)
     }
 
+    const removeMapMarkers = useCallback(() =>{
+        if (leafletMap) {
+            activeMarkers.forEach(marker => leafletMap.removeLayer(marker));
+        }
+    }, [activeMarkers, leafletMap])
+
     useEffect(() => {
-        console.log("Fetching relays")
-        fetch(apiBaseUrl + "/node/relays")
-            .then(response => response.json())
-            .then((relays: RelayView[]) => {
-                relays.forEach(relay => {
-                    circleMarker(
+        if (leafletMap) {
+            removeMapMarkers()
+            const newActiveMarkers: CircleMarker[] = [];
+            relays.forEach(relay => {
+                if (
+                    new Date(relay.firstSeen) < dateRangeToDisplay.endDate
+                    && new Date(relay.lastSeen) > dateRangeToDisplay.startDate
+                ) {
+                    const marker = circleMarker(
                         [relay.lat, relay.long],
                         {
                             radius: 2,
@@ -38,10 +56,22 @@ export const WorldMap = () => {
                     )
                         .on("click", onMarkerClick)
                         .addTo(leafletMap);
-                });
+                    newActiveMarkers.push(marker);
+                    leafletMap.addLayer(marker);
+                }
+            });
+            setActiveMarkers(newActiveMarkers)
+        }
+    }, [relays, dateRangeToDisplay]);
+
+    useEffect(() => {
+        console.log("Fetching relays")
+        fetch(apiBaseUrl + "/node/relays")
+            .then(response => response.json())
+            .then(newRelays => {
+                setRelays(newRelays)
             })
             .catch(console.log)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -55,7 +85,7 @@ export const WorldMap = () => {
             wheelPxPerZoomLevel={200}
             preferCanvas={true}
             whenCreated={(newMap: Map) => {
-                leafletMap = newMap
+                setLeafletMap(newMap)
             }}
         >
             <PopupModal
