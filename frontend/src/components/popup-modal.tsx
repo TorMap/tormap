@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {FunctionComponent} from 'react';
 import Popup from 'reactjs-popup';
 
 interface Props {
@@ -16,7 +16,7 @@ interface Props {
     content: string
 }
 
-export const PopupModal: React.FunctionComponent<Props> = ({show, onClose, content}) => (
+export const PopupModal: FunctionComponent<Props> = ({show, onClose, content}) => (
     <Popup open={show} modal={true} onClose={onClose}>
             <span>{content}</span>
     </Popup>
