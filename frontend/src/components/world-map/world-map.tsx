@@ -3,8 +3,9 @@ import React, {FunctionComponent, useCallback, useEffect, useState} from "react"
 import {RelayView} from "../../types/relay";
 import {apiBaseUrl} from "../../util/constants";
 import {CircleMarker, circleMarker, LeafletMouseEvent, Map} from "leaflet";
-import {PopupModal} from "../popup-modal";
+import 'leaflet/dist/leaflet.css';
 import "./world-map.css"
+import {NodePopUp} from "../NodePopUp";
 
 interface Props {
     /**
@@ -88,10 +89,10 @@ export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
                 setLeafletMap(newMap)
             }}
         >
-            <PopupModal
-                show={showNodePopup}
-                onClose={() => setShowNodePopup(false)}
-                content={nodePopupContent}
+            <NodePopUp
+                showNodePopup={showNodePopup}
+                setShowNodePopup={() => setShowNodePopup(false)}
+                nodePopupContent={nodePopupContent}
             />
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
