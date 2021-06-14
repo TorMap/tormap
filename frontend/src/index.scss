@@ -13,3 +13,14 @@ code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.optionPaneButton {
+    background-color: white !important;
+    position: fixed !important;
+    bottom: 10px;
+    left: 50%;
+}
+
+.slider {
+    width: 400px;
+}
