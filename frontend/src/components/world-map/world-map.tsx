@@ -63,6 +63,7 @@ export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
             });
             setActiveMarkers(newActiveMarkers)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [relays, dateRangeToDisplay]);
 
     useEffect(() => {
