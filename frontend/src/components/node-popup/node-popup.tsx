@@ -3,36 +3,24 @@ import {
     DialogContent,
     DialogTitle,
     IconButton,
-    makeStyles,
     Typography
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import React from "react";
+import "./node-popup.scss"
+import {Relay} from "../../types/relay";
 
 interface Props{
     showNodePopup: boolean,
     setShowNodePopup: () => void,
-    nodePopupContent: string,
+    relay?: Relay,
 }
 
-export const NodePopUp: React.FunctionComponent<Props> = ({
+export const NodePopup: React.FunctionComponent<Props> = ({
     showNodePopup,
     setShowNodePopup,
-    nodePopupContent,
+    relay,
 }) => {
-    const css= makeStyles({
-        closeButton: {
-            position: 'absolute',
-            right: "10px",
-            top: "10px",
-            color: "grey",
-        },
-        dialogfield:{
-            backgroundColor: "darkgray",
-        }
-    });
-    const style = css();
-
     return(
         <Dialog
             open={showNodePopup}
@@ -40,19 +28,19 @@ export const NodePopUp: React.FunctionComponent<Props> = ({
             onBackdropClick={setShowNodePopup}
         >
             <DialogTitle
-                className={style.dialogfield}
+                className={"dialogfield"}
             >
-                <Typography variant="h6">Test Dialog</Typography>
-                <IconButton aria-label="close" className={style.closeButton} onClick={setShowNodePopup}>
+                <Typography variant="h6">{relay?.nickname}</Typography>
+                <IconButton aria-label="close" className={"closeButton"} onClick={setShowNodePopup}>
                     <CloseIcon />
                 </IconButton>
             </DialogTitle>
             <DialogContent
                 dividers
-                className={style.dialogfield}
+                className={"dialogfield"}
             >
                 <Typography>
-                    {nodePopupContent}
+                    {JSON.stringify(relay)}
                 </Typography>
             </DialogContent>
         </Dialog>
