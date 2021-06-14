@@ -1,11 +1,11 @@
 import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
-import {RelayView} from "../../types/relay";
+import {Relay, RelayView} from "../../types/relay";
 import {apiBaseUrl} from "../../util/constants";
 import {CircleMarker, circleMarker, LeafletMouseEvent, Map} from "leaflet";
 import 'leaflet/dist/leaflet.css';
-import "./world-map.css"
-import {NodePopUp} from "../NodePopUp";
+import "./world-map.scss"
+import {NodePopup} from "../node-popup/node-popup";
 
 interface Props {
     /**
@@ -16,7 +16,7 @@ interface Props {
 
 export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
     const [showNodePopup, setShowNodePopup] = useState(false)
-    const [nodePopupContent, setNodePopupContent] = useState("")
+    const [nodePopupRelay, setNodePopupRelay] = useState<Relay>()
     const [relays, setRelays] = useState<RelayView[]>([])
     const [leafletMap, setLeafletMap] = useState<Map>()
     const [activeMarkers, setActiveMarkers] = useState<CircleMarker[]>([])
@@ -26,8 +26,8 @@ export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
         const relayId = click.sourceTarget.options.className
         fetch(apiBaseUrl + "/node/relay/" + relayId)
             .then(response => response.json())
-            .then((data: any) => {
-                setNodePopupContent(JSON.stringify(data))
+            .then((relay: Relay) => {
+                setNodePopupRelay(relay)
                 setShowNodePopup(true)
             })
             .catch(console.log)
@@ -90,10 +90,10 @@ export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
                 setLeafletMap(newMap)
             }}
         >
-            <NodePopUp
+            <NodePopup
                 showNodePopup={showNodePopup}
                 setShowNodePopup={() => setShowNodePopup(false)}
-                nodePopupContent={nodePopupContent}
+                relay={nodePopupRelay}
             />
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
