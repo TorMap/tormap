@@ -5,7 +5,8 @@ import {Button, FormControlLabel, Switch, FormGroup, Checkbox, Slider, Typograph
 import "@material-ui/styles";
 import "./index.scss";
 
-const startYear = 2007
+const historicStartYear = 2007
+const historicStartMonth = 10
 
 function App() {
     const [showOptionPane, setShowOptionPane] = useState(false)
@@ -14,7 +15,7 @@ function App() {
         checkBox: true,
         checkBox2: false,
     })
-    const [sliderValue, setSliderValue] = useState<[number, number]>([1, monthsSinceBeginning()])
+    const [sliderValue, setSliderValue] = useState<[number, number]>([0, monthsSinceBeginning()])
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setState({...state, [event.target.name]: event.target.checked})
@@ -28,12 +29,12 @@ function App() {
         const today = new Date()
         const currentYear = today.getFullYear()
         const currentMonth = today.getMonth()
-        return (currentYear - startYear) * 12 - 10 + currentMonth
+        return (currentYear - historicStartYear) * 12 - 9 + currentMonth
     }
 
     const mapSliderValueToDate = (value: number, isStartValue: boolean) => {
-        value += 10
-        const month = value % 12
+        value += historicStartMonth
+        const month = (value % 12)
         const relativeYear = (value - month) / 12
         return isStartValue ?
             new Date(historicStartYear + relativeYear, month-1, 1)  :
