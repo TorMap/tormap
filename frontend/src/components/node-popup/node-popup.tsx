@@ -1,17 +1,11 @@
-import {
-    Dialog,
-    DialogContent,
-    DialogTitle,
-    IconButton,
-    Typography
-} from "@material-ui/core";
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography} from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import React, {useEffect, useState} from "react";
 import "./node-popup.scss"
 import {Relay} from "../../types/relay";
 import {apiBaseUrl} from "../../util/constants";
 
-interface Props{
+interface Props {
     /**
      * Whether the node popup will be shown
      */
@@ -27,12 +21,13 @@ interface Props{
 }
 
 export const NodePopup: React.FunctionComponent<Props> = ({
-    showNodePopup,
-    setShowNodePopup,
-    relayId,
-}) => {
+                                                              showNodePopup,
+                                                              setShowNodePopup,
+                                                              relayId,
+                                                          }) => {
     const [relay, setRelay] = useState<Relay>()
     const [relayInfos, setRelayInfos] = useState<RelayInfo[]>()
+    const [showRelayDetails, setShowRelayDetails] = useState<boolean>(false)
 
     useEffect(() => {
         fetch(apiBaseUrl + "/node/relay/" + relayId)
@@ -40,21 +35,27 @@ export const NodePopup: React.FunctionComponent<Props> = ({
             .then((relay: Relay) => {
                 setRelay(relay)
                 setRelayInfos([
-                        {name: "Fingerprint", value: relay.fingerprint},
-                        {name: "AS family", value: relay.as_name},
-                        {name: "Contact", value: relay.contact},
-                        {name: "First seen", value: relay.first_seen},
-                        {name: "Last seen", value: relay.last_seen},
-                        {name: "Flags", value: relay.flags?.join(", ")},
-                        {name: "Observed bandwidth", value: relay.observed_bandwidth ? (relay.observed_bandwidth / 1000000).toFixed(2) + " MB/s" : undefined},
-                        {name: "Consensus weight", value: relay.consensus_weight},
-                        {name: "Platform", value: relay.platform},
+                    {name: "Fingerprint", value: relay.fingerprint},
+                    {name: "AS family", value: relay.as_name},
+                    {name: "Contact", value: relay.contact},
+                    {name: "Verified domains", value: relay.verified_host_names?.join(", ")},
+                    {name: "First seen", value: relay.first_seen},
+                    {name: "Last seen", value: relay.last_seen},
+                    {name: "Flags", value: relay.flags?.join(", ")},
+                    {
+                        name: "Observed bandwidth",
+                        value: relay.observed_bandwidth ?
+                            (relay.observed_bandwidth / 1000000).toFixed(2) + " MB/s"
+                            : undefined
+                    },
+                    {name: "Consensus weight", value: relay.consensus_weight},
+                    {name: "Platform", value: relay.platform},
                 ])
             })
             .catch(console.log)
     }, [relayId])
 
-    return(
+    return (
         <Dialog
             open={showNodePopup}
             onClose={setShowNodePopup}
@@ -65,17 +66,29 @@ export const NodePopup: React.FunctionComponent<Props> = ({
             >
                 <Typography variant="h6">{relay?.nickname}</Typography>
                 <IconButton aria-label="close" className={"closeButton"} onClick={setShowNodePopup}>
-                    <CloseIcon />
+                    <CloseIcon/>
                 </IconButton>
             </DialogTitle>
             <DialogContent
                 dividers
                 className={"dialogfield"}
             >
-                {relayInfos?.map((relayInfo) =>
-                    relayInfo.value ? <p><b>{relayInfo.name}</b>: {relayInfo.value}</p> : undefined
-                )}
+                {showRelayDetails ?
+                    <pre>{JSON.stringify(relay, null, 2)}</pre>
+                    : relayInfos?.map((relayInfo) =>
+                        relayInfo.value ? <p><b>{relayInfo.name}</b>: {relayInfo.value}</p> : undefined
+                    )
+                }
             </DialogContent>
+            <DialogActions className={"dialogfield"}>
+                <Button
+                    autoFocus
+                    onClick={() => setShowRelayDetails(prevState => !prevState)}
+                    color="primary"
+                >
+                    {showRelayDetails ? "Show summary" : "Show details"}
+                </Button>
+            </DialogActions>
         </Dialog>
     );
 }
