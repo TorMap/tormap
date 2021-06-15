@@ -22,11 +22,18 @@ code {
     left: 50%;
 }
 
-.slider {
-    width: 90%;
-}
-
 .optionPane{
     height: 20vh !important;
     margin-top: 80vh !important;
+}
+
+.sliderContainer{
+    position: fixed !important;
+    bottom: 5vh !important;
+    width: 80% !important;
+    left: 10%;
+    color: white;
+}
+
+.slider {
 }
