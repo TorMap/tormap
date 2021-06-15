@@ -1,5 +1,6 @@
 @import '~reactjs-popup/dist/index.css';
 
+/*ToDo: replace !important with correct CSS*/
 body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -22,5 +23,10 @@ code {
 }
 
 .slider {
-    width: 400px;
+    width: 90%;
+}
+
+.optionPane{
+    height: 20vh !important;
+    margin-top: 80vh !important;
 }
