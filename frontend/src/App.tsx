@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import {WorldMap} from "./components/world-map/world-map";
 import ReactSlidingPane from "react-sliding-pane";
-import {Button, Checkbox, FormControlLabel, FormGroup, Slider, Switch, Typography} from "@material-ui/core";
-import "@material-ui/styles"
+import {Button, FormControlLabel, makeStyles, Switch, FormGroup, Checkbox, Slider, Typography} from "@material-ui/core";
+import "@material-ui/styles";
 import "./index.scss";
 
 const startYear = 2007
@@ -45,6 +45,13 @@ function App() {
         return [date.getFullYear(), date.getMonth(), date.getDate()].join("-")
     }
 
+    function mapValueToDateString(value:number){
+        value += 10;
+        const month = value % 12;
+        const year = (value - month) / 12;
+        return (2007 + year) + "-" + (month + 1);
+    }
+
     return (
         <div>
             <WorldMap dateRangeToDisplay={{
@@ -54,7 +61,7 @@ function App() {
             <Button className={"optionPaneButton"} onClick={() => setShowOptionPane(!showOptionPane)}>toggle
                 overlay</Button>
             <ReactSlidingPane width={"100%"} isOpen={showOptionPane} onRequestClose={() => setShowOptionPane(false)}
-                              from={"bottom"} title={"Optionen"}>
+                              from={"bottom"} title={"Optionen"} className={"optionPane"}>
                 <FormGroup>
                     <FormControlLabel control={<Switch checked={button} onChange={() => setButton(!button)}/>}
                                       label={"Test Button"}/>
@@ -73,6 +80,8 @@ function App() {
                             name={"slider"}
                             min={1}
                             max={monthsSinceBeginning()}
+                            marks
+                            valueLabelFormat={mapValueToDateString}
                         />
                     } label={"test Slider"} className={"slider"}/>
                     <Typography>
