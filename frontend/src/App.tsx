@@ -42,15 +42,14 @@ function App() {
     }
 
     const formatSliderValue = (value: number, isStartValue: boolean) => {
-        const date = mapSliderValueToDate(value, isStartValue)
-        return [date.getFullYear(), date.getMonth()+1, date.getDate()].join("-")
+        return mapSliderValueToDate(value, isStartValue).toLocaleDateString("en-CA")
     }
     const formatSliderValueMonths = (value: number, isStartValue: boolean) => {
-        const date = mapSliderValueToDate(value, isStartValue)
-        return [date.getFullYear(), date.getMonth()+1].join("-")
+        const date = mapSliderValueToDate(value, isStartValue).toLocaleDateString("en-CA")
+        return date.replace(/(-\d\d)$/,"")
     }
 
-    const marksFunc = (anzahl: number) => {
+    const marks = (anzahl: number) => {
         anzahl -= 1
         let marks=[]
         for (let i = 0; i <= anzahl; i++){
@@ -86,7 +85,7 @@ function App() {
                             name={"slider"}
                             min={0}
                             max={monthsSinceBeginning()}
-                            marks={marksFunc(6)}
+                            marks={marks(6)}
                         />
                     </Grid>
                     <Grid item>
