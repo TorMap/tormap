@@ -44,6 +44,23 @@ function App() {
         const date = mapSliderValueToDate(value, isStartValue)
         return [date.getFullYear(), date.getMonth()+1, date.getDate()].join("-")
     }
+    const formatSliderValueMonths = (value: number, isStartValue: boolean) => {
+        const date = mapSliderValueToDate(value, isStartValue)
+        return [date.getFullYear(), date.getMonth()+1].join("-")
+    }
+
+    const marksFunc = (anzahl: number) => {
+        anzahl -= 1
+        let marks=[]
+        for (let i = 0; i <= anzahl; i++){
+            const mark = {
+                value: i * monthsSinceBeginning()/ anzahl,
+                label: formatSliderValueMonths(i * monthsSinceBeginning()/ anzahl, true)
+            }
+            marks.push(mark);
+        }
+        return marks
+    }
 
     return (
         <div>
@@ -52,8 +69,8 @@ function App() {
                 endDate: mapSliderValueToDate(sliderValue[1], false)
             }}/>
             <div className={"sliderContainer"}>
-                <Grid container spacing={2}>
-                    <Grid item>
+                <Grid container spacing={2} alignContent={"center"}>
+                    <Grid item >
                         <Typography>
                             {formatSliderValue(sliderValue[0], true)}
                         </Typography>
@@ -68,7 +85,7 @@ function App() {
                             name={"slider"}
                             min={0}
                             max={monthsSinceBeginning()}
-                            marks={false}
+                            marks={marksFunc(6)}
                         />
                     </Grid>
                     <Grid item>
