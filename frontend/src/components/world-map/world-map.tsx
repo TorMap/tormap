@@ -1,6 +1,6 @@
 import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
-import {Relay, RelayView} from "../../types/relay";
+import {RelayView} from "../../types/relay";
 import {apiBaseUrl} from "../../util/constants";
 import {CircleMarker, circleMarker, LeafletMouseEvent, Map} from "leaflet";
 import 'leaflet/dist/leaflet.css';
@@ -16,21 +16,15 @@ interface Props {
 
 export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
     const [showNodePopup, setShowNodePopup] = useState(false)
-    const [nodePopupRelay, setNodePopupRelay] = useState<Relay>()
+    const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
     const [relays, setRelays] = useState<RelayView[]>([])
     const [leafletMap, setLeafletMap] = useState<Map>()
     const [activeMarkers, setActiveMarkers] = useState<CircleMarker[]>([])
 
     const onMarkerClick = (click: LeafletMouseEvent) => {
         console.log("Marker clicked, show node details")
-        const relayId = click.sourceTarget.options.className
-        fetch(apiBaseUrl + "/node/relay/" + relayId)
-            .then(response => response.json())
-            .then((relay: Relay) => {
-                setNodePopupRelay(relay)
-                setShowNodePopup(true)
-            })
-            .catch(console.log)
+        setNodePopupRelayId(click.sourceTarget.options.className)
+        setShowNodePopup(true)
     }
 
     const removeMapMarkers = useCallback(() =>{
@@ -93,7 +87,7 @@ export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
             <NodePopup
                 showNodePopup={showNodePopup}
                 setShowNodePopup={() => setShowNodePopup(false)}
-                relay={nodePopupRelay}
+                relayId={nodePopupRelayId}
             />
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
