@@ -70,7 +70,7 @@ function App() {
                 endDate: mapSliderValueToDate(sliderValue[1], false)
             }}/>
             <div className={"sliderContainer"}>
-                <Grid container spacing={2} alignContent={"center"}>
+                <Grid container spacing={2} >
                     <Grid item >
                         <Typography>
                             {formatSliderValue(sliderValue[0], true)}
