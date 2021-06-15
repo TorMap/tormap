@@ -19,7 +19,6 @@ code {
     background-color: white !important;
     position: fixed !important;
     bottom: 10px;
-    left: 50%;
 }
 
 .optionPane{
@@ -36,4 +35,8 @@ code {
 }
 
 .slider {
+}
+
+.MuiSlider-markLabel{
+    color: rgba(255,255,255,.6) !important;
 }
