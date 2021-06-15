@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {WorldMap} from "./components/world-map/world-map";
 import ReactSlidingPane from "react-sliding-pane";
-import {Button, FormControlLabel, makeStyles, Switch, FormGroup, Checkbox, Slider, Typography} from "@material-ui/core";
+import {Button, FormControlLabel, Switch, FormGroup, Checkbox, Slider, Typography, Grid} from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
 
@@ -36,20 +36,13 @@ function App() {
         const month = value % 12
         const relativeYear = (value - month) / 12
         return isStartValue ?
-            new Date(startYear + relativeYear, month + 1, 1)  :
-            new Date(startYear + relativeYear, month + 2, 0)
+            new Date(historicStartYear + relativeYear, month, 1)  :
+            new Date(historicStartYear + relativeYear, month, 0)
     }
 
     const formatSliderValue = (value: number, isStartValue: boolean) => {
         const date = mapSliderValueToDate(value, isStartValue)
         return [date.getFullYear(), date.getMonth(), date.getDate()].join("-")
-    }
-
-    function mapValueToDateString(value:number){
-        value += 10;
-        const month = value % 12;
-        const year = (value - month) / 12;
-        return (2007 + year) + "-" + (month + 1);
     }
 
     return (
@@ -58,6 +51,36 @@ function App() {
                 startDate: mapSliderValueToDate(sliderValue[0], true),
                 endDate: mapSliderValueToDate(sliderValue[1], false)
             }}/>
+            <div className={"sliderContainer"}>
+                <Grid container spacing={2}>
+                    <Grid item>
+                        <Typography>
+                            {formatSliderValue(sliderValue[0], true)}
+                        </Typography>
+                    </Grid>
+                    <Grid item xs>
+                        <Slider
+                            className={"slider"}
+                            value={sliderValue}
+                            onChange={handleSliderChange}
+                            valueLabelDisplay={"off"}
+                            aria-labelledby={"range-slider"}
+                            name={"slider"}
+                            min={0}
+                            max={monthsSinceBeginning()}
+                            marks={false}
+                        />
+                    </Grid>
+                    <Grid item>
+                        <Typography>
+                            {formatSliderValue(sliderValue[1], false)}
+                        </Typography>
+                    </Grid>
+                </Grid>
+            </div>
+
+
+
             <Button className={"optionPaneButton"} onClick={() => setShowOptionPane(!showOptionPane)}>toggle
                 overlay</Button>
             <ReactSlidingPane width={"100%"} isOpen={showOptionPane} onRequestClose={() => setShowOptionPane(false)}
@@ -71,25 +94,9 @@ function App() {
                     <FormControlLabel
                         control={<Checkbox checked={state.checkBox2} onChange={handleChange} name={"checkBox2"}/>}
                         label={"test Checkbox2"}/>
-                    <FormControlLabel control={
-                        <Slider
-                            value={sliderValue}
-                            onChange={handleSliderChange}
-                            valueLabelDisplay={"auto"}
-                            aria-labelledby={"range-slider"}
-                            name={"slider"}
-                            min={1}
-                            max={monthsSinceBeginning()}
-                            marks
-                            valueLabelFormat={mapValueToDateString}
-                        />
-                    } label={"test Slider"} className={"slider"}/>
-                    <Typography>
-                        {"From " + formatSliderValue(sliderValue[0], true) + " until " + formatSliderValue(sliderValue[1], false)}
-                    </Typography>
+
                 </FormGroup>
             </ReactSlidingPane>
-
         </div>
     );
 }
