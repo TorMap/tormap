@@ -36,13 +36,13 @@ function App() {
         const month = value % 12
         const relativeYear = (value - month) / 12
         return isStartValue ?
-            new Date(historicStartYear + relativeYear, month, 1)  :
+            new Date(historicStartYear + relativeYear, month-1, 1)  :
             new Date(historicStartYear + relativeYear, month, 0)
     }
 
     const formatSliderValue = (value: number, isStartValue: boolean) => {
         const date = mapSliderValueToDate(value, isStartValue)
-        return [date.getFullYear(), date.getMonth(), date.getDate()].join("-")
+        return [date.getFullYear(), date.getMonth()+1, date.getDate()].join("-")
     }
 
     return (
@@ -63,7 +63,7 @@ function App() {
                             className={"slider"}
                             value={sliderValue}
                             onChange={handleSliderChange}
-                            valueLabelDisplay={"off"}
+                            valueLabelDisplay={"on"}
                             aria-labelledby={"range-slider"}
                             name={"slider"}
                             min={0}
