@@ -5,6 +5,8 @@ import {Button, Checkbox, FormControlLabel, FormGroup, Slider, Switch, Typograph
 import "@material-ui/styles"
 import "./index.scss";
 
+const startYear = 2007
+
 function App() {
     const [showOptionPane, setShowOptionPane] = useState(false)
     const [button, setButton] = useState(false)
@@ -12,33 +14,43 @@ function App() {
         checkBox: true,
         checkBox2: false,
     })
-    const [sliderValue, setSliderValue] = useState<number[]>([1, monthsSinceBeginning()]);
+    const [sliderValue, setSliderValue] = useState<[number, number]>([1, monthsSinceBeginning()])
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setState({...state, [event.target.name]: event.target.checked});
+        setState({...state, [event.target.name]: event.target.checked})
     };
 
     const handleSliderChange = (event: any, newValue: number | number[]) => {
-        setSliderValue(newValue as number[]);
+        setSliderValue(newValue as [number, number])
     };
 
     function monthsSinceBeginning() {
-        const today = new Date();
-        const currentYear = today.getFullYear();
-        const currentMonth = today.getMonth();
-        return (currentYear - 2007) * 12 - 10 + currentMonth;
+        const today = new Date()
+        const currentYear = today.getFullYear()
+        const currentMonth = today.getMonth()
+        return (currentYear - startYear) * 12 - 10 + currentMonth
     }
 
-    function mapValueToDateString(value: number) {
-        value += 10;
-        const month = value % 12;
-        const year = (value - month) / 12;
-        return (2007 + year) + "-" + (month + 1);
+    const mapSliderValueToDate = (value: number, isStartValue: boolean) => {
+        value += 10
+        const month = value % 12
+        const relativeYear = (value - month) / 12
+        return isStartValue ?
+            new Date(startYear + relativeYear, month + 1, 1)  :
+            new Date(startYear + relativeYear, month + 2, 0)
+    }
+
+    const formatSliderValue = (value: number, isStartValue: boolean) => {
+        const date = mapSliderValueToDate(value, isStartValue)
+        return [date.getFullYear(), date.getMonth(), date.getDate()].join("-")
     }
 
     return (
         <div>
-            <WorldMap dateRangeToDisplay={{startDate: new Date("2021-05-01"), endDate: new Date("2021-06-01")}}/>
+            <WorldMap dateRangeToDisplay={{
+                startDate: mapSliderValueToDate(sliderValue[0], true),
+                endDate: mapSliderValueToDate(sliderValue[1], false)
+            }}/>
             <Button className={"optionPaneButton"} onClick={() => setShowOptionPane(!showOptionPane)}>toggle
                 overlay</Button>
             <ReactSlidingPane width={"100%"} isOpen={showOptionPane} onRequestClose={() => setShowOptionPane(false)}
@@ -61,11 +73,10 @@ function App() {
                             name={"slider"}
                             min={1}
                             max={monthsSinceBeginning()}
-                            getAriaValueText={mapValueToDateString}
                         />
-                    } label={"test Slider"} className={"slider"} />
+                    } label={"test Slider"} className={"slider"}/>
                     <Typography>
-                        {"Von " + mapValueToDateString(sliderValue[0]) + " bis " + mapValueToDateString(sliderValue[1])}
+                        {"From " + formatSliderValue(sliderValue[0], true) + " until " + formatSliderValue(sliderValue[1], false)}
                     </Typography>
                 </FormGroup>
             </ReactSlidingPane>

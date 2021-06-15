@@ -35,14 +35,14 @@ export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
 
     const removeMapMarkers = useCallback(() =>{
         if (leafletMap) {
-            activeMarkers.forEach(marker => leafletMap.removeLayer(marker));
+            activeMarkers.forEach(marker => leafletMap.removeLayer(marker))
         }
     }, [activeMarkers, leafletMap])
 
     useEffect(() => {
         if (leafletMap) {
             removeMapMarkers()
-            const newActiveMarkers: CircleMarker[] = [];
+            const newActiveMarkers: CircleMarker[] = []
             relays.forEach(relay => {
                 if (
                     new Date(relay.firstSeen) < dateRangeToDisplay.endDate
@@ -57,14 +57,14 @@ export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
                     )
                         .on("click", onMarkerClick)
                         .addTo(leafletMap);
-                    newActiveMarkers.push(marker);
-                    leafletMap.addLayer(marker);
+                    newActiveMarkers.push(marker)
+                    leafletMap.addLayer(marker)
                 }
             });
             setActiveMarkers(newActiveMarkers)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [relays, dateRangeToDisplay]);
+    }, [relays, dateRangeToDisplay])
 
     useEffect(() => {
         console.log("Fetching relays")
@@ -74,7 +74,7 @@ export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
                 setRelays(newRelays)
             })
             .catch(console.log)
-    }, []);
+    }, [])
 
     return (
         <MapContainer
