@@ -29,6 +29,16 @@ export const NodePopup: React.FunctionComponent<Props> = ({
     const [relayInfos, setRelayInfos] = useState<RelayInfo[]>()
     const [showRelayDetails, setShowRelayDetails] = useState<boolean>(false)
 
+    const formatLocation = (city: string | undefined, country: string | undefined) => {
+        if (city) {
+            return city + ", " + country
+        } else return country
+    }
+
+    const convertBandwidthBytesToMB = (bandwidthInBytes: number | undefined) => bandwidthInBytes ?
+        (bandwidthInBytes / 1000000).toFixed(2) + " MB/s"
+        : undefined
+
     useEffect(() => {
         fetch(apiBaseUrl + "/node/relay/" + relayId)
             .then(response => response.json())
@@ -38,16 +48,12 @@ export const NodePopup: React.FunctionComponent<Props> = ({
                     {name: "Fingerprint", value: relay.fingerprint},
                     {name: "AS family", value: relay.as_name},
                     {name: "Contact", value: relay.contact},
+                    {name: "Location", value: formatLocation(relay.city_name, relay.country_name)},
                     {name: "Verified domains", value: relay.verified_host_names?.join(", ")},
                     {name: "First seen", value: relay.first_seen},
                     {name: "Last seen", value: relay.last_seen},
                     {name: "Flags", value: relay.flags?.join(", ")},
-                    {
-                        name: "Observed bandwidth",
-                        value: relay.observed_bandwidth ?
-                            (relay.observed_bandwidth / 1000000).toFixed(2) + " MB/s"
-                            : undefined
-                    },
+                    {name: "Observed bandwidth", value: convertBandwidthBytesToMB(relay.observed_bandwidth)},
                     {name: "Consensus weight", value: relay.consensus_weight},
                     {name: "Platform", value: relay.platform},
                 ])
@@ -76,7 +82,7 @@ export const NodePopup: React.FunctionComponent<Props> = ({
                 {showRelayDetails ?
                     <pre>{JSON.stringify(relay, null, 2)}</pre>
                     : relayInfos?.map((relayInfo) =>
-                        relayInfo.value ? <p><b>{relayInfo.name}</b>: {relayInfo.value}</p> : undefined
+                        relayInfo.value ? <p key={relayInfo.name}><b>{relayInfo.name}</b>: {relayInfo.value}</p> : undefined
                     )
                 }
             </DialogContent>
