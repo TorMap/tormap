@@ -48,7 +48,7 @@ export const NodePopup: React.FunctionComponent<Props> = ({
                     {name: "Fingerprint", value: relay.fingerprint},
                     {name: "AS family", value: relay.as_name},
                     {name: "Contact", value: relay.contact},
-                    {name: "Location", value: formatLocation(relay.city_name, relay.country_name)},
+                    // {name: "Location", value: formatLocation(relay.city_name, relay.country_name)},
                     {name: "Verified domains", value: relay.verified_host_names?.join(", ")},
                     {name: "First seen", value: relay.first_seen},
                     {name: "Last seen", value: relay.last_seen},
