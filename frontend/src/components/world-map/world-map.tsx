@@ -1,11 +1,12 @@
-import {MapContainer, TileLayer} from "react-leaflet";
+import {FeatureGroup, GeoJSON, GeoJSONProps, LayerGroup, MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
 import {RelayView} from "../../types/relay";
 import {apiBaseUrl} from "../../util/constants";
-import {CircleMarker, circleMarker, LeafletMouseEvent, Map} from "leaflet";
+import {CircleMarker, circleMarker, GeoJSONOptions, Layer, LeafletMouseEvent, Map} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import "./world-map.scss"
 import {NodePopup} from "../node-popup/node-popup";
+import {FeatureCollection} from "geojson"
 
 interface Props {
     /**
@@ -20,6 +21,7 @@ export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
     const [relays, setRelays] = useState<RelayView[]>([])
     const [leafletMap, setLeafletMap] = useState<Map>()
     const [activeMarkers, setActiveMarkers] = useState<CircleMarker[]>([])
+    const [coutries, setCountries] = useState<FeatureCollection>()
 
     const onMarkerClick = (click: LeafletMouseEvent) => {
         console.log("Marker clicked, show node details")
@@ -70,6 +72,18 @@ export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
             .catch(console.log)
     }, [])
 
+    useEffect(() => {
+        console.log("Fetching countrys geoJSON")
+        const path = 'https://datahub.io/core/geo-countries/r/countries.geojson'
+        fetch(path)
+            .then(response => response.json())
+            .then(countries => setCountries(countries))
+
+    },[])
+
+
+
+
     return (
         <MapContainer
             center={[15, 0]}
@@ -96,6 +110,9 @@ export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                 noWrap={true}
             />
+            <FeatureGroup>
+                {coutries?.features.map(countrie => <GeoJSON data={countrie}/>)}
+            </FeatureGroup>
         </MapContainer>
     );
 };
