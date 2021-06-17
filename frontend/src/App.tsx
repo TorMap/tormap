@@ -86,6 +86,7 @@ function App() {
                             min={0}
                             max={monthsSinceBeginning()}
                             marks={marks(6)}
+                            valueLabelFormat={(x) => formatSliderValueMonths(x, true)}
                         />
                     </Grid>
                     <Grid item>
