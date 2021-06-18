@@ -4,6 +4,7 @@ import ReactSlidingPane from "react-sliding-pane";
 import {Button, FormControlLabel, Switch, FormGroup, Checkbox, Slider, Typography, Grid} from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
+import Moment from "react-moment";
 
 const historicStartYear = 2007
 const historicStartMonth = 10
@@ -38,25 +39,20 @@ function App() {
         const month = (value % 12)
         const relativeYear = (value - month) / 12
         return isStartValue ?
-            new Date(historicStartYear + relativeYear, month-1, 1)  :
+            new Date(historicStartYear + relativeYear, month - 1, 1) :
             new Date(historicStartYear + relativeYear, month, 0)
     }
 
-    const formatSliderValue = (value: number, isStartValue: boolean) => {
-        return mapSliderValueToDate(value, isStartValue).toLocaleDateString("en-CA")
-    }
-    const formatSliderValueMonths = (value: number, isStartValue: boolean) => {
-        const date = mapSliderValueToDate(value, isStartValue).toLocaleDateString("en-CA")
-        return date.replace(/(-\d\d)$/,"")
-    }
-
-    const marks = (anzahl: number) => {
-        anzahl -= 1
-        let marks=[]
-        for (let i = 0; i <= anzahl; i++){
+    const marks = (count: number) => {
+        count -= 1
+        let marks = []
+        for (let i = 0; i <= count; i++) {
             const mark = {
-                value: i * monthsSinceBeginning()/ anzahl,
-                label: formatSliderValueMonths(i * monthsSinceBeginning()/ anzahl, true)
+                value: i * monthsSinceBeginning() / count,
+                label: <Moment
+                    date={mapSliderValueToDate(i * monthsSinceBeginning() / count, true)}
+                    format={"MM/YYYY"}
+                />
             }
             marks.push(mark);
         }
@@ -70,12 +66,12 @@ function App() {
                 endDate: mapSliderValueToDate(sliderValue[1], false)
             }}/>
             <div className={"sliderContainer"}>
-                <Grid container spacing={2} >
-                    <Grid item >
-                        <Typography>
-                            {formatSliderValue(sliderValue[0], true)}
-                        </Typography>
-                    </Grid>
+                <Grid container spacing={2}>
+                    {/*<Grid item>*/}
+                    {/*    <Typography>*/}
+                    {/*        {formatSliderValue(sliderValue[0], true)}*/}
+                    {/*    </Typography>*/}
+                    {/*</Grid>*/}
                     <Grid item xs>
                         <Slider
                             className={"slider"}
@@ -87,14 +83,14 @@ function App() {
                             min={0}
                             max={monthsSinceBeginning()}
                             marks={marks(6)}
-                            valueLabelFormat={(x) => formatSliderValueMonths(x, true)}
+                            valueLabelFormat={(x) => <Moment date={mapSliderValueToDate(x, true)} format={"MM/YY"}/>}
                         />
                     </Grid>
-                    <Grid item>
-                        <Typography>
-                            {formatSliderValue(sliderValue[1], false)}
-                        </Typography>
-                    </Grid>
+                    {/*<Grid item>*/}
+                    {/*    <Typography>*/}
+                    {/*        {formatSliderValue(sliderValue[1], false)}*/}
+                    {/*    </Typography>*/}
+                    {/*</Grid>*/}
                 </Grid>
             </div>
             <Button className={"optionPaneButton"} onClick={() => setShowOptionPane(!showOptionPane)}>toggle
@@ -117,7 +113,7 @@ function App() {
                 </FormGroup>
             </ReactSlidingPane>
         </div>
-    );
+    )
 }
 
 export default App;
