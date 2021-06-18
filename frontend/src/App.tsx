@@ -13,7 +13,8 @@ function App() {
     const [button, setButton] = useState(false)
     const [state, setState] = useState({
         checkBox: true,
-        checkBox2: false,
+        checkBox2: true,
+        checkBox3: true,
     })
     const [sliderValue, setSliderValue] = useState<[number, number]>([0, monthsSinceBeginning()])
 
@@ -96,23 +97,23 @@ function App() {
                     </Grid>
                 </Grid>
             </div>
-
-
-
             <Button className={"optionPaneButton"} onClick={() => setShowOptionPane(!showOptionPane)}>toggle
                 overlay</Button>
             <ReactSlidingPane width={"100%"} isOpen={showOptionPane} onRequestClose={() => setShowOptionPane(false)}
                               from={"bottom"} title={"Optionen"} className={"optionPane"}>
                 <FormGroup>
-                    <FormControlLabel control={<Switch checked={button} onChange={() => setButton(!button)}/>}
-                                      label={"Test Button"}/>
+                    {/*<FormControlLabel control={<Switch checked={button} onChange={() => setButton(!button)}/>}*/}
+                    {/*                  label={"Test Button"}/>*/}
+                    <p>Filter by relay flags</p>
                     <FormControlLabel
                         control={<Checkbox checked={state.checkBox} onChange={handleChange} name={"checkBox"}/>}
-                        label={"test Checkbox"}/>
+                        label={"Guard"}/>
                     <FormControlLabel
                         control={<Checkbox checked={state.checkBox2} onChange={handleChange} name={"checkBox2"}/>}
-                        label={"test Checkbox2"}/>
-
+                        label={"Exit"}/>
+                    <FormControlLabel
+                        control={<Checkbox checked={state.checkBox3} onChange={handleChange} name={"checkBox3"}/>}
+                        label={"Fast"}/>
                 </FormGroup>
             </ReactSlidingPane>
         </div>
