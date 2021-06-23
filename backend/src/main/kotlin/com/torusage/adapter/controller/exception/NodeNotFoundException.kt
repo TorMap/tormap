@@ -1,4 +1,4 @@
-package com.torusage.adapter.exception
+package com.torusage.adapter.controller.exception
 
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus

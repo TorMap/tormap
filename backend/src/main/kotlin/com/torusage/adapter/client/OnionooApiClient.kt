@@ -1,7 +1,7 @@
-package com.torusage.adapter
+package com.torusage.adapter.client
 
-import com.torusage.adapter.model.OnionooDetailsResponse
-import com.torusage.adapter.model.OnionooSummaryResponse
+import com.torusage.adapter.client.model.OnionooDetailsResponse
+import com.torusage.adapter.client.model.OnionooSummaryResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -23,9 +23,9 @@ class OnionooApiClient(
     private val webClient: WebClient = webClientBuilder.baseUrl(onionooBaseurl).build()
 
     /**
-     * Get the historic details of Tor relays and/or bridges.
-     * This uses the function [getOnionnoResponse] which limits the response with parameters [limitCount], [seenSinceUTCDate] and [torNodeType].
-     * The response can be quite large due to the full information per node (with no limitation set, currently > 10 MB).
+     * Get the details of Tor relays and/or bridges.
+     * This is a wrapper function for [getOnionnoResponse].
+     * The response will be larger due to the full information per node (in 2021 roughly 12 MB in total size).
      */
     fun getTorNodeDetails(
         limitCount: Int? = null,
@@ -34,8 +34,8 @@ class OnionooApiClient(
     ) = getOnionnoResponse("details", OnionooDetailsResponse::class.java, limitCount, seenSinceUTCDate, torNodeType)
 
     /**
-     * Get the historic summary of Tor relays and/or bridges.
-     * This uses the function [getOnionnoResponse] which limits the response with parameters [limitCount], [seenSinceUTCDate] and [torNodeType].
+     * Get the summary of Tor relays and/or bridges.
+     * This is a wrapper function for [getOnionnoResponse].
      * The response will be smaller due to the decreased information per node.
      */
     fun getTorNodeSummary(
@@ -45,15 +45,15 @@ class OnionooApiClient(
     ) = getOnionnoResponse("summary", OnionooSummaryResponse::class.java, limitCount, seenSinceUTCDate, torNodeType)
 
     /**
-     * Get the historic data of Tor relays and/or bridges for an [apiEndpoint] of the [Onionoo API](https://metrics.torproject.org/onionoo.html).
+     * Get data of Tor relays and/or bridges for an [apiEndpoint] of the [Onionoo API](https://metrics.torproject.org/onionoo.html).
      * The API's JSON response needs to fit the provided [responseClass] to be parsable.
-     * The response can be limited by providing a [limitCount] of returned nodes which have been [seenSinceUTCDate] online.
+     * The response can be limited by providing a [limitCount] of returned nodes
+     * which have been [seenSinceUTCDate] online (only nodes seen in the last week can be returned).
      * The [torNodeType] can be set to only retrieve [TorNodeType.RELAY] or [TorNodeType.BRIDGE].
      * If no [torNodeType] but a [limitCount] is set, relays are returned first.
-     * If all limits are set null, all historic nodes provided by the
-     * [Onionoo API](https://metrics.torproject.org/onionoo.html) are downloaded.
+     * If no limits are provided, all nodes seen in the last week will be downloaded.
      */
-    private fun <T> getOnionnoResponse(
+    fun <T> getOnionnoResponse(
         apiEndpoint: String,
         responseClass: Class<T>,
         limitCount: Int?,

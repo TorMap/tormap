@@ -8,14 +8,13 @@ import org.springframework.scheduling.annotation.EnableScheduling
 import java.time.ZonedDateTime
 
 /**
- * Configure basic Spring Boot application
+ * Configures basic Spring Boot application
  */
 @SpringBootApplication
-@EnableScheduling
 class TorUsageApplication : ApplicationRunner {
 
     override fun run(args: ApplicationArguments) {
-        logger().info("TorUsage backend started successfully, running in timezone: " + ZonedDateTime.now().zone)
+        logger().info("Backend started successfully, running in timezone: " + ZonedDateTime.now().zone)
     }
 
 }

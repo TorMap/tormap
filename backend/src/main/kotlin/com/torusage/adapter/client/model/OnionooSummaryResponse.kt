@@ -1,4 +1,4 @@
-package com.torusage.adapter.model
+package com.torusage.adapter.client.model
 
 import com.torusage.database.entity.BridgeSummary
 import com.torusage.database.entity.RelaySummary
