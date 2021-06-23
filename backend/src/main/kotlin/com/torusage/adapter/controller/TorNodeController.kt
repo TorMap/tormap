@@ -1,6 +1,6 @@
 package com.torusage.adapter.controller
 
-import com.torusage.adapter.exception.NodeNotFoundException
+import com.torusage.adapter.controller.exception.NodeNotFoundException
 import com.torusage.database.entity.Relay
 import com.torusage.database.repository.RelayRepository
 import com.torusage.database.view.RelayView

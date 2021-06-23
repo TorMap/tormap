@@ -6,5 +6,6 @@ import org.slf4j.LoggerFactory
 /**
  * Get logger for certain class
  */
+@Suppress("unused")
 inline fun <reified T> T.logger(): Logger = LoggerFactory.getLogger(T::class.java)
 

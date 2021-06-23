@@ -4,3 +4,4 @@ yarn.lock
 node_modules/
 *.iml
 /.jpb/jpb-settings.xml
+/backend/descriptors/
