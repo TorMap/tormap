@@ -1,6 +1,7 @@
 package com.torusage.service
 
 import com.torusage.adapter.client.OnionooApiClient
+import com.torusage.database.entity.DescriptorFile
 import com.torusage.database.entity.GeoNode
 import com.torusage.database.repository.*
 import com.torusage.logger
@@ -26,6 +27,7 @@ class ScheduledCollectorService(
     val relaySummaryRepository: RelaySummaryRepository,
     val bridgeSummaryRepository: BridgeSummaryRepository,
     val geoNodeRepository: GeoNodeRepository,
+    val descriptorFileRepository: DescriptorFileRepository,
     val geoLocationService: GeoLocationService,
 ) {
     val logger = logger()
@@ -54,28 +56,36 @@ class ScheduledCollectorService(
         collectDescriptors(collectorApiPathConsensuses)
         logger.info("Stored consensus descriptors")
 
-        logger.info("Preparing geo nodes for DB")
-        val nodesToSave = mutableListOf<GeoNode>()
+        logger.info("Processing descriptors for DB")
+        val excludedFiles = mutableMapOf<String, Long>()
+        descriptorFileRepository.findAll().forEach { excludedFiles[it.filename] = it.time }
+        descriptorReader.excludedFiles = excludedFiles.toSortedMap()
         descriptorReader.readDescriptors(
             File(collectorTargetDirectory + collectorApiPathConsensuses)
         ).forEach { descriptor ->
+            val descriptorFileName = descriptor.descriptorFile.name
+            logger.info("Processing descriptor part of file $descriptorFileName")
             if (descriptor is RelayNetworkStatusConsensus) {
+                val nodesToSave = mutableListOf<GeoNode>()
                 val consensusDate = Date(descriptor.validAfterMillis)
+
                 descriptor.statusEntries.forEach {
                     val networkStatusEntry = it.value
-                    nodesToSave.add(GeoNode(networkStatusEntry, consensusDate, 0.0, 0.0))
-//                    val cityLocation = geoLocationService.getCityLocationForIpAddress(networkStatusEntry.address)
-//                    val longitude = cityLocation?.location?.longitude
-//                    val latitude = cityLocation?.location?.latitude
-//                    if (longitude != null && latitude != null) {
-//                        nodesToSave.add(
-//                            GeoNode(networkStatusEntry, consensusDate, longitude, latitude)
-//                        )
-//                    }
+                    val cityLocation = geoLocationService.getCityLocationForIpAddress(networkStatusEntry.address)
+                    val longitude = cityLocation?.location?.longitude
+                    val latitude = cityLocation?.location?.latitude
+                    if (longitude != null && latitude != null) {
+                        nodesToSave.add(
+                            GeoNode(networkStatusEntry, consensusDate, longitude, latitude)
+                        )
+                    }
                 }
+                geoNodeRepository.saveAll(nodesToSave)
             }
         }
-        geoNodeRepository.saveAll(nodesToSave)
+        descriptorReader.parsedFiles.forEach {
+            descriptorFileRepository.save(DescriptorFile(it.key, it.value))
+        }
         logger.info("Stored geo nodes in DB")
     }
 
@@ -93,7 +103,7 @@ class ScheduledCollectorService(
     /**
      * Fetches Tor node summary with the configured fixedRate and stores corresponding entities in DB
      */
-    @Scheduled(fixedRate = 3600000L)
+//    @Scheduled(fixedRate = 3600000L)
     fun collectOnionooNodeSummary() {
         logger.info("Fetching Onionoo node summary")
         val summaryResponse = onionooApiClient.getTorNodeSummary()
@@ -105,7 +115,7 @@ class ScheduledCollectorService(
     /**
      * Fetches Tor node details with the configured fixedRate and stores corresponding entities in DB
      */
-    @Scheduled(fixedRate = 3600000L)
+//    @Scheduled(fixedRate = 3600000L)
     fun collectOnionooNodeDetails() {
         logger.info("Fetching Onionoo node details")
         val detailsResponse = onionooApiClient.getTorNodeDetails()
