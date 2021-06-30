@@ -19,7 +19,10 @@ class GeoNode(
     var latitude: Double,
 ) {
     @EmbeddedId
-    var id: GeoNodeId = GeoNodeId(networkStatusEntry.fingerprint, SimpleDateFormat("yyyy-MM").format(seen))
+    var id: GeoNodeId = GeoNodeId(
+        networkStatusEntry.fingerprint,
+        SimpleDateFormat("yyyy-MM").format(seen)
+    )
 
     @ElementCollection
     var flags: List<String> = networkStatusEntry.flags.toList()
