@@ -20,7 +20,7 @@ class TorUsageApplication : ApplicationRunner {
 }
 
 /**
- * Main method to start backend application
+ * com.ip2location.Main method to start backend application
  */
 fun main(args: Array<String>) {
     runApplication<TorUsageApplication>(*args)
