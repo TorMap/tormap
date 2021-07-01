@@ -59,7 +59,7 @@ class ScheduledCollectorService(
         descriptorReader.excludedFiles = excludedFiles.toSortedMap()
 
         descriptorReader.readDescriptors(
-            File(collectorTargetDirectory + collectorApiPathConsensuses)
+            File(collectorTargetDirectory + collectorApiPathConsensuses + "consensuses-2017-09.tar.xz")
         ).forEach { processConsensusesDescriptor(it) }
 
         descriptorReader.parsedFiles.forEach {

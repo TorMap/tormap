@@ -1,12 +1,13 @@
 package com.torusage.service
 
+import com.ip2location.IP2Location
 import com.maxmind.db.CHMCache
 import com.maxmind.geoip2.DatabaseReader
 import com.maxmind.geoip2.model.CityResponse
-import com.maxmind.geoip2.record.Location
 import com.torusage.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import java.io.File
 import java.net.InetAddress
 
 
@@ -15,27 +16,39 @@ import java.net.InetAddress
  */
 @Service
 class GeoLocationService(
-    @Value("\${geo.location.database.resource.file}")
-    private val databaseResourceFile: String,
+    @Value("\${maxmind.db.resource.file}")
+    private val maxmindDBFile: String,
+
+    @Value("\${ip2location.db.resource.file}")
+    private val ip2locationDBFile: String,
 ) {
     private val logger = logger()
-    private val databaseReader: DatabaseReader = DatabaseReader.Builder(
-        javaClass.getResourceAsStream(databaseResourceFile)
+    private val maxmindDatabaseReader: DatabaseReader = DatabaseReader.Builder(
+        File(maxmindDBFile)
     ).withCache(CHMCache()).build()
+    private val ip2locationDatabaseReader = IP2Location().open(
+        ip2locationDBFile
+    )
 
-    fun getCityLocationForIpAddress(ipAddress: String): CityResponse? = try {
-        databaseReader.city(InetAddress.getByName(ipAddress))
+    fun getLocationForIpAddress(ipAddress: String): GeoLocation? = try {
+        val location = maxmindDatabaseReader.city(InetAddress.getByName(ipAddress)).location
+        if (location.latitude == null || location.longitude == null) throw Exception("Latitude and longitude missing!")
+        GeoLocation(location.longitude, location.latitude)
     } catch (exception: Exception) {
-        logger.warn("Location lookup failed for IP address $ipAddress! " + exception.message)
-        null
-    }
-
-    fun getLocationForIpAddress(ipAddress: String): Location? = try {
-        val location = databaseReader.city(InetAddress.getByName(ipAddress)).location
-        if (location.latitude == null || location.longitude == null) throw Exception("Latitude and longitude were not found!")
-        location
-    } catch (exception: Exception) {
-        logger.warn("Location lookup failed for IP address $ipAddress! " + exception.message)
-        null
+        logger.warn("Maxmind location lookup failed for IP address $ipAddress! " + exception.message)
+        try {
+            val location = ip2locationDatabaseReader.ipQuery(ipAddress)
+            if (location.status != "OK") throw Exception(location.status)
+            else if (location.latitude == null || location.longitude == null) throw Exception("Latitude and longitude missing!")
+            GeoLocation(location.latitude!!.toDouble(), location.longitude!!.toDouble())
+        } catch (exception: Exception) {
+            logger.warn("IP2Location location lookup failed for IP address $ipAddress! " + exception.message)
+            null
+        }
     }
 }
+
+data class GeoLocation(
+    var longitude: Double,
+    var latitude: Double,
+)
