@@ -1,5 +1,6 @@
 package com.torusage
 
+import kotlinx.coroutines.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -9,3 +10,12 @@ import org.slf4j.LoggerFactory
 @Suppress("unused")
 inline fun <reified T> T.logger(): Logger = LoggerFactory.getLogger(T::class.java)
 
+suspend fun <A, B> Iterable<A>.mapParallel(f: suspend (A) -> B): List<B> = coroutineScope {
+    map { async { f(it) } }.awaitAll()
+}
+
+fun <T> Iterable<T>.forEachParallel(action: suspend (T) -> Unit) = runBlocking {
+    for (item in this@forEachParallel) launch(Dispatchers.Default) {
+        action(item)
+    }
+}

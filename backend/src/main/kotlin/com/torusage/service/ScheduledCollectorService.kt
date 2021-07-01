@@ -8,10 +8,7 @@ import com.torusage.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import org.torproject.descriptor.DescriptorCollector
-import org.torproject.descriptor.DescriptorReader
-import org.torproject.descriptor.DescriptorSourceFactory
-import org.torproject.descriptor.RelayNetworkStatusConsensus
+import org.torproject.descriptor.*
 import java.io.File
 import java.util.*
 
@@ -50,7 +47,7 @@ class ScheduledCollectorService(
      * Fetches consensus descriptors and stores them as files
      * The years 2007 - 2021 equal roughly 3 GB in size
      */
-    @Scheduled(fixedRate = 3600000L)
+    @Scheduled(fixedRate = 86400000L)
     fun collectConsensusesDescriptors() {
         logger.info("Fetching consensus descriptors")
         collectDescriptors(collectorApiPathConsensuses)
@@ -60,33 +57,15 @@ class ScheduledCollectorService(
         val excludedFiles = mutableMapOf<String, Long>()
         descriptorFileRepository.findAll().forEach { excludedFiles[it.filename] = it.time }
         descriptorReader.excludedFiles = excludedFiles.toSortedMap()
+
         descriptorReader.readDescriptors(
             File(collectorTargetDirectory + collectorApiPathConsensuses)
-        ).forEach { descriptor ->
-            val descriptorFileName = descriptor.descriptorFile.name
-            logger.info("Processing descriptor part of file $descriptorFileName")
-            if (descriptor is RelayNetworkStatusConsensus) {
-                val nodesToSave = mutableListOf<GeoNode>()
-                val consensusDate = Date(descriptor.validAfterMillis)
+        ).forEach { processConsensusesDescriptor(it) }
 
-                descriptor.statusEntries.forEach {
-                    val networkStatusEntry = it.value
-                    val cityLocation = geoLocationService.getCityLocationForIpAddress(networkStatusEntry.address)
-                    val longitude = cityLocation?.location?.longitude
-                    val latitude = cityLocation?.location?.latitude
-                    if (longitude != null && latitude != null) {
-                        nodesToSave.add(
-                            GeoNode(networkStatusEntry, consensusDate, longitude, latitude)
-                        )
-                    }
-                }
-                geoNodeRepository.saveAll(nodesToSave)
-            }
-        }
         descriptorReader.parsedFiles.forEach {
             descriptorFileRepository.save(DescriptorFile(it.key, it.value))
         }
-        logger.info("Stored geo nodes in DB")
+        logger.info("Finished processing descriptors for DB")
     }
 
     /**
@@ -103,7 +82,7 @@ class ScheduledCollectorService(
     /**
      * Fetches Tor node summary with the configured fixedRate and stores corresponding entities in DB
      */
-//    @Scheduled(fixedRate = 3600000L)
+//    @Scheduled(fixedRate = 86400000L)
     fun collectOnionooNodeSummary() {
         logger.info("Fetching Onionoo node summary")
         val summaryResponse = onionooApiClient.getTorNodeSummary()
@@ -115,7 +94,7 @@ class ScheduledCollectorService(
     /**
      * Fetches Tor node details with the configured fixedRate and stores corresponding entities in DB
      */
-//    @Scheduled(fixedRate = 3600000L)
+//    @Scheduled(fixedRate = 86400000L)
     fun collectOnionooNodeDetails() {
         logger.info("Fetching Onionoo node details")
         val detailsResponse = onionooApiClient.getTorNodeDetails()
@@ -139,4 +118,28 @@ class ScheduledCollectorService(
             File(collectorTargetDirectory),
             shouldDeleteLocalFilesNotFoundOnRemote,
         )
+
+    /**
+     * Process a descriptor which is part of a consensuses file
+     */
+    private fun processConsensusesDescriptor(descriptor: Descriptor) {
+        val descriptorFileName = descriptor.descriptorFile.name
+        logger.info("Processing descriptor with size ${descriptor.rawDescriptorLength} which is part of file $descriptorFileName")
+        if (descriptor is RelayNetworkStatusConsensus) {
+            val nodesToSave = mutableListOf<GeoNode>()
+            val consensusDate = Date(descriptor.validAfterMillis)
+
+            descriptor.statusEntries.forEach {
+                val networkStatusEntry = it.value
+                val location = geoLocationService.getLocationForIpAddress(networkStatusEntry.address)
+                if (location != null) {
+                    nodesToSave.add(
+                        GeoNode(networkStatusEntry, consensusDate, location.longitude, location.latitude)
+                    )
+                }
+            }
+            geoNodeRepository.saveAll(nodesToSave)
+        }
+    }
 }
+

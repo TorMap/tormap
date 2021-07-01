@@ -27,6 +27,7 @@ dependencies {
     // Kotlin
     kotlin("reflect")
     kotlin("stdlib-jdk8")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
 
     // Download and read Tor descriptors (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
     implementation(fileTree("lib/metrics-lib-2.17.0"))
