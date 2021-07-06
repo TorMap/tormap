@@ -3,7 +3,6 @@ package com.torusage.database.entity
 import org.torproject.descriptor.NetworkStatusEntry
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.persistence.ElementCollection
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity
 
@@ -14,16 +13,15 @@ import javax.persistence.Entity
 @Entity
 class GeoNode(
     networkStatusEntry: NetworkStatusEntry,
-    seen: Date,
-    var longitude: Double,
+    seenAt: Date,
     var latitude: Double,
+    var longitude: Double,
 ) {
     @EmbeddedId
     var id: GeoNodeId = GeoNodeId(
         networkStatusEntry.fingerprint,
-        SimpleDateFormat("yyyy-MM").format(seen)
+        SimpleDateFormat("yyyy-MM").format(seenAt)
     )
 
-    @ElementCollection
-    var flags: List<String> = networkStatusEntry.flags.toList()
+    var flags: String? = networkStatusEntry.flags.joinToString(", ")
 }

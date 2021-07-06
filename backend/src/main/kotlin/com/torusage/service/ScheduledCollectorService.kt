@@ -93,8 +93,9 @@ class ScheduledCollectorService(
 
         logger.info("Processing descriptors from api path $apiPath")
         val parentDirectory = File(collectorTargetDirectory + collectorApiPathConsensuses)
+        val processedFiles = processedDescriptorsFileRepository.findAll()
         parentDirectory.walkBottomUp().forEach {
-            processDescriptorsFile(it, parentDirectory, processedDescriptorsFileRepository.findAll())
+            processDescriptorsFile(it, parentDirectory, processedFiles)
         }
         logger.info("Finished processing descriptors from api path $apiPath")
     }
@@ -121,7 +122,7 @@ class ScheduledCollectorService(
     private fun processDescriptorsFile(
         fileToProcess: File,
         parentDirectory: File,
-        processedFiles: Iterable<ProcessedDescriptorsFile>
+        processedFiles: Iterable<ProcessedDescriptorsFile>,
     ) {
         if (fileToProcess != parentDirectory &&
             !processedFiles.any { it.filename == fileToProcess.name && it.lastModified != fileToProcess.lastModified() }
@@ -159,7 +160,7 @@ class ScheduledCollectorService(
                 val location = geoLocationService.getLocationForIpAddress(networkStatusEntry.address)
                 if (location != null) {
                     nodesToSave.add(
-                        GeoNode(networkStatusEntry, consensusDate, location.longitude, location.latitude)
+                        GeoNode(networkStatusEntry, consensusDate, location.latitude, location.longitude)
                     )
                 }
             }

@@ -34,9 +34,9 @@ class TorNodeController(
         val months = geoNodeRepository.findDistinctMonths()
         val requestedMonth = month ?: months.last()
         return GeoNodeResponse(
-            availableMonths = months,
-            requestedMonth = requestedMonth,
-            geoNodes = geoNodeRepository.findAllById_SeenInMonth(requestedMonth),
+            months,
+            requestedMonth,
+            geoNodeRepository.findAllById_SeenInMonth(requestedMonth),
         )
     }
 }
