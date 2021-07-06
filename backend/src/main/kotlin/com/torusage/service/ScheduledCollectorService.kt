@@ -1,14 +1,17 @@
 package com.torusage.service
 
 import com.torusage.adapter.client.OnionooApiClient
-import com.torusage.database.entity.DescriptorFile
 import com.torusage.database.entity.GeoNode
+import com.torusage.database.entity.ProcessedDescriptorsFile
 import com.torusage.database.repository.*
 import com.torusage.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import org.torproject.descriptor.*
+import org.torproject.descriptor.Descriptor
+import org.torproject.descriptor.DescriptorCollector
+import org.torproject.descriptor.DescriptorSourceFactory
+import org.torproject.descriptor.RelayNetworkStatusConsensus
 import java.io.File
 import java.util.*
 
@@ -24,12 +27,11 @@ class ScheduledCollectorService(
     val relaySummaryRepository: RelaySummaryRepository,
     val bridgeSummaryRepository: BridgeSummaryRepository,
     val geoNodeRepository: GeoNodeRepository,
-    val descriptorFileRepository: DescriptorFileRepository,
+    val processedDescriptorsFileRepository: ProcessedDescriptorsFileRepository,
     val geoLocationService: GeoLocationService,
 ) {
     val logger = logger()
     val descriptorCollector: DescriptorCollector = DescriptorSourceFactory.createDescriptorCollector()
-    val descriptorReader: DescriptorReader = DescriptorSourceFactory.createDescriptorReader()
 
     @Value("\${collector.api.baseurl}")
     lateinit var collectorApiBaseUrl: String
@@ -82,6 +84,22 @@ class ScheduledCollectorService(
     }
 
     /**
+     * Collect and process descriptors from a specific the TorProject archive [apiPath]
+     */
+    private fun collectAndProcessDescriptors(apiPath: String) {
+        logger.info("Collecting descriptors from api path $apiPath")
+        collectDescriptors(apiPath)
+        logger.info("Finished collecting descriptors from api path $apiPath")
+
+        logger.info("Processing descriptors from api path $apiPath")
+        val parentDirectory = File(collectorTargetDirectory + collectorApiPathConsensuses)
+        parentDirectory.walkBottomUp().forEach {
+            processDescriptorsFile(it, parentDirectory, processedDescriptorsFileRepository.findAll())
+        }
+        logger.info("Finished processing descriptors from api path $apiPath")
+    }
+
+    /**
      * This is a wrapper function to collect descriptors from the configured collector API.
      */
     private fun collectDescriptors(
@@ -98,36 +116,27 @@ class ScheduledCollectorService(
         )
 
     /**
-     * Collect and process descriptors from a specific the TorProject archive [apiPath]
-     */
-    private fun collectAndProcessDescriptors(apiPath: String) {
-        logger.info("Collecting descriptors from api path $apiPath")
-        collectDescriptors(apiPath)
-        logger.info("Finished collecting descriptors")
-
-        val excludedFiles = mutableMapOf<String, Long>()
-        descriptorFileRepository.findAll().forEach { excludedFiles[it.filename] = it.time }
-        descriptorReader.excludedFiles = excludedFiles.toSortedMap()
-
-        logger.info("Processing descriptors")
-        val parentDirectory = File(collectorTargetDirectory + collectorApiPathConsensuses)
-        parentDirectory.walkBottomUp().forEach { processDescriptorsFile(it, parentDirectory)
-        logger.info("Finished processing descriptors") }
-    }
-
-    /**
      * The [fileToProcess] must contain descriptors which are then processed by the [processDescriptor] method
      */
-    private fun processDescriptorsFile(fileToProcess: File, parentDirectory: File) {
-        if (fileToProcess != parentDirectory) {
+    private fun processDescriptorsFile(
+        fileToProcess: File,
+        parentDirectory: File,
+        processedFiles: Iterable<ProcessedDescriptorsFile>
+    ) {
+        if (fileToProcess != parentDirectory &&
+            !processedFiles.any { it.filename == fileToProcess.name && it.lastModified != fileToProcess.lastModified() }
+        ) {
             try {
                 logger.info("Processing descriptors file ${fileToProcess.name}")
-                descriptorReader.readDescriptors(fileToProcess).forEach {
+                DescriptorSourceFactory.createDescriptorReader().readDescriptors(fileToProcess).forEach {
                     processDescriptor(it)
                 }
-                descriptorReader.parsedFiles.forEach {
-                    descriptorFileRepository.save(DescriptorFile(it.key, it.value))
-                }
+                processedDescriptorsFileRepository.save(
+                    ProcessedDescriptorsFile(
+                        fileToProcess.name,
+                        fileToProcess.lastModified()
+                    )
+                )
                 logger.info("Finished processing descriptors file ${fileToProcess.name}")
             } catch (exception: Exception) {
                 logger.error("Failed to process descriptors file ${fileToProcess.name}. " + exception.message)
