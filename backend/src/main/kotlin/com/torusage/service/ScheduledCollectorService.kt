@@ -48,42 +48,14 @@ class ScheduledCollectorService(
      * The years 2007 - 2021 equal roughly 3 GB in size
      */
     @Scheduled(fixedRate = 86400000L)
-    fun collectConsensusesDescriptors() {
-        logger.info("Fetching consensus descriptors")
-        collectDescriptors(collectorApiPathConsensuses)
-        logger.info("Stored consensus descriptors")
-
-        logger.info("Processing descriptors for DB")
-        val excludedFiles = mutableMapOf<String, Long>()
-        descriptorFileRepository.findAll().forEach { excludedFiles[it.filename] = it.time }
-        descriptorReader.excludedFiles = excludedFiles.toSortedMap()
-
-        File(collectorTargetDirectory + collectorApiPathConsensuses).walk().forEach {
-            try {
-                descriptorReader.readDescriptors(it).forEach { descriptor ->
-                    processConsensusesDescriptor(descriptor)
-                }
-                descriptorReader.parsedFiles.forEach { parsedFile ->
-                    descriptorFileRepository.save(DescriptorFile(parsedFile.key, parsedFile.value))
-                }
-            } catch (exception: Exception) {
-                logger.error("Failed to process descriptor file ${it.absolutePath}. " + exception.message)
-            }
-
-        }
-        logger.info("Finished processing descriptors for DB")
-    }
+    fun collectConsensusesDescriptors() = collectAndProcessDescriptors(collectorApiPathConsensuses)
 
     /**
      * Fetches server descriptors and stores them in files
      * The years 2005 - 2021 equal roughly 30 GB in size
      */
     //    @Scheduled(fixedRate = 86400000L)
-    fun collectServerDescriptors() {
-        logger.info("Fetching server descriptors")
-        collectDescriptors(collectorApiPathServerDescriptors)
-        logger.info("Stored server descriptors")
-    }
+    fun collectServerDescriptors() = collectAndProcessDescriptors(collectorApiPathServerDescriptors)
 
     /**
      * Fetches Tor node summary with the configured fixedRate and stores corresponding entities in DB
@@ -126,9 +98,47 @@ class ScheduledCollectorService(
         )
 
     /**
-     * Process a descriptor which is part of a consensuses file
+     * Collect and process descriptors from a specific the TorProject archive [apiPath]
      */
-    private fun processConsensusesDescriptor(descriptor: Descriptor) {
+    private fun collectAndProcessDescriptors(apiPath: String) {
+        logger.info("Collecting descriptors from api path $apiPath")
+        collectDescriptors(apiPath)
+        logger.info("Finished collecting descriptors")
+
+        val excludedFiles = mutableMapOf<String, Long>()
+        descriptorFileRepository.findAll().forEach { excludedFiles[it.filename] = it.time }
+        descriptorReader.excludedFiles = excludedFiles.toSortedMap()
+
+        logger.info("Processing descriptors")
+        val parentDirectory = File(collectorTargetDirectory + collectorApiPathConsensuses)
+        parentDirectory.walkBottomUp().forEach { processDescriptorsFile(it, parentDirectory)
+        logger.info("Finished processing descriptors") }
+    }
+
+    /**
+     * The [fileToProcess] must contain descriptors which are then processed by the [processDescriptor] method
+     */
+    private fun processDescriptorsFile(fileToProcess: File, parentDirectory: File) {
+        if (fileToProcess != parentDirectory) {
+            try {
+                logger.info("Processing descriptors file ${fileToProcess.name}")
+                descriptorReader.readDescriptors(fileToProcess).forEach {
+                    processDescriptor(it)
+                }
+                descriptorReader.parsedFiles.forEach {
+                    descriptorFileRepository.save(DescriptorFile(it.key, it.value))
+                }
+                logger.info("Finished processing descriptors file ${fileToProcess.name}")
+            } catch (exception: Exception) {
+                logger.error("Failed to process descriptors file ${fileToProcess.name}. " + exception.message)
+            }
+        }
+    }
+
+    /**
+     * Process a [descriptor] depending on it's type
+     */
+    private fun processDescriptor(descriptor: Descriptor) {
         val descriptorFileName = descriptor.descriptorFile.name
         logger.info("Processing descriptor with size ${descriptor.rawDescriptorLength} which is part of file $descriptorFileName")
         if (descriptor is RelayNetworkStatusConsensus) {
