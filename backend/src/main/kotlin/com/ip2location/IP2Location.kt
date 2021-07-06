@@ -117,9 +117,10 @@ class IP2Location {
      * This function can be used to initialized the component with params and pre-load the BIN file.
      */
     @Throws(IOException::class)
-    fun open(DBPath: String, UseMMF: Boolean) {
+    fun open(DBPath: String, UseMMF: Boolean): IP2Location {
         useMemoryMappedFile = UseMMF
         open(DBPath)
+        return this
     }
 
     /**

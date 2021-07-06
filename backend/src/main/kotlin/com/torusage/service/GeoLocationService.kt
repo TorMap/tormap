@@ -6,7 +6,6 @@ import com.maxmind.geoip2.DatabaseReader
 import com.torusage.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.io.File
 import java.net.InetAddress
 
 
@@ -20,23 +19,39 @@ class GeoLocationService(
 
     @Value("\${ip2location.db.resource.file}")
     private val ip2locationDBFile: String,
+
+    @Value("\${geo.location.cache}")
+    private val shouldCacheQueries: Boolean = true,
 ) {
     private val logger = logger()
-    private val maxmindDatabaseReader: DatabaseReader = DatabaseReader.Builder(
-        File(maxmindDBFile)
-    ).withCache(CHMCache()).build()
-    private val ip2locationDatabaseReader = IP2Location().open(
-        ip2locationDBFile
-    )
+    private var maxmindDatabaseReader: DatabaseReader? = null
+    private var ip2locationDatabaseReader: IP2Location? = null
+
+    init {
+        val maxmindDBResource = javaClass.getResourceAsStream(maxmindDBFile) ?: throw GeoDatabaseNotFound(
+            maxmindDBFile
+        )
+        val ip2locationDBResource = javaClass.getResource(ip2locationDBFile) ?: throw GeoDatabaseNotFound(
+            ip2locationDBFile
+        )
+        var maxmindDatabaseReaderBuilder = DatabaseReader.Builder(maxmindDBResource)
+        if (shouldCacheQueries) {
+            maxmindDatabaseReaderBuilder = maxmindDatabaseReaderBuilder.withCache(CHMCache())
+        }
+        maxmindDatabaseReader = maxmindDatabaseReaderBuilder.build()
+        ip2locationDatabaseReader = IP2Location().open(
+            ip2locationDBResource.file, shouldCacheQueries
+        )
+    }
 
     fun getLocationForIpAddress(ipAddress: String): GeoLocation? = try {
-        val location = maxmindDatabaseReader.city(InetAddress.getByName(ipAddress)).location
+        val location = maxmindDatabaseReader!!.city(InetAddress.getByName(ipAddress)).location
         if (location.latitude == null || location.longitude == null) throw GeoException()
         GeoLocation(location.longitude, location.latitude)
     } catch (exception: Exception) {
         logger.warn("Maxmind location lookup failed for IP address $ipAddress! " + exception.message)
         try {
-            val location = ip2locationDatabaseReader.ipQuery(ipAddress)
+            val location = ip2locationDatabaseReader!!.ipQuery(ipAddress)
             if (location.status != "OK") throw Exception(location.status)
             else if (location.latitude == null || location.longitude == null) throw GeoException()
             GeoLocation(location.latitude!!.toDouble(), location.longitude!!.toDouble())
@@ -45,8 +60,6 @@ class GeoLocationService(
             null
         }
     }
-
-
 }
 
 data class GeoLocation(
@@ -54,4 +67,7 @@ data class GeoLocation(
     var latitude: Double,
 )
 
-class GeoException: Exception("Latitude and longitude missing!")
+class GeoException : Exception("Latitude and longitude missing!")
+class GeoDatabaseNotFound(dbFile: String) : Exception(
+    "A configured DB file could not be found: $dbFile"
+)
