@@ -5,3 +5,5 @@ node_modules/
 *.iml
 /.jpb/jpb-settings.xml
 /backend/descriptors/
+tor_usage.*.db
+descriptors/

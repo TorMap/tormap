@@ -58,12 +58,18 @@ class ScheduledCollectorService(
         descriptorFileRepository.findAll().forEach { excludedFiles[it.filename] = it.time }
         descriptorReader.excludedFiles = excludedFiles.toSortedMap()
 
-        descriptorReader.readDescriptors(
-            File(collectorTargetDirectory + collectorApiPathConsensuses + "consensuses-2017-09.tar.xz")
-        ).forEach { processConsensusesDescriptor(it) }
+        File(collectorTargetDirectory + collectorApiPathConsensuses).walk().forEach {
+            try {
+                descriptorReader.readDescriptors(it).forEach { descriptor ->
+                    processConsensusesDescriptor(descriptor)
+                }
+                descriptorReader.parsedFiles.forEach { parsedFile ->
+                    descriptorFileRepository.save(DescriptorFile(parsedFile.key, parsedFile.value))
+                }
+            } catch (exception: Exception) {
+                logger.error("Failed to process descriptor file ${it.absolutePath}. " + exception.message)
+            }
 
-        descriptorReader.parsedFiles.forEach {
-            descriptorFileRepository.save(DescriptorFile(it.key, it.value))
         }
         logger.info("Finished processing descriptors for DB")
     }
@@ -71,8 +77,8 @@ class ScheduledCollectorService(
     /**
      * Fetches server descriptors and stores them in files
      * The years 2005 - 2021 equal roughly 30 GB in size
-     * TODO Currently not scheduled due to large download size
      */
+    //    @Scheduled(fixedRate = 86400000L)
     fun collectServerDescriptors() {
         logger.info("Fetching server descriptors")
         collectDescriptors(collectorApiPathServerDescriptors)
