@@ -4,6 +4,7 @@ import com.ip2location.IP2Location
 import com.maxmind.db.CHMCache
 import com.maxmind.geoip2.DatabaseReader
 import com.torusage.logger
+import com.torusage.round
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.net.InetAddress
@@ -62,10 +63,13 @@ class GeoLocationService(
     }
 }
 
-data class GeoLocation(
-    var longitude: Double,
-    var latitude: Double,
-)
+class GeoLocation(
+    rawLongitude: Double,
+    rawLatitude: Double,
+) {
+    var longitude = rawLongitude.round()
+    var latitude = rawLatitude.round()
+}
 
 class GeoException : Exception("Latitude and longitude missing!")
 class GeoDatabaseNotFound(dbFile: String) : Exception(
