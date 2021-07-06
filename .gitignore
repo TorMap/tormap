@@ -7,3 +7,4 @@ node_modules/
 /backend/descriptors/
 tor_usage.*.db
 descriptors/
+*.log

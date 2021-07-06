@@ -1,13 +1,13 @@
 @file:Suppress("unused")
 
-package com.torusage.database.view
+package com.torusage.adapter.controller.model
 
 import com.torusage.database.entity.Relay
 
 /**
  * A relay with minimal data to be displayed in the frontend world map
  */
-class RelayView(relay: Relay) {
+class RelayResponse(relay: Relay) {
     val id = relay.id
     val firstSeen = stripTimeOfDate(relay.first_seen)
     val lastSeen = stripTimeOfDate(relay.last_seen)
