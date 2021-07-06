@@ -21,21 +21,22 @@ class RelayResponse(relay: Relay) {
 /**
  * The possible flags a relay can have assigned to it
  * [Further documentation](https://github.com/torproject/torspec/blob/main/dir-spec.txt)
+ * Please keep the order of attributes, since the frontend relies on the same order.
  */
 enum class RelayFlag {
-    Valid,
+    Valid, // if the router has been 'validated'
     Named,
     Unamed,
-    Running,
-    Stable,
-    Exit,
-    Fast,
-    Guard,
-    Authority,
-    V2Dir,
-    HSDir,
-    NoEdConsensus,
-    StaleDesc,
+    Running, // if the router is currently usable over all its published ORPorts
+    Stable, // if the router is suitable for long-lived circuits
+    Exit, // if the router is more useful for building general-purpose exit circuits than for relay circuits
+    Fast, // if the router is suitable for high-bandwidth circuits
+    Guard, // if the router is suitable for use as an entry guard
+    Authority, // if the router is a directory authority
+    V2Dir, // if the router implements the v2 directory protocol or higher
+    HSDir, // if the router is considered a v2 hidden service directory
+    NoEdConsensus, // if any Ed25519 key in the router's descriptor or microdesriptor does not reflect authority consensus
+    StaleDesc, // if the router should upload a new descriptor because the old one is too old
     Sybil,
-    BadExit,
+    BadExit, // if the router is believed to be useless as an exit node
 }
