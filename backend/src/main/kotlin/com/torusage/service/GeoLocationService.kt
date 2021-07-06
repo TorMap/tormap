@@ -45,18 +45,18 @@ class GeoLocationService(
     }
 
     fun getLocationForIpAddress(ipAddress: String): GeoLocation? = try {
-        val location = maxmindDatabaseReader!!.city(InetAddress.getByName(ipAddress)).location
-        if (location.latitude == null || location.longitude == null) throw GeoException()
-        GeoLocation(location.longitude, location.latitude)
+        val location = ip2locationDatabaseReader!!.ipQuery(ipAddress)
+        if (location.status != "OK") throw Exception(location.status)
+        else if (location.latitude == null || location.longitude == null) throw GeoException()
+        GeoLocation(location.latitude!!.toDouble(), location.longitude!!.toDouble())
     } catch (exception: Exception) {
-        logger.warn("Maxmind location lookup failed for IP address $ipAddress! " + exception.message)
+        logger.warn("IP2Location location lookup failed for IP address $ipAddress! " + exception.message)
         try {
-            val location = ip2locationDatabaseReader!!.ipQuery(ipAddress)
-            if (location.status != "OK") throw Exception(location.status)
-            else if (location.latitude == null || location.longitude == null) throw GeoException()
-            GeoLocation(location.latitude!!.toDouble(), location.longitude!!.toDouble())
+            val location = maxmindDatabaseReader!!.city(InetAddress.getByName(ipAddress)).location
+            if (location.latitude == null || location.longitude == null) throw GeoException()
+            GeoLocation(location.longitude, location.latitude)
         } catch (exception: Exception) {
-            logger.warn("IP2Location location lookup failed for IP address $ipAddress! " + exception.message)
+            logger.warn("Maxmind location lookup failed for IP address $ipAddress! " + exception.message)
             null
         }
     }

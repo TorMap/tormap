@@ -1,5 +1,6 @@
 package com.torusage.database.entity
 
+import java.util.*
 import javax.persistence.Entity
 import javax.persistence.Id
 
@@ -8,8 +9,9 @@ import javax.persistence.Id
  */
 @Suppress("unused")
 @Entity
-class DescriptorFile(
+class ProcessedDescriptorsFile(
     @Id
     var filename: String,
-    var time: Long,
+    var lastModified: Long,
+    var processedAt: Date = Date()
 )
