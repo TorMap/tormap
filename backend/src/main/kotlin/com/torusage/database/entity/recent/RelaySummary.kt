@@ -1,6 +1,9 @@
-package com.torusage.database.entity
+package com.torusage.database.entity.recent
 
-import javax.persistence.*
+import javax.persistence.ElementCollection
+import javax.persistence.Entity
+import javax.persistence.FetchType
+import javax.persistence.Id
 
 /**
  * This entity matches the [Relay summary object](https://metrics.torproject.org/onionoo.html#summary_relay)

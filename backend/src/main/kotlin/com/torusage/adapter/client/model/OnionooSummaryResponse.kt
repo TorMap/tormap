@@ -1,7 +1,7 @@
 package com.torusage.adapter.client.model
 
-import com.torusage.database.entity.BridgeSummary
-import com.torusage.database.entity.RelaySummary
+import com.torusage.database.entity.recent.BridgeSummary
+import com.torusage.database.entity.recent.RelaySummary
 
 /**
  * A summary response by the [Onionoo API](https://metrics.torproject.org/onionoo.html#responses) of the Torproject.

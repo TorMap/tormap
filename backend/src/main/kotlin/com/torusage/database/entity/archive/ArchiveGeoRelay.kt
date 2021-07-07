@@ -1,4 +1,4 @@
-package com.torusage.database.entity
+package com.torusage.database.entity.archive
 
 import org.torproject.descriptor.NetworkStatusEntry
 import java.text.SimpleDateFormat
@@ -11,14 +11,14 @@ import javax.persistence.Entity
  */
 @Suppress("unused")
 @Entity
-class GeoNode(
+class ArchiveGeoRelay(
     networkStatusEntry: NetworkStatusEntry,
     seenAt: Date,
     var latitude: Double,
     var longitude: Double,
 ) {
     @EmbeddedId
-    var id: GeoNodeId = GeoNodeId(
+    var id: ArchiveNodeId = ArchiveNodeId(
         networkStatusEntry.fingerprint,
         SimpleDateFormat("yyyy-MM").format(seenAt)
     )
