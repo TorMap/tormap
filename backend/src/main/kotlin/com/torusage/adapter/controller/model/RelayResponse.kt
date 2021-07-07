@@ -2,7 +2,7 @@
 
 package com.torusage.adapter.controller.model
 
-import com.torusage.database.entity.Relay
+import com.torusage.database.entity.recent.Relay
 
 /**
  * A relay with minimal data to be displayed in the frontend world map

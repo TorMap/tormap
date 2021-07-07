@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {WorldMap} from "./components/world-map/world-map";
 import ReactSlidingPane from "react-sliding-pane";
-import {Button, FormControlLabel, Switch, FormGroup, Checkbox, Slider, Typography, Grid} from "@material-ui/core";
+import {Button, Checkbox, FormControlLabel, FormGroup, Grid, Slider, Switch} from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
 import Moment from "react-moment";
@@ -67,11 +67,6 @@ function App() {
             }}/>
             <div className={"sliderContainer"}>
                 <Grid container spacing={2}>
-                    {/*<Grid item>*/}
-                    {/*    <Typography>*/}
-                    {/*        {formatSliderValue(sliderValue[0], true)}*/}
-                    {/*    </Typography>*/}
-                    {/*</Grid>*/}
                     <Grid item xs>
                         <Slider
                             className={"slider"}
@@ -86,11 +81,6 @@ function App() {
                             valueLabelFormat={(x) => <Moment date={mapSliderValueToDate(x, true)} format={"MM/YY"}/>}
                         />
                     </Grid>
-                    {/*<Grid item>*/}
-                    {/*    <Typography>*/}
-                    {/*        {formatSliderValue(sliderValue[1], false)}*/}
-                    {/*    </Typography>*/}
-                    {/*</Grid>*/}
                 </Grid>
             </div>
             <Button className={"optionPaneButton"} onClick={() => setShowOptionPane(!showOptionPane)}>toggle
@@ -98,8 +88,8 @@ function App() {
             <ReactSlidingPane width={"100%"} isOpen={showOptionPane} onRequestClose={() => setShowOptionPane(false)}
                               from={"bottom"} title={"Optionen"} className={"optionPane"}>
                 <FormGroup>
-                    {/*<FormControlLabel control={<Switch checked={button} onChange={() => setButton(!button)}/>}*/}
-                    {/*                  label={"Test Button"}/>*/}
+                    <FormControlLabel control={<Switch checked={button} onChange={() => setButton(!button)}/>}
+                                      label={"Test Button"}/>
                     <p>Filter by relay flags</p>
                     <FormControlLabel
                         control={<Checkbox checked={state.checkBox} onChange={handleChange} name={"checkBox"}/>}

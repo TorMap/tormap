@@ -1,6 +1,6 @@
-package com.torusage.database.repository
+package com.torusage.database.repository.recent
 
-import com.torusage.database.entity.RelaySummary
+import com.torusage.database.entity.recent.RelaySummary
 import org.springframework.data.repository.CrudRepository
 
 /**

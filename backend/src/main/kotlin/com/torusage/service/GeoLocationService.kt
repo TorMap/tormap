@@ -45,6 +45,10 @@ class GeoLocationService(
         )
     }
 
+    /**
+     * Get the approximate [GeoLocation] of an [ipAddress]
+     * by looking it up with two different file based DB providers (IP2Location & Maxmind)
+     */
     fun getLocationForIpAddress(ipAddress: String): GeoLocation? = try {
         val location = ip2locationDatabaseReader!!.ipQuery(ipAddress)
         if (location.status != "OK") throw Exception(location.status)
