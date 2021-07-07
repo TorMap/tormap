@@ -1,9 +1,14 @@
 package com.torusage.service
 
 import com.torusage.adapter.client.OnionooApiClient
-import com.torusage.database.entity.GeoNode
-import com.torusage.database.entity.ProcessedDescriptorsFile
-import com.torusage.database.repository.*
+import com.torusage.database.entity.archive.ArchiveGeoRelay
+import com.torusage.database.entity.archive.ProcessedDescriptorsFile
+import com.torusage.database.repository.archive.ArchiveGeoRelayRepository
+import com.torusage.database.repository.archive.ProcessedDescriptorsFileRepository
+import com.torusage.database.repository.recent.BridgeRepository
+import com.torusage.database.repository.recent.BridgeSummaryRepository
+import com.torusage.database.repository.recent.RelayRepository
+import com.torusage.database.repository.recent.RelaySummaryRepository
 import com.torusage.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
@@ -26,7 +31,7 @@ class ScheduledCollectorService(
     val bridgeRepository: BridgeRepository,
     val relaySummaryRepository: RelaySummaryRepository,
     val bridgeSummaryRepository: BridgeSummaryRepository,
-    val geoNodeRepository: GeoNodeRepository,
+    val archiveGeoRelayRepository: ArchiveGeoRelayRepository,
     val processedDescriptorsFileRepository: ProcessedDescriptorsFileRepository,
     val geoLocationService: GeoLocationService,
 ) {
@@ -124,9 +129,11 @@ class ScheduledCollectorService(
         parentDirectory: File,
         processedFiles: Iterable<ProcessedDescriptorsFile>,
     ) {
-        if (fileToProcess != parentDirectory &&
-            !processedFiles.any { it.filename == fileToProcess.name && it.lastModified != fileToProcess.lastModified() }
+        if (fileToProcess == parentDirectory ||
+            processedFiles.any { it.filename == fileToProcess.name && it.lastModified == fileToProcess.lastModified() }
         ) {
+            logger.info("Skipping already processed descriptors file ${fileToProcess.name}")
+        } else {
             try {
                 logger.info("Processing descriptors file ${fileToProcess.name}")
                 DescriptorSourceFactory.createDescriptorReader().readDescriptors(fileToProcess).forEach {
@@ -152,7 +159,7 @@ class ScheduledCollectorService(
         val descriptorFileName = descriptor.descriptorFile.name
         logger.info("Processing descriptor with size ${descriptor.rawDescriptorLength} which is part of file $descriptorFileName")
         if (descriptor is RelayNetworkStatusConsensus) {
-            val nodesToSave = mutableListOf<GeoNode>()
+            val nodesToSave = mutableListOf<ArchiveGeoRelay>()
             val consensusDate = Date(descriptor.validAfterMillis)
 
             descriptor.statusEntries.forEach {
@@ -160,11 +167,11 @@ class ScheduledCollectorService(
                 val location = geoLocationService.getLocationForIpAddress(networkStatusEntry.address)
                 if (location != null) {
                     nodesToSave.add(
-                        GeoNode(networkStatusEntry, consensusDate, location.latitude, location.longitude)
+                        ArchiveGeoRelay(networkStatusEntry, consensusDate, location.latitude, location.longitude)
                     )
                 }
             }
-            geoNodeRepository.saveAll(nodesToSave)
+            archiveGeoRelayRepository.saveAll(nodesToSave)
         }
     }
 }

@@ -1,6 +1,6 @@
-package com.torusage.database.repository
+package com.torusage.database.repository.recent
 
-import com.torusage.database.entity.Bridge
+import com.torusage.database.entity.recent.Bridge
 import org.springframework.data.repository.CrudRepository
 
 /**
