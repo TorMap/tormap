@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("recent")
-class TorRecentDataController(
+class RecentDataController(
     val relayRepository: RelayRepository,
 ) {
 

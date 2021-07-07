@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("archive")
-class TorArchiveDataController(
+class ArchiveDataController(
     val geoNodeRepository: ArchiveGeoRelayRepositoryImpl,
 ) {
 
-    @GetMapping("/geo/relays/{month}")
-    fun getGeoRelays(@PathVariable month: String?): ArchiveGeoRelaysResponse {
+    @GetMapping("/geo/relays", "/geo/relays/{month}")
+    fun getGeoRelays(@PathVariable month: String? = null): ArchiveGeoRelaysResponse {
         val months = geoNodeRepository.findDistinctMonths()
         val requestedMonth = month ?: months.last()
         return ArchiveGeoRelaysResponse(
