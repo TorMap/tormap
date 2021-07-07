@@ -1,27 +1,25 @@
-import {FeatureGroup, GeoJSON, MapContainer, TileLayer} from "react-leaflet";
+import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
-import {RelayView} from "../../types/relay";
 import {apiBaseUrl} from "../../util/constants";
-import {CircleMarker, circleMarker, LeafletMouseEvent, Map} from "leaflet";
+import {CircleMarker, circleMarker, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import "./world-map.scss"
 import {NodePopup} from "../node-popup/node-popup";
-import {FeatureCollection} from "geojson"
+import {ArchiveGeoRelayView} from "../../types/archive-geo-relay";
 
 interface Props {
     /**
-     * This range is used to select nodes which will be displayed on the map
+     * This months data will be fetched from backend and visualized on the map
      */
-    dateRangeToDisplay: { startDate: Date, endDate: Date }
+    monthToDisplay?: string
 }
 
-export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
+export const WorldMap: FunctionComponent<Props> = ({monthToDisplay}) => {
     const [showNodePopup, setShowNodePopup] = useState(false)
     const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
-    const [relays, setRelays] = useState<RelayView[]>([])
-    const [leafletMap, setLeafletMap] = useState<Map>()
+    const [monthToRelays] = useState<Map<string, ArchiveGeoRelayView[]>>(new Map())
+    const [leafletMap, setLeafletMap] = useState<LeafletMap>()
     const [activeMarkers, setActiveMarkers] = useState<CircleMarker[]>([])
-    // const [countries, setCountries] = useState<FeatureCollection>()
 
     const onMarkerClick = (click: LeafletMouseEvent) => {
         console.log("Marker clicked, show node details")
@@ -29,57 +27,54 @@ export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
         setShowNodePopup(true)
     }
 
-    const removeMapMarkers = useCallback(() =>{
+    const removeMapMarkers = useCallback(() => {
         if (leafletMap) {
             activeMarkers.forEach(marker => leafletMap.removeLayer(marker))
         }
     }, [activeMarkers, leafletMap])
 
-    useEffect(() => {
+    const drawRelays = async (month: string, relays: ArchiveGeoRelayView[]) => {
         if (leafletMap) {
             removeMapMarkers()
             const newActiveMarkers: CircleMarker[] = []
             relays.forEach(relay => {
-                if (
-                    new Date(relay.firstSeen) < dateRangeToDisplay.endDate
-                    && new Date(relay.lastSeen) > dateRangeToDisplay.startDate
-                ) {
-                    const marker = circleMarker(
-                        [relay.lat, relay.long],
-                        {
-                            radius: 2,
-                            className: relay.id,
-                        },
-                    )
-                        .on("click", onMarkerClick)
-                        .addTo(leafletMap);
-                    newActiveMarkers.push(marker)
-                    leafletMap.addLayer(marker)
-                }
+                const marker = circleMarker(
+                    [relay.lat, relay.long],
+                    {
+                        radius: 2,
+                        className: relay.finger,
+                    },
+                )
+                    .on("click", onMarkerClick)
+                    .addTo(leafletMap);
+                newActiveMarkers.push(marker)
+                leafletMap.addLayer(marker)
             });
             setActiveMarkers(newActiveMarkers)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [relays, dateRangeToDisplay])
+    }
 
     useEffect(() => {
-        console.log("Fetching relays")
-        fetch(apiBaseUrl + "/node/relays")
-            .then(response => response.json())
-            .then(newRelays => {
-                setRelays(newRelays)
-            })
-            .catch(console.log)
-    }, [])
+        if (monthToDisplay) {
+            if (!monthToRelays.has(monthToDisplay)) {
+                console.log("Fetching relays")
+                fetch(`${apiBaseUrl}/archive/geo/relay/${monthToDisplay}`)
+                    .then(response => response.json())
+                    .then(newRelays => {
+                        monthToRelays.set(monthToDisplay, newRelays)
+                        drawRelays(monthToDisplay, newRelays)
+                    })
+                    .catch(console.log)
+            } else {
+                drawRelays(monthToDisplay, monthToRelays.get(monthToDisplay)!!)
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [monthToDisplay])
 
-    // useEffect(() => {
-    //     console.log("Fetching countrys geoJSON")
-    //     const path = 'https://datahub.io/core/geo-countries/r/countries.geojson'
-    //     fetch(path)
-    //         .then(response => response.json())
-    //         .then(countries => setCountries(countries))
-    //
-    // },[])
+    useEffect(() => {
+
+    }, [])
 
     return (
         <MapContainer
@@ -91,7 +86,7 @@ export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
             zoomDelta={0.5}
             wheelPxPerZoomLevel={200}
             preferCanvas={true}
-            whenCreated={(newMap: Map) => {
+            whenCreated={(newMap: LeafletMap) => {
                 setLeafletMap(newMap)
             }}
         >
@@ -107,9 +102,6 @@ export const WorldMap: FunctionComponent<Props> = ({dateRangeToDisplay}) => {
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                 noWrap={true}
             />
-            {/*<FeatureGroup>*/}
-            {/*    {countries?.features.map(countries => <GeoJSON data={countries}/>)}*/}
-            {/*</FeatureGroup>*/}
         </MapContainer>
     );
 };

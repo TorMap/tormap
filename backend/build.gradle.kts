@@ -27,6 +27,10 @@ dependencies {
     // Kotlin
     kotlin("reflect")
     kotlin("stdlib-jdk8")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
+
+    // Download and read Tor descriptors (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
+    implementation(fileTree("lib/metrics-lib-2.17.0"))
 
     // Spring Boot
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -39,6 +43,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     runtimeOnly("com.h2database:h2")
+
+    // Handle tasks requiring a geo location lookup
+    implementation("com.maxmind.geoip2:geoip2:2.15.0")
 
     // Code documentation
     dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin")
