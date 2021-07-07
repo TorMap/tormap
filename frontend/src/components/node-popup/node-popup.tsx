@@ -40,7 +40,7 @@ export const NodePopup: React.FunctionComponent<Props> = ({
         : undefined
 
     useEffect(() => {
-        fetch(apiBaseUrl + "/node/relay/" + relayId)
+        fetch(`${apiBaseUrl}/recent/relay/${relayId}`)
             .then(response => response.json())
             .then((relay: Relay) => {
                 setRelay(relay)

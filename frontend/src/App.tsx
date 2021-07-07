@@ -1,13 +1,11 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {WorldMap} from "./components/world-map/world-map";
 import ReactSlidingPane from "react-sliding-pane";
 import {Button, Checkbox, FormControlLabel, FormGroup, Grid, Slider, Switch} from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
 import Moment from "react-moment";
-
-const historicStartYear = 2007
-const historicStartMonth = 10
+import {apiBaseUrl} from "./util/constants";
 
 function App() {
     const [showOptionPane, setShowOptionPane] = useState(false)
@@ -17,40 +15,21 @@ function App() {
         checkBox2: true,
         checkBox3: true,
     })
-    const [sliderValue, setSliderValue] = useState<[number, number]>([0, monthsSinceBeginning()])
+    const [availableMonths, setAvailableMonths] = useState<string[]>([])
+    const [sliderValue, setSliderValue] = useState<number>(0)
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setState({...state, [event.target.name]: event.target.checked})
     };
 
-    const handleSliderChange = (event: any, newValue: number | number[]) => {
-        setSliderValue(newValue as [number, number])
-    };
-
-    function monthsSinceBeginning() {
-        const today = new Date()
-        const currentYear = today.getFullYear()
-        const currentMonth = today.getMonth()
-        return (currentYear - historicStartYear) * 12 - 9 + currentMonth
-    }
-
-    const mapSliderValueToDate = (value: number, isStartValue: boolean) => {
-        value += historicStartMonth
-        const month = (value % 12)
-        const relativeYear = (value - month) / 12
-        return isStartValue ?
-            new Date(historicStartYear + relativeYear, month - 1, 1) :
-            new Date(historicStartYear + relativeYear, month, 0)
-    }
-
     const marks = (count: number) => {
-        count -= 1
         let marks = []
-        for (let i = 0; i <= count; i++) {
+        for (let i = 0; i < count; i++) {
             const mark = {
-                value: i * monthsSinceBeginning() / count,
+                value: i * availableMonths.length / count,
                 label: <Moment
-                    date={mapSliderValueToDate(i * monthsSinceBeginning() / count, true)}
+                    date={availableMonths[i * availableMonths.length / count]}
                     format={"MM/YYYY"}
                 />
             }
@@ -59,26 +38,37 @@ function App() {
         return marks
     }
 
+    useEffect(() => {
+        console.log("Fetching available months")
+        fetch(`${apiBaseUrl}/archive/geo/relay/months`)
+            .then(response => response.json())
+            .then(availableMonths => {
+                setAvailableMonths(availableMonths)
+                setSliderValue(availableMonths.length - 1)
+            })
+            .catch(console.log)
+    }, [])
+
+
     return (
         <div>
-            <WorldMap dateRangeToDisplay={{
-                startDate: mapSliderValueToDate(sliderValue[0], true),
-                endDate: mapSliderValueToDate(sliderValue[1], false)
-            }}/>
+            <WorldMap
+                monthToDisplay={sliderValue ? availableMonths[sliderValue] : undefined}
+            />
             <div className={"sliderContainer"}>
                 <Grid container spacing={2}>
                     <Grid item xs>
                         <Slider
                             className={"slider"}
                             value={sliderValue}
-                            onChange={handleSliderChange}
+                            onChange={(event: any, newValue: number | number[]) => setSliderValue(newValue as number)}
                             valueLabelDisplay={"on"}
-                            aria-labelledby={"range-slider"}
+                            aria-labelledby={"discrete-slider-always"}
                             name={"slider"}
                             min={0}
-                            max={monthsSinceBeginning()}
+                            max={availableMonths.length - 1}
                             marks={marks(6)}
-                            valueLabelFormat={(x) => <Moment date={mapSliderValueToDate(x, true)} format={"MM/YY"}/>}
+                            valueLabelFormat={(x) => <Moment date={availableMonths[x]} format={"MM/YY"}/>}
                         />
                     </Grid>
                 </Grid>
@@ -92,13 +82,13 @@ function App() {
                                       label={"Test Button"}/>
                     <p>Filter by relay flags</p>
                     <FormControlLabel
-                        control={<Checkbox checked={state.checkBox} onChange={handleChange} name={"checkBox"}/>}
+                        control={<Checkbox checked={state.checkBox} onChange={handleInputChange} name={"checkBox"}/>}
                         label={"Guard"}/>
                     <FormControlLabel
-                        control={<Checkbox checked={state.checkBox2} onChange={handleChange} name={"checkBox2"}/>}
+                        control={<Checkbox checked={state.checkBox2} onChange={handleInputChange} name={"checkBox2"}/>}
                         label={"Exit"}/>
                     <FormControlLabel
-                        control={<Checkbox checked={state.checkBox3} onChange={handleChange} name={"checkBox3"}/>}
+                        control={<Checkbox checked={state.checkBox3} onChange={handleInputChange} name={"checkBox3"}/>}
                         label={"Fast"}/>
                 </FormGroup>
             </ReactSlidingPane>
