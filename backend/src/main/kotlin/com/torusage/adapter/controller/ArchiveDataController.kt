@@ -1,6 +1,6 @@
 package com.torusage.adapter.controller
 
-import com.torusage.adapter.controller.model.ArchiveGeoRelaysResponse
+import com.torusage.adapter.controller.model.ArchiveGeoRelayView
 import com.torusage.database.repository.archive.ArchiveGeoRelayRepositoryImpl
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -10,17 +10,13 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("archive")
 class ArchiveDataController(
-    val geoNodeRepository: ArchiveGeoRelayRepositoryImpl,
+    val archiveGeoRelayRepository: ArchiveGeoRelayRepositoryImpl,
 ) {
 
-    @GetMapping("/geo/relays", "/geo/relays/{month}")
-    fun getGeoRelays(@PathVariable month: String? = null): ArchiveGeoRelaysResponse {
-        val months = geoNodeRepository.findDistinctMonths()
-        val requestedMonth = month ?: months.last()
-        return ArchiveGeoRelaysResponse(
-            months,
-            requestedMonth,
-            geoNodeRepository.findAllById_SeenInMonth(requestedMonth),
-        )
-    }
+    @GetMapping("/geo/relay/months")
+    fun getMonthsForGeoRelays() = archiveGeoRelayRepository.findDistinctMonths()
+
+    @GetMapping("/geo/relay/{month}")
+    fun getGeoRelays(@PathVariable month: String) =
+        archiveGeoRelayRepository.findAllById_SeenInMonth(month).map { ArchiveGeoRelayView(it) }
 }

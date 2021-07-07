@@ -59,7 +59,7 @@ class GeoLocationService(
         try {
             val location = maxmindDatabaseReader!!.city(InetAddress.getByName(ipAddress)).location
             if (location.latitude == null || location.longitude == null) throw GeoException()
-            GeoLocation(location.longitude, location.latitude)
+            GeoLocation(location.latitude, location.longitude)
         } catch (exception: Exception) {
             logger.warn("Maxmind location lookup failed for IP address $ipAddress! " + exception.message)
             null
@@ -68,11 +68,11 @@ class GeoLocationService(
 }
 
 class GeoLocation(
-    rawLongitude: Double,
     rawLatitude: Double,
+    rawLongitude: Double,
 ) {
-    var longitude = rawLongitude.round()
     var latitude = rawLatitude.round()
+    var longitude = rawLongitude.round()
 }
 
 class GeoException : Exception("Latitude and longitude missing!")
