@@ -5,9 +5,9 @@ package com.torusage.adapter.controller.model
 import com.torusage.database.entity.recent.Relay
 
 /**
- * A relay with minimal data to be displayed in the frontend world map
+ * A [Relay] with minimal data for fast frontend response times
  */
-class RelayResponse(relay: Relay) {
+class RelayView(relay: Relay) {
     val id = relay.id
     val firstSeen = stripTimeOfDate(relay.first_seen)
     val lastSeen = stripTimeOfDate(relay.last_seen)

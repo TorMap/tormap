@@ -1,7 +1,7 @@
 package com.torusage.adapter.controller
 
 import com.torusage.adapter.controller.exception.NodeNotFoundException
-import com.torusage.adapter.controller.model.RelayResponse
+import com.torusage.adapter.controller.model.RelayView
 import com.torusage.database.entity.recent.Relay
 import com.torusage.database.repository.recent.RelayRepository
 import org.springframework.web.bind.annotation.GetMapping
@@ -15,10 +15,10 @@ class RecentDataController(
     val relayRepository: RelayRepository,
 ) {
 
-    @GetMapping("/relays")
-    fun getRelays(): List<RelayResponse> {
+    @GetMapping("/relay")
+    fun getRelays(): List<RelayView> {
         val relays = relayRepository.findAllByLatitudeNotNullAndLongitudeNotNull()
-        return relays.map { RelayResponse(it) }
+        return relays.map { RelayView(it) }
     }
 
     @GetMapping("/relay/{id}")
