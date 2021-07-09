@@ -1,6 +1,7 @@
 package com.torusage.database.entity.archive
 
 import org.torproject.descriptor.NetworkStatusEntry
+import java.math.BigDecimal
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.persistence.EmbeddedId
@@ -14,8 +15,8 @@ import javax.persistence.Entity
 class ArchiveGeoRelay(
     networkStatusEntry: NetworkStatusEntry,
     seenAt: Date,
-    var latitude: Double,
-    var longitude: Double,
+    var latitude: BigDecimal,
+    var longitude: BigDecimal,
 ) {
     @EmbeddedId
     var id: ArchiveNodeId = ArchiveNodeId(

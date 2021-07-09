@@ -20,6 +20,4 @@ fun <T> Iterable<T>.forEachParallel(action: suspend (T) -> Unit) = runBlocking {
     }
 }
 
-fun String.commaSeperatedToList() = this.split(",").map { it.trim() }
-
-fun Double.round(decimals: Int = 4): Double = "%.${decimals}f".format(this).toDouble()
+fun String.commaSeparatedToList() = this.split(",").map { it.trim() }

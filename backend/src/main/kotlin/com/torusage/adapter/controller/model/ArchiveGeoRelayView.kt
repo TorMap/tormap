@@ -2,7 +2,7 @@
 
 package com.torusage.adapter.controller.model
 
-import com.torusage.commaSeperatedToList
+import com.torusage.commaSeparatedToList
 import com.torusage.database.entity.archive.ArchiveGeoRelay
 
 /**
@@ -13,7 +13,7 @@ class ArchiveGeoRelayView(relay: ArchiveGeoRelay) {
     val lat = relay.latitude
     val long = relay.longitude
     val flags = try {
-        relay.flags?.commaSeperatedToList()?.map { RelayFlag.valueOf(it).ordinal }
+        relay.flags?.commaSeparatedToList()?.map { RelayFlag.valueOf(it).ordinal }
     } catch (exception: Exception) {
         null
     }
