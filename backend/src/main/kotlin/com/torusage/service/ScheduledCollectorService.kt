@@ -93,7 +93,7 @@ class ScheduledCollectorService(
      */
     private fun collectAndProcessDescriptors(apiPath: String) {
         logger.info("Collecting descriptors from api path $apiPath")
-        collectDescriptors(apiPath)
+        // collectDescriptors(apiPath)
         logger.info("Finished collecting descriptors from api path $apiPath")
 
         logger.info("Processing descriptors from api path $apiPath")
