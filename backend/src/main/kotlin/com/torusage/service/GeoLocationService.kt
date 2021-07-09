@@ -4,9 +4,10 @@ import com.ip2location.IP2Location
 import com.maxmind.db.CHMCache
 import com.maxmind.geoip2.DatabaseReader
 import com.torusage.logger
-import com.torusage.round
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.net.InetAddress
 
 
@@ -53,26 +54,26 @@ class GeoLocationService(
         val location = ip2locationDatabaseReader!!.ipQuery(ipAddress)
         if (location.status != "OK") throw Exception(location.status)
         else if (location.latitude == null || location.longitude == null) throw GeoException()
-        GeoLocation(location.latitude!!.toDouble(), location.longitude!!.toDouble())
+        GeoLocation(location.latitude!!.toBigDecimal(), location.longitude!!.toBigDecimal())
     } catch (exception: Exception) {
-        logger.warn("IP2Location location lookup failed for IP address $ipAddress! " + exception.message)
+        logger.warn("IP2Location location lookup failed for IP address $ipAddress! ${exception.javaClass}: ${exception.message}")
         try {
             val location = maxmindDatabaseReader!!.city(InetAddress.getByName(ipAddress)).location
             if (location.latitude == null || location.longitude == null) throw GeoException()
-            GeoLocation(location.latitude, location.longitude)
+            GeoLocation(location.latitude.toBigDecimal(), location.longitude.toBigDecimal())
         } catch (exception: Exception) {
-            logger.warn("Maxmind location lookup failed for IP address $ipAddress! " + exception.message)
+            logger.warn("Maxmind location lookup failed for IP address $ipAddress! ${exception.javaClass}: ${exception.message}")
             null
         }
     }
 }
 
 class GeoLocation(
-    rawLatitude: Double,
-    rawLongitude: Double,
+    rawLatitude: BigDecimal,
+    rawLongitude: BigDecimal,
 ) {
-    var latitude = rawLatitude.round()
-    var longitude = rawLongitude.round()
+    var latitude: BigDecimal = rawLatitude.setScale(4, RoundingMode.HALF_EVEN)
+    var longitude: BigDecimal = rawLongitude.setScale(4, RoundingMode.HALF_EVEN)
 }
 
 class GeoException : Exception("Latitude and longitude missing!")
