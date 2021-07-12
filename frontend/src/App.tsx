@@ -17,7 +17,7 @@ function App() {
         fast: true,
     })
     const [availableMonths, setAvailableMonths] = useState<string[]>([])
-    const [sliderValue, setSliderValue] = useState<number>(0)
+    const [sliderValue, setSliderValue] = useState<number>(-1)
     const [sliderMarks, setSliderMarks] = useState<Mark[]>([])
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,7 +63,7 @@ function App() {
     return (
         <div>
             <WorldMap
-                monthToDisplay={sliderValue ? availableMonths[sliderValue] : undefined}
+                monthToDisplay={sliderValue >= 0 ? availableMonths[sliderValue] : undefined}
                 colorFlags={colorNodeFlags}
             />
             <div className={"sliderContainer"}>
@@ -80,6 +80,7 @@ function App() {
                             max={availableMonths.length - 1}
                             marks={sliderMarks}
                             valueLabelFormat={(x) => <Moment date={availableMonths[x]} format={"MM/YY"}/>}
+                            track={false}
                         />
                     </Grid>
                 </Grid>
