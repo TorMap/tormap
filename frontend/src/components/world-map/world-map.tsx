@@ -6,15 +6,18 @@ import 'leaflet/dist/leaflet.css';
 import "./world-map.scss"
 import {NodePopup} from "../node-popup/node-popup";
 import {ArchiveGeoRelayView} from "../../types/archive-geo-relay";
+import {RelayFlag} from "../../types/relay";
 
 interface Props {
     /**
      * This months data will be fetched from backend and visualized on the map
      */
     monthToDisplay?: string
+
+    colorFlags: boolean
 }
 
-export const WorldMap: FunctionComponent<Props> = ({monthToDisplay}) => {
+export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= false}) => {
     const [showNodePopup, setShowNodePopup] = useState(false)
     const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
     const [monthToRelays] = useState<Map<string, ArchiveGeoRelayView[]>>(new Map())
@@ -38,11 +41,22 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay}) => {
             removeMapMarkers()
             const newActiveMarkers: CircleMarker[] = []
             relays.forEach(relay => {
+
+                var color = "#833ab4"
+                if(colorFlags) {
+                    if (relay.flags?.includes(RelayFlag.Exit)) {
+                        color = "#f96969"
+                    } else if (relay.flags?.includes(RelayFlag.Guard)) {
+                        color = "#fcb045"
+                    }
+                }
+
                 const marker = circleMarker(
                     [relay.lat, relay.long],
                     {
-                        radius: 2,
+                        radius: 1,
                         className: relay.finger,
+                        color: color
                     },
                 )
                     .on("click", onMarkerClick)
@@ -70,11 +84,8 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay}) => {
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [monthToDisplay])
+    }, [monthToDisplay, colorFlags])
 
-    useEffect(() => {
-
-    }, [])
 
     return (
         <MapContainer

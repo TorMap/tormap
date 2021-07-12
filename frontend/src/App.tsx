@@ -9,11 +9,11 @@ import {apiBaseUrl} from "./util/constants";
 
 function App() {
     const [showOptionPane, setShowOptionPane] = useState(false)
-    const [button, setButton] = useState(false)
+    const [colorNodeFlags, setColorNodeFlags] = useState(true)
     const [state, setState] = useState({
-        checkBox: true,
-        checkBox2: true,
-        checkBox3: true,
+        guard: true,
+        exit: true,
+        fast: true,
     })
     const [availableMonths, setAvailableMonths] = useState<string[]>([])
     const [sliderValue, setSliderValue] = useState<number>(0)
@@ -24,12 +24,13 @@ function App() {
     };
 
     const marks = (count: number) => {
+        count--
         let marks = []
-        for (let i = 0; i < count; i++) {
+        for (let i = 0; i <= count; i++) {
             const mark = {
-                value: i * availableMonths.length / count,
+                value: Math.round(i * (availableMonths.length - 1) / count),
                 label: <Moment
-                    date={availableMonths[i * availableMonths.length / count]}
+                    date={availableMonths[Math.round(i * (availableMonths.length - 1) / count)]}
                     format={"MM/YYYY"}
                 />
             }
@@ -54,6 +55,7 @@ function App() {
         <div>
             <WorldMap
                 monthToDisplay={sliderValue ? availableMonths[sliderValue] : undefined}
+                colorFlags={colorNodeFlags}
             />
             <div className={"sliderContainer"}>
                 <Grid container spacing={2}>
@@ -61,7 +63,8 @@ function App() {
                         <Slider
                             className={"slider"}
                             value={sliderValue}
-                            onChange={(event: any, newValue: number | number[]) => setSliderValue(newValue as number)}
+                            onChange={(event: any, newValue: number | number[]) => null}
+                            onChangeCommitted={(event: any, newValue: number | number[]) => setSliderValue(newValue as number)}
                             valueLabelDisplay={"on"}
                             aria-labelledby={"discrete-slider-always"}
                             name={"slider"}
@@ -78,17 +81,17 @@ function App() {
             <ReactSlidingPane width={"100%"} isOpen={showOptionPane} onRequestClose={() => setShowOptionPane(false)}
                               from={"bottom"} title={"Optionen"} className={"optionPane"}>
                 <FormGroup>
-                    <FormControlLabel control={<Switch checked={button} onChange={() => setButton(!button)}/>}
-                                      label={"Test Button"}/>
+                    <FormControlLabel control={<Switch checked={colorNodeFlags} onChange={() => setColorNodeFlags(!colorNodeFlags)}/>}
+                                      label={"Color nodes according to Flags"}/>
                     <p>Filter by relay flags</p>
                     <FormControlLabel
-                        control={<Checkbox checked={state.checkBox} onChange={handleInputChange} name={"checkBox"}/>}
+                        control={<Checkbox checked={state.guard} onChange={handleInputChange} name={"guard"}/>}
                         label={"Guard"}/>
                     <FormControlLabel
-                        control={<Checkbox checked={state.checkBox2} onChange={handleInputChange} name={"checkBox2"}/>}
+                        control={<Checkbox checked={state.exit} onChange={handleInputChange} name={"exit"}/>}
                         label={"Exit"}/>
                     <FormControlLabel
-                        control={<Checkbox checked={state.checkBox3} onChange={handleInputChange} name={"checkBox3"}/>}
+                        control={<Checkbox checked={state.fast} onChange={handleInputChange} name={"fast"}/>}
                         label={"Fast"}/>
                 </FormGroup>
             </ReactSlidingPane>
