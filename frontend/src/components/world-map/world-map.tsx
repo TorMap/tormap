@@ -65,13 +65,14 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= 
                 leafletMap.addLayer(marker)
             });
             setActiveMarkers(newActiveMarkers)
+            console.log(newActiveMarkers.length)
         }
     }
 
     useEffect(() => {
         if (monthToDisplay) {
             if (!monthToRelays.has(monthToDisplay)) {
-                console.log("Fetching relays")
+                //console.log(`Fetching relays for ${ monthToDisplay }`)
                 fetch(`${apiBaseUrl}/archive/geo/relay/${monthToDisplay}`)
                     .then(response => response.json())
                     .then(newRelays => {
@@ -79,8 +80,12 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= 
                         drawRelays(monthToDisplay, newRelays)
                     })
                     .catch(console.log)
+
+                //console.log(`Fetching relays for ${ monthToDisplay } finished`)
             } else {
+                //console.log(`Drawing relays for ${ monthToDisplay } `)
                 drawRelays(monthToDisplay, monthToRelays.get(monthToDisplay)!!)
+                //console.log(`Drawing relays for ${ monthToDisplay } finished`)
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
