@@ -35,7 +35,13 @@ code {
     color: white;
 }
 
-.slider {
+.slider .PrivateValueLabel-offset-3.MuiSlider-valueLabel{
+    top: -42px;
+    left: calc(-50% - 8px)
+}
+.slider .PrivateValueLabel-circle-4{
+    width: 40px;
+    height: 40px;
 }
 
 .MuiSlider-markLabel{
