@@ -6,6 +6,7 @@ import "@material-ui/styles";
 import "./index.scss";
 import Moment from "react-moment";
 import {apiBaseUrl} from "./util/constants";
+import {Mark} from "./types/mark";
 
 function App() {
     const [showOptionPane, setShowOptionPane] = useState(false)
@@ -17,30 +18,32 @@ function App() {
     })
     const [availableMonths, setAvailableMonths] = useState<string[]>([])
     const [sliderValue, setSliderValue] = useState<number>(0)
-
+    const [sliderMarks, setSliderMarks] = useState<Mark[]>([])
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setState({...state, [event.target.name]: event.target.checked})
     };
 
-    const marks = (count: number) => {
+    const marks = (count: number) : Mark[] => {
+        console.log("entered marks()")
+        if (count < 2) return []
         count--
         let marks = []
         for (let i = 0; i <= count; i++) {
-            const mark = {
+            const mark: Mark = {
                 value: Math.round(i * (availableMonths.length - 1) / count),
                 label: <Moment
                     date={availableMonths[Math.round(i * (availableMonths.length - 1) / count)]}
                     format={"MM/YYYY"}
                 />
             }
+            console.log(mark.label)
             marks.push(mark);
         }
         return marks
     }
 
     useEffect(() => {
-        console.log("Fetching available months")
         fetch(`${apiBaseUrl}/archive/geo/relay/months`)
             .then(response => response.json())
             .then(availableMonths => {
@@ -49,6 +52,12 @@ function App() {
             })
             .catch(console.log)
     }, [])
+
+    useEffect(() => {
+        if(availableMonths.length != 0){
+            setSliderMarks(marks(6))
+        }
+    }, [availableMonths])
 
 
     return (
@@ -61,16 +70,15 @@ function App() {
                 <Grid container spacing={2}>
                     <Grid item xs>
                         <Slider
+                            disabled={(availableMonths.length == 0)}
                             className={"slider"}
                             value={sliderValue}
-                            onChange={(event: any, newValue: number | number[]) => null}
                             onChangeCommitted={(event: any, newValue: number | number[]) => setSliderValue(newValue as number)}
-                            valueLabelDisplay={"on"}
-                            aria-labelledby={"discrete-slider-always"}
+                            valueLabelDisplay={(availableMonths.length == 0) ? "off" : "on"}
                             name={"slider"}
                             min={0}
                             max={availableMonths.length - 1}
-                            marks={marks(6)}
+                            marks={sliderMarks}
                             valueLabelFormat={(x) => <Moment date={availableMonths[x]} format={"MM/YY"}/>}
                         />
                     </Grid>
