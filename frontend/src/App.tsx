@@ -11,6 +11,7 @@ import {Mark} from "./types/mark";
 function App() {
     const [showOptionPane, setShowOptionPane] = useState(false)
     const [colorNodeFlags, setColorNodeFlags] = useState(true)
+    const [preLoadMonths, setPreLoadMonths] = useState(true)
     const [state, setState] = useState({
         guard: true,
         exit: true,
@@ -65,6 +66,7 @@ function App() {
             <WorldMap
                 monthToDisplay={sliderValue >= 0 ? availableMonths[sliderValue] : undefined}
                 colorFlags={colorNodeFlags}
+                preLoadMonths={preLoadMonths ? availableMonths : undefined}
             />
             <div className={"sliderContainer"}>
                 <Grid container spacing={2}>
@@ -92,6 +94,8 @@ function App() {
                 <FormGroup>
                     <FormControlLabel control={<Switch checked={colorNodeFlags} onChange={() => setColorNodeFlags(!colorNodeFlags)}/>}
                                       label={"Color nodes according to Flags"}/>
+                    <FormControlLabel control={<Switch checked={preLoadMonths} onChange={() => setPreLoadMonths(!colorNodeFlags)}/>}
+                                      label={"Loads the data for all months in the background"}/>
                     <p>Filter by relay flags</p>
                     <FormControlLabel
                         control={<Checkbox checked={state.guard} onChange={handleInputChange} name={"guard"}/>}
