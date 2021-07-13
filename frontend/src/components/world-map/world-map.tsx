@@ -49,28 +49,37 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= 
     }, [preLoadMonths])
 
     useEffect(() => {
+        console.timeEnd(`Fetch`)
+        console.time(`Fetch`)
         if (monthToDisplay) {
             if ( !monthToLayer.has(monthToDisplay) ) {
-                console.log(`Fetching Layer for ${ monthToDisplay }`)
+                console.timeLog(`Fetch`, `Fetching Layer for ${ monthToDisplay }`)
                 fetch(`${apiBaseUrl}/archive/geo/relay/${monthToDisplay}`)
                     .then(response => response.json())
                     .then(newRelays => {
                         monthToLayer.set(monthToDisplay, relaysToLayerGroup(newRelays))
-                        console.log(`Drawing fetched Layer for ${ monthToDisplay } `)
+                    })
+                    .then(() => console.timeLog(`Fetch`, `Fetching Layer for ${ monthToDisplay } finished`))
+                    .then(() => {
+                        console.timeLog(`Fetch`, `Drawing fetched Layer for ${ monthToDisplay } `)
                         drawLayer(monthToDisplay)
+                        console.timeLog(`Fetch`, `Drawing fetched Layer for ${ monthToDisplay } finished`)
+                        console.timeEnd(`Fetch`)
                     })
                     .catch(console.log)
-
-                console.log(`Fetching Layer for ${ monthToDisplay } finished`)
             } else {
-                console.log(`Drawing Layer for ${ monthToDisplay } `)
+                console.timeLog(`Fetch`, `Drawing Layer for ${ monthToDisplay } `)
                 drawLayer(monthToDisplay)
-                console.log(`Drawing Layer for ${ monthToDisplay } finished`)
+                console.timeLog(`Fetch`, `Drawing Layer for ${ monthToDisplay } finished`)
+                console.timeEnd(`Fetch`)
             }
         }
     }, [monthToDisplay])
 
     const relaysToLayerGroup = (relays: ArchiveGeoRelayView[]) : LayerGroup => {
+
+        console.time(`relaysToLayerGroup`)
+        console.timeLog(`relaysToLayerGroup`, `New Layer with ${ relays.length } elements`)
 
         const defaultLayer = new LayerGroup()
         const exitLayer = new LayerGroup()
@@ -101,6 +110,9 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= 
                 .on("click", onMarkerClick)
                 .addTo(layer)
         })
+
+        console.timeLog(`relaysToLayerGroup`, `New Layer with ${ relays.length } elements finished`)
+        console.timeEnd(`relaysToLayerGroup`)
         return layer
     }
 
