@@ -5,7 +5,7 @@ import javax.persistence.Entity
 import javax.persistence.Id
 
 /**
- * This entity is used to record which descriptors have been processed
+ * This entity is used to record which descriptors files have been processed
  */
 @Suppress("unused")
 @Entity
