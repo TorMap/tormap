@@ -9,7 +9,7 @@ import com.torusage.database.entity.archive.ArchiveGeoRelay
  * A [ArchiveGeoRelay] with minimal data for fast frontend response times
  */
 class ArchiveGeoRelayView(relay: ArchiveGeoRelay) {
-    val finger = relay.id.fingerprint
+    val id = relay.id
     val lat = relay.latitude
     val long = relay.longitude
     val flags = try {
