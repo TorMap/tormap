@@ -1,7 +1,7 @@
 import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
 import {apiBaseUrl} from "../../util/constants";
-import {CircleMarker, circleMarker, Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
+import {CircleMarker, circleMarker, control, Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import "./world-map.scss"
 import {NodePopup} from "../node-popup/node-popup";
@@ -17,9 +17,15 @@ interface Props {
     colorFlags: boolean
 
     preLoadMonths?: string[]
+
+    filter: {
+        guard: boolean,
+        exit: boolean,
+        default: boolean,
+    }
 }
 
-export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= false, preLoadMonths}) => {
+export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= false, preLoadMonths, filter}) => {
     const [showNodePopup, setShowNodePopup] = useState(false)
     const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
     const [monthToLayer] = useState<Map<string, LayerGroup>>(new Map())
@@ -113,6 +119,7 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= 
 
         console.timeLog(`relaysToLayerGroup`, `New Layer with ${ relays.length } elements finished`)
         console.timeEnd(`relaysToLayerGroup`)
+
         return layer
     }
 
@@ -121,10 +128,21 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= 
         if(map){
             if(monthToLayer.has(previousMonth)) { monthToLayer.get(previousMonth)!!.eachLayer(layer => layer.removeFrom(map)) }
             const newLayer = monthToLayer.get(monthToDisplay)!!
-            newLayer.eachLayer(layer => layer.addTo(map))
+            const layers = newLayer.getLayers()
+
+            if (filter.default) layers[0].addTo(map)
+            if (filter.exit) layers[1].addTo(map)
+            if (filter.guard) layers[2].addTo(map)
+
             setPreviousMonth(monthToDisplay)
         }
     }
+
+    useEffect(() => {
+        if(monthToDisplay) {
+            drawLayer(monthToDisplay)
+        }
+    }, [filter])
 
     return (
         <MapContainer

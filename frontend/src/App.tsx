@@ -15,7 +15,7 @@ function App() {
     const [state, setState] = useState({
         guard: true,
         exit: true,
-        fast: true,
+        default: true,
     })
     const [availableMonths, setAvailableMonths] = useState<string[]>([])
     const [sliderValue, setSliderValue] = useState<number>(-1)
@@ -91,6 +91,7 @@ function App() {
                 monthToDisplay={debouncedSliderValue >= 0 ? availableMonths[debouncedSliderValue] : undefined}
                 colorFlags={colorNodeFlags}
                 preLoadMonths={preLoadMonths ? availableMonths : undefined}
+                filter={state}
             />
             <div className={"sliderContainer"}>
                 <Grid container spacing={2}>
@@ -128,8 +129,8 @@ function App() {
                         control={<Checkbox checked={state.exit} onChange={handleInputChange} name={"exit"}/>}
                         label={"Exit"}/>
                     <FormControlLabel
-                        control={<Checkbox checked={state.fast} onChange={handleInputChange} name={"fast"}/>}
-                        label={"Fast"}/>
+                        control={<Checkbox checked={state.default} onChange={handleInputChange} name={"default"}/>}
+                        label={"default"}/>
                 </FormGroup>
             </ReactSlidingPane>
         </div>
