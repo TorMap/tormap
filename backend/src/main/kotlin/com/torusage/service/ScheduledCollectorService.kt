@@ -1,9 +1,9 @@
 package com.torusage.service
 
 import com.torusage.adapter.client.OnionooApiClient
-import com.torusage.database.entity.archive.ArchiveGeoRelay
-import com.torusage.database.entity.archive.ProcessedDescriptorsFile
+import com.torusage.database.entity.archive.*
 import com.torusage.database.repository.archive.ArchiveGeoRelayRepository
+import com.torusage.database.repository.archive.ProcessedDescriptorRepository
 import com.torusage.database.repository.archive.ProcessedDescriptorsFileRepository
 import com.torusage.database.repository.recent.BridgeRepository
 import com.torusage.database.repository.recent.BridgeSummaryRepository
@@ -18,6 +18,7 @@ import org.torproject.descriptor.DescriptorCollector
 import org.torproject.descriptor.DescriptorSourceFactory
 import org.torproject.descriptor.RelayNetworkStatusConsensus
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -33,10 +34,12 @@ class ScheduledCollectorService(
     val bridgeSummaryRepository: BridgeSummaryRepository,
     val archiveGeoRelayRepository: ArchiveGeoRelayRepository,
     val processedDescriptorsFileRepository: ProcessedDescriptorsFileRepository,
+    val processedDescriptorRepository: ProcessedDescriptorRepository,
     val geoLocationService: GeoLocationService,
 ) {
     val logger = logger()
     val descriptorCollector: DescriptorCollector = DescriptorSourceFactory.createDescriptorCollector()
+    val yearMonthDayFormatter = SimpleDateFormat("yyyy-MM-dd")
 
     @Value("\${collector.api.baseurl}")
     lateinit var collectorApiBaseUrl: String
@@ -157,21 +160,35 @@ class ScheduledCollectorService(
      */
     private fun processDescriptor(descriptor: Descriptor) {
         val descriptorFileName = descriptor.descriptorFile.name
-        logger.info("Processing descriptor with size ${descriptor.rawDescriptorLength} which is part of file $descriptorFileName")
         if (descriptor is RelayNetworkStatusConsensus) {
-            val nodesToSave = mutableListOf<ArchiveGeoRelay>()
-            val consensusDate = Date(descriptor.validAfterMillis)
-
-            descriptor.statusEntries.forEach {
-                val networkStatusEntry = it.value
-                val location = geoLocationService.getLocationForIpAddress(networkStatusEntry.address)
-                if (location != null) {
-                    nodesToSave.add(
-                        ArchiveGeoRelay(networkStatusEntry, consensusDate, location.latitude, location.longitude)
-                    )
+            val consensusCalendarDate = Calendar.Builder().setInstant(descriptor.validAfterMillis).build()
+            val formattedConsensusDate = yearMonthDayFormatter.format(consensusCalendarDate.time)
+            val descriptorId = DescriptorId(
+                DescriptorType.CONSENSUS,
+                consensusCalendarDate
+            )
+            if (processedDescriptorRepository.existsById(descriptorId)) {
+                logger.info("Skipping consensus descriptor for day $formattedConsensusDate part of file $descriptorFileName")
+            } else {
+                val nodesToSave = mutableListOf<ArchiveGeoRelay>()
+                descriptor.statusEntries.forEach {
+                    val networkStatusEntry = it.value
+                    val location = geoLocationService.getLocationForIpAddress(networkStatusEntry.address)
+                    if (location != null) {
+                        nodesToSave.add(
+                            ArchiveGeoRelay(
+                                networkStatusEntry,
+                                consensusCalendarDate,
+                                location.latitude,
+                                location.longitude
+                            )
+                        )
+                    }
                 }
+                archiveGeoRelayRepository.saveAll(nodesToSave)
+                processedDescriptorRepository.save(ProcessedDescriptor(descriptorId))
+                logger.info("Saved consensus descriptor for day $formattedConsensusDate part of file $descriptorFileName")
             }
-            archiveGeoRelayRepository.saveAll(nodesToSave)
         }
     }
 }
