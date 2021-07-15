@@ -96,14 +96,14 @@ class ScheduledCollectorService(
      */
     private fun collectAndProcessDescriptors(apiPath: String) {
         logger.info("Collecting descriptors from api path $apiPath")
-        // collectDescriptors(apiPath)
+        collectDescriptors(apiPath)
         logger.info("Finished collecting descriptors from api path $apiPath")
 
         logger.info("Processing descriptors from api path $apiPath")
         val parentDirectory = File(collectorTargetDirectory + collectorApiPathConsensuses)
         val processedFiles = processedDescriptorsFileRepository.findAll()
         parentDirectory.walkBottomUp().forEach {
-            processDescriptorsFile(it, parentDirectory, processedFiles)
+            processDescriptorsFile(it, parentDirectory, true, processedFiles)
         }
         logger.info("Finished processing descriptors from api path $apiPath")
     }
@@ -127,9 +127,11 @@ class ScheduledCollectorService(
     /**
      * The [fileToProcess] must contain descriptors which are then processed by the [processDescriptor] method
      */
+    @Suppress("SameParameterValue")
     private fun processDescriptorsFile(
         fileToProcess: File,
         parentDirectory: File,
+        shouldOnlyProcessFirstDescriptor: Boolean,
         processedFiles: Iterable<ProcessedDescriptorsFile>,
     ) {
         if (fileToProcess == parentDirectory ||
@@ -138,9 +140,17 @@ class ScheduledCollectorService(
             logger.info("Skipping already processed descriptors file ${fileToProcess.name}")
         } else {
             try {
+                System.gc()
                 logger.info("Processing descriptors file ${fileToProcess.name}")
-                DescriptorSourceFactory.createDescriptorReader().readDescriptors(fileToProcess).forEach {
-                    processDescriptor(it)
+                var descriptorReader = DescriptorSourceFactory.createDescriptorReader()
+                if (shouldOnlyProcessFirstDescriptor) {
+                    descriptorReader.setMaxDescriptorsInQueue(1)
+                    var descriptors = descriptorReader.readDescriptors(fileToProcess)
+                    processDescriptor(descriptors.first())
+                } else {
+                    descriptorReader.readDescriptors(fileToProcess).forEach {
+                        processDescriptor(it)
+                    }
                 }
                 processedDescriptorsFileRepository.save(
                     ProcessedDescriptorsFile(
