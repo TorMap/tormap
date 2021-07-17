@@ -1,18 +1,11 @@
 package com.torusage.service
 
-import com.torusage.adapter.client.OnionooApiClient
 import com.torusage.database.entity.archive.*
 import com.torusage.database.repository.archive.ArchiveGeoRelayRepository
 import com.torusage.database.repository.archive.ProcessedDescriptorRepository
 import com.torusage.database.repository.archive.ProcessedDescriptorsFileRepository
-import com.torusage.database.repository.recent.BridgeRepository
-import com.torusage.database.repository.recent.BridgeSummaryRepository
-import com.torusage.database.repository.recent.RelayRepository
-import com.torusage.database.repository.recent.RelaySummaryRepository
 import com.torusage.logger
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import org.torproject.descriptor.Descriptor
 import org.torproject.descriptor.DescriptorCollector
