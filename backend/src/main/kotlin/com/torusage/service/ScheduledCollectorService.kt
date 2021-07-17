@@ -32,17 +32,9 @@ class ScheduledCollectorService(
     val bridgeRepository: BridgeRepository,
     val relaySummaryRepository: RelaySummaryRepository,
     val bridgeSummaryRepository: BridgeSummaryRepository,
-    val archiveGeoRelayRepository: ArchiveGeoRelayRepository,
-    val processedDescriptorsFileRepository: ProcessedDescriptorsFileRepository,
-    val processedDescriptorRepository: ProcessedDescriptorRepository,
-    val geoLocationService: GeoLocationService,
+    val torDescriptorService: TorDescriptorService,
 ) {
     val logger = logger()
-    val descriptorCollector: DescriptorCollector = DescriptorSourceFactory.createDescriptorCollector()
-    val yearMonthDayFormatter = SimpleDateFormat("yyyy-MM-dd")
-
-    @Value("\${collector.api.baseurl}")
-    lateinit var collectorApiBaseUrl: String
 
     @Value("\${collector.api.path.consensuses}")
     lateinit var collectorApiPathConsensuses: String
@@ -50,22 +42,25 @@ class ScheduledCollectorService(
     @Value("\${collector.api.path.servers}")
     lateinit var collectorApiPathServerDescriptors: String
 
-    @Value("\${collector.target.directory}")
-    lateinit var collectorTargetDirectory: String
-
     /**
      * Fetches consensus descriptors and stores them as files
      * The years 2007 - 2021 equal roughly 3 GB in size
      */
     @Scheduled(fixedRate = 86400000L)
-    fun collectConsensusesDescriptors() = collectAndProcessDescriptors(collectorApiPathConsensuses)
+    fun collectConsensusesDescriptors() = torDescriptorService.collectAndProcessDescriptors(
+            collectorApiPathConsensuses,
+            true,
+    )
 
     /**
      * Fetches server descriptors and stores them in files
      * The years 2005 - 2021 equal roughly 30 GB in size
      */
     //    @Scheduled(fixedRate = 86400000L)
-    fun collectServerDescriptors() = collectAndProcessDescriptors(collectorApiPathServerDescriptors)
+    fun collectServerDescriptors() = torDescriptorService.collectAndProcessDescriptors(
+            collectorApiPathServerDescriptors,
+            false,
+    )
 
     /**
      * Fetches Tor node summary with the configured fixedRate and stores corresponding entities in DB
@@ -89,117 +84,6 @@ class ScheduledCollectorService(
         relayRepository.saveAll(detailsResponse.relays)
         bridgeRepository.saveAll(detailsResponse.bridges)
         logger.info("Stored Onionoo node details in DB")
-    }
-
-    /**
-     * Collect and process descriptors from a specific the TorProject archive [apiPath]
-     */
-    private fun collectAndProcessDescriptors(apiPath: String) {
-        logger.info("Collecting descriptors from api path $apiPath")
-        collectDescriptors(apiPath)
-        logger.info("Finished collecting descriptors from api path $apiPath")
-
-        logger.info("Processing descriptors from api path $apiPath")
-        val parentDirectory = File(collectorTargetDirectory + collectorApiPathConsensuses)
-        val processedFiles = processedDescriptorsFileRepository.findAll()
-        parentDirectory.walkBottomUp().forEach {
-            processDescriptorsFile(it, parentDirectory, true, processedFiles)
-        }
-        logger.info("Finished processing descriptors from api path $apiPath")
-    }
-
-    /**
-     * This is a wrapper function to collect descriptors from the configured collector API.
-     */
-    private fun collectDescriptors(
-        apiPath: String,
-        minLastModifiedMilliseconds: Long = 0L,
-        shouldDeleteLocalFilesNotFoundOnRemote: Boolean = false
-    ) =
-        descriptorCollector.collectDescriptors(
-            collectorApiBaseUrl,
-            arrayOf(apiPath),
-            minLastModifiedMilliseconds,
-            File(collectorTargetDirectory),
-            shouldDeleteLocalFilesNotFoundOnRemote,
-        )
-
-    /**
-     * The [fileToProcess] must contain descriptors which are then processed by the [processDescriptor] method
-     */
-    @Suppress("SameParameterValue")
-    private fun processDescriptorsFile(
-        fileToProcess: File,
-        parentDirectory: File,
-        shouldOnlyProcessFirstDescriptor: Boolean,
-        processedFiles: Iterable<ProcessedDescriptorsFile>,
-    ) {
-        if (fileToProcess == parentDirectory ||
-            processedFiles.any { it.filename == fileToProcess.name && it.lastModified == fileToProcess.lastModified() }
-        ) {
-            logger.info("Skipping already processed descriptors file ${fileToProcess.name}")
-        } else {
-            try {
-                System.gc()
-                logger.info("Processing descriptors file ${fileToProcess.name}")
-                var descriptorReader = DescriptorSourceFactory.createDescriptorReader()
-                if (shouldOnlyProcessFirstDescriptor) {
-                    descriptorReader.setMaxDescriptorsInQueue(1)
-                    var descriptors = descriptorReader.readDescriptors(fileToProcess)
-                    processDescriptor(descriptors.first())
-                } else {
-                    descriptorReader.readDescriptors(fileToProcess).forEach {
-                        processDescriptor(it)
-                    }
-                }
-                processedDescriptorsFileRepository.save(
-                    ProcessedDescriptorsFile(
-                        fileToProcess.name,
-                        fileToProcess.lastModified()
-                    )
-                )
-                logger.info("Finished processing descriptors file ${fileToProcess.name}")
-            } catch (exception: Exception) {
-                logger.error("Failed to process descriptors file ${fileToProcess.name}. " + exception.message)
-            }
-        }
-    }
-
-    /**
-     * Process a [descriptor] depending on it's type
-     */
-    private fun processDescriptor(descriptor: Descriptor) {
-        val descriptorFileName = descriptor.descriptorFile.name
-        if (descriptor is RelayNetworkStatusConsensus) {
-            val consensusCalendarDate = Calendar.Builder().setInstant(descriptor.validAfterMillis).build()
-            val formattedConsensusDate = yearMonthDayFormatter.format(consensusCalendarDate.time)
-            val descriptorId = DescriptorId(
-                DescriptorType.CONSENSUS,
-                consensusCalendarDate
-            )
-            if (processedDescriptorRepository.existsById(descriptorId)) {
-                logger.info("Skipping consensus descriptor for day $formattedConsensusDate part of file $descriptorFileName")
-            } else {
-                val nodesToSave = mutableListOf<ArchiveGeoRelay>()
-                descriptor.statusEntries.forEach {
-                    val networkStatusEntry = it.value
-                    val location = geoLocationService.getLocationForIpAddress(networkStatusEntry.address)
-                    if (location != null) {
-                        nodesToSave.add(
-                            ArchiveGeoRelay(
-                                networkStatusEntry,
-                                consensusCalendarDate,
-                                location.latitude,
-                                location.longitude
-                            )
-                        )
-                    }
-                }
-                archiveGeoRelayRepository.saveAll(nodesToSave)
-                processedDescriptorRepository.save(ProcessedDescriptor(descriptorId))
-                logger.info("Saved consensus descriptor for day $formattedConsensusDate part of file $descriptorFileName")
-            }
-        }
     }
 }
 
