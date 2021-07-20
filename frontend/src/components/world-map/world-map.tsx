@@ -1,12 +1,19 @@
 import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
 import {apiBaseUrl} from "../../util/constants";
-import {CircleMarker, circleMarker, control, Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
+import {
+    circleMarker,
+    LayerGroup,
+    LeafletMouseEvent,
+    Map as LeafletMap,
+    marker
+} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import "./world-map.scss"
 import {NodePopup} from "../node-popup/node-popup";
 import {ArchiveGeoRelayView} from "../../types/archive-geo-relay";
 import {RelayFlag} from "../../types/relay";
+import {Settings} from "../../types/variousTypes";
 
 interface Props {
     /**
@@ -14,23 +21,20 @@ interface Props {
      */
     monthToDisplay?: string
 
-    colorFlags: boolean
-
     preLoadMonths?: string[]
 
-    filter: {
-        guard: boolean,
-        exit: boolean,
-        default: boolean,
-    }
+    settings: Settings
 }
 
-export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= false, preLoadMonths, filter}) => {
+// Important!!!
+let latestRequestTimestamp: number | undefined = undefined
+
+export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, preLoadMonths, settings}) => {
     const [showNodePopup, setShowNodePopup] = useState(false)
     const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
     const [monthToLayer] = useState<Map<string, LayerGroup>>(new Map())
-    const [previousMonth, setPreviousMonth] = useState("")
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
+    const [markerLayer, setMarkerLayer] = useState<LayerGroup>(new LayerGroup())
 
     const onMarkerClick = (click: LeafletMouseEvent) => {
         console.log("Marker clicked, show node details")
@@ -55,32 +59,24 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= 
     }, [preLoadMonths])
 
     useEffect(() => {
-        console.timeEnd(`Fetch`)
-        console.time(`Fetch`)
         if (monthToDisplay) {
+            let currentTimeStamp = Date.now()
             if ( !monthToLayer.has(monthToDisplay) ) {
-                console.timeLog(`Fetch`, `Fetching Layer for ${ monthToDisplay }`)
+                console.log(`pre fetching: ${monthToDisplay}`)
                 fetch(`${apiBaseUrl}/archive/geo/relay/${monthToDisplay}`)
                     .then(response => response.json())
                     .then(newRelays => {
                         monthToLayer.set(monthToDisplay, relaysToLayerGroup(newRelays))
-                    })
-                    .then(() => console.timeLog(`Fetch`, `Fetching Layer for ${ monthToDisplay } finished`))
-                    .then(() => {
-                        console.timeLog(`Fetch`, `Drawing fetched Layer for ${ monthToDisplay } `)
-                        drawLayer(monthToDisplay)
-                        console.timeLog(`Fetch`, `Drawing fetched Layer for ${ monthToDisplay } finished`)
-                        console.timeEnd(`Fetch`)
+                        drawLayer(currentTimeStamp)
                     })
                     .catch(console.log)
+                latestRequestTimestamp = currentTimeStamp
             } else {
-                console.timeLog(`Fetch`, `Drawing Layer for ${ monthToDisplay } `)
-                drawLayer(monthToDisplay)
-                console.timeLog(`Fetch`, `Drawing Layer for ${ monthToDisplay } finished`)
-                console.timeEnd(`Fetch`)
+                latestRequestTimestamp = currentTimeStamp
+                drawLayer(currentTimeStamp)
             }
         }
-    }, [monthToDisplay])
+    }, [monthToDisplay, settings])
 
     const relaysToLayerGroup = (relays: ArchiveGeoRelayView[]) : LayerGroup => {
 
@@ -96,14 +92,12 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= 
         relays.forEach(relay => {
             let color = "#833ab4";
             let layer = defaultLayer;
-            if(colorFlags) {
-                if (relay.flags?.includes(RelayFlag.Exit)) {
-                    color = "#f96969"
-                    layer = exitLayer
-                } else if (relay.flags?.includes(RelayFlag.Guard)) {
-                    color = "#fcb045"
-                    layer = guardLayer
-                }
+            if (relay.flags?.includes(RelayFlag.Exit)) {
+                color = "#f96969"
+                layer = exitLayer
+            } else if (relay.flags?.includes(RelayFlag.Guard)) {
+                color = "#fcb045"
+                layer = guardLayer
             }
             const marker = circleMarker(
                 [relay.lat, relay.long],
@@ -123,26 +117,21 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= 
         return layer
     }
 
-    const drawLayer = (monthToDisplay: string) =>{
+    const drawLayer = (currentTimeStamp: number) =>{
         const map = leafletMap
-        if(map){
-            if(monthToLayer.has(previousMonth)) { monthToLayer.get(previousMonth)!!.eachLayer(layer => layer.removeFrom(map)) }
+        if(currentTimeStamp != latestRequestTimestamp){
+            console.log(`skipped drawing for ${monthToDisplay}`)
+        }else if(map && monthToDisplay){
+            console.log(`drawing for ${monthToDisplay}`)
+            markerLayer.clearLayers()
             const newLayer = monthToLayer.get(monthToDisplay)!!
             const layers = newLayer.getLayers()
 
-            if (filter.default) layers[0].addTo(map)
-            if (filter.exit) layers[1].addTo(map)
-            if (filter.guard) layers[2].addTo(map)
-
-            setPreviousMonth(monthToDisplay)
+            if (settings.default) layers[0].addTo(markerLayer)
+            if (settings.exit) layers[1].addTo(markerLayer)
+            if (settings.guard) layers[2].addTo(markerLayer)
         }
     }
-
-    useEffect(() => {
-        if(monthToDisplay) {
-            drawLayer(monthToDisplay)
-        }
-    }, [filter])
 
     return (
         <MapContainer
@@ -155,6 +144,7 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= 
             wheelPxPerZoomLevel={200}
             preferCanvas={true}
             whenCreated={(newMap: LeafletMap) => {
+                markerLayer.addTo(newMap)
                 setLeafletMap(newMap)
             }}
         >
