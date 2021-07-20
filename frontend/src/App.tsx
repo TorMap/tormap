@@ -1,17 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {WorldMap} from "./components/world-map/world-map";
-import ReactSlidingPane from "react-sliding-pane";
-import {
-    Accordion,
-    Button,
-    Checkbox,
-    CircularProgress,
-    FormControlLabel,
-    FormGroup,
-    Grid,
-    Slider,
-    Switch
-} from "@material-ui/core";
+import {CircularProgress, Grid, Slider,} from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
 import Moment from "react-moment";
@@ -21,9 +10,7 @@ import {AccordionStats} from "./components/arccordion-stats/accordion-stats";
 import {Settings} from "./types/variousTypes";
 
 function App() {
-    const [showOptionPane, setShowOptionPane] = useState(false)
-    const [preLoadMonths, setPreLoadMonths] = useState(false)
-    const [availableMonths, setAvailableMonths] = useState<string[]>([])
+    const [availableDays, setAvailableDays] = useState<string[]>([])
     const [sliderValue, setSliderValue] = useState<number>(-1)
     const [sliderMarks, setSliderMarks] = useState<Mark[]>([])
     const [isLoading, setIsLoading] = useState(true)
@@ -42,42 +29,37 @@ function App() {
         console.log(`trigger changed ${event.target.checked}`)
     };
 
-
-    const marks = (count: number) : Mark[] => {
-        if (count < 2) return []
-        count--
-        let marks = []
-        for (let i = 0; i <= count; i++) {
-            const mark: Mark = {
-                value: Math.round(i * (availableMonths.length - 1) / count),
-                label: <Moment
-                    date={availableMonths[Math.round(i * (availableMonths.length - 1) / count)]}
-                    format={"MM/YYYY"}
-                />
-            }
-            marks.push(mark);
-        }
-        return marks
-    }
-
-    // Loads available months from the backend
+    // Loads available days from the backend
     useEffect(() => {
         setIsLoading(true)
-        fetch(`${apiBaseUrl}/archive/geo/relay/months`)
+        fetch(`${apiBaseUrl}/archive/geo/relay/days`)
             .then(response => response.json())
-            .then(availableMonths => {
-                setAvailableMonths(availableMonths)
-                setSliderValue(availableMonths.length - 1)
+            .then(availableDays => {
+                setAvailableDays(availableDays)
+                setSliderValue(availableDays.length - 1)
                 setIsLoading(false)
             })
             .catch(console.log)
     }, [])
 
     useEffect(() => {
-        if(availableMonths.length !== 0){
-            setSliderMarks(marks(6))
+        if (availableDays.length !== 0) {
+            let markCount = 6
+            markCount--
+            let marks = []
+            for (let i = 0; i <= markCount; i++) {
+                const mark: Mark = {
+                    value: Math.round(i * (availableDays.length - 1) / markCount),
+                    label: <Moment
+                        date={availableDays[Math.round(i * (availableDays.length - 1) / markCount)]}
+                        format={"YYYY-MM"}
+                    />
+                }
+                marks.push(mark);
+            }
+            setSliderMarks(marks)
         }
-    }, [availableMonths])
+    }, [availableDays])
 
     // Hook
     // T is a generic type for value parameter, our case this will be string
@@ -102,18 +84,16 @@ function App() {
         return debouncedValue;
     }
 
-    const Loading = (
-        <div className={"progressCircle"}>
-            <CircularProgress/>
-        </div>
-    )
-
     return (
         <div>
-            {isLoading ? (Loading) : null}
+            {isLoading ?
+                <div className={"progressCircle"}>
+                    <CircularProgress/>
+                </div>
+                : null
+            }
             <WorldMap
-                monthToDisplay={debouncedSliderValue >= 0 ? availableMonths[debouncedSliderValue] : undefined}
-                preLoadMonths={preLoadMonths ? availableMonths : undefined}
+                dayToDisplay={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}
                 settings={settings}
                 setLoadingStateCallback={setIsLoading}
             />
@@ -121,16 +101,16 @@ function App() {
                 <Grid container spacing={2}>
                     <Grid item xs>
                         <Slider
-                            disabled={(availableMonths.length == 0)}
+                            disabled={(availableDays.length === 0)}
                             className={"slider"}
                             value={sliderValue}
                             onChangeCommitted={(event: any, newValue: number | number[]) => setSliderValue(newValue as number)}
-                            valueLabelDisplay={(availableMonths.length == 0) ? "off" : "on"}
+                            valueLabelDisplay={(availableDays.length === 0) ? "off" : "on"}
                             name={"slider"}
                             min={0}
-                            max={availableMonths.length - 1}
+                            max={availableDays.length - 1}
                             marks={sliderMarks}
-                            valueLabelFormat={(x) => <Moment date={availableMonths[x]} format={"MM/YY"}/>}
+                            valueLabelFormat={(x) => <Moment date={availableDays[x]} format={"YYYY-MM-DD"}/>}
                             track={false}
                         />
                     </Grid>
