@@ -574,7 +574,7 @@ class IP2Location {
         val tmp = "0000:0000:0000:0000:0000:"
         val padMe = "0000"
         val hexOffset: Long = 0xFF
-        var myIP2 = myIP.toUpperCase()
+        var myIP2 = myIP.uppercase()
         var retType = myIPType.toString()
 
         // expand ipv4-mapped ipv6
@@ -632,7 +632,7 @@ class IP2Location {
                     bf.append(":")
                     bf.append(padMe.substring(part2Hex.length))
                     bf.append(part2Hex)
-                    myIP2 = bf.toString().toUpperCase()
+                    myIP2 = bf.toString().uppercase()
                     val myArr = myIP2.split("::".toRegex()).toTypedArray()
                     val leftSide = myArr[0].split(":".toRegex()).toTypedArray()
                     val bf2 = StringBuffer(40)
