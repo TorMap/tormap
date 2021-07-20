@@ -1,7 +1,7 @@
 import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
 import {apiBaseUrl} from "../../util/constants";
-import {CircleMarker, circleMarker, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
+import {CircleMarker, circleMarker, control, Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import "./world-map.scss"
 import {NodePopup} from "../node-popup/node-popup";
@@ -15,14 +15,22 @@ interface Props {
     monthToDisplay?: string
 
     colorFlags: boolean
+
+    preLoadMonths?: string[]
+
+    filter: {
+        guard: boolean,
+        exit: boolean,
+        default: boolean,
+    }
 }
 
-export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= false}) => {
+export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= false, preLoadMonths, filter}) => {
     const [showNodePopup, setShowNodePopup] = useState(false)
     const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
-    const [monthToRelays] = useState<Map<string, ArchiveGeoRelayView[]>>(new Map())
+    const [monthToLayer] = useState<Map<string, LayerGroup>>(new Map())
+    const [previousMonth, setPreviousMonth] = useState("")
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
-    const [activeMarkers, setActiveMarkers] = useState<CircleMarker[]>([])
 
     const onMarkerClick = (click: LeafletMouseEvent) => {
         console.log("Marker clicked, show node details")
@@ -30,67 +38,111 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, colorFlags= 
         setShowNodePopup(true)
     }
 
-    const removeMapMarkers = useCallback(() => {
-        if (leafletMap) {
-            activeMarkers.forEach(marker => leafletMap.removeLayer(marker))
-        }
-    }, [activeMarkers, leafletMap])
-
-    const drawRelays = async (month: string, relays: ArchiveGeoRelayView[]) => {
-        if (leafletMap) {
-            removeMapMarkers()
-            const newActiveMarkers: CircleMarker[] = []
-            relays.forEach(relay => {
-
-                var color = "#833ab4"
-                if(colorFlags) {
-                    if (relay.flags?.includes(RelayFlag.Exit)) {
-                        color = "#f96969"
-                    } else if (relay.flags?.includes(RelayFlag.Guard)) {
-                        color = "#fcb045"
-                    }
+    useEffect(() => {
+        if (preLoadMonths) {
+            preLoadMonths.forEach(month => {
+                if (!monthToLayer.has(month)) {
+                    fetch(`${apiBaseUrl}/archive/geo/relay/${month}`)
+                        .then(response => response.json())
+                        .then(newRelays => {
+                            monthToLayer.set(month, relaysToLayerGroup(newRelays))
+                            console.log(`Preloaded ${month} `)
+                        })
                 }
+            })
+            console.log("Completed preloading")
+        }
+    }, [preLoadMonths])
 
-                const marker = circleMarker(
-                    [relay.lat, relay.long],
-                    {
-                        radius: 1,
-                        className: relay.finger,
-                        color: color
-                    },
-                )
-                    .on("click", onMarkerClick)
-                    .addTo(leafletMap);
-                newActiveMarkers.push(marker)
-                leafletMap.addLayer(marker)
-            });
-            setActiveMarkers(newActiveMarkers)
-            console.log(newActiveMarkers.length)
+    useEffect(() => {
+        console.timeEnd(`Fetch`)
+        console.time(`Fetch`)
+        if (monthToDisplay) {
+            if ( !monthToLayer.has(monthToDisplay) ) {
+                console.timeLog(`Fetch`, `Fetching Layer for ${ monthToDisplay }`)
+                fetch(`${apiBaseUrl}/archive/geo/relay/${monthToDisplay}`)
+                    .then(response => response.json())
+                    .then(newRelays => {
+                        monthToLayer.set(monthToDisplay, relaysToLayerGroup(newRelays))
+                    })
+                    .then(() => console.timeLog(`Fetch`, `Fetching Layer for ${ monthToDisplay } finished`))
+                    .then(() => {
+                        console.timeLog(`Fetch`, `Drawing fetched Layer for ${ monthToDisplay } `)
+                        drawLayer(monthToDisplay)
+                        console.timeLog(`Fetch`, `Drawing fetched Layer for ${ monthToDisplay } finished`)
+                        console.timeEnd(`Fetch`)
+                    })
+                    .catch(console.log)
+            } else {
+                console.timeLog(`Fetch`, `Drawing Layer for ${ monthToDisplay } `)
+                drawLayer(monthToDisplay)
+                console.timeLog(`Fetch`, `Drawing Layer for ${ monthToDisplay } finished`)
+                console.timeEnd(`Fetch`)
+            }
+        }
+    }, [monthToDisplay])
+
+    const relaysToLayerGroup = (relays: ArchiveGeoRelayView[]) : LayerGroup => {
+
+        console.time(`relaysToLayerGroup`)
+        console.timeLog(`relaysToLayerGroup`, `New Layer with ${ relays.length } elements`)
+
+        const defaultLayer = new LayerGroup()
+        const exitLayer = new LayerGroup()
+        const guardLayer = new LayerGroup()
+
+        const layer = new LayerGroup([defaultLayer, exitLayer, guardLayer])
+
+        relays.forEach(relay => {
+            let color = "#833ab4";
+            let layer = defaultLayer;
+            if(colorFlags) {
+                if (relay.flags?.includes(RelayFlag.Exit)) {
+                    color = "#f96969"
+                    layer = exitLayer
+                } else if (relay.flags?.includes(RelayFlag.Guard)) {
+                    color = "#fcb045"
+                    layer = guardLayer
+                }
+            }
+            const marker = circleMarker(
+                [relay.lat, relay.long],
+                {
+                    radius: 1,
+                    className: relay.finger,
+                    color: color
+                },
+            )
+                .on("click", onMarkerClick)
+                .addTo(layer)
+        })
+
+        console.timeLog(`relaysToLayerGroup`, `New Layer with ${ relays.length } elements finished`)
+        console.timeEnd(`relaysToLayerGroup`)
+
+        return layer
+    }
+
+    const drawLayer = (monthToDisplay: string) =>{
+        const map = leafletMap
+        if(map){
+            if(monthToLayer.has(previousMonth)) { monthToLayer.get(previousMonth)!!.eachLayer(layer => layer.removeFrom(map)) }
+            const newLayer = monthToLayer.get(monthToDisplay)!!
+            const layers = newLayer.getLayers()
+
+            if (filter.default) layers[0].addTo(map)
+            if (filter.exit) layers[1].addTo(map)
+            if (filter.guard) layers[2].addTo(map)
+
+            setPreviousMonth(monthToDisplay)
         }
     }
 
     useEffect(() => {
-        if (monthToDisplay) {
-            if (!monthToRelays.has(monthToDisplay)) {
-                //console.log(`Fetching relays for ${ monthToDisplay }`)
-                fetch(`${apiBaseUrl}/archive/geo/relay/${monthToDisplay}`)
-                    .then(response => response.json())
-                    .then(newRelays => {
-                        monthToRelays.set(monthToDisplay, newRelays)
-                        drawRelays(monthToDisplay, newRelays)
-                    })
-                    .catch(console.log)
-
-                //console.log(`Fetching relays for ${ monthToDisplay } finished`)
-            } else {
-                //console.log(`Drawing relays for ${ monthToDisplay } `)
-                drawRelays(monthToDisplay, monthToRelays.get(monthToDisplay)!!)
-                //console.log(`Drawing relays for ${ monthToDisplay } finished`)
-            }
+        if(monthToDisplay) {
+            drawLayer(monthToDisplay)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [monthToDisplay, colorFlags])
-
+    }, [filter])
 
     return (
         <MapContainer
