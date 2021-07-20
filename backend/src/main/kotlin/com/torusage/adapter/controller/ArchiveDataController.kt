@@ -2,6 +2,7 @@ package com.torusage.adapter.controller
 
 import com.torusage.adapter.controller.model.ArchiveGeoRelayView
 import com.torusage.database.repository.archive.ArchiveGeoRelayRepositoryImpl
+import com.torusage.database.repository.archive.ProcessedDescriptorRepositoryImpl
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -12,17 +13,10 @@ import java.time.LocalDate
 @RequestMapping("archive")
 class ArchiveDataController(
     val archiveGeoRelayRepository: ArchiveGeoRelayRepositoryImpl,
+    val processedDescriptorRepository: ProcessedDescriptorRepositoryImpl,
 ) {
-
-//    @GetMapping("/geo/relay/months")
-//    fun getMonthsForGeoRelays() = archiveGeoRelayRepository.findDistinctMonths()
-
-//    @GetMapping("/geo/relay/{month}")
-//    fun getGeoRelays(@PathVariable month: String) =
-//        archiveGeoRelayRepository.findAllByDay(month).map { ArchiveGeoRelayView(it) }
-
     @GetMapping("/geo/relay/days")
-    fun getDaysForGeoRelays() = archiveGeoRelayRepository.findDistinctDays()
+    fun getDaysForGeoRelays() = processedDescriptorRepository.findDistinctDays()
 
     @GetMapping("/geo/relay/day/{day}")
     fun getGeoRelaysByDay(@PathVariable day: String) =
