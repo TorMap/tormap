@@ -51,16 +51,25 @@ class GeoLocationService(
      * by looking it up with two different file based DB providers (IP2Location & Maxmind)
      */
     fun getLocationForIpAddress(ipAddress: String): GeoLocation? = try {
-        val location = ip2locationDatabaseReader!!.ipQuery(ipAddress)
-        if (location.status != "OK") throw Exception(location.status)
-        else if (location.latitude == null || location.longitude == null) throw GeoException()
-        GeoLocation(location.latitude!!.toBigDecimal(), location.longitude!!.toBigDecimal())
+        val ip2locationResult = ip2locationDatabaseReader!!.ipQuery(ipAddress)
+        if (ip2locationResult.status != "OK") throw Exception(ip2locationResult.status)
+        else if (ip2locationResult.latitude == null || ip2locationResult.longitude == null) throw GeoException()
+        GeoLocation(
+            ip2locationResult.latitude!!.toBigDecimal(),
+            ip2locationResult.longitude!!.toBigDecimal(),
+            ip2locationResult.countryShort,
+        )
     } catch (exception: Exception) {
         logger.warn("IP2Location location lookup failed for IP address $ipAddress! ${exception.javaClass}: ${exception.message}")
         try {
-            val location = maxmindDatabaseReader!!.city(InetAddress.getByName(ipAddress)).location
+            val maxmindResult = maxmindDatabaseReader!!.city(InetAddress.getByName(ipAddress))
+            val location = maxmindResult.location
             if (location.latitude == null || location.longitude == null) throw GeoException()
-            GeoLocation(location.latitude.toBigDecimal(), location.longitude.toBigDecimal())
+            GeoLocation(
+                location.latitude.toBigDecimal(),
+                location.longitude.toBigDecimal(),
+                maxmindResult.country.isoCode,
+            )
         } catch (exception: Exception) {
             logger.warn("Maxmind location lookup failed for IP address $ipAddress! ${exception.javaClass}: ${exception.message}")
             null
@@ -71,9 +80,10 @@ class GeoLocationService(
 class GeoLocation(
     rawLatitude: BigDecimal,
     rawLongitude: BigDecimal,
+    val countryIsoCode: String?,
 ) {
-    var latitude: BigDecimal = rawLatitude.setScale(4, RoundingMode.HALF_EVEN)
-    var longitude: BigDecimal = rawLongitude.setScale(4, RoundingMode.HALF_EVEN)
+    val latitude: BigDecimal = rawLatitude.setScale(4, RoundingMode.HALF_EVEN)
+    val longitude: BigDecimal = rawLongitude.setScale(4, RoundingMode.HALF_EVEN)
 }
 
 class GeoException : Exception("Latitude and longitude missing!")

@@ -1,5 +1,6 @@
 package com.torusage.database.entity.archive
 
+import com.torusage.adapter.controller.model.RelayFlag
 import org.torproject.descriptor.NetworkStatusEntry
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -20,6 +21,7 @@ class ArchiveGeoRelay(
     var day: LocalDate,
     var latitude: BigDecimal,
     var longitude: BigDecimal,
+    var countryIsoCode: String?,
 ) {
     @Id
     @GeneratedValue
@@ -28,5 +30,9 @@ class ArchiveGeoRelay(
     @Column(length = 40)
     var fingerprint: String = networkStatusEntry.fingerprint
 
-    var flags: String? = networkStatusEntry.flags.joinToString(", ")
+    var flags: String? = try {
+        networkStatusEntry.flags.map { RelayFlag.valueOf(it.toString()).ordinal }.joinToString(", ")
+    } catch (exception: Exception) {
+        null
+    }
 }
