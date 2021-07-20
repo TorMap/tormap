@@ -47,3 +47,15 @@ code {
 .MuiSlider-markLabel{
     color: rgba(255,255,255,.6) !important;
 }
+
+.progressCircle{
+    position: absolute;
+    left: calc(50% - 20px);
+    top: calc(50% - 20px);
+    margin: auto;
+    z-index: 100;
+    background-color: transparent;
+}
+.MuiCircularProgress-colorPrimary {
+    color: #FFFFFF !important;
+}
