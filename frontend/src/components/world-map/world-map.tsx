@@ -24,12 +24,14 @@ interface Props {
     preLoadMonths?: string[]
 
     settings: Settings
+
+    setLoadingStateCallback: (b: boolean) => void
 }
 
 // Important!!!
 let latestRequestTimestamp: number | undefined = undefined
 
-export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, preLoadMonths, settings}) => {
+export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, preLoadMonths, settings, setLoadingStateCallback}) => {
     const [showNodePopup, setShowNodePopup] = useState(false)
     const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
     const [monthToLayer] = useState<Map<string, LayerGroup>>(new Map())
@@ -61,18 +63,21 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, preLoadMonth
     useEffect(() => {
         if (monthToDisplay) {
             let currentTimeStamp = Date.now()
+            setLoadingStateCallback(true)
             if ( !monthToLayer.has(monthToDisplay) ) {
                 console.log(`pre fetching: ${monthToDisplay}`)
                 fetch(`${apiBaseUrl}/archive/geo/relay/${monthToDisplay}`)
                     .then(response => response.json())
                     .then(newRelays => {
                         monthToLayer.set(monthToDisplay, relaysToLayerGroup(newRelays))
+                        setLoadingStateCallback(false)
                         drawLayer(currentTimeStamp)
                     })
                     .catch(console.log)
                 latestRequestTimestamp = currentTimeStamp
             } else {
                 latestRequestTimestamp = currentTimeStamp
+                setLoadingStateCallback(false)
                 drawLayer(currentTimeStamp)
             }
         }

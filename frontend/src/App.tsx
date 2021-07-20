@@ -115,6 +115,7 @@ function App() {
                 monthToDisplay={debouncedSliderValue >= 0 ? availableMonths[debouncedSliderValue] : undefined}
                 preLoadMonths={preLoadMonths ? availableMonths : undefined}
                 settings={settings}
+                setLoadingStateCallback={setIsLoading}
             />
             <div className={"sliderContainer"}>
                 <Grid container spacing={2}>
