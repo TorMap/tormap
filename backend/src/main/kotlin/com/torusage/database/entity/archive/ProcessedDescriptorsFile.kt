@@ -1,6 +1,6 @@
 package com.torusage.database.entity.archive
 
-import java.util.*
+import java.time.LocalDateTime
 import javax.persistence.Entity
 import javax.persistence.Id
 
@@ -13,5 +13,5 @@ class ProcessedDescriptorsFile(
     @Id
     var filename: String,
     var lastModified: Long,
-    var processedAt: Date = Date()
+    var processedAt: LocalDateTime = LocalDateTime.now()
 )
