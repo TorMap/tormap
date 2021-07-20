@@ -1,34 +1,49 @@
 import React, {useEffect, useState} from 'react';
 import {WorldMap} from "./components/world-map/world-map";
 import ReactSlidingPane from "react-sliding-pane";
-import {Button, Checkbox, FormControlLabel, FormGroup, Grid, Slider, Switch} from "@material-ui/core";
+import {
+    Accordion,
+    Button,
+    Checkbox,
+    CircularProgress,
+    FormControlLabel,
+    FormGroup,
+    Grid,
+    Slider,
+    Switch
+} from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
 import Moment from "react-moment";
 import {apiBaseUrl} from "./util/constants";
 import {Mark} from "./types/mark";
+import {AccordionStats} from "./components/arccordion-stats/accordion-stats";
+import {Settings} from "./types/variousTypes";
 
 function App() {
     const [showOptionPane, setShowOptionPane] = useState(false)
-    const [colorNodeFlags, setColorNodeFlags] = useState(true)
     const [preLoadMonths, setPreLoadMonths] = useState(false)
-    const [state, setState] = useState({
-        guard: true,
-        exit: true,
-        default: true,
-    })
     const [availableMonths, setAvailableMonths] = useState<string[]>([])
     const [sliderValue, setSliderValue] = useState<number>(-1)
     const [sliderMarks, setSliderMarks] = useState<Mark[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [settings, setSettings] = useState<Settings>({
+        guard: true,
+        default: true,
+        exit: true,
+
+        colorNodesAccordingToFlags: true,
+    })
 
     const debouncedSliderValue = useDebounce<number>(sliderValue, 100);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setState({...state, [event.target.name]: event.target.checked})
+        setSettings({...settings, [event.target.name]: event.target.checked})
+        console.log(`trigger changed ${event.target.checked}`)
     };
 
+
     const marks = (count: number) : Mark[] => {
-        console.log("entered marks()")
         if (count < 2) return []
         count--
         let marks = []
@@ -40,24 +55,26 @@ function App() {
                     format={"MM/YYYY"}
                 />
             }
-            console.log(mark.label)
             marks.push(mark);
         }
         return marks
     }
 
+    // Loads available months from the backend
     useEffect(() => {
+        setIsLoading(true)
         fetch(`${apiBaseUrl}/archive/geo/relay/months`)
             .then(response => response.json())
             .then(availableMonths => {
                 setAvailableMonths(availableMonths)
                 setSliderValue(availableMonths.length - 1)
+                setIsLoading(false)
             })
             .catch(console.log)
     }, [])
 
     useEffect(() => {
-        if(availableMonths.length != 0){
+        if(availableMonths.length !== 0){
             setSliderMarks(marks(6))
         }
     }, [availableMonths])
@@ -85,13 +102,20 @@ function App() {
         return debouncedValue;
     }
 
+    const Loading = (
+        <div className={"progressCircle"}>
+            <CircularProgress/>
+        </div>
+    )
+
     return (
         <div>
+            {isLoading ? (Loading) : null}
             <WorldMap
                 monthToDisplay={debouncedSliderValue >= 0 ? availableMonths[debouncedSliderValue] : undefined}
-                colorFlags={colorNodeFlags}
                 preLoadMonths={preLoadMonths ? availableMonths : undefined}
-                filter={state}
+                settings={settings}
+                setLoadingStateCallback={setIsLoading}
             />
             <div className={"sliderContainer"}>
                 <Grid container spacing={2}>
@@ -112,27 +136,7 @@ function App() {
                     </Grid>
                 </Grid>
             </div>
-            <Button className={"optionPaneButton"} onClick={() => setShowOptionPane(!showOptionPane)}>toggle
-                overlay</Button>
-            <ReactSlidingPane width={"100%"} isOpen={showOptionPane} onRequestClose={() => setShowOptionPane(false)}
-                              from={"bottom"} title={"Optionen"} className={"optionPane"}>
-                <FormGroup>
-                    <FormControlLabel control={<Switch checked={colorNodeFlags} onChange={() => setColorNodeFlags(!colorNodeFlags)}/>}
-                                      label={"Color nodes according to Flags"}/>
-                    <FormControlLabel control={<Switch checked={preLoadMonths} onChange={() => setPreLoadMonths(!preLoadMonths)}/>}
-                                      label={"Loads the data for all months in the background"}/>
-                    <p>Filter by relay flags</p>
-                    <FormControlLabel
-                        control={<Checkbox checked={state.guard} onChange={handleInputChange} name={"guard"}/>}
-                        label={"Guard"}/>
-                    <FormControlLabel
-                        control={<Checkbox checked={state.exit} onChange={handleInputChange} name={"exit"}/>}
-                        label={"Exit"}/>
-                    <FormControlLabel
-                        control={<Checkbox checked={state.default} onChange={handleInputChange} name={"default"}/>}
-                        label={"default"}/>
-                </FormGroup>
-            </ReactSlidingPane>
+            <AccordionStats settings={settings} onChange={handleInputChange}/>
         </div>
     )
 }
