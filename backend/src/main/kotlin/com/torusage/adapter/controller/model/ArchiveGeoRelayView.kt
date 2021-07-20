@@ -13,7 +13,7 @@ class ArchiveGeoRelayView(relay: ArchiveGeoRelay) {
     val lat = relay.latitude
     val long = relay.longitude
     val flags = try {
-        relay.flags?.commaSeparatedToList()?.map { RelayFlag.valueOf(it).ordinal }
+        relay.flags?.commaSeparatedToList()
     } catch (exception: Exception) {
         null
     }

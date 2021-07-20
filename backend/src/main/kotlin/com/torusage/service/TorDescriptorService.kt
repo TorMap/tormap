@@ -157,7 +157,8 @@ class TorDescriptorService(
                         networkStatusEntry,
                         consensusDate,
                         location.latitude,
-                        location.longitude
+                        location.longitude,
+                        location.countryIsoCode,
                     )
                 )
             }
