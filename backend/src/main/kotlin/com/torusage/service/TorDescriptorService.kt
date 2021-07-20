@@ -12,8 +12,9 @@ import org.torproject.descriptor.DescriptorCollector
 import org.torproject.descriptor.DescriptorSourceFactory
 import org.torproject.descriptor.RelayNetworkStatusConsensus
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 
 /**
@@ -28,7 +29,6 @@ class TorDescriptorService(
 ) {
     val logger = logger()
     val descriptorCollector: DescriptorCollector = DescriptorSourceFactory.createDescriptorCollector()
-    val yearMonthDayFormatter = SimpleDateFormat("yyyy-MM-dd")
 
     @Value("\${collector.api.baseurl}")
     lateinit var collectorApiBaseUrl: String
@@ -125,27 +125,26 @@ class TorDescriptorService(
      */
     private fun processConsensusDescriptor(descriptor: RelayNetworkStatusConsensus) {
         val descriptorFileName = descriptor.descriptorFile.name
-        val consensusCalendarDate = Calendar.Builder().setInstant(descriptor.validAfterMillis).build()
-        val formattedConsensusDate = yearMonthDayFormatter.format(consensusCalendarDate.time)
+        val consensusDate = LocalDate.ofInstant(Instant.ofEpochMilli(descriptor.validAfterMillis), ZoneId.of("UTC"))
         val descriptorId = DescriptorId(
             DescriptorType.CONSENSUS,
-            consensusCalendarDate
+            consensusDate
         )
         if (processedDescriptorRepository.existsById(descriptorId)) {
-            logger.info("Skipping consensus descriptor for day $formattedConsensusDate part of file $descriptorFileName")
+            logger.info("Skipping consensus descriptor for day $consensusDate part of file $descriptorFileName")
         } else {
-            saveArchiveGeoRelays(descriptor, consensusCalendarDate, descriptorId)
-            logger.info("Saved consensus descriptor for day $formattedConsensusDate part of file $descriptorFileName")
+            saveArchiveGeoRelays(descriptor, consensusDate, descriptorId)
+            logger.info("Saved consensus descriptor for day $consensusDate part of file $descriptorFileName")
         }
     }
 
     /**
      * Use a [descriptor] to generate and save [ArchiveGeoRelay]s
-     * based on the relay's IP address and the [consensusCalendarDate].
+     * based on the relay's IP address and the [consensusDate].
      */
     private fun saveArchiveGeoRelays(
         descriptor: RelayNetworkStatusConsensus,
-        consensusCalendarDate: Calendar,
+        consensusDate: LocalDate,
         descriptorId: DescriptorId,
     ) {
         val nodesToSave = mutableListOf<ArchiveGeoRelay>()
@@ -156,7 +155,7 @@ class TorDescriptorService(
                 nodesToSave.add(
                     ArchiveGeoRelay(
                         networkStatusEntry,
-                        consensusCalendarDate,
+                        consensusDate,
                         location.latitude,
                         location.longitude
                     )

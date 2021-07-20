@@ -2,7 +2,7 @@ package com.torusage.database.entity.archive
 
 import org.torproject.descriptor.NetworkStatusEntry
 import java.math.BigDecimal
-import java.util.*
+import java.time.LocalDate
 import javax.persistence.*
 
 /**
@@ -17,13 +17,8 @@ import javax.persistence.*
 )
 class ArchiveGeoRelay(
     networkStatusEntry: NetworkStatusEntry,
-
-    @Column(length = 7)
-    @Temporal(TemporalType.DATE)
-    var day: Calendar,
-
+    var day: LocalDate,
     var latitude: BigDecimal,
-
     var longitude: BigDecimal,
 ) {
     @Id
