@@ -1,13 +1,7 @@
 import {MapContainer, TileLayer} from "react-leaflet";
-import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
+import React, {FunctionComponent, useEffect, useState} from "react";
 import {apiBaseUrl} from "../../util/constants";
-import {
-    circleMarker,
-    LayerGroup,
-    LeafletMouseEvent,
-    Map as LeafletMap,
-    marker
-} from "leaflet";
+import {circleMarker, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import "./world-map.scss"
 import {NodePopup} from "../node-popup/node-popup";
@@ -19,24 +13,37 @@ interface Props {
     /**
      * This months data will be fetched from backend and visualized on the map
      */
-    monthToDisplay?: string
-
-    preLoadMonths?: string[]
+    dayToDisplay?: string
 
     settings: Settings
 
     setLoadingStateCallback: (b: boolean) => void
 }
 
-// Important!!!
+// Variable needs to be outside component
 let latestRequestTimestamp: number | undefined = undefined
 
-export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, preLoadMonths, settings, setLoadingStateCallback}) => {
+export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setLoadingStateCallback}) => {
     const [showNodePopup, setShowNodePopup] = useState(false)
     const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
-    const [monthToLayer] = useState<Map<string, LayerGroup>>(new Map())
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
-    const [markerLayer, setMarkerLayer] = useState<LayerGroup>(new LayerGroup())
+    const [markerLayer] = useState<LayerGroup>(new LayerGroup())
+
+    useEffect(() => {
+        if (dayToDisplay) {
+            let currentTimeStamp = Date.now()
+            setLoadingStateCallback(true)
+            fetch(`${apiBaseUrl}/archive/geo/relay/day/${dayToDisplay}`)
+                .then(response => response.json())
+                .then(newRelays => {
+                    setLoadingStateCallback(false)
+                    drawLayerGroup(currentTimeStamp, relaysToLayerGroup(newRelays))
+                })
+                .catch(console.log)
+            latestRequestTimestamp = currentTimeStamp
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dayToDisplay, settings])
 
     const onMarkerClick = (click: LeafletMouseEvent) => {
         console.log("Marker clicked, show node details")
@@ -44,49 +51,10 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, preLoadMonth
         setShowNodePopup(true)
     }
 
-    useEffect(() => {
-        if (preLoadMonths) {
-            preLoadMonths.forEach(month => {
-                if (!monthToLayer.has(month)) {
-                    fetch(`${apiBaseUrl}/archive/geo/relay/${month}`)
-                        .then(response => response.json())
-                        .then(newRelays => {
-                            monthToLayer.set(month, relaysToLayerGroup(newRelays))
-                            console.log(`Preloaded ${month} `)
-                        })
-                }
-            })
-            console.log("Completed preloading")
-        }
-    }, [preLoadMonths])
-
-    useEffect(() => {
-        if (monthToDisplay) {
-            let currentTimeStamp = Date.now()
-            setLoadingStateCallback(true)
-            if ( !monthToLayer.has(monthToDisplay) ) {
-                console.log(`pre fetching: ${monthToDisplay}`)
-                fetch(`${apiBaseUrl}/archive/geo/relay/${monthToDisplay}`)
-                    .then(response => response.json())
-                    .then(newRelays => {
-                        monthToLayer.set(monthToDisplay, relaysToLayerGroup(newRelays))
-                        setLoadingStateCallback(false)
-                        drawLayer(currentTimeStamp)
-                    })
-                    .catch(console.log)
-                latestRequestTimestamp = currentTimeStamp
-            } else {
-                latestRequestTimestamp = currentTimeStamp
-                setLoadingStateCallback(false)
-                drawLayer(currentTimeStamp)
-            }
-        }
-    }, [monthToDisplay, settings])
-
-    const relaysToLayerGroup = (relays: ArchiveGeoRelayView[]) : LayerGroup => {
+    const relaysToLayerGroup = (relays: ArchiveGeoRelayView[]): LayerGroup => {
 
         console.time(`relaysToLayerGroup`)
-        console.timeLog(`relaysToLayerGroup`, `New Layer with ${ relays.length } elements`)
+        console.timeLog(`relaysToLayerGroup`, `New Layer with ${relays.length} elements`)
 
         const defaultLayer = new LayerGroup()
         const exitLayer = new LayerGroup()
@@ -104,7 +72,7 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, preLoadMonth
                 color = "#fcb045"
                 layer = guardLayer
             }
-            const marker = circleMarker(
+            circleMarker(
                 [relay.lat, relay.long],
                 {
                     radius: 1,
@@ -116,21 +84,19 @@ export const WorldMap: FunctionComponent<Props> = ({monthToDisplay, preLoadMonth
                 .addTo(layer)
         })
 
-        console.timeLog(`relaysToLayerGroup`, `New Layer with ${ relays.length } elements finished`)
+        console.timeLog(`relaysToLayerGroup`, `New Layer with ${relays.length} elements finished`)
         console.timeEnd(`relaysToLayerGroup`)
 
         return layer
     }
 
-    const drawLayer = (currentTimeStamp: number) =>{
-        const map = leafletMap
-        if(currentTimeStamp != latestRequestTimestamp){
-            console.log(`skipped drawing for ${monthToDisplay}`)
-        }else if(map && monthToDisplay){
-            console.log(`drawing for ${monthToDisplay}`)
+    const drawLayerGroup = (currentTimeStamp: number, layerGroup: LayerGroup) => {
+        if (currentTimeStamp !== latestRequestTimestamp) {
+            console.log(`skipped drawing for ${dayToDisplay}`)
+        } else if (leafletMap && dayToDisplay) {
+            console.log(`drawing for ${dayToDisplay}`)
             markerLayer.clearLayers()
-            const newLayer = monthToLayer.get(monthToDisplay)!!
-            const layers = newLayer.getLayers()
+            const layers = layerGroup.getLayers()
 
             if (settings.default) layers[0].addTo(markerLayer)
             if (settings.exit) layers[1].addTo(markerLayer)
