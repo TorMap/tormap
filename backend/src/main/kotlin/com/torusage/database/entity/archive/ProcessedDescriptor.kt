@@ -1,6 +1,6 @@
 package com.torusage.database.entity.archive
 
-import java.util.*
+import java.time.LocalDateTime
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity
 
@@ -13,5 +13,5 @@ class ProcessedDescriptor(
     @EmbeddedId
     var id: DescriptorId,
 
-    var processedAt: Date = Date(),
+    var processedAt: LocalDateTime = LocalDateTime.now(),
 )
