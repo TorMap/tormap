@@ -13,7 +13,8 @@ import javax.persistence.*
 @Entity
 @Table(
     indexes = [
-        Index(columnList = "fingerprint, day", unique = true)
+        Index(columnList = "fingerprint, day", unique = true),
+        Index(columnList = "day"),
     ]
 )
 class ArchiveGeoRelay(
