@@ -1,10 +1,6 @@
 package com.torusage.service
 
 import com.torusage.adapter.client.OnionooApiClient
-import com.torusage.database.entity.archive.*
-import com.torusage.database.repository.archive.ArchiveGeoRelayRepository
-import com.torusage.database.repository.archive.ProcessedDescriptorRepository
-import com.torusage.database.repository.archive.ProcessedDescriptorsFileRepository
 import com.torusage.database.repository.recent.BridgeRepository
 import com.torusage.database.repository.recent.BridgeSummaryRepository
 import com.torusage.database.repository.recent.RelayRepository
@@ -13,13 +9,6 @@ import com.torusage.logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import org.torproject.descriptor.Descriptor
-import org.torproject.descriptor.DescriptorCollector
-import org.torproject.descriptor.DescriptorSourceFactory
-import org.torproject.descriptor.RelayNetworkStatusConsensus
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
 
 
 /**
@@ -47,20 +36,16 @@ class ScheduledCollectorService(
      * The years 2007 - 2021 equal roughly 3 GB in size
      */
     @Scheduled(fixedRate = 86400000L)
-    fun collectConsensusesDescriptors() = torDescriptorService.collectAndProcessDescriptors(
-            collectorApiPathConsensuses,
-            true,
-    )
+    fun collectConsensusesDescriptors() =
+        torDescriptorService.collectAndProcessDescriptors(collectorApiPathConsensuses)
 
     /**
      * Fetches server descriptors and stores them in files
      * The years 2005 - 2021 equal roughly 30 GB in size
      */
     //    @Scheduled(fixedRate = 86400000L)
-    fun collectServerDescriptors() = torDescriptorService.collectAndProcessDescriptors(
-            collectorApiPathServerDescriptors,
-            false,
-    )
+    fun collectServerDescriptors() =
+        torDescriptorService.collectAndProcessDescriptors(collectorApiPathServerDescriptors)
 
     /**
      * Fetches Tor node summary with the configured fixedRate and stores corresponding entities in DB

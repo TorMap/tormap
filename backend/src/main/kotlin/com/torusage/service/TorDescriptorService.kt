@@ -37,20 +37,21 @@ class TorDescriptorService(
     lateinit var collectorTargetDirectory: String
 
     /**
-     * Collect and process descriptors from a specific the TorProject archive [apiPath]
+     * Collect and process descriptors from a specific the TorProject collector [apiPath]
      */
-    fun collectAndProcessDescriptors(apiPath: String, shouldProcessOneDescriptorPerMonth: Boolean) {
-        logger.info("Collecting descriptors from api path $apiPath")
-        collectDescriptors(apiPath)
-        logger.info("Finished collecting descriptors from api path $apiPath")
+    fun collectAndProcessDescriptors(apiPath: String) {
+        try {
+            logger.info("Collecting descriptors from api path $apiPath")
+            collectDescriptors(apiPath)
+            logger.info("Finished collecting descriptors from api path $apiPath")
 
-        logger.info("Processing descriptors from api path $apiPath")
-        val parentDirectory = File(collectorTargetDirectory + apiPath)
-        val processedFiles = processedDescriptorsFileRepository.findAll()
-        parentDirectory.walkBottomUp().forEach {
-            processDescriptorsFile(it, parentDirectory, shouldProcessOneDescriptorPerMonth, processedFiles)
+            logger.info("Processing descriptors from api path $apiPath")
+            processDescriptors(apiPath)
+            logger.info("Finished processing descriptors from api path $apiPath")
+        } catch (exception: Exception) {
+            logger.error("Could not collect and process descriptors from api path $apiPath. ${exception.message}")
         }
-        logger.info("Finished processing descriptors from api path $apiPath")
+
     }
 
     /**
@@ -70,41 +71,43 @@ class TorDescriptorService(
         )
 
     /**
-     * The [fileToProcess] must contain descriptors which are then processed by the [processDescriptor] method
+     * Process descriptors which were previously saved to disk at [apiPath]
      */
-    private fun processDescriptorsFile(
-        fileToProcess: File,
-        parentDirectory: File,
-        shouldOnlyProcessFirstDescriptor: Boolean,
-        processedFiles: Iterable<ProcessedDescriptorsFile>,
-    ) {
-        if (fileToProcess == parentDirectory ||
-            processedFiles.any { it.filename == fileToProcess.name && it.lastModified == fileToProcess.lastModified() }
-        ) {
-            logger.info("Skipping already processed descriptors file ${fileToProcess.name}")
-        } else {
-            try {
-                logger.info("Processing descriptors file ${fileToProcess.name}")
-                val descriptorReader = DescriptorSourceFactory.createDescriptorReader()
-                if (shouldOnlyProcessFirstDescriptor) {
-                    descriptorReader.setMaxDescriptorsInQueue(1)
-                    processDescriptor(descriptorReader.readDescriptors(fileToProcess).first())
-                } else {
-                    descriptorReader.readDescriptors(fileToProcess).forEach {
-                        processDescriptor(it)
-                    }
-                }
+    private fun processDescriptors(apiPath: String) {
+        var lastProcessedFile: File? = null
+        readDescriptors(apiPath).forEach {
+            processDescriptor(it)
+            if (lastProcessedFile == null) {
+                lastProcessedFile = it.descriptorFile
+            }
+            else if (it.descriptorFile != lastProcessedFile) {
                 processedDescriptorsFileRepository.save(
                     ProcessedDescriptorsFile(
-                        fileToProcess.name,
-                        fileToProcess.lastModified()
+                        lastProcessedFile!!.name,
+                        lastProcessedFile!!.lastModified()
                     )
                 )
-                logger.info("Finished processing descriptors file ${fileToProcess.name}")
-            } catch (exception: Exception) {
-                logger.error("Failed to process descriptors file ${fileToProcess.name}. " + exception.message)
+                lastProcessedFile = it.descriptorFile
             }
         }
+    }
+
+    /**
+     * Read descriptors which were previously saved to disk at [apiPath]
+     * A reader can consume quite some memory. Try not to create multiple readers in a short time.
+     */
+    private fun readDescriptors(apiPath: String): MutableIterable<Descriptor> {
+        val descriptorReader = DescriptorSourceFactory.createDescriptorReader()
+        val parentDirectory = File(collectorTargetDirectory + apiPath)
+        val excludedFiles = processedDescriptorsFileRepository.findAll()
+        descriptorReader.excludedFiles = excludedFiles.associate {
+            Pair(
+                parentDirectory.absolutePath + File.separator + it.filename,
+                it.lastModified,
+            )
+        }.toSortedMap()
+
+        return descriptorReader.readDescriptors(parentDirectory)
     }
 
     /**
@@ -138,7 +141,7 @@ class TorDescriptorService(
 
     /**
      * Use a [descriptor] to generate and save [ArchiveGeoRelay]s
-     * based on the relay's IP address and the [consensusCalendarDate]
+     * based on the relay's IP address and the [consensusCalendarDate].
      */
     private fun saveArchiveGeoRelays(
         descriptor: RelayNetworkStatusConsensus,

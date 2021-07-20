@@ -19,6 +19,7 @@ class ArchiveGeoRelay(
     networkStatusEntry: NetworkStatusEntry,
 
     @Column(length = 7)
+    @Temporal(TemporalType.DATE)
     var day: Calendar,
 
     var latitude: BigDecimal,
