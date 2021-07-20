@@ -21,7 +21,10 @@ class ArchiveDataController(
 //    fun getGeoRelays(@PathVariable month: String) =
 //        archiveGeoRelayRepository.findAllByDay(month).map { ArchiveGeoRelayView(it) }
 
+    @GetMapping("/geo/relay/days")
+    fun getDaysForGeoRelays() = archiveGeoRelayRepository.findDistinctDays()
+
     @GetMapping("/geo/relay/day/{day}")
-    fun getGeoRelays(@PathVariable day: String) =
+    fun getGeoRelaysByDay(@PathVariable day: String) =
         archiveGeoRelayRepository.findAllByDay(LocalDate.parse(day)).map { ArchiveGeoRelayView(it) }
 }
