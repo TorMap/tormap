@@ -10,7 +10,7 @@ import javax.persistence.*
 @Entity(name = "exit_policy_summary")
 class ExitPolicySummary(
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     @Column(name = "id")
     var id: Long,
 

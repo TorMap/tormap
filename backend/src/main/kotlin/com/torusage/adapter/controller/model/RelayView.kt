@@ -21,12 +21,12 @@ class RelayView(relay: Relay) {
 /**
  * The possible flags a relay can have assigned to it
  * [Further documentation](https://github.com/torproject/torspec/blob/main/dir-spec.txt)
- * Please keep the order of attributes, since the frontend relies on the same order.
+ * Please keep the order of attributes, since the frontend and DB rely on the exact order.
  */
 enum class RelayFlag {
     Valid, // if the router has been 'validated'
     Named,
-    Unamed,
+    Unnamed,
     Running, // if the router is currently usable over all its published ORPorts
     Stable, // if the router is suitable for long-lived circuits
     Exit, // if the router is more useful for building general-purpose exit circuits than for relay circuits
