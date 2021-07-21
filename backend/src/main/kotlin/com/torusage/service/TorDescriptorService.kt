@@ -1,20 +1,17 @@
 package com.torusage.service
 
-import com.torusage.database.entity.archive.*
+import com.torusage.database.entity.archive.ArchiveGeoRelay
+import com.torusage.database.entity.archive.ArchiveNodeDetails
+import com.torusage.database.entity.archive.ProcessedDescriptorsFile
 import com.torusage.database.repository.archive.ArchiveGeoRelayRepository
-import com.torusage.database.repository.archive.ProcessedDescriptorRepository
+import com.torusage.database.repository.archive.ArchiveNodeDetailsRepository
 import com.torusage.database.repository.archive.ProcessedDescriptorsFileRepository
 import com.torusage.logger
+import com.torusage.millisSinceEpochToLocalDate
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.torproject.descriptor.Descriptor
-import org.torproject.descriptor.DescriptorCollector
-import org.torproject.descriptor.DescriptorSourceFactory
-import org.torproject.descriptor.RelayNetworkStatusConsensus
+import org.torproject.descriptor.*
 import java.io.File
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
 
 
 /**
@@ -23,8 +20,8 @@ import java.time.ZoneId
 @Service
 class TorDescriptorService(
     val archiveGeoRelayRepository: ArchiveGeoRelayRepository,
+    val archiveNodeDetailsRepository: ArchiveNodeDetailsRepository,
     val processedDescriptorsFileRepository: ProcessedDescriptorsFileRepository,
-    val processedDescriptorRepository: ProcessedDescriptorRepository,
     val geoLocationService: GeoLocationService,
 ) {
     val logger = logger()
@@ -79,8 +76,8 @@ class TorDescriptorService(
             processDescriptor(it)
             if (lastProcessedFile == null) {
                 lastProcessedFile = it.descriptorFile
-            }
-            else if (it.descriptorFile != lastProcessedFile) {
+            } else if (it.descriptorFile != lastProcessedFile) {
+                logger.info("Finished processing descriptors file ${lastProcessedFile!!.name}")
                 processedDescriptorsFileRepository.save(
                     ProcessedDescriptorsFile(
                         lastProcessedFile!!.name,
@@ -114,57 +111,58 @@ class TorDescriptorService(
      * Process a [descriptor] depending on it's type
      */
     private fun processDescriptor(descriptor: Descriptor) {
-        when (descriptor) {
-            is RelayNetworkStatusConsensus -> processConsensusDescriptor(descriptor)
-            else -> throw Exception("Descriptor type ${descriptor.javaClass.name} not supported!")
+        try {
+            when (descriptor) {
+                is RelayNetworkStatusConsensus -> processRelayConsensusDescriptor(descriptor)
+                is ServerDescriptor -> processServerDescriptor(descriptor)
+                else -> throw Exception("Descriptor type ${descriptor.javaClass.name} not supported!")
+            }
+        } catch (exception: Exception) {
+            logger.error("Could not process descriptor: ${exception.message}")
         }
     }
 
     /**
-     * Process a [descriptor] of the type [RelayNetworkStatusConsensus]
+     * Use a [RelayNetworkStatusConsensus] descriptor to save [ArchiveGeoRelay]s in the DB.
+     * The location is retrieved based on the relay's IP addresses.
      */
-    private fun processConsensusDescriptor(descriptor: RelayNetworkStatusConsensus) {
-        val descriptorFileName = descriptor.descriptorFile.name
-        val consensusDate = LocalDate.ofInstant(Instant.ofEpochMilli(descriptor.validAfterMillis), ZoneId.of("UTC"))
-        val descriptorId = DescriptorId(
-            DescriptorType.CONSENSUS,
-            consensusDate
-        )
-        if (processedDescriptorRepository.existsById(descriptorId)) {
-            logger.info("Skipping consensus descriptor for day $consensusDate part of file $descriptorFileName")
-        } else {
-            saveArchiveGeoRelays(descriptor, consensusDate, descriptorId)
-            logger.info("Saved consensus descriptor for day $consensusDate part of file $descriptorFileName")
-        }
-    }
-
-    /**
-     * Use a [descriptor] to generate and save [ArchiveGeoRelay]s
-     * based on the relay's IP address and the [consensusDate].
-     */
-    private fun saveArchiveGeoRelays(
-        descriptor: RelayNetworkStatusConsensus,
-        consensusDate: LocalDate,
-        descriptorId: DescriptorId,
-    ) {
+    private fun processRelayConsensusDescriptor(descriptor: RelayNetworkStatusConsensus) {
+        val descriptorDay = millisSinceEpochToLocalDate(descriptor.validAfterMillis)
         val nodesToSave = mutableListOf<ArchiveGeoRelay>()
         descriptor.statusEntries.forEach {
             val networkStatusEntry = it.value
-            val location = geoLocationService.getLocationForIpAddress(networkStatusEntry.address)
-            if (location != null) {
-                nodesToSave.add(
-                    ArchiveGeoRelay(
-                        networkStatusEntry,
-                        consensusDate,
-                        location.latitude,
-                        location.longitude,
-                        location.countryIsoCode,
+            if (!archiveGeoRelayRepository.existsByDayAndFingerprint(descriptorDay, networkStatusEntry.fingerprint)) {
+                val location = geoLocationService.getLocationForIpAddress(networkStatusEntry.address)
+                if (location != null) {
+                    nodesToSave.add(
+                        ArchiveGeoRelay(
+                            networkStatusEntry,
+                            descriptorDay,
+                            location.latitude,
+                            location.longitude,
+                            location.countryIsoCode,
+                        )
                     )
-                )
+                }
             }
         }
         archiveGeoRelayRepository.saveAll(nodesToSave)
-        processedDescriptorRepository.save(ProcessedDescriptor(descriptorId))
+        logger.info("Processed relay consensus descriptor for day $descriptorDay")
+    }
+
+    /**
+     * Use a server descriptor to save [ArchiveNodeDetails] in the DB.
+     */
+    private fun processServerDescriptor(descriptor: ServerDescriptor) {
+        val descriptorDay = millisSinceEpochToLocalDate(descriptor.publishedMillis)
+        if (! archiveNodeDetailsRepository.existsByDayAndFingerprint(descriptorDay, descriptor.fingerprint)) {
+            archiveNodeDetailsRepository.save(
+                ArchiveNodeDetails(
+                    descriptor,
+                    descriptorDay,
+                )
+            )
+        }
     }
 
 }

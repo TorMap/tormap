@@ -13,4 +13,5 @@ import java.time.LocalDate
  */
 interface ArchiveGeoRelayRepository : CrudRepository<ArchiveGeoRelay, ArchiveNodeId> {
     fun findAllByDay(day: LocalDate): List<ArchiveGeoRelay>
+    fun existsByDayAndFingerprint(day: LocalDate, fingerprint: String): Boolean
 }

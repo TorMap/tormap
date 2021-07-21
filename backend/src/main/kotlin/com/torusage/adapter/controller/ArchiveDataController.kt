@@ -19,7 +19,7 @@ class ArchiveDataController(
     val logger = logger()
 
     @GetMapping("/geo/relay/days")
-    fun getDaysForGeoRelays() = processedDescriptorRepository.findDistinctDays()
+    fun getDaysForGeoRelays() = archiveGeoRelayRepository.findDistinctDays()
 
     @GetMapping("/geo/relay/day/{day}")
     fun getGeoRelaysByDay(@PathVariable day: String): List<ArchiveGeoRelayView> {
