@@ -59,6 +59,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
         const defaultLayer = new LayerGroup()
         const exitLayer = new LayerGroup()
         const guardLayer = new LayerGroup()
+        const bridgeLayer = new LayerGroup()
 
         const layer = new LayerGroup([defaultLayer, exitLayer, guardLayer])
 
@@ -71,6 +72,9 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
             } else if (relay.flags?.includes(RelayFlag.Guard)) {
                 color = "#fcb045"
                 layer = guardLayer
+            } else if (relay.flags?.includes(RelayFlag.Bridge)) {
+                color = "#abffab"
+                layer = bridgeLayer
             }
             circleMarker(
                 [relay.lat, relay.long],
@@ -101,6 +105,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
             if (settings.default) layers[0].addTo(markerLayer)
             if (settings.exit) layers[1].addTo(markerLayer)
             if (settings.guard) layers[2].addTo(markerLayer)
+            if (settings.bridge) layers[3].addTo(markerLayer)
         }
     }
 
