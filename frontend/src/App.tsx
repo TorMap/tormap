@@ -18,21 +18,42 @@ import Moment from "react-moment";
 import {apiBaseUrl} from "./util/constants";
 import {Mark} from "./types/mark";
 import {AccordionStats} from "./components/arccordion-stats/accordion-stats";
-import {Settings} from "./types/variousTypes";
+import {Settings, Statistics, TempSettings} from "./types/variousTypes";
 import classes from "*.module.css";
+import {MapStats} from "./components/legend/map-legend";
 
 function App() {
     const [availableDays, setAvailableDays] = useState<string[]>([])
     const [sliderValue, setSliderValue] = useState<number>(-1)
     const [sliderMarks, setSliderMarks] = useState<Mark[]>([])
     const [isLoading, setIsLoading] = useState(true)
-    const [settings, setSettings] = useState<Settings>({
-        guard: true,
-        default: true,
-        exit: true,
-        bridge: true,
+    const [settings, setSettings] = useState<TempSettings>({
+        Guard: true,
+        Exit: true,
+        Default: true,
+
+        miValid: false,
+        miNamed: false,
+        miUnamed: false,
+        miRunning: false,
+        miStable: false,
+        miExit: false,
+        miFast: false,
+        miGuard: false,
+        miAuthority: false,
+        miV2Dir: false,
+        miHSDir: false,
+        miNoEdConsensus: false,
+        miStaleDesc: false,
+        miSybil: false,
+        miBadExit: false,
 
         colorNodesAccordingToFlags: true,
+    })
+    const [statistics, setStatistics] = useState<Statistics>({
+        guard: 0,
+        default: 0,
+        exit: 0,
     })
     const [errorState, setErrorState] = useState(false)
 
@@ -40,7 +61,7 @@ function App() {
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSettings({...settings, [event.target.name]: event.target.checked})
-        console.log(`trigger changed ${event.target.checked}`)
+        console.log(`trigger changed ${[event.target.name]} to ${event.target.checked}`)
     };
 
     // Loads available days from the backend
@@ -110,6 +131,7 @@ function App() {
                 dayToDisplay={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}
                 settings={settings}
                 setLoadingStateCallback={setIsLoading}
+                setStatisticsCallback={setStatistics}
             />
             <div className={"sliderContainer"}>
                 <Grid container spacing={2}>
@@ -175,6 +197,7 @@ function App() {
                 </Grid>
             </div>
             <AccordionStats settings={settings} onChange={handleInputChange}/>
+            <MapStats statistics={statistics}/>
         </div>
     )
 }
