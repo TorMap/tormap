@@ -25,30 +25,41 @@ class ScheduledCollectorService(
 ) {
     val logger = logger()
 
-    @Value("\${collector.api.path.consensuses}")
-    lateinit var collectorApiPathConsensuses: String
+    @Value("\${collector.path.relay.consensuses}")
+    lateinit var collectorPathRelayConsensuses: String
 
-    @Value("\${collector.api.path.servers}")
+    @Value("\${collector.path.bridge.statuses}")
+    lateinit var collectorPathBridgeConsensuses: String
+
+    @Value("\${collector.path.relay.servers}")
     lateinit var collectorApiPathServerDescriptors: String
 
     /**
-     * Fetches consensus descriptors and stores them as files
-     * The years 2007 - 2021 equal roughly 3 GB in size
+     * Fetches and processes relay consensus descriptors.
+     * The years 2007 - 2021 equal roughly 3 GB in size.
      */
-    @Scheduled(fixedRate = 86400000L)
-    fun collectConsensusesDescriptors() =
-        torDescriptorService.collectAndProcessDescriptors(collectorApiPathConsensuses)
+//    @Scheduled(fixedRate = 86400000L)
+    fun processRelayConsensusDescriptors() =
+        torDescriptorService.collectAndProcessDescriptors(collectorPathRelayConsensuses)
 
     /**
-     * Fetches server descriptors and stores them in files
-     * The years 2005 - 2021 equal roughly 30 GB in size
+     * Fetches and processes bridge network descriptors.
+     * The years 2008 - 2021 equal roughly 2 GB in size.
      */
-    //    @Scheduled(fixedRate = 86400000L)
-    fun collectServerDescriptors() =
+//    @Scheduled(fixedRate = 86400000L)
+    fun processBridgeNetworkDescriptors() =
+        torDescriptorService.collectAndProcessDescriptors(collectorPathBridgeConsensuses)
+
+    /**
+     * Fetches and processes relay server descriptors.
+     * The years 2005 - 2021 equal roughly 30 GB in size.
+     */
+        @Scheduled(fixedRate = 86400000L)
+    fun collectRelayServerDescriptors() =
         torDescriptorService.collectAndProcessDescriptors(collectorApiPathServerDescriptors)
 
     /**
-     * Fetches Tor node summary with the configured fixedRate and stores corresponding entities in DB
+     * Fetches Tor node summary with the configured fixedRate and stores corresponding entities in DB.
      */
 //    @Scheduled(fixedRate = 86400000L)
     fun collectOnionooNodeSummary() {
@@ -60,7 +71,7 @@ class ScheduledCollectorService(
     }
 
     /**
-     * Fetches Tor node details with the configured fixedRate and stores corresponding entities in DB
+     * Fetches Tor node details with the configured fixedRate and stores corresponding entities in DB.
      */
 //    @Scheduled(fixedRate = 86400000L)
     fun collectOnionooNodeDetails() {

@@ -25,6 +25,7 @@ class DescriptorId(
 }
 
 enum class DescriptorType {
-    CONSENSUS,
+    RELAY_CONSENSUS,
     SERVER,
+    BRIDGE_NETWORK,
 }
