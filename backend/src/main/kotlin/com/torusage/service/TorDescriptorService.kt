@@ -115,10 +115,10 @@ class TorDescriptorService(
             when (descriptor) {
                 is RelayNetworkStatusConsensus -> processRelayConsensusDescriptor(descriptor)
                 is ServerDescriptor -> processServerDescriptor(descriptor)
-                else -> throw Exception("Descriptor type ${descriptor.javaClass.name} not supported!")
+                else -> throw Exception("Type ${descriptor.javaClass.name} is not supported!")
             }
         } catch (exception: Exception) {
-            logger.error("Could not process descriptor: ${exception.message}")
+            logger.error("Could not process descriptor part of file ${descriptor.descriptorFile.name}: ${exception.message}")
         }
     }
 
