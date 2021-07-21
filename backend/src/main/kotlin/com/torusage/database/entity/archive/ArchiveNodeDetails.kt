@@ -1,12 +1,14 @@
 package com.torusage.database.entity.archive
 
 import com.torusage.jointToCommaSeparated
+import com.torusage.stripLengthForDB
 import org.torproject.descriptor.ServerDescriptor
 import java.time.LocalDate
 import javax.persistence.*
 
 /**
- * This entity is used to store relevant information about a [ServerDescriptor]
+ * This entity is used to store details from a relay or bridge [ServerDescriptor].
+ * Documentation about attributes can be found at [https://metrics.torproject.org/metrics-lib/org/torproject/descriptor/ServerDescriptor.html].
  */
 @Suppress("unused")
 @Entity
@@ -24,22 +26,13 @@ class ArchiveNodeDetails(
     @GeneratedValue
     val id: Long? = null
 
-    var digestSha1Hex: String? = descriptor.digestSha1Hex
+    @Column(length = 15)
+    var address: String? = descriptor.address
 
-    var digestSha256Base64: String? = descriptor.digestSha256Base64
+    var allowSingleHopExits: Boolean = descriptor.allowSingleHopExits
 
     @Column(length = 19)
     var nickname: String? = descriptor.nickname
-
-    var address: String? = descriptor.address
-
-    var orPort: Int = descriptor.orPort
-
-    var socksPort: Int = descriptor.socksPort
-
-    var dirPort: Int = descriptor.dirPort
-
-    var orAddresses: String? = descriptor.orAddresses.jointToCommaSeparated()
 
     var bandwidthRate: Int = descriptor.bandwidthRate
 
@@ -47,11 +40,11 @@ class ArchiveNodeDetails(
 
     var bandwidthObserved: Int = descriptor.bandwidthObserved
 
-    var platform: String? = descriptor.platform
+    var platform: String? = descriptor.platform.stripLengthForDB()
 
     var protocols: String? = descriptor.protocols?.map {
-        it.key + it.value.jointToCommaSeparated()
-    }.jointToCommaSeparated()
+        "${it.key} (${it.value.jointToCommaSeparated()})"
+    }.jointToCommaSeparated().stripLengthForDB()
 
     @Column(length = 40)
     var fingerprint: String? = descriptor.fingerprint
@@ -60,61 +53,18 @@ class ArchiveNodeDetails(
 
     var uptime: Long = descriptor.uptime
 
-    var onionKey: String? = descriptor.onionKey
-
-    var signingKey: String? = descriptor.signingKey
-
-    @Lob
-    var exitPolicyLines: String? = descriptor.exitPolicyLines.jointToCommaSeparated()
-
-    @Lob
-    var routerSignature: String? = descriptor.routerSignature
-
-    @Lob
-    var contact: String? = descriptor.contact
-
-    var bridgeDistributionRequest: String? = descriptor.bridgeDistributionRequest
+    var contact: String? = descriptor.contact.stripLengthForDB()
 
     @Lob
     var familyEntries: String? = descriptor.familyEntries.jointToCommaSeparated()
 
-    var usesEnhancedDnsLogic: Boolean = descriptor.usesEnhancedDnsLogic
-
     var cachesExtraInfo: Boolean = descriptor.cachesExtraInfo
-
-    var extraInfoDigestSha1Hex: String? = descriptor.extraInfoDigestSha1Hex
-
-    var extraInfoDigestSha256Base64: String? = descriptor.extraInfoDigestSha256Base64
 
     var isHiddenServiceDir: Boolean = descriptor.isHiddenServiceDir
 
-    var linkProtocolVersions: String? = descriptor.linkProtocolVersions.jointToCommaSeparated()
+    var linkProtocolVersions: String? = descriptor.linkProtocolVersions.jointToCommaSeparated().stripLengthForDB()
 
-    var circuitProtocolVersions: String? = descriptor.circuitProtocolVersions.jointToCommaSeparated()
-
-    var allowSingleHopExits: Boolean = descriptor.allowSingleHopExits
-
-    var ipv6DefaultPolicy: String? = descriptor.ipv6DefaultPolicy
-
-    @Lob
-    var ipv6PortList: String? = descriptor.ipv6PortList
-
-    var ntorOnionKey: String? = descriptor.ntorOnionKey
-
-    var identityEd25519: String? = descriptor.identityEd25519
-
-    var masterKeyEd25519: String? = descriptor.masterKeyEd25519
-
-    @Lob
-    var routerSignatureEd25519: String? = descriptor.routerSignatureEd25519
-
-    @Lob
-    var onionKeyCrossCert: String? = descriptor.onionKeyCrosscert
-
-    @Lob
-    var ntorOnionKeyCrossCert: String? = descriptor.ntorOnionKeyCrosscert
-
-    var ntorOnionKeyCrossCertSign: Int = descriptor.ntorOnionKeyCrosscertSign
+    var circuitProtocolVersions: String? = descriptor.circuitProtocolVersions.jointToCommaSeparated().stripLengthForDB()
 
     var tunnelledDirServer: Boolean = descriptor.tunnelledDirServer
 }

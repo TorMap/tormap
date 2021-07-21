@@ -28,9 +28,6 @@ class ScheduledCollectorService(
     @Value("\${collector.path.relay.consensuses}")
     lateinit var collectorPathRelayConsensuses: String
 
-    @Value("\${collector.path.bridge.statuses}")
-    lateinit var collectorPathBridgeConsensuses: String
-
     @Value("\${collector.path.relay.servers}")
     lateinit var collectorApiPathServerDescriptors: String
 
@@ -38,23 +35,15 @@ class ScheduledCollectorService(
      * Fetches and processes relay consensus descriptors.
      * The years 2007 - 2021 equal roughly 3 GB in size.
      */
-//    @Scheduled(fixedRate = 86400000L)
+    @Scheduled(fixedRate = 86400000L)
     fun processRelayConsensusDescriptors() =
         torDescriptorService.collectAndProcessDescriptors(collectorPathRelayConsensuses)
-
-    /**
-     * Fetches and processes bridge network descriptors.
-     * The years 2008 - 2021 equal roughly 2 GB in size.
-     */
-//    @Scheduled(fixedRate = 86400000L)
-    fun processBridgeNetworkDescriptors() =
-        torDescriptorService.collectAndProcessDescriptors(collectorPathBridgeConsensuses)
 
     /**
      * Fetches and processes relay server descriptors.
      * The years 2005 - 2021 equal roughly 30 GB in size.
      */
-        @Scheduled(fixedRate = 86400000L)
+    @Scheduled(fixedRate = 86400000L)
     fun collectRelayServerDescriptors() =
         torDescriptorService.collectAndProcessDescriptors(collectorApiPathServerDescriptors)
 
