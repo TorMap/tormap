@@ -7,7 +7,7 @@ import "./world-map.scss"
 import {NodePopup} from "../node-popup/node-popup";
 import {ArchiveGeoRelayView} from "../../types/archive-geo-relay";
 import {RelayFlag} from "../../types/relay";
-import {Settings} from "../../types/variousTypes";
+import {Settings, Statistics, TempSettings} from "../../types/variousTypes";
 
 interface Props {
     /**
@@ -15,15 +15,17 @@ interface Props {
      */
     dayToDisplay?: string
 
-    settings: Settings
+    settings: TempSettings
 
     setLoadingStateCallback: (b: boolean) => void
+
+    setStatisticsCallback: (stat: Statistics) => void
 }
 
 // Variable needs to be outside component
 let latestRequestTimestamp: number | undefined = undefined
 
-export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setLoadingStateCallback}) => {
+export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setLoadingStateCallback, setStatisticsCallback}) => {
     const [showNodePopup, setShowNodePopup] = useState(false)
     const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
@@ -59,22 +61,45 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
         const defaultLayer = new LayerGroup()
         const exitLayer = new LayerGroup()
         const guardLayer = new LayerGroup()
-        const bridgeLayer = new LayerGroup()
 
         const layer = new LayerGroup([defaultLayer, exitLayer, guardLayer])
 
+        let stats: Statistics = {
+            guard: 0,
+            default: 0,
+            exit: 0,
+        }
+
         relays.forEach(relay => {
+            if (settings.miValid &&         !relay.flags?.includes(RelayFlag.Valid))        {return}
+            if (settings.miNamed &&         !relay.flags?.includes(RelayFlag.Named))        {return}
+            if (settings.miUnamed &&        !relay.flags?.includes(RelayFlag.Unamed))       {return}
+            if (settings.miRunning &&       !relay.flags?.includes(RelayFlag.Running))      {return}
+            if (settings.miStable &&        !relay.flags?.includes(RelayFlag.Stable))       {return}
+            if (settings.miExit &&          !relay.flags?.includes(RelayFlag.Exit))         {return}
+            if (settings.miFast &&          !relay.flags?.includes(RelayFlag.Fast))         {return}
+            if (settings.miGuard &&         !relay.flags?.includes(RelayFlag.Guard))        {return}
+            if (settings.miAuthority &&     !relay.flags?.includes(RelayFlag.Authority))    {return}
+            if (settings.miV2Dir &&         !relay.flags?.includes(RelayFlag.V2Dir))        {return}
+            if (settings.miHSDir &&         !relay.flags?.includes(RelayFlag.HSDir))        {return}
+            if (settings.miNoEdConsensus && !relay.flags?.includes(RelayFlag.NoEdConsensus)){return}
+            if (settings.miStaleDesc &&     !relay.flags?.includes(RelayFlag.StaleDesc))    {return}
+            if (settings.miSybil &&         !relay.flags?.includes(RelayFlag.Sybil))        {return}
+            if (settings.miBadExit &&       !relay.flags?.includes(RelayFlag.BadExit))      {return}
+
+
             let color = "#833ab4";
             let layer = defaultLayer;
             if (relay.flags?.includes(RelayFlag.Exit)) {
                 color = "#f96969"
                 layer = exitLayer
+                stats.exit++
             } else if (relay.flags?.includes(RelayFlag.Guard)) {
                 color = "#fcb045"
                 layer = guardLayer
-            } else if (relay.flags?.includes(RelayFlag.Bridge)) {
-                color = "#abffab"
-                layer = bridgeLayer
+                stats.guard++
+            } else {
+                stats.default++
             }
             circleMarker(
                 [relay.lat, relay.long],
@@ -87,6 +112,8 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
                 .on("click", onMarkerClick)
                 .addTo(layer)
         })
+
+        setStatisticsCallback(stats)
 
         console.timeLog(`relaysToLayerGroup`, `New Layer with ${relays.length} elements finished`)
         console.timeEnd(`relaysToLayerGroup`)
@@ -102,10 +129,9 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
             markerLayer.clearLayers()
             const layers = layerGroup.getLayers()
 
-            if (settings.default) layers[0].addTo(markerLayer)
-            if (settings.exit) layers[1].addTo(markerLayer)
-            if (settings.guard) layers[2].addTo(markerLayer)
-            if (settings.bridge) layers[3].addTo(markerLayer)
+            if (settings.Default) layers[0].addTo(markerLayer)
+            if (settings.Exit) layers[1].addTo(markerLayer)
+            if (settings.Guard) layers[2].addTo(markerLayer)
         }
     }
 
