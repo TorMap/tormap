@@ -25,7 +25,23 @@ export enum RelayFlag {
     StaleDesc,
     Sybil,
     BadExit,
-    Bridge,
+}
+export enum RelayFlagName {
+    Valid = "Valid",
+    Named = "Named",
+    Unamed = "Unamed",
+    Running = "Running",
+    Stable = "Stable",
+    Exit = "Exit",
+    Fast = "Fast",
+    Guard = "Guard",
+    Authority = "Authority",
+    V2Dir = "V2Dir",
+    HSDir = "HSDir",
+    NoEdConsensus = "NoEdConsensus",
+    StaleDesc = "StaleDesc",
+    Sybil = "Sybil",
+    BadExit = "BadExit",
 }
 
 export interface Relay {
