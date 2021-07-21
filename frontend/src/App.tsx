@@ -1,6 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import {WorldMap} from "./components/world-map/world-map";
-import {CircularProgress, Grid, Slider,} from "@material-ui/core";
+import ReactSlidingPane from "react-sliding-pane";
+import {
+    Accordion,
+    Button,
+    Checkbox,
+    CircularProgress,
+    FormControlLabel,
+    FormGroup,
+    Grid,
+    Slider,
+    Switch, TextField
+} from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
 import Moment from "react-moment";
@@ -8,6 +19,7 @@ import {apiBaseUrl} from "./util/constants";
 import {Mark} from "./types/mark";
 import {AccordionStats} from "./components/arccordion-stats/accordion-stats";
 import {Settings} from "./types/variousTypes";
+import classes from "*.module.css";
 
 function App() {
     const [availableDays, setAvailableDays] = useState<string[]>([])
@@ -21,8 +33,9 @@ function App() {
 
         colorNodesAccordingToFlags: true,
     })
+    const [errorState, setErrorState] = useState(false)
 
-    const debouncedSliderValue = useDebounce<number>(sliderValue, 100);
+    const debouncedSliderValue = useDebounce<number>(sliderValue, 500);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSettings({...settings, [event.target.name]: event.target.checked})
@@ -99,12 +112,29 @@ function App() {
             />
             <div className={"sliderContainer"}>
                 <Grid container spacing={2}>
+                    <Grid item className={"dateGridRight"}>
+                        <form className={"textFieldContainer"} noValidate>
+                            <TextField
+                                id="date"
+                                type="date"
+                                defaultValue={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}
+                                className={"textField"}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                disabled={true}
+                            />
+                        </form>
+                    </Grid>
                     <Grid item xs>
                         <Slider
                             disabled={(availableDays.length === 0)}
                             className={"slider"}
                             value={sliderValue}
-                            onChangeCommitted={(event: any, newValue: number | number[]) => setSliderValue(newValue as number)}
+                            onChange={(event: any, newValue: number | number[]) => {
+                                setSliderValue(newValue as number)
+                                setErrorState(false)
+                            }}
                             valueLabelDisplay={(availableDays.length === 0) ? "off" : "on"}
                             name={"slider"}
                             min={0}
@@ -113,6 +143,33 @@ function App() {
                             valueLabelFormat={(x) => <Moment date={availableDays[x]} format={"YYYY-MM-DD"}/>}
                             track={false}
                         />
+                    </Grid>
+                    <Grid item className={"dateGridRight"}>
+                        <form className={"textFieldContainer"} noValidate>
+                            <TextField
+                                id="date"
+                                type="date"
+                                defaultValue={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}
+                                className={"textField"}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                disabled={(availableDays.length === 0)}
+                                onChange={(event) => {
+                                    const value = event.target.value
+                                    if (availableDays.includes(value)) {
+                                        setErrorState(false)
+                                        setSliderValue(availableDays.findIndex(element => element === value))
+                                    }else{
+                                        setErrorState(true)
+                                        console.log(`Day ${value} is not available at the moment`)
+                                    }
+                                }}
+                                value={availableDays[sliderValue]}
+                                error={errorState}
+                                helperText={errorState ? `Day is not available at the moment` : null}
+                            />
+                        </form>
                     </Grid>
                 </Grid>
             </div>
