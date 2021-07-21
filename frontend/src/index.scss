@@ -30,18 +30,23 @@ code {
 .sliderContainer{
     position: fixed !important;
     bottom: 2vh !important;
-    width: 80% !important;
-    left: 10%;
+    width: 90% !important;
+    left: 5%;
     color: white;
 }
 
 .slider .PrivateValueLabel-offset-3.MuiSlider-valueLabel{
-    top: -42px;
-    left: calc(-50% - 8px)
+    top: -41px;
+    left: calc(-50% - 8px);
+    font-size: .7rem;
 }
 .slider .PrivateValueLabel-circle-4{
     width: 40px;
     height: 40px;
+}
+.slider .PrivateValueLabel-label-5{
+    padding: 5px;
+    text-align: center;
 }
 
 .MuiSlider-markLabel{
@@ -50,12 +55,30 @@ code {
 
 .progressCircle{
     position: absolute;
-    left: calc(50% - 20px);
-    top: calc(50% - 20px);
+    left: calc(50% - 25px);
+    top: calc(50% - 25px);
     margin: auto;
     z-index: 100;
     background-color: transparent;
 }
 .MuiCircularProgress-colorPrimary {
     color: #FFFFFF !important;
+}
+.MuiInputBase-root{
+    color: #FFFFFF !important;
+}
+.textField{
+    marginLeft: 20px !important;
+    marginRight: 20px !important;
+    width: 200px !important;
+}
+.textFieldContainer{
+    display: flex;
+    flexWrap: wrap;
+}
+.dateGridRight{
+    padding-left: 50px !important;
+}
+.dateGridLeft{
+    padding-right: 50px !important;
 }
