@@ -1,8 +1,56 @@
 export interface Settings{
-    guard: boolean
-    exit: boolean
-    default: boolean
-    bridge: boolean
+    nodeTypes: {
+        Guard: boolean
+        Exit: boolean
+        Default: boolean
+    }
+    mustInclude: {
+        Valid: boolean
+        Named: boolean
+        Unamed: boolean
+        Running: boolean
+        Stable: boolean
+        Exit: boolean
+        Fast: boolean
+        Guard: boolean
+        Authority: boolean
+        V2Dir: boolean
+        HSDir: boolean
+        NoEdConsensus: boolean
+        StaleDesc: boolean
+        Sybil: boolean
+        BadExit: boolean
+    }
 
     colorNodesAccordingToFlags: boolean
+}
+
+export interface TempSettings{
+    Guard: boolean
+    Exit: boolean
+    Default: boolean
+
+    miValid: boolean
+    miNamed: boolean
+    miUnamed: boolean
+    miRunning: boolean
+    miStable: boolean
+    miExit: boolean
+    miFast: boolean
+    miGuard: boolean
+    miAuthority: boolean
+    miV2Dir: boolean
+    miHSDir: boolean
+    miNoEdConsensus: boolean
+    miStaleDesc: boolean
+    miSybil: boolean
+    miBadExit: boolean
+
+    colorNodesAccordingToFlags: boolean
+}
+
+export interface Statistics{
+    guard: number
+    exit: number
+    default: number
 }
