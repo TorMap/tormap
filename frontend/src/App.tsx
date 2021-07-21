@@ -30,6 +30,7 @@ function App() {
         guard: true,
         default: true,
         exit: true,
+        bridge: true,
 
         colorNodesAccordingToFlags: true,
     })

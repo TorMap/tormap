@@ -48,7 +48,7 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                     aria-controls="panel2a-content"
                     id="panel2a-header"
                 >
-                    <Typography className={"heading"}>Filter by relay flags</Typography>
+                    <Typography className={"heading"}>Show node types</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <FormGroup>
@@ -60,7 +60,32 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                             label={"Exit"}/>
                         <FormControlLabel
                             control={<Checkbox checked={settings.default} onChange={onChange} name={"default"}/>}
-                            label={"default"}/>
+                            label={"Other"}/>
+                        <FormControlLabel
+                            control={<Checkbox checked={settings.bridge} onChange={onChange} name={"bridge"}/>}
+                            label={"Bridge"}/>
+                    </FormGroup>
+                </AccordionDetails>
+            </Accordion>
+            <Accordion>
+                <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel2a-content"
+                    id="panel2a-header"
+                >
+                    <Typography className={"heading"}>Node must include flag</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <FormGroup>
+                        <FormControlLabel
+                            control={<Checkbox checked={settings.guard} onChange={onChange} name={"guard"}/>}
+                            label={"Guard"}/>
+                        <FormControlLabel
+                            control={<Checkbox checked={settings.exit} onChange={onChange} name={"exit"}/>}
+                            label={"Exit"}/>
+                        <FormControlLabel
+                            control={<Checkbox checked={settings.default} onChange={onChange} name={"default"}/>}
+                            label={"Other"}/>
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>

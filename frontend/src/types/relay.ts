@@ -25,6 +25,7 @@ export enum RelayFlag {
     StaleDesc,
     Sybil,
     BadExit,
+    Bridge,
 }
 
 export interface Relay {
