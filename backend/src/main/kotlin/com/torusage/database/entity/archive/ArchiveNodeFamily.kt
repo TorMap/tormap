@@ -23,5 +23,6 @@ class ArchiveNodeFamily(
     @GeneratedValue
     val id: Long? = null,
 ) {
+    @Lob
     val fingerprints: String = sortedFingerprints.jointToCommaSeparated()!!
 }

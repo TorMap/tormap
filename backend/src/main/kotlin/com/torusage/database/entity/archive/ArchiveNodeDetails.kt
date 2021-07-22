@@ -48,7 +48,7 @@ class ArchiveNodeDetails(
     }.jointToCommaSeparated().stripLengthForDB()
 
     @Column(length = 40)
-    var fingerprint: String? = descriptor.fingerprint
+    var fingerprint: String = descriptor.fingerprint
 
     var isHibernating: Boolean = descriptor.isHibernating
 
