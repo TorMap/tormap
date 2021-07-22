@@ -22,11 +22,11 @@ class ArchiveGeoRelay(
     var latitude: BigDecimal,
     var longitude: BigDecimal,
     var countryIsoCode: String?,
-) {
+
     @Id
     @GeneratedValue
-    val id: Long? = null
-
+    val id: Long? = null,
+) {
     @Column(length = 40)
     var fingerprint: String = networkStatusEntry.fingerprint
 
@@ -35,6 +35,10 @@ class ArchiveGeoRelay(
     } catch (exception: Exception) {
         null
     }
+
+    val detailsId: Long? = null
+
+    val familyId: Long? = null
 }
 
 /**

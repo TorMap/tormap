@@ -35,7 +35,7 @@ class ScheduledCollectorService(
      * Fetches and processes relay consensus descriptors.
      * The years 2007 - 2021 equal roughly 3 GB in size.
      */
-    @Scheduled(fixedRate = 86400000L)
+//    @Scheduled(fixedRate = 86400000L)
     fun processRelayConsensusDescriptors() =
         torDescriptorService.collectAndProcessDescriptors(collectorPathRelayConsensuses)
 
