@@ -27,13 +27,6 @@ code {
     margin-top: 60vh !important;
 }
 
-.sliderContainer{
-    position: fixed !important;
-    bottom: 2vh !important;
-    width: 90% !important;
-    left: 5%;
-    color: white;
-}
 
 .slider .PrivateValueLabel-offset-3.MuiSlider-valueLabel{
     top: -41px;
@@ -67,19 +60,4 @@ code {
 }
 .MuiInputBase-root{
     color: #FFFFFF !important;
-}
-.textField{
-    marginLeft: 20px !important;
-    marginRight: 20px !important;
-    width: 200px !important;
-}
-.textFieldContainer{
-    display: flex;
-    flexWrap: wrap;
-}
-.dateGridRight{
-    padding-left: 50px !important;
-}
-.dateGridLeft{
-    padding-right: 50px !important;
 }
