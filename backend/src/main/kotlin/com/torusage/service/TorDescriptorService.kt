@@ -1,11 +1,15 @@
 package com.torusage.service
 
+import com.torusage.commaSeparatedToList
 import com.torusage.database.entity.archive.ArchiveGeoRelay
 import com.torusage.database.entity.archive.ArchiveNodeDetails
+import com.torusage.database.entity.archive.ArchiveNodeFamily
 import com.torusage.database.entity.archive.ProcessedDescriptorsFile
 import com.torusage.database.repository.archive.ArchiveGeoRelayRepository
 import com.torusage.database.repository.archive.ArchiveNodeDetailsRepository
+import com.torusage.database.repository.archive.ArchiveNodeFamilyRepository
 import com.torusage.database.repository.archive.ProcessedDescriptorsFileRepository
+import com.torusage.jointToCommaSeparated
 import com.torusage.logger
 import com.torusage.millisSinceEpochToLocalDate
 import org.springframework.beans.factory.annotation.Value
@@ -23,6 +27,7 @@ class TorDescriptorService(
     val archiveGeoRelayRepository: ArchiveGeoRelayRepository,
     val archiveNodeDetailsRepository: ArchiveNodeDetailsRepository,
     val processedDescriptorsFileRepository: ProcessedDescriptorsFileRepository,
+    val archiveNodeFamilyRepository: ArchiveNodeFamilyRepository,
     val geoLocationService: GeoLocationService,
 ) {
     val logger = logger()
@@ -171,5 +176,61 @@ class TorDescriptorService(
         }
     }
 
+    fun analyzeNodeFamilies(month: String) {
+        val familyNodes = archiveNodeDetailsRepository.getAllByMonthAndFamilyEntriesIsNotNull(month)
+        familyNodes.forEach { requestingNode ->
+            val confirmedFamilyFingerprints = mutableSetOf<String>()
+            requestingNode.familyEntries!!.commaSeparatedToList().forEach { allegedFamilyMemberId ->
+                val fingerprintRegex = Regex("^\\$[A-F0-9]{40}.*")
+                val nicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
+                when {
+                    fingerprintRegex.matches(allegedFamilyMemberId) -> {
+                        val allegedFamilyMember = archiveNodeDetailsRepository.getByMonthAndFingerprint(
+                            month,
+                            allegedFamilyMemberId.substring(1, 40),
+                        )
+                        if (isNodeMemberOfFamily(requestingNode, allegedFamilyMember)) {
+                            confirmedFamilyFingerprints.add(allegedFamilyMember!!.fingerprint)
+                        }
+
+                    }
+                    nicknameRegex.matches(allegedFamilyMemberId) -> {
+                        val allegedFamilyMembers =
+                            archiveNodeDetailsRepository.getAllByMonthAndNickname(month, allegedFamilyMemberId)
+                        val confirmedFamilyMember =
+                            allegedFamilyMembers.firstOrNull { isNodeMemberOfFamily(requestingNode, it) }
+                        if (confirmedFamilyMember != null) {
+                            confirmedFamilyFingerprints.add(confirmedFamilyMember.fingerprint)
+                        }
+
+                    }
+                    else -> logger.error("Could not add member $allegedFamilyMemberId to requestingNode ${requestingNode.id} family!")
+                }
+            }
+            if (confirmedFamilyFingerprints.size > 0) {
+                confirmedFamilyFingerprints.add(requestingNode.fingerprint)
+                val confirmedFamilyFingerprintsSorted = confirmedFamilyFingerprints.toSortedSet()
+                if (!archiveNodeFamilyRepository.existsByMonthAndFingerprints(
+                        month,
+                        confirmedFamilyFingerprintsSorted.jointToCommaSeparated()!!
+                    )
+                ) {
+                    archiveNodeFamilyRepository.save(
+                        ArchiveNodeFamily(
+                            confirmedFamilyFingerprintsSorted,
+                            month
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun isNodeMemberOfFamily(
+        requestingNode: ArchiveNodeDetails,
+        allegedFamilyMember: ArchiveNodeDetails?,
+    ) = allegedFamilyMember?.familyEntries?.commaSeparatedToList()?.any {
+        it == "$" + requestingNode.fingerprint || it == requestingNode.nickname
+    } ?: false
 }
 
