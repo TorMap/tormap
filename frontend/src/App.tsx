@@ -1,16 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {WorldMap} from "./components/world-map/world-map";
-import ReactSlidingPane from "react-sliding-pane";
 import {
-    Accordion,
-    Button,
-    Checkbox,
-    CircularProgress,
-    FormControlLabel,
-    FormGroup,
-    Grid,
+    CircularProgress, createMuiTheme,
+    Grid, makeStyles,
     Slider,
-    Switch, TextField
+    TextField, ThemeProvider
 } from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
@@ -19,8 +13,33 @@ import {apiBaseUrl} from "./util/constants";
 import {Mark} from "./types/mark";
 import {AccordionStats} from "./components/arccordion-stats/accordion-stats";
 import {Settings, Statistics, TempSettings} from "./types/variousTypes";
-import classes from "*.module.css";
 import {MapStats} from "./components/legend/map-legend";
+import {blue} from "@material-ui/core/colors";
+
+const useStyle = makeStyles(theme => ({
+    slider: {
+        position: "fixed",
+        bottom: "20px",
+        width: "90%",
+        left: "5%",
+    },
+    sliderValueLabel: {
+        top: "-41px",
+        left: "calc(-50% - 8px)",
+        fontSize: ".7rem",
+        "& span":{
+            width: "40px",
+            height: "40px",
+            "& span":{
+                padding: "14px 5px 0px 5px",
+                textAlign: "center",
+            }
+        }
+    },
+    datePicker: {
+        width: "100%",
+    },
+}))
 
 function App() {
     const [availableDays, setAvailableDays] = useState<string[]>([])
@@ -56,6 +75,13 @@ function App() {
         exit: 0,
     })
     const [errorState, setErrorState] = useState(false)
+
+    const [theme, setTheme] = useState(createMuiTheme({
+        palette: {
+            type: "dark",
+        },
+    }))
+    const classes = useStyle()
 
     const debouncedSliderValue = useDebounce<number>(sliderValue, 500);
 
@@ -120,6 +146,7 @@ function App() {
     }
 
     return (
+        <ThemeProvider theme={theme}>
         <div>
             {isLoading ?
                 <div className={"progressCircle"}>
@@ -133,27 +160,27 @@ function App() {
                 setLoadingStateCallback={setIsLoading}
                 setStatisticsCallback={setStatistics}
             />
-            <div className={"sliderContainer"}>
-                <Grid container spacing={2}>
-                    <Grid item className={"dateGridRight"}>
-                        <form className={"textFieldContainer"} noValidate>
+            <div className={classes.slider}>
+                <Grid container spacing={8} justify={"center"}>
+                    <Grid item xs={2} justify={"center"}>
                             <TextField
                                 id="date"
                                 type="date"
                                 defaultValue={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}
-                                className={"textField"}
+                                className={classes.datePicker}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
                                 disabled={true}
                             />
-                        </form>
                     </Grid>
                     <Grid item xs>
                         <Slider
                             disabled={(availableDays.length === 0)}
-                            className={"slider"}
                             value={sliderValue}
+                            classes={{
+                                valueLabel: classes.sliderValueLabel,
+                            }}
                             onChange={(event: any, newValue: number | number[]) => {
                                 setSliderValue(newValue as number)
                                 setErrorState(false)
@@ -167,13 +194,12 @@ function App() {
                             track={false}
                         />
                     </Grid>
-                    <Grid item className={"dateGridRight"}>
-                        <form className={"textFieldContainer"} noValidate>
+                    <Grid item xs={2} >
                             <TextField
                                 id="date"
                                 type="date"
                                 defaultValue={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}
-                                className={"textField"}
+                                className={classes.datePicker}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -192,13 +218,13 @@ function App() {
                                 error={errorState}
                                 helperText={errorState ? `Day is not available at the moment` : null}
                             />
-                        </form>
                     </Grid>
                 </Grid>
             </div>
             <AccordionStats settings={settings} onChange={handleInputChange}/>
             <MapStats statistics={statistics}/>
         </div>
+        </ThemeProvider>
     )
 }
 
