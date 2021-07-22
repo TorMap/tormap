@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.torproject.descriptor.*
 import java.io.File
+import java.time.YearMonth
 
 
 /**
@@ -118,7 +119,7 @@ class TorDescriptorService(
                 else -> throw Exception("Type ${descriptor.javaClass.name} is not supported!")
             }
         } catch (exception: Exception) {
-            logger.error("Could not process descriptor part of file ${descriptor.descriptorFile.name}: ${exception.message}")
+            logger.error("Could not process descriptor part of ${descriptor.descriptorFile.name}: ${exception.message}")
         }
     }
 
@@ -155,11 +156,16 @@ class TorDescriptorService(
      */
     private fun processServerDescriptor(descriptor: ServerDescriptor) {
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.publishedMillis)
-        if (! archiveNodeDetailsRepository.existsByDayAndFingerprint(descriptorDay, descriptor.fingerprint)) {
+        val descriptorMonth = YearMonth.from(descriptorDay).toString()
+        val existingNode =
+            archiveNodeDetailsRepository.getByMonthAndFingerprint(descriptorMonth, descriptor.fingerprint)
+        if (existingNode == null || existingNode.day < descriptorDay) {
             archiveNodeDetailsRepository.save(
                 ArchiveNodeDetails(
                     descriptor,
+                    descriptorMonth,
                     descriptorDay,
+                    existingNode?.id
                 )
             )
         }

@@ -14,18 +14,19 @@ import javax.persistence.*
 @Entity
 @Table(
     indexes = [
-        Index(columnList = "fingerprint, day", unique = true),
-        Index(columnList = "day"),
+        Index(columnList = "fingerprint, month", unique = true),
+        Index(columnList = "nickname, month"),
     ]
 )
 class ArchiveNodeDetails(
     descriptor: ServerDescriptor,
+    var month: String,
     var day: LocalDate,
-) {
+
     @Id
     @GeneratedValue
     val id: Long? = null
-
+) {
     @Column(length = 15)
     var address: String? = descriptor.address
 
