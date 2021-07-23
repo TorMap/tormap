@@ -12,7 +12,7 @@ import javax.persistence.*
 @Entity
 @Table(
     indexes = [
-        Index(columnList = "month, fingerprints", unique = true),
+        Index(columnList = "fingerprints, month", unique = true),
     ]
 )
 class NodeFamily(

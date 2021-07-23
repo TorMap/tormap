@@ -6,7 +6,6 @@ import com.torusage.database.repository.DescriptorsFileRepository
 import com.torusage.database.repository.GeoRelayRepositoryImpl
 import com.torusage.database.repository.NodeDetailsRepository
 import com.torusage.database.repository.NodeFamilyRepository
-import com.torusage.jointToCommaSeparated
 import com.torusage.logger
 import com.torusage.millisSinceEpochToLocalDate
 import org.springframework.beans.factory.annotation.Value
@@ -189,7 +188,7 @@ class TorDescriptorService(
             }
         }
         geoRelayRepositoryImpl.saveAll(nodesToSave)
-        logger.info("Processed relay consensus descriptor for day $descriptorDay")
+        logger.debug("Processed relay consensus descriptor for day $descriptorDay")
         return descriptorDay
     }
 
@@ -218,23 +217,20 @@ class TorDescriptorService(
      * Creates amd saves [NodeFamily] entities for the requested [months] by processing [NodeDetails].
      */
     private fun createNodeFamilies(months: Set<String>? = null) {
-        val familyNodes =
+        val requestingNodes =
             if (months != null) nodeDetailsRepository.getAllByMonthInAndFamilyEntriesNotNull(months)
             else nodeDetailsRepository.getAllByFamilyEntriesNotNull()
-        familyNodes.forEach { requestingNode ->
+        requestingNodes.forEach { requestingNode ->
             val confirmedFamilyFingerprints = mutableSetOf<String>()
             val month = requestingNode.month
             requestingNode.familyEntries!!.commaSeparatedToList().forEach {
                 try {
                     confirmedFamilyFingerprints.add(extractFamilyMemberFingerprint(requestingNode, it, month))
                 } catch (exception: Exception) {
-                    logger.warn(exception.message)
+                    logger.debug(exception.message)
                 }
             }
-            if (confirmedFamilyFingerprints.size > 0) {
-                confirmedFamilyFingerprints.add(requestingNode.fingerprint)
-                saveNodeFamilies(confirmedFamilyFingerprints, month)
-            }
+            saveNodeFamilies(requestingNode, confirmedFamilyFingerprints, month)
         }
         geoRelayRepositoryImpl.updateFamilyIds()
     }
@@ -242,19 +238,25 @@ class TorDescriptorService(
     /**
      * Check if an identical [NodeFamily] already exists for a given [month], otherwise save it
      */
-    private fun saveNodeFamilies(confirmedFamilyFingerprints: MutableSet<String>, month: String) {
-        val sortedFingerprints = confirmedFamilyFingerprints.toSortedSet()
-        if (!nodeFamilyRepository.existsByMonthAndFingerprints(
-                month,
-                sortedFingerprints.jointToCommaSeparated()
-            )
-        ) {
-            nodeFamilyRepository.save(
-                NodeFamily(
-                    sortedFingerprints,
-                    month
+    private fun saveNodeFamilies(
+        requestingNode: NodeDetails,
+        confirmedFamilyFingerprints: MutableSet<String>,
+        month: String
+    ) {
+        if (confirmedFamilyFingerprints.size > 0) {
+            if (!nodeFamilyRepository.existsByMonthAndFingerprintsIsLike(
+                    month,
+                    "%${requestingNode.fingerprint}%"
                 )
-            )
+            ) {
+                confirmedFamilyFingerprints.add(requestingNode.fingerprint)
+                nodeFamilyRepository.save(
+                    NodeFamily(
+                        confirmedFamilyFingerprints.toSortedSet(),
+                        month
+                    )
+                )
+            }
         }
     }
 
