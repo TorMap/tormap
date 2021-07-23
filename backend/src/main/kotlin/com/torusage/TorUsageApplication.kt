@@ -4,7 +4,6 @@ import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
-import org.springframework.scheduling.annotation.EnableScheduling
 import java.time.ZonedDateTime
 
 /**
@@ -20,7 +19,7 @@ class TorUsageApplication : ApplicationRunner {
 }
 
 /**
- * com.ip2location.Main method to start backend application
+ * main method to start backend application
  */
 fun main(args: Array<String>) {
     runApplication<TorUsageApplication>(*args)

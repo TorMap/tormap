@@ -12,8 +12,8 @@ import javax.persistence.*
 @Entity
 @Table(
     indexes = [
-        Index(columnList = "fingerprint, day", unique = true),
-        Index(columnList = "day"),
+        Index(columnList = "fingerprint, day", unique = true, name = "fingerprint_day_index"),
+        Index(columnList = "day", name = "day_index"),
     ]
 )
 class GeoRelay(
