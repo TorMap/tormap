@@ -7,7 +7,7 @@ import "./world-map.scss"
 import {NodePopup} from "../node-popup/node-popup";
 import {ArchiveGeoRelayView} from "../../types/archive-geo-relay";
 import {RelayFlag} from "../../types/relay";
-import {Settings, Statistics, TempSettings} from "../../types/variousTypes";
+import {Statistics, TempSettings} from "../../types/variousTypes";
 
 interface Props {
     /**
@@ -73,7 +73,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
         relays.forEach(relay => {
             if (settings.miValid &&         !relay.flags?.includes(RelayFlag.Valid))        {return}
             if (settings.miNamed &&         !relay.flags?.includes(RelayFlag.Named))        {return}
-            if (settings.miUnamed &&        !relay.flags?.includes(RelayFlag.Unamed))       {return}
+            if (settings.miUnnamed &&        !relay.flags?.includes(RelayFlag.Unnamed))     {return}
             if (settings.miRunning &&       !relay.flags?.includes(RelayFlag.Running))      {return}
             if (settings.miStable &&        !relay.flags?.includes(RelayFlag.Stable))       {return}
             if (settings.miExit &&          !relay.flags?.includes(RelayFlag.Exit))         {return}

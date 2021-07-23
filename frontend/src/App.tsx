@@ -1,25 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {WorldMap} from "./components/world-map/world-map";
-import ReactSlidingPane from "react-sliding-pane";
-import {
-    Accordion,
-    Button,
-    Checkbox,
-    CircularProgress,
-    FormControlLabel,
-    FormGroup,
-    Grid,
-    Slider,
-    Switch, TextField
-} from "@material-ui/core";
+import {CircularProgress, Grid, Slider, TextField} from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
 import Moment from "react-moment";
 import {apiBaseUrl} from "./util/constants";
 import {Mark} from "./types/mark";
 import {AccordionStats} from "./components/arccordion-stats/accordion-stats";
-import {Settings, Statistics, TempSettings} from "./types/variousTypes";
-import classes from "*.module.css";
+import {Statistics, TempSettings} from "./types/variousTypes";
 import {MapStats} from "./components/legend/map-legend";
 
 function App() {
@@ -34,7 +22,7 @@ function App() {
 
         miValid: false,
         miNamed: false,
-        miUnamed: false,
+        miUnnamed: false,
         miRunning: false,
         miStable: false,
         miExit: false,
