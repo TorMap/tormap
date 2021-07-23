@@ -1,4 +1,4 @@
-package com.torusage.database.entity.archive
+package com.torusage.database.entity
 
 import com.torusage.jointToCommaSeparated
 import com.torusage.stripLengthForDB
@@ -18,7 +18,7 @@ import javax.persistence.*
         Index(columnList = "nickname, month"),
     ]
 )
-class ArchiveNodeDetails(
+class NodeDetails(
     descriptor: ServerDescriptor,
     var month: String,
     var day: LocalDate,

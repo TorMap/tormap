@@ -1,11 +1,11 @@
 package com.torusage.service
 
 import com.torusage.commaSeparatedToList
-import com.torusage.database.entity.archive.*
-import com.torusage.database.repository.archive.ArchiveGeoRelayRepositoryImpl
-import com.torusage.database.repository.archive.ArchiveNodeDetailsRepository
-import com.torusage.database.repository.archive.ArchiveNodeFamilyRepository
-import com.torusage.database.repository.archive.DescriptorsFileRepository
+import com.torusage.database.entity.*
+import com.torusage.database.repository.DescriptorsFileRepository
+import com.torusage.database.repository.GeoRelayRepositoryImpl
+import com.torusage.database.repository.NodeDetailsRepository
+import com.torusage.database.repository.NodeFamilyRepository
 import com.torusage.jointToCommaSeparated
 import com.torusage.logger
 import com.torusage.millisSinceEpochToLocalDate
@@ -23,10 +23,10 @@ import java.time.YearMonth
  */
 @Service
 class TorDescriptorService(
-    val archiveGeoRelayRepositoryImpl: ArchiveGeoRelayRepositoryImpl,
-    val archiveNodeDetailsRepository: ArchiveNodeDetailsRepository,
+    val geoRelayRepositoryImpl: GeoRelayRepositoryImpl,
+    val nodeDetailsRepository: NodeDetailsRepository,
     val descriptorsFileRepository: DescriptorsFileRepository,
-    val archiveNodeFamilyRepository: ArchiveNodeFamilyRepository,
+    val nodeFamilyRepository: NodeFamilyRepository,
     val geoLocationService: GeoLocationService,
 ) {
     val logger = logger()
@@ -89,7 +89,7 @@ class TorDescriptorService(
                 logger.info("Finished processing descriptors file ${lastProcessedFile!!.name}")
                 descriptorsFileRepository.save(
                     DescriptorsFile(
-                        DescriptorFileId(lastProcessedFile!!.name, descriptorType),
+                        DescriptorsFileId(lastProcessedFile!!.name, descriptorType),
                         lastProcessedFile!!.lastModified()
                     )
                 )
@@ -98,14 +98,14 @@ class TorDescriptorService(
         }
         when (descriptorType) {
             DescriptorType.SERVER -> {
-                createArchiveNodeFamilies(processedDescriptorDays.map {
+                createNodeFamilies(processedDescriptorDays.map {
                     YearMonth.from(it).toString()
                 }.toSet())
-                archiveGeoRelayRepositoryImpl.updateDetailsIds()
+                geoRelayRepositoryImpl.updateDetailsIds()
             }
             DescriptorType.RELAY_CONSENSUS -> {
-                archiveGeoRelayRepositoryImpl.updateDetailsIds()
-                archiveGeoRelayRepositoryImpl.updateFamilyIds()
+                geoRelayRepositoryImpl.updateDetailsIds()
+                geoRelayRepositoryImpl.updateFamilyIds()
             }
         }
     }
@@ -145,15 +145,15 @@ class TorDescriptorService(
     }
 
     /**
-     * Use a [RelayNetworkStatusConsensus] descriptor to save [ArchiveGeoRelay]s in the DB.
+     * Use a [RelayNetworkStatusConsensus] descriptor to save [GeoRelay]s in the DB.
      * The location is retrieved based on the relay's IP addresses.
      */
     private fun processRelayConsensusDescriptor(descriptor: RelayNetworkStatusConsensus): LocalDate {
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.validAfterMillis)
-        val nodesToSave = mutableListOf<ArchiveGeoRelay>()
+        val nodesToSave = mutableListOf<GeoRelay>()
         descriptor.statusEntries.forEach {
             val networkStatusEntry = it.value
-            if (!archiveGeoRelayRepositoryImpl.existsByDayAndFingerprint(
+            if (!geoRelayRepositoryImpl.existsByDayAndFingerprint(
                     descriptorDay,
                     networkStatusEntry.fingerprint
                 )
@@ -161,7 +161,7 @@ class TorDescriptorService(
                 val location = geoLocationService.getLocationForIpAddress(networkStatusEntry.address)
                 if (location != null) {
                     nodesToSave.add(
-                        ArchiveGeoRelay(
+                        GeoRelay(
                             networkStatusEntry,
                             descriptorDay,
                             location.latitude,
@@ -172,22 +172,22 @@ class TorDescriptorService(
                 }
             }
         }
-        archiveGeoRelayRepositoryImpl.saveAll(nodesToSave)
+        geoRelayRepositoryImpl.saveAll(nodesToSave)
         logger.info("Processed relay consensus descriptor for day $descriptorDay")
         return descriptorDay
     }
 
     /**
-     * Use a server descriptor to save [ArchiveNodeDetails] in the DB.
+     * Use a server descriptor to save [NodeDetails] in the DB.
      */
     private fun processServerDescriptor(descriptor: ServerDescriptor): LocalDate {
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.publishedMillis)
         val descriptorMonth = YearMonth.from(descriptorDay).toString()
         val existingNode =
-            archiveNodeDetailsRepository.getByMonthAndFingerprint(descriptorMonth, descriptor.fingerprint)
+            nodeDetailsRepository.getByMonthAndFingerprint(descriptorMonth, descriptor.fingerprint)
         if (existingNode == null || existingNode.day < descriptorDay) {
-            archiveNodeDetailsRepository.save(
-                ArchiveNodeDetails(
+            nodeDetailsRepository.save(
+                NodeDetails(
                     descriptor,
                     descriptorMonth,
                     descriptorDay,
@@ -199,10 +199,10 @@ class TorDescriptorService(
     }
 
     /**
-     * Creates amd saves [ArchiveNodeFamily] entities for the requested [months] by processing [ArchiveNodeDetails].
+     * Creates amd saves [NodeFamily] entities for the requested [months] by processing [NodeDetails].
      */
-    private fun createArchiveNodeFamilies(months: Set<String>) {
-        val familyNodes = archiveNodeDetailsRepository.getAllByMonthInAndFamilyEntriesNotNull(months)
+    private fun createNodeFamilies(months: Set<String>) {
+        val familyNodes = nodeDetailsRepository.getAllByMonthInAndFamilyEntriesNotNull(months)
         familyNodes.forEach { requestingNode ->
             val confirmedFamilyFingerprints = mutableSetOf<String>()
             val month = requestingNode.month
@@ -215,24 +215,24 @@ class TorDescriptorService(
             }
             if (confirmedFamilyFingerprints.size > 0) {
                 confirmedFamilyFingerprints.add(requestingNode.fingerprint)
-                saveArchiveNodeFamilies(confirmedFamilyFingerprints, month)
+                saveNodeFamilies(confirmedFamilyFingerprints, month)
             }
         }
-        archiveGeoRelayRepositoryImpl.updateFamilyIds()
+        geoRelayRepositoryImpl.updateFamilyIds()
     }
 
     /**
-     * Check if an identical [ArchiveNodeFamily] already exists for a given [month], otherwise save it
+     * Check if an identical [NodeFamily] already exists for a given [month], otherwise save it
      */
-    private fun saveArchiveNodeFamilies(confirmedFamilyFingerprints: MutableSet<String>, month: String) {
+    private fun saveNodeFamilies(confirmedFamilyFingerprints: MutableSet<String>, month: String) {
         val sortedFingerprints = confirmedFamilyFingerprints.toSortedSet()
-        if (!archiveNodeFamilyRepository.existsByMonthAndFingerprints(
+        if (!nodeFamilyRepository.existsByMonthAndFingerprints(
                 month,
                 sortedFingerprints.jointToCommaSeparated()
             )
         ) {
-            archiveNodeFamilyRepository.save(
-                ArchiveNodeFamily(
+            nodeFamilyRepository.save(
+                NodeFamily(
                     sortedFingerprints,
                     month
                 )
@@ -244,7 +244,7 @@ class TorDescriptorService(
      * Extract the fingerprint of a [allegedFamilyMemberId] for a [requestingNode] in a given [month]
      */
     private fun extractFamilyMemberFingerprint(
-        requestingNode: ArchiveNodeDetails,
+        requestingNode: NodeDetails,
         allegedFamilyMemberId: String,
         month: String,
     ): String {
@@ -252,7 +252,7 @@ class TorDescriptorService(
         val nicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
         when {
             fingerprintRegex.matches(allegedFamilyMemberId) -> {
-                val allegedFamilyMember = archiveNodeDetailsRepository.getByMonthAndFingerprint(
+                val allegedFamilyMember = nodeDetailsRepository.getByMonthAndFingerprint(
                     month,
                     allegedFamilyMemberId.substring(1, 40),
                 )
@@ -262,7 +262,7 @@ class TorDescriptorService(
             }
             nicknameRegex.matches(allegedFamilyMemberId) -> {
                 val allegedFamilyMembers =
-                    archiveNodeDetailsRepository.getAllByMonthAndNickname(month, allegedFamilyMemberId)
+                    nodeDetailsRepository.getAllByMonthAndNickname(month, allegedFamilyMemberId)
                 val confirmedFamilyMember =
                     allegedFamilyMembers.firstOrNull { isNodeMemberOfFamily(requestingNode, it) }
                 if (confirmedFamilyMember != null) {
@@ -277,8 +277,8 @@ class TorDescriptorService(
      * Determines if the [requestingNode] shares a family with the [allegedFamilyMember].
      */
     private fun isNodeMemberOfFamily(
-        requestingNode: ArchiveNodeDetails,
-        allegedFamilyMember: ArchiveNodeDetails?,
+        requestingNode: NodeDetails,
+        allegedFamilyMember: NodeDetails?,
     ) = allegedFamilyMember?.familyEntries?.commaSeparatedToList()?.any {
         it == "$" + requestingNode.fingerprint || it == requestingNode.nickname
     } ?: false

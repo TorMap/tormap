@@ -1,6 +1,6 @@
-package com.torusage.database.repository.archive
+package com.torusage.database.repository
 
-import com.torusage.database.entity.archive.DescriptorsFile
+import com.torusage.database.entity.DescriptorsFile
 import org.springframework.data.repository.CrudRepository
 
 

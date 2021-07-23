@@ -1,4 +1,4 @@
-package com.torusage.database.entity.archive
+package com.torusage.database.entity
 
 import org.torproject.descriptor.NetworkStatusEntry
 import java.math.BigDecimal
@@ -16,7 +16,7 @@ import javax.persistence.*
         Index(columnList = "day"),
     ]
 )
-class ArchiveGeoRelay(
+class GeoRelay(
     networkStatusEntry: NetworkStatusEntry,
     var day: LocalDate,
     var latitude: BigDecimal,
@@ -36,9 +36,9 @@ class ArchiveGeoRelay(
         null
     }
 
-    val detailsId: Long? = null
+    val nodeDetailsId: Long? = null
 
-    val familyId: Long? = null
+    val nodeFamilyId: Long? = null
 }
 
 /**
