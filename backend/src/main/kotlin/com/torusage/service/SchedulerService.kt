@@ -30,19 +30,19 @@ class SchedulerService(
     /**
      * Fetches and processes relay consensus descriptors.
      * The years 2007 - 2021 equal about 3 GB in size.
-     * When the download finished and you start with an empty DB this takes about 20 hours depending on your machine.
+     * After the download finished and you start with an empty DB this takes about 20 hours depending on your machine.
      */
     @Scheduled(fixedRate = 86400000L)
-    fun processRelayConsensusDescriptors() =
+    fun handleRelayConsensusDescriptors() =
         torDescriptorService.collectAndProcessDescriptors(collectorPathRelayConsensuses, DescriptorType.RELAY_CONSENSUS)
 
     /**
      * Fetches and processes relay server descriptors.
      * The years 2005 - 2021 equal about 30 GB in size.
-     * When the download finished and you start with an empty DB this takes about 5 hours depending on your machine.
+     * After the download finished and you start with an empty DB this takes about 10 hours depending on your machine.
      */
     @Scheduled(fixedRate = 86400000L)
-    fun collectRelayServerDescriptors() =
+    fun handleRelayServerDescriptors() =
         torDescriptorService.collectAndProcessDescriptors(collectorApiPathServerDescriptors, DescriptorType.SERVER)
 }
 

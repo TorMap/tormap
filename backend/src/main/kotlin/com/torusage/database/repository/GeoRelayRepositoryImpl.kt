@@ -26,8 +26,8 @@ interface GeoRelayRepositoryImpl : GeoRelayRepository {
     @Modifying
     @Query(
         "UPDATE GeoRelay g " +
-                "set g.nodeFamilyId = (SELECT f.id FROM NodeFamily f WHERE function('FORMATDATETIME', g.day, 'yyyy-MM') = f.month AND f.fingerprints LIKE concat('%', g.fingerprint,'%'))" +
-                "where exists (SELECT f.id FROM NodeFamily f WHERE function('FORMATDATETIME', g.day, 'yyyy-MM') = f.month AND f.fingerprints LIKE concat('%', g.fingerprint,'%'))"
+                "set g.nodeFamilyId = (SELECT f.id FROM NodeFamily f WHERE function('FORMATDATETIME', g.day, 'yyyy-MM') = f.month AND f.fingerprints LIKE concat('%', g.fingerprint, '%'))" +
+                "where exists (SELECT f.id FROM NodeFamily f WHERE function('FORMATDATETIME', g.day, 'yyyy-MM') = f.month AND f.fingerprints LIKE concat('%', g.fingerprint, '%'))"
     )
     fun updateFamilyIds(): Int
 }
