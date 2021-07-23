@@ -17,17 +17,9 @@ interface GeoRelayRepositoryImpl : GeoRelayRepository {
     @Modifying
     @Query(
         "UPDATE GeoRelay g " +
-                "set g.nodeDetailsId = (SELECT d.id FROM NodeDetails d WHERE function('FORMATDATETIME', g.day, 'yyyy-MM') = d.month AND g.fingerprint = d.fingerprint)" +
+                "set g.nodeDetailsId = (SELECT d.id FROM NodeDetails d WHERE function('FORMATDATETIME', g.day, 'yyyy-MM') = d.month AND g.fingerprint = d.fingerprint)," +
+                "g.nodeFamilyId = (SELECT d.familyId FROM NodeDetails d WHERE function('FORMATDATETIME', g.day, 'yyyy-MM') = d.month AND g.fingerprint = d.fingerprint)" +
                 "where exists (SELECT d.id FROM NodeDetails d WHERE function('FORMATDATETIME', g.day, 'yyyy-MM') = d.month AND g.fingerprint = d.fingerprint)"
     )
-    fun updateDetailsIds(): Int
-
-    @Transactional
-    @Modifying
-    @Query(
-        "UPDATE GeoRelay g " +
-                "set g.nodeFamilyId = (SELECT f.id FROM NodeFamily f WHERE function('FORMATDATETIME', g.day, 'yyyy-MM') = f.month AND f.fingerprints LIKE concat('%', g.fingerprint, '%'))" +
-                "where exists (SELECT f.id FROM NodeFamily f WHERE function('FORMATDATETIME', g.day, 'yyyy-MM') = f.month AND f.fingerprints LIKE concat('%', g.fingerprint, '%'))"
-    )
-    fun updateFamilyIds(): Int
+    fun updateForeignIds(): Int
 }

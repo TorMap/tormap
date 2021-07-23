@@ -5,10 +5,10 @@ import com.torusage.database.entity.*
 import com.torusage.database.repository.DescriptorsFileRepository
 import com.torusage.database.repository.GeoRelayRepositoryImpl
 import com.torusage.database.repository.NodeDetailsRepository
-import com.torusage.database.repository.NodeFamilyRepository
 import com.torusage.logger
 import com.torusage.millisSinceEpochToLocalDate
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.jdbc.support.incrementer.H2SequenceMaxValueIncrementer
 import org.springframework.stereotype.Service
 import org.torproject.descriptor.*
 import java.io.File
@@ -25,8 +25,8 @@ class TorDescriptorService(
     val geoRelayRepositoryImpl: GeoRelayRepositoryImpl,
     val nodeDetailsRepository: NodeDetailsRepository,
     val descriptorsFileRepository: DescriptorsFileRepository,
-    val nodeFamilyRepository: NodeFamilyRepository,
     val geoLocationService: GeoLocationService,
+    val dbSequenceIncrementer: H2SequenceMaxValueIncrementer,
 ) {
     val logger = logger()
     val descriptorCollector: DescriptorCollector = DescriptorSourceFactory.createDescriptorCollector()
@@ -59,13 +59,8 @@ class TorDescriptorService(
      */
     fun updateAllGeoRelayForeignIds() {
         try {
-            logger.info("Updating all geo relay foreign ids")
-            geoRelayRepositoryImpl.updateDetailsIds()
-            logger.info("Updated all geo relay details ids")
+            logger.info("Creating node families for all available months")
             createNodeFamilies()
-            logger.info("Created all node families")
-            geoRelayRepositoryImpl.updateFamilyIds()
-            logger.info("Updated all geo relay family ids")
         } catch (exception: Exception) {
             logger.error("Could not update all geo relay foreign ids. ${exception.message}")
         }
@@ -116,11 +111,9 @@ class TorDescriptorService(
                 createNodeFamilies(processedDescriptorDays.map {
                     YearMonth.from(it).toString()
                 }.toSet())
-                geoRelayRepositoryImpl.updateDetailsIds()
             }
             DescriptorType.RELAY_CONSENSUS -> {
-                geoRelayRepositoryImpl.updateDetailsIds()
-                geoRelayRepositoryImpl.updateFamilyIds()
+                geoRelayRepositoryImpl.updateForeignIds()
             }
         }
     }
@@ -214,60 +207,55 @@ class TorDescriptorService(
     }
 
     /**
-     * Creates amd saves [NodeFamily] entities for the requested [months] by processing [NodeDetails].
+     * Confirms family structure and sets [NodeDetails.familyId] for the requested [months].
+     * Afterwards the foreign keys of [GeoRelay] are updated.
      */
     private fun createNodeFamilies(months: Set<String>? = null) {
         val requestingNodes =
             if (months != null) nodeDetailsRepository.getAllByMonthInAndFamilyEntriesNotNull(months)
             else nodeDetailsRepository.getAllByFamilyEntriesNotNull()
         requestingNodes.forEach { requestingNode ->
-            val confirmedFamilyFingerprints = mutableSetOf<String>()
+            val confirmedFamilyNodes = mutableListOf<NodeDetails>()
             val month = requestingNode.month
             requestingNode.familyEntries!!.commaSeparatedToList().forEach {
                 try {
-                    confirmedFamilyFingerprints.add(extractFamilyMemberFingerprint(requestingNode, it, month))
+                    confirmedFamilyNodes.add(confirmFamilyMember(requestingNode, it, month))
                 } catch (exception: Exception) {
                     logger.debug(exception.message)
                 }
             }
-            saveNodeFamilies(requestingNode, confirmedFamilyFingerprints, month)
+            saveNodeFamily(requestingNode, confirmedFamilyNodes)
         }
-        geoRelayRepositoryImpl.updateFamilyIds()
+        logger.info("Updating all geo relay foreign ids")
+        geoRelayRepositoryImpl.updateForeignIds()
+        logger.info("Finished updating all geo relay foreign ids")
     }
 
     /**
-     * Check if an identical [NodeFamily] already exists for a given [month], otherwise save it
+     * Save a new family of nodes by updating their [NodeDetails.familyId]
      */
-    private fun saveNodeFamilies(
+    private fun saveNodeFamily(
         requestingNode: NodeDetails,
-        confirmedFamilyFingerprints: MutableSet<String>,
-        month: String
+        confirmedFamilyMembers: MutableList<NodeDetails>,
     ) {
-        if (confirmedFamilyFingerprints.size > 0) {
-            if (!nodeFamilyRepository.existsByMonthAndFingerprintsIsLike(
-                    month,
-                    "%${requestingNode.fingerprint}%"
-                )
-            ) {
-                confirmedFamilyFingerprints.add(requestingNode.fingerprint)
-                nodeFamilyRepository.save(
-                    NodeFamily(
-                        confirmedFamilyFingerprints.toSortedSet(),
-                        month
-                    )
-                )
+        if (confirmedFamilyMembers.size > 0) {
+            val newFamilyId = dbSequenceIncrementer.nextLongValue()
+            confirmedFamilyMembers.add(requestingNode)
+            confirmedFamilyMembers.forEach {
+                it.familyId = newFamilyId
             }
+            nodeDetailsRepository.saveAll(confirmedFamilyMembers)
         }
     }
 
     /**
      * Extract the fingerprint of a [allegedFamilyMemberId] for a [requestingNode] in a given [month]
      */
-    private fun extractFamilyMemberFingerprint(
+    private fun confirmFamilyMember(
         requestingNode: NodeDetails,
         allegedFamilyMemberId: String,
         month: String,
-    ): String {
+    ): NodeDetails {
         val fingerprintRegex = Regex("^\\$[A-F0-9]{40}.*")
         val nicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
         when {
@@ -277,7 +265,7 @@ class TorDescriptorService(
                     allegedFamilyMemberId.substring(1, 40),
                 )
                 if (isNodeMemberOfFamily(requestingNode, allegedFamilyMember)) {
-                    return allegedFamilyMember!!.fingerprint
+                    return allegedFamilyMember!!
                 }
             }
             nicknameRegex.matches(allegedFamilyMemberId) -> {
@@ -286,9 +274,10 @@ class TorDescriptorService(
                 val confirmedFamilyMember =
                     allegedFamilyMembers.firstOrNull { isNodeMemberOfFamily(requestingNode, it) }
                 if (confirmedFamilyMember != null) {
-                    return confirmedFamilyMember.fingerprint
+                    return confirmedFamilyMember
                 }
             }
+            else -> throw Exception("Format of new family member $allegedFamilyMemberId for requestingNode ${requestingNode.fingerprint} not supported!")
         }
         throw Exception("New family member $allegedFamilyMemberId for requestingNode ${requestingNode.fingerprint} rejected!")
     }
