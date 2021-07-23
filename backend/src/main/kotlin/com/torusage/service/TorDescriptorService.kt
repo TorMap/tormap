@@ -53,7 +53,23 @@ class TorDescriptorService(
         } catch (exception: Exception) {
             logger.error("Could not collect or process descriptors from api path $apiPath. ${exception.message}")
         }
+    }
 
+    /**
+     * Updates [GeoRelay.nodeDetailsId] and [GeoRelay.nodeFamilyId] for all [GeoRelay]s
+     */
+    fun updateAllGeoRelayForeignIds() {
+        try {
+            logger.info("Updating all geo relay foreign ids")
+            geoRelayRepositoryImpl.updateDetailsIds()
+            logger.info("Updated all geo relay details ids")
+            createNodeFamilies()
+            logger.info("Created all node families")
+            geoRelayRepositoryImpl.updateFamilyIds()
+            logger.info("Updated all geo relay family ids")
+        } catch (exception: Exception) {
+            logger.error("Could not update all geo relay foreign ids. ${exception.message}")
+        }
     }
 
     /**
@@ -201,8 +217,10 @@ class TorDescriptorService(
     /**
      * Creates amd saves [NodeFamily] entities for the requested [months] by processing [NodeDetails].
      */
-    private fun createNodeFamilies(months: Set<String>) {
-        val familyNodes = nodeDetailsRepository.getAllByMonthInAndFamilyEntriesNotNull(months)
+    private fun createNodeFamilies(months: Set<String>? = null) {
+        val familyNodes =
+            if (months != null) nodeDetailsRepository.getAllByMonthInAndFamilyEntriesNotNull(months)
+            else nodeDetailsRepository.getAllByFamilyEntriesNotNull()
         familyNodes.forEach { requestingNode ->
             val confirmedFamilyFingerprints = mutableSetOf<String>()
             val month = requestingNode.month
