@@ -45,7 +45,7 @@ class ArchiveNodeDetails(
 
     var protocols: String? = descriptor.protocols?.map {
         "${it.key} (${it.value.jointToCommaSeparated()})"
-    }.jointToCommaSeparated().stripLengthForDB()
+    }?.jointToCommaSeparated().stripLengthForDB()
 
     @Column(length = 40)
     var fingerprint: String = descriptor.fingerprint
@@ -57,15 +57,15 @@ class ArchiveNodeDetails(
     var contact: String? = descriptor.contact.stripLengthForDB()
 
     @Lob
-    var familyEntries: String? = descriptor.familyEntries.jointToCommaSeparated()
+    var familyEntries: String? = descriptor.familyEntries?.jointToCommaSeparated()
 
     var cachesExtraInfo: Boolean = descriptor.cachesExtraInfo
 
     var isHiddenServiceDir: Boolean = descriptor.isHiddenServiceDir
 
-    var linkProtocolVersions: String? = descriptor.linkProtocolVersions.jointToCommaSeparated().stripLengthForDB()
+    var linkProtocolVersions: String? = descriptor.linkProtocolVersions?.jointToCommaSeparated().stripLengthForDB()
 
-    var circuitProtocolVersions: String? = descriptor.circuitProtocolVersions.jointToCommaSeparated().stripLengthForDB()
+    var circuitProtocolVersions: String? = descriptor.circuitProtocolVersions?.jointToCommaSeparated().stripLengthForDB()
 
     var tunnelledDirServer: Boolean = descriptor.tunnelledDirServer
 }
