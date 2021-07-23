@@ -5,7 +5,7 @@ import {circleMarker, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "le
 import 'leaflet/dist/leaflet.css';
 import "./world-map.scss"
 import {NodePopup} from "../node-popup/node-popup";
-import {ArchiveGeoRelayView} from "../../types/archive-geo-relay";
+import {GeoRelayView} from "../../types/geo-relay";
 import {RelayFlag} from "../../types/relay";
 import {Statistics, TempSettings} from "../../types/variousTypes";
 
@@ -53,7 +53,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
         setShowNodePopup(true)
     }
 
-    const relaysToLayerGroup = (relays: ArchiveGeoRelayView[]): LayerGroup => {
+    const relaysToLayerGroup = (relays: GeoRelayView[]): LayerGroup => {
 
         console.time(`relaysToLayerGroup`)
         console.timeLog(`relaysToLayerGroup`, `New Layer with ${relays.length} elements`)
@@ -105,7 +105,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
                 [relay.lat, relay.long],
                 {
                     radius: 1,
-                    className: relay.finger,
+                    className: relay.detailsId,
                     color: color
                 },
             )
@@ -153,7 +153,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
             <NodePopup
                 showNodePopup={showNodePopup}
                 setShowNodePopup={() => setShowNodePopup(false)}
-                relayId={nodePopupRelayId}
+                nodeDetailsId={nodePopupRelayId}
             />
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'

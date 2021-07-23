@@ -9,7 +9,6 @@ import com.torusage.database.entity.GeoRelay
  * A [GeoRelay] with minimal data for fast frontend response times
  */
 class GeoRelayView(relay: GeoRelay) {
-    val id = relay.id
     val lat = relay.latitude
     val long = relay.longitude
     val flags = try {
@@ -17,4 +16,6 @@ class GeoRelayView(relay: GeoRelay) {
     } catch (exception: Exception) {
         null
     }
+    val detailsId = relay.nodeDetailsId
+    val familyId = relay.nodeFamilyId
 }

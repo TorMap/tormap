@@ -1,9 +1,9 @@
-import {Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography} from "@material-ui/core";
+import {Dialog, DialogContent, DialogTitle, IconButton, Typography} from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import React, {useEffect, useState} from "react";
 import "./node-popup.scss"
-import {Relay} from "../../types/relay";
 import {apiBaseUrl} from "../../util/constants";
+import {NodeDetails} from "../../types/node-details";
 
 interface Props {
     /**
@@ -15,51 +15,39 @@ interface Props {
      */
     setShowNodePopup: () => void,
     /**
-     * Id of the relay to be displayed
+     * Id of the relay node details
      */
-    relayId?: number,
+    nodeDetailsId?: number,
 }
 
 export const NodePopup: React.FunctionComponent<Props> = ({
                                                               showNodePopup,
                                                               setShowNodePopup,
-                                                              relayId,
+                                                              nodeDetailsId,
                                                           }) => {
-    const [relay, setRelay] = useState<Relay>()
+    const [nodeDetails, setNodeDetails] = useState<NodeDetails>()
     const [relayInfos, setRelayInfos] = useState<RelayInfo[]>()
-    const [showRelayDetails, setShowRelayDetails] = useState<boolean>(false)
-
-    const formatLocation = (city: string | undefined, country: string | undefined) => {
-        if (city) {
-            return city + ", " + country
-        } else return country
-    }
 
     const convertBandwidthBytesToMB = (bandwidthInBytes: number | undefined) => bandwidthInBytes ?
         (bandwidthInBytes / 1000000).toFixed(2) + " MB/s"
         : undefined
 
     useEffect(() => {
-        fetch(`${apiBaseUrl}/recent/relay/${relayId}`)
-            .then(response => response.json())
-            .then((relay: Relay) => {
-                setRelay(relay)
-                setRelayInfos([
-                    {name: "Fingerprint", value: relay.fingerprint},
-                    {name: "AS family", value: relay.as_name},
-                    {name: "Contact", value: relay.contact},
-                    // {name: "Location", value: formatLocation(relay.city_name, relay.country_name)},
-                    {name: "Verified domains", value: relay.verified_host_names?.join(", ")},
-                    {name: "First seen", value: relay.first_seen},
-                    {name: "Last seen", value: relay.last_seen},
-                    {name: "Flags", value: relay.flags?.join(", ")},
-                    {name: "Observed bandwidth", value: convertBandwidthBytesToMB(relay.observed_bandwidth)},
-                    {name: "Consensus weight", value: relay.consensus_weight},
-                    {name: "Platform", value: relay.platform},
-                ])
-            })
-            .catch(console.log)
-    }, [relayId])
+        if (nodeDetailsId) {
+            fetch(`${apiBaseUrl}/archive/node/details/${nodeDetailsId}`)
+                .then(response => response.json())
+                .then((relay: NodeDetails) => {
+                    setNodeDetails(relay)
+                    setRelayInfos([
+                        {name: "Fingerprint", value: relay.fingerprint},
+                        {name: "Contact", value: relay.contact},
+                        {name: "Observed bandwidth", value: convertBandwidthBytesToMB(relay.bandwidthObserved)},
+                        {name: "Platform", value: relay.platform},
+                    ])
+                })
+                .catch(console.log)
+        }
+    }, [nodeDetailsId])
 
     return (
         <Dialog
@@ -70,7 +58,7 @@ export const NodePopup: React.FunctionComponent<Props> = ({
             <DialogTitle
                 className={"dialogfield"}
             >
-                <Typography variant="h6">{relay?.nickname}</Typography>
+                <Typography variant="h6">{nodeDetailsId ? nodeDetails?.nickname : "No information"}</Typography>
                 <IconButton aria-label="close" className={"closeButton"} onClick={setShowNodePopup}>
                     <CloseIcon/>
                 </IconButton>
@@ -79,22 +67,10 @@ export const NodePopup: React.FunctionComponent<Props> = ({
                 dividers
                 className={"dialogfield"}
             >
-                {showRelayDetails ?
-                    <pre>{JSON.stringify(relay, null, 2)}</pre>
-                    : relayInfos?.map((relayInfo) =>
-                        relayInfo.value ? <p key={relayInfo.name}><b>{relayInfo.name}</b>: {relayInfo.value}</p> : undefined
-                    )
-                }
+                {nodeDetailsId ? relayInfos?.map((relayInfo) =>
+                    relayInfo.value ? <p key={relayInfo.name}><b>{relayInfo.name}</b>: {relayInfo.value}</p> : undefined
+                ) : <p>Currently we do not have more information about this node.</p>}
             </DialogContent>
-            <DialogActions className={"dialogfield"}>
-                <Button
-                    autoFocus
-                    onClick={() => setShowRelayDetails(prevState => !prevState)}
-                    color="primary"
-                >
-                    {showRelayDetails ? "Show summary" : "Show details"}
-                </Button>
-            </DialogActions>
         </Dialog>
     );
 }
