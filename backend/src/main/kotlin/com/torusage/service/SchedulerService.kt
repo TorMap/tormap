@@ -20,8 +20,17 @@ class SchedulerService(
     lateinit var collectorApiPathServerDescriptors: String
 
     /**
+     * Updates the foreign ids for all available data
+     * Takes about 1 minute depending on your machine.
+     */
+    @Scheduled(fixedRate = 86400000L)
+    fun updateAllGeoRelayForeignIds() =
+        torDescriptorService.updateAllGeoRelayForeignIds()
+
+    /**
      * Fetches and processes relay consensus descriptors.
-     * The years 2007 - 2021 equal roughly 3 GB in size.
+     * The years 2007 - 2021 equal about 3 GB in size.
+     * When the download finished and you start with an empty DB this takes about 20 hours depending on your machine.
      */
     @Scheduled(fixedRate = 86400000L)
     fun processRelayConsensusDescriptors() =
@@ -29,7 +38,8 @@ class SchedulerService(
 
     /**
      * Fetches and processes relay server descriptors.
-     * The years 2005 - 2021 equal roughly 30 GB in size.
+     * The years 2005 - 2021 equal about 30 GB in size.
+     * When the download finished and you start with an empty DB this takes about 5 hours depending on your machine.
      */
     @Scheduled(fixedRate = 86400000L)
     fun collectRelayServerDescriptors() =
