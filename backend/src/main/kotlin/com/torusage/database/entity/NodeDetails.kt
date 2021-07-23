@@ -14,8 +14,9 @@ import javax.persistence.*
 @Entity
 @Table(
     indexes = [
-        Index(columnList = "fingerprint, month", unique = true),
-        Index(columnList = "nickname, month"),
+        Index(columnList = "fingerprint, month", unique = true, name = "fingerprint_month_index"),
+        Index(columnList = "nickname, month", name = "nickname_month_index"),
+        Index(columnList = "familyId, month", name = "familyId_month_index"),
     ]
 )
 class NodeDetails(
@@ -58,6 +59,8 @@ class NodeDetails(
 
     @Lob
     var familyEntries: String? = descriptor.familyEntries?.jointToCommaSeparated()
+
+    var familyId: Long? = null
 
     var cachesExtraInfo: Boolean = descriptor.cachesExtraInfo
 
