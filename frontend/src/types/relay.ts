@@ -12,7 +12,7 @@ export interface RelayView {
 export enum RelayFlag {
     Valid,
     Named,
-    Unamed,
+    Unnamed,
     Running,
     Stable,
     Exit,
@@ -29,7 +29,7 @@ export enum RelayFlag {
 export enum RelayFlagName {
     Valid = "Valid",
     Named = "Named",
-    Unamed = "Unamed",
+    Unnamed = "Unnamed",
     Running = "Running",
     Stable = "Stable",
     Exit = "Exit",
