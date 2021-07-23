@@ -1,6 +1,7 @@
 package com.torusage.service
 
 import com.torusage.adapter.client.OnionooApiClient
+import com.torusage.database.entity.archive.DescriptorType
 import com.torusage.database.repository.recent.BridgeRepository
 import com.torusage.database.repository.recent.BridgeSummaryRepository
 import com.torusage.database.repository.recent.RelayRepository
@@ -37,20 +38,15 @@ class ScheduledCollectorService(
      */
     @Scheduled(fixedRate = 86400000L)
     fun processRelayConsensusDescriptors() =
-        torDescriptorService.collectAndProcessDescriptors(collectorPathRelayConsensuses)
+        torDescriptorService.collectAndProcessDescriptors(collectorPathRelayConsensuses, DescriptorType.RELAY_CONSENSUS)
 
     /**
      * Fetches and processes relay server descriptors.
      * The years 2005 - 2021 equal roughly 30 GB in size.
      */
-//    @Scheduled(fixedRate = 86400000L)
+    @Scheduled(fixedRate = 86400000L)
     fun collectRelayServerDescriptors() =
-        torDescriptorService.collectAndProcessDescriptors(collectorApiPathServerDescriptors)
-
-
-//    @Scheduled(fixedRate = 86400000L)
-    fun analyzeNodeFamilies() =
-        torDescriptorService.analyzeNodeFamilies("2015-01")
+        torDescriptorService.collectAndProcessDescriptors(collectorApiPathServerDescriptors, DescriptorType.SERVER)
 
     /**
      * Fetches Tor node summary with the configured fixedRate and stores corresponding entities in DB.

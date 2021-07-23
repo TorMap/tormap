@@ -1,14 +1,11 @@
 package com.torusage.service
 
 import com.torusage.commaSeparatedToList
-import com.torusage.database.entity.archive.ArchiveGeoRelay
-import com.torusage.database.entity.archive.ArchiveNodeDetails
-import com.torusage.database.entity.archive.ArchiveNodeFamily
-import com.torusage.database.entity.archive.ProcessedDescriptorsFile
-import com.torusage.database.repository.archive.ArchiveGeoRelayRepository
+import com.torusage.database.entity.archive.*
+import com.torusage.database.repository.archive.ArchiveGeoRelayRepositoryImpl
 import com.torusage.database.repository.archive.ArchiveNodeDetailsRepository
 import com.torusage.database.repository.archive.ArchiveNodeFamilyRepository
-import com.torusage.database.repository.archive.ProcessedDescriptorsFileRepository
+import com.torusage.database.repository.archive.DescriptorsFileRepository
 import com.torusage.jointToCommaSeparated
 import com.torusage.logger
 import com.torusage.millisSinceEpochToLocalDate
@@ -16,17 +13,19 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.torproject.descriptor.*
 import java.io.File
+import java.time.LocalDate
 import java.time.YearMonth
 
 
 /**
- * This service can collect and process Tor descriptors
+ * This service can collect and process Tor descriptors.
+ * Descriptors are downloaded from this remote collector endpoint: [https://metrics.torproject.org/collector/]
  */
 @Service
 class TorDescriptorService(
-    val archiveGeoRelayRepository: ArchiveGeoRelayRepository,
+    val archiveGeoRelayRepositoryImpl: ArchiveGeoRelayRepositoryImpl,
     val archiveNodeDetailsRepository: ArchiveNodeDetailsRepository,
-    val processedDescriptorsFileRepository: ProcessedDescriptorsFileRepository,
+    val descriptorsFileRepository: DescriptorsFileRepository,
     val archiveNodeFamilyRepository: ArchiveNodeFamilyRepository,
     val geoLocationService: GeoLocationService,
 ) {
@@ -42,17 +41,17 @@ class TorDescriptorService(
     /**
      * Collect and process descriptors from a specific the TorProject collector [apiPath]
      */
-    fun collectAndProcessDescriptors(apiPath: String) {
+    fun collectAndProcessDescriptors(apiPath: String, descriptorType: DescriptorType) {
         try {
             logger.info("Collecting descriptors from api path $apiPath")
             collectDescriptors(apiPath)
             logger.info("Finished collecting descriptors from api path $apiPath")
 
             logger.info("Processing descriptors from api path $apiPath")
-            processDescriptors(apiPath)
+            processDescriptors(apiPath, descriptorType)
             logger.info("Finished processing descriptors from api path $apiPath")
         } catch (exception: Exception) {
-            logger.error("Could not collect and process descriptors from api path $apiPath. ${exception.message}")
+            logger.error("Could not collect or process descriptors from api path $apiPath. ${exception.message}")
         }
 
     }
@@ -76,21 +75,37 @@ class TorDescriptorService(
     /**
      * Process descriptors which were previously saved to disk at [apiPath]
      */
-    private fun processDescriptors(apiPath: String) {
+    private fun processDescriptors(apiPath: String, descriptorType: DescriptorType) {
+        val processedDescriptorDays = mutableSetOf<LocalDate>()
         var lastProcessedFile: File? = null
         readDescriptors(apiPath).forEach {
-            processDescriptor(it)
+            val descriptorDay = processDescriptor(it)
+            if (descriptorDay != null) {
+                processedDescriptorDays.add(descriptorDay)
+            }
             if (lastProcessedFile == null) {
                 lastProcessedFile = it.descriptorFile
             } else if (it.descriptorFile != lastProcessedFile) {
                 logger.info("Finished processing descriptors file ${lastProcessedFile!!.name}")
-                processedDescriptorsFileRepository.save(
-                    ProcessedDescriptorsFile(
-                        lastProcessedFile!!.name,
+                descriptorsFileRepository.save(
+                    DescriptorsFile(
+                        DescriptorFileId(lastProcessedFile!!.name, descriptorType),
                         lastProcessedFile!!.lastModified()
                     )
                 )
                 lastProcessedFile = it.descriptorFile
+            }
+        }
+        when (descriptorType) {
+            DescriptorType.SERVER -> {
+                createArchiveNodeFamilies(processedDescriptorDays.map {
+                    YearMonth.from(it).toString()
+                }.toSet())
+                archiveGeoRelayRepositoryImpl.updateDetailsIds()
+            }
+            DescriptorType.RELAY_CONSENSUS -> {
+                archiveGeoRelayRepositoryImpl.updateDetailsIds()
+                archiveGeoRelayRepositoryImpl.updateFamilyIds()
             }
         }
     }
@@ -102,10 +117,10 @@ class TorDescriptorService(
     private fun readDescriptors(apiPath: String): MutableIterable<Descriptor> {
         val descriptorReader = DescriptorSourceFactory.createDescriptorReader()
         val parentDirectory = File(collectorTargetDirectory + apiPath)
-        val excludedFiles = processedDescriptorsFileRepository.findAll()
+        val excludedFiles = descriptorsFileRepository.findAll()
         descriptorReader.excludedFiles = excludedFiles.associate {
             Pair(
-                parentDirectory.absolutePath + File.separator + it.filename,
+                parentDirectory.absolutePath + File.separator + it.id.filename,
                 it.lastModified,
             )
         }.toSortedMap()
@@ -116,8 +131,8 @@ class TorDescriptorService(
     /**
      * Process a [descriptor] depending on it's type
      */
-    private fun processDescriptor(descriptor: Descriptor) {
-        try {
+    private fun processDescriptor(descriptor: Descriptor): LocalDate? {
+        return try {
             when (descriptor) {
                 is RelayNetworkStatusConsensus -> processRelayConsensusDescriptor(descriptor)
                 is ServerDescriptor -> processServerDescriptor(descriptor)
@@ -125,6 +140,7 @@ class TorDescriptorService(
             }
         } catch (exception: Exception) {
             logger.error("Could not process descriptor part of ${descriptor.descriptorFile.name}: ${exception.message}")
+            null
         }
     }
 
@@ -132,12 +148,16 @@ class TorDescriptorService(
      * Use a [RelayNetworkStatusConsensus] descriptor to save [ArchiveGeoRelay]s in the DB.
      * The location is retrieved based on the relay's IP addresses.
      */
-    private fun processRelayConsensusDescriptor(descriptor: RelayNetworkStatusConsensus) {
+    private fun processRelayConsensusDescriptor(descriptor: RelayNetworkStatusConsensus): LocalDate {
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.validAfterMillis)
         val nodesToSave = mutableListOf<ArchiveGeoRelay>()
         descriptor.statusEntries.forEach {
             val networkStatusEntry = it.value
-            if (!archiveGeoRelayRepository.existsByDayAndFingerprint(descriptorDay, networkStatusEntry.fingerprint)) {
+            if (!archiveGeoRelayRepositoryImpl.existsByDayAndFingerprint(
+                    descriptorDay,
+                    networkStatusEntry.fingerprint
+                )
+            ) {
                 val location = geoLocationService.getLocationForIpAddress(networkStatusEntry.address)
                 if (location != null) {
                     nodesToSave.add(
@@ -152,14 +172,15 @@ class TorDescriptorService(
                 }
             }
         }
-        archiveGeoRelayRepository.saveAll(nodesToSave)
+        archiveGeoRelayRepositoryImpl.saveAll(nodesToSave)
         logger.info("Processed relay consensus descriptor for day $descriptorDay")
+        return descriptorDay
     }
 
     /**
      * Use a server descriptor to save [ArchiveNodeDetails] in the DB.
      */
-    private fun processServerDescriptor(descriptor: ServerDescriptor) {
+    private fun processServerDescriptor(descriptor: ServerDescriptor): LocalDate {
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.publishedMillis)
         val descriptorMonth = YearMonth.from(descriptorDay).toString()
         val existingNode =
@@ -174,58 +195,87 @@ class TorDescriptorService(
                 )
             )
         }
+        return descriptorDay
     }
 
-    fun analyzeNodeFamilies(month: String) {
-        val familyNodes = archiveNodeDetailsRepository.getAllByMonthAndFamilyEntriesIsNotNull(month)
+    /**
+     * Creates amd saves [ArchiveNodeFamily] entities for the requested [months] by processing [ArchiveNodeDetails].
+     */
+    private fun createArchiveNodeFamilies(months: Set<String>) {
+        val familyNodes = archiveNodeDetailsRepository.getAllByMonthInAndFamilyEntriesNotNull(months)
         familyNodes.forEach { requestingNode ->
             val confirmedFamilyFingerprints = mutableSetOf<String>()
-            requestingNode.familyEntries!!.commaSeparatedToList().forEach { allegedFamilyMemberId ->
-                val fingerprintRegex = Regex("^\\$[A-F0-9]{40}.*")
-                val nicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
-                when {
-                    fingerprintRegex.matches(allegedFamilyMemberId) -> {
-                        val allegedFamilyMember = archiveNodeDetailsRepository.getByMonthAndFingerprint(
-                            month,
-                            allegedFamilyMemberId.substring(1, 40),
-                        )
-                        if (isNodeMemberOfFamily(requestingNode, allegedFamilyMember)) {
-                            confirmedFamilyFingerprints.add(allegedFamilyMember!!.fingerprint)
-                        }
-
-                    }
-                    nicknameRegex.matches(allegedFamilyMemberId) -> {
-                        val allegedFamilyMembers =
-                            archiveNodeDetailsRepository.getAllByMonthAndNickname(month, allegedFamilyMemberId)
-                        val confirmedFamilyMember =
-                            allegedFamilyMembers.firstOrNull { isNodeMemberOfFamily(requestingNode, it) }
-                        if (confirmedFamilyMember != null) {
-                            confirmedFamilyFingerprints.add(confirmedFamilyMember.fingerprint)
-                        }
-
-                    }
-                    else -> logger.error("Could not add member $allegedFamilyMemberId to requestingNode ${requestingNode.id} family!")
+            val month = requestingNode.month
+            requestingNode.familyEntries!!.commaSeparatedToList().forEach {
+                try {
+                    confirmedFamilyFingerprints.add(extractFamilyMemberFingerprint(requestingNode, it, month))
+                } catch (exception: Exception) {
+                    logger.warn(exception.message)
                 }
             }
             if (confirmedFamilyFingerprints.size > 0) {
                 confirmedFamilyFingerprints.add(requestingNode.fingerprint)
-                val confirmedFamilyFingerprintsSorted = confirmedFamilyFingerprints.toSortedSet()
-                if (!archiveNodeFamilyRepository.existsByMonthAndFingerprints(
-                        month,
-                        confirmedFamilyFingerprintsSorted.jointToCommaSeparated()!!
-                    )
-                ) {
-                    archiveNodeFamilyRepository.save(
-                        ArchiveNodeFamily(
-                            confirmedFamilyFingerprintsSorted,
-                            month
-                        )
-                    )
-                }
+                saveArchiveNodeFamilies(confirmedFamilyFingerprints, month)
             }
+        }
+        archiveGeoRelayRepositoryImpl.updateFamilyIds()
+    }
+
+    /**
+     * Check if an identical [ArchiveNodeFamily] already exists for a given [month], otherwise save it
+     */
+    private fun saveArchiveNodeFamilies(confirmedFamilyFingerprints: MutableSet<String>, month: String) {
+        val sortedFingerprints = confirmedFamilyFingerprints.toSortedSet()
+        if (!archiveNodeFamilyRepository.existsByMonthAndFingerprints(
+                month,
+                sortedFingerprints.jointToCommaSeparated()
+            )
+        ) {
+            archiveNodeFamilyRepository.save(
+                ArchiveNodeFamily(
+                    sortedFingerprints,
+                    month
+                )
+            )
         }
     }
 
+    /**
+     * Extract the fingerprint of a [allegedFamilyMemberId] for a [requestingNode] in a given [month]
+     */
+    private fun extractFamilyMemberFingerprint(
+        requestingNode: ArchiveNodeDetails,
+        allegedFamilyMemberId: String,
+        month: String,
+    ): String {
+        val fingerprintRegex = Regex("^\\$[A-F0-9]{40}.*")
+        val nicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
+        when {
+            fingerprintRegex.matches(allegedFamilyMemberId) -> {
+                val allegedFamilyMember = archiveNodeDetailsRepository.getByMonthAndFingerprint(
+                    month,
+                    allegedFamilyMemberId.substring(1, 40),
+                )
+                if (isNodeMemberOfFamily(requestingNode, allegedFamilyMember)) {
+                    return allegedFamilyMember!!.fingerprint
+                }
+            }
+            nicknameRegex.matches(allegedFamilyMemberId) -> {
+                val allegedFamilyMembers =
+                    archiveNodeDetailsRepository.getAllByMonthAndNickname(month, allegedFamilyMemberId)
+                val confirmedFamilyMember =
+                    allegedFamilyMembers.firstOrNull { isNodeMemberOfFamily(requestingNode, it) }
+                if (confirmedFamilyMember != null) {
+                    return confirmedFamilyMember.fingerprint
+                }
+            }
+        }
+        throw Exception("New family member $allegedFamilyMemberId for requestingNode ${requestingNode.fingerprint} rejected!")
+    }
+
+    /**
+     * Determines if the [requestingNode] shares a family with the [allegedFamilyMember].
+     */
     private fun isNodeMemberOfFamily(
         requestingNode: ArchiveNodeDetails,
         allegedFamilyMember: ArchiveNodeDetails?,
