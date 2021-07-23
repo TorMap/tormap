@@ -1,4 +1,4 @@
-package com.torusage.database.entity.archive
+package com.torusage.database.entity
 
 import com.torusage.jointToCommaSeparated
 import org.torproject.descriptor.NetworkStatusEntry
@@ -15,7 +15,7 @@ import javax.persistence.*
         Index(columnList = "month, fingerprints", unique = true),
     ]
 )
-class ArchiveNodeFamily(
+class NodeFamily(
     sortedFingerprints: SortedSet<String>,
     var month: String,
 
