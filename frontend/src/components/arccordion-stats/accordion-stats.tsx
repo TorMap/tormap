@@ -33,17 +33,29 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                 </AccordionSummary>
                 <AccordionDetails>
                     <FormGroup>
+                        <FormControlLabel control={<Switch checked={settings.showMarker}
+                                                           onChange={onChange}
+                        />}
+                                          label={"Draw marker"}
+                                          name={"showMarker"}
+                        />
                         <FormControlLabel control={<Switch checked={settings.colorNodesAccordingToType}
                                                            onChange={onChange}
                                                     />}
                                           label={"Color relays according to Type"}
-                                          name={"colorNodesAccordingToFlags"}
+                                          name={"colorNodesAccordingToType"}
                         />
-                        <FormControlLabel control={<Switch checked={settings.agregateCoordinates}
+                        <FormControlLabel control={<Switch checked={settings.aggregateCoordinates}
+                                                           onChange={onChange}
+                                                    />}
+                                          label={"Aggregate Relays that have the same coordinates"}
+                                          name={"aggregateCoordinates"}
+                        />
+                        <FormControlLabel control={<Switch checked={settings.heatMap}
                                                            onChange={onChange}
                         />}
-                                          label={"Aggregate Relays that have the same coordinates"}
-                                          name={"agregateCoordinates"}
+                                          label={"Aggregate Relays to density heatmap"}
+                                          name={"heatMap"}
                         />
                     </FormGroup>
                 </AccordionDetails>
@@ -54,7 +66,7 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                     aria-controls="panel2a-content"
                     id="panel2a-header"
                 >
-                    <Typography className={"heading"}>Show node types</Typography>
+                    <Typography className={"heading"}>Show relay types</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <FormGroup>
@@ -76,7 +88,7 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                     aria-controls="panel2a-content"
                     id="panel2a-header"
                 >
-                    <Typography className={"heading"}>Node must include flag</Typography>
+                    <Typography className={"heading"}>Relay must include flag</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <FormGroup>

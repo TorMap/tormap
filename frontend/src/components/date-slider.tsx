@@ -1,9 +1,8 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
-import {Grid, makeStyles, Slider, TextField} from "@material-ui/core";
+import {Grid, makeStyles, Slider, } from "@material-ui/core";
 import {useDebounce} from "../util/hooks";
 import {Mark} from "../types/mark";
 import Moment from "react-moment";
-import {WorldMap} from "./world-map/world-map";
 import {KeyboardDatePicker, MuiPickersUtilsProvider} from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 import moment from "moment";
@@ -83,7 +82,7 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue, s
                             variant="inline"
                             format="yyyy-MM-dd"
                             margin="normal"
-                            id="date-picker-2"
+                            id="date-picker-1"
                             minDate={availableDays[0]}
                             maxDate={availableDays[availableDays.length-1]}
                             value={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}

@@ -1,7 +1,7 @@
 import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useEffect, useState} from "react";
 import {apiBaseUrl} from "../../util/constants";
-import {circleMarker, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
+import L, {circleMarker, Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import "./world-map.scss"
 import {NodePopup} from "../node-popup/node-popup";
@@ -9,6 +9,7 @@ import {GeoRelayView} from "../../types/geo-relay";
 import {RelayFlag} from "../../types/relay";
 import {Settings, Statistics, TempSettings} from "../../types/variousTypes";
 import {Colors} from "../../types/colors";
+import "leaflet.heat"
 
 interface Props {
     /**
@@ -31,6 +32,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
     const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
     const [markerLayer] = useState<LayerGroup>(new LayerGroup())
+    const [heatLayer, setHeatLayer] = useState<Layer>(new Layer())
     const [relays, setRelays] = useState<GeoRelayView[]>([])
 
     useEffect(() => {
@@ -96,7 +98,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
             if (settings.miSybil &&         !relay.flags?.includes(RelayFlag.Sybil))        {return}
             if (settings.miBadExit &&       !relay.flags?.includes(RelayFlag.BadExit))      {return}
 
-            if (settings.agregateCoordinates){ //Draw only one Point for same coordinates
+            if (settings.aggregateCoordinates || settings.heatMap){ //Draw only one Point for same coordinates
                 const key: string = `${relay.lat},${relay.long}`
                 if (latLonMap.has(key)){
                     latLonMap.set(key, latLonMap.get(key)!! + 1)
@@ -105,7 +107,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
                 }
             }
 
-            if(!settings.agregateCoordinates){ //Draw a point for each Relay
+            if(settings.showMarker && !settings.aggregateCoordinates){ //Draw a point for each Relay
                 let color = "#833ab4"
                 let layer = defaultLayer
                 if (relay.flags?.includes(RelayFlag.Exit)) {
@@ -133,7 +135,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
 
         })
 
-        if(settings.agregateCoordinates){
+        if(settings.aggregateCoordinates){
             latLonMap.forEach((value, key) => {
                 const coordinates= key.split(",")
                 circleMarker(
@@ -145,6 +147,24 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
                 )
                     .addTo(defaultLayer)
             })
+        }
+
+        if(settings.heatMap){
+            leafletMap?.removeLayer(heatLayer)
+
+            let latlngs: Array<number[]> = new Array<number[]>()
+            let maxValue: number = 1
+            latLonMap.forEach((value, key) => {
+                const coordinates= key.split(",")
+                if (value > maxValue) maxValue = value
+                latlngs.push([+coordinates[0],+coordinates[1], value])})
+            // @ts-ignore
+            let heat = L.heatLayer(latlngs, {radius: 25, max: maxValue, blur: 35, minOpacity: .55, gradient: {0.4: '#2e53dc', 0.65: '#c924ae', .8: '#ff4646'}}).addTo(leafletMap)
+            setHeatLayer(heat)
+            stats ={...stats, maxValueOnSameCoordinate: maxValue}
+
+        }else{
+            leafletMap?.removeLayer(heatLayer)
         }
 
         setStatisticsCallback(stats)
