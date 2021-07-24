@@ -22,6 +22,9 @@ export const MapStats: FunctionComponent<Props> = ({statistics}) => {
                     <Typography>
                         Other relays: {statistics.default}
                     </Typography>
+                    <Typography>
+                        maxValueOnSameCoordinate: {statistics.maxValueOnSameCoordinate}
+                    </Typography>
                 </CardContent>
             </Card>
         </div>
