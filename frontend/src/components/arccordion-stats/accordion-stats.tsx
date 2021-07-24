@@ -1,17 +1,17 @@
-
-import React, {FunctionComponent, } from "react";
+import React, {FunctionComponent,} from "react";
 import {
     Accordion,
     AccordionDetails,
-    AccordionSummary, Checkbox,
+    AccordionSummary,
+    Checkbox,
     FormControlLabel,
-    FormGroup, Switch,
+    FormGroup,
+    Switch,
     Typography
 } from "@material-ui/core";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import "./accordion-stats.scss"
-import {Settings, TempSettings} from "../../types/variousTypes";
-import ReactSlidingPane from "react-sliding-pane";
+import {TempSettings} from "../../types/variousTypes";
 import {RelayFlagName} from "../../types/relay";
 
 interface Props {
@@ -87,8 +87,8 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                             control={<Checkbox checked={settings.miNamed} onChange={onChange} name={"mi"+RelayFlagName.Named}/>}
                             label={RelayFlagName.Named}/>
                         <FormControlLabel
-                            control={<Checkbox checked={settings.miUnamed} onChange={onChange} name={"mi"+RelayFlagName.Unamed}/>}
-                            label={RelayFlagName.Unamed}/>
+                            control={<Checkbox checked={settings.miUnnamed} onChange={onChange} name={"mi"+RelayFlagName.Unnamed}/>}
+                            label={RelayFlagName.Unnamed}/>
                         <FormControlLabel
                             control={<Checkbox checked={settings.miRunning} onChange={onChange} name={"mi"+RelayFlagName.Running}/>}
                             label={RelayFlagName.Running}/>

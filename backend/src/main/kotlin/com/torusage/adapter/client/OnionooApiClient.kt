@@ -14,7 +14,9 @@ import java.util.concurrent.TimeUnit
 /**
  * This is an client for downloading data regarding the Tor network from the
  * [Onionoo API](https://metrics.torproject.org/onionoo.html).
+ * Currently the client is not used, but it is ready if needed in the future.
  */
+@Suppress("unused")
 @Service
 class OnionooApiClient(
     @Value("\${onionoo.api.baseurl}") private val onionooBaseurl: String,
