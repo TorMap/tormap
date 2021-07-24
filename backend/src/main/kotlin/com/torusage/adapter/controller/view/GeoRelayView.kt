@@ -1,15 +1,14 @@
 @file:Suppress("unused")
 
-package com.torusage.adapter.controller.model
+package com.torusage.adapter.controller.view
 
 import com.torusage.commaSeparatedToList
-import com.torusage.database.entity.archive.ArchiveGeoRelay
+import com.torusage.database.entity.GeoRelay
 
 /**
- * A [ArchiveGeoRelay] with minimal data for fast frontend response times
+ * A [GeoRelay] with minimal data for fast frontend response times
  */
-class ArchiveGeoRelayView(relay: ArchiveGeoRelay) {
-    val id = relay.id
+class GeoRelayView(relay: GeoRelay) {
     val lat = relay.latitude
     val long = relay.longitude
     val flags = try {
@@ -17,4 +16,6 @@ class ArchiveGeoRelayView(relay: ArchiveGeoRelay) {
     } catch (exception: Exception) {
         null
     }
+    val detailsId = relay.nodeDetailsId
+    val familyId = relay.nodeFamilyId
 }

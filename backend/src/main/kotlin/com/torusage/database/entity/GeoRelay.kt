@@ -1,4 +1,4 @@
-package com.torusage.database.entity.archive
+package com.torusage.database.entity
 
 import org.torproject.descriptor.NetworkStatusEntry
 import java.math.BigDecimal
@@ -12,21 +12,21 @@ import javax.persistence.*
 @Entity
 @Table(
     indexes = [
-        Index(columnList = "fingerprint, day", unique = true),
-        Index(columnList = "day"),
+        Index(columnList = "fingerprint, day", unique = true, name = "fingerprint_day_index"),
+        Index(columnList = "day", name = "day_index"),
     ]
 )
-class ArchiveGeoRelay(
+class GeoRelay(
     networkStatusEntry: NetworkStatusEntry,
     var day: LocalDate,
     var latitude: BigDecimal,
     var longitude: BigDecimal,
     var countryIsoCode: String?,
-) {
+
     @Id
     @GeneratedValue
-    val id: Long? = null
-
+    val id: Long? = null,
+) {
     @Column(length = 40)
     var fingerprint: String = networkStatusEntry.fingerprint
 
@@ -35,6 +35,10 @@ class ArchiveGeoRelay(
     } catch (exception: Exception) {
         null
     }
+
+    val nodeDetailsId: Long? = null
+
+    val nodeFamilyId: Long? = null
 }
 
 /**

@@ -2,9 +2,10 @@
 
 import {RelayFlag} from "./relay";
 
-export interface ArchiveGeoRelayView {
-    finger: string
+export interface GeoRelayView {
     lat: number
     long: number
     flags?: RelayFlag[]
+    detailsId: string
+    familyId: string
 }
