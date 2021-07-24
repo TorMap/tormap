@@ -57,6 +57,7 @@ function App() {
         miBadExit: false,
 
         colorNodesAccordingToType: true,
+        agregateCoordinates: true
     })
     const [statistics, setStatistics] = useState<Statistics>({
         guard: 0,
