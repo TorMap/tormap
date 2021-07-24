@@ -23,6 +23,7 @@ export interface Settings{
     }
 
     colorNodesAccordingToType: boolean
+    agregateCoordinates: boolean
 }
 
 export interface TempSettings{
@@ -47,6 +48,7 @@ export interface TempSettings{
     miBadExit: boolean
 
     colorNodesAccordingToType: boolean
+    agregateCoordinates: boolean
 }
 
 export interface Statistics{
