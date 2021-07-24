@@ -22,7 +22,7 @@ export interface Settings{
         BadExit: boolean
     }
 
-    colorNodesAccordingToFlags: boolean
+    colorNodesAccordingToType: boolean
 }
 
 export interface TempSettings{
@@ -46,7 +46,7 @@ export interface TempSettings{
     miSybil: boolean
     miBadExit: boolean
 
-    colorNodesAccordingToFlags: boolean
+    colorNodesAccordingToType: boolean
 }
 
 export interface Statistics{

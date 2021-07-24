@@ -8,6 +8,7 @@ import {NodePopup} from "../node-popup/node-popup";
 import {ArchiveGeoRelayView} from "../../types/archive-geo-relay";
 import {RelayFlag} from "../../types/relay";
 import {Settings, Statistics, TempSettings} from "../../types/variousTypes";
+import {Colors} from "../../types/colors";
 
 interface Props {
     /**
@@ -30,22 +31,28 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
     const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
     const [markerLayer] = useState<LayerGroup>(new LayerGroup())
+    const [relays, setRelays] = useState<ArchiveGeoRelayView[]>([])
 
     useEffect(() => {
         if (dayToDisplay) {
+            console.log("fetching")
             let currentTimeStamp = Date.now()
             setLoadingStateCallback(true)
             fetch(`${apiBaseUrl}/archive/geo/relay/day/${dayToDisplay}`)
                 .then(response => response.json())
                 .then(newRelays => {
                     setLoadingStateCallback(false)
-                    drawLayerGroup(currentTimeStamp, relaysToLayerGroup(newRelays))
+                    if (currentTimeStamp === latestRequestTimestamp) setRelays(newRelays)
                 })
                 .catch(console.log)
             latestRequestTimestamp = currentTimeStamp
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dayToDisplay, settings])
+    }, [dayToDisplay])
+
+    useEffect(() => {
+        drawLayerGroup(relaysToLayerGroup(relays))
+    },[relays, settings])
 
     const onMarkerClick = (click: LeafletMouseEvent) => {
         console.log("Marker clicked, show node details")
@@ -87,15 +94,14 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
             if (settings.miSybil &&         !relay.flags?.includes(RelayFlag.Sybil))        {return}
             if (settings.miBadExit &&       !relay.flags?.includes(RelayFlag.BadExit))      {return}
 
-
-            let color = "#833ab4";
-            let layer = defaultLayer;
+            let color = "#833ab4"
+            let layer = defaultLayer
             if (relay.flags?.includes(RelayFlag.Exit)) {
-                color = "#f96969"
+                if (settings.colorNodesAccordingToType) color = "#f96969"
                 layer = exitLayer
                 stats.exit++
             } else if (relay.flags?.includes(RelayFlag.Guard)) {
-                color = "#fcb045"
+                if (settings.colorNodesAccordingToType) color = "#fcb045"
                 layer = guardLayer
                 stats.guard++
             } else {
@@ -121,10 +127,8 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
         return layer
     }
 
-    const drawLayerGroup = (currentTimeStamp: number, layerGroup: LayerGroup) => {
-        if (currentTimeStamp !== latestRequestTimestamp) {
-            console.log(`skipped drawing for ${dayToDisplay}`)
-        } else if (leafletMap && dayToDisplay) {
+    const drawLayerGroup = (layerGroup: LayerGroup) => {
+        if (leafletMap && dayToDisplay) {
             console.log(`drawing for ${dayToDisplay}`)
             markerLayer.clearLayers()
             const layers = layerGroup.getLayers()
