@@ -39,6 +39,12 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                                           label={"Color relays according to Type"}
                                           name={"colorNodesAccordingToFlags"}
                         />
+                        <FormControlLabel control={<Switch checked={settings.agregateCoordinates}
+                                                           onChange={onChange}
+                        />}
+                                          label={"Aggregate Relays that have the same coordinates"}
+                                          name={"agregateCoordinates"}
+                        />
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>

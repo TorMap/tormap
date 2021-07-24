@@ -77,6 +77,8 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
             exit: 0,
         }
 
+        let latLonMap: Map<string, number> = new Map<string, number>()
+
         relays.forEach(relay => {
             if (settings.miValid &&         !relay.flags?.includes(RelayFlag.Valid))        {return}
             if (settings.miNamed &&         !relay.flags?.includes(RelayFlag.Named))        {return}
@@ -94,32 +96,60 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
             if (settings.miSybil &&         !relay.flags?.includes(RelayFlag.Sybil))        {return}
             if (settings.miBadExit &&       !relay.flags?.includes(RelayFlag.BadExit))      {return}
 
-            let color = "#833ab4"
-            let layer = defaultLayer
-            if (relay.flags?.includes(RelayFlag.Exit)) {
-                if (settings.colorNodesAccordingToType) color = "#f96969"
-                layer = exitLayer
-                stats.exit++
-            } else if (relay.flags?.includes(RelayFlag.Guard)) {
-                if (settings.colorNodesAccordingToType) color = "#fcb045"
-                layer = guardLayer
-                stats.guard++
-            } else {
-                stats.default++
+            if (settings.agregateCoordinates){ //Draw only one Point for same coordinates
+                const key: string = `${relay.lat},${relay.long}`
+                if (latLonMap.has(key)){
+                    latLonMap.set(key, latLonMap.get(key)!! + 1)
+                }else{
+                    latLonMap.set(key, 1)
+                }
             }
-            circleMarker(
-                [relay.lat, relay.long],
-                {
-                    radius: 1,
-                    className: relay.finger,
-                    color: color
-                },
-            )
-                .on("click", onMarkerClick)
-                .addTo(layer)
+
+            if(!settings.agregateCoordinates){ //Draw a point for each Relay
+                let color = "#833ab4"
+                let layer = defaultLayer
+                if (relay.flags?.includes(RelayFlag.Exit)) {
+                    if (settings.colorNodesAccordingToType) color = "#f96969"
+                    layer = exitLayer
+                    stats.exit++
+                } else if (relay.flags?.includes(RelayFlag.Guard)) {
+                    if (settings.colorNodesAccordingToType) color = "#fcb045"
+                    layer = guardLayer
+                    stats.guard++
+                } else {
+                    stats.default++
+                }
+                circleMarker(
+                    [relay.lat, relay.long],
+                    {
+                        radius: 1,
+                        className: relay.finger,
+                        color: color
+                    },
+                )
+                    .on("click", onMarkerClick)
+                    .addTo(layer)
+            }
+
         })
 
+        if(settings.agregateCoordinates){
+            latLonMap.forEach((value, key) => {
+                const coordinates= key.split(",")
+                circleMarker(
+                    [+coordinates[0],+coordinates[1]],
+                    {
+                        radius: value/3,
+                        color: "#ffffff"
+                    }
+                )
+                    .addTo(defaultLayer)
+            })
+        }
+
         setStatisticsCallback(stats)
+
+        console.log(latLonMap)
 
         console.timeLog(`relaysToLayerGroup`, `New Layer with ${relays.length} elements finished`)
         console.timeEnd(`relaysToLayerGroup`)
