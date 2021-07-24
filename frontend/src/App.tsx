@@ -1,7 +1,17 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {WorldMap} from "./components/world-map/world-map";
 import ReactSlidingPane from "react-sliding-pane";
-import {Button, FormControlLabel, Switch, FormGroup, Checkbox, Slider, Typography, Grid} from "@material-ui/core";
+import {
+    Button,
+    FormControlLabel,
+    Switch,
+    FormGroup,
+    Checkbox,
+    Slider,
+    Typography,
+    Grid,
+    makeStyles, createMuiTheme, CircularProgress, TextField, ThemeProvider
+} from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
 import Moment from "react-moment";
