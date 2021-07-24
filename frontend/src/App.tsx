@@ -34,6 +34,7 @@ const useStyle = makeStyles(theme => ({
 function App() {
     const [availableDays, setAvailableDays] = useState<string[]>([])
     const [sliderValue, setSliderValue] = useState<number>(-1)
+    const [sliderMarks, setSliderMarks] = useState<Mark[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [settings, setSettings] = useState<TempSettings>({
         Guard: true,
@@ -64,6 +65,7 @@ function App() {
         default: 0,
         exit: 0,
     })
+    const [errorState, setErrorState] = useState(false)
 
     const [theme, setTheme] = useState(createMuiTheme({
         palette: {

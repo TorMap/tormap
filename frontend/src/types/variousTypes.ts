@@ -7,7 +7,7 @@ export interface Settings{
     mustInclude: {
         Valid: boolean
         Named: boolean
-        Unamed: boolean
+        Unnamed: boolean
         Running: boolean
         Stable: boolean
         Exit: boolean
@@ -33,7 +33,7 @@ export interface TempSettings{
 
     miValid: boolean
     miNamed: boolean
-    miUnamed: boolean
+    miUnnamed: boolean
     miRunning: boolean
     miStable: boolean
     miExit: boolean
