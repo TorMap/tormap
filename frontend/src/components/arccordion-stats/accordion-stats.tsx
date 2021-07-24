@@ -33,12 +33,11 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                 </AccordionSummary>
                 <AccordionDetails>
                     <FormGroup>
-                        <FormControlLabel control={<Switch checked={settings.colorNodesAccordingToFlags}
+                        <FormControlLabel control={<Switch checked={settings.colorNodesAccordingToType}
                                                            onChange={onChange}
-                                                           disabled={true}
                                                     />}
-                                                  label={"Color nodes according to Flags"}
-                                                  name={"colorNodesAccordingToFlags"}
+                                          label={"Color relays according to Type"}
+                                          name={"colorNodesAccordingToFlags"}
                         />
                     </FormGroup>
                 </AccordionDetails>

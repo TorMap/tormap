@@ -24,37 +24,16 @@ import {blue} from "@material-ui/core/colors";
 import {MuiPickersUtilsProvider, KeyboardDatePicker} from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 import moment from 'moment';
+import {DateSlider} from "./components/date-slider";
 
 const useStyle = makeStyles(theme => ({
-    slider: {
-        position: "fixed",
-        bottom: "20px",
-        width: "90%",
-        left: "5%",
-    },
-    sliderValueLabel: {
-        top: "-41px",
-        left: "calc(-50% - 8px)",
-        fontSize: ".7rem",
-        "& span":{
-            width: "40px",
-            height: "40px",
-            "& span":{
-                padding: "14px 5px 0px 5px",
-                textAlign: "center",
-            }
-        }
-    },
-    datePicker: {
-        width: "100%",
-    },
+
 }))
 
 
 function App() {
     const [availableDays, setAvailableDays] = useState<string[]>([])
     const [sliderValue, setSliderValue] = useState<number>(-1)
-    const [sliderMarks, setSliderMarks] = useState<Mark[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [settings, setSettings] = useState<TempSettings>({
         Guard: true,
@@ -77,14 +56,13 @@ function App() {
         miSybil: false,
         miBadExit: false,
 
-        colorNodesAccordingToFlags: true,
+        colorNodesAccordingToType: true,
     })
     const [statistics, setStatistics] = useState<Statistics>({
         guard: 0,
         default: 0,
         exit: 0,
     })
-    const [errorState, setErrorState] = useState(false)
 
     const [theme, setTheme] = useState(createMuiTheme({
         palette: {
@@ -92,8 +70,6 @@ function App() {
         },
     }))
     const classes = useStyle()
-
-    const debouncedSliderValue = useDebounce<number>(sliderValue, 500);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSettings({...settings, [event.target.name]: event.target.checked})
@@ -113,47 +89,9 @@ function App() {
             .catch(console.log)
     }, [])
 
-    useEffect(() => {
-        if (availableDays.length !== 0) {
-            let markCount = 6
-            markCount--
-            let marks = []
-            for (let i = 0; i <= markCount; i++) {
-                const mark: Mark = {
-                    value: Math.round(i * (availableDays.length - 1) / markCount),
-                    label: <Moment
-                        date={availableDays[Math.round(i * (availableDays.length - 1) / markCount)]}
-                        format={"YYYY-MM"}
-                    />
-                }
-                marks.push(mark);
-            }
-            setSliderMarks(marks)
-        }
-    }, [availableDays])
 
-    // Hook
-    // T is a generic type for value parameter, our case this will be string
-    function useDebounce<T>(value: T, delay: number): T {
-        // State and setters for debounced value
-        const [debouncedValue, setDebouncedValue] = useState<T>(value);
-        useEffect(
-            () => {
-                // Update debounced value after delay
-                const handler = setTimeout(() => {
-                    setDebouncedValue(value);
-                }, delay);
-                // Cancel the timeout if value changes (also on delay change or unmount)
-                // This is how we prevent debounced value from updating if value is changed ...
-                // .. within the delay period. Timeout gets cleared and restarted.
-                return () => {
-                    clearTimeout(handler);
-                };
-            },
-            [value, delay] // Only re-call effect if value or delay changes
-        );
-        return debouncedValue;
-    }
+
+
 
     return (
         <ThemeProvider theme={theme}>
@@ -165,102 +103,12 @@ function App() {
                 : null
             }
             <WorldMap
-                dayToDisplay={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}
+                dayToDisplay={sliderValue >= 0 ? availableDays[sliderValue] : undefined}
                 settings={settings}
                 setLoadingStateCallback={setIsLoading}
                 setStatisticsCallback={setStatistics}
             />
-            <div className={classes.slider}>
-                <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                    <Grid container spacing={8} justify={"center"}>
-                        <Grid item xs={2}>
-                            <TextField
-                                id="date"
-                                type="date"
-                                defaultValue={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}
-                                className={classes.datePicker}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                disabled={true}
-                            />
-                        </Grid>
-                        <Grid item xs>
-                            <Slider
-                                disabled={(availableDays.length === 0)}
-                                value={sliderValue}
-                                classes={{
-                                    valueLabel: classes.sliderValueLabel,
-                                }}
-                                onChange={(event: any, newValue: number | number[]) => {
-                                    setSliderValue(newValue as number)
-                                    setErrorState(false)
-                                }}
-                                valueLabelDisplay={(availableDays.length === 0) ? "off" : "on"}
-                                name={"slider"}
-                                min={0}
-                                max={availableDays.length - 1}
-                                marks={sliderMarks}
-                                valueLabelFormat={(x) => <Moment date={availableDays[x]} format={"DD-MM-YYYY"}/>}
-                                track={false}
-                            />
-                        </Grid>
-                        <Grid item xs={2} >
-                                <TextField
-                                    id="date"
-                                    type="date"
-                                    defaultValue={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}
-                                    className={classes.datePicker}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    disabled={(availableDays.length === 0)}
-                                    onChange={(event) => {
-                                        const value = event.target.value
-                                        if (availableDays.includes(value)) {
-                                            setErrorState(false)
-                                            setSliderValue(availableDays.findIndex(element => element === value))
-                                        }else{
-                                            setErrorState(true)
-                                            console.log(`Day ${value} is not available at the moment`)
-                                        }
-                                    }}
-                                    value={availableDays[sliderValue]}
-                                    error={errorState}
-                                    helperText={errorState ? `Day is not available at the moment` : null}
-                                />
-                        </Grid>
-                        <Grid item xs={2} >
-                            <KeyboardDatePicker
-                                autoOk
-                                variant="inline"
-                                format="yyyy-MM-dd"
-                                margin="normal"
-                                id="date-picker-2"
-                                minDate={availableDays[0]}
-                                maxDate={availableDays[availableDays.length-1]}
-                                value={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}
-                                onChange={(date, value) => {
-                                    if (availableDays.includes(value!!)) {
-                                        setErrorState(false)
-                                        setSliderValue(availableDays.findIndex(element => element === value))
-                                    }else{
-                                        setErrorState(true)
-                                        console.log(`Day ${value} is not available at the moment`)
-                                    }
-                                }}
-                                KeyboardButtonProps={{
-                                    'aria-label': 'change date',
-                                }}
-                                helperText={errorState ? `Day is not available at the moment` : null}
-                                shouldDisableDate={date => {
-                                    return !(availableDays.includes(moment(date).format("YYYY-MM-DD")))
-                                }}
-                            />
-                        </Grid>
-                    </Grid>
-                </MuiPickersUtilsProvider>
-            </div>
+            <DateSlider availableDays={availableDays} setValue={setSliderValue} settings={settings}/>
             <AccordionStats settings={settings} onChange={handleInputChange}/>
             <MapStats statistics={statistics}/>
         </div>
