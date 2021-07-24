@@ -23,7 +23,9 @@ export interface Settings{
     }
 
     colorNodesAccordingToType: boolean
-    agregateCoordinates: boolean
+    aggregateCoordinates: boolean
+    heatMap: boolean
+    showMarker: boolean
 }
 
 export interface TempSettings{
@@ -48,11 +50,14 @@ export interface TempSettings{
     miBadExit: boolean
 
     colorNodesAccordingToType: boolean
-    agregateCoordinates: boolean
+    aggregateCoordinates: boolean
+    heatMap: boolean
+    showMarker: boolean
 }
 
 export interface Statistics{
     guard: number
     exit: number
     default: number
+    maxValueOnSameCoordinate?: number
 }

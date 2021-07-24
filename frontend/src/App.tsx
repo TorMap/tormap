@@ -34,7 +34,6 @@ const useStyle = makeStyles(theme => ({
 function App() {
     const [availableDays, setAvailableDays] = useState<string[]>([])
     const [sliderValue, setSliderValue] = useState<number>(-1)
-    const [sliderMarks, setSliderMarks] = useState<Mark[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [settings, setSettings] = useState<TempSettings>({
         Guard: true,
@@ -43,7 +42,7 @@ function App() {
 
         miValid: false,
         miNamed: false,
-        miUnamed: false,
+        miUnnamed: false,
         miRunning: false,
         miStable: false,
         miExit: false,
@@ -58,7 +57,9 @@ function App() {
         miBadExit: false,
 
         colorNodesAccordingToType: true,
-        agregateCoordinates: true
+        aggregateCoordinates: false,
+        heatMap: false,
+        showMarker: true,
     })
     const [statistics, setStatistics] = useState<Statistics>({
         guard: 0,
