@@ -220,9 +220,7 @@ class TorDescriptorService(
             requestingNode.familyEntries!!.commaSeparatedToList().forEach {
                 try {
                     confirmedFamilyNodes.add(confirmFamilyMember(requestingNode, it, month))
-                } catch (exception: Exception) {
-                    logger.debug(exception.message)
-                }
+                } catch (exception: Exception) {}
             }
             saveNodeFamily(requestingNode, confirmedFamilyNodes)
         }
