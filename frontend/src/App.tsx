@@ -51,8 +51,9 @@ function App() {
         daterange: false,
         familyGradient: false,
 
-        selectedCountry: undefined,
         sortContry: false,
+        selectedCountry: undefined,
+        sortFamily: false,
         selectedFamily: undefined,
     })
     const [statistics, setStatistics] = useState<Statistics>({
