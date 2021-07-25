@@ -42,7 +42,7 @@ dependencies {
     // Database
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
-    runtimeOnly("com.h2database:h2")
+    runtimeOnly("com.h2database:h2:1.4.199")
 
     // Handle tasks requiring a geo location lookup
     implementation("com.maxmind.geoip2:geoip2:2.15.0")
