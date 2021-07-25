@@ -11,6 +11,7 @@ import com.torusage.database.entity.GeoRelay
 class GeoRelayView(relay: GeoRelay) {
     val lat = relay.latitude
     val long = relay.longitude
+    val country = relay.countryIsoCode
     val flags = try {
         relay.flags?.commaSeparatedToList()?.map { it.toInt() }
     } catch (exception: Exception) {
