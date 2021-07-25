@@ -1,8 +1,11 @@
 export interface Settings{
+
+    // Show relay types
     Guard: boolean
     Exit: boolean
     Default: boolean
 
+    //Relay Must Include flags
     miValid: boolean
     miNamed: boolean
     miUnnamed: boolean
@@ -27,9 +30,10 @@ export interface Settings{
     daterange: boolean
     familyGradient: boolean
 
-    selectedCountry: string | undefined
     sortContry: boolean
-    selectedFamily: string | undefined
+    selectedCountry: string | undefined
+    sortFamily: boolean
+    selectedFamily: number | undefined
 }
 
 export interface Statistics{
