@@ -63,11 +63,11 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                                           label={"Sort relays according to country"}
                                           name={"sortContry"}
                         />
-                        <FormControlLabel control={<Switch checked={settings.familyGradient}
+                        <FormControlLabel control={<Switch checked={settings.sortFamily}
                                                            onChange={onChange}
                         />}
                                           label={"Sort relays according to family"}
-                                          name={"familyGradient"}
+                                          name={"sortFamily"}
                         />
                         <FormControlLabel control={<Switch checked={settings.daterange}
                                                            onChange={onChange}
