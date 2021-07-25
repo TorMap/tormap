@@ -1,15 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {WorldMap} from "./components/world-map/world-map";
-import ReactSlidingPane from "react-sliding-pane";
 import {
-    Button,
-    FormControlLabel,
-    Switch,
-    FormGroup,
-    Checkbox,
-    Slider,
-    Typography,
-    Grid,
     makeStyles, createMuiTheme, CircularProgress, TextField, ThemeProvider
 } from "@material-ui/core";
 import "@material-ui/styles";
@@ -18,12 +9,8 @@ import Moment from "react-moment";
 import {apiBaseUrl} from "./util/constants";
 import {Mark} from "./types/mark";
 import {AccordionStats} from "./components/arccordion-stats/accordion-stats";
-import {Settings, Statistics, TempSettings} from "./types/variousTypes";
+import {Settings, Statistics} from "./types/variousTypes";
 import {MapStats} from "./components/legend/map-legend";
-import {blue} from "@material-ui/core/colors";
-import {MuiPickersUtilsProvider, KeyboardDatePicker} from "@material-ui/pickers";
-import DateFnsUtils from "@date-io/date-fns";
-import moment from 'moment';
 import {DateSlider} from "./components/date-slider";
 
 const useStyle = makeStyles(theme => ({
@@ -35,7 +22,7 @@ function App() {
     const [availableDays, setAvailableDays] = useState<string[]>([])
     const [sliderValue, setSliderValue] = useState<number>(-1)
     const [isLoading, setIsLoading] = useState(true)
-    const [settings, setSettings] = useState<TempSettings>({
+    const [settings, setSettings] = useState<Settings>({
         Guard: true,
         Exit: true,
         Default: true,
@@ -56,10 +43,17 @@ function App() {
         miSybil: false,
         miBadExit: false,
 
-        colorNodesAccordingToType: true,
+        showMarker: true,
+        colorNodesAccordingToType: false,
         aggregateCoordinates: false,
         heatMap: false,
-        showMarker: true,
+
+        daterange: false,
+        familyGradient: false,
+
+        selectedCountry: undefined,
+        sortContry: false,
+        selectedFamily: undefined,
     })
     const [statistics, setStatistics] = useState<Statistics>({
         guard: 0,
@@ -109,12 +103,13 @@ function App() {
             <WorldMap
                 dayToDisplay={sliderValue >= 0 ? availableDays[sliderValue] : undefined}
                 settings={settings}
+                setSettingsCallback={setSettings}
                 setLoadingStateCallback={setIsLoading}
                 setStatisticsCallback={setStatistics}
             />
             <DateSlider availableDays={availableDays} setValue={setSliderValue} settings={settings}/>
             <AccordionStats settings={settings} onChange={handleInputChange}/>
-            <MapStats statistics={statistics}/>
+            <MapStats settings={settings} statistics={statistics}/>
         </div>
         </ThemeProvider>
     )

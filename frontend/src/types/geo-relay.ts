@@ -8,5 +8,5 @@ export interface GeoRelayView {
     country: string
     flags?: RelayFlag[]
     detailsId: string
-    familyId: string
+    familyId: number
 }
