@@ -7,7 +7,7 @@ import "./world-map.scss"
 import {NodePopup} from "../node-popup/node-popup";
 import {GeoRelayView} from "../../types/geo-relay";
 import {RelayFlag} from "../../types/relay";
-import {Settings, Statistics, TempSettings} from "../../types/variousTypes";
+import {Settings, Statistics} from "../../types/variousTypes";
 import {Colors} from "../../types/colors";
 import "leaflet.heat"
 
@@ -17,7 +17,9 @@ interface Props {
      */
     dayToDisplay?: string
 
-    settings: TempSettings
+    settings: Settings
+
+    setSettingsCallback: (s: Settings) => void
 
     setLoadingStateCallback: (b: boolean) => void
 
@@ -27,13 +29,14 @@ interface Props {
 // Variable needs to be outside component
 let latestRequestTimestamp: number | undefined = undefined
 
-export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setLoadingStateCallback, setStatisticsCallback}) => {
+export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setSettingsCallback, setLoadingStateCallback, setStatisticsCallback}) => {
     const [showNodePopup, setShowNodePopup] = useState(false)
     const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
     const [markerLayer] = useState<LayerGroup>(new LayerGroup())
     const [heatLayer, setHeatLayer] = useState<Layer>(new Layer())
     const [relays, setRelays] = useState<GeoRelayView[]>([])
+    const [selectedFamily, setSelectedFamily] = useState<number | undefined>(undefined)
 
     useEffect(() => {
         if (dayToDisplay) {
@@ -54,7 +57,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
 
     useEffect(() => {
         drawLayerGroup(relaysToLayerGroup(relays))
-    },[relays, settings])
+    },[relays, settings, selectedFamily])
 
     const onMarkerClick = (click: LeafletMouseEvent) => {
         console.log("Marker clicked, show node details")
@@ -80,6 +83,8 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
         }
 
         let latLonMap: Map<string, number> = new Map<string, number>()
+        let gradientMap: number[] = []
+        let countrys: string[] = []
 
         relays.forEach(relay => {
             if (settings.miValid &&         !relay.flags?.includes(RelayFlag.Valid))        {return}
@@ -98,6 +103,13 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
             if (settings.miSybil &&         !relay.flags?.includes(RelayFlag.Sybil))        {return}
             if (settings.miBadExit &&       !relay.flags?.includes(RelayFlag.BadExit))      {return}
 
+            if (settings.familyGradient && relay.familyId != undefined) {
+                if (!gradientMap.includes(+relay.familyId)) gradientMap.push(+relay.familyId)
+            }
+            if (settings.sortContry && relay.country != undefined){
+                if (!countrys.includes(relay.country)) countrys.push(relay.country)
+            }
+
             if (settings.aggregateCoordinates || settings.heatMap){ //Draw only one Point for same coordinates
                 const key: string = `${relay.lat},${relay.long}`
                 if (latLonMap.has(key)){
@@ -107,7 +119,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
                 }
             }
 
-            if(settings.showMarker && !settings.aggregateCoordinates){ //Draw a point for each Relay
+            if(settings.showMarker && !settings.aggregateCoordinates && !settings.familyGradient){ //Draw a point for each Relay
                 let color = "#833ab4"
                 let layer = defaultLayer
                 if (relay.flags?.includes(RelayFlag.Exit)) {
@@ -135,13 +147,96 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
 
         })
 
+        if (settings.familyGradient) {
+            relays.forEach(relay => {
+                let color = "#787d7d"
+                if (relay.familyId != undefined) {
+                    const index = gradientMap.findIndex((value, i) => {
+                        if (value === +relay.familyId) return i
+                    })
+                    const hue = index * 360 / gradientMap.length
+                    let sat = "90%"
+                    if (selectedFamily !== undefined) sat = "30%"
+                    if (selectedFamily != undefined && selectedFamily === relay.familyId) sat = "90%"
+                        color = `hsl(${hue},${sat},60%)`
+                    circleMarker(
+                        [relay.lat,relay.long],
+                        {color: color,
+                            radius: 4,
+                        }
+                    )
+                        .on("click", () => {
+                            if (relay.familyId === selectedFamily) {
+                                setSelectedFamily(undefined)
+                            }else{
+                                setSelectedFamily(relay.familyId)
+                            }
+                        })
+                        .addTo(exitLayer)
+                }
+                if (settings.showMarker){
+                    circleMarker(
+                        [relay.lat, relay.long],
+                        {
+                            color: color,
+                            radius: 1,
+                        }
+                    )
+                        .on("click", () => setSelectedFamily(undefined))
+                        .addTo(defaultLayer)
+                }
+            })
+        }
+
+        if (settings.sortContry) {
+            relays.forEach(relay => {
+                let color = "#FFFFFF"
+                if (relay.country != undefined) {
+                    const index = countrys.findIndex((value, i) => {
+                        if (value === relay.country) return i
+                    })
+                    //const hue = index * 360 / countrys.length
+                    const hue = index * 86.507
+                    let sat = "90%"
+                    if (settings.selectedCountry != undefined) sat = "10%"
+                    if (settings.selectedCountry != undefined && settings.selectedCountry === relay.country) sat = "90%"
+                    color = `hsl(${hue},${sat},60%)`
+                    circleMarker(
+                        [relay.lat,relay.long],
+                        {color: color,
+                            radius: 1,
+                        }
+                    )
+                        .on("click", () => {
+                            if (settings.selectedCountry === relay.country) {
+                                setSettingsCallback({...settings, selectedCountry: undefined})
+                            }else{
+                                setSettingsCallback({...settings, selectedCountry: relay.country})
+                            }
+                        })
+                        .addTo(exitLayer)
+                }
+                if (settings.showMarker){
+                    circleMarker(
+                        [relay.lat, relay.long],
+                        {
+                            color: color,
+                            radius: 1,
+                        }
+                    )
+                        .on("click", () => setSettingsCallback({...settings, selectedCountry: undefined}))
+                        .addTo(defaultLayer)
+                }
+            })
+        }
+
         if(settings.aggregateCoordinates){
             latLonMap.forEach((value, key) => {
                 const coordinates= key.split(",")
                 circleMarker(
                     [+coordinates[0],+coordinates[1]],
                     {
-                        radius: value/3,
+                        radius: value/7,
                         color: "#ffffff"
                     }
                 )
@@ -154,12 +249,16 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setL
 
             let latlngs: Array<number[]> = new Array<number[]>()
             let maxValue: number = 1
+
             latLonMap.forEach((value, key) => {
                 const coordinates= key.split(",")
                 if (value > maxValue) maxValue = value
-                latlngs.push([+coordinates[0],+coordinates[1], value])})
+                latlngs.push([+coordinates[0],+coordinates[1], value/maxValue])})
+
+
+            //relays.forEach(relay => latlngs.push([relay.lat, relay.long, 1]))
             // @ts-ignore
-            let heat = L.heatLayer(latlngs, {radius: 25, max: maxValue, blur: 35, minOpacity: .55, gradient: {0.4: '#2e53dc', 0.65: '#c924ae', .8: '#ff4646'}}).addTo(leafletMap)
+            let heat = L.heatLayer(latlngs, {radius: 25, max: 100, blur: 35, minOpacity: .55, gradient: {0.4: '#2e53dc', 0.65: '#c924ae', .75: '#ff4646', .83: "#ff0000"}}).addTo(leafletMap)
             setHeatLayer(heat)
             stats ={...stats, maxValueOnSameCoordinate: maxValue}
 

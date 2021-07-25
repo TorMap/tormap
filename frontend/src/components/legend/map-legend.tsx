@@ -1,13 +1,14 @@
 import {FunctionComponent} from "react";
 import {Card, CardContent, Typography} from "@material-ui/core";
-import {Statistics} from "../../types/variousTypes";
+import {Settings, Statistics} from "../../types/variousTypes";
 import "./map-legend.scss"
 
 interface Props {
+    settings: Settings
     statistics: Statistics
 }
 
-export const MapStats: FunctionComponent<Props> = ({statistics}) => {
+export const MapStats: FunctionComponent<Props> = ({settings, statistics}) => {
 
     return (
         <div className={"map-stats"}>
@@ -24,6 +25,9 @@ export const MapStats: FunctionComponent<Props> = ({statistics}) => {
                     </Typography>
                     <Typography>
                         maxValueOnSameCoordinate: {statistics.maxValueOnSameCoordinate}
+                    </Typography>
+                    <Typography>
+                        selected Country: {settings.selectedCountry}
                     </Typography>
                 </CardContent>
             </Card>

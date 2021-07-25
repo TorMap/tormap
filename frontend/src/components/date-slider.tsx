@@ -6,7 +6,7 @@ import Moment from "react-moment";
 import {KeyboardDatePicker, MuiPickersUtilsProvider} from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 import moment from "moment";
-import {Settings, TempSettings} from "../types/variousTypes";
+import {Settings} from "../types/variousTypes";
 
 const useStyle = makeStyles(theme => ({
     slider: {
@@ -36,7 +36,7 @@ const useStyle = makeStyles(theme => ({
 interface Props {
     availableDays: string[]
     setValue: (n: number) => void
-    settings: TempSettings
+    settings: Settings
 }
 
 export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue, settings}) => {
@@ -76,31 +76,34 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue, s
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <Grid container spacing={8} justify={"center"}>
                     <Grid item xs={2}>
-                        <KeyboardDatePicker
-                            disabled={true}
-                            autoOk
-                            variant="inline"
-                            format="yyyy-MM-dd"
-                            margin="normal"
-                            id="date-picker-1"
-                            minDate={availableDays[0]}
-                            maxDate={availableDays[availableDays.length-1]}
-                            value={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}
-                            onChange={(date, value) => {
-                                if (availableDays.includes(value!!)) {
-                                    setSliderValue(availableDays.findIndex(element => element === value))
-                                }else{
-                                    console.log(`Day ${value} is not available at the moment`)
-                                }
-                            }}
-                            KeyboardButtonProps={{
-                                'aria-label': 'change date',
-                            }}
-                            helperText={`Day in the life of the tor network`}
-                            shouldDisableDate={date => {
-                                return !(availableDays.includes(moment(date).format("YYYY-MM-DD")))
-                            }}
-                        />
+                        {settings.daterange ? (
+                            <KeyboardDatePicker
+                                disabled={settings.daterange}
+                                autoOk
+                                variant="inline"
+                                format="yyyy-MM-dd"
+                                margin="normal"
+                                id="date-picker-1"
+                                minDate={availableDays[0]}
+                                maxDate={availableDays[availableDays.length-1]}
+                                value={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}
+                                onChange={(date, value) => {
+                                    if (availableDays.includes(value!!)) {
+                                        setSliderValue(availableDays.findIndex(element => element === value))
+                                    }else{
+                                        console.log(`Day ${value} is not available at the moment`)
+                                    }
+                                }}
+                                KeyboardButtonProps={{
+                                    'aria-label': 'change date',
+                                }}
+                                helperText={`Day in the life of the tor network`}
+                                shouldDisableDate={date => {
+                                    return !(availableDays.includes(moment(date).format("YYYY-MM-DD")))
+                                }}
+                            />
+                        ) : null}
+
                     </Grid>
                     <Grid item xs>
                         <Slider
@@ -117,7 +120,7 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue, s
                             min={0}
                             max={availableDays.length - 1}
                             marks={sliderMarks}
-                            valueLabelFormat={(x) => <Moment date={availableDays[x]} format={"DD-MM-YYYY"}/>}
+                            valueLabelFormat={(x) => <Moment date={availableDays[x]} format={"YYYY-MM-DD"}/>}
                             track={false}
                         />
                     </Grid>

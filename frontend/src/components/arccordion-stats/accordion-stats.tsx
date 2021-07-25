@@ -11,11 +11,11 @@ import {
 } from "@material-ui/core";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import "./accordion-stats.scss"
-import {TempSettings} from "../../types/variousTypes";
+import {Settings} from "../../types/variousTypes";
 import {RelayFlagName} from "../../types/relay";
 
 interface Props {
-    settings: TempSettings
+    settings: Settings
 
     onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
@@ -56,6 +56,24 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                         />}
                                           label={"Aggregate Relays to density heatmap"}
                                           name={"heatMap"}
+                        />
+                        <FormControlLabel control={<Switch checked={settings.sortContry}
+                                                           onChange={onChange}
+                        />}
+                                          label={"Sort relays according to country"}
+                                          name={"sortContry"}
+                        />
+                        <FormControlLabel control={<Switch checked={settings.familyGradient}
+                                                           onChange={onChange}
+                        />}
+                                          label={"Sort relays according to family"}
+                                          name={"familyGradient"}
+                        />
+                        <FormControlLabel control={<Switch checked={settings.daterange}
+                                                           onChange={onChange}
+                        />}
+                                          label={"Enable date range selection on slider"}
+                                          name={"daterange"}
                         />
                     </FormGroup>
                 </AccordionDetails>
