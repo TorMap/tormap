@@ -5,7 +5,6 @@ import com.torusage.adapter.controller.view.GeoRelayView
 import com.torusage.database.entity.NodeDetails
 import com.torusage.database.repository.GeoRelayRepositoryImpl
 import com.torusage.database.repository.NodeDetailsRepository
-import com.torusage.logger
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -18,16 +17,12 @@ class ArchiveDataController(
     val geoRelayRepository: GeoRelayRepositoryImpl,
     val nodeDetailsRepository: NodeDetailsRepository,
 ) {
-    val logger = logger()
-
     @GetMapping("/geo/relay/days")
     fun getDaysForGeoRelays() = geoRelayRepository.findDistinctDays()
 
     @GetMapping("/geo/relay/day/{day}")
     fun getGeoRelaysByDay(@PathVariable day: String): List<GeoRelayView> {
-        logger.info("Querying geo relays for day $day")
         val relays = geoRelayRepository.findAllByDay(LocalDate.parse(day))
-        logger.info("Finished query for day $day")
         return relays.map { GeoRelayView(it) }
     }
 
