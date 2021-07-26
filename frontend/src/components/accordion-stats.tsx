@@ -45,50 +45,62 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                 <AccordionDetails>
                     <FormGroup>
                         <FormControlLabel control={<Switch checked={settings.showMarker}
-                                                           onChange={onChange}
-                        />}
+                                                           onChange={onChange}/>}
                                           label={"Draw marker"}
                                           name={"showMarker"}
                         />
-                        <FormControlLabel control={<Switch checked={settings.colorNodesAccordingToType}
-                                                           onChange={onChange}
-                                                    />}
-                                          label={"Color relays according to Type"}
-                                          name={"colorNodesAccordingToType"}
-                        />
                         <FormControlLabel control={<Switch checked={settings.aggregateCoordinates}
-                                                           onChange={onChange}
-                                                    />}
+                                                           onChange={onChange}/>}
                                           label={"Aggregate Relays that have the same coordinates"}
                                           name={"aggregateCoordinates"}
                         />
                         <FormControlLabel control={<Switch checked={settings.heatMap}
-                                                           onChange={onChange}
-                        />}
+                                                           onChange={onChange}/>}
                                           label={"Aggregate Relays to density heatmap"}
                                           name={"heatMap"}
                         />
-                        <FormControlLabel control={<Switch checked={settings.sortCountry}
-                                                           onChange={onChange}
-                        />}
-                                          label={"Sort relays according to country"}
-                                          name={"sortCountry"}
-                        />
-                        <FormControlLabel control={<Switch checked={settings.sortFamily}
-                                                           onChange={onChange}
-                        />}
-                                          label={"Sort relays according to family"}
-                                          name={"sortFamily"}
-                        />
                         <FormControlLabel control={<Switch checked={settings.dateRange}
-                                                           onChange={onChange}
-                        />}
+                                                           onChange={onChange}/>}
                                           label={"Enable date range selection on slider"}
                                           name={"dateRange"}
                         />
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>
+            <Accordion>
+                <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel2a-content"
+                    id="panel2a-header"
+                >
+                    <Typography className={"heading"}>Selection</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <FormGroup>
+                        <FormControlLabel control={<Switch checked={settings.sortCountry}
+                                                           onChange={onChange}/>}
+                                          label={"Sort relays according to country"}
+                                          name={"sortCountry"}
+                        />
+                        <FormControlLabel control={<Switch checked={settings.onlyCountry}
+                                                           onChange={onChange}/>}
+                                          label={"Draw only selected country"}
+                                          name={"onlyCountry"}
+                        />
+                        <FormControlLabel control={<Switch checked={settings.sortFamily}
+                                                           onChange={onChange}/>}
+                                          label={"Sort relays according to family"}
+                                          name={"sortFamily"}
+                        />
+                        <FormControlLabel control={<Switch checked={settings.onlyFamily}
+                                                           onChange={onChange}/>}
+                                          label={"Draw only selected family"}
+                                          name={"onlyFamily"}
+                        />
+                    </FormGroup>
+                </AccordionDetails>
+            </Accordion>
+
             <Accordion>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
@@ -108,6 +120,11 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                         <FormControlLabel
                             control={<Checkbox checked={settings.Default} onChange={onChange} name={"Default"}/>}
                             label={"Other"}/>
+                        <FormControlLabel control={<Switch checked={settings.colorNodesAccordingToType}
+                                                           onChange={onChange}/>}
+                                          label={"Color relays according to Type"}
+                                          name={"colorNodesAccordingToType"}
+                        />
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>

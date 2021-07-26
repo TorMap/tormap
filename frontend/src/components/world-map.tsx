@@ -167,6 +167,8 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
                     let sat = "90%"
                     let radius = 4
                     if (selectedFamily !== undefined) sat = "30%"
+                    if (settings.selectedFamily != undefined && settings.selectedFamily && settings.selectedFamily !== relay.familyId) return
+                    if (settings.selectedCountry != undefined && settings.onlyCountry && settings.selectedCountry !== relay.country) return
                     if (selectedFamily !== undefined && selectedFamily === relay.familyId) {
                         sat = "90%"
                         radius = 7
@@ -212,6 +214,8 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
                     const hue = index * 86.507
                     let sat = "90%"
                     if (settings.selectedCountry != undefined) sat = "10%"
+                    if (settings.selectedFamily != undefined && settings.selectedFamily && settings.selectedFamily !== relay.familyId) return
+                    if (settings.selectedCountry != undefined && settings.onlyCountry && settings.selectedCountry !== relay.country) return
                     if (settings.selectedCountry != undefined && settings.selectedCountry === relay.country) sat = "90%"
                     color = `hsl(${hue},${sat},60%)`
                     circleMarker(
