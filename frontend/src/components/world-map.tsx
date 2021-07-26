@@ -10,7 +10,7 @@ import {Settings, Statistics} from "../types/variousTypes";
 import "leaflet.heat"
 import {makeStyles} from "@material-ui/core";
 
-const useStyle = makeStyles(theme => ({
+const useStyle = makeStyles(() => ({
     leafletContainer: {
         width: "100vw",
         height: "100vh",
@@ -114,7 +114,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
             if (settings.sortFamily && relay.familyId != undefined) {
                 if (!gradientMap.includes(relay.familyId)) gradientMap.push(relay.familyId)
             }
-            if (settings.sortContry && relay.country != undefined){
+            if (settings.sortCountry && relay.country != undefined){
                 if (!countrys.includes(relay.country)) countrys.push(relay.country)
             }
 
@@ -201,7 +201,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
             })
         }
 
-        if (settings.sortContry) {
+        if (settings.sortCountry) {
             relays.forEach(relay => {
                 let color = "#FFFFFF"
                 if (relay.country != undefined) {

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {WorldMap} from "./components/world-map";
 import {
-    makeStyles, createMuiTheme, CircularProgress, TextField, ThemeProvider
+    createMuiTheme, CircularProgress, ThemeProvider, makeStyles
 } from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
@@ -11,10 +11,17 @@ import {Settings, Statistics} from "./types/variousTypes";
 import {MapStats} from "./components/map-stats";
 import {DateSlider} from "./components/date-slider";
 
-const useStyle = makeStyles(theme => ({
-
+const useStyle = makeStyles(() => ({
+    progressCircle: {
+        position: "fixed",
+        left: "calc(50% - 25px)",
+        top: "calc(50% - 25px)",
+        margin: "auto",
+        backgroundColor: "transparent",
+        color: "rgba(255,255,255,.6)",
+        zIndex: 1000,
+    },
 }))
-
 
 function App() {
     const [availableDays, setAvailableDays] = useState<string[]>([])
@@ -46,10 +53,10 @@ function App() {
         aggregateCoordinates: false,
         heatMap: false,
 
-        daterange: false,
+        dateRange: false,
         familyGradient: false,
 
-        sortContry: false,
+        sortCountry: false,
         selectedCountry: undefined,
         sortFamily: false,
         selectedFamily: undefined,
@@ -59,14 +66,13 @@ function App() {
         default: 0,
         exit: 0,
     })
-    const [errorState, setErrorState] = useState(false)
+    const classes = useStyle()
 
-    const [theme, setTheme] = useState(createMuiTheme({
+    const [theme] = useState(createMuiTheme({
         palette: {
             type: "dark",
         },
     }))
-    const classes = useStyle()
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSettings({...settings, [event.target.name]: event.target.checked})
@@ -92,24 +98,24 @@ function App() {
 
     return (
         <ThemeProvider theme={theme}>
-        <div>
-            {isLoading ?
-                <div className={"progressCircle"}>
-                    <CircularProgress/>
-                </div>
-                : null
-            }
-            <WorldMap
-                dayToDisplay={sliderValue >= 0 ? availableDays[sliderValue] : undefined}
-                settings={settings}
-                setSettingsCallback={setSettings}
-                setLoadingStateCallback={setIsLoading}
-                setStatisticsCallback={setStatistics}
-            />
-            <DateSlider availableDays={availableDays} setValue={setSliderValue} settings={settings}/>
-            <AccordionStats settings={settings} onChange={handleInputChange}/>
-            <MapStats settings={settings} statistics={statistics}/>
-        </div>
+            <div>
+                {isLoading ?
+                    <div className={classes.progressCircle}>
+                        <CircularProgress color={"inherit"}/>
+                    </div>
+                    : null
+                }
+                <WorldMap
+                    dayToDisplay={sliderValue >= 0 ? availableDays[sliderValue] : undefined}
+                    settings={settings}
+                    setSettingsCallback={setSettings}
+                    setLoadingStateCallback={setIsLoading}
+                    setStatisticsCallback={setStatistics}
+                />
+                <DateSlider availableDays={availableDays} setValue={setSliderValue} settings={settings}/>
+                <AccordionStats settings={settings} onChange={handleInputChange}/>
+                <MapStats settings={settings} statistics={statistics}/>
+            </div>
         </ThemeProvider>
     )
 }

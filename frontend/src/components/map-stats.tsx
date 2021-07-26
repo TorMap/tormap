@@ -2,7 +2,7 @@ import {FunctionComponent} from "react";
 import {Card, CardContent, makeStyles, Typography} from "@material-ui/core";
 import {Settings, Statistics} from "../types/variousTypes";
 
-const useStyle = makeStyles(theme => ({
+const useStyle = makeStyles(() => ({
     root: {
         position: "fixed",
         left: "10px",

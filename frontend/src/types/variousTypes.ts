@@ -27,10 +27,10 @@ export interface Settings{
     heatMap: boolean
     showMarker: boolean
 
-    daterange: boolean
+    dateRange: boolean
     familyGradient: boolean
 
-    sortContry: boolean
+    sortCountry: boolean
     selectedCountry: string | undefined
     sortFamily: boolean
     selectedFamily: number | undefined
