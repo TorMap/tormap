@@ -31,8 +31,10 @@ export interface Settings{
     familyGradient: boolean
 
     sortCountry: boolean
+    onlyCountry: boolean
     selectedCountry: string | undefined
     sortFamily: boolean
+    onlyFamily: boolean
     selectedFamily: number | undefined
 }
 
