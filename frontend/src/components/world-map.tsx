@@ -1,14 +1,23 @@
 import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useEffect, useState} from "react";
-import {apiBaseUrl} from "../../util/constants";
+import {apiBaseUrl} from "../util/constants";
 import L, {circleMarker, Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
 import 'leaflet/dist/leaflet.css';
-import "./world-map.scss"
-import {NodePopup} from "../node-popup/node-popup";
-import {GeoRelayView} from "../../types/geo-relay";
-import {RelayFlag} from "../../types/relay";
-import {Settings, Statistics} from "../../types/variousTypes";
+import {NodePopup} from "./node-popup";
+import {GeoRelayView} from "../types/geo-relay";
+import {RelayFlag} from "../types/relay";
+import {Settings, Statistics} from "../types/variousTypes";
 import "leaflet.heat"
+import {makeStyles} from "@material-ui/core";
+
+const useStyle = makeStyles(theme => ({
+    leafletContainer: {
+        width: "100vw",
+        height: "100vh",
+        backgroundColor: "#262626",
+        position: "fixed",
+    }
+}))
 
 interface Props {
     /**
@@ -35,6 +44,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
     const [markerLayer] = useState<LayerGroup>(new LayerGroup())
     const [heatLayer, setHeatLayer] = useState<Layer>(new Layer())
     const [relays, setRelays] = useState<GeoRelayView[]>([])
+    const classes = useStyle()
 
     useEffect(() => {
         if (dayToDisplay) {
@@ -155,13 +165,17 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
                     const selectedFamily = settings.selectedFamily
                     const hue = index * 360 / gradientMap.length
                     let sat = "90%"
+                    let radius = 4
                     if (selectedFamily !== undefined) sat = "30%"
-                    if (selectedFamily !== undefined && selectedFamily === relay.familyId) sat = "90%"
+                    if (selectedFamily !== undefined && selectedFamily === relay.familyId) {
+                        sat = "90%"
+                        radius = 7
+                    }
                         color = `hsl(${hue},${sat},60%)`
                     circleMarker(
                         [relay.lat,relay.long],
                         {color: color,
-                            radius: 4,
+                            radius: radius,
                         }
                     )
                         .on("click", () => {
@@ -287,6 +301,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
 
     return (
         <MapContainer
+            className={classes.leafletContainer}
             center={[15, 0]}
             minZoom={2}
             zoom={3}

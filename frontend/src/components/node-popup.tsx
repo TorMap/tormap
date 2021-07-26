@@ -1,9 +1,16 @@
-import {Dialog, DialogContent, DialogTitle, IconButton, Typography} from "@material-ui/core";
+import {Dialog, DialogContent, DialogTitle, IconButton, makeStyles, Typography} from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import React, {useEffect, useState} from "react";
-import "./node-popup.scss"
-import {apiBaseUrl} from "../../util/constants";
-import {NodeDetails} from "../../types/node-details";
+import {apiBaseUrl} from "../util/constants";
+import {NodeDetails} from "../types/node-details";
+
+const useStyle = makeStyles(theme => ({
+    closeButton: {
+        position: "absolute",
+        right: "10px",
+        top: "10px",
+    }
+}))
 
 interface Props {
     /**
@@ -27,6 +34,7 @@ export const NodePopup: React.FunctionComponent<Props> = ({
                                                           }) => {
     const [nodeDetails, setNodeDetails] = useState<NodeDetails>()
     const [relayInfos, setRelayInfos] = useState<RelayInfo[]>()
+    const classes = useStyle()
 
     const convertBandwidthBytesToMB = (bandwidthInBytes: number | undefined) => bandwidthInBytes ?
         (bandwidthInBytes / 1000000).toFixed(2) + " MB/s"
@@ -59,7 +67,7 @@ export const NodePopup: React.FunctionComponent<Props> = ({
                 className={"dialogfield"}
             >
                 <Typography variant="h6">{nodeDetailsId ? nodeDetails?.nickname : "No information"}</Typography>
-                <IconButton aria-label="close" className={"closeButton"} onClick={setShowNodePopup}>
+                <IconButton aria-label="close" className={classes.closeButton} onClick={setShowNodePopup}>
                     <CloseIcon/>
                 </IconButton>
             </DialogTitle>

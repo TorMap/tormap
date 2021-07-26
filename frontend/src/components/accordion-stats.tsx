@@ -5,14 +5,23 @@ import {
     AccordionSummary,
     Checkbox,
     FormControlLabel,
-    FormGroup,
+    FormGroup, makeStyles,
     Switch,
-    Typography
+    Typography, useTheme
 } from "@material-ui/core";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import "./accordion-stats.scss"
-import {Settings} from "../../types/variousTypes";
-import {RelayFlagName} from "../../types/relay";
+import {Settings} from "../types/variousTypes";
+import {RelayFlagName} from "../types/relay";
+
+const useStyle = makeStyles(theme => ({
+    accordion: {
+        position: "absolute",
+        right: "10px",
+        top: "10px",
+        paddingBottom: "10px",
+        maxWidth: "20%",
+    }
+}))
 
 interface Props {
     settings: Settings
@@ -21,15 +30,18 @@ interface Props {
 }
 
 export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) => {
+    const classes = useStyle()
+    const theme = useTheme()
+
     return (
-        <div className={"accordion-stats"}>
+        <div className={classes.accordion}>
             <Accordion>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="panel1a-content"
                     id="panel1a-header"
                 >
-                    <Typography className={"heading"}>Map Settings</Typography>
+                    <Typography>Map Settings</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <FormGroup>
