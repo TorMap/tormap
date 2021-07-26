@@ -5,7 +5,7 @@ export interface NodeDetails {
     month: string,
     day: string,
     address: string
-    allowSingleHopExits: Boolean
+    allowSingleHopExits: boolean
     nickname: string
     bandwidthRate: number
     bandwidthBurst: number
@@ -13,14 +13,14 @@ export interface NodeDetails {
     platform: string
     protocols: string
     fingerprint: string
-    isHibernating: Boolean
+    isHibernating: boolean
     uptime: number
     contact: string
     familyEntries: string
-    cachesExtraInfo: Boolean
-    isHiddenServiceDir: Boolean
+    cachesExtraInfo: boolean
+    isHiddenServiceDir: boolean
     linkProtocolVersions: string
     circuitProtocolVersions: string
-    tunnelledDirServer: Boolean
+    tunnelledDirServer: boolean
 }
 

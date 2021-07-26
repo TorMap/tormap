@@ -27,6 +27,16 @@ interface Props {
     nodeDetailsId?: number,
 }
 
+const formatBytesToMBPerSecond = (bandwidthInBytes?: number) => bandwidthInBytes ?
+    (bandwidthInBytes / 1000000).toFixed(2) + " MB/s"
+    : undefined
+
+const formatSecondsToHours = (seconds?: number) => seconds ?
+    (seconds / 3600).toFixed(2) + " hours"
+    : undefined
+
+const formatBoolean = (value?: boolean) => value === null || value === undefined ? undefined : value ? "yes" : "no"
+
 export const NodePopup: React.FunctionComponent<Props> = ({
                                                               showNodePopup,
                                                               setShowNodePopup,
@@ -36,10 +46,6 @@ export const NodePopup: React.FunctionComponent<Props> = ({
     const [relayInfos, setRelayInfos] = useState<RelayInfo[]>()
     const classes = useStyle()
 
-    const convertBandwidthBytesToMB = (bandwidthInBytes: number | undefined) => bandwidthInBytes ?
-        (bandwidthInBytes / 1000000).toFixed(2) + " MB/s"
-        : undefined
-
     useEffect(() => {
         if (nodeDetailsId) {
             fetch(`${apiBaseUrl}/archive/node/details/${nodeDetailsId}`)
@@ -48,9 +54,23 @@ export const NodePopup: React.FunctionComponent<Props> = ({
                     setNodeDetails(relay)
                     setRelayInfos([
                         {name: "Fingerprint", value: relay.fingerprint},
-                        {name: "Contact", value: relay.contact},
-                        {name: "Observed bandwidth", value: convertBandwidthBytesToMB(relay.bandwidthObserved)},
+                        {name: "IP address", value: relay.address},
                         {name: "Platform", value: relay.platform},
+                        {name: "Uptime", value: formatSecondsToHours(relay.uptime)},
+                        {name: "Contact", value: relay.contact},
+                        {name: "Bandwidth for short intervals", value: formatBytesToMBPerSecond(relay.bandwidthBurst)},
+                        {name: "Bandwidth for long periods", value: formatBytesToMBPerSecond(relay.bandwidthRate)},
+                        {name: "Bandwidth observed", value: formatBytesToMBPerSecond(relay.bandwidthObserved)},
+                        {name: "Supported protocols", value: relay.protocols},
+                        {name: "Allows single hop exit", value: formatBoolean(relay.allowSingleHopExits)},
+                        {name: "Is hibernating", value: formatBoolean(relay.isHibernating)},
+                        {name: "Caches extra info", value: formatBoolean(relay.cachesExtraInfo)},
+                        {name: "Is a hidden service directory", value: formatBoolean(relay.isHiddenServiceDir)},
+                        {name: "Accepts tunneled directory requests", value: formatBoolean(relay.tunnelledDirServer)},
+                        {name: "Link protocol versions", value: relay.linkProtocolVersions},
+                        {name: "Circuit protocol versions", value: relay.circuitProtocolVersions},
+                        {name: "Family members", value: relay.familyEntries},
+                        {name: "Infos published on", value: relay.day},
                     ])
                 })
                 .catch(console.log)
