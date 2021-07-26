@@ -8,7 +8,7 @@ import DateFnsUtils from "@date-io/date-fns";
 import moment from "moment";
 import {Settings} from "../types/variousTypes";
 
-const useStyle = makeStyles(theme => ({
+const useStyle = makeStyles(() => ({
     slider: {
         position: "fixed",
         bottom: "20px",
@@ -47,7 +47,6 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue, s
     const debouncedSliderValue = useDebounce<number>(sliderValue, 500);
 
     useEffect(() => {
-        console.log("Marks werden berechnet")
         if (availableDays.length !== 0) {
             let markCount = 6
             markCount--
@@ -76,9 +75,8 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue, s
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <Grid container spacing={8} justify={"center"}>
                     <Grid item xs={2}>
-                        {settings.daterange ? (
+                        {settings.dateRange ? (
                             <KeyboardDatePicker
-                                disabled={settings.daterange}
                                 autoOk
                                 variant="inline"
                                 format="yyyy-MM-dd"
