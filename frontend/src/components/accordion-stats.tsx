@@ -7,13 +7,13 @@ import {
     FormControlLabel,
     FormGroup, makeStyles,
     Switch,
-    Typography, useTheme
+    Typography,
 } from "@material-ui/core";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import {Settings} from "../types/variousTypes";
 import {RelayFlagName} from "../types/relay";
 
-const useStyle = makeStyles(theme => ({
+const useStyle = makeStyles(() => ({
     accordion: {
         position: "absolute",
         right: "10px",
@@ -31,7 +31,6 @@ interface Props {
 
 export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) => {
     const classes = useStyle()
-    const theme = useTheme()
 
     return (
         <div className={classes.accordion}>
@@ -69,11 +68,11 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                                           label={"Aggregate Relays to density heatmap"}
                                           name={"heatMap"}
                         />
-                        <FormControlLabel control={<Switch checked={settings.sortContry}
+                        <FormControlLabel control={<Switch checked={settings.sortCountry}
                                                            onChange={onChange}
                         />}
                                           label={"Sort relays according to country"}
-                                          name={"sortContry"}
+                                          name={"sortCountry"}
                         />
                         <FormControlLabel control={<Switch checked={settings.sortFamily}
                                                            onChange={onChange}
@@ -81,11 +80,11 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                                           label={"Sort relays according to family"}
                                           name={"sortFamily"}
                         />
-                        <FormControlLabel control={<Switch checked={settings.daterange}
+                        <FormControlLabel control={<Switch checked={settings.dateRange}
                                                            onChange={onChange}
                         />}
                                           label={"Enable date range selection on slider"}
-                                          name={"daterange"}
+                                          name={"dateRange"}
                         />
                     </FormGroup>
                 </AccordionDetails>

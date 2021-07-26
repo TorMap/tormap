@@ -4,7 +4,7 @@ import React, {useEffect, useState} from "react";
 import {apiBaseUrl} from "../util/constants";
 import {NodeDetails} from "../types/node-details";
 
-const useStyle = makeStyles(theme => ({
+const useStyle = makeStyles(() => ({
     closeButton: {
         position: "absolute",
         right: "10px",
