@@ -1,16 +1,14 @@
 import React, {useEffect, useState} from 'react';
-import {WorldMap} from "./components/world-map/world-map";
+import {WorldMap} from "./components/world-map";
 import {
     makeStyles, createMuiTheme, CircularProgress, TextField, ThemeProvider
 } from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
-import Moment from "react-moment";
 import {apiBaseUrl} from "./util/constants";
-import {Mark} from "./types/mark";
-import {AccordionStats} from "./components/arccordion-stats/accordion-stats";
+import {AccordionStats} from "./components/accordion-stats";
 import {Settings, Statistics} from "./types/variousTypes";
-import {MapStats} from "./components/legend/map-legend";
+import {MapStats} from "./components/map-stats";
 import {DateSlider} from "./components/date-slider";
 
 const useStyle = makeStyles(theme => ({

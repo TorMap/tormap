@@ -1,7 +1,14 @@
 import {FunctionComponent} from "react";
-import {Card, CardContent, Typography} from "@material-ui/core";
-import {Settings, Statistics} from "../../types/variousTypes";
-import "./map-legend.scss"
+import {Card, CardContent, makeStyles, Typography} from "@material-ui/core";
+import {Settings, Statistics} from "../types/variousTypes";
+
+const useStyle = makeStyles(theme => ({
+    root: {
+        position: "fixed",
+        left: "10px",
+        bottom: "100px",
+    }
+}))
 
 interface Props {
     settings: Settings
@@ -9,10 +16,9 @@ interface Props {
 }
 
 export const MapStats: FunctionComponent<Props> = ({settings, statistics}) => {
-
+    const classes = useStyle()
     return (
-        <div className={"map-stats"}>
-            <Card variant={"outlined"}>
+            <Card variant={"outlined"} className={classes.root}>
                 <CardContent>
                     <Typography>
                         Exit relays: {statistics.exit}
@@ -31,6 +37,5 @@ export const MapStats: FunctionComponent<Props> = ({settings, statistics}) => {
                     </Typography>
                 </CardContent>
             </Card>
-        </div>
     )
 }
