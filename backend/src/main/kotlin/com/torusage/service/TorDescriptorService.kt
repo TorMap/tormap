@@ -1,13 +1,13 @@
 package com.torusage.service
 
 import com.torusage.commaSeparatedToList
+import com.torusage.config.ApiConfig
 import com.torusage.database.entity.*
 import com.torusage.database.repository.DescriptorsFileRepository
 import com.torusage.database.repository.GeoRelayRepositoryImpl
 import com.torusage.database.repository.NodeDetailsRepository
 import com.torusage.logger
 import com.torusage.millisSinceEpochToLocalDate
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.jdbc.support.incrementer.H2SequenceMaxValueIncrementer
 import org.springframework.stereotype.Service
 import org.torproject.descriptor.*
@@ -22,6 +22,7 @@ import java.time.YearMonth
  */
 @Service
 class TorDescriptorService(
+    private val apiConfig: ApiConfig,
     val geoRelayRepositoryImpl: GeoRelayRepositoryImpl,
     val nodeDetailsRepository: NodeDetailsRepository,
     val descriptorsFileRepository: DescriptorsFileRepository,
@@ -30,12 +31,6 @@ class TorDescriptorService(
 ) {
     val logger = logger()
     val descriptorCollector: DescriptorCollector = DescriptorSourceFactory.createDescriptorCollector()
-
-    @Value("\${collector.api.baseurl}")
-    lateinit var collectorApiBaseUrl: String
-
-    @Value("\${collector.target.directory}")
-    lateinit var collectorTargetDirectory: String
 
     /**
      * Collect and process descriptors from a specific the TorProject collector [apiPath]
@@ -75,10 +70,10 @@ class TorDescriptorService(
         shouldDeleteLocalFilesNotFoundOnRemote: Boolean = false
     ) =
         descriptorCollector.collectDescriptors(
-            collectorApiBaseUrl,
+            apiConfig.descriptorBaseURL,
             arrayOf(apiPath),
             minLastModifiedMilliseconds,
-            File(collectorTargetDirectory),
+            File(apiConfig.descriptorDownloadDirectory),
             shouldDeleteLocalFilesNotFoundOnRemote,
         )
 
@@ -124,7 +119,7 @@ class TorDescriptorService(
      */
     private fun readDescriptors(apiPath: String): MutableIterable<Descriptor> {
         val descriptorReader = DescriptorSourceFactory.createDescriptorReader()
-        val parentDirectory = File(collectorTargetDirectory + apiPath)
+        val parentDirectory = File(apiConfig.descriptorDownloadDirectory + apiPath)
         val excludedFiles = descriptorsFileRepository.findAll()
         descriptorReader.excludedFiles = excludedFiles.associate {
             Pair(
@@ -220,7 +215,8 @@ class TorDescriptorService(
             requestingNode.familyEntries!!.commaSeparatedToList().forEach {
                 try {
                     confirmedFamilyNodes.add(confirmFamilyMember(requestingNode, it, month))
-                } catch (exception: Exception) {}
+                } catch (exception: Exception) {
+                }
             }
             saveNodeFamily(requestingNode, confirmedFamilyNodes)
         }

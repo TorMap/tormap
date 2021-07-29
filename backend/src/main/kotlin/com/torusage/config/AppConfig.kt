@@ -1,6 +1,6 @@
-package com.torusage
+package com.torusage.config
 
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.jdbc.support.incrementer.H2SequenceMaxValueIncrementer
@@ -14,11 +14,10 @@ import javax.sql.DataSource
  */
 @Configuration
 @EnableScheduling
+@ConfigurationPropertiesScan
 class AppConfig(
-     val dataSource: DataSource,
-
-    @Value("\${db.sequence.name}")
-    val dbSequenceName: String,
+    val databaseConfig: DatabaseConfig,
+    val dataSource: DataSource,
 ) : WebMvcConfigurer {
 
     override fun addCorsMappings(registry: CorsRegistry) {
@@ -27,7 +26,7 @@ class AppConfig(
 
     @Bean
     fun h2SequenceMaxValueIncrementer(): H2SequenceMaxValueIncrementer {
-        return H2SequenceMaxValueIncrementer(dataSource, dbSequenceName)
+        return H2SequenceMaxValueIncrementer(dataSource, databaseConfig.defaultSequenceName)
     }
 
 }
