@@ -2,6 +2,7 @@ package com.torusage.adapter.controller
 
 import com.torusage.adapter.controller.exception.NodeNotFoundException
 import com.torusage.adapter.controller.view.GeoRelayView
+import com.torusage.adapter.controller.view.GeoRelayViewTest
 import com.torusage.database.entity.NodeDetails
 import com.torusage.database.repository.GeoRelayRepositoryImpl
 import com.torusage.database.repository.NodeDetailsRepository
@@ -24,6 +25,11 @@ class ArchiveDataController(
     fun getGeoRelaysByDay(@PathVariable day: String): List<GeoRelayView> {
         val relays = geoRelayRepository.findAllByDay(LocalDate.parse(day))
         return relays.map { GeoRelayView(it) }
+    }
+
+    @GetMapping("/geo/relay/day-test/{day}")
+    fun getGeoRelaysByDayTest(@PathVariable day: String): List<GeoRelayViewTest> {
+        return geoRelayRepository.findAllUsingDay(LocalDate.parse(day))
     }
 
     @GetMapping("/node/details/{id}")
