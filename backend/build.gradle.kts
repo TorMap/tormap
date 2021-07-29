@@ -1,8 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
 
 plugins {
     val kotlinVersion = "1.5.21"
     kotlin("jvm") version kotlinVersion
+    kotlin("kapt") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     kotlin("plugin.allopen") version kotlinVersion
     kotlin("plugin.jpa") version kotlinVersion
@@ -35,6 +37,11 @@ dependencies {
     // Spring Boot
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    val configurationProcessor = "org.springframework.boot:spring-boot-configuration-processor"
+    kapt(configurationProcessor)
+    kaptTest(configurationProcessor)
+    annotationProcessor(configurationProcessor)
+
 
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -52,6 +59,10 @@ dependencies {
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+
+kapt {
+    annotationProcessor("org.springframework.boot.configurationprocessor.ConfigurationMetadataAnnotationProcessor")
 }
 
 allOpen {

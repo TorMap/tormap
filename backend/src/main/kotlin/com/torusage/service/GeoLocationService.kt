@@ -3,8 +3,8 @@ package com.torusage.service
 import com.ip2location.IP2Location
 import com.maxmind.db.CHMCache
 import com.maxmind.geoip2.DatabaseReader
+import com.torusage.config.DatabaseConfig
 import com.torusage.logger
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -16,33 +16,28 @@ import java.net.InetAddress
  */
 @Service
 class GeoLocationService(
-    @Value("\${maxmind.db.resource.file}")
-    private val maxmindDBFile: String,
-
-    @Value("\${ip2location.db.resource.file}")
-    private val ip2locationDBFile: String,
-
-    @Value("\${geo.location.cache}")
-    private val shouldCacheQueries: Boolean = true,
+    databaseConfig: DatabaseConfig,
 ) {
     private val logger = logger()
     private var maxmindDatabaseReader: DatabaseReader? = null
     private var ip2locationDatabaseReader: IP2Location? = null
 
     init {
-        val maxmindDBResource = javaClass.getResourceAsStream(maxmindDBFile) ?: throw GeoDatabaseNotFound(
-            maxmindDBFile
-        )
-        val ip2locationDBResource = javaClass.getResource(ip2locationDBFile) ?: throw GeoDatabaseNotFound(
-            ip2locationDBFile
-        )
+        val maxmindDBResource =
+            javaClass.getResourceAsStream(databaseConfig.maxmindResourceFile) ?: throw GeoDatabaseNotFound(
+                databaseConfig.maxmindResourceFile
+            )
+        val ip2locationDBResource =
+            javaClass.getResource(databaseConfig.ip2locationResourceFile) ?: throw GeoDatabaseNotFound(
+                databaseConfig.ip2locationResourceFile
+            )
         var maxmindDatabaseReaderBuilder = DatabaseReader.Builder(maxmindDBResource)
-        if (shouldCacheQueries) {
+        if (databaseConfig.shouldCacheIPLookup) {
             maxmindDatabaseReaderBuilder = maxmindDatabaseReaderBuilder.withCache(CHMCache())
         }
         maxmindDatabaseReader = maxmindDatabaseReaderBuilder.build()
         ip2locationDatabaseReader = IP2Location().open(
-            ip2locationDBResource.file, shouldCacheQueries
+            ip2locationDBResource.file, databaseConfig.shouldCacheIPLookup
         )
     }
 
