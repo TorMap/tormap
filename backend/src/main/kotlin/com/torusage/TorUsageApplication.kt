@@ -19,7 +19,7 @@ class TorUsageApplication : ApplicationRunner {
 }
 
 /**
- * main method to start backend application
+ * Main method that starts backend application
  */
 fun main(args: Array<String>) {
     runApplication<TorUsageApplication>(*args)

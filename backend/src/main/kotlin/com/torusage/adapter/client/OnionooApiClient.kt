@@ -2,7 +2,7 @@ package com.torusage.adapter.client
 
 import com.torusage.adapter.client.model.OnionooDetailsResponse
 import com.torusage.adapter.client.model.OnionooSummaryResponse
-import org.springframework.beans.factory.annotation.Value
+import com.torusage.config.ApiConfig
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.util.UriBuilder
@@ -19,10 +19,10 @@ import java.util.concurrent.TimeUnit
 @Suppress("unused")
 @Service
 class OnionooApiClient(
-    @Value("\${onionoo.api.baseurl}") private val onionooBaseurl: String,
-    webClientBuilder: WebClient.Builder
+    webClientBuilder: WebClient.Builder,
+    private val apiConfig: ApiConfig,
 ) {
-    private val webClient: WebClient = webClientBuilder.baseUrl(onionooBaseurl).build()
+    private val webClient: WebClient = webClientBuilder.baseUrl(apiConfig.onionooBaseURL).build()
 
     /**
      * Get the details of Tor relays and/or bridges.
@@ -62,7 +62,7 @@ class OnionooApiClient(
         seenSinceUTCDate: Date?,
         torNodeType: TorNodeType?,
     ): T {
-        val fullUrl = onionooBaseurl + apiEndpoint
+        val fullUrl = apiConfig.onionooBaseURL + apiEndpoint
         val uriBuilder: UriBuilder = UriComponentsBuilder.fromUriString(fullUrl)
             .queryParamIfPresent("limit", Optional.ofNullable(limitCount))
             .queryParamIfPresent("type", Optional.ofNullable(torNodeType?.apiReferenceName))
