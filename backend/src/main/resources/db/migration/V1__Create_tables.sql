@@ -1,6 +1,6 @@
-create sequence HIBERNATE_SEQUENCE;
+create sequence if not exists HIBERNATE_SEQUENCE;
 
-create table DESCRIPTORS_FILE
+create table if not exists DESCRIPTORS_FILE
 (
     FILENAME      VARCHAR(255) not null,
     TYPE          INTEGER      not null,
@@ -9,7 +9,7 @@ create table DESCRIPTORS_FILE
     primary key (FILENAME, TYPE)
 );
 
-create table GEO_RELAY
+create table if not exists GEO_RELAY
 (
     ID               BIGINT not null
         primary key,
@@ -19,16 +19,14 @@ create table GEO_RELAY
     FLAGS            VARCHAR(255),
     LATITUDE         DECIMAL(19, 2),
     LONGITUDE        DECIMAL(19, 2),
-    NODE_DETAILS_ID  BIGINT,
-    NODE_FAMILY_ID   BIGINT,
     constraint FINGERPRINT_DAY_INDEX
         unique (FINGERPRINT, DAY)
 );
 
-create index DAY_INDEX
+create index if not exists DAY_INDEX
     on GEO_RELAY (DAY);
 
-create table NODE_DETAILS
+create table if not exists NODE_DETAILS
 (
     ID                        BIGINT  not null
         primary key,
@@ -52,13 +50,13 @@ create table NODE_DETAILS
     PLATFORM                  VARCHAR(255),
     PROTOCOLS                 VARCHAR(255),
     TUNNELLED_DIR_SERVER      BOOLEAN not null,
-    UPTIME                    BIGINT  not null,
+    UPTIME                    BIGINT,
     constraint FINGERPRINT_MONTH_INDEX
         unique (FINGERPRINT, MONTH)
 );
 
-create index NICKNAME_MONTH_INDEX
+create index if not exists NICKNAME_MONTH_INDEX
     on NODE_DETAILS (NICKNAME, MONTH);
 
-create index FAMILYID_MONTH_INDEX
+create index if not exists FAMILYID_MONTH_INDEX
     on NODE_DETAILS (FAMILY_ID, MONTH);

@@ -8,14 +8,14 @@ plugins {
     kotlin("plugin.allopen") version kotlinVersion
     kotlin("plugin.jpa") version kotlinVersion
 
-    // Code documentation https://kotlin.github.io/dokka/1.5.0/
+    // Generate code documentation https://kotlin.github.io/dokka/1.5.0/
     id("org.jetbrains.dokka") version "1.5.0"
 
     // Spring
     id("org.springframework.boot") version "2.5.2"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 
-    // Database Migration Tool
+    // Database migration tool https://flywaydb.org/documentation/usage/gradle/
     id("org.flywaydb.flyway") version "7.12.1"
 }
 
@@ -31,7 +31,6 @@ dependencies {
     // Kotlin
     kotlin("reflect")
     kotlin("stdlib-jdk8")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
 
     // Download and read Tor descriptors (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
     implementation(fileTree("lib/metrics-lib-2.17.0"))
@@ -52,7 +51,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     runtimeOnly("com.h2database:h2:1.4.199")
 
-    // Handle tasks requiring a geo location lookup
+    // Run database migration tool on startup
+    implementation("org.flywaydb:flyway-core")
+
+    // Provider for geo-ip lookups
     implementation("com.maxmind.geoip2:geoip2:2.15.0")
 
     // Testing
@@ -76,10 +78,6 @@ flyway {
 
 
 tasks.dokkaHtml.configure {
-    outputDirectory.set(buildDir.resolve("dokka"))
-}
-
-tasks.dokkaGfm.configure {
     outputDirectory.set(buildDir.resolve("dokka"))
 }
 

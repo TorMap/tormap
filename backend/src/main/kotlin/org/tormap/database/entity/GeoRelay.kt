@@ -35,10 +35,6 @@ class GeoRelay(
     } catch (exception: Exception) {
         null
     }
-
-    val nodeDetailsId: Long? = null
-
-    val nodeFamilyId: Long? = null
 }
 
 /**
