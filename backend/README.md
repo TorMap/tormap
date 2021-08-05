@@ -17,13 +17,13 @@ On `Linux` systems you can use the main install script `./install`, also describ
 
 - `./gradlew`: Installs dependencies
 - `./gradlew bootRun`:  creates build, runs it and listens on http://localhost:8080/
-- `./gradlew build`: build, test, and analyze the project
-- `./gradlew dokkaHtml`: generate code documentation
+- `./gradlew build`: build the project
+- `./gradlew dokkaHtml`: generate code documentation in HTML format
 - On `Windows` replace `./gradlew` with `./gradlew.bat` for all commands mentioned above
 
 ## IP to geo location DBs
 
-TorUsage uses two file based DBs to map IPv4 addresses of Tor nodes to latitude and longitude values. To use the latest IP records it is advised to replace the database files of `IP2Location` and `Maxmind` every few weeks.
+TorMap uses two file based DBs to map IPv4 addresses of Tor nodes to latitude and longitude values. To use the latest IP records it is advised to replace the database files of `IP2Location` and `Maxmind` every few weeks.
 Currently the DB files still need to be downloaded manually.
 
 ### IP2Location
