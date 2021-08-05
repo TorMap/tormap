@@ -5,7 +5,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 /logs/
-tor_usage.*.db
+/*.db
 descriptors/
 .log
 
