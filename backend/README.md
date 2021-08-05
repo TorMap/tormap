@@ -18,6 +18,12 @@ On `Linux` systems you can use the main install script `./install`, also describ
 - `./gradlew`: Installs dependencies
 - `./gradlew bootRun`:  creates build, runs it and listens on http://localhost:8080/
 - `./gradlew build`: build the project
+- `./gradlew flywayMigrate`: Migrates the database
+- `./gradlew flywayClean`: Drops all objects in the configured schemas
+- `./gradlew flywayInfo`: Prints the details and status information about all the migrations
+- `./gradlew flywayValidate`: Validates the applied migrations against the ones available on the classpath
+- `./gradlew flywayBaseline`: Baselines an existing database, excluding all migrations up to and including baselineVersion
+- `./gradlew flywayRepair`: Repairs the schema history table
 - `./gradlew dokkaHtml`: generate code documentation in HTML format
 - On `Windows` replace `./gradlew` with `./gradlew.bat` for all commands mentioned above
 
