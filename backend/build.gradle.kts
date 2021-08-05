@@ -8,15 +8,18 @@ plugins {
     kotlin("plugin.allopen") version kotlinVersion
     kotlin("plugin.jpa") version kotlinVersion
 
-    // Code documentation
+    // Code documentation https://kotlin.github.io/dokka/1.5.0/
     id("org.jetbrains.dokka") version "1.5.0"
 
     // Spring
     id("org.springframework.boot") version "2.5.2"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
+
+    // Database Migration Tool
+    id("org.flywaydb.flyway") version "7.12.1"
 }
 
-group = "com.torusage"
+group = "org.tormap"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
@@ -41,7 +44,6 @@ dependencies {
     kaptTest(configurationProcessor)
     annotationProcessor(configurationProcessor)
 
-
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
@@ -52,9 +54,6 @@ dependencies {
 
     // Handle tasks requiring a geo location lookup
     implementation("com.maxmind.geoip2:geoip2:2.15.0")
-
-    // Code documentation
-    dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin")
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -68,6 +67,20 @@ allOpen {
     annotation("javax.persistence.Entity")
     annotation("javax.persistence.Embeddable")
     annotation("javax.persistence.MappedSuperclass")
+}
+
+flyway {
+    url = "jdbc:h2:./tormap;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=5"
+    user = "sa"
+}
+
+
+tasks.dokkaHtml.configure {
+    outputDirectory.set(buildDir.resolve("dokka"))
+}
+
+tasks.dokkaGfm.configure {
+    outputDirectory.set(buildDir.resolve("dokka"))
 }
 
 tasks.withType<KotlinCompile> {
