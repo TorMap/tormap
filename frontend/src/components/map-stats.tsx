@@ -1,8 +1,8 @@
-import {FunctionComponent} from "react";
+import {FunctionComponent, ReactComponentElement} from "react";
 import {
     Card,
-    CardContent,
-    makeStyles,
+    CardContent, Icon,
+    makeStyles, SvgIcon,
     Table,
     TableBody,
     TableCell,
@@ -10,15 +10,24 @@ import {
     TableRow,
     Typography
 } from "@material-ui/core";
-import {Settings, Statistics} from "../types/variousTypes";
+import {rowType, Settings, Statistics} from "../types/variousTypes";
+import {ReactComponent} from "*.svg";
+import DirectionsRunIcon from '@material-ui/icons/DirectionsRun';
+import SecurityIcon from '@material-ui/icons/Security';
+import DeviceHubIcon from '@material-ui/icons/DeviceHub';
+import FlagIcon from '@material-ui/icons/Flag';
+import TimelineIcon from '@material-ui/icons/Timeline';
+import StorageIcon from '@material-ui/icons/Storage';
+import SubdirectoryArrowRightIcon from '@material-ui/icons/SubdirectoryArrowRight';
+import {SvgIconComponent} from "@material-ui/icons";
 
 const useStyle = makeStyles(() => ({
     root: {
         position: "fixed",
         left: "10px",
         bottom: "100px",
-        width: "250px",
-    }
+        width: "300px",
+    },
 }))
 
 interface Props {
@@ -30,57 +39,50 @@ export const MapStats: FunctionComponent<Props> = ({settings, statistics}) => {
     const classes = useStyle()
     const table = true
 
-    const rows = (sett: Settings, stat: Statistics) => {
-        let row: Array<string[]> = []
-        if (stat.exit) row.push(["Exit relays", stat.exit.toString()])
-        if (stat.guard) row.push(["Guard relays", stat.guard.toString()])
-        if (stat.default) row.push(["Other Relays", stat.default.toString()])
-        if (stat.exit || stat.guard || stat.default) row.push(["Total amount of Relays", (stat.exit + stat.guard + stat.default).toString()])
-        if (settings.sortFamily) row.push(["Selectet Family", settings.selectedFamily == undefined ? "none" : settings.selectedFamily.toString()])
-        if (settings.sortCountry) row.push(["Selectet Country", settings.selectedCountry == undefined ? "none" : settings.selectedCountry])
+    const rows = (sett: Settings, stats: Statistics) => {
+        let row: Array<Array<string|number|any>> = []
+        row.push(["Exit relays", stats.exit, <DirectionsRunIcon style={{color: "#f96969"}}/>])
+        row.push(["Guard relays", stats.guard, <SecurityIcon style={{color: "#fcb045"}}/>])
+        row.push(["Other Relays", stats.default, <TimelineIcon style={{color: "#833ab4"}}/>])
+        row.push(["Total amount of Relays", (stats.exit + stats.guard + stats.default), <SubdirectoryArrowRightIcon/>])
+
+
+        row.push(["", ""])
+        row.push(["Family count", stats.familyCount, <StorageIcon/>])
+        row.push(["Selectet Family (internal ID)", settings.selectedFamily === undefined ? "none" : settings.selectedFamily, <StorageIcon/>])
+        row.push(["Relays in selectet Family", stats.familyRelayCount === undefined ? "none" : stats.familyRelayCount, <StorageIcon/>])
+
+
+        row.push(["", ""])
+        row.push(["Country count", stats.countryCount, <FlagIcon/>])
+        row.push(["Selectet Country", settings.selectedCountry === undefined ? "none" : settings.selectedCountry, <FlagIcon/>])
+        row.push(["Relays in selectet Country", stats.countryRelayCount === undefined ? "none" : stats.countryRelayCount, <FlagIcon/>])
         return row
     }
 
     return (
         <div>
-            {table ? (
-                <TableContainer component={Card} className={classes.root}>
-                    <Table size="small">
-                        <TableBody>
-                            {rows(settings, statistics).map(row => (
-                                <TableRow key={row[0]}>
-                                    <TableCell component="th" scope="row">
-                                        {row[0]}
+            <TableContainer component={Card} className={classes.root}>
+                <Table size="small">
+                    <TableBody>
+                        {rows(settings, statistics).map(row => (
+                            <TableRow>
+                                {row[2] ? (
+                                    <TableCell scope="row">
+                                        {row[2]}
                                     </TableCell>
-                                    <TableCell align={"center"}>
-                                        {row[1]}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            ) : (
-                <Card variant={"outlined"} className={classes.root}>
-                    <CardContent>
-                        <Typography>
-                            Exit relays: {statistics.exit}
-                        </Typography>
-                        <Typography>
-                            Guard relays: {statistics.guard}
-                        </Typography>
-                        <Typography>
-                            Other relays: {statistics.default}
-                        </Typography>
-                        <Typography>
-                            maxValueOnSameCoordinate: {statistics.maxValueOnSameCoordinate}
-                        </Typography>
-                        <Typography>
-                            selected Country: {settings.selectedCountry}
-                        </Typography>
-                    </CardContent>
-                </Card>
-            )}
+                                ) : null}
+                                <TableCell scope="row">
+                                    <Typography>{row[0]}</Typography>
+                                </TableCell>
+                                <TableCell align={"right"}>
+                                    {row[1]}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </div>
     )
 }
