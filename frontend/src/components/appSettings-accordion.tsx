@@ -29,9 +29,11 @@ interface Props {
     onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) => {
+export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
     const classes = useStyle()
 
+    // ToDo redo the MapSettings Menu
+    // ToDo redo the Grouping Menu
     return (
         <div className={classes.accordion}>
             <Accordion>
@@ -44,21 +46,24 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                 </AccordionSummary>
                 <AccordionDetails>
                     <FormGroup>
-                        <FormControlLabel control={<Switch checked={settings.showMarker}
-                                                           onChange={onChange}/>}
-                                          label={"Draw marker"}
-                                          name={"showMarker"}
-                        />
-                        <FormControlLabel control={<Switch checked={settings.aggregateCoordinates}
-                                                           onChange={onChange}/>}
-                                          label={"Aggregate Relays that have the same coordinates"}
-                                          name={"aggregateCoordinates"}
-                        />
                         <FormControlLabel control={<Switch checked={settings.heatMap}
                                                            onChange={onChange}/>}
                                           label={"Aggregate Relays to density heatmap"}
                                           name={"heatMap"}
                         />
+                    </FormGroup>
+                </AccordionDetails>
+            </Accordion>
+            <Accordion>
+                <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel1a-content"
+                    id="panel1a-header"
+                >
+                    <Typography>Slider Settings</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <FormGroup>
                         <FormControlLabel control={<Switch checked={settings.dateRange}
                                                            onChange={onChange}/>}
                                           label={"Enable date range selection on slider"}
@@ -73,13 +78,13 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                     aria-controls="panel2a-content"
                     id="panel2a-header"
                 >
-                    <Typography className={"heading"}>Selection</Typography>
+                    <Typography className={"heading"}>Grouping</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <FormGroup>
                         <FormControlLabel control={<Switch checked={settings.sortCountry}
                                                            onChange={onChange}/>}
-                                          label={"Sort relays according to country"}
+                                          label={"Group relays according to country"}
                                           name={"sortCountry"}
                         />
                         <FormControlLabel control={<Switch checked={settings.onlyCountry}
@@ -89,13 +94,18 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                         />
                         <FormControlLabel control={<Switch checked={settings.sortFamily}
                                                            onChange={onChange}/>}
-                                          label={"Sort relays according to family"}
+                                          label={"Group relays according to family"}
                                           name={"sortFamily"}
                         />
                         <FormControlLabel control={<Switch checked={settings.onlyFamily}
                                                            onChange={onChange}/>}
                                           label={"Draw only selected family"}
                                           name={"onlyFamily"}
+                        />
+                        <FormControlLabel control={<Switch checked={settings.aggregateCoordinates}
+                                                           onChange={onChange}/>}
+                                          label={"Aggregate Relays that have the same coordinates"}
+                                          name={"aggregateCoordinates"}
                         />
                     </FormGroup>
                 </AccordionDetails>
@@ -134,7 +144,7 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                     aria-controls="panel2a-content"
                     id="panel2a-header"
                 >
-                    <Typography className={"heading"}>Relay must include flag</Typography>
+                    <Typography className={"heading"}>Relays must include flag</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <FormGroup>

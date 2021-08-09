@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import {WorldMap} from "./components/world-map";
 import {
-    createMuiTheme, CircularProgress, ThemeProvider, makeStyles
+    createMuiTheme, CircularProgress, ThemeProvider, makeStyles, Snackbar
 } from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
 import {apiBaseUrl} from "./util/constants";
-import {AccordionStats} from "./components/accordion-stats";
+import {AppSettings} from "./components/appSettings-accordion";
 import {Settings, Statistics} from "./types/variousTypes";
 import {MapStats} from "./components/map-stats";
 import {DateSlider} from "./components/date-slider";
@@ -49,7 +49,7 @@ function App() {
         miBadExit: false,
 
         showMarker: true,
-        colorNodesAccordingToType: false,
+        colorNodesAccordingToType: true,
         aggregateCoordinates: false,
         heatMap: false,
 
@@ -95,7 +95,15 @@ function App() {
     }, [])
 
 
-
+    // Resets selection if grouping gets disabled
+    useEffect(() => {
+        if (!settings.sortCountry && settings.selectedCountry){
+            setSettings({...settings, selectedCountry: undefined})
+        }
+        if (!settings.sortFamily && settings.selectedFamily){
+            setSettings({...settings, selectedFamily: undefined})
+        }
+    }, [settings])
 
 
     return (
@@ -115,7 +123,7 @@ function App() {
                     setStatisticsCallback={setStatistics}
                 />
                 <DateSlider availableDays={availableDays} setValue={setSliderValue} settings={settings}/>
-                <AccordionStats settings={settings} onChange={handleInputChange}/>
+                <AppSettings settings={settings} onChange={handleInputChange}/>
                 <MapStats settings={settings} statistics={statistics}/>
             </div>
         </ThemeProvider>
