@@ -20,6 +20,7 @@ import TimelineIcon from '@material-ui/icons/Timeline';
 import StorageIcon from '@material-ui/icons/Storage';
 import SubdirectoryArrowRightIcon from '@material-ui/icons/SubdirectoryArrowRight';
 import {SvgIconComponent} from "@material-ui/icons";
+import {Colors} from "../Config";
 
 const useStyle = makeStyles(() => ({
     root: {
@@ -28,6 +29,9 @@ const useStyle = makeStyles(() => ({
         bottom: "100px",
         width: "300px",
     },
+    margin: {
+        marginTop: "10px",
+    }
 }))
 
 interface Props {
@@ -39,21 +43,23 @@ export const MapStats: FunctionComponent<Props> = ({settings, statistics}) => {
     const classes = useStyle()
     const table = true
 
-    const rows = (sett: Settings, stats: Statistics) => {
-        let row: Array<Array<string|number|any>> = []
-        row.push(["Exit relays", stats.exit, <DirectionsRunIcon style={{color: "#f96969"}}/>])
-        row.push(["Guard relays", stats.guard, <SecurityIcon style={{color: "#fcb045"}}/>])
-        row.push(["Other Relays", stats.default, <TimelineIcon style={{color: "#833ab4"}}/>])
+    const typeRows = (sett: Settings, stats: Statistics) => {
+        let row: Array<Array<string | number | any>> = []
+        row.push(["Exit relays", stats.exit, <DirectionsRunIcon style={{color: Colors.Exit}}/>])
+        row.push(["Guard relays", stats.guard, <SecurityIcon style={{color: Colors.Guard}}/>])
+        row.push(["Other Relays", stats.default, <TimelineIcon style={{color: Colors.Default}}/>])
         row.push(["Total amount of Relays", (stats.exit + stats.guard + stats.default), <SubdirectoryArrowRightIcon/>])
-
-
-        row.push(["", ""])
+        return row
+    }
+    const familyRows = (sett: Settings, stats: Statistics) => {
+        let row: Array<Array<string | number | any>> = []
         row.push(["Family count", stats.familyCount, <StorageIcon/>])
         row.push(["Selectet Family (internal ID)", settings.selectedFamily === undefined ? "none" : settings.selectedFamily, <StorageIcon/>])
         row.push(["Relays in selectet Family", stats.familyRelayCount === undefined ? "none" : stats.familyRelayCount, <StorageIcon/>])
-
-
-        row.push(["", ""])
+        return row
+    }
+    const contryRows = (sett: Settings, stats: Statistics) => {
+        let row: Array<Array<string | number | any>> = []
         row.push(["Country count", stats.countryCount, <FlagIcon/>])
         row.push(["Selectet Country", settings.selectedCountry === undefined ? "none" : settings.selectedCountry, <FlagIcon/>])
         row.push(["Relays in selectet Country", stats.countryRelayCount === undefined ? "none" : stats.countryRelayCount, <FlagIcon/>])
@@ -61,11 +67,53 @@ export const MapStats: FunctionComponent<Props> = ({settings, statistics}) => {
     }
 
     return (
-        <div>
-            <TableContainer component={Card} className={classes.root}>
+        <div className={classes.root}>
+            <TableContainer component={Card} classes={{root: classes.margin}}>
                 <Table size="small">
                     <TableBody>
-                        {rows(settings, statistics).map(row => (
+                        {typeRows(settings, statistics).map(row => (
+                            <TableRow>
+                                {row[2] ? (
+                                    <TableCell scope="row">
+                                        {row[2]}
+                                    </TableCell>
+                                ) : null}
+                                <TableCell scope="row">
+                                    <Typography>{row[0]}</Typography>
+                                </TableCell>
+                                <TableCell align={"right"}>
+                                    {row[1]}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+            <TableContainer component={Card}>
+                <Table size="small">
+                    <TableBody>
+                        {familyRows(settings, statistics).map(row => (
+                            <TableRow>
+                                {row[2] ? (
+                                    <TableCell scope="row">
+                                        {row[2]}
+                                    </TableCell>
+                                ) : null}
+                                <TableCell scope="row">
+                                    <Typography>{row[0]}</Typography>
+                                </TableCell>
+                                <TableCell align={"right"}>
+                                    {row[1]}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+            <TableContainer component={Card}>
+                <Table size="small">
+                    <TableBody>
+                        {contryRows(settings, statistics).map(row => (
                             <TableRow>
                                 {row[2] ? (
                                     <TableCell scope="row">
