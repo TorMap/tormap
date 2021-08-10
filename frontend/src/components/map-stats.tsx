@@ -1,8 +1,11 @@
-import {FunctionComponent, ReactComponentElement} from "react";
+import React, {FunctionComponent, ReactComponentElement} from "react";
 import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
     Card,
-    CardContent, Icon,
-    makeStyles, SvgIcon,
+    CardContent, Checkbox, FormControlLabel, FormGroup, Icon,
+    makeStyles, Paper, SvgIcon, Switch,
     Table,
     TableBody,
     TableCell,
@@ -19,8 +22,11 @@ import FlagIcon from '@material-ui/icons/Flag';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import StorageIcon from '@material-ui/icons/Storage';
 import SubdirectoryArrowRightIcon from '@material-ui/icons/SubdirectoryArrowRight';
-import {SvgIconComponent} from "@material-ui/icons";
+import {ExpandLess, SvgIconComponent} from "@material-ui/icons";
 import {Colors} from "../Config";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import {RelayFlagName} from "../types/relay";
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 
 const useStyle = makeStyles(() => ({
     root: {
@@ -29,8 +35,8 @@ const useStyle = makeStyles(() => ({
         bottom: "100px",
         width: "300px",
     },
-    margin: {
-        marginTop: "10px",
+    noPadding: {
+        padding: 0,
     }
 }))
 
@@ -68,69 +74,99 @@ export const MapStats: FunctionComponent<Props> = ({settings, statistics}) => {
 
     return (
         <div className={classes.root}>
-            <TableContainer component={Card} classes={{root: classes.margin}}>
-                <Table size="small">
-                    <TableBody>
-                        {typeRows(settings, statistics).map(row => (
-                            <TableRow>
-                                {row[2] ? (
-                                    <TableCell scope="row">
-                                        {row[2]}
-                                    </TableCell>
-                                ) : null}
-                                <TableCell scope="row">
-                                    <Typography>{row[0]}</Typography>
-                                </TableCell>
-                                <TableCell align={"right"}>
-                                    {row[1]}
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <TableContainer component={Card}>
-                <Table size="small">
-                    <TableBody>
-                        {familyRows(settings, statistics).map(row => (
-                            <TableRow>
-                                {row[2] ? (
-                                    <TableCell scope="row">
-                                        {row[2]}
-                                    </TableCell>
-                                ) : null}
-                                <TableCell scope="row">
-                                    <Typography>{row[0]}</Typography>
-                                </TableCell>
-                                <TableCell align={"right"}>
-                                    {row[1]}
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <TableContainer component={Card}>
-                <Table size="small">
-                    <TableBody>
-                        {contryRows(settings, statistics).map(row => (
-                            <TableRow>
-                                {row[2] ? (
-                                    <TableCell scope="row">
-                                        {row[2]}
-                                    </TableCell>
-                                ) : null}
-                                <TableCell scope="row">
-                                    <Typography>{row[0]}</Typography>
-                                </TableCell>
-                                <TableCell align={"right"}>
-                                    {row[1]}
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            <Accordion>
+                <AccordionSummary
+                    expandIcon={<ExpandLessIcon />}
+                    aria-controls="panel2a-content"
+                    id="panel2a-header"
+                >
+                    <Typography className={"heading"}>Relay types</Typography>
+                </AccordionSummary>
+                <AccordionDetails classes={{root: classes.noPadding}}>
+                        <Table size="small">
+                            <TableBody>
+                                {typeRows(settings, statistics).map(row => (
+                                    <TableRow>
+                                        {row[2] ? (
+                                            <TableCell scope="row">
+                                                {row[2]}
+                                            </TableCell>
+                                        ) : null}
+                                        <TableCell scope="row">
+                                            <Typography>{row[0]}</Typography>
+                                        </TableCell>
+                                        <TableCell align={"right"}>
+                                            {row[1]}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                </AccordionDetails>
+            </Accordion>
+
+            <Accordion>
+                <AccordionSummary
+                    expandIcon={<ExpandLessIcon />}
+                    aria-controls="panel2a-content"
+                    id="panel2a-header"
+                >
+                    <Typography className={"heading"}>Family</Typography>
+                </AccordionSummary>
+                <AccordionDetails classes={{root: classes.noPadding}}>
+                        <Table size="small">
+                            <TableBody>
+                                {familyRows(settings, statistics).map(row => (
+                                    <TableRow>
+                                        {row[2] ? (
+                                            <TableCell scope="row">
+                                                {row[2]}
+                                            </TableCell>
+                                        ) : null}
+                                        <TableCell scope="row">
+                                            <Typography>{row[0]}</Typography>
+                                        </TableCell>
+                                        <TableCell align={"right"}>
+                                            {row[1]}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                </AccordionDetails>
+            </Accordion>
+
+            <Accordion>
+                <AccordionSummary
+                    expandIcon={<ExpandLessIcon />}
+                    aria-controls="panel2a-content"
+                    id="panel2a-header"
+                >
+                    <Typography className={"heading"}>Country</Typography>
+                </AccordionSummary>
+                <AccordionDetails classes={{root: classes.noPadding}}>
+                        <Table size="small">
+                            <TableBody>
+                                {contryRows(settings, statistics).map(row => (
+                                    <TableRow>
+                                        {row[2] ? (
+                                            <TableCell scope="row">
+                                                {row[2]}
+                                            </TableCell>
+                                        ) : null}
+                                        <TableCell scope="row">
+                                            <Typography>{row[0]}</Typography>
+                                        </TableCell>
+                                        <TableCell align={"right"}>
+                                            {row[1]}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                </AccordionDetails>
+            </Accordion>
+
         </div>
     )
 }
