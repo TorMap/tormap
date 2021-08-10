@@ -6,12 +6,13 @@ import 'leaflet/dist/leaflet.css';
 import {NodePopup} from "./node-popup";
 import {GeoRelayView} from "../types/geo-relay";
 import {RelayFlag} from "../types/relay";
-import {Settings, Statistics} from "../types/variousTypes";
+import {Settings, snackbarMessage, Statistics} from "../types/variousTypes";
 import "leaflet.heat"
 import {makeStyles, Snackbar} from "@material-ui/core";
 import worldGeoData from "../data/world.geo.json"; // data from https://geojson-maps.ash.ms/
 import {Feature, GeoJsonObject, GeoJsonProperties, GeometryObject} from "geojson";
 import {stat} from "fs";
+import {Colors} from "../Config";
 
 const useStyle = makeStyles(() => ({
     leafletContainer: {
@@ -51,12 +52,17 @@ interface Props {
      */
     setStatisticsCallback: (stat: Statistics) => void
 
+    /**
+     * callback for errormessages
+     * @param snackbarMessage Objekt of type snackbarMessage with message and severity
+     */
+    handleSnackbar: (snackbarMessage: snackbarMessage) => void
 }
 
 // Variable needs to be outside component to keep track of the last selected date
 let latestRequestTimestamp: number | undefined = undefined
 
-export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setSettingsCallback, setLoadingStateCallback, setStatisticsCallback}) => {
+export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setSettingsCallback, setLoadingStateCallback, setStatisticsCallback, handleSnackbar}) => {
     const [showNodePopup, setShowNodePopup] = useState(false)
     const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
@@ -77,7 +83,9 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
                     setLoadingStateCallback(false)
                     if (currentTimeStamp === latestRequestTimestamp) setRelays(newRelays)
                 })
-                .catch(console.log)
+                .catch(reason => {
+                    handleSnackbar({message: `${reason}`, severity: "error"})
+                })
             latestRequestTimestamp = currentTimeStamp
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -85,7 +93,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
 
     //Update listener, fires whenever settings get changed or an new date got downloaded
     useEffect(() => {
-        drawLayerGroup(relaysToLayerGroup(relays))
+        if (dayToDisplay) drawLayerGroup(relaysToLayerGroup(relays))
     },[relays, settings])
 
     //Eventhandler for markers to show the node-popup component
@@ -126,14 +134,6 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
         return filtered
     }
 
-    //Helper for checking if filter is relevant for the day
-    const checkFilter = (relays: GeoRelayView[]) => {
-        let filter: Array<boolean> = new Array<boolean>(14)
-        filter.fill(false)
-        relays.forEach(relay => relay.flags?.forEach(id => filter[id] = true))
-
-    }
-
     //Helper for relaysToLayerGroup, used for adding eventlisteners to the countries
     const onEachFeature = (feature: Feature<GeometryObject, GeoJsonProperties>, layer: Layer) => {
         layer.on({
@@ -146,17 +146,16 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
         });
     }
 
+    // Processes an array of Relays according to settings and returns an layerGroup with all relevant layers that have to be added to the map
     const relaysToLayerGroup = (relays: GeoRelayView[]): LayerGroup => {
         console.time(`relaysToLayerGroup`)
         console.timeLog(`relaysToLayerGroup`, `New Layer with ${relays.length} elements`)
 
         const layerToReturn = new LayerGroup()
 
-        // Check if filter setting is good for that date
-        //checkFilter(relays)
-
         // filter relays
         relays = applyFilter(relays)
+        if (!relays.length && dayToDisplay) handleSnackbar({message: "there are no Relays withe the filtered flags", severity:"warning"})
 
         // Map for coordinate's, used to get an Array of GeoRelayView with relays on the same coordinate
         let latLonMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
@@ -276,14 +275,14 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
             const guardLayer = new LayerGroup()
             const defaultMarkerLayer = new LayerGroup([defaultLayer, guardLayer, exitLayer])
             relays.forEach(relay => {
-                let color = "#833ab4"
+                let color = Colors.Default
                 let layer = defaultLayer
                 if (relay.flags?.includes(RelayFlag.Exit)) {
-                    color = "#f96969"
+                    color = Colors.Exit
                     layer = exitLayer
                 }
                 else if (relay.flags?.includes(RelayFlag.Guard)) {
-                    color = "#fcb045"
+                    color = Colors.Guard
                     layer = guardLayer
                 }
 

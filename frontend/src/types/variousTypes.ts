@@ -64,3 +64,8 @@ export type rowType = {
     value: string | number,
     icon?: IconClassKey,
 }
+
+export type snackbarMessage = {
+    message: string,
+    severity: "error"|"warning"|"info"|"success",
+}
