@@ -21,24 +21,22 @@ class NodeDetailsService(
     /**
      * Updates [NodeDetails.familyId] for all entities of the requested [months].
      */
-    fun updateNodeFamilies(months: Set<String>? = null) {
+    fun updateNodeFamilies(months: Set<String>) {
         try {
             logger.info("Updating node families")
-            val requestingNodes =
-                if (months != null) nodeDetailsRepository.getAllByMonthInAndFamilyEntriesNotNullAndFamilyIdNotNull(
-                    months
-                )
-                else nodeDetailsRepository.getAllByFamilyEntriesNotNullAndFamilyIdNotNull()
-            requestingNodes.forEach { requestingNode ->
-                val confirmedFamilyNodes = mutableListOf<NodeDetails>()
-                val month = requestingNode.month
-                requestingNode.familyEntries!!.commaSeparatedToList().forEach {
-                    try {
-                        confirmedFamilyNodes.add(confirmFamilyMember(requestingNode, it, month))
-                    } catch (exception: Exception) {
+            months.forEach {
+                val requestingNodes = nodeDetailsRepository.getAllByMonthEqualsAndFamilyEntriesNotNull(it)
+                requestingNodes.forEach { requestingNode ->
+                    val confirmedFamilyNodes = mutableListOf<NodeDetails>()
+                    val month = requestingNode.month
+                    requestingNode.familyEntries!!.commaSeparatedToList().forEach {
+                        try {
+                            confirmedFamilyNodes.add(confirmFamilyMember(requestingNode, it, month))
+                        } catch (exception: Exception) {
+                        }
                     }
+                    saveNodeFamily(requestingNode, confirmedFamilyNodes)
                 }
-                saveNodeFamily(requestingNode, confirmedFamilyNodes)
             }
             logger.info("Finished updating node families")
         } catch (exception: Exception) {
@@ -76,7 +74,7 @@ class NodeDetailsService(
         val nicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
         when {
             fingerprintRegex.matches(allegedFamilyMemberId) -> {
-                val allegedFamilyMember = nodeDetailsRepository.getByMonthAndFingerprint(
+                val allegedFamilyMember = nodeDetailsRepository.findByMonthAndFingerprintAndFamilyEntriesNotNull(
                     month,
                     allegedFamilyMemberId.substring(1, 40),
                 )

@@ -13,12 +13,12 @@ create table if not exists GEO_RELAY
 (
     ID               BIGINT not null
         primary key,
-    COUNTRY_ISO_CODE VARCHAR(255),
+    COUNTRY_CODE VARCHAR(2),
     DAY              DATE,
     FINGERPRINT      VARCHAR(40),
     FLAGS            VARCHAR(255),
-    LATITUDE         DECIMAL(19, 2),
-    LONGITUDE        DECIMAL(19, 2),
+    LATITUDE         DECIMAL(6, 4),
+    LONGITUDE        DECIMAL(7, 4),
     constraint FINGERPRINT_DAY_INDEX
         unique (FINGERPRINT, DAY)
 );
