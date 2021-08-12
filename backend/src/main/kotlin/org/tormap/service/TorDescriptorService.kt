@@ -71,7 +71,7 @@ class TorDescriptorService(
      * Process descriptors which were previously saved to disk at [apiPath]
      */
     private fun processDescriptors(apiPath: String, descriptorType: DescriptorType) {
-        val processingDescriptorDays = mutableSetOf<Future<LocalDate?>>()
+        var processingDescriptorDays = mutableSetOf<Future<LocalDate?>>()
         var lastProcessedFile: File? = null
         readDescriptors(apiPath).forEach {
             processingDescriptorDays.add(processDescriptor(it))
@@ -80,10 +80,15 @@ class TorDescriptorService(
             } else if (it.descriptorFile != lastProcessedFile) {
                 finishDescriptorFile(lastProcessedFile!!, descriptorType, processingDescriptorDays)
                 lastProcessedFile = it.descriptorFile
+                processingDescriptorDays = mutableSetOf()
             }
         }
     }
 
+    /**
+     * Waits until all descriptors of the [descriptorFile] are processed and finally saves finished [DescriptorsFile].
+     * Updates the [NodeDetails.familyId] of processed months when [descriptorType] is [DescriptorType.SERVER].
+     */
     @Async
     fun finishDescriptorFile(
         descriptorFile: File,
@@ -114,7 +119,7 @@ class TorDescriptorService(
     }
 
     /**
-     * Read descriptors which were previously saved to disk at [apiPath]
+     * Read descriptors which were previously saved to disk at [apiPath].
      * A reader can consume quite some memory. Try not to create multiple readers in a short time.
      */
     private fun readDescriptors(apiPath: String): MutableIterable<Descriptor> {
