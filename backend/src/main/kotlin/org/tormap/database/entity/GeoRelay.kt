@@ -21,7 +21,7 @@ class GeoRelay(
     var day: LocalDate,
     var latitude: BigDecimal,
     var longitude: BigDecimal,
-    var countryIsoCode: String?,
+    var countryCode: String?,
 
     @Id
     @GeneratedValue

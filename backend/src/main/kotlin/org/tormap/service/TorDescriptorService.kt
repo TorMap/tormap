@@ -1,5 +1,7 @@
 package org.tormap.service
 
+import org.springframework.scheduling.annotation.Async
+import org.springframework.scheduling.annotation.AsyncResult
 import org.springframework.stereotype.Service
 import org.tormap.config.ApiConfig
 import org.tormap.database.entity.*
@@ -10,8 +12,10 @@ import org.tormap.logger
 import org.tormap.millisSinceEpochToLocalDate
 import org.torproject.descriptor.*
 import java.io.File
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.concurrent.Future
 
 
 /**
@@ -24,7 +28,7 @@ class TorDescriptorService(
     val geoRelayRepositoryImpl: GeoRelayRepositoryImpl,
     val nodeDetailsRepository: NodeDetailsRepository,
     val descriptorsFileRepository: DescriptorsFileRepository,
-    val geoLocationService: GeoLocationService,
+    val ipLookupService: IpLookupService,
     val nodeDetailsService: NodeDetailsService,
 ) {
     val logger = logger()
@@ -67,32 +71,46 @@ class TorDescriptorService(
      * Process descriptors which were previously saved to disk at [apiPath]
      */
     private fun processDescriptors(apiPath: String, descriptorType: DescriptorType) {
-        val processedDescriptorDays = mutableSetOf<LocalDate>()
+        val processingDescriptorDays = mutableSetOf<Future<LocalDate?>>()
         var lastProcessedFile: File? = null
         readDescriptors(apiPath).forEach {
-            val descriptorDay = processDescriptor(it)
-            if (descriptorDay != null) {
-                processedDescriptorDays.add(descriptorDay)
-            }
+            processingDescriptorDays.add(processDescriptor(it))
             if (lastProcessedFile == null) {
                 lastProcessedFile = it.descriptorFile
             } else if (it.descriptorFile != lastProcessedFile) {
-                logger.info("Finished processing descriptors file ${lastProcessedFile!!.name}")
-                descriptorsFileRepository.save(
-                    DescriptorsFile(
-                        DescriptorsFileId(lastProcessedFile!!.name, descriptorType),
-                        lastProcessedFile!!.lastModified()
-                    )
-                )
+                finishDescriptorFile(lastProcessedFile!!, descriptorType, processingDescriptorDays)
                 lastProcessedFile = it.descriptorFile
             }
         }
+    }
+
+    @Async
+    fun finishDescriptorFile(
+        descriptorFile: File,
+        descriptorType: DescriptorType,
+        processingDescriptorDays: MutableSet<Future<LocalDate?>>
+    ) {
+        val processedMonths = mutableSetOf<String>()
+        processingDescriptorDays.forEach {
+            try {
+                val processedDay = it.get()
+                if (processedDay != null) {
+                    processedMonths.add(YearMonth.from(processedDay).toString())
+                }
+            } catch (exception: Exception) {
+                logger.error("Could not complete processing a descriptor. ${exception.message}")
+            }
+        }
         if (descriptorType == DescriptorType.SERVER) {
-            val processedMonths = processedDescriptorDays.map {
-                YearMonth.from(it).toString()
-            }.toSet()
             nodeDetailsService.updateNodeFamilies(processedMonths)
         }
+        descriptorsFileRepository.save(
+            DescriptorsFile(
+                DescriptorsFileId(descriptorFile.name, descriptorType),
+                descriptorFile.lastModified()
+            )
+        )
+        logger.info("Finished processing descriptors file ${descriptorFile.name}")
     }
 
     /**
@@ -116,16 +134,17 @@ class TorDescriptorService(
     /**
      * Process a [descriptor] depending on it's type
      */
-    private fun processDescriptor(descriptor: Descriptor): LocalDate? {
+    @Async
+    fun processDescriptor(descriptor: Descriptor): Future<LocalDate?> {
         return try {
-            when (descriptor) {
-                is RelayNetworkStatusConsensus -> processRelayConsensusDescriptor(descriptor)
-                is ServerDescriptor -> processServerDescriptor(descriptor)
+            return when (descriptor) {
+                is RelayNetworkStatusConsensus -> AsyncResult(processRelayConsensusDescriptor(descriptor))
+                is ServerDescriptor -> AsyncResult(processServerDescriptor(descriptor))
                 else -> throw Exception("Type ${descriptor.javaClass.name} is not supported!")
             }
         } catch (exception: Exception) {
             logger.error("Could not process descriptor part of ${descriptor.descriptorFile.name}: ${exception.message}")
-            null
+            AsyncResult(null)
         }
     }
 
@@ -143,15 +162,16 @@ class TorDescriptorService(
                     networkStatusEntry.fingerprint
                 )
             ) {
-                val location = geoLocationService.getLocationForIpAddress(networkStatusEntry.address)
+                val location = ipLookupService.getLocationForIpAddress(networkStatusEntry.address)
+                val geoDecimalPlaces = 4
                 if (location != null) {
                     nodesToSave.add(
                         GeoRelay(
                             networkStatusEntry,
                             descriptorDay,
-                            location.latitude,
-                            location.longitude,
-                            location.countryIsoCode,
+                            location.latitude!!.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN),
+                            location.longitude!!.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN),
+                            location.countryShort,
                         )
                     )
                 }
@@ -170,7 +190,7 @@ class TorDescriptorService(
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.publishedMillis)
         val descriptorMonth = YearMonth.from(descriptorDay).toString()
         val existingNode =
-            nodeDetailsRepository.getByMonthAndFingerprint(descriptorMonth, descriptor.fingerprint)
+            nodeDetailsRepository.findByMonthAndFingerprint(descriptorMonth, descriptor.fingerprint)
         if (existingNode == null || existingNode.day < descriptorDay) {
             nodeDetailsRepository.save(
                 NodeDetails(
