@@ -12,14 +12,14 @@ import java.math.BigDecimal
 class GeoRelayView(
     latitude: BigDecimal,
     longitude: BigDecimal,
-    countryIsoCode: String?,
+    countryCode: String?,
     flags: String?,
     val detailsId: Long?,
     val familyId: Long?,
 ) {
     val lat = latitude
     val long = longitude
-    val country = countryIsoCode
+    val country = countryCode
     val flags = try {
         flags?.commaSeparatedToList()?.map { it.toInt() }
     } catch (exception: Exception) {

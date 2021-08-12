@@ -13,11 +13,6 @@ data class DatabaseConfig(
     val defaultSequenceName: String,
 
     /**
-     * Relative resource file path to the maxmind DB file
-     */
-    val maxmindResourceFile: String,
-
-    /**
      * Relative resource file path to the ip2location DB file
      */
     val ip2locationResourceFile: String,

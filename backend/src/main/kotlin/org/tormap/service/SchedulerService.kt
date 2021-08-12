@@ -40,13 +40,13 @@ class SchedulerService(
     fun handleRelayServerDescriptors() =
         torDescriptorService.collectAndProcessDescriptors(apiConfig.descriptorPathRelayServers, DescriptorType.SERVER)
 
-    /**
-     * Updates the node families in DB
-     * Can take up to 30 min depending on your machine.
-     */
-    @Async
-    @Scheduled(fixedRate = 86400000L)
-    fun updateNodeFamilies() =
-        nodeDetailsService.updateNodeFamilies()
+//    /**
+//     * Updates the node families in DB
+//     * Can take up to 30 min depending on your machine.
+//     */
+//    @Async
+//    @Scheduled(fixedRate = 86400000L)
+//    fun updateNodeFamilies() =
+//        nodeDetailsService.updateNodeFamilies()
 }
 
