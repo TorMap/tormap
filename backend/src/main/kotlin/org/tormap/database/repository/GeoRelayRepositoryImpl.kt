@@ -10,7 +10,7 @@ import java.time.LocalDate
  */
 interface GeoRelayRepositoryImpl : GeoRelayRepository {
     @Query("SELECT DISTINCT day FROM GeoRelay ORDER BY day")
-    fun findDistinctDays(): List<LocalDate>
+    fun findDistinctDays(): Set<LocalDate>
 
     @Query(
         "SELECT new org.tormap.adapter.controller.view.GeoRelayView(g.latitude, g.longitude, g.countryCode, g.flags, n.id, n.familyId) FROM GeoRelay g " +
