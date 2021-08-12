@@ -6,16 +6,22 @@ import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConstructorBinding
 @ConfigurationProperties("scheduler")
+/**
+ * For all following rates, please provide milliseconds or a [Duration](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-) compliant term!
+ */
 data class SchedulerConfig(
     /**
      * The rate in which relay consensus descriptors are handled.
-     * Please provide milliseconds or a [Duration](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-) compliant term!
      */
     val relayConsensusDescriptorsRate: String,
 
     /**
      * The rate in which relay server descriptors are handled.
-     * Please provide milliseconds or a [Duration](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-) compliant term!
      */
     val relayServerDescriptorsRate: String,
+
+    /**
+     * The rate in which all node families should be updated
+     */
+    val updateAllNodeFamiliesRate: String,
 )
