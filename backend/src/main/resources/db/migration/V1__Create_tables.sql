@@ -31,7 +31,6 @@ create table if not exists node_details
     id                        BIGINT  not null
         primary key,
     address                   VARCHAR(15),
-    address_number            BIGINT,
     allow_single_hop_exits    BOOLEAN not null,
     autonomous_system_name    varchar(255),
     autonomous_system_number  varchar(10),
@@ -58,11 +57,17 @@ create table if not exists node_details
         unique (fingerprint, month)
 );
 
-create index if not exists nickname_month_index
-    on node_details (nickname, month);
+create index if not exists NICKNAME_MONTH_INDEX
+    on NODE_DETAILS (NICKNAME, MONTH);
 
-create index if not exists family_index
-    on node_details (family_id);
+create index if not exists FAMILY_INDEX
+    on NODE_DETAILS (FAMILY_ID);
+
+create index if not exists FAMILYID_INDEX
+    on NODE_DETAILS (FAMILY_ID);
+
+create index if not exists AUTONOMOUSSYSTEMNUMBER_NUMBER_INDEX
+    on NODE_DETAILS (AUTONOMOUS_SYSTEM_NUMBER);
 
 CREATE TABLE IF NOT EXISTS autonomous_system
 (

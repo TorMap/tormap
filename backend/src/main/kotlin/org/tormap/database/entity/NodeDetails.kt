@@ -1,8 +1,6 @@
 package org.tormap.database.entity
 
-import org.tormap.calculateIPv4NumberRepresentation
 import org.tormap.jointToCommaSeparated
-import org.tormap.logger
 import org.tormap.stripLengthForDB
 import org.torproject.descriptor.ServerDescriptor
 import java.time.LocalDate
@@ -18,7 +16,8 @@ import javax.persistence.*
     indexes = [
         Index(columnList = "fingerprint, month", unique = true, name = "fingerprint_month_index"),
         Index(columnList = "nickname, month", name = "nickname_month_index"),
-        Index(columnList = "familyId", name = "family_index"),
+        Index(columnList = "familyId", name = "familyId_index"),
+        Index(columnList = "autonomousSystemNumber", name = "autonomousSystemNumber_number_index"),
     ]
 )
 class NodeDetails(
@@ -28,17 +27,16 @@ class NodeDetails(
 
     @Id
     @GeneratedValue
-    val id: Long? = null
+    val id: Long? = null,
+
+    @Column(length = 255)
+    var autonomousSystemName: String? = null,
+
+    @Column(length = 10)
+    var autonomousSystemNumber: String? = null,
 ) {
     @Column(length = 15)
     var address: String? = descriptor.address
-
-    var addressNumber: Long? = try {
-        calculateIPv4NumberRepresentation(descriptor.address)
-    } catch (exception: Exception) {
-        logger().warn("Could not calculate addressNumber for address ${descriptor.address}")
-        null
-    }
 
     var allowSingleHopExits: Boolean = descriptor.allowSingleHopExits
 
@@ -71,19 +69,14 @@ class NodeDetails(
 
     var familyId: Long? = null
 
-    @Column(length = 10)
-    var autonomousSystemNumber: String? = null
-
-    @Column(length = 255)
-    var autonomousSystemName: String? = null
-
     var cachesExtraInfo: Boolean = descriptor.cachesExtraInfo
 
     var isHiddenServiceDir: Boolean = descriptor.isHiddenServiceDir
 
     var linkProtocolVersions: String? = descriptor.linkProtocolVersions?.jointToCommaSeparated().stripLengthForDB()
 
-    var circuitProtocolVersions: String? = descriptor.circuitProtocolVersions?.jointToCommaSeparated().stripLengthForDB()
+    var circuitProtocolVersions: String? =
+        descriptor.circuitProtocolVersions?.jointToCommaSeparated().stripLengthForDB()
 
     var tunnelledDirServer: Boolean = descriptor.tunnelledDirServer
 

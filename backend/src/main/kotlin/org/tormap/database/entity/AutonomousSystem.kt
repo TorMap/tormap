@@ -8,6 +8,6 @@ class AutonomousSystem(
     @EmbeddedId
     var ipRange: IpRangeId,
     var cidr: String,
-    var autonomous_system_number: String,
-    var autonomous_system_name: String,
+    var autonomousSystemNumber: String,
+    var autonomousSystemName: String,
 )

@@ -29,9 +29,9 @@ class NodeDetailsService(
                 requestingNodes.forEach { requestingNode ->
                     val confirmedFamilyNodes = mutableListOf<NodeDetails>()
                     val month = requestingNode.month
-                    requestingNode.familyEntries!!.commaSeparatedToList().forEach {
+                    requestingNode.familyEntries!!.commaSeparatedToList().forEach {familyEntry ->
                         try {
-                            confirmedFamilyNodes.add(confirmFamilyMember(requestingNode, it, month))
+                            confirmedFamilyNodes.add(confirmFamilyMember(requestingNode, familyEntry, month))
                         } catch (exception: Exception) {
                         }
                     }
