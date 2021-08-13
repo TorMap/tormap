@@ -21,7 +21,7 @@ data class SchedulerConfig(
     val relayServerDescriptorsRate: String,
 
     /**
-     * The rate in which all node families should be updated
+     * The rate in which node details should be updated
      */
-    val updateAllNodeFamiliesRate: String,
+    val updateNodeDetailsRate: String,
 )

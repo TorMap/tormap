@@ -3,8 +3,10 @@ package org.tormap.service
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.AsyncResult
 import org.springframework.stereotype.Service
+import org.tormap.calculateIPv4NumberRepresentation
 import org.tormap.config.ApiConfig
 import org.tormap.database.entity.*
+import org.tormap.database.repository.AutonomousSystemRepositoryImpl
 import org.tormap.database.repository.DescriptorsFileRepository
 import org.tormap.database.repository.GeoRelayRepositoryImpl
 import org.tormap.database.repository.NodeDetailsRepository
@@ -28,6 +30,7 @@ class TorDescriptorService(
     val geoRelayRepositoryImpl: GeoRelayRepositoryImpl,
     val nodeDetailsRepository: NodeDetailsRepository,
     val descriptorsFileRepository: DescriptorsFileRepository,
+    val autonomousSystemRepositoryImpl: AutonomousSystemRepositoryImpl,
     val ipLookupService: IpLookupService,
     val nodeDetailsService: NodeDetailsService,
 ) {
@@ -197,12 +200,20 @@ class TorDescriptorService(
         val existingNode =
             nodeDetailsRepository.findByMonthAndFingerprint(descriptorMonth, descriptor.fingerprint)
         if (existingNode == null || existingNode.day < descriptorDay) {
+            val autonomousSystem = try {
+                autonomousSystemRepositoryImpl.findUsingIPv4(calculateIPv4NumberRepresentation(descriptor.address))
+            } catch (exception: Exception) {
+                logger().warn("Could not search autonomousSystem for address ${descriptor.address}")
+                null
+            }
             nodeDetailsRepository.save(
                 NodeDetails(
                     descriptor,
                     descriptorMonth,
                     descriptorDay,
-                    existingNode?.id
+                    existingNode?.id,
+                    autonomousSystem?.autonomousSystemName,
+                    autonomousSystem?.autonomousSystemNumber,
                 )
             )
         }
