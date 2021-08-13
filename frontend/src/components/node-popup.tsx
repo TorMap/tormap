@@ -4,6 +4,9 @@ import React, {useEffect, useState} from "react";
 import {apiBaseUrl} from "../util/constants";
 import {NodeDetails} from "../types/node-details";
 
+/**
+ * Styles according to Material UI doc for components used in NodePopup component
+ */
 const useStyle = makeStyles(() => ({
     closeButton: {
         position: "absolute",

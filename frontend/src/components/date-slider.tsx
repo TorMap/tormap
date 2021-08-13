@@ -1,5 +1,5 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
-import {Grid, makeStyles, Slider, } from "@material-ui/core";
+import {Grid, makeStyles, Slider,} from "@material-ui/core";
 import {useDebounce} from "../util/hooks";
 import {Mark} from "../types/mark";
 import Moment from "react-moment";
@@ -8,6 +8,9 @@ import DateFnsUtils from "@date-io/date-fns";
 import moment from "moment";
 import {Settings} from "../types/variousTypes";
 
+/**
+ * Styles according to Material UI doc for components used in DateSlider component
+ */
 const useStyle = makeStyles(() => ({
     slider: {
         position: "fixed",
@@ -34,8 +37,21 @@ const useStyle = makeStyles(() => ({
 }))
 
 interface Props {
+
+    /**
+     * A String array of available days available at the backend
+     */
     availableDays: string[]
+
+    /**
+     * A callback funktion to update the selected day
+     * @param n the n'th entry in availableDays array
+     */
     setValue: (n: number) => void
+
+    /**
+     * The currently applied app settings
+     */
     settings: Settings
 }
 
@@ -46,6 +62,7 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue, s
     const classes = useStyle()
     const debouncedSliderValue = useDebounce<number>(sliderValue, 500);
 
+    // calculate the marks for the slider
     useEffect(() => {
         if (availableDays.length !== 0) {
             let markCount = 6
@@ -66,6 +83,7 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue, s
         }
     }, [availableDays])
 
+    // handle debouncing of the slider value
     useEffect(() => {
         setValue(debouncedSliderValue)
     },[debouncedSliderValue])
@@ -75,33 +93,6 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue, s
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <Grid container spacing={8} justify={"center"}>
                     <Grid item xs={2}>
-                        {settings.dateRange ? (
-                            <KeyboardDatePicker
-                                autoOk
-                                variant="inline"
-                                format="yyyy-MM-dd"
-                                margin="normal"
-                                id="date-picker-1"
-                                minDate={availableDays[0]}
-                                maxDate={availableDays[availableDays.length-1]}
-                                value={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}
-                                onChange={(date, value) => {
-                                    if (availableDays.includes(value!!)) {
-                                        setSliderValue(availableDays.findIndex(element => element === value))
-                                    }else{
-                                        console.log(`Day ${value} is not available at the moment`)
-                                    }
-                                }}
-                                KeyboardButtonProps={{
-                                    'aria-label': 'change date',
-                                }}
-                                helperText={`Day in the life of the tor network`}
-                                shouldDisableDate={date => {
-                                    return !(availableDays.includes(moment(date).format("YYYY-MM-DD")))
-                                }}
-                            />
-                        ) : null}
-
                     </Grid>
                     <Grid item xs>
                         <Slider
