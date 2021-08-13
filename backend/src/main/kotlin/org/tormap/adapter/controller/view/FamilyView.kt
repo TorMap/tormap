@@ -2,7 +2,7 @@
 
 package org.tormap.adapter.controller.view
 
-import org.tormap.database.entity.IpLookupAs
+import org.tormap.database.entity.AutonomousSystem
 import org.tormap.database.entity.NodeDetails
 
 /**
@@ -10,5 +10,5 @@ import org.tormap.database.entity.NodeDetails
  */
 class FamilyView(
     val familyMembers: List<NodeDetails>,
-    val autonomousSystems: Set<IpLookupAs>,
+    val autonomousSystems: Set<AutonomousSystem>,
 )
