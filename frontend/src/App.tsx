@@ -11,8 +11,12 @@ import {Settings, snackbarMessage, Statistics} from "./types/variousTypes";
 import {MapStats} from "./components/map-stats";
 import {DateSlider} from "./components/date-slider";
 import MuiAlert from '@material-ui/lab/Alert';
-import {defaultSettings} from "./Config";
+import {defaultSettings} from "./util/Config";
 
+
+/**
+ * Styles according to Material UI doc for components used in the App component
+ */
 const useStyle = makeStyles(() => ({
     progressCircle: {
         position: "fixed",
@@ -41,6 +45,7 @@ function App() {
         },
     }))
 
+    // Input handling for settings
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSettings({...settings, [event.target.name]: event.target.checked})
     };

@@ -8,12 +8,14 @@ import {GeoRelayView} from "../types/geo-relay";
 import {RelayFlag} from "../types/relay";
 import {Settings, snackbarMessage, Statistics} from "../types/variousTypes";
 import "leaflet.heat"
-import {makeStyles, Snackbar} from "@material-ui/core";
+import {makeStyles} from "@material-ui/core";
 import worldGeoData from "../data/world.geo.json"; // data from https://geojson-maps.ash.ms/
 import {Feature, GeoJsonObject, GeoJsonProperties, GeometryObject} from "geojson";
-import {stat} from "fs";
-import {Colors} from "../Config";
+import {Colors} from "../util/Config";
 
+/**
+ * Styles according to Material UI doc for components used in WorldMap component
+ */
 const useStyle = makeStyles(() => ({
     leafletContainer: {
         width: "100vw",
@@ -174,7 +176,8 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
 
         //Map for family's, used to get an Array of GeoRelayView with relays in the same family / autonomsystem
         let familyMap: Map<number, GeoRelayView[]> = new Map<number, GeoRelayView[]>()
-        if (settings.sortFamily || true) {
+        // true for forcing the calculation to include it in statistics
+        if (settings.sortFamily) {
             relays.forEach(relay => {
                 if (relay.familyId !== null) {
                     const key: number = relay.familyId
@@ -187,14 +190,16 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
                     }
                 }
             })
-            if(settings.selectedFamily && !familyMap.has(settings.selectedFamily)){
+            if (settings.selectedFamily && !familyMap.has(settings.selectedFamily)){
                 setSettingsCallback({...settings, selectedFamily: undefined})
             }
+            if (settings.sortFamily && familyMap.size === 0) handleSnackbar({message: "There are no Families available for this day!", severity: "warning"})
         }
 
         //Map for country's, used to get an Array of GeoRelayView with relays in the same country
         let countryMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
-        if (settings.sortCountry || true) {
+        // true for forcing the calculation to include it in statistics
+        if (settings.sortCountry) {
             relays.forEach(relay => {
                 if (relay.country !== undefined) {
                     const key: string = relay.country
@@ -313,7 +318,6 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
 
                     if (settings.selectedFamily !== undefined && settings.selectedFamily !== relay.familyId) sat = "30%"
                     if (settings.selectedFamily !== undefined && settings.selectedFamily && settings.selectedFamily !== relay.familyId) sat = "0%"
-                    if (settings.selectedCountry !== undefined && settings.onlyCountry && settings.selectedCountry !== relay.country) return
 
                     const color = `hsl(${hue},${sat},60%)`
                     circleMarker(
@@ -365,7 +369,6 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
 
                     if (settings.selectedCountry !== undefined && settings.selectedCountry !== relay.country) sat = "30%"
                     if (settings.selectedCountry !== undefined && settings.selectedCountry && settings.selectedCountry !== relay.country) sat = "0%"
-                    if (settings.selectedFamily !== undefined && settings.onlyFamily && settings.selectedFamily !== relay.familyId) return
 
                     const color = `hsl(${hue},${sat},60%)`
                     circleMarker(
@@ -411,12 +414,14 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
             }
         })
 
+        // true for forcing the calculation to include it in statistics
         if(settings.sortCountry || true){
             stats = {...stats, countryCount: countryMap.size}
             if(settings.selectedCountry) {
                 stats = {...stats, countryRelayCount: countryMap.get(settings.selectedCountry)?.length}
             }
         }
+        // true for forcing the calculation to include it in statistics
         if(settings.sortFamily || true){
             stats = {...stats, familyCount: familyMap.size}
             if(settings.selectedFamily) stats = {...stats, familyRelayCount: familyMap.get(settings.selectedFamily)?.length}

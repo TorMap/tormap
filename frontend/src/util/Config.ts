@@ -1,4 +1,4 @@
-import {Settings} from "./types/variousTypes";
+import {Settings} from "../types/variousTypes";
 
 // Default settings, that are selected on page load
 export const defaultSettings: Settings = {
@@ -22,19 +22,12 @@ export const defaultSettings: Settings = {
     miSybil: false,
     miBadExit: false,
 
-    showMarker: true,
-    colorNodesAccordingToType: true,
     aggregateCoordinates: false,
     heatMap: false,
 
-    dateRange: false,
-    familyGradient: false,
-
     sortCountry: false,
-    onlyCountry: false,
     selectedCountry: undefined,
     sortFamily: false,
-    onlyFamily: false,
     selectedFamily: undefined,
 }
 

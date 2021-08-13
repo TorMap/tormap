@@ -26,25 +26,15 @@ export interface Settings{
     miSybil: boolean
     miBadExit: boolean
 
-    colorNodesAccordingToType: boolean
-
-
     aggregateCoordinates: boolean
 
     //Heatmap settings
     heatMap: boolean
-    showMarker: boolean
-
-    //Slider settings
-    dateRange: boolean
 
     //Grouping settings
-    familyGradient: boolean
     sortCountry: boolean
-    onlyCountry: boolean
     selectedCountry: string | undefined
     sortFamily: boolean
-    onlyFamily: boolean
     selectedFamily: number | undefined
 }
 
