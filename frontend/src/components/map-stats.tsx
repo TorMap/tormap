@@ -1,38 +1,33 @@
-import React, {FunctionComponent, ReactComponentElement} from "react";
+import React, {FunctionComponent} from "react";
 import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
-    Card,
-    CardContent, Checkbox, FormControlLabel, FormGroup, Icon,
-    makeStyles, Paper, SvgIcon, Switch,
+    makeStyles,
     Table,
     TableBody,
     TableCell,
-    TableContainer,
     TableRow,
     Typography
 } from "@material-ui/core";
-import {rowType, Settings, Statistics} from "../types/variousTypes";
-import {ReactComponent} from "*.svg";
+import {Settings, Statistics} from "../types/variousTypes";
 import DirectionsRunIcon from '@material-ui/icons/DirectionsRun';
 import SecurityIcon from '@material-ui/icons/Security';
-import DeviceHubIcon from '@material-ui/icons/DeviceHub';
 import FlagIcon from '@material-ui/icons/Flag';
 import TimelineIcon from '@material-ui/icons/Timeline';
 import StorageIcon from '@material-ui/icons/Storage';
 import SubdirectoryArrowRightIcon from '@material-ui/icons/SubdirectoryArrowRight';
-import {ExpandLess, SvgIconComponent} from "@material-ui/icons";
-import {Colors} from "../Config";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import {RelayFlagName} from "../types/relay";
+import {Colors} from "../util/Config";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 
+/**
+ * Styles according to Material UI doc for components used in MapStats component
+ */
 const useStyle = makeStyles(() => ({
     root: {
         position: "fixed",
         left: "10px",
-        bottom: "100px",
+        bottom: "50px",
         width: "300px",
     },
     noPadding: {
@@ -41,14 +36,21 @@ const useStyle = makeStyles(() => ({
 }))
 
 interface Props {
+    /**
+     * The currently applied app settings
+     */
     settings: Settings
+
+    /**
+     * The currently map statistics of the currently rendered information
+     */
     statistics: Statistics
 }
 
 export const MapStats: FunctionComponent<Props> = ({settings, statistics}) => {
     const classes = useStyle()
-    const table = true
 
+    // The rows for the node type statistics
     const typeRows = (sett: Settings, stats: Statistics) => {
         let row: Array<Array<string | number | any>> = []
         row.push(["Exit relays", stats.exit, <DirectionsRunIcon style={{color: Colors.Exit}}/>])
@@ -57,24 +59,26 @@ export const MapStats: FunctionComponent<Props> = ({settings, statistics}) => {
         row.push(["Total amount of Relays", (stats.exit + stats.guard + stats.default), <SubdirectoryArrowRightIcon/>])
         return row
     }
+    // The rows for the node family statistics
     const familyRows = (sett: Settings, stats: Statistics) => {
         let row: Array<Array<string | number | any>> = []
-        row.push(["Family count", stats.familyCount, <StorageIcon/>])
-        row.push(["Selectet Family (internal ID)", settings.selectedFamily === undefined ? "none" : settings.selectedFamily, <StorageIcon/>])
+        row.push(["Different families", stats.familyCount, <StorageIcon/>])
+        //row.push(["Selectet Family (internal ID)", settings.selectedFamily === undefined ? "none" : settings.selectedFamily, <StorageIcon/>])
         row.push(["Relays in selectet Family", stats.familyRelayCount === undefined ? "none" : stats.familyRelayCount, <StorageIcon/>])
         return row
     }
+    // The rows for the node country statistics
     const contryRows = (sett: Settings, stats: Statistics) => {
         let row: Array<Array<string | number | any>> = []
-        row.push(["Country count", stats.countryCount, <FlagIcon/>])
-        row.push(["Selectet Country", settings.selectedCountry === undefined ? "none" : settings.selectedCountry, <FlagIcon/>])
+        row.push(["Different countries", stats.countryCount, <FlagIcon/>])
+        //row.push(["Selectet Country", settings.selectedCountry === undefined ? "none" : settings.selectedCountry, <FlagIcon/>])
         row.push(["Relays in selectet Country", stats.countryRelayCount === undefined ? "none" : stats.countryRelayCount, <FlagIcon/>])
         return row
     }
 
     return (
         <div className={classes.root}>
-            <Accordion>
+            <Accordion defaultExpanded={true}>
                 <AccordionSummary
                     expandIcon={<ExpandLessIcon />}
                     aria-controls="panel2a-content"
@@ -87,11 +91,9 @@ export const MapStats: FunctionComponent<Props> = ({settings, statistics}) => {
                             <TableBody>
                                 {typeRows(settings, statistics).map(row => (
                                     <TableRow>
-                                        {row[2] ? (
-                                            <TableCell scope="row">
-                                                {row[2]}
-                                            </TableCell>
-                                        ) : null}
+                                        <TableCell scope="row">
+                                            {row[2] ? row[2] : ""}
+                                        </TableCell>
                                         <TableCell scope="row">
                                             <Typography>{row[0]}</Typography>
                                         </TableCell>
@@ -111,18 +113,16 @@ export const MapStats: FunctionComponent<Props> = ({settings, statistics}) => {
                     aria-controls="panel2a-content"
                     id="panel2a-header"
                 >
-                    <Typography className={"heading"}>Family</Typography>
+                    <Typography className={"heading"}>Family{settings.selectedFamily ? (": " + settings.selectedFamily) : null}</Typography>
                 </AccordionSummary>
                 <AccordionDetails classes={{root: classes.noPadding}}>
                         <Table size="small">
                             <TableBody>
                                 {familyRows(settings, statistics).map(row => (
                                     <TableRow>
-                                        {row[2] ? (
-                                            <TableCell scope="row">
-                                                {row[2]}
-                                            </TableCell>
-                                        ) : null}
+                                        <TableCell scope="row">
+                                            {row[2] ? row[2] : ""}
+                                        </TableCell>
                                         <TableCell scope="row">
                                             <Typography>{row[0]}</Typography>
                                         </TableCell>
@@ -142,18 +142,16 @@ export const MapStats: FunctionComponent<Props> = ({settings, statistics}) => {
                     aria-controls="panel2a-content"
                     id="panel2a-header"
                 >
-                    <Typography className={"heading"}>Country</Typography>
+                    <Typography className={"heading"}>Country{settings.selectedCountry ? (": " + settings.selectedCountry) : null}</Typography>
                 </AccordionSummary>
                 <AccordionDetails classes={{root: classes.noPadding}}>
                         <Table size="small">
                             <TableBody>
                                 {contryRows(settings, statistics).map(row => (
                                     <TableRow>
-                                        {row[2] ? (
-                                            <TableCell scope="row">
-                                                {row[2]}
-                                            </TableCell>
-                                        ) : null}
+                                        <TableCell scope="row">
+                                            {row[2] ? row[2] : ""}
+                                        </TableCell>
                                         <TableCell scope="row">
                                             <Typography>{row[0]}</Typography>
                                         </TableCell>
