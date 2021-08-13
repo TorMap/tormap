@@ -71,11 +71,6 @@ allOpen {
     annotation("javax.persistence.MappedSuperclass")
 }
 
-flyway {
-    url = "jdbc:h2:./tormap;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=5"
-    user = "sa"
-}
-
 
 tasks.dokkaHtml.configure {
     outputDirectory.set(buildDir.resolve("dokka"))

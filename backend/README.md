@@ -27,21 +27,24 @@ On `Linux` systems you can use the main install script `./install`, also describ
 - `./gradlew dokkaHtml`: generate code documentation in HTML format
 - On `Windows` replace `./gradlew` with `./gradlew.bat` for all commands mentioned above
 
-## IP to geo location DBs
+## Database
+TorMap uses an embedded H2 database which saves the whole state in a single DB file located at `database/tormap.mv.db`. To connect to the DB you either can add the datasource in your IDE open http://localhost:8080/h2 while the backend is running. Make sure to configure the connection the same way your `application.properties` are set. In an IDE it might be necessary to configure the datasource URL with `./backend/...` or an absolute path to ensure the correct working directory is used.
 
-TorMap uses two file based DBs to map IPv4 addresses of Tor nodes to latitude and longitude values. To use the latest IP records it is advised to replace the database files of `IP2Location` and `Maxmind` every few weeks.
-Currently the DB files still need to be downloaded manually.
+### IP to autonomous systems
+If you are not starting with a preprocessed TorMap DB you will need to import a CSV file containing autonomous systems via a SQL Query Console. This is also useful if you want to replace records with more recent data.
 
-### IP2Location
-
+#### Manual import
 1. Create a free account at https://lite.ip2location.com/sign-up
-2. Replace the `DOWNLOAD_TOKEN` in the following link with you own one:
-   https://www.ip2location.com/download/?token=DOWNLOAD_TOKEN&file=DB5LITEBIN
-3. Now replace the old DB file located at `./database/ip2location/database.BIN` with the new one.
+2. Download latest IPv4 CSV file from https://lite.ip2location.com/database-asn or use CSV located at `database/csv/IP2LOCATION-LITE-ASN/IP2LOCATION-LITE-ASN.CSV`
+4. Run following commands on the TorMap DB:
+   1. `TRUNCATE TABLE AUTONOMOUS_SYSTEM;`
+   2. `INSERT INTO AUTONOMOUS_SYSTEM SELECT * FROM CSVREAD('<absolute_path_to_csv_file>');` (replace <absolute_path_to_csv_file> with your file)
 
-### Maxmind
+### IP to geo location
 
-1. Create an account and license key at https://www.maxmind.com/
-2. Replace `YOUR_LICENSE_KEY` in the following link and download the DB:
-   https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=YOUR_LICENSE_KEY&suffix=tar.gz
-3. Now replace the old DB file located at `./database/maxmind/database.mmdb` with the new one.
+TorMap uses a binary DB file from `IP2Location` to map IPv4 addresses of Tor nodes to geo locations. It is advised to replace the binary file every few weeks, to keep the IP ranges up to date.
+
+#### Manual replacement
+1. Create a free account at https://lite.ip2location.com/sign-up
+2. Download latest IPv4 BIN file from https://lite.ip2location.com/database/db5-ip-country-region-city-latitude-longitude
+3. Replace old BIN file with new one in `src/main/resources/db/ip2location`

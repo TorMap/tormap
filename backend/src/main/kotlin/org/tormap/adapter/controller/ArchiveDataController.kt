@@ -8,10 +8,10 @@ import org.tormap.adapter.controller.exception.NodeNotFoundException
 import org.tormap.adapter.controller.view.FamilyView
 import org.tormap.adapter.controller.view.GeoRelayView
 import org.tormap.calculateIPv4NumberRepresentation
-import org.tormap.database.entity.IpLookupAs
+import org.tormap.database.entity.AutonomousSystem
 import org.tormap.database.entity.NodeDetails
+import org.tormap.database.repository.AutonomousSystemRepositoryImpl
 import org.tormap.database.repository.GeoRelayRepositoryImpl
-import org.tormap.database.repository.IpLookupAsRepositoryImpl
 import org.tormap.database.repository.NodeDetailsRepository
 import java.time.LocalDate
 
@@ -20,7 +20,7 @@ import java.time.LocalDate
 class ArchiveDataController(
     val geoRelayRepository: GeoRelayRepositoryImpl,
     val nodeDetailsRepository: NodeDetailsRepository,
-    val ipLookupAsRepositoryImpl: IpLookupAsRepositoryImpl,
+    val autonomousSystemRepositoryImpl: AutonomousSystemRepositoryImpl,
 ) {
     @GetMapping("/geo/relay/days")
     fun getDaysForGeoRelays() = geoRelayRepository.findDistinctDays()
@@ -40,9 +40,9 @@ class ArchiveDataController(
         val familyMembers = nodeDetailsRepository.findAllByFamilyId(id)
         if (familyMembers.isEmpty()) throw NodeNotFoundException()
 
-        val autonomousSystems = mutableSetOf<IpLookupAs>()
+        val autonomousSystems = mutableSetOf<AutonomousSystem>()
         familyMembers.forEach {
-            val autonomousSystem = ipLookupAsRepositoryImpl.findUsingIPv4(
+            val autonomousSystem = autonomousSystemRepositoryImpl.findUsingIPv4(
                 calculateIPv4NumberRepresentation(it.address!!)
             )
             if (autonomousSystem != null) {
