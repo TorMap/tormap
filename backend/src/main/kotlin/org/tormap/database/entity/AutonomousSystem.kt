@@ -4,10 +4,10 @@ import javax.persistence.EmbeddedId
 import javax.persistence.Entity
 
 @Entity
-class IpLookupAs(
+class AutonomousSystem(
     @EmbeddedId
     var ipRange: IpRangeId,
     var cidr: String,
-    var asn: String,
-    var `as`: String,
+    var autonomous_system_number: String,
+    var autonomous_system_name: String,
 )
