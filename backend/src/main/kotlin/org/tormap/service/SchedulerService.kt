@@ -5,7 +5,6 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.tormap.config.ApiConfig
 import org.tormap.database.entity.DescriptorType
-import org.tormap.database.repository.NodeDetailsRepositoryImpl
 
 
 /**
@@ -16,8 +15,6 @@ import org.tormap.database.repository.NodeDetailsRepositoryImpl
 class SchedulerService(
     val apiConfig: ApiConfig,
     val torDescriptorService: TorDescriptorService,
-    val nodeDetailsService: NodeDetailsService,
-    val nodeDetailsRepositoryImpl: NodeDetailsRepositoryImpl,
 ) {
     /**
      * Fetches and processes relay consensus descriptors.
@@ -41,14 +38,5 @@ class SchedulerService(
     @Scheduled(fixedRateString = "\${scheduler.relayConsensusDescriptorsRate}")
     fun relayServerDescriptors() =
         torDescriptorService.collectAndProcessDescriptors(apiConfig.descriptorPathRelayServers, DescriptorType.SERVER)
-
-    /**
-     * Updates the node families in DB
-     * Can take up to 30 min depending on your machine.
-     */
-    @Async
-    @Scheduled(fixedRateString = "\${scheduler.updateAllNodeFamiliesRate}")
-    fun updateAllNodeFamilies() =
-        nodeDetailsService.updateNodeFamilies(nodeDetailsRepositoryImpl.findDistinctMonths())
 }
 
