@@ -5,7 +5,8 @@ import {
     AccordionSummary,
     Checkbox,
     FormControlLabel,
-    FormGroup, makeStyles,
+    FormGroup,
+    makeStyles,
     Switch,
     Typography,
 } from "@material-ui/core";
@@ -13,6 +14,9 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import {Settings} from "../types/variousTypes";
 import {RelayFlagName} from "../types/relay";
 
+/**
+ * Styles according to Material UI doc for components used in AppSettings component
+ */
 const useStyle = makeStyles(() => ({
     accordion: {
         position: "absolute",
@@ -24,14 +28,24 @@ const useStyle = makeStyles(() => ({
 }))
 
 interface Props {
+
+    /**
+     * The currently applied app settings
+     */
     settings: Settings
 
+    /**
+     * A callback to handle the change of setting elements
+     * @param event the event of a controlling component (E.g. switches, checkboxes...)
+     */
     onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) => {
+export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
     const classes = useStyle()
 
+    // ToDo redo the MapSettings Menu
+    // ToDo redo the Grouping Menu
     return (
         <div className={classes.accordion}>
             <Accordion>
@@ -40,29 +54,14 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                     aria-controls="panel1a-content"
                     id="panel1a-header"
                 >
-                    <Typography>Map Settings</Typography>
+                    <Typography>Heatmap</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <FormGroup>
-                        <FormControlLabel control={<Switch checked={settings.showMarker}
-                                                           onChange={onChange}/>}
-                                          label={"Draw marker"}
-                                          name={"showMarker"}
-                        />
-                        <FormControlLabel control={<Switch checked={settings.aggregateCoordinates}
-                                                           onChange={onChange}/>}
-                                          label={"Aggregate Relays that have the same coordinates"}
-                                          name={"aggregateCoordinates"}
-                        />
                         <FormControlLabel control={<Switch checked={settings.heatMap}
                                                            onChange={onChange}/>}
                                           label={"Aggregate Relays to density heatmap"}
                                           name={"heatMap"}
-                        />
-                        <FormControlLabel control={<Switch checked={settings.dateRange}
-                                                           onChange={onChange}/>}
-                                          label={"Enable date range selection on slider"}
-                                          name={"dateRange"}
                         />
                     </FormGroup>
                 </AccordionDetails>
@@ -73,29 +72,24 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                     aria-controls="panel2a-content"
                     id="panel2a-header"
                 >
-                    <Typography className={"heading"}>Selection</Typography>
+                    <Typography className={"heading"}>Grouping</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <FormGroup>
                         <FormControlLabel control={<Switch checked={settings.sortCountry}
                                                            onChange={onChange}/>}
-                                          label={"Sort relays according to country"}
+                                          label={"Group relays according to country"}
                                           name={"sortCountry"}
-                        />
-                        <FormControlLabel control={<Switch checked={settings.onlyCountry}
-                                                           onChange={onChange}/>}
-                                          label={"Draw only selected country"}
-                                          name={"onlyCountry"}
                         />
                         <FormControlLabel control={<Switch checked={settings.sortFamily}
                                                            onChange={onChange}/>}
-                                          label={"Sort relays according to family"}
+                                          label={"Group relays according to family"}
                                           name={"sortFamily"}
                         />
-                        <FormControlLabel control={<Switch checked={settings.onlyFamily}
+                        <FormControlLabel control={<Switch checked={settings.aggregateCoordinates}
                                                            onChange={onChange}/>}
-                                          label={"Draw only selected family"}
-                                          name={"onlyFamily"}
+                                          label={"Aggregate Relays that have the same coordinates"}
+                                          name={"aggregateCoordinates"}
                         />
                     </FormGroup>
                 </AccordionDetails>
@@ -120,11 +114,6 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                         <FormControlLabel
                             control={<Checkbox checked={settings.Default} onChange={onChange} name={"Default"}/>}
                             label={"Other"}/>
-                        <FormControlLabel control={<Switch checked={settings.colorNodesAccordingToType}
-                                                           onChange={onChange}/>}
-                                          label={"Color relays according to Type"}
-                                          name={"colorNodesAccordingToType"}
-                        />
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>
@@ -134,7 +123,7 @@ export const AccordionStats: FunctionComponent<Props> = ({settings, onChange}) =
                     aria-controls="panel2a-content"
                     id="panel2a-header"
                 >
-                    <Typography className={"heading"}>Relay must include flag</Typography>
+                    <Typography className={"heading"}>Relays must include flag</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <FormGroup>

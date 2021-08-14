@@ -1,16 +1,22 @@
 import React, {useEffect, useState} from 'react';
 import {WorldMap} from "./components/world-map";
 import {
-    createMuiTheme, CircularProgress, ThemeProvider, makeStyles
+    createMuiTheme, CircularProgress, ThemeProvider, makeStyles, Snackbar
 } from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
 import {apiBaseUrl} from "./util/constants";
-import {AccordionStats} from "./components/accordion-stats";
-import {Settings, Statistics} from "./types/variousTypes";
+import {AppSettings} from "./components/appSettings-accordion";
+import {Settings, snackbarMessage, Statistics} from "./types/variousTypes";
 import {MapStats} from "./components/map-stats";
 import {DateSlider} from "./components/date-slider";
+import MuiAlert from '@material-ui/lab/Alert';
+import {defaultSettings} from "./util/Config";
 
+
+/**
+ * Styles according to Material UI doc for components used in the App component
+ */
 const useStyle = makeStyles(() => ({
     progressCircle: {
         position: "fixed",
@@ -27,47 +33,10 @@ function App() {
     const [availableDays, setAvailableDays] = useState<string[]>([])
     const [sliderValue, setSliderValue] = useState<number>(-1)
     const [isLoading, setIsLoading] = useState(true)
-    const [settings, setSettings] = useState<Settings>({
-        Guard: true,
-        Exit: true,
-        Default: true,
-
-        miValid: false,
-        miNamed: false,
-        miUnnamed: false,
-        miRunning: false,
-        miStable: false,
-        miExit: false,
-        miFast: false,
-        miGuard: false,
-        miAuthority: false,
-        miV2Dir: false,
-        miHSDir: false,
-        miNoEdConsensus: false,
-        miStaleDesc: false,
-        miSybil: false,
-        miBadExit: false,
-
-        showMarker: true,
-        colorNodesAccordingToType: false,
-        aggregateCoordinates: false,
-        heatMap: false,
-
-        dateRange: false,
-        familyGradient: false,
-
-        sortCountry: false,
-        onlyCountry: false,
-        selectedCountry: undefined,
-        sortFamily: false,
-        onlyFamily: false,
-        selectedFamily: undefined,
-    })
-    const [statistics, setStatistics] = useState<Statistics>({
-        guard: 0,
-        default: 0,
-        exit: 0,
-    })
+    const [snackbar, setSnackbar] = useState(false)
+    const [snackbarMessage, setSnackbarMessage] = useState<snackbarMessage>({message: "",severity: "info"})
+    const [settings, setSettings] = useState<Settings>(defaultSettings)
+    const [statistics, setStatistics] = useState<Statistics | undefined>(undefined)
     const classes = useStyle()
 
     const [theme] = useState(createMuiTheme({
@@ -76,9 +45,9 @@ function App() {
         },
     }))
 
+    // Input handling for settings
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSettings({...settings, [event.target.name]: event.target.checked})
-        console.log(`trigger changed ${[event.target.name]} to ${event.target.checked}`)
     };
 
     // Loads available days from the backend
@@ -91,12 +60,32 @@ function App() {
                 setSliderValue(availableDays.length - 1)
                 setIsLoading(false)
             })
-            .catch(console.log)
+            .catch(reason => {
+                handleSnackbar({message: `${reason.message}`, severity: "error"})
+            })
     }, [])
 
 
+    // Resets selection if grouping gets disabled
+    useEffect(() => {
+        if (!settings.sortCountry && settings.selectedCountry){
+            setSettings({...settings, selectedCountry: undefined})
+        }
+        if (!settings.sortFamily && settings.selectedFamily){
+            setSettings({...settings, selectedFamily: undefined})
+        }
+    }, [settings])
 
-
+    const handleCloseSnackbar = (event?: React.SyntheticEvent, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setSnackbar(false)
+    }
+    const handleSnackbar = (snackbarMessage: snackbarMessage) => {
+        setSnackbarMessage(snackbarMessage)
+        setSnackbar(true)
+    }
 
     return (
         <ThemeProvider theme={theme}>
@@ -113,11 +102,22 @@ function App() {
                     setSettingsCallback={setSettings}
                     setLoadingStateCallback={setIsLoading}
                     setStatisticsCallback={setStatistics}
+                    handleSnackbar={handleSnackbar}
                 />
                 <DateSlider availableDays={availableDays} setValue={setSliderValue} settings={settings}/>
-                <AccordionStats settings={settings} onChange={handleInputChange}/>
-                <MapStats settings={settings} statistics={statistics}/>
+                <AppSettings settings={settings} onChange={handleInputChange}/>
+                {statistics ? <MapStats settings={settings} statistics={statistics}/> : null}
             </div>
+            <Snackbar
+                open={snackbar}
+                autoHideDuration={snackbarMessage.severity === "error" ? null : 6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{vertical: "top", horizontal: "center"}}
+            >
+                <MuiAlert elevation={6} variant="filled" onClose={handleCloseSnackbar} severity={snackbarMessage.severity}>
+                    {snackbarMessage.message}
+                </MuiAlert>
+            </Snackbar>
         </ThemeProvider>
     )
 }
