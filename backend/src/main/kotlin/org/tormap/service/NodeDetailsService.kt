@@ -4,7 +4,7 @@ import org.springframework.jdbc.support.incrementer.H2SequenceMaxValueIncremente
 import org.springframework.stereotype.Service
 import org.tormap.commaSeparatedToList
 import org.tormap.database.entity.NodeDetails
-import org.tormap.database.repository.NodeDetailsRepository
+import org.tormap.database.repository.NodeDetailsRepositoryImpl
 import org.tormap.logger
 
 
@@ -13,7 +13,7 @@ import org.tormap.logger
  */
 @Service
 class NodeDetailsService(
-    val nodeDetailsRepository: NodeDetailsRepository,
+    val nodeDetailsRepositoryImpl: NodeDetailsRepositoryImpl,
     val dbSequenceIncrementer: H2SequenceMaxValueIncrementer,
 ) {
     val logger = logger()
@@ -21,28 +21,47 @@ class NodeDetailsService(
     /**
      * Updates [NodeDetails.familyId] for all entities of the requested [months].
      */
-    fun updateNodeFamilies(months: Set<String>) {
+    fun updateNodeFamilies(months: Set<String>? = null) {
         try {
             logger.info("Updating node families")
-            months.forEach {
-                val requestingNodes = nodeDetailsRepository.getAllByMonthEqualsAndFamilyEntriesNotNull(it)
+            val monthsToProcess = months ?: nodeDetailsRepositoryImpl.findDistinctMonths()
+            monthsToProcess.forEach {
+                var confirmedFamilyConnectionCount = 0
+                var rejectedFamilyConnectionCount = 0
+                var membersOfProcessedFamilies = mutableMapOf<String, Long>()
+                val requestingNodes = nodeDetailsRepositoryImpl.getAllByMonthEqualsAndFamilyEntriesNotNull(it)
                 requestingNodes.forEach { requestingNode ->
                     val confirmedFamilyNodes = mutableListOf<NodeDetails>()
                     val month = requestingNode.month
-                    requestingNode.familyEntries!!.commaSeparatedToList().forEach {familyEntry ->
+                    var familyId: Long? = null
+                    requestingNode.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
                         try {
-                            confirmedFamilyNodes.add(confirmFamilyMember(requestingNode, familyEntry, month))
+                            val newConfirmedMember = confirmFamilyMember(requestingNode, familyEntry, month)
+                            if (newConfirmedMember != null) {
+                                if (! membersOfProcessedFamilies.containsKey(newConfirmedMember.fingerprint)) {
+                                    confirmedFamilyNodes.add(newConfirmedMember)
+                                }
+                                familyId = membersOfProcessedFamilies[requestingNode.fingerprint]
+                                    ?: membersOfProcessedFamilies[newConfirmedMember.fingerprint]
+                                confirmedFamilyConnectionCount++
+                            } else {
+                                rejectedFamilyConnectionCount++
+                            }
                         } catch (exception: Exception) {
+                            logger.debug(exception.message)
+                            rejectedFamilyConnectionCount++
                         }
                     }
-                    saveNodeFamily(requestingNode, confirmedFamilyNodes)
+                    membersOfProcessedFamilies =
+                        saveNodeFamily(requestingNode, confirmedFamilyNodes, membersOfProcessedFamilies, familyId)
                 }
+                val totalFamilyConnectionCount = confirmedFamilyConnectionCount + rejectedFamilyConnectionCount
+                logger.info("For month $it this many family connections were rejected: $rejectedFamilyConnectionCount / $totalFamilyConnectionCount")
             }
             logger.info("Finished updating node families")
         } catch (exception: Exception) {
             logger.error("Could not update node families. ${exception.message}")
         }
-
     }
 
     /**
@@ -51,15 +70,21 @@ class NodeDetailsService(
     private fun saveNodeFamily(
         requestingNode: NodeDetails,
         confirmedFamilyMembers: MutableList<NodeDetails>,
-    ) {
-        if (confirmedFamilyMembers.size > 0) {
-            val newFamilyId = dbSequenceIncrementer.nextLongValue()
-            confirmedFamilyMembers.add(requestingNode)
+        membersOfOtherFamilies: MutableMap<String, Long>,
+        familyId: Long?,
+    ): MutableMap<String, Long> {
+        if (confirmedFamilyMembers.isNotEmpty() || familyId != null) {
+            if (! membersOfOtherFamilies.containsKey(requestingNode.fingerprint)) {
+                confirmedFamilyMembers.add(requestingNode)
+            }
+            val newFamilyId = familyId ?: dbSequenceIncrementer.nextLongValue()
             confirmedFamilyMembers.forEach {
                 it.familyId = newFamilyId
+                membersOfOtherFamilies[it.fingerprint] = newFamilyId
             }
-            nodeDetailsRepository.saveAll(confirmedFamilyMembers)
+            nodeDetailsRepositoryImpl.saveAll(confirmedFamilyMembers)
         }
+        return membersOfOtherFamilies
     }
 
     /**
@@ -69,14 +94,14 @@ class NodeDetailsService(
         requestingNode: NodeDetails,
         allegedFamilyMemberId: String,
         month: String,
-    ): NodeDetails {
-        val fingerprintRegex = Regex("^\\$[A-F0-9]{40}.*")
+    ): NodeDetails? {
+        val fingerprintRegex = Regex("^\\$[A-F0-9]{40}.*$")
         val nicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
         when {
             fingerprintRegex.matches(allegedFamilyMemberId) -> {
-                val allegedFamilyMember = nodeDetailsRepository.findByMonthAndFingerprintAndFamilyEntriesNotNull(
+                val allegedFamilyMember = nodeDetailsRepositoryImpl.findByMonthAndFingerprintAndFamilyEntriesNotNull(
                     month,
-                    allegedFamilyMemberId.substring(1, 40),
+                    allegedFamilyMemberId.substring(1, 41),
                 )
                 if (isNodeMemberOfFamily(requestingNode, allegedFamilyMember)) {
                     return allegedFamilyMember!!
@@ -84,16 +109,12 @@ class NodeDetailsService(
             }
             nicknameRegex.matches(allegedFamilyMemberId) -> {
                 val allegedFamilyMembers =
-                    nodeDetailsRepository.getAllByMonthAndNickname(month, allegedFamilyMemberId)
-                val confirmedFamilyMember =
-                    allegedFamilyMembers.firstOrNull { isNodeMemberOfFamily(requestingNode, it) }
-                if (confirmedFamilyMember != null) {
-                    return confirmedFamilyMember
-                }
+                    nodeDetailsRepositoryImpl.getAllByMonthAndNickname(month, allegedFamilyMemberId)
+                return allegedFamilyMembers.firstOrNull { isNodeMemberOfFamily(requestingNode, it) }
             }
             else -> throw Exception("Format of new family member $allegedFamilyMemberId for requestingNode ${requestingNode.fingerprint} not supported!")
         }
-        throw Exception("New family member $allegedFamilyMemberId for requestingNode ${requestingNode.fingerprint} rejected!")
+        return null
     }
 
     /**
