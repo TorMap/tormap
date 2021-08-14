@@ -19,9 +19,4 @@ data class SchedulerConfig(
      * The rate in which relay server descriptors are handled.
      */
     val relayServerDescriptorsRate: String,
-
-    /**
-     * The rate in which node details should be updated
-     */
-    val updateNodeDetailsRate: String,
 )
