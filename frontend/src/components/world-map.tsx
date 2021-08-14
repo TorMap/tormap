@@ -157,7 +157,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
 
         // filter relays
         relays = applyFilter(relays)
-        if (!relays.length && dayToDisplay) handleSnackbar({message: "there are no Relays withe the filtered flags", severity:"warning"})
+        if (!relays.length && dayToDisplay) handleSnackbar({message: "There are no relays with the filtered flags!", severity:"warning"})
 
         // Map for coordinate's, used to get an Array of GeoRelayView with relays on the same coordinate
         let latLonMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
@@ -193,7 +193,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
             if (settings.selectedFamily && !familyMap.has(settings.selectedFamily)){
                 setSettingsCallback({...settings, selectedFamily: undefined})
             }
-            if (settings.sortFamily && familyMap.size === 0) handleSnackbar({message: "There are no Families available for this day!", severity: "warning"})
+            if (settings.sortFamily && familyMap.size === 0) handleSnackbar({message: "There are no families available for this day!", severity: "warning"})
         }
 
         //Map for country's, used to get an Array of GeoRelayView with relays in the same country

@@ -6,7 +6,7 @@ import {
 import "@material-ui/styles";
 import "./index.scss";
 import {apiBaseUrl} from "./util/constants";
-import {AppSettings} from "./components/appSettings-accordion";
+import {AppSettings} from "./components/app-settings";
 import {Settings, snackbarMessage, Statistics} from "./types/variousTypes";
 import {MapStats} from "./components/map-stats";
 import {DateSlider} from "./components/date-slider";

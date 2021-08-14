@@ -78,7 +78,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                     <FormGroup>
                         <FormControlLabel control={<Switch checked={settings.sortCountry}
                                                            onChange={onChange}/>}
-                                          label={"Groupby country"}
+                                          label={"Group by country"}
                                           name={"sortCountry"}
                         />
                         <FormControlLabel control={<Switch checked={settings.sortFamily}
