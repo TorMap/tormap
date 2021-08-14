@@ -54,13 +54,13 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                     aria-controls="panel1a-content"
                     id="panel1a-header"
                 >
-                    <Typography>Heatmap</Typography>
+                    <Typography>Heat-Map</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <FormGroup>
                         <FormControlLabel control={<Switch checked={settings.heatMap}
                                                            onChange={onChange}/>}
-                                          label={"Aggregate Relays to density heatmap"}
+                                          label={"Density of Relays"}
                                           name={"heatMap"}
                         />
                     </FormGroup>
@@ -78,17 +78,17 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                     <FormGroup>
                         <FormControlLabel control={<Switch checked={settings.sortCountry}
                                                            onChange={onChange}/>}
-                                          label={"Group relays according to country"}
+                                          label={"Groupby country"}
                                           name={"sortCountry"}
                         />
                         <FormControlLabel control={<Switch checked={settings.sortFamily}
                                                            onChange={onChange}/>}
-                                          label={"Group relays according to family"}
+                                          label={"Group by family"}
                                           name={"sortFamily"}
                         />
                         <FormControlLabel control={<Switch checked={settings.aggregateCoordinates}
                                                            onChange={onChange}/>}
-                                          label={"Aggregate Relays that have the same coordinates"}
+                                          label={"Group by coordinates"}
                                           name={"aggregateCoordinates"}
                         />
                     </FormGroup>
