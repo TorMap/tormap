@@ -1,3 +1,7 @@
+import {ReactComponent} from "*.svg";
+import {IconClassKey, SvgIcon} from "@material-ui/core";
+import {DOMElement} from "react";
+
 export interface Settings{
 
     // Show relay types
@@ -22,19 +26,15 @@ export interface Settings{
     miSybil: boolean
     miBadExit: boolean
 
-    colorNodesAccordingToType: boolean
     aggregateCoordinates: boolean
+
+    //Heatmap settings
     heatMap: boolean
-    showMarker: boolean
 
-    dateRange: boolean
-    familyGradient: boolean
-
+    //Grouping settings
     sortCountry: boolean
-    onlyCountry: boolean
     selectedCountry: string | undefined
     sortFamily: boolean
-    onlyFamily: boolean
     selectedFamily: number | undefined
 }
 
@@ -42,5 +42,20 @@ export interface Statistics{
     guard: number
     exit: number
     default: number
+    familyCount?: number
+    countryCount?: number
+    familyRelayCount?: number
+    countryRelayCount?: number
     maxValueOnSameCoordinate?: number
+}
+
+export type rowType = {
+    name: string,
+    value: string | number,
+    icon?: IconClassKey,
+}
+
+export type snackbarMessage = {
+    message: string,
+    severity: "error"|"warning"|"info"|"success",
 }
