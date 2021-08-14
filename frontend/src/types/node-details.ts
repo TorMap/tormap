@@ -2,9 +2,11 @@
 
 export interface NodeDetails {
     id: number
-    month: string,
-    day: string,
+    month: string
+    day: string
     address: string
+    autonomousSystemName: string
+    autonomousSystemNumber: string
     allowSingleHopExits: boolean
     nickname: string
     bandwidthRate: number
