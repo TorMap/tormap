@@ -5,9 +5,10 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 /logs/
-tor_usage.*.db
+/*.db
 descriptors/
 .log
+tormap.*.db
 
 ### STS ###
 .apt_generated
