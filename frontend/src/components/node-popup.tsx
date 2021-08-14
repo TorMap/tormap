@@ -58,6 +58,8 @@ export const NodePopup: React.FunctionComponent<Props> = ({
                     setRelayInfos([
                         {name: "Fingerprint", value: relay.fingerprint},
                         {name: "IP address", value: relay.address},
+                        {name: "Autonomous System", value: relay.autonomousSystemName},
+                        {name: "Autonomous System Number", value: relay.autonomousSystemNumber},
                         {name: "Platform", value: relay.platform},
                         {name: "Uptime", value: formatSecondsToHours(relay.uptime)},
                         {name: "Contact", value: relay.contact},
