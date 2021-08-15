@@ -128,9 +128,10 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
 
             //Filter relay types
             if (!settings.Exit &&           relay.flags?.includes(RelayFlag.Exit))          {return}
-            if (!settings.Guard &&          relay.flags?.includes(RelayFlag.Guard))         {return}
+            if (!settings.Guard &&          (relay.flags?.includes(RelayFlag.Guard))
+                                            && !(relay.flags?.includes(RelayFlag.Exit)))    {return}
             if (!settings.Default &&        (!relay.flags?.includes(RelayFlag.Guard)
-                                            && !relay.flags?.includes(RelayFlag.Exit)))      {return}
+                                            && !relay.flags?.includes(RelayFlag.Exit)))     {return}
             filtered.push(relay)
         })
         return filtered
@@ -195,6 +196,28 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
             }
             if (settings.sortFamily && familyMap.size === 0) handleSnackbar({message: "There are no families available for this day!", severity: "warning"})
         }
+
+
+        //
+        let familyCordMap: Map<number, Map<string, GeoRelayView[]>> = new Map<number, Map<string, GeoRelayView[]>>()
+        //
+        if (settings.sortFamily) {
+            familyMap.forEach((family, famKey) => {
+                let cordMap = new Map<string, GeoRelayView[]>()
+                family.forEach(relay => {
+                    const key: string = `${relay.lat},${relay.long}`
+                    if (cordMap.has(key)){
+                        let old = cordMap.get(key)!!
+                        old.push(relay)
+                        cordMap.set(key, old)
+                    }else{
+                        cordMap.set(key, [relay])
+                    }
+                })
+                familyCordMap.set(famKey, cordMap)
+            })
+        }
+        console.log(familyCordMap)
 
         //Map for country's, used to get an Array of GeoRelayView with relays in the same country
         let countryMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
@@ -307,7 +330,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
         }
 
         //Draw family marker's, used to draw all markers to the map with colors according to their family
-        if (settings.sortFamily){
+        if (settings.sortFamily && false){
             const familyLayer: LayerGroup = new LayerGroup()
             let index = 0
             familyMap.forEach(family => {
@@ -323,7 +346,10 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
                     circleMarker(
                         [relay.lat, relay.long],
                         {color: color,
-                                radius: radius,}
+                                radius: radius,
+                                fillOpacity: .05,
+                                weight: .1,
+                        }
                     )
                         .on("click", () => {
                             if (relay.familyId === settings.selectedFamily) {
@@ -335,6 +361,47 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
                         .addTo(familyLayer)
                 })
                 index ++
+            })
+            familyLayer.addTo(layerToReturn)
+        }
+
+        //todo: scaling anpassen
+        //Draw familyCord marker's, used to draw all markers to the map with colors according to their family
+        if (settings.sortFamily){
+            const familyLayer: LayerGroup = new LayerGroup()
+            let index = 0
+            familyCordMap.forEach((famLocations, famKey) => {
+                famLocations.forEach((familyLocation, key) => {
+                    const coordinates = key.split(",")
+
+                    let hue = index * 360 / familyMap.size * (2 / 3)
+                    let sat = "90%"
+                    let radius = familyLocation.length * 5
+
+                    if (settings.selectedFamily !== undefined && settings.selectedFamily !== famKey) sat = "30%"
+                    if (settings.selectedFamily !== undefined && settings.selectedFamily && settings.selectedFamily !== famKey) sat = "0%"
+
+                    const color = `hsl(${hue},${sat},60%)`
+
+                    circleMarker(
+                        [+coordinates[0],+coordinates[1]],
+                        {
+                            radius: radius,
+                            color: color,
+                            weight: 1.5,
+                            fillOpacity: .3,
+                        }
+                    )
+                        .on("click", () => {
+                            if (famKey === settings.selectedFamily) {
+                                setSettingsCallback({...settings, selectedFamily: undefined})
+                            }else{
+                                setSettingsCallback({...settings, selectedFamily: famKey})
+                            }
+                        })
+                        .addTo(familyLayer)
+                })
+                index++
             })
             familyLayer.addTo(layerToReturn)
         }
