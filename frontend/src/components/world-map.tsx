@@ -12,6 +12,15 @@ import {makeStyles} from "@material-ui/core";
 import worldGeoData from "../data/world.geo.json"; // data from https://geojson-maps.ash.ms/
 import {Feature, GeoJsonObject, GeoJsonProperties, GeometryObject} from "geojson";
 import {Colors} from "../util/Config";
+import {
+    applyFilter,
+    famCordArr,
+    getFamCordMap,
+    getFamilyMap,
+    getLatLonMap,
+    onEachFeature,
+    sortFamCordMap
+} from "./world-map-helper";
 
 /**
  * Styles according to Material UI doc for components used in WorldMap component
@@ -105,50 +114,6 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
         setShowNodePopup(true)
     }
 
-    //Helper for relaysToLayerGroup, applys all Filters to the downloaded data
-    const applyFilter = (relays: GeoRelayView[]): GeoRelayView[] => {
-        let filtered: GeoRelayView[] = []
-        relays.forEach(relay => {
-            //Filter must include settings
-            if (settings.miValid &&         !relay.flags?.includes(RelayFlag.Valid))        {return}
-            if (settings.miNamed &&         !relay.flags?.includes(RelayFlag.Named))        {return}
-            if (settings.miUnnamed &&       !relay.flags?.includes(RelayFlag.Unnamed))      {return}
-            if (settings.miRunning &&       !relay.flags?.includes(RelayFlag.Running))      {return}
-            if (settings.miStable &&        !relay.flags?.includes(RelayFlag.Stable))       {return}
-            if (settings.miExit &&          !relay.flags?.includes(RelayFlag.Exit))         {return}
-            if (settings.miFast &&          !relay.flags?.includes(RelayFlag.Fast))         {return}
-            if (settings.miGuard &&         !relay.flags?.includes(RelayFlag.Guard))        {return}
-            if (settings.miAuthority &&     !relay.flags?.includes(RelayFlag.Authority))    {return}
-            if (settings.miV2Dir &&         !relay.flags?.includes(RelayFlag.V2Dir))        {return}
-            if (settings.miHSDir &&         !relay.flags?.includes(RelayFlag.HSDir))        {return}
-            if (settings.miNoEdConsensus && !relay.flags?.includes(RelayFlag.NoEdConsensus)){return}
-            if (settings.miStaleDesc &&     !relay.flags?.includes(RelayFlag.StaleDesc))    {return}
-            if (settings.miSybil &&         !relay.flags?.includes(RelayFlag.Sybil))        {return}
-            if (settings.miBadExit &&       !relay.flags?.includes(RelayFlag.BadExit))      {return}
-
-            //Filter relay types
-            if (!settings.Exit &&           relay.flags?.includes(RelayFlag.Exit))          {return}
-            if (!settings.Guard &&          (relay.flags?.includes(RelayFlag.Guard))
-                                            && !(relay.flags?.includes(RelayFlag.Exit)))    {return}
-            if (!settings.Default &&        (!relay.flags?.includes(RelayFlag.Guard)
-                                            && !relay.flags?.includes(RelayFlag.Exit)))     {return}
-            filtered.push(relay)
-        })
-        return filtered
-    }
-
-    //Helper for relaysToLayerGroup, used for adding eventlisteners to the countries
-    const onEachFeature = (feature: Feature<GeometryObject, GeoJsonProperties>, layer: Layer) => {
-        layer.on({
-            click: () => {
-                if (feature.properties!!.iso_a2 !== settings.selectedCountry)
-                    setSettingsCallback({...settings, selectedCountry: feature.properties?.iso_a2})
-                else setSettingsCallback({...settings, selectedCountry: undefined})
-            }
-
-        });
-    }
-
     // Processes an array of Relays according to settings and returns an layerGroup with all relevant layers that have to be added to the map
     const relaysToLayerGroup = (relays: GeoRelayView[]): LayerGroup => {
         console.time(`relaysToLayerGroup`)
@@ -157,48 +122,25 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
         const layerToReturn = new LayerGroup()
 
         // filter relays
-        relays = applyFilter(relays)
-        if (!relays.length && dayToDisplay) handleSnackbar({message: "There are no relays with the filtered flags!", severity:"warning"})
+        relays = applyFilter(relays, settings)
+        if (!relays.length && dayToDisplay) {
+            handleSnackbar({message: "There are no relays with the filtered flags!", severity: "warning"})
+            return layerToReturn
+        }
 
         // Map for coordinate's, used to get an Array of GeoRelayView with relays on the same coordinate
-        let latLonMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
-        if (settings.aggregateCoordinates || settings.heatMap){
-            relays.forEach(relay => {
-                const key: string = `${relay.lat},${relay.long}`
-                if (latLonMap.has(key)){
-                    let old = latLonMap.get(key)!!
-                    old.push(relay)
-                    latLonMap.set(key, old)
-                }else{
-                    latLonMap.set(key, [relay])
-                }
-            })
-        }
+        const latLonMap = getLatLonMap(relays, settings)
+        console.log(`latLonMap: ${latLonMap.size}`)
 
         //Map for family's, used to get an Array of GeoRelayView with relays in the same family / autonomsystem
-        let familyMap: Map<number, GeoRelayView[]> = new Map<number, GeoRelayView[]>()
-        // true for forcing the calculation to include it in statistics
-        if (settings.sortFamily) {
-            relays.forEach(relay => {
-                if (relay.familyId !== null) {
-                    const key: number = relay.familyId
-                    if (familyMap.has(key)) {
-                        let old = familyMap.get(key)!!
-                        old.push(relay)
-                        familyMap.set(key, old)
-                    } else {
-                        familyMap.set(key, [relay])
-                    }
-                }
-            })
-            if (settings.selectedFamily && !familyMap.has(settings.selectedFamily)){
-                setSettingsCallback({...settings, selectedFamily: undefined})
-            }
-            if (settings.sortFamily && familyMap.size === 0) handleSnackbar({message: "There are no families available for this day!", severity: "warning"})
+        const familyMap = getFamilyMap(relays, settings)
+        if (settings.selectedFamily && !familyMap.has(settings.selectedFamily)){
+            setSettingsCallback({...settings, selectedFamily: undefined})
         }
+        if (settings.sortFamily && familyMap.size === 0) handleSnackbar({message: "There are no families available for this day!", severity: "warning"})
+        console.log(`familyMap: ${familyMap.size}`)
 
-
-        //
+        // todo: remove
         let familyCordMap: Map<number, Map<string, GeoRelayView[]>> = new Map<number, Map<string, GeoRelayView[]>>()
         //
         if (settings.sortFamily) {
@@ -217,7 +159,11 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
                 familyCordMap.set(famKey, cordMap)
             })
         }
-        console.log(familyCordMap)
+
+        const famCordMap = getFamCordMap(latLonMap)
+        console.log(`famCordMap: ${famCordMap.size}`)
+
+        //todo: funktionen auslagern
 
         //Map for country's, used to get an Array of GeoRelayView with relays in the same country
         let countryMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
@@ -261,7 +207,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
                 let filteredGeoData = new GeoJSON(undefined,{
                     style: style as PathOptions,
                     onEachFeature(feature: Feature<GeometryObject, GeoJsonProperties>, layer: Layer) {
-                        onEachFeature(feature, layer)
+                        onEachFeature(feature, layer, settings, setSettingsCallback)
                     }
                 })
                 geoData.features.forEach(feature => {
@@ -329,6 +275,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
             defaultMarkerLayer.addTo(layerToReturn)
         }
 
+        //todo: remove
         //Draw family marker's, used to draw all markers to the map with colors according to their family
         if (settings.sortFamily && false){
             const familyLayer: LayerGroup = new LayerGroup()
@@ -369,40 +316,38 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
         //Draw familyCord marker's, used to draw all markers to the map with colors according to their family
         if (settings.sortFamily){
             const familyLayer: LayerGroup = new LayerGroup()
-            let index = 0
-            familyCordMap.forEach((famLocations, famKey) => {
-                famLocations.forEach((familyLocation, key) => {
-                    const coordinates = key.split(",")
-
-                    let hue = index * 360 / familyMap.size * (2 / 3)
+            const sortedFamCordMap: Map<string, famCordArr[]> = sortFamCordMap(famCordMap)
+            sortedFamCordMap.forEach((famMapForLocation ,location) => {
+                const coordinates= location.split(",")
+                const latlng: L.LatLngExpression = [+coordinates[0],+coordinates[1]]
+                famMapForLocation.forEach((famCordArr) => {
+                    let hue = famCordArr.familyID % 360
                     let sat = "90%"
-                    let radius = familyLocation.length * 5
+                    let radius = famCordArr.relays.length * 6 + famCordArr.padding * 5 + famMapForLocation.length * 0
 
-                    if (settings.selectedFamily !== undefined && settings.selectedFamily !== famKey) sat = "30%"
-                    if (settings.selectedFamily !== undefined && settings.selectedFamily && settings.selectedFamily !== famKey) sat = "0%"
+                    if (settings.selectedFamily !== undefined && settings.selectedFamily !== famCordArr.familyID) sat = "30%"
+                    if (settings.selectedFamily !== undefined && settings.selectedFamily && settings.selectedFamily !== famCordArr.familyID) sat = "0%"
 
                     const color = `hsl(${hue},${sat},60%)`
-
                     circleMarker(
-                        [+coordinates[0],+coordinates[1]],
-                        {
+                        latlng,
+                        {color: color,
                             radius: radius,
-                            color: color,
-                            weight: 1.5,
-                            fillOpacity: .3,
+                            fillOpacity: .25,
+                            weight: .5,
                         }
                     )
                         .on("click", () => {
-                            if (famKey === settings.selectedFamily) {
+                            if (famCordArr.familyID === settings.selectedFamily) {
                                 setSettingsCallback({...settings, selectedFamily: undefined})
                             }else{
-                                setSettingsCallback({...settings, selectedFamily: famKey})
+                                setSettingsCallback({...settings, selectedFamily: famCordArr.familyID})
                             }
                         })
                         .addTo(familyLayer)
                 })
-                index++
             })
+            console.log(familyLayer)
             familyLayer.addTo(layerToReturn)
         }
 
