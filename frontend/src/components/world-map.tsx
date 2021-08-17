@@ -1,17 +1,30 @@
 import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useEffect, useState} from "react";
 import {apiBaseUrl} from "../util/constants";
-import L, {circleMarker, GeoJSON, Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap, PathOptions} from "leaflet";
+import L, {GeoJSON, Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap, PathOptions} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import {NodePopup} from "./node-popup";
 import {GeoRelayView} from "../types/geo-relay";
-import {RelayFlag} from "../types/relay";
 import {Settings, snackbarMessage, Statistics} from "../types/variousTypes";
 import "leaflet.heat"
 import {makeStyles} from "@material-ui/core";
 import worldGeoData from "../data/world.geo.json"; // data from https://geojson-maps.ash.ms/
 import {Feature, GeoJsonObject, GeoJsonProperties, GeometryObject} from "geojson";
-import {Colors} from "../util/Config";
+import {
+    aggregatedCoordinatesLayer,
+    applyFilter,
+    calculateStatistics,
+    countryMarkerLayer,
+    defaultMarkerLayer,
+    familyCordLayer,
+    familyLayer,
+    getCountryMap,
+    getFamCordMap,
+    getFamilyMap,
+    getLatLonMap,
+    onEachFeature
+} from "./world-map-helper";
+import {NodeArrayPopup} from "./nodeArray-popup";
 
 /**
  * Styles according to Material UI doc for components used in WorldMap component
@@ -64,9 +77,18 @@ interface Props {
 // Variable needs to be outside component to keep track of the last selected date
 let latestRequestTimestamp: number | undefined = undefined
 
-export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setSettingsCallback, setLoadingStateCallback, setStatisticsCallback, handleSnackbar}) => {
+export const WorldMap: FunctionComponent<Props> = ({
+                                                       dayToDisplay,
+                                                       settings,
+                                                       setSettingsCallback,
+                                                       setLoadingStateCallback,
+                                                       setStatisticsCallback,
+                                                       handleSnackbar
+                                                    }) => {
     const [showNodePopup, setShowNodePopup] = useState(false)
     const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
+    const [showNodeArrayPopup, setShowNodeArrayPopup] = useState(false)
+    const [nodePopupRelays, setNodePopupRelays] = useState<GeoRelayView[]>([])
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
     const [markerLayer] = useState<LayerGroup>(new LayerGroup())
     const [heatLayer, setHeatLayer] = useState<Layer>(new Layer())
@@ -99,53 +121,19 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
     },[relays, settings])
 
     //Eventhandler for markers to show the node-popup component
-    const onMarkerClick = (click: LeafletMouseEvent) => {
+    const onMarkerClick = (event: LeafletMouseEvent) => {
         console.log("Marker clicked, show node details")
-        setNodePopupRelayId(click.sourceTarget.options.className)
+        setNodePopupRelayId(event.sourceTarget.options.className)
         setShowNodePopup(true)
     }
 
-    //Helper for relaysToLayerGroup, applys all Filters to the downloaded data
-    const applyFilter = (relays: GeoRelayView[]): GeoRelayView[] => {
-        let filtered: GeoRelayView[] = []
-        relays.forEach(relay => {
-            //Filter must include settings
-            if (settings.miValid &&         !relay.flags?.includes(RelayFlag.Valid))        {return}
-            if (settings.miNamed &&         !relay.flags?.includes(RelayFlag.Named))        {return}
-            if (settings.miUnnamed &&       !relay.flags?.includes(RelayFlag.Unnamed))      {return}
-            if (settings.miRunning &&       !relay.flags?.includes(RelayFlag.Running))      {return}
-            if (settings.miStable &&        !relay.flags?.includes(RelayFlag.Stable))       {return}
-            if (settings.miExit &&          !relay.flags?.includes(RelayFlag.Exit))         {return}
-            if (settings.miFast &&          !relay.flags?.includes(RelayFlag.Fast))         {return}
-            if (settings.miGuard &&         !relay.flags?.includes(RelayFlag.Guard))        {return}
-            if (settings.miAuthority &&     !relay.flags?.includes(RelayFlag.Authority))    {return}
-            if (settings.miV2Dir &&         !relay.flags?.includes(RelayFlag.V2Dir))        {return}
-            if (settings.miHSDir &&         !relay.flags?.includes(RelayFlag.HSDir))        {return}
-            if (settings.miNoEdConsensus && !relay.flags?.includes(RelayFlag.NoEdConsensus)){return}
-            if (settings.miStaleDesc &&     !relay.flags?.includes(RelayFlag.StaleDesc))    {return}
-            if (settings.miSybil &&         !relay.flags?.includes(RelayFlag.Sybil))        {return}
-            if (settings.miBadExit &&       !relay.flags?.includes(RelayFlag.BadExit))      {return}
-
-            //Filter relay types
-            if (!settings.Exit &&           relay.flags?.includes(RelayFlag.Exit))          {return}
-            if (!settings.Guard &&          relay.flags?.includes(RelayFlag.Guard))         {return}
-            if (!settings.Default &&        (!relay.flags?.includes(RelayFlag.Guard)
-                                            && !relay.flags?.includes(RelayFlag.Exit)))      {return}
-            filtered.push(relay)
-        })
-        return filtered
-    }
-
-    //Helper for relaysToLayerGroup, used for adding eventlisteners to the countries
-    const onEachFeature = (feature: Feature<GeometryObject, GeoJsonProperties>, layer: Layer) => {
-        layer.on({
-            click: () => {
-                if (feature.properties!!.iso_a2 !== settings.selectedCountry)
-                    setSettingsCallback({...settings, selectedCountry: feature.properties?.iso_a2})
-                else setSettingsCallback({...settings, selectedCountry: undefined})
-            }
-
-        });
+    const onMarkerGroupClick = (event: LeafletMouseEvent) => {
+        console.log("Marker Group clicked")
+        const relaysAtCoordinate = getLatLonMap(applyFilter(relays, settings), settings).get(event.target.options.className)!!
+        setNodePopupRelays(relaysAtCoordinate)
+        console.log(`${event.target.options.className} has ${relaysAtCoordinate.length}`)
+        console.log(relaysAtCoordinate)
+        setShowNodeArrayPopup(true)
     }
 
     // Processes an array of Relays according to settings and returns an layerGroup with all relevant layers that have to be added to the map
@@ -156,66 +144,26 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
         const layerToReturn = new LayerGroup()
 
         // filter relays
-        relays = applyFilter(relays)
-        if (!relays.length && dayToDisplay) handleSnackbar({message: "There are no relays with the filtered flags!", severity:"warning"})
+        relays = applyFilter(relays, settings)
+        if (!relays.length && dayToDisplay) {
+            handleSnackbar({message: "There are no relays with the filtered flags!", severity: "warning"})
+            return layerToReturn
+        }
 
         // Map for coordinate's, used to get an Array of GeoRelayView with relays on the same coordinate
-        let latLonMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
-        if (settings.aggregateCoordinates || settings.heatMap){
-            relays.forEach(relay => {
-                const key: string = `${relay.lat},${relay.long}`
-                if (latLonMap.has(key)){
-                    let old = latLonMap.get(key)!!
-                    old.push(relay)
-                    latLonMap.set(key, old)
-                }else{
-                    latLonMap.set(key, [relay])
-                }
-            })
-        }
+        const latLonMap: Map<string, GeoRelayView[]> = getLatLonMap(relays, settings)
 
         //Map for family's, used to get an Array of GeoRelayView with relays in the same family / autonomsystem
-        let familyMap: Map<number, GeoRelayView[]> = new Map<number, GeoRelayView[]>()
-        // true for forcing the calculation to include it in statistics
-        if (settings.sortFamily) {
-            relays.forEach(relay => {
-                if (relay.familyId !== null) {
-                    const key: number = relay.familyId
-                    if (familyMap.has(key)) {
-                        let old = familyMap.get(key)!!
-                        old.push(relay)
-                        familyMap.set(key, old)
-                    } else {
-                        familyMap.set(key, [relay])
-                    }
-                }
-            })
-            if (settings.selectedFamily && !familyMap.has(settings.selectedFamily)){
-                setSettingsCallback({...settings, selectedFamily: undefined})
-            }
-            if (settings.sortFamily && familyMap.size === 0) handleSnackbar({message: "There are no families available for this day!", severity: "warning"})
+        const familyMap: Map<number, GeoRelayView[]> = getFamilyMap(relays, settings)
+        if (settings.selectedFamily && !familyMap.has(settings.selectedFamily)){
+            setSettingsCallback({...settings, selectedFamily: undefined})
         }
+        if (settings.sortFamily && familyMap.size === 0) handleSnackbar({message: "There are no families available for this day!", severity: "warning"})
+
+        const famCordMap: Map<string, Map<number, GeoRelayView[]>> = getFamCordMap(latLonMap)
 
         //Map for country's, used to get an Array of GeoRelayView with relays in the same country
-        let countryMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
-        // true for forcing the calculation to include it in statistics
-        if (settings.sortCountry) {
-            relays.forEach(relay => {
-                if (relay.country !== undefined) {
-                    const key: string = relay.country
-                    if (countryMap.has(key)) {
-                        let old = countryMap.get(key)!!
-                        old.push(relay)
-                        countryMap.set(key, old)
-                    } else {
-                        countryMap.set(key, [relay])
-                    }
-                }
-            })
-            if(settings.selectedCountry && !countryMap.has(settings.selectedCountry)){
-                setSettingsCallback({...settings, selectedCountry: undefined})
-            }
-        }
+        const countryMap: Map<string, GeoRelayView[]> = getCountryMap(relays, settings, setSettingsCallback)
 
         //Draw Country's, used to draw all countries to the map if at least one relay is hosted there
         if (settings.sortCountry){
@@ -238,7 +186,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
                 let filteredGeoData = new GeoJSON(undefined,{
                     style: style as PathOptions,
                     onEachFeature(feature: Feature<GeometryObject, GeoJsonProperties>, layer: Layer) {
-                        onEachFeature(feature, layer)
+                        onEachFeature(feature, layer, settings, setSettingsCallback)
                     }
                 })
                 geoData.features.forEach(feature => {
@@ -255,88 +203,23 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
 
         //Draw aggregated marker's, used to draw all markers to the map with more than 4 relays on the same coordinate
         if (settings.aggregateCoordinates){
-            const aggregatedCoordinatesLayer = new LayerGroup()
-            latLonMap.forEach((value, key) => {
-                const coordinates= key.split(",")
-                // skip if a coordinate has less than 4 relays
-                if (value.length < 4) return
-                circleMarker(
-                    [+coordinates[0],+coordinates[1]],
-                    {
-                        radius: value.length / 2,
-                        color: "#ffffff",
-                        weight: .3,
-                    }
-                )
-                    .addTo(aggregatedCoordinatesLayer)
-            })
-            aggregatedCoordinatesLayer.addTo(layerToReturn)
+            aggregatedCoordinatesLayer(latLonMap, onMarkerGroupClick).addTo(layerToReturn)
         }
 
         //Draw marker's, used to draw all markers to the map with colors according to their type
         if (!settings.sortCountry){
-            const defaultLayer = new LayerGroup()
-            const exitLayer = new LayerGroup()
-            const guardLayer = new LayerGroup()
-            const defaultMarkerLayer = new LayerGroup([defaultLayer, guardLayer, exitLayer])
-            relays.forEach(relay => {
-                let color = Colors.Default
-                let layer = defaultLayer
-                if (relay.flags?.includes(RelayFlag.Exit)) {
-                    color = Colors.Exit
-                    layer = exitLayer
-                }
-                else if (relay.flags?.includes(RelayFlag.Guard)) {
-                    color = Colors.Guard
-                    layer = guardLayer
-                }
-
-                circleMarker(
-                    [relay.lat, relay.long],
-                    {
-                        radius: 1,
-                        className: relay.detailsId,
-                        color: color,
-                        weight: 3,
-                    },
-                )
-                    .on("click", onMarkerClick)
-                    .addTo(layer)
-            })
-            defaultMarkerLayer.addTo(layerToReturn)
+            defaultMarkerLayer(relays, onMarkerClick).addTo(layerToReturn)
         }
 
+        //todo: remove
         //Draw family marker's, used to draw all markers to the map with colors according to their family
+        if (settings.sortFamily && false){
+            familyLayer(familyMap, settings, setSettingsCallback).addTo(layerToReturn)
+        }
+
+        //Draw familyCord marker's, used to draw all markers to the map with colors according to their family
         if (settings.sortFamily){
-            const familyLayer: LayerGroup = new LayerGroup()
-            let index = 0
-            familyMap.forEach(family => {
-                family.forEach((relay,i , family) => {
-                    let hue = index * 360 / familyMap.size * (2 / 3)
-                    let sat = "90%"
-                    let radius = family.length * 10
-
-                    if (settings.selectedFamily !== undefined && settings.selectedFamily !== relay.familyId) sat = "30%"
-                    if (settings.selectedFamily !== undefined && settings.selectedFamily && settings.selectedFamily !== relay.familyId) sat = "0%"
-
-                    const color = `hsl(${hue},${sat},60%)`
-                    circleMarker(
-                        [relay.lat, relay.long],
-                        {color: color,
-                                radius: radius,}
-                    )
-                        .on("click", () => {
-                            if (relay.familyId === settings.selectedFamily) {
-                                setSettingsCallback({...settings, selectedFamily: undefined})
-                            }else{
-                                setSettingsCallback({...settings, selectedFamily: relay.familyId})
-                            }
-                        })
-                        .addTo(familyLayer)
-                })
-                index ++
-            })
-            familyLayer.addTo(layerToReturn)
+            familyCordLayer(famCordMap, settings, setSettingsCallback).addTo(layerToReturn)
         }
 
         //Draw Heatmap, draws a heatmap with a point for each coordinate
@@ -354,36 +237,7 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
 
         //Draw country marker's, used to draw all markers to the map with colors according to their country
         if (settings.sortCountry){
-            const countryLayer: LayerGroup = new LayerGroup()
-            let index = 0
-            const geoData = worldGeoData
-            countryMap.forEach((country, key) => {
-                let hue = 0
-                const mapColor9 = (geoData.features.find(feature => feature.properties.iso_a2 === key)?.properties.mapcolor9)
-                if (mapColor9) hue = mapColor9 * 360 / 9
-                else hue = 9 * 360 / 9
-
-                country.forEach((relay,i , country) => {
-                    let sat = "90%"
-                    let radius = 1
-
-                    if (settings.selectedCountry !== undefined && settings.selectedCountry !== relay.country) sat = "30%"
-                    if (settings.selectedCountry !== undefined && settings.selectedCountry && settings.selectedCountry !== relay.country) sat = "0%"
-
-                    const color = `hsl(${hue},${sat},60%)`
-                    circleMarker(
-                        [relay.lat, relay.long],
-                        {color: color,
-                            radius: radius,
-                            className: relay.detailsId,
-                        }
-                    )
-                        .on("click", onMarkerClick)
-                        .addTo(countryLayer)
-                })
-                index ++
-            })
-            countryLayer.addTo(layerToReturn)
+            countryMarkerLayer(countryMap, settings, onMarkerClick).addTo(layerToReturn)
         }
 
         //Calculate statistics
@@ -399,35 +253,8 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
         } else if(settings.selectedFamily && familyMap.has(settings.selectedFamily)){
             relays = familyMap.get(settings.selectedFamily)!!
         }
-        let stats: Statistics = {
-            guard: 0,
-            exit: 0,
-            default: 0,
-        }
-        relays.forEach(relay => {
-            if (relay.flags?.includes(RelayFlag.Exit)) {
-                stats.exit++
-            }else if( relay.flags?.includes(RelayFlag.Guard)){
-                stats.guard++
-            }else{
-                stats.default++
-            }
-        })
 
-        // true for forcing the calculation to include it in statistics
-        if(settings.sortCountry || true){
-            stats = {...stats, countryCount: countryMap.size}
-            if(settings.selectedCountry) {
-                stats = {...stats, countryRelayCount: countryMap.get(settings.selectedCountry)?.length}
-            }
-        }
-        // true for forcing the calculation to include it in statistics
-        if(settings.sortFamily || true){
-            stats = {...stats, familyCount: familyMap.size}
-            if(settings.selectedFamily) stats = {...stats, familyRelayCount: familyMap.get(settings.selectedFamily)?.length}
-        }
-
-        setStatisticsCallback(stats)
+        setStatisticsCallback(calculateStatistics(relays, countryMap, familyMap, settings))
 
         console.timeLog(`relaysToLayerGroup`, `New Layer with ${relays.length} elements finished`)
         console.timeEnd(`relaysToLayerGroup`, )
@@ -444,11 +271,6 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
         }
     }
 
-    // ToDo: fix handleUnselect
-    const handleUnselect = () => {
-        setSettingsCallback({...settings, selectedCountry: undefined, selectedFamily: undefined})
-    }
-
     return (
         <MapContainer
             className={classes.leafletContainer}
@@ -462,7 +284,6 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
             preferCanvas={true}
             whenCreated={(newMap: LeafletMap) => {
                 markerLayer.addTo(newMap)
-                newMap.on("contextmenu", handleUnselect)
                 setLeafletMap(newMap)
             }}
         >
@@ -470,6 +291,11 @@ export const WorldMap: FunctionComponent<Props> = ({dayToDisplay, settings, setS
                 showNodePopup={showNodePopup}
                 setShowNodePopup={() => setShowNodePopup(false)}
                 nodeDetailsId={nodePopupRelayId}
+            />
+            <NodeArrayPopup
+                showNodePopup={showNodeArrayPopup}
+                relays={nodePopupRelays}
+                closeNodePopup={() => setShowNodeArrayPopup(false)}
             />
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
