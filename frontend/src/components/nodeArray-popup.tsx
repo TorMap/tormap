@@ -1,47 +1,47 @@
+import React, {useEffect, useState} from "react";
 import {
     Dialog,
     DialogContent,
     DialogTitle,
-    Drawer,
-    IconButton,
+    Drawer, IconButton,
     List,
     ListItem,
     ListItemIcon,
     ListItemText,
-    makeStyles,
-    Typography
+    makeStyles, Typography
 } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
-import React, {useEffect, useState} from "react";
-import {apiBaseUrl} from "../util/constants";
 import {NodeDetails} from "../types/node-details";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
-import MailIcon from "@material-ui/icons/Mail";
+import {GeoRelayView} from "../types/geo-relay";
+
+
+import InboxIcon from '@material-ui/icons/MoveToInbox';
+import MailIcon from '@material-ui/icons/Mail';
+import {apiBaseUrl} from "../util/constants";
+import CloseIcon from "@material-ui/icons/Close";
 
 /**
- * Styles according to Material UI doc for components used in NodePopup component
+ *
  */
 const useStyle = makeStyles(() => ({
     closeButton: {
         position: "absolute",
         right: "10px",
         top: "10px",
+    },
+    drawer: {
+        width: "200px",
+    },
+    infoPadding: {
+        paddingLeft: "200px",
     }
 }))
 
 interface Props {
-    /**
-     * Whether the node popup will be shown
-     */
-    showNodePopup: boolean,
-    /**
-     * Method to set dialog visibility
-     */
-    setShowNodePopup: () => void,
-    /**
-     * Id of the relay node details
-     */
-    nodeDetailsId?: number,
+    showNodePopup: boolean
+
+    relays: GeoRelayView[]
+
+    closeNodePopup: () => void
 }
 
 const formatBytesToMBPerSecond = (bandwidthInBytes?: number) => bandwidthInBytes ?
@@ -54,14 +54,19 @@ const formatSecondsToHours = (seconds?: number) => seconds ?
 
 const formatBoolean = (value?: boolean) => value === null || value === undefined ? undefined : value ? "yes" : "no"
 
-export const NodePopup: React.FunctionComponent<Props> = ({
-                                                              showNodePopup,
-                                                              setShowNodePopup,
-                                                              nodeDetailsId,
-                                                          }) => {
+export const NodeArrayPopup: React.FunctionComponent<Props> = ({
+                                                                   showNodePopup,
+                                                                   relays,
+                                                                   closeNodePopup,
+                                                               }) => {
+    const [nodeDetailsId, setNodeDetailsId] = useState<number | undefined>()
     const [nodeDetails, setNodeDetails] = useState<NodeDetails>()
     const [relayInfos, setRelayInfos] = useState<RelayInfo[]>()
     const classes = useStyle()
+
+    useEffect(() => {
+        setNodeDetailsId(+relays[0].detailsId)
+    }, [relays])
 
     useEffect(() => {
         if (nodeDetailsId) {
@@ -99,27 +104,47 @@ export const NodePopup: React.FunctionComponent<Props> = ({
     return (
         <Dialog
             open={showNodePopup}
-            onClose={setShowNodePopup}
-            onBackdropClick={setShowNodePopup}
+            onClose={closeNodePopup}
+            onBackdropClick={closeNodePopup}
         >
-            <DialogTitle
-                className={"dialogfield"}
-            >
-                <Typography variant="h6">{nodeDetailsId ? nodeDetails?.nickname : "No information"}</Typography>
-                <IconButton aria-label="close" className={classes.closeButton} onClick={setShowNodePopup}>
+            <DialogTitle className={classes.infoPadding}>
+                <Typography variant="h6">{nodeDetailsId ? (`${nodeDetailsId.toString()}: ${nodeDetails?.nickname}`) : (`${nodeDetailsId?.toString()} No information`)}</Typography>
+                <IconButton aria-label="close" className={classes.closeButton} onClick={closeNodePopup}>
                     <CloseIcon/>
                 </IconButton>
             </DialogTitle>
             <DialogContent
                 dividers
-                className={"dialogfield"}
-            >
-                {nodeDetailsId ? relayInfos?.map((relayInfo) =>
-                    relayInfo.value ? <p key={relayInfo.name}><b>{relayInfo.name}</b>: {relayInfo.value}</p> : undefined
-                ) : <p>Currently we do not have more information about this node.</p>}
+                className={"dialogfield"}>
+
+                <div className={classes.infoPadding}>
+                    {nodeDetailsId ? relayInfos?.map((relayInfo) =>
+                        relayInfo.value ? <p key={relayInfo.name}><b>{relayInfo.name}</b>: {relayInfo.value}</p> : undefined
+                    ) : <p>Currently we do not have more information about this node.</p>}
+                </div>
+
+                <Drawer
+                    className={classes.drawer}
+                    PaperProps={{
+                        style: {
+                            position: "absolute",
+                            width: "170px",
+                        }
+                    }}
+                    anchor={"left"}
+                    variant={"permanent"}>
+                    <List>
+                        {relays.map((relay, index) =>
+                            (relay.detailsId ?
+                                (<ListItem button key={relay.detailsId}
+                                          onClick={() => setNodeDetailsId(+relay.detailsId)}>
+                                    <ListItemText primary={relay.detailsId}/>
+                                </ListItem>) : (null) ))}
+                    </List>
+                </Drawer>
             </DialogContent>
         </Dialog>
-    );
+    )
 }
 
 interface RelayInfo {
