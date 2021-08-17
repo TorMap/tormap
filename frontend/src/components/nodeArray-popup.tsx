@@ -13,11 +13,11 @@ import {
 import {NodeDetails} from "../types/node-details";
 import {GeoRelayView} from "../types/geo-relay";
 
-
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
 import {apiBaseUrl} from "../util/constants";
 import CloseIcon from "@material-ui/icons/Close";
+import {Colors} from "../util/Config";
+import DirectionsRunIcon from "@material-ui/icons/DirectionsRun";
+import {getIcon} from "../util/jsx-helpers";
 
 /**
  *
@@ -29,11 +29,15 @@ const useStyle = makeStyles(() => ({
         top: "10px",
     },
     drawer: {
-        width: "200px",
+        width: "250px",
     },
     infoPadding: {
-        paddingLeft: "200px",
-    }
+        paddingLeft: "270px",
+    },
+    dialogSize: {
+        maxWidth: "700px",
+        minHeight: "500px",
+    },
 }))
 
 interface Props {
@@ -59,13 +63,29 @@ export const NodeArrayPopup: React.FunctionComponent<Props> = ({
                                                                    relays,
                                                                    closeNodePopup,
                                                                }) => {
+    const [relayNicknames, setRelayNicknames] = useState<RelayNickname[]>([])
     const [nodeDetailsId, setNodeDetailsId] = useState<number | undefined>()
     const [nodeDetails, setNodeDetails] = useState<NodeDetails>()
     const [relayInfos, setRelayInfos] = useState<RelayInfo[]>()
     const classes = useStyle()
 
     useEffect(() => {
-        setNodeDetailsId(+relays[0].detailsId)
+        setNodeDetailsId(undefined)
+        let relayIDs: Array<string> = []
+        relays.forEach((relay) => {
+            relayIDs.push(relay.detailsId)
+        })
+        const payload = JSON.stringify(relayIDs)
+        setRelayNicknames([])
+        fetch(`${apiBaseUrl}/archive/node/identifiers`,{
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            method: "post",
+            body: payload,
+        })
+            .then(response => response.json())
+            .then(relays => setRelayNicknames(relays))
     }, [relays])
 
     useEffect(() => {
@@ -107,42 +127,45 @@ export const NodeArrayPopup: React.FunctionComponent<Props> = ({
             onClose={closeNodePopup}
             onBackdropClick={closeNodePopup}
         >
-            <DialogTitle className={classes.infoPadding}>
-                <Typography variant="h6">{nodeDetailsId ? (`${nodeDetailsId.toString()}: ${nodeDetails?.nickname}`) : (`${nodeDetailsId?.toString()} No information`)}</Typography>
-                <IconButton aria-label="close" className={classes.closeButton} onClick={closeNodePopup}>
-                    <CloseIcon/>
-                </IconButton>
-            </DialogTitle>
-            <DialogContent
-                dividers
-                className={"dialogfield"}>
+            <div className={classes.dialogSize}>
+                <DialogTitle className={classes.infoPadding}>
+                    <Typography variant="h6">{nodeDetailsId ? (nodeDetails?.nickname) : (`No information`)}</Typography>
+                    <IconButton aria-label="close" className={classes.closeButton} onClick={closeNodePopup}>
+                        <CloseIcon/>
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent
+                    dividers
+                    className={classes.infoPadding}>
 
-                <div className={classes.infoPadding}>
-                    {nodeDetailsId ? relayInfos?.map((relayInfo) =>
-                        relayInfo.value ? <p key={relayInfo.name}><b>{relayInfo.name}</b>: {relayInfo.value}</p> : undefined
-                    ) : <p>Currently we do not have more information about this node.</p>}
-                </div>
-
+                    <div >
+                        {nodeDetailsId ? relayInfos?.map((relayInfo) =>
+                            relayInfo.value ? <p key={relayInfo.name}><b>{relayInfo.name}</b>: {relayInfo.value}</p> : undefined
+                        ) : <p>Currently we do not have more information about this node.</p>}
+                    </div>
+                </DialogContent>
                 <Drawer
                     className={classes.drawer}
                     PaperProps={{
                         style: {
                             position: "absolute",
-                            width: "170px",
+                            width: "250px",
                         }
                     }}
                     anchor={"left"}
                     variant={"permanent"}>
                     <List>
-                        {relays.map((relay, index) =>
-                            (relay.detailsId ?
-                                (<ListItem button key={relay.detailsId}
-                                          onClick={() => setNodeDetailsId(+relay.detailsId)}>
-                                    <ListItemText primary={relay.detailsId}/>
+                        {relayNicknames.map((relay, index) =>
+                            (relay.id ?
+                                (<ListItem button key={relay.id}
+                                           selected={+relay.id === nodeDetailsId}
+                                           onClick={() => setNodeDetailsId(+relay.id)}>
+                                    <ListItemIcon>{getIcon(relay.id, relays)}</ListItemIcon>
+                                    <ListItemText primary={relay.nickname}/>
                                 </ListItem>) : (null) ))}
                     </List>
                 </Drawer>
-            </DialogContent>
+            </div>
         </Dialog>
     )
 }
@@ -150,4 +173,10 @@ export const NodeArrayPopup: React.FunctionComponent<Props> = ({
 interface RelayInfo {
     name: string
     value: string | number | undefined
+}
+
+interface RelayNickname {
+    id: string,
+    fingerprint: string
+    nickname: string
 }

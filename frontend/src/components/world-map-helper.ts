@@ -141,8 +141,8 @@ export const sortFamCordMap = (
                 if (relays.length > largest.relays.length) largest = {relays: relays, familyID: famID, padding: 0}
             })
             if (sorted.length > 0 && largest.relays.length === sorted[sorted.length-1].relays.length) {
-                sorted.forEach((value, index, array) => {
-                    array[index] = {...value, padding: value.padding++}
+                sorted.map(value => {
+                    value.padding = value.padding +1
                 })
             }
             sorted.push(largest)
@@ -292,24 +292,33 @@ export const familyCordLayer = (
     sortedFamCordMap.forEach((famMapForLocation ,location) => {
         const coordinates= location.split(",")
         const latlng: L.LatLngExpression = [+coordinates[0],+coordinates[1]]
-        famMapForLocation.forEach((famCordArr) => {
+        famMapForLocation.forEach((famCordArr, index) => {
             let hue = famCordArr.familyID % 360
             let sat = "90%"
-            let radius = famCordArr.relays.length * 6 + famCordArr.padding * 5 + famMapForLocation.length * 0
+            let radius = 5 + (famCordArr.relays.length + famCordArr.padding)*2
+            let fillOpacity = .25
 
-            if (settings.selectedFamily !== undefined && settings.selectedFamily !== famCordArr.familyID) sat = "30%"
+            let selected = true
+
+            if (settings.selectedFamily !== undefined && settings.selectedFamily !== famCordArr.familyID) selected = false
             if (settings.selectedFamily !== undefined && settings.selectedFamily && settings.selectedFamily !== famCordArr.familyID) sat = "0%"
+
+            if (!selected) {
+                sat = "0%"
+                fillOpacity = 0
+            }
 
             const color = `hsl(${hue},${sat},60%)`
             circleMarker(
                 latlng,
                 {color: color,
                     radius: radius,
-                    fillOpacity: .25,
+                    fillOpacity: fillOpacity,
                     weight: .5,
                 }
             )
                 .on("click", () => {
+                    console.log(index)
                     if (famCordArr.familyID === settings.selectedFamily) {
                         setSettingsCallback({...settings, selectedFamily: undefined})
                     }else{
@@ -319,6 +328,7 @@ export const familyCordLayer = (
                 .addTo(familyLayer)
         })
     })
+    console.log(sortedFamCordMap)
     return familyLayer
 }
 

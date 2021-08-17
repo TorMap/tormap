@@ -211,12 +211,6 @@ export const WorldMap: FunctionComponent<Props> = ({
             defaultMarkerLayer(relays, onMarkerClick).addTo(layerToReturn)
         }
 
-        //todo: remove
-        //Draw family marker's, used to draw all markers to the map with colors according to their family
-        if (settings.sortFamily && false){
-            familyLayer(familyMap, settings, setSettingsCallback).addTo(layerToReturn)
-        }
-
         //Draw familyCord marker's, used to draw all markers to the map with colors according to their family
         if (settings.sortFamily){
             familyCordLayer(famCordMap, settings, setSettingsCallback).addTo(layerToReturn)
