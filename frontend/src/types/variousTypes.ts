@@ -39,14 +39,11 @@ export interface Settings{
 }
 
 export interface Statistics{
-    guard: number
-    exit: number
-    default: number
-    familyCount?: number
-    countryCount?: number
-    familyRelayCount?: number
-    countryRelayCount?: number
-    maxValueOnSameCoordinate?: number
+    relayGuardCount: number
+    relayExitCount: number
+    relayOtherCount: number
+    familyCount: number
+    countryCount: number
 }
 
 export type rowType = {

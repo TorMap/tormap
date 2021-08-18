@@ -106,7 +106,7 @@ function App() {
                 />
                 <DateSlider availableDays={availableDays} setValue={setSliderValue} settings={settings}/>
                 <AppSettings settings={settings} onChange={handleInputChange}/>
-                {statistics ? <MapStats settings={settings} statistics={statistics}/> : null}
+                {statistics ? <MapStats settings={settings} stats={statistics}/> : null}
             </div>
             <Snackbar
                 open={snackbar}
