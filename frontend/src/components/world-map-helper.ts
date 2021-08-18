@@ -197,7 +197,6 @@ export const getCountryMap = (
     setSettingsCallback: (s: Settings) => void
 ): Map<string, GeoRelayView[]> => {
     let countryMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
-    // true for forcing the calculation to include it in statistics
     if (settings.sortCountry) {
         relays.forEach(relay => {
             if (relay.country !== undefined) {
@@ -411,13 +410,16 @@ export const calculateStatistics = (
     relays: GeoRelayView[],
     countryMap: Map<string, GeoRelayView[]>,
     familyMap: Map<number, GeoRelayView[]>,
+    settings: Settings
 ): Statistics => {
     let stats: Statistics = {
         relayGuardCount: 0,
         relayExitCount: 0,
         relayOtherCount: 0,
-        familyCount: familyMap.size,
-        countryCount: countryMap.size,
+    }
+    if (!settings.selectedCountry && !settings.selectedFamily) {
+        stats.countryCount = countryMap.size
+        stats.familyCount = familyMap.size
     }
     relays.forEach(relay => {
         if (relay.flags?.includes(RelayFlag.Exit)) {

@@ -29,9 +29,9 @@ import {StatsRow} from "./stats-row";
 const useStyle = makeStyles(() => ({
     root: {
         position: "fixed",
-        left: "10px",
-        bottom: "50px",
-        width: "300px",
+        left: "1%",
+        bottom: "15px",
+        maxWidth: "20%",
     },
     noPadding: {
         padding: 0,
@@ -52,17 +52,6 @@ interface Props {
 
 export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
     const classes = useStyle()
-
-    // The rows for the node type statistics
-    const typeRows = (sett: Settings, stats: Statistics) => {
-        let row: Array<Array<string | number | any>> = []
-        row.push(["Exit relays", stats.relayExitCount, <DirectionsRunIcon style={{color: Colors.Exit}}/>])
-        row.push(["Guard relays", stats.relayGuardCount, <SecurityIcon style={{color: Colors.Guard}}/>])
-        row.push(["Other Relays", stats.relayOtherCount, <TimelineIcon style={{color: Colors.Default}}/>])
-        row.push(["Total amount of Relays", (stats.relayExitCount + stats.relayGuardCount + stats.relayOtherCount), <SubdirectoryArrowRightIcon/>])
-        return row
-    }
-
     return (
         <div className={classes.root}>
             <Accordion defaultExpanded={true}>
@@ -96,19 +85,19 @@ export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
                             />
                             <StatsRow
                                 icon={<SubdirectoryArrowRightIcon/>}
-                                title={"Total amount of Relays"}
+                                title={"Total relays"}
                                 value={stats.relayExitCount + stats.relayGuardCount + stats.relayOtherCount}
                             />
-                            <StatsRow // TODO count families according to selected country
+                            {stats.familyCount ? <StatsRow
                                 icon={<GroupIcon/>}
-                                title={"Different families"}
+                                title={"Families"}
                                 value={stats.familyCount}
-                            />
-                            <StatsRow
+                            /> : null}
+                            {stats.countryCount ? <StatsRow
                                 icon={<PublicIcon/>}
-                                title={"Different countries"}
+                                title={"Countries"}
                                 value={stats.countryCount}
-                            />
+                            /> : null}
                         </TableBody>
                     </Table>
                 </AccordionDetails>
