@@ -4,7 +4,6 @@ import {
     TableRow,
     Typography
 } from "@material-ui/core";
-import SvgIcon from "@material-ui/core/SvgIcon/SvgIcon";
 
 interface Props {
     icon?: ReactElement

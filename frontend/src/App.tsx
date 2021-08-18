@@ -27,6 +27,17 @@ const useStyle = makeStyles(() => ({
         color: "rgba(255,255,255,.6)",
         zIndex: 1000,
     },
+    attribution: {
+        color: "#b4b4b4",
+        background: "#262626",
+        position: "fixed",
+        right: "0px",
+        bottom: "0px",
+        fontSize: ".7rem",
+        "a, a:link, a:visited, a:hover, a:active, a:focus, &:focus, &:hover": {
+            color: "#3a68a4",
+        },
+    },
 }))
 
 function App() {
@@ -118,6 +129,11 @@ function App() {
                     {snackbarMessage.message}
                 </MuiAlert>
             </Snackbar>
+            <span className={classes.attribution}>
+                <a href="https://leafletjs.com">Leaflet</a> | &copy;&nbsp;
+                <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>&nbsp;
+                contributors &copy; <a href="https://carto.com/attributions">CARTO</a>
+            </span>
         </ThemeProvider>
     )
 }

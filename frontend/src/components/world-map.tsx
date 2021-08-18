@@ -84,7 +84,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                                                        setLoadingStateCallback,
                                                        setStatisticsCallback,
                                                        handleSnackbar
-                                                    }) => {
+                                                   }) => {
     const [showNodePopup, setShowNodePopup] = useState(false)
     const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
     const [showNodeArrayPopup, setShowNodeArrayPopup] = useState(false)
@@ -118,7 +118,7 @@ export const WorldMap: FunctionComponent<Props> = ({
     //Update listener, fires whenever settings get changed or an new date got downloaded
     useEffect(() => {
         if (dayToDisplay) drawLayerGroup(relaysToLayerGroup(relays))
-    },[relays, settings])
+    }, [relays, settings])
 
     //Eventhandler for markers to show the node-popup component
     const onMarkerClick = (event: LeafletMouseEvent) => {
@@ -155,10 +155,13 @@ export const WorldMap: FunctionComponent<Props> = ({
 
         //Map for family's, used to get an Array of GeoRelayView with relays in the same family / autonomsystem
         const familyMap: Map<number, GeoRelayView[]> = getFamilyMap(relays, settings)
-        if (settings.selectedFamily && !familyMap.has(settings.selectedFamily)){
+        if (settings.selectedFamily && !familyMap.has(settings.selectedFamily)) {
             setSettingsCallback({...settings, selectedFamily: undefined})
         }
-        if (settings.sortFamily && familyMap.size === 0) handleSnackbar({message: "There are no families available for this day!", severity: "warning"})
+        if (settings.sortFamily && familyMap.size === 0) handleSnackbar({
+            message: "There are no families available for this day!",
+            severity: "warning"
+        })
 
         const famCordMap: Map<string, Map<number, GeoRelayView[]>> = getFamCordMap(latLonMap)
 
@@ -166,10 +169,10 @@ export const WorldMap: FunctionComponent<Props> = ({
         const countryMap: Map<string, GeoRelayView[]> = getCountryMap(relays, settings, setSettingsCallback)
 
         //Draw Country's, used to draw all countries to the map if at least one relay is hosted there
-        if (settings.sortCountry){
+        if (settings.sortCountry) {
             if (leafletMap && countryMap.size > 0) {
                 const style = (feature: Feature<GeometryObject, GeoJsonProperties>): PathOptions => {
-                    if (settings.selectedCountry === feature.properties!!.iso_a2){
+                    if (settings.selectedCountry === feature.properties!!.iso_a2) {
                         return {
                             fillColor: "rgba(255,255,255,0.7)",
                             weight: .5,
@@ -183,14 +186,14 @@ export const WorldMap: FunctionComponent<Props> = ({
                 }
 
                 const geoData = worldGeoData
-                let filteredGeoData = new GeoJSON(undefined,{
+                let filteredGeoData = new GeoJSON(undefined, {
                     style: style as PathOptions,
                     onEachFeature(feature: Feature<GeometryObject, GeoJsonProperties>, layer: Layer) {
                         onEachFeature(feature, layer, settings, setSettingsCallback)
                     }
                 })
                 geoData.features.forEach(feature => {
-                    if (countryMap.has(feature.properties.iso_a2)){
+                    if (countryMap.has(feature.properties.iso_a2)) {
                         filteredGeoData.addData(feature as GeoJsonObject)
                     }
                 })
@@ -202,35 +205,41 @@ export const WorldMap: FunctionComponent<Props> = ({
         }
 
         //Draw aggregated marker's, used to draw all markers to the map with more than 4 relays on the same coordinate
-        if (settings.aggregateCoordinates){
+        if (settings.aggregateCoordinates) {
             aggregatedCoordinatesLayer(latLonMap, onMarkerGroupClick).addTo(layerToReturn)
         }
 
         //Draw marker's, used to draw all markers to the map with colors according to their type
-        if (!settings.sortCountry){
+        if (!settings.sortCountry) {
             defaultMarkerLayer(relays, onMarkerClick).addTo(layerToReturn)
         }
 
         //Draw familyCord marker's, used to draw all markers to the map with colors according to their family
-        if (settings.sortFamily){
+        if (settings.sortFamily) {
             familyCordLayer(famCordMap, settings, setSettingsCallback).addTo(layerToReturn)
         }
 
         //Draw Heatmap, draws a heatmap with a point for each coordinate
         // https://github.com/Leaflet/Leaflet.heat
-        if (settings.heatMap){
+        if (settings.heatMap) {
             leafletMap?.removeLayer(heatLayer)
             let latlngs: Array<number[]> = new Array<number[]>()
             relays.forEach(relay => latlngs.push([relay.lat, relay.long, 1]))
             // @ts-ignore needed for compatibility with js code of the heatmap package
-            let heat = L.heatLayer(latlngs, {radius: 25, max: 1, blur: 35, minOpacity: .55, gradient: {0.4: '#2e53dc', 0.65: '#c924ae', .75: '#ff4646', .83: "#ff0000"}}).addTo(leafletMap)
+            let heat = L.heatLayer(latlngs, {
+                radius: 25,
+                max: 1,
+                blur: 35,
+                minOpacity: .55,
+                gradient: {0.4: '#2e53dc', 0.65: '#c924ae', .75: '#ff4646', .83: "#ff0000"}
+            }).addTo(leafletMap)
             setHeatLayer(heat)
-        }else{
+        } else {
             leafletMap?.removeLayer(heatLayer)
         }
 
         //Draw country marker's, used to draw all markers to the map with colors according to their country
-        if (settings.sortCountry){
+        if (settings.sortCountry) {
             countryMarkerLayer(countryMap, settings, onMarkerClick).addTo(layerToReturn)
         }
 
@@ -238,20 +247,20 @@ export const WorldMap: FunctionComponent<Props> = ({
         if (settings.selectedCountry && settings.selectedFamily && familyMap && countryMap) {
             relays = []
             familyMap.get(settings.selectedFamily)?.forEach(familyRelay => {
-                countryMap.get(settings.selectedCountry!!)?.forEach( countryRelay => {
+                countryMap.get(settings.selectedCountry!!)?.forEach(countryRelay => {
                     if (familyRelay.detailsId === countryRelay.detailsId) relays.push(familyRelay)
                 })
             })
-        } else if(settings.selectedCountry && countryMap.has(settings.selectedCountry)){
+        } else if (settings.selectedCountry && countryMap.has(settings.selectedCountry)) {
             relays = countryMap.get(settings.selectedCountry)!!
-        } else if(settings.selectedFamily && familyMap.has(settings.selectedFamily)){
+        } else if (settings.selectedFamily && familyMap.has(settings.selectedFamily)) {
             relays = familyMap.get(settings.selectedFamily)!!
         }
 
-        setStatisticsCallback(calculateStatistics(relays, countryMap, familyMap))
+        setStatisticsCallback(calculateStatistics(relays, countryMap, familyMap, settings))
 
         console.timeLog(`relaysToLayerGroup`, `New Layer with ${relays.length} elements finished`)
-        console.timeEnd(`relaysToLayerGroup`, )
+        console.timeEnd(`relaysToLayerGroup`,)
         return layerToReturn
     }
 
@@ -276,6 +285,7 @@ export const WorldMap: FunctionComponent<Props> = ({
             zoomDelta={0.5}
             wheelPxPerZoomLevel={200}
             preferCanvas={true}
+            attributionControl={false}
             whenCreated={(newMap: LeafletMap) => {
                 markerLayer.addTo(newMap)
                 setLeafletMap(newMap)
@@ -292,7 +302,6 @@ export const WorldMap: FunctionComponent<Props> = ({
                 closeNodePopup={() => setShowNodeArrayPopup(false)}
             />
             <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                 subdomains="abcd"
                 maxZoom={19}
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
