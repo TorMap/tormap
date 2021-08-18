@@ -248,7 +248,7 @@ export const WorldMap: FunctionComponent<Props> = ({
             relays = familyMap.get(settings.selectedFamily)!!
         }
 
-        setStatisticsCallback(calculateStatistics(relays, countryMap, familyMap, settings))
+        setStatisticsCallback(calculateStatistics(relays, countryMap, familyMap))
 
         console.timeLog(`relaysToLayerGroup`, `New Layer with ${relays.length} elements finished`)
         console.timeEnd(`relaysToLayerGroup`, )
