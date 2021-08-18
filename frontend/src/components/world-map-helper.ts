@@ -11,28 +11,64 @@ export const applyFilter = (relays: GeoRelayView[], settings: Settings): GeoRela
     let filtered: GeoRelayView[] = []
     relays.forEach(relay => {
         //Filter must include settings
-        if (settings.miValid &&         !relay.flags?.includes(RelayFlag.Valid))        {return}
-        if (settings.miNamed &&         !relay.flags?.includes(RelayFlag.Named))        {return}
-        if (settings.miUnnamed &&       !relay.flags?.includes(RelayFlag.Unnamed))      {return}
-        if (settings.miRunning &&       !relay.flags?.includes(RelayFlag.Running))      {return}
-        if (settings.miStable &&        !relay.flags?.includes(RelayFlag.Stable))       {return}
-        if (settings.miExit &&          !relay.flags?.includes(RelayFlag.Exit))         {return}
-        if (settings.miFast &&          !relay.flags?.includes(RelayFlag.Fast))         {return}
-        if (settings.miGuard &&         !relay.flags?.includes(RelayFlag.Guard))        {return}
-        if (settings.miAuthority &&     !relay.flags?.includes(RelayFlag.Authority))    {return}
-        if (settings.miV2Dir &&         !relay.flags?.includes(RelayFlag.V2Dir))        {return}
-        if (settings.miHSDir &&         !relay.flags?.includes(RelayFlag.HSDir))        {return}
-        if (settings.miNoEdConsensus && !relay.flags?.includes(RelayFlag.NoEdConsensus)){return}
-        if (settings.miStaleDesc &&     !relay.flags?.includes(RelayFlag.StaleDesc))    {return}
-        if (settings.miSybil &&         !relay.flags?.includes(RelayFlag.Sybil))        {return}
-        if (settings.miBadExit &&       !relay.flags?.includes(RelayFlag.BadExit))      {return}
+        if (settings.miValid && !relay.flags?.includes(RelayFlag.Valid)) {
+            return
+        }
+        if (settings.miNamed && !relay.flags?.includes(RelayFlag.Named)) {
+            return
+        }
+        if (settings.miUnnamed && !relay.flags?.includes(RelayFlag.Unnamed)) {
+            return
+        }
+        if (settings.miRunning && !relay.flags?.includes(RelayFlag.Running)) {
+            return
+        }
+        if (settings.miStable && !relay.flags?.includes(RelayFlag.Stable)) {
+            return
+        }
+        if (settings.miExit && !relay.flags?.includes(RelayFlag.Exit)) {
+            return
+        }
+        if (settings.miFast && !relay.flags?.includes(RelayFlag.Fast)) {
+            return
+        }
+        if (settings.miGuard && !relay.flags?.includes(RelayFlag.Guard)) {
+            return
+        }
+        if (settings.miAuthority && !relay.flags?.includes(RelayFlag.Authority)) {
+            return
+        }
+        if (settings.miV2Dir && !relay.flags?.includes(RelayFlag.V2Dir)) {
+            return
+        }
+        if (settings.miHSDir && !relay.flags?.includes(RelayFlag.HSDir)) {
+            return
+        }
+        if (settings.miNoEdConsensus && !relay.flags?.includes(RelayFlag.NoEdConsensus)) {
+            return
+        }
+        if (settings.miStaleDesc && !relay.flags?.includes(RelayFlag.StaleDesc)) {
+            return
+        }
+        if (settings.miSybil && !relay.flags?.includes(RelayFlag.Sybil)) {
+            return
+        }
+        if (settings.miBadExit && !relay.flags?.includes(RelayFlag.BadExit)) {
+            return
+        }
 
         //Filter relay types
-        if (!settings.Exit &&           relay.flags?.includes(RelayFlag.Exit))          {return}
-        if (!settings.Guard &&          (relay.flags?.includes(RelayFlag.Guard))
-            && !(relay.flags?.includes(RelayFlag.Exit)))    {return}
-        if (!settings.Default &&        (!relay.flags?.includes(RelayFlag.Guard)
-            && !relay.flags?.includes(RelayFlag.Exit)))     {return}
+        if (!settings.Exit && relay.flags?.includes(RelayFlag.Exit)) {
+            return
+        }
+        if (!settings.Guard && (relay.flags?.includes(RelayFlag.Guard))
+            && !(relay.flags?.includes(RelayFlag.Exit))) {
+            return
+        }
+        if (!settings.Default && (!relay.flags?.includes(RelayFlag.Guard)
+            && !relay.flags?.includes(RelayFlag.Exit))) {
+            return
+        }
         filtered.push(relay)
     })
     return filtered
@@ -60,14 +96,14 @@ export const getLatLonMap = (
     relays: GeoRelayView[], settings: Settings
 ): Map<string, GeoRelayView[]> => {
     let latLonMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
-    if (settings.aggregateCoordinates || settings.heatMap || settings.sortFamily){
+    if (settings.aggregateCoordinates || settings.heatMap || settings.sortFamily) {
         relays.forEach(relay => {
             const key: string = `${relay.lat},${relay.long}`
-            if (latLonMap.has(key)){
+            if (latLonMap.has(key)) {
                 let old = latLonMap.get(key)!!
                 old.push(relay)
                 latLonMap.set(key, old)
-            }else{
+            } else {
                 latLonMap.set(key, [relay])
             }
         })
@@ -136,13 +172,13 @@ export const sortFamCordMap = (
     input.forEach((famMapForLocation, coordinateKey) => {
         let sorted: famCordArr[] = []
         let largest: famCordArr = {relays: [], familyID: 0, padding: 0}
-        while(famMapForLocation.size > 0){
+        while (famMapForLocation.size > 0) {
             famMapForLocation.forEach((relays, famID) => {
                 if (relays.length > largest.relays.length) largest = {relays: relays, familyID: famID, padding: 0}
             })
-            if (sorted.length > 0 && largest.relays.length === sorted[sorted.length-1].relays.length) {
+            if (sorted.length > 0 && largest.relays.length === sorted[sorted.length - 1].relays.length) {
                 sorted.map(value => {
-                    value.padding = value.padding +1
+                    value.padding = value.padding + 1
                 })
             }
             sorted.push(largest)
@@ -175,7 +211,7 @@ export const getCountryMap = (
                 }
             }
         })
-        if(settings.selectedCountry && !countryMap.has(settings.selectedCountry)){
+        if (settings.selectedCountry && !countryMap.has(settings.selectedCountry)) {
             setSettingsCallback({...settings, selectedCountry: undefined})
         }
     }
@@ -188,11 +224,11 @@ export const aggregatedCoordinatesLayer = (
 ): LayerGroup => {
     const aggregatedCoordinatesLayer = new LayerGroup()
     latLonMap.forEach((value, key) => {
-        const coordinates= key.split(",")
+        const coordinates = key.split(",")
         // skip if a coordinate has less than 4 relays
         if (value.length < 4) return
         circleMarker(
-            [+coordinates[0],+coordinates[1]],
+            [+coordinates[0], +coordinates[1]],
             {
                 radius: value.length / 2,
                 color: "#ffffff",
@@ -220,8 +256,7 @@ export const defaultMarkerLayer = (
         if (relay.flags?.includes(RelayFlag.Exit)) {
             color = Colors.Exit
             layer = exitLayer
-        }
-        else if (relay.flags?.includes(RelayFlag.Guard)) {
+        } else if (relay.flags?.includes(RelayFlag.Guard)) {
             color = Colors.Guard
             layer = guardLayer
         }
@@ -250,7 +285,7 @@ export const familyLayer = (
     const familyLayer: LayerGroup = new LayerGroup()
     let index = 0
     familyMap.forEach(family => {
-        family.forEach((relay,i , family) => {
+        family.forEach((relay, i, family) => {
             let hue = index * 360 / familyMap.size * (2 / 3)
             let sat = "90%"
             let radius = family.length * 10
@@ -261,7 +296,8 @@ export const familyLayer = (
             const color = `hsl(${hue},${sat},60%)`
             circleMarker(
                 [relay.lat, relay.long],
-                {color: color,
+                {
+                    color: color,
                     radius: radius,
                     fillOpacity: .05,
                     weight: .1,
@@ -270,13 +306,13 @@ export const familyLayer = (
                 .on("click", () => {
                     if (relay.familyId === settings.selectedFamily) {
                         setSettingsCallback({...settings, selectedFamily: undefined})
-                    }else{
+                    } else {
                         setSettingsCallback({...settings, selectedFamily: relay.familyId})
                     }
                 })
                 .addTo(familyLayer)
         })
-        index ++
+        index++
     })
     return familyLayer
 }
@@ -289,13 +325,13 @@ export const familyCordLayer = (
 ): LayerGroup => {
     const familyLayer: LayerGroup = new LayerGroup()
     const sortedFamCordMap: Map<string, famCordArr[]> = sortFamCordMap(famCordMap)
-    sortedFamCordMap.forEach((famMapForLocation ,location) => {
-        const coordinates= location.split(",")
-        const latlng: L.LatLngExpression = [+coordinates[0],+coordinates[1]]
+    sortedFamCordMap.forEach((famMapForLocation, location) => {
+        const coordinates = location.split(",")
+        const latlng: L.LatLngExpression = [+coordinates[0], +coordinates[1]]
         famMapForLocation.forEach((famCordArr, index) => {
             let hue = famCordArr.familyID % 360
             let sat = "90%"
-            let radius = 5 + (famCordArr.relays.length + famCordArr.padding)*2
+            let radius = 5 + (famCordArr.relays.length + famCordArr.padding) * 2
             let fillOpacity = .25
 
             let selected = true
@@ -311,7 +347,8 @@ export const familyCordLayer = (
             const color = `hsl(${hue},${sat},60%)`
             circleMarker(
                 latlng,
-                {color: color,
+                {
+                    color: color,
                     radius: radius,
                     fillOpacity: fillOpacity,
                     weight: .5,
@@ -321,7 +358,7 @@ export const familyCordLayer = (
                     console.log(index)
                     if (famCordArr.familyID === settings.selectedFamily) {
                         setSettingsCallback({...settings, selectedFamily: undefined})
-                    }else{
+                    } else {
                         setSettingsCallback({...settings, selectedFamily: famCordArr.familyID})
                     }
                 })
@@ -346,7 +383,7 @@ export const countryMarkerLayer = (
         if (mapColor9) hue = mapColor9 * 360 / 9
         else hue = 9 * 360 / 9
 
-        country.forEach((relay,i , country) => {
+        country.forEach((relay, i, country) => {
             let sat = "90%"
             let radius = 1
 
@@ -356,7 +393,8 @@ export const countryMarkerLayer = (
             const color = `hsl(${hue},${sat},60%)`
             circleMarker(
                 [relay.lat, relay.long],
-                {color: color,
+                {
+                    color: color,
                     radius: radius,
                     className: relay.detailsId,
                 }
@@ -364,7 +402,7 @@ export const countryMarkerLayer = (
                 .on("click", onMarkerClick)
                 .addTo(countryLayer)
         })
-        index ++
+        index++
     })
     return countryLayer
 }
@@ -373,34 +411,22 @@ export const calculateStatistics = (
     relays: GeoRelayView[],
     countryMap: Map<string, GeoRelayView[]>,
     familyMap: Map<number, GeoRelayView[]>,
-    settings: Settings,
 ): Statistics => {
     let stats: Statistics = {
-        guard: 0,
-        exit: 0,
-        default: 0,
+        relayGuardCount: 0,
+        relayExitCount: 0,
+        relayOtherCount: 0,
+        familyCount: familyMap.size,
+        countryCount: countryMap.size,
     }
     relays.forEach(relay => {
         if (relay.flags?.includes(RelayFlag.Exit)) {
-            stats.exit++
-        }else if( relay.flags?.includes(RelayFlag.Guard)){
-            stats.guard++
-        }else{
-            stats.default++
+            stats.relayExitCount++
+        } else if (relay.flags?.includes(RelayFlag.Guard)) {
+            stats.relayGuardCount++
+        } else {
+            stats.relayOtherCount++
         }
     })
-
-    // true for forcing the calculation to include it in statistics
-    if(settings.sortCountry || true){
-        stats = {...stats, countryCount: countryMap.size}
-        if(settings.selectedCountry) {
-            stats = {...stats, countryRelayCount: countryMap.get(settings.selectedCountry)?.length}
-        }
-    }
-    // true for forcing the calculation to include it in statistics
-    if(settings.sortFamily || true){
-        stats = {...stats, familyCount: familyMap.size}
-        if(settings.selectedFamily) stats = {...stats, familyRelayCount: familyMap.get(settings.selectedFamily)?.length}
-    }
     return stats
 }
