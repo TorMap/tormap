@@ -20,8 +20,8 @@ import {RelayFlagName} from "../types/relay";
 const useStyle = makeStyles(() => ({
     accordion: {
         position: "absolute",
-        right: "10px",
-        top: "10px",
+        right: "1%",
+        top: "15px",
         paddingBottom: "10px",
         maxWidth: "20%",
     }
