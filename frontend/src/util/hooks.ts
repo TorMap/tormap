@@ -1,11 +1,12 @@
 // Hook
 // T is a generic type for value parameter, our case this will be string
-import React, {useEffect, useState} from "react";
-import {GeoRelayView} from "../types/geo-relay";
-import {RelayFlag} from "../types/relay";
-import {Colors} from "./Config";
-import TimelineIcon from "@material-ui/icons/Timeline";
+import {useEffect, useState} from "react";
 
+/**
+ * new React-Hook for handeling
+ * @param value Value to debounce
+ * @param delay Time without changes to update value
+ */
 export function useDebounce<T>(value: T, delay: number): T {
     // State and setters for debounced value
     const [debouncedValue, setDebouncedValue] = useState<T>(value);

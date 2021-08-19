@@ -1,6 +1,4 @@
-import {ReactComponent} from "*.svg";
-import {IconClassKey, SvgIcon} from "@material-ui/core";
-import {DOMElement} from "react";
+import {IconClassKey} from "@material-ui/core";
 
 export interface Settings{
 

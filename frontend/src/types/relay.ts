@@ -97,3 +97,9 @@ export interface ExitPolicySummary {
     reject?: Array<String>
     accept?: Array<String>
 }
+
+export enum RelayType {
+    Exit,
+    Guard,
+    default,
+}

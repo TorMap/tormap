@@ -12,12 +12,10 @@ import {
 } from "@material-ui/core";
 import {NodeDetails} from "../types/node-details";
 import {GeoRelayView} from "../types/geo-relay";
-
-import {apiBaseUrl} from "../util/constants";
 import CloseIcon from "@material-ui/icons/Close";
-import {Colors} from "../util/Config";
-import DirectionsRunIcon from "@material-ui/icons/DirectionsRun";
-import {getIcon} from "../util/jsx-helpers";
+import {apiBaseUrl} from "../util/Config";
+import {getIcon} from "../types/icons";
+import {findRelayByID, getRelayType} from "../util/aggregate-relays";
 
 /**
  *
@@ -160,7 +158,7 @@ export const NodeArrayPopup: React.FunctionComponent<Props> = ({
                                 (<ListItem button key={relay.id}
                                            selected={+relay.id === nodeDetailsId}
                                            onClick={() => setNodeDetailsId(+relay.id)}>
-                                    <ListItemIcon>{getIcon(relay.id, relays)}</ListItemIcon>
+                                    <ListItemIcon>{getIcon(getRelayType(findRelayByID(relay.id, relays)))}</ListItemIcon>
                                     <ListItemText primary={relay.nickname}/>
                                 </ListItem>) : (null) ))}
                     </List>
