@@ -38,5 +38,5 @@ export const defaultSettings: Settings = {
 export const Colors = {
     Exit: "#f96969",
     Guard: "#fcb045",
-    Default: "#833ab4",
+    Default: "#b337c6",
 }

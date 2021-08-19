@@ -253,7 +253,7 @@ export const countryLayer = (
     let filteredGeoData = new GeoJSON(undefined, {
         style: style as PathOptions,
         onEachFeature(feature: Feature<GeometryObject, GeoJsonProperties>, layer: Layer) {
-            onEachFeature(feature, layer, settings, setSettingsCallback)
+            onEachCountry(feature, layer, settings, setSettingsCallback)
         }
     })
     geoData.features.forEach(feature => {
@@ -264,7 +264,7 @@ export const countryLayer = (
 
     return filteredGeoData
 }
-//Helper for relaysToLayerGroup, used for adding eventlisteners to the countries
+
 /**
  * Helper for adding events to countries
  * @param feature
@@ -272,7 +272,7 @@ export const countryLayer = (
  * @param settings
  * @param setSettingsCallback
  */
-export const onEachFeature = (
+const onEachCountry = (
     feature: Feature<GeometryObject, GeoJsonProperties>,
     layer: Layer,
     settings: Settings,

@@ -17,7 +17,8 @@ import {
     getLatLonMap
 } from "../util/aggregate-relays";
 import {
-    aggregatedCoordinatesLayer, countryLayer,
+    aggregatedCoordinatesLayer,
+    countryLayer,
     countryMarkerLayer,
     defaultMarkerLayer,
     familyCordLayer
@@ -162,11 +163,14 @@ export const WorldMap: FunctionComponent<Props> = ({
             severity: "warning"
         })
 
-//todo: doc
+        //todo: doc
         const famCordMap: Map<string, Map<number, GeoRelayView[]>> = getFamCordMap(latLonMap)
 
         //Map for country's, used to get an Array of GeoRelayView with relays in the same country
-        const countryMap: Map<string, GeoRelayView[]> = getCountryMap(relays, settings, setSettingsCallback)
+        const countryMap: Map<string, GeoRelayView[]> = getCountryMap(relays)
+        if (settings.selectedCountry && !countryMap.has(settings.selectedCountry)) {
+            setSettingsCallback({...settings, selectedCountry: undefined})
+        }
 
         //Draw Country's, used to draw all countries to the map if at least one relay is hosted there
         if (leafletMap && countryMap.size > 0 && settings.sortCountry) {
