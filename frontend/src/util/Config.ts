@@ -1,5 +1,7 @@
 import {Settings} from "../types/variousTypes";
 
+export const apiBaseUrl = "http://localhost:8080"
+
 // Default settings, that are selected on page load
 export const defaultSettings: Settings = {
     Guard: true,

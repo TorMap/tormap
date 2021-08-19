@@ -44,8 +44,6 @@ interface Props {
 export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
     const classes = useStyle()
 
-    // ToDo redo the MapSettings Menu
-    // ToDo redo the Grouping Menu
     return (
         <div className={classes.accordion}>
             <Accordion>

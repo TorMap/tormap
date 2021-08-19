@@ -1,6 +1,5 @@
 import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useEffect, useState} from "react";
-import {apiBaseUrl} from "../util/constants";
 import L, {GeoJSON, Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap, PathOptions} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import {NodePopup} from "./node-popup";
@@ -10,21 +9,22 @@ import "leaflet.heat"
 import {makeStyles} from "@material-ui/core";
 import worldGeoData from "../data/world.geo.json"; // data from https://geojson-maps.ash.ms/
 import {Feature, GeoJsonObject, GeoJsonProperties, GeometryObject} from "geojson";
+import {NodeArrayPopup} from "./nodeArray-popup";
 import {
-    aggregatedCoordinatesLayer,
     applyFilter,
     calculateStatistics,
-    countryMarkerLayer,
-    defaultMarkerLayer,
-    familyCordLayer,
-    familyLayer,
     getCountryMap,
     getFamCordMap,
     getFamilyMap,
-    getLatLonMap,
-    onEachFeature
-} from "./world-map-helper";
-import {NodeArrayPopup} from "./nodeArray-popup";
+    getLatLonMap
+} from "../util/aggregate-relays";
+import {
+    aggregatedCoordinatesLayer, countryLayer,
+    countryMarkerLayer,
+    defaultMarkerLayer,
+    familyCordLayer
+} from "../util/layer-construction";
+import {apiBaseUrl} from "../util/Config";
 
 /**
  * Styles according to Material UI doc for components used in WorldMap component
@@ -132,7 +132,6 @@ export const WorldMap: FunctionComponent<Props> = ({
         const relaysAtCoordinate = getLatLonMap(applyFilter(relays, settings), settings).get(event.target.options.className)!!
         setNodePopupRelays(relaysAtCoordinate)
         console.log(`${event.target.options.className} has ${relaysAtCoordinate.length}`)
-        console.log(relaysAtCoordinate)
         setShowNodeArrayPopup(true)
     }
 
@@ -171,36 +170,7 @@ export const WorldMap: FunctionComponent<Props> = ({
         //Draw Country's, used to draw all countries to the map if at least one relay is hosted there
         if (settings.sortCountry) {
             if (leafletMap && countryMap.size > 0) {
-                const style = (feature: Feature<GeometryObject, GeoJsonProperties>): PathOptions => {
-                    if (settings.selectedCountry === feature.properties!!.iso_a2) {
-                        return {
-                            fillColor: "rgba(255,255,255,0.7)",
-                            weight: .5,
-                        }
-                    } else {
-                        return {
-                            fillColor: "rgba(255,255,255,0.3)",
-                            weight: .5,
-                        }
-                    }
-                }
-
-                const geoData = worldGeoData
-                let filteredGeoData = new GeoJSON(undefined, {
-                    style: style as PathOptions,
-                    onEachFeature(feature: Feature<GeometryObject, GeoJsonProperties>, layer: Layer) {
-                        onEachFeature(feature, layer, settings, setSettingsCallback)
-                    }
-                })
-                geoData.features.forEach(feature => {
-                    if (countryMap.has(feature.properties.iso_a2)) {
-                        filteredGeoData.addData(feature as GeoJsonObject)
-                    }
-                })
-
-                const worldGeoLayer = new LayerGroup()
-                filteredGeoData.addTo(worldGeoLayer)
-                worldGeoLayer.addTo(layerToReturn)
+                countryLayer(countryMap, settings, setSettingsCallback).addTo(layerToReturn)
             }
         }
 
