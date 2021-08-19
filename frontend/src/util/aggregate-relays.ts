@@ -75,7 +75,6 @@ export const applyFilter = (relays: GeoRelayView[], settings: Settings): GeoRela
 }
 
 // Map for coordinate's, used to get an Array of GeoRelayView with relays on the same coordinate
-//todo: remove settings
 /**
  * Returns a Key-Value-Map where Key is the coordinate pair as string and Value is a GeoRelayView[] with all Relays at this coordinate pair
  * @param relays Relays
@@ -95,15 +94,11 @@ export const getLatLonMap = (relays: GeoRelayView[]): Map<string, GeoRelayView[]
     return latLonMap
 }
 
-
-//todo: remove settings
 /**
  * Returns a Key-Value-Map where Key is the Family ID and Value is a GeoRelayView[] with all Relays that are part of this Family
  * @param relays Relays
  */
-export const getFamilyMap = (
-    relays: GeoRelayView[],
-): Map<number, GeoRelayView[]> => {
+export const getFamilyMap = (relays: GeoRelayView[]): Map<number, GeoRelayView[]> => {
     let familyMap: Map<number, GeoRelayView[]> = new Map<number, GeoRelayView[]>()
         relays.forEach(relay => {
             if (relay.familyId !== null) {
@@ -124,9 +119,7 @@ export const getFamilyMap = (
  * Returns a Key-Value-Map where Key is the coordinate pair as string and Value is also a Key-Value-Map where Key is the family ID and value is GeoRelayView[] with all Relays that are part of this Family
  * @param latLonMap
  */
-export const getFamCordMap = (
-    latLonMap: Map<string, GeoRelayView[]>,
-): Map<string, Map<number, GeoRelayView[]>> => {
+export const getFamCordMap = (latLonMap: Map<string, GeoRelayView[]>): Map<string, Map<number, GeoRelayView[]>> => {
     let famCordMap: Map<string, Map<number, GeoRelayView[]>> = new Map<string, Map<number, GeoRelayView[]>>()
     latLonMap.forEach((relaysOnLocation, location) => {
         let famMapForLocation: Map<number, GeoRelayView[]> = new Map<number, GeoRelayView[]>()
@@ -151,9 +144,7 @@ export const getFamCordMap = (
  * Returns a Key-Value-Map where Key is the coordinate pair as string and Value is an Array of famCordArr-Objects that are sorted for family size
  * @param famCordMap famCordMap-Object to sort
  */
-export const sortFamCordMap = (
-    famCordMap: Map<string, Map<number, GeoRelayView[]>>
-): Map<string, famCordArr[]> => {
+export const sortFamCordMap = (famCordMap: Map<string, Map<number, GeoRelayView[]>>): Map<string, famCordArr[]> => {
     let output: Map<string, famCordArr[]> = new Map<string, famCordArr[]>()
     famCordMap.forEach((famMapForLocation, coordinateKey) => {
         let sorted: famCordArr[] = []
@@ -183,20 +174,12 @@ export type famCordArr = {
     padding: number
 }
 
-//todo: remove settings
 /**
  * Returns a Key-Value-Map where Key is the countries ISO-2 ID
  * @param relays Relays
- * @param settings
- * @param setSettingsCallback
  */
-export const getCountryMap = (
-    relays: GeoRelayView[],
-    settings: Settings,
-    setSettingsCallback: (s: Settings) => void
-): Map<string, GeoRelayView[]> => {
+export const getCountryMap = (relays: GeoRelayView[]): Map<string, GeoRelayView[]> => {
     let countryMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
-    if (settings.sortCountry) {
         relays.forEach(relay => {
             if (relay.country !== undefined) {
                 const key: string = relay.country
@@ -209,10 +192,6 @@ export const getCountryMap = (
                 }
             }
         })
-        if (settings.selectedCountry && !countryMap.has(settings.selectedCountry)) {
-            setSettingsCallback({...settings, selectedCountry: undefined})
-        }
-    }
     return countryMap
 }
 
