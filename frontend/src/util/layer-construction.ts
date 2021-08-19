@@ -6,6 +6,7 @@ import {Settings} from "../types/variousTypes";
 import worldGeoData from "../data/world.geo.json";
 import {Feature, GeoJsonObject, GeoJsonProperties, GeometryObject} from "geojson";
 import {famCordArr, getRelayType, sortFamCordMap} from "./aggregate-relays";
+import {getMapColor9} from "./geojson";
 
 /**
  * Returns a Layer with markers with size relative to number of relays on a coordinate.
@@ -199,11 +200,7 @@ export const countryMarkerLayer = (
     let index = 0
     const geoData = worldGeoData
     countryMap.forEach((country, key) => {
-        let hue = 0
-        const mapColor9 = (geoData.features.find(feature => feature.properties.iso_a2 === key)?.properties.mapcolor9)
-        if (mapColor9) hue = mapColor9 * 360 / 9
-        else hue = 9 * 360 / 9
-
+        let hue = getMapColor9(key) * 360 / 9
         country.forEach((relay, i, country) => {
             let sat = "90%"
             let radius = 1
@@ -227,7 +224,12 @@ export const countryMarkerLayer = (
     })
     return countryLayer
 }
-
+/**
+ * Returns an Layer with all Countries that contain relays
+ * @param countryMap
+ * @param settings
+ * @param setSettingsCallback
+ */
 export const countryLayer = (
     countryMap: Map<string, GeoRelayView[]>,
     settings: Settings,
@@ -260,9 +262,7 @@ export const countryLayer = (
         }
     })
 
-    const worldGeoLayer = new LayerGroup()
-    filteredGeoData.addTo(worldGeoLayer)
-    return worldGeoLayer
+    return filteredGeoData
 }
 //Helper for relaysToLayerGroup, used for adding eventlisteners to the countries
 /**

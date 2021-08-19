@@ -46,16 +46,20 @@ interface Props {
     closeNodePopup: () => void
 }
 
+//todo: doc
 const formatBytesToMBPerSecond = (bandwidthInBytes?: number) => bandwidthInBytes ?
     (bandwidthInBytes / 1000000).toFixed(2) + " MB/s"
     : undefined
 
+//todo: doc
 const formatSecondsToHours = (seconds?: number) => seconds ?
     (seconds / 3600).toFixed(2) + " hours"
     : undefined
 
+//todo: doc
 const formatBoolean = (value?: boolean) => value === null || value === undefined ? undefined : value ? "yes" : "no"
 
+//todo: doc
 export const NodeArrayPopup: React.FunctionComponent<Props> = ({
                                                                    showNodePopup,
                                                                    relays,
@@ -153,14 +157,14 @@ export const NodeArrayPopup: React.FunctionComponent<Props> = ({
                     anchor={"left"}
                     variant={"permanent"}>
                     <List>
-                        {relayNicknames.map((relay, index) =>
+                        {relayNicknames.map((relay) =>
                             (relay.id ?
                                 (<ListItem button key={relay.id}
                                            selected={+relay.id === nodeDetailsId}
                                            onClick={() => setNodeDetailsId(+relay.id)}>
                                     <ListItemIcon>{getIcon(getRelayType(findRelayByID(relay.id, relays)))}</ListItemIcon>
                                     <ListItemText primary={relay.nickname}/>
-                                </ListItem>) : (null) ))}
+                                </ListItem>) : null ))}
                     </List>
                 </Drawer>
             </div>

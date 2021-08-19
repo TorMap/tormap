@@ -10,10 +10,7 @@ import {
 } from "@material-ui/core";
 import {Settings, Statistics} from "../types/variousTypes";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import {StatsRow} from "./stats-row";
 import {getIcon, Icon} from "../types/icons";
-import {Colors} from "../util/Config";
-import DirectionsRunIcon from "@material-ui/icons/DirectionsRun";
 import {icon} from "leaflet";
 
 /**
@@ -43,6 +40,7 @@ interface Props {
     stats: Statistics
 }
 
+//todo: doc
 export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
     const classes = useStyle()
 

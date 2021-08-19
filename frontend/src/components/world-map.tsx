@@ -1,14 +1,12 @@
 import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useEffect, useState} from "react";
-import L, {GeoJSON, Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap, PathOptions} from "leaflet";
+import L, {Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import {NodePopup} from "./node-popup";
 import {GeoRelayView} from "../types/geo-relay";
 import {Settings, snackbarMessage, Statistics} from "../types/variousTypes";
 import "leaflet.heat"
 import {makeStyles} from "@material-ui/core";
-import worldGeoData from "../data/world.geo.json"; // data from https://geojson-maps.ash.ms/
-import {Feature, GeoJsonObject, GeoJsonProperties, GeometryObject} from "geojson";
 import {NodeArrayPopup} from "./nodeArray-popup";
 import {
     applyFilter,
@@ -68,8 +66,8 @@ interface Props {
     setStatisticsCallback: (stat: Statistics) => void
 
     /**
-     * callback for errormessages
-     * @param snackbarMessage Objekt of type snackbarMessage with message and severity
+     * callback for errormessage
+     * @param snackbarMessage Object of type snackbarMessage with message and severity
      */
     handleSnackbar: (snackbarMessage: snackbarMessage) => void
 }
@@ -121,15 +119,17 @@ export const WorldMap: FunctionComponent<Props> = ({
     }, [relays, settings])
 
     //Eventhandler for markers to show the node-popup component
+//todo: doc
     const onMarkerClick = (event: LeafletMouseEvent) => {
         console.log("Marker clicked, show node details")
         setNodePopupRelayId(event.sourceTarget.options.className)
         setShowNodePopup(true)
     }
 
+//todo: doc
     const onMarkerGroupClick = (event: LeafletMouseEvent) => {
         console.log("Marker Group clicked")
-        const relaysAtCoordinate = getLatLonMap(applyFilter(relays, settings), settings).get(event.target.options.className)!!
+        const relaysAtCoordinate = getLatLonMap(applyFilter(relays, settings)).get(event.target.options.className)!!
         setNodePopupRelays(relaysAtCoordinate)
         console.log(`${event.target.options.className} has ${relaysAtCoordinate.length}`)
         setShowNodeArrayPopup(true)
@@ -150,10 +150,10 @@ export const WorldMap: FunctionComponent<Props> = ({
         }
 
         // Map for coordinate's, used to get an Array of GeoRelayView with relays on the same coordinate
-        const latLonMap: Map<string, GeoRelayView[]> = getLatLonMap(relays, settings)
+        const latLonMap: Map<string, GeoRelayView[]> = getLatLonMap(relays)
 
         //Map for family's, used to get an Array of GeoRelayView with relays in the same family / autonomsystem
-        const familyMap: Map<number, GeoRelayView[]> = getFamilyMap(relays, settings)
+        const familyMap: Map<number, GeoRelayView[]> = getFamilyMap(relays)
         if (settings.selectedFamily && !familyMap.has(settings.selectedFamily)) {
             setSettingsCallback({...settings, selectedFamily: undefined})
         }
@@ -162,16 +162,15 @@ export const WorldMap: FunctionComponent<Props> = ({
             severity: "warning"
         })
 
+//todo: doc
         const famCordMap: Map<string, Map<number, GeoRelayView[]>> = getFamCordMap(latLonMap)
 
         //Map for country's, used to get an Array of GeoRelayView with relays in the same country
         const countryMap: Map<string, GeoRelayView[]> = getCountryMap(relays, settings, setSettingsCallback)
 
         //Draw Country's, used to draw all countries to the map if at least one relay is hosted there
-        if (settings.sortCountry) {
-            if (leafletMap && countryMap.size > 0) {
-                countryLayer(countryMap, settings, setSettingsCallback).addTo(layerToReturn)
-            }
+        if (leafletMap && countryMap.size > 0 && settings.sortCountry) {
+            countryLayer(countryMap, settings, setSettingsCallback).addTo(layerToReturn)
         }
 
         //Draw aggregated marker's, used to draw all markers to the map with more than 4 relays on the same coordinate
