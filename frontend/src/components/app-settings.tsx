@@ -41,6 +41,7 @@ interface Props {
     onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+//todo: doc
 export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
     const classes = useStyle()
 
