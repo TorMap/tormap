@@ -1,5 +1,5 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
-import {Grid, makeStyles, Slider,} from "@material-ui/core";
+import {makeStyles, Slider,} from "@material-ui/core";
 import {useDebounce} from "../util/hooks";
 import {Mark} from "../types/mark";
 import Moment from "react-moment";

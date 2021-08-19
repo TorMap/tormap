@@ -5,23 +5,16 @@ import {
     AccordionSummary,
     makeStyles,
     Table,
-    TableBody,
-    TableCell,
-    TableRow,
+    TableBody, TableCell, TableRow,
     Typography
 } from "@material-ui/core";
 import {Settings, Statistics} from "../types/variousTypes";
-import DirectionsRunIcon from '@material-ui/icons/DirectionsRun';
-import SecurityIcon from '@material-ui/icons/Security';
-import FlagIcon from '@material-ui/icons/Flag';
-import TimelineIcon from '@material-ui/icons/Timeline';
-import StorageIcon from '@material-ui/icons/Storage';
-import SubdirectoryArrowRightIcon from '@material-ui/icons/SubdirectoryArrowRight';
-import GroupIcon from '@material-ui/icons/Group';
-import PublicIcon from '@material-ui/icons/Public';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import {Colors} from "../util/Config";
 import {StatsRow} from "./stats-row";
+import {getIcon, Icon} from "../types/icons";
+import {Colors} from "../util/Config";
+import DirectionsRunIcon from "@material-ui/icons/DirectionsRun";
+import {icon} from "leaflet";
 
 /**
  * Styles according to Material UI doc for components used in MapStats component
@@ -52,6 +45,15 @@ interface Props {
 
 export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
     const classes = useStyle()
+
+    let rows: StatsRow[] = []
+    rows.push({icon: Icon.ExitRelay, title: "Exit Relays", value: stats.relayExitCount})
+    rows.push({icon: Icon.GuardRelay, title: "Guard relays", value: stats.relayGuardCount})
+    rows.push({icon: Icon.DefaultRelay, title: "Other Relays", value: stats.relayOtherCount})
+    rows.push({icon: Icon.TotalRelays, title: "Total Relays", value: stats.relayExitCount + stats.relayGuardCount + stats.relayOtherCount})
+    if(stats.familyCount) rows.push({icon: Icon.FamilyCount, title: "Families", value: stats.familyCount})
+    if(stats.countryCount) rows.push({icon: Icon.CountryCount, title: "Countries", value: stats.countryCount})
+
     return (
         <div className={classes.root}>
             <Accordion defaultExpanded={true}>
@@ -68,40 +70,29 @@ export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
                 <AccordionDetails classes={{root: classes.noPadding}}>
                     <Table size="small">
                         <TableBody>
-                            <StatsRow
-                                icon={<DirectionsRunIcon style={{color: Colors.Exit}}/>}
-                                title={"Exit relays"}
-                                value={stats.relayExitCount}
-                            />
-                            <StatsRow
-                                icon={<SecurityIcon style={{color: Colors.Guard}}/>}
-                                title={"Guard relays"}
-                                value={stats.relayGuardCount}
-                            />
-                            <StatsRow
-                                icon={<TimelineIcon style={{color: Colors.Default}}/>}
-                                title={"Other relays"}
-                                value={stats.relayOtherCount}
-                            />
-                            <StatsRow
-                                icon={<SubdirectoryArrowRightIcon/>}
-                                title={"Total relays"}
-                                value={stats.relayExitCount + stats.relayGuardCount + stats.relayOtherCount}
-                            />
-                            {stats.familyCount ? <StatsRow
-                                icon={<GroupIcon/>}
-                                title={"Families"}
-                                value={stats.familyCount}
-                            /> : null}
-                            {stats.countryCount ? <StatsRow
-                                icon={<PublicIcon/>}
-                                title={"Countries"}
-                                value={stats.countryCount}
-                            /> : null}
+                            {rows.map(row =>
+                                (<TableRow>
+                                        <TableCell scope="row">
+                                            {icon !== undefined ? getIcon(row.icon) : null}
+                                        </TableCell>
+                                        <TableCell scope="row">
+                                            <Typography>{row.title}</Typography>
+                                        </TableCell>
+                                        <TableCell align={"right"}>
+                                            {row.value}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
                         </TableBody>
                     </Table>
                 </AccordionDetails>
             </Accordion>
         </div>
     )
+}
+
+interface StatsRow {
+    icon?: Icon
+    title: string
+    value: string | number
 }
