@@ -47,8 +47,8 @@ interface Props {
     availableDays: string[]
 
     /**
-     * A callback funktion to update the selected day
-     * @param n the n'th entry in availableDays array
+     * A callback function to update the selected day
+     * @param n the nth entry in availableDays array
      */
     setValue: (n: number) => void
 
@@ -57,8 +57,8 @@ interface Props {
      */
     settings: Settings
 }
-
-export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue, settings}) => {
+//todo: doc
+export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue}) => {
 
     const [sliderValue, setSliderValue] = useState<number>(-1)
     const [sliderMarks, setSliderMarks] = useState<Mark[]>([])

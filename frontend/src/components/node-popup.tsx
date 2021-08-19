@@ -2,20 +2,13 @@ import {
     Dialog,
     DialogContent,
     DialogTitle,
-    Drawer,
     IconButton,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
     makeStyles,
     Typography
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import React, {useEffect, useState} from "react";
 import {NodeDetails} from "../types/node-details";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
-import MailIcon from "@material-ui/icons/Mail";
 import {apiBaseUrl} from "../util/Config";
 
 /**
