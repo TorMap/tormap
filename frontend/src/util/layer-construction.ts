@@ -43,40 +43,42 @@ export const aggregatedCoordinatesLayer = (
  * @param onMarkerClick
  */
 export const defaultMarkerLayer = (
-    relays: GeoRelayView[],
+    latlonMap: Map<string, GeoRelayView[]>,
     onMarkerClick: (e: LeafletMouseEvent) => void,
 ): LayerGroup => {
     const defaultLayer = new LayerGroup()
     const exitLayer = new LayerGroup()
     const guardLayer = new LayerGroup()
     const defaultMarkerLayer = new LayerGroup([defaultLayer, guardLayer, exitLayer])
-    relays.forEach(relay => {
-        let color = Colors.Default
-        let layer = defaultLayer
-        switch (getRelayType(relay)){
-            case RelayType.Exit: {
-                color = Colors.Exit
-                layer = exitLayer
-                break
+    latlonMap.forEach((coordinate, key) =>{
+        coordinate.forEach(relay => {
+            let color = Colors.Default
+            let layer = defaultLayer
+            switch (getRelayType(relay)){
+                case RelayType.Exit: {
+                    color = Colors.Exit
+                    layer = exitLayer
+                    break
+                }
+                case RelayType.Guard: {
+                    color = Colors.Guard
+                    layer = guardLayer
+                    break
+                }
             }
-            case RelayType.Guard: {
-                color = Colors.Guard
-                layer = guardLayer
-                break
-            }
-        }
 
-        circleMarker(
-            [relay.lat, relay.long],
-            {
-                radius: 1,
-                className: relay.detailsId,
-                color: color,
-                weight: 3,
-            },
-        )
-            .on("click", onMarkerClick)
-            .addTo(layer)
+            circleMarker(
+                [relay.lat, relay.long],
+                {
+                    radius: 1,
+                    className: key,
+                    color: color,
+                    weight: 3,
+                },
+            )
+                .on("click", onMarkerClick)
+                .addTo(layer)
+        })
     })
     return defaultMarkerLayer
 }

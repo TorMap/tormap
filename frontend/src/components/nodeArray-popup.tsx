@@ -91,6 +91,10 @@ export const NodeArrayPopup: React.FunctionComponent<Props> = ({
     }, [relays])
 
     useEffect(() => {
+        if (relays && relays.length >= 0) setNodeDetailsId(+relays[0].detailsId)
+    }, [relayNicknames])
+
+    useEffect(() => {
         if (nodeDetailsId) {
             fetch(`${apiBaseUrl}/archive/node/details/${nodeDetailsId}`)
                 .then(response => response.json())

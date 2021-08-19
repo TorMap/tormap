@@ -184,7 +184,7 @@ export const WorldMap: FunctionComponent<Props> = ({
 
         //Draw marker's, used to draw all markers to the map with colors according to their type
         if (!settings.sortCountry) {
-            defaultMarkerLayer(relays, onMarkerClick).addTo(layerToReturn)
+            defaultMarkerLayer(latLonMap, onMarkerGroupClick).addTo(layerToReturn)
         }
 
         //Draw familyCord marker's, used to draw all markers to the map with colors according to their family
