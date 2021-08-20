@@ -5,7 +5,7 @@ import {RelayType} from "../types/relay";
 import {Settings} from "../types/variousTypes";
 import worldGeoData from "../data/world.geo.json";
 import {Feature, GeoJsonObject, GeoJsonProperties, GeometryObject} from "geojson";
-import {famCordArr, buildLatLonMap, getRelayType, sortFamilyCoordinatesMap} from "./aggregate-relays";
+import {famCordArr, buildLatLonMap, getRelayType, sortFamilyCoordinatesMap, createLatLonKey} from "./aggregate-relays";
 import {getMapColor9} from "./geojson";
 import {GeoRelayView} from "../types/responses";
 
@@ -213,7 +213,7 @@ export const countryMarkerLayer = (
                 {
                     color: color,
                     radius: radius,
-                    className: relay.detailsId,
+                    className: createLatLonKey(relay),
                 }
             )
                 .on("click", onMarkerClick)

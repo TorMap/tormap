@@ -89,8 +89,8 @@ export const WorldMap: FunctionComponent<Props> = ({
                                                        showSnackbarMessage,
                                                        closeSnackbar
                                                    }) => {
-    const [showRelayDetailsModal, setShowRelayDetailsModal] = useState(false)
-    const [relaysForDetailsModal, setRelaysForDetailsModal] = useState<GeoRelayView[]>([])
+    const [showRelayDetailsDialog, setShowRelayDetailsDialog] = useState(false)
+    const [relaysForDetailsDialog, setRelaysForDetailsDialog] = useState<GeoRelayView[]>([])
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
     const [markerLayer] = useState<LayerGroup>(new LayerGroup())
     const [heatLayer, setHeatLayer] = useState<Layer>(new Layer())
@@ -123,21 +123,16 @@ export const WorldMap: FunctionComponent<Props> = ({
         if (dayToDisplay) drawLayerGroup(relaysToLayerGroup(relays))
     }, [relays, settings])
 
-    // Eventhandler for markers to show the node-popup component
-//todo: doc
-    const onMarkerClick = (event: LeafletMouseEvent) => {
-        console.log("Marker clicked, show node details")
-        console.log(event.sourceTarget.options.className)
-
-    }
-
-//todo: doc
-    const onMarkerGroupClick = (event: LeafletMouseEvent) => {
-        console.log("Marker Group clicked")
+    /**
+     * After a marker was clicked on the map the corresponding relays are passed to the details dialog
+     * @param event - The leaflet marker click event
+     */
+    const openRelayDetailsDialog = (event: LeafletMouseEvent) => {
+        console.log("Marker clicked")
         const relaysAtCoordinate = buildLatLonMap(applyFilter(relays, settings)).get(event.target.options.className)!!
-        setRelaysForDetailsModal(relaysAtCoordinate)
+        setRelaysForDetailsDialog(relaysAtCoordinate)
         console.log(`${event.target.options.className} has ${relaysAtCoordinate.length}`)
-        setShowRelayDetailsModal(true)
+        setShowRelayDetailsDialog(true)
     }
 
     /**
@@ -187,12 +182,12 @@ export const WorldMap: FunctionComponent<Props> = ({
 
         // Draw aggregated marker's, used to draw all markers to the map with more than 4 relays on the same coordinate
         if (settings.aggregateCoordinates) {
-            aggregatedCoordinatesLayer(latLonMap, onMarkerGroupClick).addTo(layerToReturn)
+            aggregatedCoordinatesLayer(latLonMap, openRelayDetailsDialog).addTo(layerToReturn)
         }
 
         // Draw marker's, used to draw all markers to the map with colors according to their type
         if (!settings.sortCountry) {
-            defaultMarkerLayer(latLonMap, onMarkerGroupClick).addTo(layerToReturn)
+            defaultMarkerLayer(latLonMap, openRelayDetailsDialog).addTo(layerToReturn)
         }
 
         // Draw familyCord marker's, used to draw all markers to the map with colors according to their family
@@ -223,7 +218,7 @@ export const WorldMap: FunctionComponent<Props> = ({
 
         // Draw country marker's, used to draw all markers to the map with colors according to their country
         if (settings.sortCountry) {
-            countryMarkerLayer(countryMap, settings, onMarkerClick).addTo(layerToReturn)
+            countryMarkerLayer(countryMap, settings, openRelayDetailsDialog).addTo(layerToReturn)
         }
 
         // Calculate statistics
@@ -278,9 +273,9 @@ export const WorldMap: FunctionComponent<Props> = ({
             }}
         >
             <RelayDetailsDialog
-                shouldShowModal={showRelayDetailsModal}
-                closeModal={() => setShowRelayDetailsModal(false)}
-                relays={relaysForDetailsModal}
+                shouldShowDialog={showRelayDetailsDialog}
+                closeDialog={() => setShowRelayDetailsDialog(false)}
+                relays={relaysForDetailsDialog}
             />
             <TileLayer
                 subdomains="abcd"
