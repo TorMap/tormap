@@ -190,6 +190,7 @@ export const WorldMap: FunctionComponent<Props> = ({
         //Draw familyCord marker's, used to draw all markers to the map with colors according to their family
         if (settings.sortFamily) {
             if (settings.selectedFamily) familyLayer(familyMap, settings, setSettingsCallback).addTo(layerToReturn)
+                //todo: change mouse event
             else familyCordLayer(famCordMap, settings, setSettingsCallback, (e) => null).addTo(layerToReturn)
         }
 
