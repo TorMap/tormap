@@ -1,6 +1,6 @@
 import {IconClassKey} from "@material-ui/core";
 
-export interface Settings{
+export interface Settings {
 
     // Show relay types
     Guard: boolean
@@ -36,7 +36,7 @@ export interface Settings{
     selectedFamily: number | undefined
 }
 
-export interface Statistics{
+export interface Statistics {
     relayGuardCount: number
     relayExitCount: number
     relayOtherCount: number
@@ -44,9 +44,9 @@ export interface Statistics{
     countryCount?: number
 }
 
-export type snackbarMessage = {
+export type SnackbarMessage = {
     message: string,
-    severity: "error"|"warning"|"info"|"success",
+    severity: "error" | "warning" | "info" | "success",
 }
 
 export interface Mark {

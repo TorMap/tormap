@@ -35,12 +35,12 @@ export interface NodeDetails {
     tunnelledDirServer: boolean
 }
 
-export interface RelayInfo {
+export interface NodeDetailsInfo {
     name: string
     value: string | number | undefined
 }
 
-export interface RelayNickname {
+export interface NodeIdentifier {
     id: string,
     fingerprint: string
     nickname: string
