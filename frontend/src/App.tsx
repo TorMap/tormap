@@ -6,7 +6,7 @@ import {
 import "@material-ui/styles";
 import "./index.scss";
 import {AppSettings} from "./components/app-settings";
-import {Settings, snackbarMessage, Statistics} from "./types/variousTypes";
+import {Settings, SnackbarMessage, Statistics} from "./types/variousTypes";
 import {MapStats} from "./components/map-stats";
 import {DateSlider} from "./components/date-slider";
 import MuiAlert from '@material-ui/lab/Alert';
@@ -43,8 +43,8 @@ function App() {
     const [availableDays, setAvailableDays] = useState<string[]>([])
     const [sliderValue, setSliderValue] = useState<number>(-1)
     const [isLoading, setIsLoading] = useState(true)
-    const [snackbar, setSnackbar] = useState(false)
-    const [snackbarMessage, setSnackbarMessage] = useState<snackbarMessage>({message: "",severity: "info"})
+    const [showSnackbar, setShowSnackbar] = useState(false)
+    const [snackbarMessage, setSnackbarMessage] = useState<SnackbarMessage>({message: "", severity: "info"})
     const [settings, setSettings] = useState<Settings>(defaultSettings)
     const [statistics, setStatistics] = useState<Statistics | undefined>(undefined)
     const classes = useStyle()
@@ -74,16 +74,17 @@ function App() {
                 setIsLoading(false)
             })
             .catch(reason => {
-                handleSnackbar({message: `${reason.message}`, severity: "error"})
+                showSnackbarMessage({message: `${reason.message}`, severity: "error"})
+                setIsLoading(false)
             })
     }, [])
 
     // Resets selection if grouping gets disabled
     useEffect(() => {
-        if (!settings.sortCountry && settings.selectedCountry){
+        if (!settings.sortCountry && settings.selectedCountry) {
             setSettings({...settings, selectedCountry: undefined})
         }
-        if (!settings.sortFamily && settings.selectedFamily){
+        if (!settings.sortFamily && settings.selectedFamily) {
             setSettings({...settings, selectedFamily: undefined})
         }
     }, [settings])
@@ -92,21 +93,20 @@ function App() {
         if (reason === 'clickaway') {
             return;
         }
-        setSnackbar(false)
+        setShowSnackbar(false)
     }
-    const handleSnackbar = (snackbarMessage: snackbarMessage) => {
-        setSnackbarMessage(snackbarMessage)
-        setSnackbar(true)
+    const showSnackbarMessage = (message: SnackbarMessage) => {
+        setSnackbarMessage(message)
+        setShowSnackbar(true)
     }
 
     return (
         <ThemeProvider theme={theme}>
             <div>
-                {isLoading ?
+                {isLoading &&
                     <div className={classes.progressCircle}>
                         <CircularProgress color={"inherit"}/>
                     </div>
-                    : null
                 }
                 <WorldMap
                     dayToDisplay={sliderValue >= 0 ? availableDays[sliderValue] : undefined}
@@ -114,19 +114,25 @@ function App() {
                     setSettingsCallback={setSettings}
                     setLoadingStateCallback={setIsLoading}
                     setStatisticsCallback={setStatistics}
-                    handleSnackbar={handleSnackbar}
+                    showSnackbarMessage={showSnackbarMessage}
+                    closeSnackbar={() => setShowSnackbar(false)}
                 />
                 <DateSlider availableDays={availableDays} setValue={setSliderValue} settings={settings}/>
                 <AppSettings settings={settings} onChange={handleInputChange}/>
-                {statistics ? <MapStats settings={settings} stats={statistics}/> : null}
+                {statistics && <MapStats settings={settings} stats={statistics}/>}
             </div>
             <Snackbar
-                open={snackbar}
+                open={showSnackbar}
                 autoHideDuration={snackbarMessage.severity === "error" ? null : 6000}
                 onClose={handleCloseSnackbar}
                 anchorOrigin={{vertical: "top", horizontal: "center"}}
             >
-                <MuiAlert elevation={6} variant="filled" onClose={handleCloseSnackbar} severity={snackbarMessage.severity}>
+                <MuiAlert
+                    elevation={6}
+                    variant="filled"
+                    onClose={handleCloseSnackbar}
+                    severity={snackbarMessage.severity}
+                >
                     {snackbarMessage.message}
                 </MuiAlert>
             </Snackbar>

@@ -2,18 +2,16 @@ import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useEffect, useState} from "react";
 import L, {Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
 import 'leaflet/dist/leaflet.css';
-import {NodePopup} from "./node-popup";
-import {Settings, snackbarMessage, Statistics} from "../types/variousTypes";
+import {Settings, SnackbarMessage, Statistics} from "../types/variousTypes";
 import "leaflet.heat"
 import {makeStyles} from "@material-ui/core";
-import {NodeArrayPopup} from "./nodeArray-popup";
 import {
     applyFilter,
     calculateStatistics,
     getCountryMap,
-    getFamCordMap,
-    getFamilyMap,
-    getLatLonMap
+    buildFamilyCoordinatesMap,
+    buildFamilyMap,
+    buildLatLonMap
 } from "../util/aggregate-relays";
 import {
     aggregatedCoordinatesLayer,
@@ -24,6 +22,7 @@ import {
 } from "../util/layer-construction";
 import {apiBaseUrl} from "../util/Config";
 import {GeoRelayView} from "../types/responses";
+import {RelayDetailsDialog} from "./relay-details-dialog";
 
 /**
  * Styles according to Material UI doc for components used in WorldMap component
@@ -62,15 +61,20 @@ interface Props {
 
     /**
      * A callback to change statistics
-     * @param stat the statistic variable that should be changed
+     * @param stats - the statistic variable that should be changed
      */
-    setStatisticsCallback: (stat: Statistics) => void
+    setStatisticsCallback: (stats: Statistics) => void
 
     /**
-     * callback for errormessage
-     * @param snackbarMessage Object of type snackbarMessage with message and severity
+     * Show a message in the snackbar
+     * @param message - what to display to user and at which severity
      */
-    handleSnackbar: (snackbarMessage: snackbarMessage) => void
+    showSnackbarMessage: (message: SnackbarMessage) => void
+
+    /**
+     * Hide the snackbar
+     */
+    closeSnackbar: () => void
 }
 
 // Variable needs to be outside component to keep track of the last selected date
@@ -82,19 +86,18 @@ export const WorldMap: FunctionComponent<Props> = ({
                                                        setSettingsCallback,
                                                        setLoadingStateCallback,
                                                        setStatisticsCallback,
-                                                       handleSnackbar
+                                                       showSnackbarMessage,
+                                                       closeSnackbar
                                                    }) => {
-    const [showNodePopup, setShowNodePopup] = useState(false)
-    const [nodePopupRelayId, setNodePopupRelayId] = useState<number>()
-    const [showNodeArrayPopup, setShowNodeArrayPopup] = useState(false)
-    const [nodePopupRelays, setNodePopupRelays] = useState<GeoRelayView[]>([])
+    const [showRelayDetailsModal, setShowRelayDetailsModal] = useState(false)
+    const [relaysForDetailsModal, setRelaysForDetailsModal] = useState<GeoRelayView[]>([])
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
     const [markerLayer] = useState<LayerGroup>(new LayerGroup())
     const [heatLayer, setHeatLayer] = useState<Layer>(new Layer())
     const [relays, setRelays] = useState<GeoRelayView[]>([])
     const classes = useStyle()
 
-    //Update listener, fires whenever a new date is to be downloaded, only the last selected date gets displayed
+    // Update listener, fires whenever a new dateToDisplay was selected, only the last selected date gets displayed
     useEffect(() => {
         if (dayToDisplay) {
             console.log("fetching")
@@ -107,101 +110,106 @@ export const WorldMap: FunctionComponent<Props> = ({
                     if (currentTimeStamp === latestRequestTimestamp) setRelays(newRelays)
                 })
                 .catch(reason => {
-                    handleSnackbar({message: `${reason}`, severity: "error"})
+                    showSnackbarMessage({message: `${reason}`, severity: "error"})
                 })
             latestRequestTimestamp = currentTimeStamp
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dayToDisplay])
 
-    //Update listener, fires whenever settings get changed or an new date got downloaded
+    // Update listener, fires whenever settings get changed or an new relays got downloaded
     useEffect(() => {
+        closeSnackbar()
         if (dayToDisplay) drawLayerGroup(relaysToLayerGroup(relays))
     }, [relays, settings])
 
-    //Eventhandler for markers to show the node-popup component
+    // Eventhandler for markers to show the node-popup component
 //todo: doc
     const onMarkerClick = (event: LeafletMouseEvent) => {
         console.log("Marker clicked, show node details")
-        setNodePopupRelayId(event.sourceTarget.options.className)
-        setShowNodePopup(true)
+        console.log(event.sourceTarget.options.className)
+
     }
 
 //todo: doc
     const onMarkerGroupClick = (event: LeafletMouseEvent) => {
         console.log("Marker Group clicked")
-        const relaysAtCoordinate = getLatLonMap(applyFilter(relays, settings)).get(event.target.options.className)!!
-        setNodePopupRelays(relaysAtCoordinate)
+        const relaysAtCoordinate = buildLatLonMap(applyFilter(relays, settings)).get(event.target.options.className)!!
+        setRelaysForDetailsModal(relaysAtCoordinate)
         console.log(`${event.target.options.className} has ${relaysAtCoordinate.length}`)
-        setShowNodeArrayPopup(true)
+        setShowRelayDetailsModal(true)
     }
 
-    // Processes an array of Relays according to settings and returns an layerGroup with all relevant layers that have to be added to the map
+    /**
+     * Processes relays according to settings and create multiple layers which can be added to the world map
+     * @param relays - The relays which should be drawn on the map
+     * @return LayerGroup - The layer group which contains all relevant layers
+     */
     const relaysToLayerGroup = (relays: GeoRelayView[]): LayerGroup => {
         console.time(`relaysToLayerGroup`)
         console.timeLog(`relaysToLayerGroup`, `New Layer with ${relays.length} elements`)
 
         const layerToReturn = new LayerGroup()
 
-        // filter relays
+        // Filter relays
         relays = applyFilter(relays, settings)
         if (!relays.length && dayToDisplay) {
-            handleSnackbar({message: "There are no relays with the filtered flags!", severity: "warning"})
+            showSnackbarMessage({message: "There are no relays with the filtered flags!", severity: "warning"})
             return layerToReturn
         }
 
         // Map for coordinate's, used to get an Array of GeoRelayView with relays on the same coordinate
-        const latLonMap: Map<string, GeoRelayView[]> = getLatLonMap(relays)
+        const latLonMap: Map<string, GeoRelayView[]> = buildLatLonMap(relays)
 
-        //Map for family's, used to get an Array of GeoRelayView with relays in the same family / autonomsystem
-        const familyMap: Map<number, GeoRelayView[]> = getFamilyMap(relays)
+        // Map for family's, used to get an Array of GeoRelayView with relays in the same family
+        const familyMap: Map<number, GeoRelayView[]> = buildFamilyMap(relays)
         if (settings.selectedFamily && !familyMap.has(settings.selectedFamily)) {
             setSettingsCallback({...settings, selectedFamily: undefined})
         }
-        if (settings.sortFamily && familyMap.size === 0) handleSnackbar({
+        if (settings.sortFamily && familyMap.size === 0) showSnackbarMessage({
             message: "There are no families available for this day!",
             severity: "warning"
         })
 
         //todo: doc
-        const famCordMap: Map<string, Map<number, GeoRelayView[]>> = getFamCordMap(latLonMap)
+        const familyCoordinatesMap: Map<string, Map<number, GeoRelayView[]>> = buildFamilyCoordinatesMap(latLonMap)
 
-        //Map for country's, used to get an Array of GeoRelayView with relays in the same country
+        // Map for country's, used to get an Array of GeoRelayView with relays in the same country
         const countryMap: Map<string, GeoRelayView[]> = getCountryMap(relays)
         if (settings.selectedCountry && !countryMap.has(settings.selectedCountry)) {
             setSettingsCallback({...settings, selectedCountry: undefined})
         }
 
-        //Draw Country's, used to draw all countries to the map if at least one relay is hosted there
+        // Draw Country's, used to draw all countries to the map if at least one relay is hosted there
         if (leafletMap && countryMap.size > 0 && settings.sortCountry) {
             countryLayer(countryMap, settings, setSettingsCallback).addTo(layerToReturn)
         }
 
-        //Draw aggregated marker's, used to draw all markers to the map with more than 4 relays on the same coordinate
+        // Draw aggregated marker's, used to draw all markers to the map with more than 4 relays on the same coordinate
         if (settings.aggregateCoordinates) {
             aggregatedCoordinatesLayer(latLonMap, onMarkerGroupClick).addTo(layerToReturn)
         }
 
-        //Draw marker's, used to draw all markers to the map with colors according to their type
+        // Draw marker's, used to draw all markers to the map with colors according to their type
         if (!settings.sortCountry) {
             defaultMarkerLayer(latLonMap, onMarkerGroupClick).addTo(layerToReturn)
         }
 
-        //Draw familyCord marker's, used to draw all markers to the map with colors according to their family
+        // Draw familyCord marker's, used to draw all markers to the map with colors according to their family
         if (settings.sortFamily) {
             if (settings.selectedFamily) familyLayer(familyMap, settings, setSettingsCallback).addTo(layerToReturn)
-                //todo: change mouse event
-            else familyCordLayer(famCordMap, settings, setSettingsCallback, (e) => null).addTo(layerToReturn)
+            //todo: change mouse event
+            else familyCordLayer(familyCoordinatesMap, settings, setSettingsCallback, (e) => null).addTo(layerToReturn)
         }
 
-        //Draw Heatmap, draws a heatmap with a point for each coordinate
+        // Draw Heatmap, draws a heatmap with a point for each coordinate
         // https://github.com/Leaflet/Leaflet.heat
         if (settings.heatMap) {
             leafletMap?.removeLayer(heatLayer)
-            let latlngs: Array<number[]> = new Array<number[]>()
-            relays.forEach(relay => latlngs.push([relay.lat, relay.long, 1]))
+            let coordinates: Array<number[]> = new Array<number[]>()
+            relays.forEach(relay => coordinates.push([relay.lat, relay.long, 1]))
             // @ts-ignore needed for compatibility with js code of the heatmap package
-            let heat = L.heatLayer(latlngs, {
+            let heat = L.heatLayer(coordinates, {
                 radius: 25,
                 max: 1,
                 blur: 35,
@@ -213,12 +221,12 @@ export const WorldMap: FunctionComponent<Props> = ({
             leafletMap?.removeLayer(heatLayer)
         }
 
-        //Draw country marker's, used to draw all markers to the map with colors according to their country
+        // Draw country marker's, used to draw all markers to the map with colors according to their country
         if (settings.sortCountry) {
             countryMarkerLayer(countryMap, settings, onMarkerClick).addTo(layerToReturn)
         }
 
-        //Calculate statistics
+        // Calculate statistics
         if (settings.selectedCountry && settings.selectedFamily && familyMap && countryMap) {
             relays = []
             familyMap.get(settings.selectedFamily)?.forEach(familyRelay => {
@@ -239,7 +247,10 @@ export const WorldMap: FunctionComponent<Props> = ({
         return layerToReturn
     }
 
-    // Draws a group of layers to the map
+    /**
+     * Draws a group of layers on the map
+     * @param layerGroup - The group of layers to be drawn
+     */
     const drawLayerGroup = (layerGroup: LayerGroup) => {
         if (leafletMap && dayToDisplay) {
             console.log(`drawing for ${dayToDisplay}`)
@@ -266,15 +277,10 @@ export const WorldMap: FunctionComponent<Props> = ({
                 setLeafletMap(newMap)
             }}
         >
-            <NodePopup
-                showNodePopup={showNodePopup}
-                setShowNodePopup={() => setShowNodePopup(false)}
-                nodeDetailsId={nodePopupRelayId}
-            />
-            <NodeArrayPopup
-                showNodePopup={showNodeArrayPopup}
-                relays={nodePopupRelays}
-                closeNodePopup={() => setShowNodeArrayPopup(false)}
+            <RelayDetailsDialog
+                shouldShowModal={showRelayDetailsModal}
+                closeModal={() => setShowRelayDetailsModal(false)}
+                relays={relaysForDetailsModal}
             />
             <TileLayer
                 subdomains="abcd"
