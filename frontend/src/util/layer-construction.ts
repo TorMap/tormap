@@ -5,7 +5,7 @@ import {RelayType} from "../types/relay";
 import {Settings} from "../types/variousTypes";
 import worldGeoData from "../data/world.geo.json";
 import {Feature, GeoJsonObject, GeoJsonProperties, GeometryObject} from "geojson";
-import {famCordArr, getLatLonMap, getRelayType, sortFamCordMap} from "./aggregate-relays";
+import {famCordArr, buildLatLonMap, getRelayType, sortFamilyCoordinatesMap} from "./aggregate-relays";
 import {getMapColor9} from "./geojson";
 import {GeoRelayView} from "../types/responses";
 
@@ -40,18 +40,18 @@ export const aggregatedCoordinatesLayer = (
 
 /**
  * Returns a Layer with markers for each relay.
- * @param relays
+ * @param latLonMap
  * @param onMarkerClick
  */
 export const defaultMarkerLayer = (
-    latlonMap: Map<string, GeoRelayView[]>,
+    latLonMap: Map<string, GeoRelayView[]>,
     onMarkerClick: (e: LeafletMouseEvent) => void,
 ): LayerGroup => {
     const defaultLayer = new LayerGroup()
     const exitLayer = new LayerGroup()
     const guardLayer = new LayerGroup()
     const defaultMarkerLayer = new LayerGroup([defaultLayer, guardLayer, exitLayer])
-    latlonMap.forEach((coordinate, key) =>{
+    latLonMap.forEach((coordinate, key) =>{
         coordinate.forEach(relay => {
             let color = Colors.Default
             let layer = defaultLayer
@@ -99,7 +99,7 @@ export const familyLayer = (
     let index = 0
     familyMap.forEach((family, familyID) => {
         if (familyID !== settings.selectedFamily) return
-        const latLonMap: Map<string, GeoRelayView[]> = getLatLonMap(family)
+        const latLonMap: Map<string, GeoRelayView[]> = buildLatLonMap(family)
         latLonMap.forEach((relays, key) => {
             let hue = familyID % 360
             let sat = "90%"
@@ -137,6 +137,7 @@ export const familyLayer = (
  * @param famCordMap
  * @param settings
  * @param setSettingsCallback
+ * @param onMarkerClick
  */
 export const familyCordLayer = (
     famCordMap: Map<string, Map<number, GeoRelayView[]>>,
@@ -145,7 +146,7 @@ export const familyCordLayer = (
     onMarkerClick: (e: LeafletMouseEvent) => void,
 ): LayerGroup => {
     const familyLayer: LayerGroup = new LayerGroup()
-    const sortedFamCordMap: Map<string, famCordArr[]> = sortFamCordMap(famCordMap)
+    const sortedFamCordMap: Map<string, famCordArr[]> = sortFamilyCoordinatesMap(famCordMap)
     sortedFamCordMap.forEach((famMapForLocation, location) => {
         const coordinates = location.split(",")
         const latlng: L.LatLngExpression = [+coordinates[0], +coordinates[1]]
