@@ -44,12 +44,12 @@ interface Props {
     /**
      * Whether the modal should currently be visible
      */
-    shouldShowModal: boolean
+    shouldShowDialog: boolean
 
     /**
      * Hide the modal
      */
-    closeModal: () => void
+    closeDialog: () => void
 
     /**
      * Relays which the user ca view detailed information about
@@ -80,8 +80,8 @@ const formatSecondsToHours = (seconds?: number) => seconds ?
 const formatBoolean = (value?: boolean) => value === null || value === undefined ? undefined : value ? "yes" : "no"
 
 export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
-                                                                      shouldShowModal,
-                                                                      closeModal,
+                                                                      shouldShowDialog,
+                                                                      closeDialog,
                                                                       relays,
                                                                   }) => {
     const [relayIdentifiers, setRelayIdentifiers] = useState<NodeIdentifier[]>([])
@@ -157,9 +157,9 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
 
     return (
         <FullHeightDialog
-            open={shouldShowModal}
-            onClose={closeModal}
-            onBackdropClick={closeModal}
+            open={shouldShowDialog}
+            onClose={closeDialog}
+            onBackdropClick={closeDialog}
             maxWidth={relays.length > 1 ? "lg" : "md"}
             fullWidth={true}
         >
@@ -167,7 +167,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                 {!isLoading && <DialogTitle className={relays.length > 1 ? classes.infoPadding : undefined}>
                     <Typography
                         variant="h6">{nodeDetailsId ? (rawRelayDetails?.nickname) : (`No information`)}</Typography>
-                    <IconButton aria-label="close" className={classes.closeButton} onClick={closeModal}>
+                    <IconButton aria-label="close" className={classes.closeButton} onClick={closeDialog}>
                         <CloseIcon/>
                     </IconButton>
                 </DialogTitle>}

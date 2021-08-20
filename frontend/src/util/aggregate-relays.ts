@@ -81,7 +81,7 @@ export const applyFilter = (relays: GeoRelayView[], settings: Settings): GeoRela
 export const buildLatLonMap = (relays: GeoRelayView[]): Map<string, GeoRelayView[]> => {
     let latLonMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
     relays.forEach(relay => {
-        const key: string = `${relay.lat},${relay.long}`
+        const key: string = createLatLonKey(relay)
         if (latLonMap.has(key)) {
             let old = latLonMap.get(key)!!
             old.push(relay)
@@ -92,6 +92,8 @@ export const buildLatLonMap = (relays: GeoRelayView[]): Map<string, GeoRelayView
     })
     return latLonMap
 }
+
+export const createLatLonKey = (relay: GeoRelayView) => `${relay.lat},${relay.long}`
 
 /**
  * Returns a Key-Value-Map where Key is the Family ID and Value is a GeoRelayView[] with all Relays that are part of this Family
