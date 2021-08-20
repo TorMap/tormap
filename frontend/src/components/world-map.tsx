@@ -20,7 +20,7 @@ import {
     countryLayer,
     countryMarkerLayer,
     defaultMarkerLayer,
-    familyCordLayer
+    familyCordLayer, familyLayer
 } from "../util/layer-construction";
 import {apiBaseUrl} from "../util/Config";
 import {GeoRelayView} from "../types/responses";
@@ -189,7 +189,8 @@ export const WorldMap: FunctionComponent<Props> = ({
 
         //Draw familyCord marker's, used to draw all markers to the map with colors according to their family
         if (settings.sortFamily) {
-            familyCordLayer(famCordMap, settings, setSettingsCallback).addTo(layerToReturn)
+            if (settings.selectedFamily) familyLayer(familyMap, settings, setSettingsCallback).addTo(layerToReturn)
+            else familyCordLayer(famCordMap, settings, setSettingsCallback, (e) => null).addTo(layerToReturn)
         }
 
         //Draw Heatmap, draws a heatmap with a point for each coordinate

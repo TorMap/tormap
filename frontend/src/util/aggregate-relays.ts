@@ -1,4 +1,3 @@
-
 import {Settings, Statistics} from "../types/variousTypes";
 import {RelayFlag, RelayType} from "../types/relay";
 import {GeoRelayView} from "../types/responses";
@@ -150,10 +149,12 @@ export const sortFamCordMap = (famCordMap: Map<string, Map<number, GeoRelayView[
     famCordMap.forEach((famMapForLocation, coordinateKey) => {
         let sorted: famCordArr[] = []
         let largest: famCordArr = {relays: [], familyID: 0, padding: 0}
+        let padding: number = 0
         while (famMapForLocation.size > 0) {
             famMapForLocation.forEach((relays, famID) => {
                 if (relays.length > largest.relays.length) largest = {relays: relays, familyID: famID, padding: 0}
             })
+            //todo: fix padding
             if (sorted.length > 0 && largest.relays.length === sorted[sorted.length - 1].relays.length) {
                 sorted.map(value => {
                     value.padding = value.padding + 1
