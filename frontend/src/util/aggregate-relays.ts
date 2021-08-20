@@ -233,7 +233,7 @@ export const calculateStatistics = (
  * Returns the type of the relay
  * @param relay
  */
-export function getRelayType(relay: GeoRelayView | undefined): RelayType | undefined {
+export function getRelayType(relay?: GeoRelayView): RelayType | undefined {
     if (relay === undefined) return undefined
     if (relay.flags?.includes(RelayFlag.Exit)) {
         return RelayType.Exit

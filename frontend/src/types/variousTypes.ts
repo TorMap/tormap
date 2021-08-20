@@ -44,12 +44,6 @@ export interface Statistics{
     countryCount?: number
 }
 
-export type rowType = {
-    name: string,
-    value: string | number,
-    icon?: IconClassKey,
-}
-
 export type snackbarMessage = {
     message: string,
     severity: "error"|"warning"|"info"|"success",
