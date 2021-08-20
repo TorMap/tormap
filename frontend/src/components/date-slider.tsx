@@ -1,12 +1,11 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
 import {makeStyles, Slider,} from "@material-ui/core";
 import {useDebounce} from "../util/hooks";
-import {Mark} from "../types/mark";
 import Moment from "react-moment";
 import {KeyboardDatePicker, MuiPickersUtilsProvider} from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 import moment from "moment";
-import {Settings} from "../types/variousTypes";
+import {Mark, Settings} from "../types/variousTypes";
 
 /**
  * Styles according to Material UI doc for components used in DateSlider component
