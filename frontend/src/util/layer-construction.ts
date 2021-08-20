@@ -1,11 +1,11 @@
 
-import L, {circleMarker, GeoJSON, Layer, LayerGroup, LeafletMouseEvent, PathOptions} from "leaflet";
+import L, {circleMarker, GeoJSON, latLng, Layer, LayerGroup, LeafletMouseEvent, PathOptions} from "leaflet";
 import {Colors} from "./Config";
 import {RelayType} from "../types/relay";
 import {Settings} from "../types/variousTypes";
 import worldGeoData from "../data/world.geo.json";
 import {Feature, GeoJsonObject, GeoJsonProperties, GeometryObject} from "geojson";
-import {famCordArr, getRelayType, sortFamCordMap} from "./aggregate-relays";
+import {famCordArr, getLatLonMap, getRelayType, sortFamCordMap} from "./aggregate-relays";
 import {getMapColor9} from "./geojson";
 import {GeoRelayView} from "../types/responses";
 
@@ -19,14 +19,14 @@ export const aggregatedCoordinatesLayer = (
     onMarkerClick: (e: LeafletMouseEvent) => void,
 ): LayerGroup => {
     const aggregatedCoordinatesLayer = new LayerGroup()
-    latLonMap.forEach((value, key) => {
+    latLonMap.forEach((relays, key) => {
         const coordinates = key.split(",")
         // skip if a coordinate has less than 4 relays
-        if (value.length < 4) return
+        if (relays.length < 4) return
         circleMarker(
             [+coordinates[0], +coordinates[1]],
             {
-                radius: value.length,
+                radius: 10 + relays.length,
                 color: "#ffffff",
                 weight: .3,
                 className: key
@@ -97,30 +97,31 @@ export const familyLayer = (
 ): LayerGroup => {
     const familyLayer: LayerGroup = new LayerGroup()
     let index = 0
-    familyMap.forEach(family => {
-        family.forEach((relay, i, family) => {
-            let hue = index * 360 / familyMap.size * (2 / 3)
+    familyMap.forEach((family, familyID) => {
+        if (familyID !== settings.selectedFamily) return
+        const latLonMap: Map<string, GeoRelayView[]> = getLatLonMap(family)
+        latLonMap.forEach((relays, key) => {
+            let hue = familyID % 360
             let sat = "90%"
-            let radius = family.length * 10
+            let radius = 10 + relays.length
 
-            if (settings.selectedFamily !== undefined && settings.selectedFamily !== relay.familyId) sat = "30%"
-            if (settings.selectedFamily !== undefined && settings.selectedFamily && settings.selectedFamily !== relay.familyId) sat = "0%"
+            const coordinates = key.split(",")
 
             const color = `hsl(${hue},${sat},60%)`
             circleMarker(
-                [relay.lat, relay.long],
+                [+coordinates[0], +coordinates[1]],
                 {
                     color: color,
                     radius: radius,
-                    fillOpacity: .05,
+                    fillOpacity: .3,
                     weight: .1,
-                }
+                },
             )
                 .on("click", () => {
-                    if (relay.familyId === settings.selectedFamily) {
+                    if (familyID === settings.selectedFamily) {
                         setSettingsCallback({...settings, selectedFamily: undefined})
                     } else {
-                        setSettingsCallback({...settings, selectedFamily: relay.familyId})
+                        setSettingsCallback({...settings, selectedFamily: familyID})
                     }
                 })
                 .addTo(familyLayer)
@@ -141,16 +142,17 @@ export const familyCordLayer = (
     famCordMap: Map<string, Map<number, GeoRelayView[]>>,
     settings: Settings,
     setSettingsCallback: (s: Settings) => void,
+    onMarkerClick: (e: LeafletMouseEvent) => void,
 ): LayerGroup => {
     const familyLayer: LayerGroup = new LayerGroup()
     const sortedFamCordMap: Map<string, famCordArr[]> = sortFamCordMap(famCordMap)
     sortedFamCordMap.forEach((famMapForLocation, location) => {
         const coordinates = location.split(",")
         const latlng: L.LatLngExpression = [+coordinates[0], +coordinates[1]]
-        famMapForLocation.forEach((famCordArr, index) => {
+        famMapForLocation.forEach((famCordArr) => {
             let hue = famCordArr.familyID % 360
             let sat = "90%"
-            let radius = 5 + (famCordArr.relays.length + famCordArr.padding) * 2
+            let radius = 5 + (famCordArr.relays.length + famCordArr.padding)
             let fillOpacity = .25
 
             let selected = true
@@ -173,15 +175,7 @@ export const familyCordLayer = (
                     weight: .5,
                 }
             )
-                .on("click", () => {
-                    console.log(index)
-                    if (famCordArr.familyID === settings.selectedFamily) {
-                        setSettingsCallback({...settings, selectedFamily: undefined})
-                    } else {
-                        //todo: open NodeArrayPopup
-                        setSettingsCallback({...settings, selectedFamily: famCordArr.familyID})
-                    }
-                })
+                .on("click", onMarkerClick)
                 .addTo(familyLayer)
         })
     })
