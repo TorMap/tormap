@@ -8,14 +8,13 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
-    makeStyles, Typography
+    makeStyles, Tooltip, Typography
 } from "@material-ui/core";
-import {NodeDetails} from "../types/node-details";
-import {GeoRelayView} from "../types/geo-relay";
 import CloseIcon from "@material-ui/icons/Close";
 import {apiBaseUrl} from "../util/Config";
 import {getIcon} from "../types/icons";
-import {findRelayByID, getRelayType} from "../util/aggregate-relays";
+import {findGeoRelayViewByID, getRelayType} from "../util/aggregate-relays";
+import {GeoRelayView, NodeDetails, RelayInfo, RelayNickname} from "../types/responses";
 
 /**
  *
@@ -34,6 +33,7 @@ const useStyle = makeStyles(() => ({
     },
     dialogSize: {
         maxWidth: "700px",
+        minWidth: "50%",
         minHeight: "500px",
     },
 }))
@@ -71,6 +71,7 @@ export const NodeArrayPopup: React.FunctionComponent<Props> = ({
     const [relayInfos, setRelayInfos] = useState<RelayInfo[]>()
     const classes = useStyle()
 
+    // Load nicknames for relays
     useEffect(() => {
         setNodeDetailsId(undefined)
         let relayIDs: Array<string> = []
@@ -88,12 +89,15 @@ export const NodeArrayPopup: React.FunctionComponent<Props> = ({
         })
             .then(response => response.json())
             .then(relays => setRelayNicknames(relays))
+
     }, [relays])
 
     useEffect(() => {
-        if (relays && relays.length >= 0) setNodeDetailsId(+relays[0].detailsId)
+        //automatisch den ersten eintrag auswahlen
+        if (relayNicknames && relayNicknames.length > 0) setNodeDetailsId(+relayNicknames[0].id)
     }, [relayNicknames])
 
+    //Load details for selected relay
     useEffect(() => {
         if (nodeDetailsId) {
             fetch(`${apiBaseUrl}/archive/node/details/${nodeDetailsId}`)
@@ -163,26 +167,19 @@ export const NodeArrayPopup: React.FunctionComponent<Props> = ({
                     <List>
                         {relayNicknames.map((relay) =>
                             (relay.id ?
-                                (<ListItem button key={relay.id}
-                                           selected={+relay.id === nodeDetailsId}
-                                           onClick={() => setNodeDetailsId(+relay.id)}>
-                                    <ListItemIcon>{getIcon(getRelayType(findRelayByID(relay.id, relays)))}</ListItemIcon>
-                                    <ListItemText primary={relay.nickname}/>
-                                </ListItem>) : null ))}
+                                (<Tooltip title={relay.fingerprint} arrow={true}>
+                                    <div>
+                                        <ListItem button key={relay.id}
+                                               selected={+relay.id === nodeDetailsId}
+                                               onClick={() => setNodeDetailsId(+relay.id)}>
+                                            <ListItemIcon>{getIcon(getRelayType(findGeoRelayViewByID(relay.id, relays)))}</ListItemIcon>
+                                            <ListItemText primary={relay.nickname}/>
+                                        </ListItem>
+                                    </div>
+                                </Tooltip>) : null ))}
                     </List>
                 </Drawer>
             </div>
         </Dialog>
     )
-}
-
-interface RelayInfo {
-    name: string
-    value: string | number | undefined
-}
-
-interface RelayNickname {
-    id: string,
-    fingerprint: string
-    nickname: string
 }

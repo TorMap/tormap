@@ -3,7 +3,6 @@ import React, {FunctionComponent, useEffect, useState} from "react";
 import L, {Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import {NodePopup} from "./node-popup";
-import {GeoRelayView} from "../types/geo-relay";
 import {Settings, snackbarMessage, Statistics} from "../types/variousTypes";
 import "leaflet.heat"
 import {makeStyles} from "@material-ui/core";
@@ -24,6 +23,7 @@ import {
     familyCordLayer
 } from "../util/layer-construction";
 import {apiBaseUrl} from "../util/Config";
+import {GeoRelayView} from "../types/responses";
 
 /**
  * Styles according to Material UI doc for components used in WorldMap component

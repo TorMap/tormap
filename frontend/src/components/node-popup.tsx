@@ -8,8 +8,8 @@ import {
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import React, {useEffect, useState} from "react";
-import {NodeDetails} from "../types/node-details";
 import {apiBaseUrl} from "../util/Config";
+import {NodeDetails} from "../types/responses";
 
 /**
  * Styles according to Material UI doc for components used in NodePopup component

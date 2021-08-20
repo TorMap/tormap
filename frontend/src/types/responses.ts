@@ -1,4 +1,13 @@
-// noinspection JSUnusedGlobalSymbols
+import {RelayFlag} from "./relay";
+
+export interface GeoRelayView {
+    lat: number
+    long: number
+    country: string
+    flags?: RelayFlag[]
+    detailsId: string
+    familyId: number
+}
 
 export interface NodeDetails {
     id: number
@@ -26,3 +35,13 @@ export interface NodeDetails {
     tunnelledDirServer: boolean
 }
 
+export interface RelayInfo {
+    name: string
+    value: string | number | undefined
+}
+
+export interface RelayNickname {
+    id: string,
+    fingerprint: string
+    nickname: string
+}

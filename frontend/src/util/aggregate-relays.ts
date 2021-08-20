@@ -1,6 +1,7 @@
-import {GeoRelayView} from "../types/geo-relay";
+
 import {Settings, Statistics} from "../types/variousTypes";
 import {RelayFlag, RelayType} from "../types/relay";
+import {GeoRelayView} from "../types/responses";
 
 /**
  * Returns a Array of GeoRelayViews that are filtered according to app settings.
@@ -247,9 +248,9 @@ export function getRelayType(relay: GeoRelayView | undefined): RelayType | undef
  *
  * Returns a GeoRelayView-Object if there exists an Relay with this ID
  * @param id detailsID of the relay
- * @param relays Relays to be searched
+ * @param relays GeoRelayView[] to be searched
  */
-export function findRelayByID(id: string | number, relays: GeoRelayView[]): GeoRelayView | undefined {
+export function findGeoRelayViewByID(id: string | number, relays: GeoRelayView[]): GeoRelayView | undefined {
     //id has to be of type string
     if (typeof id === "number"){
         id = id.toString()
