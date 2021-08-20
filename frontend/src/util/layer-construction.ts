@@ -1,4 +1,4 @@
-import {GeoRelayView} from "../types/geo-relay";
+
 import L, {circleMarker, GeoJSON, Layer, LayerGroup, LeafletMouseEvent, PathOptions} from "leaflet";
 import {Colors} from "./Config";
 import {RelayType} from "../types/relay";
@@ -7,6 +7,7 @@ import worldGeoData from "../data/world.geo.json";
 import {Feature, GeoJsonObject, GeoJsonProperties, GeometryObject} from "geojson";
 import {famCordArr, getRelayType, sortFamCordMap} from "./aggregate-relays";
 import {getMapColor9} from "./geojson";
+import {GeoRelayView} from "../types/responses";
 
 /**
  * Returns a Layer with markers with size relative to number of relays on a coordinate.
@@ -25,7 +26,7 @@ export const aggregatedCoordinatesLayer = (
         circleMarker(
             [+coordinates[0], +coordinates[1]],
             {
-                radius: value.length / 2,
+                radius: value.length,
                 color: "#ffffff",
                 weight: .3,
                 className: key
@@ -177,6 +178,7 @@ export const familyCordLayer = (
                     if (famCordArr.familyID === settings.selectedFamily) {
                         setSettingsCallback({...settings, selectedFamily: undefined})
                     } else {
+                        //todo: open NodeArrayPopup
                         setSettingsCallback({...settings, selectedFamily: famCordArr.familyID})
                     }
                 })

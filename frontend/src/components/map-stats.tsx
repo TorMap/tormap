@@ -12,6 +12,7 @@ import {Settings, Statistics} from "../types/variousTypes";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import {getIcon, Icon} from "../types/icons";
 import {icon} from "leaflet";
+import {getFullName} from "../util/geojson";
 
 /**
  * Styles according to Material UI doc for components used in MapStats component
@@ -61,8 +62,8 @@ export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
                     id="panel2a-header"
                 >
                     <Typography className={"heading"}>
-                        Stats{settings.selectedFamily ? " for family" : null}
-                        {settings.selectedCountry ? " in " + settings.selectedCountry : null}
+                        Stats{settings.selectedFamily ? " for selected family" : null}
+                        {settings.selectedCountry ? " in " + getFullName(settings.selectedCountry) : null}
                     </Typography>
                 </AccordionSummary>
                 <AccordionDetails classes={{root: classes.noPadding}}>

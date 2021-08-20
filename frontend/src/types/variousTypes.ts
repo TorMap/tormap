@@ -54,3 +54,8 @@ export type snackbarMessage = {
     message: string,
     severity: "error"|"warning"|"info"|"success",
 }
+
+export interface Mark {
+    value: number
+    label: JSX.Element
+}
