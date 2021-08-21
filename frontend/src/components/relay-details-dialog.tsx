@@ -16,7 +16,6 @@ import {apiBaseUrl} from "../util/Config";
 import {getIcon} from "../types/icons";
 import {findGeoRelayViewByID, getRelayType} from "../util/aggregate-relays";
 import {GeoRelayView, NodeDetails, NodeDetailsInfo, NodeIdentifier} from "../types/responses";
-import {icon} from "leaflet";
 
 
 const useStyle = makeStyles(() => ({
@@ -44,7 +43,7 @@ interface Props {
     /**
      * Whether the modal should currently be visible
      */
-    shouldShowDialog: boolean
+    showDialog: boolean
 
     /**
      * Hide the modal
@@ -80,7 +79,7 @@ const formatSecondsToHours = (seconds?: number) => seconds ?
 const formatBoolean = (value?: boolean) => value === null || value === undefined ? undefined : value ? "yes" : "no"
 
 export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
-                                                                      shouldShowDialog,
+                                                                      showDialog,
                                                                       closeDialog,
                                                                       relays,
                                                                   }) => {
@@ -157,7 +156,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
 
     return (
         <FullHeightDialog
-            open={shouldShowDialog}
+            open={showDialog}
             onClose={closeDialog}
             onBackdropClick={closeDialog}
             maxWidth={relays.length > 1 ? "lg" : "md"}
