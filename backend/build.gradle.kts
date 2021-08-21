@@ -11,7 +11,7 @@ plugins {
     // Generate code documentation https://kotlin.github.io/dokka/1.5.0/
     id("org.jetbrains.dokka") version "1.5.0"
 
-    // Spring
+    // Spring https://spring.io/projects/spring-boot
     id("org.springframework.boot") version "2.5.2"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 
@@ -32,54 +32,59 @@ dependencies {
     kotlin("reflect")
     kotlin("stdlib-jdk8")
 
-    // Download and read Tor descriptors (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
-    implementation(fileTree("lib/metrics-lib-2.17.0"))
-
-    // Spring Boot
+    // Spring Boot https://spring.io/projects/spring-boot
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    // Annotation processing
     val configurationProcessor = "org.springframework.boot:spring-boot-configuration-processor"
     kapt(configurationProcessor)
     kaptTest(configurationProcessor)
     annotationProcessor(configurationProcessor)
 
+    // OpenAPI generation and Swagger UI https://springdoc.org/
+    implementation("org.springdoc:springdoc-openapi-ui:1.3.+")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.3.+")
+
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    // Database
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    // Latest stable H2 database driver https://www.h2database.com/
     runtimeOnly("com.h2database:h2:1.4.199")
 
-    // Run database migration tool on startup
+    // Run Flyway DB migration tool on startup https://flywaydb.org/
     implementation("org.flywaydb:flyway-core")
 
-    // Provider for geo-ip lookups
-    implementation("com.maxmind.geoip2:geoip2:2.15.0")
-
-    // Testing
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    // Download and read Tor descriptors (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
+    implementation(fileTree("lib/metrics-lib-2.17.0"))
 }
 
+// Annotation processing
 kapt {
     annotationProcessor("org.springframework.boot.configurationprocessor.ConfigurationMetadataAnnotationProcessor")
 }
 
+// Allow JPA annotations for Kotlin classes
 allOpen {
     annotation("javax.persistence.Entity")
     annotation("javax.persistence.Embeddable")
     annotation("javax.persistence.MappedSuperclass")
 }
 
+// Connect migration tool to DB
 flyway {
     url = "jdbc:h2:./database/tormap;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=5"
     user = "sa"
 }
 
+// Configure KotlinDoc generation
 tasks.dokkaHtml.configure {
     outputDirectory.set(buildDir.resolve("dokka"))
 }
 
+// Compile options for JVM build
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
@@ -87,6 +92,7 @@ tasks.withType<KotlinCompile> {
     }
 }
 
+// Configure tests
 tasks.withType<Test> {
     useJUnitPlatform()
 }
