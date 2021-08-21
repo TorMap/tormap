@@ -273,7 +273,7 @@ export const WorldMap: FunctionComponent<Props> = ({
             }}
         >
             <RelayDetailsDialog
-                shouldShowDialog={showRelayDetailsDialog}
+                showDialog={showRelayDetailsDialog}
                 closeDialog={() => setShowRelayDetailsDialog(false)}
                 relays={relaysForDetailsDialog}
             />

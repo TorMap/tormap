@@ -1,6 +1,6 @@
 # Backend
 
-## Requirements
+## Development Requirements
 
 ### Automatic
 
@@ -26,6 +26,9 @@ On `Linux` systems you can use the main install script `./install`, also describ
 - `./gradlew flywayRepair`: Repairs the schema history table
 - `./gradlew dokkaHtml`: generate code documentation in HTML format
 - On `Windows` replace `./gradlew` with `./gradlew.bat` for all commands mentioned above
+
+## OpenAPI specification
+An interactive Swagger UI is available under http://localhost:8080/documentation and the specification can also be viewed in raw JSON under http://localhost:8080/documentation/json.
 
 ## Database
 TorMap uses an embedded H2 database which saves the whole state in a single DB file located at `database/tormap.mv.db`. To connect to the DB you either can add the datasource in your IDE open http://localhost:8080/h2 while the backend is running. Make sure to configure the connection the same way your `application.properties` are set. In an IDE it might be necessary to configure the datasource URL with `./backend/...` or an absolute path to ensure the correct working directory is used.
