@@ -15,7 +15,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import {apiBaseUrl} from "../util/Config";
 import {getIcon} from "../types/icons";
 import {findGeoRelayViewByID, getRelayType} from "../util/aggregate-relays";
-import {GeoRelayView, NodeDetails, NodeDetailsInfo, NodeIdentifier} from "../types/responses";
+import {GeoRelayView, NodeDetails, DetailsInfo, NodeIdentifier} from "../types/responses";
 
 
 const useStyle = makeStyles(() => ({
@@ -32,6 +32,9 @@ const useStyle = makeStyles(() => ({
     },
     valueName: {
         minWidth: "150px",
+    },
+    noMaxWidth: {
+        maxWidth: "none",
     },
 }))
 
@@ -54,7 +57,7 @@ interface Props {
     closeDialog: () => void
 
     /**
-     * Relays which the user ca view detailed information about
+     * Relays which the user can view detailed information about
      */
     relays: GeoRelayView[]
 }
@@ -89,7 +92,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
     const [relayIdentifiers, setRelayIdentifiers] = useState<NodeIdentifier[]>([])
     const [nodeDetailsId, setNodeDetailsId] = useState<number | undefined>()
     const [rawRelayDetails, setRawRelayDetails] = useState<NodeDetails>()
-    const [relayDetails, setRelayDetails] = useState<NodeDetailsInfo[]>()
+    const [relayDetails, setRelayDetails] = useState<DetailsInfo[]>()
     const [isLoading, setIsLoading] = useState(true)
 
     const classes = useStyle()
@@ -208,7 +211,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     <List>
                         {relayIdentifiers.map((relay) =>
                             (relay.id &&
-                                <Tooltip title={relay.fingerprint} arrow={true}>
+                                <Tooltip title={relay.fingerprint} arrow={true} classes={{tooltip: classes.noMaxWidth}}>
                                     <div>
                                         <ListItem button key={relay.id}
                                                   selected={+relay.id === nodeDetailsId}

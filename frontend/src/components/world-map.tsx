@@ -23,6 +23,7 @@ import {
 import {apiBaseUrl} from "../util/Config";
 import {GeoRelayView} from "../types/responses";
 import {RelayDetailsDialog} from "./relay-details-dialog";
+import {FamilyDetailsDialog} from "./family-details-dialog";
 
 /**
  * Styles according to Material UI doc for components used in WorldMap component
@@ -87,8 +88,10 @@ export const WorldMap: FunctionComponent<Props> = ({
                                                        setLoadingStateCallback,
                                                        setStatisticsCallback,
                                                        showSnackbarMessage,
-                                                       closeSnackbar
+                                                       closeSnackbar,
                                                    }) => {
+    const [showFamilyDetailsDialog, setShowFamilyDetailsDialog] = useState(false)
+    const [familiesForDetailsDialog, setFamiliesForDetailsDialog] = useState<number[]>([])
     const [showRelayDetailsDialog, setShowRelayDetailsDialog] = useState(false)
     const [relaysForDetailsDialog, setRelaysForDetailsDialog] = useState<GeoRelayView[]>([])
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
@@ -128,11 +131,21 @@ export const WorldMap: FunctionComponent<Props> = ({
      * @param event - The leaflet marker click event
      */
     const openRelayDetailsDialog = (event: LeafletMouseEvent) => {
-        console.log("Marker clicked")
         const relaysAtCoordinate = buildLatLonMap(applyFilter(relays, settings)).get(event.target.options.className)!!
         setRelaysForDetailsDialog(relaysAtCoordinate)
-        console.log(`${event.target.options.className} has ${relaysAtCoordinate.length}`)
         setShowRelayDetailsDialog(true)
+    }
+
+    //todo: doc
+    const handleFamilyMarkerClick = (event: LeafletMouseEvent) => {
+        const relaysAtCoordinate = buildLatLonMap(applyFilter(relays, settings)).get(event.target.options.className)!!
+        const familyMap = buildFamilyMap(relaysAtCoordinate)
+        let families: number[] = []
+        familyMap.forEach((family, familyID) => {
+            if( family.length > 1 ) families.push(familyID)
+        })
+        setFamiliesForDetailsDialog(families)
+        setShowFamilyDetailsDialog(true)
     }
 
     /**
@@ -194,7 +207,7 @@ export const WorldMap: FunctionComponent<Props> = ({
         if (settings.sortFamily) {
             if (settings.selectedFamily) familyLayer(familyMap, settings, setSettingsCallback).addTo(layerToReturn)
             //todo: change mouse event
-            else familyCordLayer(familyCoordinatesMap, settings, setSettingsCallback, (e) => null).addTo(layerToReturn)
+            else familyCordLayer(familyCoordinatesMap, settings, setSettingsCallback, handleFamilyMarkerClick).addTo(layerToReturn)
         }
 
         // Draw Heatmap, draws a heatmap with a point for each coordinate
@@ -276,6 +289,11 @@ export const WorldMap: FunctionComponent<Props> = ({
                 showDialog={showRelayDetailsDialog}
                 closeDialog={() => setShowRelayDetailsDialog(false)}
                 relays={relaysForDetailsDialog}
+            />
+            <FamilyDetailsDialog
+                showDialog={showFamilyDetailsDialog}
+                closeDialog={() => setShowFamilyDetailsDialog(false)}
+                families={familiesForDetailsDialog}
             />
             <TileLayer
                 subdomains="abcd"

@@ -108,6 +108,7 @@ function App() {
         }
         setShowSnackbar(false)
     }
+
     const showSnackbarMessage = (message: SnackbarMessage) => {
         setSnackbarMessage(message)
         setShowSnackbar(true)
