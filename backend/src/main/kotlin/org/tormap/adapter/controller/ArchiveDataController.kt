@@ -32,4 +32,7 @@ class ArchiveDataController(
 
     @PostMapping("/node/identifiers")
     fun getNodeIdentifiers(@RequestBody ids: List<Long>) = nodeDetailsRepositoryImpl.findNodeIdentifiers(ids)
+
+    @PostMapping("/node/family/identifiers")
+    fun getNodeFamilyIdentifiers(@RequestBody ids: List<Long>) = nodeDetailsRepositoryImpl.findFamilyIdentifiers(ids)
 }
