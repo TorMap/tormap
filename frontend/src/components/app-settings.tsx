@@ -2,7 +2,7 @@ import React, {FunctionComponent,} from "react";
 import {
     Accordion,
     AccordionDetails,
-    AccordionSummary,
+    AccordionSummary, Button,
     Checkbox,
     FormControlLabel,
     FormGroup, Link,
@@ -87,6 +87,11 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                                           label={"Group by family"}
                                           name={"sortFamily"}
                         />
+                        {//todo: family selection buttons
+                            /*(settings.sortFamily ? (
+                        <FormControlLabel control={<Button onClick={}/>} label={"select Family"}/>
+                        <FormControlLabel control={<Button onClick={}/>} label={"about Family"}/>
+                        ) : null)*/}
                         <FormControlLabel control={<Switch checked={settings.aggregateCoordinates}
                                                            onChange={onChange}/>}
                                           label={"Group by coordinates"}
