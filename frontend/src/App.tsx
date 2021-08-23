@@ -53,6 +53,13 @@ function App() {
         palette: {
             type: "dark",
         },
+        overrides: {
+            MuiTooltip: {
+                tooltip: {
+                    fontSize: ".85em",
+                }
+            }
+        }
     }))
 
     /**
