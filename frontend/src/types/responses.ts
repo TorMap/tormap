@@ -35,7 +35,7 @@ export interface NodeDetails {
     tunnelledDirServer: boolean
 }
 
-export interface NodeDetailsInfo {
+export interface DetailsInfo {
     name: string
     value: string | number | undefined
 }
