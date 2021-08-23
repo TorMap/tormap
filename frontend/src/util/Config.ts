@@ -33,6 +33,8 @@ export const defaultSettings: Settings = {
     selectedFamily: undefined,
 }
 
+// The time it takes before the tooltip is shown
+export const tooltipTimeDelay = 1000
 
 // Colors for node types
 export const Colors = {

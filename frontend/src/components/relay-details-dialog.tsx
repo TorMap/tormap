@@ -9,7 +9,7 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
-    makeStyles, TableCell, TableRow, Tooltip, Typography, withStyles
+    makeStyles, Table, TableCell, TableRow, Tooltip, Typography, withStyles
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import {apiBaseUrl} from "../util/Config";
@@ -29,6 +29,9 @@ const useStyle = makeStyles(() => ({
     },
     infoPadding: {
         paddingLeft: "270px",
+    },
+    valueName: {
+        minWidth: "150px",
     },
 }))
 
@@ -176,17 +179,20 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     <div>
                         {isLoading ?
                             <CircularProgress color={"inherit"}/> : nodeDetailsId ?
-                                relayDetails?.map((relayInfo) =>
-                                    relayInfo.value &&
-                                    <TableRow>
-                                        <TableCell scope="row">
-                                            <Typography>{relayInfo.name}</Typography>
-                                        </TableCell>
-                                        <TableCell scope="row">
-                                            <Typography>{relayInfo.value}</Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                ) : <p>We do not have any information about this relay for this date.</p>}
+                                <Table size={"small"}>
+                                    {relayDetails?.map((relayInfo) =>
+                                        relayInfo.value &&
+                                        <TableRow>
+                                            <TableCell scope="row" className={classes.valueName}>
+                                                <Typography>{relayInfo.name}</Typography>
+                                            </TableCell>
+                                            <TableCell scope="row">
+                                                <Typography>{relayInfo.value}</Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </Table>
+                                 : <p>We do not have any information about this relay for this date.</p>}
                     </div>
                 </DialogContent>
                 {relays.length > 1 && <Drawer
