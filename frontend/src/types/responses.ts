@@ -45,3 +45,10 @@ export interface NodeIdentifier {
     fingerprint: string
     nickname: string
 }
+
+export interface NodeFamilyIdentifier {
+    id: string
+    memberCount: number
+    fingerprints: string
+    nicknames: string
+}
