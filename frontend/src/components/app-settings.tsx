@@ -7,7 +7,7 @@ import {
     FormControlLabel,
     FormGroup,
     makeStyles,
-    Switch,
+    Switch, Tooltip,
     Typography,
 } from "@material-ui/core";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -56,13 +56,15 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                     <Typography>Heat-Map</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <FormGroup>
-                        <FormControlLabel control={<Switch checked={settings.heatMap}
-                                                           onChange={onChange}/>}
-                                          label={"Density of Relays"}
-                                          name={"heatMap"}
-                        />
-                    </FormGroup>
+                    <Tooltip title={"Heat-map on relay density"} placement={"left"} enterDelay={700}>
+                        <FormGroup>
+                            <FormControlLabel control={<Switch checked={settings.heatMap}
+                                                               onChange={onChange}/>}
+                                              label={"Density of Relays"}
+                                              name={"heatMap"}
+                            />
+                        </FormGroup>
+                    </Tooltip>
                 </AccordionDetails>
             </Accordion>
             <Accordion>
@@ -75,21 +77,27 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                 </AccordionSummary>
                 <AccordionDetails>
                     <FormGroup>
-                        <FormControlLabel control={<Switch checked={settings.sortCountry}
-                                                           onChange={onChange}/>}
-                                          label={"Group by country"}
-                                          name={"sortCountry"}
-                        />
-                        <FormControlLabel control={<Switch checked={settings.sortFamily}
-                                                           onChange={onChange}/>}
-                                          label={"Group by family"}
-                                          name={"sortFamily"}
-                        />
-                        <FormControlLabel control={<Switch checked={settings.aggregateCoordinates}
-                                                           onChange={onChange}/>}
-                                          label={"Group by coordinates"}
-                                          name={"aggregateCoordinates"}
-                        />
+                        <Tooltip title={"Group relays by country"} placement={"left"}>
+                            <FormControlLabel control={<Switch checked={settings.sortCountry}
+                                                               onChange={onChange}/>}
+                                              label={"Group by country"}
+                                              name={"sortCountry"}
+                            />
+                        </Tooltip>
+                        <Tooltip title={"Group relays by family"} placement={"left"}>
+                            <FormControlLabel control={<Switch checked={settings.sortFamily}
+                                                               onChange={onChange}/>}
+                                              label={"Group by family"}
+                                              name={"sortFamily"}
+                            />
+                        </Tooltip>
+                        <Tooltip title={"Group relays by coordinate"} placement={"left"}>
+                            <FormControlLabel control={<Switch checked={settings.aggregateCoordinates}
+                                                               onChange={onChange}/>}
+                                              label={"Group by coordinates"}
+                                              name={"aggregateCoordinates"}
+                            />
+                        </Tooltip>
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>
