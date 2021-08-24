@@ -106,3 +106,30 @@ The examples explained in the tutorials are available as source code in
 src/main/resources/examples/
 ```
 
+
+Development
+-----------
+
+To contribute to metrics-lib, check out the Java survival guide first:
+https://gitlab.torproject.org/tpo/network-health/team/-/wikis/metrics/Java
+
+Start by checking out the project from Git.
+The source code from gitlab.torproject.org and can be cloned via HTTPS or SSH
+depending on the access you have. If you are doing this manually, ensure you
+perform a recursive clone as metrics-base is included in the repository as a
+submodule.
+
+The tests, builds and other common development tasks are primarily
+performed through calling Ant targets. Ant is also used to fetch dependencies.
+
+Run:
+```
+$ ant resolve
+```
+
+To fetch needed dependencies. Make sure you have [ivy](https://ant.apache.org/ivy/)
+configured and installed under:
+```
+-/usr/share/ant/lib
+-/home/hiro/.ant/lib
+```

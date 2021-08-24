@@ -15,7 +15,7 @@ data class DatabaseConfig(
     /**
      * Relative resource file path to the ip2location DB file
      */
-    val ip2locationResourceFile: String,
+    val ip2locationDatabaseFile: String,
 
     /**
      * Whether caching should be enabled when using the IP lookup DBs

@@ -1,3 +1,23 @@
+# Changes in version 2.19.0 - 2021-08-17
+
+  * Medium changes
+    - Expose overload-general fields in ServerDescriptor.
+
+  * Minor changes
+    - Document ExtraInfoDescriptor classes
+    - Refactor javadoc to remove some style warnings
+
+
+# Changes in version 2.18.0 - 2021-07-30
+
+ * Medium changes
+   - Expose overload-ratelimits and overload-fd-exhausted
+     fields in ExtraInfoDescriptor.
+   - OnionPerfAnalysisConverter discards circuits marked as
+     filtered.
+   - Adds BridgestrapStats to parse metrics from bridgestrap.
+
+
 # Changes in version 2.17.0 - 2021-06-14
 
  * Medium changes
@@ -471,4 +491,3 @@
  * Major changes
    - This is the initial release after four years of development.
      Happy 4th birthday!
-

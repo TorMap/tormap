@@ -15,20 +15,13 @@ class IpLookupService(
     databaseConfig: DatabaseConfig,
 ) {
     private val logger = logger()
-    private var ip2locationDatabaseReader: IP2Location? = null
-
-    init {
-        val ip2locationDBResource =
-            javaClass.getResource(databaseConfig.ip2locationResourceFile) ?: throw GeoDatabaseNotFound(
-                databaseConfig.ip2locationResourceFile
-            )
-        ip2locationDatabaseReader = IP2Location().open(
-            ip2locationDBResource.file, databaseConfig.shouldCacheIPLookup
-        )
-    }
+    private var ip2locationDatabaseReader: IP2Location? = IP2Location().open(
+        databaseConfig.ip2locationDatabaseFile,
+        databaseConfig.shouldCacheIPLookup,
+    )
 
     /**
-     * Get the approximate [GeoLocation] of an [ipAddress]
+     * Get the approximate geo location of an [ipAddress]
      * by looking it up with two different file based DB providers (IP2Location & Maxmind)
      */
     fun getLocationForIpAddress(ipAddress: String): IPResult? = try {
@@ -43,6 +36,3 @@ class IpLookupService(
 }
 
 class GeoException : Exception("Latitude and longitude missing!")
-class GeoDatabaseNotFound(dbFile: String) : Exception(
-    "A configured DB file could not be found: $dbFile"
-)
