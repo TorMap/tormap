@@ -9,13 +9,13 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
-    makeStyles, TableCell, TableRow, Tooltip, Typography, withStyles
+    makeStyles, Table, TableCell, TableRow, Tooltip, Typography, withStyles
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import {apiBaseUrl} from "../util/Config";
 import {getIcon} from "../types/icons";
 import {findGeoRelayViewByID, getRelayType} from "../util/aggregate-relays";
-import {GeoRelayView, NodeDetails, NodeDetailsInfo, NodeIdentifier} from "../types/responses";
+import {GeoRelayView, NodeDetails, DetailsInfo, NodeIdentifier} from "../types/responses";
 
 
 const useStyle = makeStyles(() => ({
@@ -29,6 +29,12 @@ const useStyle = makeStyles(() => ({
     },
     infoPadding: {
         paddingLeft: "270px",
+    },
+    valueName: {
+        minWidth: "150px",
+    },
+    noMaxWidth: {
+        maxWidth: "none",
     },
 }))
 
@@ -51,7 +57,7 @@ interface Props {
     closeDialog: () => void
 
     /**
-     * Relays which the user ca view detailed information about
+     * Relays which the user can view detailed information about
      */
     relays: GeoRelayView[]
 }
@@ -86,7 +92,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
     const [relayIdentifiers, setRelayIdentifiers] = useState<NodeIdentifier[]>([])
     const [nodeDetailsId, setNodeDetailsId] = useState<number | undefined>()
     const [rawRelayDetails, setRawRelayDetails] = useState<NodeDetails>()
-    const [relayDetails, setRelayDetails] = useState<NodeDetailsInfo[]>()
+    const [relayDetails, setRelayDetails] = useState<DetailsInfo[]>()
     const [isLoading, setIsLoading] = useState(true)
 
     const classes = useStyle()
@@ -176,17 +182,20 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     <div>
                         {isLoading ?
                             <CircularProgress color={"inherit"}/> : nodeDetailsId ?
-                                relayDetails?.map((relayInfo) =>
-                                    relayInfo.value &&
-                                    <TableRow>
-                                        <TableCell scope="row">
-                                            <Typography>{relayInfo.name}</Typography>
-                                        </TableCell>
-                                        <TableCell scope="row">
-                                            <Typography>{relayInfo.value}</Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                ) : <p>We do not have any information about this relay for this date.</p>}
+                                <Table size={"small"}>
+                                    {relayDetails?.map((relayInfo) =>
+                                        relayInfo.value &&
+                                        <TableRow>
+                                            <TableCell scope="row" className={classes.valueName}>
+                                                <Typography>{relayInfo.name}</Typography>
+                                            </TableCell>
+                                            <TableCell scope="row">
+                                                <Typography>{relayInfo.value}</Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </Table>
+                                 : <p>We do not have any information about this relay for this date.</p>}
                     </div>
                 </DialogContent>
                 {relays.length > 1 && <Drawer
@@ -202,7 +211,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     <List>
                         {relayIdentifiers.map((relay) =>
                             (relay.id &&
-                                <Tooltip title={relay.fingerprint} arrow={true}>
+                                <Tooltip title={relay.fingerprint} arrow={true} classes={{tooltip: classes.noMaxWidth}}>
                                     <div>
                                         <ListItem button key={relay.id}
                                                   selected={+relay.id === nodeDetailsId}
