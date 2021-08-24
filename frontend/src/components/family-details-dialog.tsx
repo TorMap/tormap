@@ -19,6 +19,8 @@ import {DetailsInfo, NodeFamilyIdentifier} from "../types/responses";
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@material-ui/icons/Close";
 import {getIcon, Icon} from "../types/icons";
+import {apiBaseUrl} from "../util/Config";
+import {settings} from "cluster";
 
 const useStyle = makeStyles(() => ({
     closeButton: {
@@ -81,7 +83,22 @@ export const FamilyDetailsDialog: React.FunctionComponent<Props> = ({
         setFamilyDetails([])
         setFamilyDetailsId(undefined)
         //todo: fetch details
-    }, [])
+        fetch(`${apiBaseUrl}/archive/node/family/identifiers`, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            method: "post",
+            body: JSON.stringify(families),
+        })
+            .then(response => response.json())
+            .then(identifiers => {
+                setFamilyDetails(identifiers)
+                if (identifiers.length > 0) {
+                    setFamilyDetailsId(identifiers[0].id)
+                }
+            })
+            .then(() => setIsLoading(false))
+    }, [families])
 
     // get data for selected family
     useEffect(() => {
@@ -92,9 +109,9 @@ export const FamilyDetailsDialog: React.FunctionComponent<Props> = ({
             setDetailsInfo([
                 {name: "Family ID", value: family.id},
                 {name: "Family members", value: family.memberCount},
-                {name: "Autonomous System", value: family.autonmousSystems},
-                {name: "Fingerprints", value: family.fingerprints},
+                {name: "Autonomous System", value: family.autonomousSystems},
                 {name: "Nicknames", value: family.nicknames},
+                {name: "Fingerprints", value: family.fingerprints},
             ])
         }
     }, [familyDetailsId])
@@ -160,7 +177,7 @@ export const FamilyDetailsDialog: React.FunctionComponent<Props> = ({
                                                   selected={family.id === familyDetailsId}
                                                   onClick={() => setFamilyDetailsId(family.id)}>
                                             <ListItemIcon>{getIcon(Icon.FamilyCount)}</ListItemIcon>
-                                            <ListItemText primary={family.id + "" + family.memberCount}/>
+                                            <ListItemText primary={family.id + " (" + family.memberCount + ")"}/>
                                         </ListItem>
                                     </div>
                                 </Tooltip>)) : null}
