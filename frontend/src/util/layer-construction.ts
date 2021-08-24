@@ -174,6 +174,7 @@ export const familyCordLayer = (
                     radius: radius,
                     fillOpacity: fillOpacity,
                     weight: .5,
+                    className: location,
                 }
             )
                 .on("click", onMarkerClick)

@@ -58,6 +58,12 @@ function App() {
                 tooltip: {
                     fontSize: ".85em",
                 }
+            },
+            MuiLink:{
+                root: {
+                    color: "rgba(255, 255, 255, 0.7)",
+                    fontSize: ".9em"
+                }
             }
         }
     }))
@@ -102,6 +108,7 @@ function App() {
         }
         setShowSnackbar(false)
     }
+
     const showSnackbarMessage = (message: SnackbarMessage) => {
         setSnackbarMessage(message)
         setShowSnackbar(true)
