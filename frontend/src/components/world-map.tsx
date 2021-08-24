@@ -24,6 +24,8 @@ import {apiBaseUrl} from "../util/Config";
 import {GeoRelayView} from "../types/responses";
 import {RelayDetailsDialog} from "./relay-details-dialog";
 import {FamilyDetailsDialog} from "./family-details-dialog";
+import {FamilySelectionDialog} from "./family-selection-dialog";
+import {settings} from "cluster";
 
 /**
  * Styles according to Material UI doc for components used in WorldMap component
@@ -90,7 +92,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                                                        showSnackbarMessage,
                                                        closeSnackbar,
                                                    }) => {
-    const [showFamilyDetailsDialog, setShowFamilyDetailsDialog] = useState(false)
+    const [showFamilySelectionDialog, setShowFamilySelectionDialog] = useState(false)
     const [familiesForDetailsDialog, setFamiliesForDetailsDialog] = useState<number[]>([])
     const [showRelayDetailsDialog, setShowRelayDetailsDialog] = useState(false)
     const [relaysForDetailsDialog, setRelaysForDetailsDialog] = useState<GeoRelayView[]>([])
@@ -145,7 +147,7 @@ export const WorldMap: FunctionComponent<Props> = ({
             if( family.length > 1 ) families.push(familyID)
         })
         setFamiliesForDetailsDialog(families)
-        setShowFamilyDetailsDialog(true)
+        setShowFamilySelectionDialog(true)
     }
 
     /**
@@ -268,6 +270,11 @@ export const WorldMap: FunctionComponent<Props> = ({
         }
     }
 
+    function handleFamilySelection(familyID: number) {
+        setSettingsCallback({...settings, selectedFamily: familyID})
+        setShowFamilySelectionDialog(false)
+    }
+
     return (
         <MapContainer
             className={classes.leafletContainer}
@@ -290,10 +297,11 @@ export const WorldMap: FunctionComponent<Props> = ({
                 closeDialog={() => setShowRelayDetailsDialog(false)}
                 relays={relaysForDetailsDialog}
             />
-            <FamilyDetailsDialog
-                showDialog={showFamilyDetailsDialog}
-                closeDialog={() => setShowFamilyDetailsDialog(false)}
+            <FamilySelectionDialog
+                showDialog={showFamilySelectionDialog}
+                closeDialog={() => setShowFamilySelectionDialog(false)}
                 families={familiesForDetailsDialog}
+                familySelectionCallback={handleFamilySelection}
             />
             <TileLayer
                 subdomains="abcd"
