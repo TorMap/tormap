@@ -39,7 +39,7 @@ If you are not starting with a preprocessed TorMap DB you will need to import a 
 
 #### Manual import
 1. Create a free account at https://lite.ip2location.com/sign-up
-2. Download latest IPv4 CSV file from https://lite.ip2location.com/database-asn or use CSV located at `database/csv/IP2LOCATION-LITE-ASN/IP2LOCATION-LITE-ASN.CSV`
+2. Download latest IPv4 CSV file from https://lite.ip2location.com/database-asn or use CSV located at `database/ip2location/IP2LOCATION-LITE-ASN.CSV`
 4. Run following commands on the TorMap DB:
    1. `TRUNCATE TABLE AUTONOMOUS_SYSTEM;`
    2. `INSERT INTO AUTONOMOUS_SYSTEM SELECT * FROM CSVREAD('<absolute_path_to_csv_file>');` (replace <absolute_path_to_csv_file> with your file)
