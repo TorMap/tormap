@@ -12,7 +12,7 @@ plugins {
     id("org.jetbrains.dokka") version "1.5.0"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "2.5.2"
+    id("org.springframework.boot") version "2.5.3"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 
     // Database migration tool https://flywaydb.org/documentation/usage/gradle/
@@ -57,8 +57,14 @@ dependencies {
     // Run Flyway DB migration tool on startup https://flywaydb.org/
     implementation("org.flywaydb:flyway-core")
 
-    // Download and read Tor descriptors (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
-    implementation(fileTree("lib/metrics-lib-2.17.0"))
+    // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
+    implementation("commons-codec:commons-codec:1.10")
+    implementation("org.apache.commons:commons-compress:1.13")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.12.4")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.4")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.12.4")
+    implementation("org.slf4j:slf4j-api:1.7.22")
+    implementation("org.tukaani:xz:1.6")
 }
 
 // Annotation processing

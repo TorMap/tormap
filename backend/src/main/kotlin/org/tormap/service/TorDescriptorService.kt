@@ -12,7 +12,12 @@ import org.tormap.database.repository.GeoRelayRepositoryImpl
 import org.tormap.database.repository.NodeDetailsRepository
 import org.tormap.logger
 import org.tormap.millisSinceEpochToLocalDate
-import org.torproject.descriptor.*
+import org.torproject.descriptor.Descriptor
+import org.torproject.descriptor.DescriptorCollector
+import org.torproject.descriptor.RelayNetworkStatusConsensus
+import org.torproject.descriptor.ServerDescriptor
+import org.torproject.descriptor.impl.DescriptorReaderImpl
+import org.torproject.descriptor.index.DescriptorIndexCollector
 import java.io.File
 import java.math.RoundingMode
 import java.time.LocalDate
@@ -35,7 +40,7 @@ class TorDescriptorService(
     val nodeDetailsService: NodeDetailsService,
 ) {
     val logger = logger()
-    val descriptorCollector: DescriptorCollector = DescriptorSourceFactory.createDescriptorCollector()
+    val descriptorCollector: DescriptorCollector = DescriptorIndexCollector()
 
     /**
      * Collect and process descriptors from a specific the TorProject collector [apiPath]
@@ -126,7 +131,7 @@ class TorDescriptorService(
      * A reader can consume quite some memory. Try not to create multiple readers in a short time.
      */
     private fun readDescriptors(apiPath: String): MutableIterable<Descriptor> {
-        val descriptorReader = DescriptorSourceFactory.createDescriptorReader()
+        val descriptorReader = DescriptorReaderImpl()
         val parentDirectory = File(apiConfig.descriptorDownloadDirectory + apiPath)
         val excludedFiles = descriptorsFileRepository.findAll()
         descriptorReader.excludedFiles = excludedFiles.associate {

@@ -16,7 +16,8 @@ On `Linux` systems you can use the main install script `./install`, also describ
 ## CLI Commands
 
 - `./gradlew`: Installs dependencies
-- `./gradlew bootRun`:  creates build, runs it and listens on http://localhost:8080/
+- `./gradlew bootRun`: creates build, runs it and listens on http://localhost:8080/
+- `./gradlew bootJar`: creates a fat JAR which contains all dependencies and resources in `build/libs/`
 - `./gradlew build`: build the project
 - `./gradlew flywayMigrate`: Migrates the database
 - `./gradlew flywayClean`: Drops all objects in the configured schemas
@@ -50,4 +51,4 @@ TorMap uses a binary DB file from `IP2Location` to map IPv4 addresses of Tor nod
 #### Manual replacement
 1. Create a free account at https://lite.ip2location.com/sign-up
 2. Download latest IPv4 BIN file from https://lite.ip2location.com/database/db5-ip-country-region-city-latitude-longitude
-3. Replace old BIN file with new one in `src/main/resources/db/ip2location`
+3. Replace old BIN file with new one in `database/ip2location/database.BIN`
