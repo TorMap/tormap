@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "This will install curl, nodeJS and yarn"
+echo "This will install curl, NodeJS and yarn"
 echo " "
 
 # Check if java is installed
@@ -36,7 +36,7 @@ fi
 if [ "$(command -v node)" ]; then
   echo 'Node.js found on your system'
 else
-  # Install Node.JS (Ubuntu v13.3.0)
+  # Install Node.JS via curl (Ubuntu v13.3.0)
   curl https://nodejs.org/dist/v12.14.1/node-v12.14.1-linux-x64.tar.xz > node.tar.xz
   sudo mkdir -p /usr/local/lib/nodejs
   sudo tar -xJvf node.tar.xz -C /usr/local/lib/nodejs
@@ -50,10 +50,10 @@ fi
 
 if [ "$(command -v yarn)" ]; then
   echo 'yarn found on your system'
+elif [ "$(command -v npm)" ]; then
+  # Install yarn via npm
+  npm install --global yarn
 else
-  # Install yarn (Ubuntu v1.21.1)
+  # Install yarn via curl (Ubuntu v1.21.1)
   curl -o- -L https://yarnpkg.com/install.sh | bash
-
-  echo 'If you want to use yarn in your command line, please save the following line in your user profile:'
-  echo 'export PATH=/usr/local/lib/nodejs/node-v12.14.1-linux-x64/bin:$PATH'
 fi
