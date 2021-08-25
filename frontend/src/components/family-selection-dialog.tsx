@@ -92,6 +92,8 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
             .then(identifiers => {
                 setFamilyDetails(identifiers)
                 setIsLoading(false)
+                console.log(families)
+                console.log(identifiers)
             })
     }, [families])
 
