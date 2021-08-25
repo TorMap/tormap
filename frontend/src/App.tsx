@@ -1,8 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {WorldMap} from "./components/world-map";
-import {
-    createMuiTheme, CircularProgress, ThemeProvider, makeStyles, Snackbar
-} from "@material-ui/core";
+import {CircularProgress, createMuiTheme, Link, makeStyles, Snackbar, ThemeProvider} from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
 import {AppSettings} from "./components/app-settings";
@@ -34,9 +32,6 @@ const useStyle = makeStyles(() => ({
         right: "0px",
         bottom: "0px",
         fontSize: ".7rem",
-        "a, a:link, a:visited, a:hover, a:active, a:focus, &:focus, &:hover": {
-            color: "#3a68a4",
-        },
     },
 }))
 
@@ -152,9 +147,9 @@ function App() {
                 </MuiAlert>
             </Snackbar>
             <span className={classes.attribution}>
-                <a href="https://leafletjs.com">Leaflet</a> | &copy;&nbsp;
-                <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>&nbsp;
-                contributors &copy; <a href="https://carto.com/attributions">CARTO</a>
+                <Link href="https://leafletjs.com" target={"_blank"}>Leaflet</Link> | &copy;&nbsp;
+                <Link href="https://www.openstreetmap.org/copyright" target={"_blank"}>OpenStreetMap</Link>&nbsp;
+                contributors &copy; <Link href="https://carto.com/attributions" target={"_blank"}>CARTO</Link>
             </span>
             <AboutInformation/>
         </ThemeProvider>
