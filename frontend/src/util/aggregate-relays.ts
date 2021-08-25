@@ -113,6 +113,9 @@ export const buildFamilyMap = (relays: GeoRelayView[]): Map<number, GeoRelayView
             }
         }
     })
+    familyMap.forEach((family, key) => {
+        if (family.length < 2) familyMap.delete(key)
+    })
     return familyMap
 }
 

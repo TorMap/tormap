@@ -300,7 +300,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                                                    name={"mi" + RelayFlagName.BadExit}/>}
                                 label={RelayFlagName.BadExit}/>
                         </Tooltip>
-                        <Link href={"https://github.com/torproject/torspec/blob/main/dir-spec.txt"}>
+                        <Link href={"https://github.com/torproject/torspec/blob/main/dir-spec.txt"} target={"_blanc"}>
                             more information on flags and their meaning
                         </Link>
                     </FormGroup>
