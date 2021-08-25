@@ -3,7 +3,6 @@ package org.tormap.service
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.AsyncResult
 import org.springframework.stereotype.Service
-import org.tormap.calculateIPv4NumberRepresentation
 import org.tormap.config.ApiConfig
 import org.tormap.database.entity.*
 import org.tormap.database.repository.AutonomousSystemRepositoryImpl
@@ -205,20 +204,12 @@ class TorDescriptorService(
         val existingNode =
             nodeDetailsRepository.findByMonthAndFingerprint(descriptorMonth, descriptor.fingerprint)
         if (existingNode == null || existingNode.day < descriptorDay) {
-            val autonomousSystem = try {
-                autonomousSystemRepositoryImpl.findUsingIPv4(calculateIPv4NumberRepresentation(descriptor.address))
-            } catch (exception: Exception) {
-                logger().warn("Could not search autonomousSystem for address ${descriptor.address}")
-                null
-            }
             nodeDetailsRepository.save(
                 NodeDetails(
                     descriptor,
                     descriptorMonth,
                     descriptorDay,
                     existingNode?.id,
-                    autonomousSystem?.autonomousSystemName,
-                    autonomousSystem?.autonomousSystemNumber,
                 )
             )
         }
