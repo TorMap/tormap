@@ -11,6 +11,7 @@ import {MapStats} from "./components/map-stats";
 import {DateSlider} from "./components/date-slider";
 import MuiAlert from '@material-ui/lab/Alert';
 import {apiBaseUrl, defaultSettings} from "./util/Config";
+import {AboutInformation} from "./components/about-information";
 
 
 /**
@@ -155,6 +156,7 @@ function App() {
                 <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>&nbsp;
                 contributors &copy; <a href="https://carto.com/attributions">CARTO</a>
             </span>
+            <AboutInformation/>
         </ThemeProvider>
     )
 }
