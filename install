@@ -17,6 +17,7 @@ else
   echo "Java found on your system"
 fi
 
+# Check if Node.js and npm are installed
 if [ "$(command -v node)" ] && [ "$(command -v npm)" ]; then
   echo 'Node.js and npm found on your system'
 elif [ "$(command -v apt-get)" ]; then

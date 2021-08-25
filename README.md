@@ -13,8 +13,8 @@ data can instantly be fetched by the frontend to be display on the world map.
 Make sure you have at least 100 GB of free disk space, since the downloaded archive and local DB will take up a lot of
 space.
 
-On most `Unix` systems you can use the install script `./install`. It will try to use your package manager to
-install missing requirements. Depending on your shell you run the script with `./install` or `bash ./install`.
+On most `Unix` systems you can use the install script `./install`. It will try to use your package manager to install
+missing requirements. Depending on your shell you run the script with `./install` or `bash ./install`.
 
 If you use Windows or the `./install` script failed, please install these manually:
 
@@ -24,6 +24,20 @@ If you use Windows or the `./install` script failed, please install these manual
 - [yarn](https://yarnpkg.com/en/docs/install)
 - [serve](https://www.npmjs.com/package/serve)
 
+### Run development servers
+
+Make sure you have installed all requirements.
+
+- Linux: Type `./run` or `bash ./run`
+- Windows: `run.bat`
+
+If the script fails or you prefer to run the servers manually:
+1. Go into `backend` directory and run commands
+   - `./gradlew` or on Windows `gradlew.bat`
+   - `./gradlew bootRun` or on Windows `gradlew.bat bootRun`
+2. Go into `frontend` directory and run commands
+    - `yarn`
+    - `yarn start`
 ### Backend
 
 The backend uses a [Spring Boot](https://spring.io/projects/spring-boot) standalone webserver and is written
@@ -31,7 +45,7 @@ in [Kotlin](https://kotlinlang.org/).
 
 #### CLI commands
 
-Make sure you are in the `backend` directory. On `Windows` use `./gradlew.bat`
+Make sure you are in the `backend` directory. On `Windows` use `gradlew.bat`
 instead of `./gradlew` for all following commands.
 
 - `./gradlew`: installs required backend packages
@@ -94,11 +108,6 @@ the [Create React App documentation](https://facebook.github.io/create-react-app
 - `yarn`: installs required frontend packages
 - `yarn start`: creates build, runs it and listens on http://localhost:3000 (page reloads if you save frontend changes)
 - `yarn build`: creates production ready build in `build` folder
-
-### Run development server
-
-- Linux: type `./run`
-- Windows: `run.bat`
 
 ## Build project
 

@@ -3,11 +3,42 @@ echo Please wait while backend and frontend servers are starting
 
 cd ./scripts || exit
 
+# Check if a new terminal can be opened
 if [ "$(command -v gnome-terminal)" ]; then
   gnome-terminal -- ./frontend.sh
   ./backend.sh
 elif [ "$(command -v xterm)" ]; then
   xterm -e ./frontend.sh
+  ./backend.sh
+elif [ "$(command -v konsole)" ]; then
+  konsole -e ./frontend.sh
+  ./backend.sh
+elif [ "$(command -v terminator)" ]; then
+  terminator -e ./frontend.sh
+  ./backend.sh
+elif [ "$(command -v xfce4-terminal)" ]; then
+  xfce4-terminal -e ./frontend.sh
+  ./backend.sh
+elif [ "$(command -v tilda)" ]; then
+  tilda -e ./frontend.sh
+  ./backend.sh
+elif [ "$(command -v guake)" ]; then
+  guake -e ./frontend.sh
+  ./backend.sh
+elif [ "$(command -v yakuake)" ]; then
+  yakuake -e ./frontend.sh
+  ./backend.sh
+elif [ "$(command -v alacritty)" ]; then
+  alacritty -e ./frontend.sh
+  ./backend.sh
+elif [ "$(command -v urxvt)" ]; then
+  urxvt -e ./frontend.sh
+  ./backend.sh
+elif [ "$(command -v kitty)" ]; then
+  kitty -e ./frontend.sh
+  ./backend.sh
+elif [ "$(command -v st)" ]; then
+  st -e ./frontend.sh
   ./backend.sh
 else
   ./frontend.sh &
