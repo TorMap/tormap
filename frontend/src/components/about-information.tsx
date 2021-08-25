@@ -1,12 +1,18 @@
 import React, {useState} from "react";
 import {
-    Box, Button, Card, CardContent, CardHeader,
+    Button,
+    Card,
+    CardHeader,
     Dialog,
     DialogContent,
     DialogTitle,
     Grid,
     IconButton,
-    Link, List, ListItem, ListItemIcon, ListItemText,
+    Link,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
     makeStyles,
     Paper,
     Typography
@@ -46,9 +52,7 @@ const useStyle = makeStyles(() => ({
     }
 }))
 
-export const AboutInformation: React.FunctionComponent = (
-
-) => {
+export const AboutInformation: React.FunctionComponent = () => {
     const [showDialog, setShowDialog] = useState(false)
     const classes = useStyle()
 
@@ -110,26 +114,31 @@ export const AboutInformation: React.FunctionComponent = (
                     dividers
                 >
                     <Typography variant={"body1"} gutterBottom>
-                        TorMap is the result of a P4-Projekt for Students at the Technische Universität Darmstadt as part of the PANDA-Projekt.
-                    </Typography>
-                    <Typography variant={"body1"} gutterBottom>
-                        Goal was to implement an interactiv view on the historic data of the Tor-Network to get insights on the size and distribution of the network itself as well as more information about relays that make up the network as a whole over time.
-                    </Typography>
-                    <Typography variant={"body2"} gutterBottom>
-                        PANDA is a joint project by the Frauenhofer SIT and the TU Darmstadt which is funded/grant-aided by the BMBF.
-                        The interdisciplinary team behind the project is researching the Darknet with a view on technical-, social- and philosophical sience.
-                        Goal of PANDA is to contribute on improving the fight against crime in the Darknet within the framework of civil security research, but without affecting its legitimate uses or even anonymous communication as a whole.
+                        The Tor network currently consists of thousands of nodes which route anonymous internet traffic
+                        daily. The nonprofit organization <Link href={"https://www.torproject.org/"}
+                                                                target={"_blank"}>TorProject</Link> already provides an <Link href={"https://metrics.torproject.org/collector.html"}
+                              target={"_blank"}>archive</Link> with raw historic data about the network. This raw data is difficult to analyze and
+                        grasp.<br/>
+                        With our app TorMap we want to visualize, group and filter public Tor relays on a world
+                        map. The state of the network can be viewed for any day between October 2007 and today. Getting
+                        details like IP address, contact or Autonomous System info of a relay is as easy as selecting it
+                        on the map.<br/>
+                        The project was developed by two students for their practical P4-Projekt at the Technische
+                        Universität Darmstadt as part of the PANDA-Projekt.<br/>
+                        PANDA is a joint project by the Frauenhofer SIT and the TU Darmstadt which is funded/grant-aided
+                        by the BMBF.
+                        The interdisciplinary team behind the project is researching the Darknet with a view on
+                        technical-, social- and philosophical since.
+                        The goal of PANDA is to contribute on improving the fight against crime in the Darknet within the
+                        framework of civil security research, but without affecting its legitimate uses or even
+                        anonymous communication as a whole.
                     </Typography>
                 </DialogContent>
                 <DialogContent
                     dividers
                 >
-                    <Typography variant={"body2"} gutterBottom>
-                        The implementation of TorMap was done by the students Julius Henke and Tim Kilb from TU-Darmstadt with Florian Platzer as contact person from the PANDA-Project-Team.
-                    </Typography>
-
                     <Grid container className={classes.paddingTop}>
-                        <Grid item xs={2}></Grid>
+                        <Grid item xs={2}/>
                         <Grid item xs={3}>
                             <Card elevation={20}>
                                 <CardHeader
@@ -144,7 +153,8 @@ export const AboutInformation: React.FunctionComponent = (
                                             Website
                                         </ListItemText>
                                     </ListItem>
-                                    <ListItem button component="a" href="https://github.com/JuliusHenke" target={"_blank"}>
+                                    <ListItem button component="a" href="https://github.com/JuliusHenke"
+                                              target={"_blank"}>
                                         <ListItemIcon>
                                             <GitHubIcon/>
                                         </ListItemIcon>
@@ -155,7 +165,7 @@ export const AboutInformation: React.FunctionComponent = (
                                 </List>
                             </Card>
                         </Grid>
-                        <Grid item xs={2}></Grid>
+                        <Grid item xs={2}/>
                         <Grid item xs={3}>
                             <Card elevation={20}>
                                 <CardHeader
@@ -181,14 +191,17 @@ export const AboutInformation: React.FunctionComponent = (
                                 </List>
                             </Card>
                         </Grid>
-                        <Grid item xs={2}></Grid>
+                        <Grid item xs={2}/>
                     </Grid>
 
                 </DialogContent>
                 <DialogContent
                     dividers
                 >
-                    <Typography variant={"body2"}>This site includes IP2Location LITE data available from <Link href={"http://www.ip2location.com/"} target={"_blank"}>http://www.ip2location.com/</Link> as well as GeoJSON data from  <Link href={"https://geojson-maps.ash.ms/"} target={"_blank"}>https://geojson-maps.ash.ms/</Link>.</Typography>
+                    <Typography variant={"body2"}>This site includes IP2Location LITE data available from <Link
+                        href={"http://www.ip2location.com/"} target={"_blank"}>http://www.ip2location.com/</Link> as
+                        well as GeoJSON data from <Link href={"https://geojson-maps.ash.ms/"}
+                                                        target={"_blank"}>https://geojson-maps.ash.ms/</Link>.</Typography>
                 </DialogContent>
             </Dialog>
         </div>
