@@ -110,10 +110,10 @@ export const AboutInformation: React.FunctionComponent = (
                     dividers
                 >
                     <Typography variant={"body1"} gutterBottom>
-                        The TorMap was the result of a P4-Projekt for Students at the Technische Universität Darmstadt as part of the PANDA-Projekt.
+                        TorMap is the result of a P4-Projekt for Students at the Technische Universität Darmstadt as part of the PANDA-Projekt.
                     </Typography>
                     <Typography variant={"body1"} gutterBottom>
-                        Goal was to implement an interactiv view on the historic data of the Tor-Network to get insights on the size and distribution of the network itself as well as to more information about relays that make up the network as a whole.
+                        Goal was to implement an interactiv view on the historic data of the Tor-Network to get insights on the size and distribution of the network itself as well as more information about relays that make up the network as a whole over time.
                     </Typography>
                     <Typography variant={"body2"} gutterBottom>
                         PANDA is a joint project by the Frauenhofer SIT and the TU Darmstadt which is funded/grant-aided by the BMBF.
@@ -184,6 +184,11 @@ export const AboutInformation: React.FunctionComponent = (
                         <Grid item xs={2}></Grid>
                     </Grid>
 
+                </DialogContent>
+                <DialogContent
+                    dividers
+                >
+                    <Typography variant={"body2"}>This site includes IP2Location LITE data available from <Link href={"http://www.ip2location.com/"} target={"_blank"}>http://www.ip2location.com/</Link> as well as GeoJSON data from  <Link href={"https://geojson-maps.ash.ms/"} target={"_blank"}>https://geojson-maps.ash.ms/</Link>.</Typography>
                 </DialogContent>
             </Dialog>
         </div>
