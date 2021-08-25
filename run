@@ -2,5 +2,14 @@
 echo Please wait while backend and frontend servers are starting
 
 cd ./scripts || exit
-./backend.sh &
-./frontend.sh
+
+if [ "$(command -v gnome-terminal)" ]; then
+  gnome-terminal -- ./frontend.sh
+  ./backend.sh
+elif [ "$(command -v xterm)" ]; then
+  xterm -e ./frontend.sh
+  ./backend.sh
+else
+  ./frontend.sh &
+  ./backend.sh
+fi

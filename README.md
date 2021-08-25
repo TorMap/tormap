@@ -10,18 +10,19 @@ data can instantly be fetched by the frontend to be display on the world map.
 
 ### Requirements
 
-Make sure you have at least 100 GB of free disk space, since the downloaded archive and local DB take up quite a lot of
+Make sure you have at least 100 GB of free disk space, since the downloaded archive and local DB will take up a lot of
 space.
 
-On`Linux` systems you can use the install script `./install`. Supported OS are `Debian/Ubuntu`, `RHEL/CentOS/Fedora`
-, `OpenSUSE`, `ArchLinux`.
+On most `Unix` systems you can use the install script `./install`. It will try to use your package manager to
+install missing requirements. Depending on your shell you run the script with `./install` or `bash ./install`.
 
-Otherwise install these manually:
+If you use Windows or the `./install` script failed, please install these manually:
 
 - [Oracle JDK](https://www.oracle.com/java/technologies/javase-downloads.html)
   / [OpenJDK](https://openjdk.java.net/install/index.html) >= Java version 11
 - [NodeJS](https://nodejs.org/en/)
 - [yarn](https://yarnpkg.com/en/docs/install)
+- [serve](https://www.npmjs.com/package/serve)
 
 ### Backend
 
