@@ -32,12 +32,14 @@ Make sure you have installed all requirements.
 - Windows: `run.bat`
 
 If the script fails or you prefer to run the servers manually:
+
 1. Go into `backend` directory and run commands
-   - `./gradlew` or on Windows `gradlew.bat`
-   - `./gradlew bootRun` or on Windows `gradlew.bat bootRun`
+    - `./gradlew` or on Windows `gradlew.bat`
+    - `./gradlew bootRun` or on Windows `gradlew.bat bootRun`
 2. Go into `frontend` directory and run commands
     - `yarn`
     - `yarn start`
+
 ### Backend
 
 The backend uses a [Spring Boot](https://spring.io/projects/spring-boot) standalone webserver and is written
@@ -128,19 +130,19 @@ First make sure you have installed all requirements for development.
 
 ## Host project
 
-First make sure you have installed all requirements for development.
+Make sure you have installed all requirements for development. To be able to host, you should have a copy of a release
+or just successfully created your own project build.
 
 ### Backend
 
-1. Go to directory where the build `.jar` file is located
+1. Go into the directory where the `.jar` file is located
 2. Run command `java -jar <backend jar file>`
 3. Backend should be available at http://localhost:8080
 
 ### Frontend
 
-1. Install package serve: `npm install --global serve` or `yarn global add serve`
-2. Go to directory where `index.html` is located
-3. Run command: `serve -l 3000`
-4. Frontend should be available at http://localhost:3000
+1. Go into the directory where `index.html` is located
+2. Run command: `serve -l 3000`
+3. Frontend should be available at http://localhost:3000
 
 
