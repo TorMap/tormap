@@ -128,7 +128,7 @@ First make sure you have installed all requirements for development.
 
 ### Frontend
 
-1. Install package serve: `npm -g install serve` or `yarn global add serve`
+1. Install package serve: `npm install --global serve` or `yarn global add serve`
 2. Go to directory where `index.html` is located
 3. Run command: `serve -l 3000`
 4. Frontend should be available at http://localhost:3000
