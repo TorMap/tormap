@@ -1,12 +1,17 @@
 # TorMap
 
-This project visualizes current and past Tor relays on a world map. The backend regularly downloads descriptors from [TorProject Archive](https://metrics.torproject.org/collector/archive/) and saves a processed version in a local database. Currently the required archive part makes up 33 GB for the available years (2007 - 2021). Processing of a descriptor type only starts after all descriptors of the same type have been downloaded and saved to disk. Processed data can instantly be fetched by the frontend to be display on the world map.
+This project visualizes current and past Tor relays on a world map. The backend regularly downloads descriptors
+from [TorProject Archive](https://metrics.torproject.org/collector/archive/) and saves a processed version in a local
+database. Currently the required archive part makes up 33 GB for the available years (2007 - 2021). Processing of a
+descriptor type only starts after all descriptors of the same type have been downloaded and saved to disk. Processed
+data can instantly be fetched by the frontend to be display on the world map.
 
 ## Development
 
 ### Requirements
 
-Make sure you have at least 100 GB of free disk space, since the downloaded archive and local DB take up quite a lot of space.
+Make sure you have at least 100 GB of free disk space, since the downloaded archive and local DB take up quite a lot of
+space.
 
 On`Linux` systems you can use the install script `./install`. Supported OS are `Debian/Ubuntu`, `RHEL/CentOS/Fedora`
 , `OpenSUSE`, `ArchLinux`.
@@ -19,6 +24,9 @@ Otherwise install these manually:
 - [yarn](https://yarnpkg.com/en/docs/install)
 
 ### Backend
+
+The backend uses a [Spring Boot](https://spring.io/projects/spring-boot) standalone webserver and is written
+in [Kotlin](https://kotlinlang.org/).
 
 #### CLI commands
 
@@ -52,8 +60,8 @@ with `./backend/...` or an absolute path to ensure the correct working directory
 
 #### IP to autonomous systems
 
-If you are not starting with a preprocessed TorMap DB you will need to import a CSV file containing autonomous systems into the local H2 database. It is advised to
- reimport a new CSV file every few months, to keep the IP ranges up to date.
+If you are not starting with a preprocessed TorMap DB you will need to import a CSV file containing autonomous systems
+into the local H2 database. It is advised to reimport a new CSV file every few months, to keep the IP ranges up to date.
 
 1. Create a free account at https://lite.ip2location.com/sign-up
 2. Download latest IPv4 CSV file from https://lite.ip2location.com/database-asn or use the CSV file located
@@ -73,11 +81,15 @@ replace the binary file every few months, to keep the IP ranges up to date.
 3. Replace old BIN file with new one in `backend/database/ip2location/IP2LOCATION-LITE-DB5.BIN`
 
 ### Frontend
-The frontend is a [ReactJS](https://reactjs.org/) web app together with [TypeScript](https://www.typescriptlang.org/) and [Material-UI](https://material-ui.com/).
+
+The frontend uses a [ReactJS](https://reactjs.org/) web app together with [TypeScript](https://www.typescriptlang.org/)
+and [Material-UI](https://material-ui.com/).
 
 #### CLI commands
 
-Make sure you are in the `frontend` directory. You can learn more about the following commands in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Make sure you are in the `frontend` directory. You can learn more about the following commands in
+the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
 - `yarn`: installs required frontend packages
 - `yarn start`: creates build, runs it and listens on http://localhost:3000 (page reloads if you save frontend changes)
 - `yarn build`: creates production ready build in `build` folder
