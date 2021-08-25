@@ -26,7 +26,7 @@ export const aggregatedCoordinatesLayer = (
         circleMarker(
             [+coordinates[0], +coordinates[1]],
             {
-                radius: 10 + relays.length,
+                radius: relays.length,
                 color: "#ffffff",
                 weight: .3,
                 className: key
