@@ -14,10 +14,11 @@ interface NodeDetailsRepositoryImpl : NodeDetailsRepository {
     )
     fun findNodeIdentifiers(ids: List<Long>): List<NodeIdentifiers>
 
-    @Query("SELECT new org.tormap.adapter.controller.view.NodeFamilyIdentifiers(familyId, count(id), function('LISTAGG', fingerprint, ', '), function('LISTAGG', nickname, ', '), function('LISTAGG', autonomousSystemName, ', ')) " +
-            "FROM NodeDetails " +
-            "WHERE familyId in :ids " +
-            "GROUP BY familyId"
+    @Query("SELECT new org.tormap.adapter.controller.view.NodeFamilyIdentifiers(n.familyId, count(n.id), function('LISTAGG', n.fingerprint, ', '), function('LISTAGG', n.nickname, ', '), function('LISTAGG', a.autonomousSystemName, ', ')) " +
+            "FROM NodeDetails n " +
+            "LEFT JOIN AutonomousSystem a ON a.ipRange.ipFrom <= n.addressNumber and a.ipRange.ipTo >= n.addressNumber " +
+            "WHERE n.familyId in :ids " +
+            "GROUP BY n.familyId"
     )
     fun findFamilyIdentifiers(ids: List<Long>): List<NodeFamilyIdentifiers>
 }
