@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 pkill -f 'gradle'
 
 cd ../backend || exit

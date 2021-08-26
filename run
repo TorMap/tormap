@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 echo Please wait while backend and frontend servers are starting
 
 cd ./scripts || exit
