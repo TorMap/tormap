@@ -131,7 +131,8 @@ First make sure you have installed all requirements for development.
 ## Host project
 
 Make sure you have installed all requirements for development. To be able to host, you should have a copy of a release
-or just successfully created your own project build.
+or just successfully created your own project build. For now prebuild releases are available
+at https://lightningpuzzle.com/tormap/.
 
 ### Backend
 
