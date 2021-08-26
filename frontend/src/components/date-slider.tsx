@@ -50,13 +50,13 @@ interface Props {
      * @param n the nth entry in availableDays array
      */
     setValue: (n: number) => void
-
-    /**
-     * The currently applied app settings
-     */
-    settings: Settings
 }
-//todo: doc
+
+/**
+ * The Date selection
+ * @param availableDays - An Array of Strings that represent the available days
+ * @param setValue - The change handler for the new date
+ */
 export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue}) => {
 
     const [sliderValue, setSliderValue] = useState<number>(-1)

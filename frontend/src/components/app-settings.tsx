@@ -42,7 +42,12 @@ interface Props {
     onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-//todo:
+/**
+ * The settings component.
+ * @param settings - the App settings
+ * @param onChange - changeHandler for settings
+ * @constructor
+ */
 export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
     const classes = useStyle()
 
