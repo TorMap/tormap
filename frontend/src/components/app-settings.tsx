@@ -2,12 +2,14 @@ import React, {FunctionComponent,} from "react";
 import {
     Accordion,
     AccordionDetails,
-    AccordionSummary, Button,
+    AccordionSummary,
     Checkbox,
     FormControlLabel,
-    FormGroup, Link,
+    FormGroup,
+    Link,
     makeStyles,
-    Switch, Tooltip,
+    Switch,
+    Tooltip,
     Typography,
 } from "@material-ui/core";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -305,8 +307,8 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                                                    name={"mi" + RelayFlagName.BadExit}/>}
                                 label={RelayFlagName.BadExit}/>
                         </Tooltip>
-                        <Link href={"https://github.com/torproject/torspec/blob/main/dir-spec.txt"} target={"_blanc"}>
-                            more information on flags and their meaning
+                        <Link href={"https://github.com/torproject/torspec/blob/main/dir-spec.txt"} target={"_blank"}>
+                            More information about flags
                         </Link>
                     </FormGroup>
                 </AccordionDetails>
