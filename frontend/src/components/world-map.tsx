@@ -80,7 +80,11 @@ interface Props {
     closeSnackbar: () => void
 }
 
-// Variable needs to be outside component to keep track of the last selected date
+/*
+Variable needs to be outside component to keep track of the last selected date
+This prevents the case that multiple dates get loaded and the last recived date is displayed.
+Instead only the last requested date will be drawen.
+ */
 let latestRequestTimestamp: number | undefined = undefined
 
 export const WorldMap: FunctionComponent<Props> = ({
@@ -102,7 +106,9 @@ export const WorldMap: FunctionComponent<Props> = ({
     const [relays, setRelays] = useState<GeoRelayView[]>([])
     const classes = useStyle()
 
-    // Update listener, fires whenever a new dateToDisplay was selected, only the last selected date gets displayed
+    /**
+     * Querry all Relays from the selected date whenever a new date is selected
+     */
     useEffect(() => {
         if (dayToDisplay) {
             console.log("fetching")
@@ -122,7 +128,9 @@ export const WorldMap: FunctionComponent<Props> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dayToDisplay])
 
-    // Update listener, fires whenever settings get changed or an new relays got downloaded
+    /**
+     * Update listener, fires whenever settings get changed or an new relays got downloaded
+     */
     useEffect(() => {
         closeSnackbar()
         if (dayToDisplay) drawLayerGroup(relaysToLayerGroup(relays))
@@ -138,7 +146,10 @@ export const WorldMap: FunctionComponent<Props> = ({
         setShowRelayDetailsDialog(true)
     }
 
-    //todo: doc
+    /**
+     * After a marker was clicked on the map the corresponding families are passed to the family selection dialog
+     * @param event - The leaflet marker click event
+     */
     const handleFamilyMarkerClick = (event: LeafletMouseEvent) => {
         const relaysAtCoordinate = buildLatLonMap(applyFilter(relays, settings)).get(event.target.options.className)!!
         const familyMap = buildFamilyMap(relaysAtCoordinate)
@@ -181,7 +192,7 @@ export const WorldMap: FunctionComponent<Props> = ({
             severity: "warning"
         })
 
-        //todo: doc
+        // Concatenated Map for Families at Coordinates
         const familyCoordinatesMap: Map<string, Map<number, GeoRelayView[]>> = buildFamilyCoordinatesMap(latLonMap)
 
         // Map for country's, used to get an Array of GeoRelayView with relays in the same country
@@ -208,11 +219,11 @@ export const WorldMap: FunctionComponent<Props> = ({
         // Draw familyCord marker's, used to draw all markers to the map with colors according to their family
         if (settings.sortFamily) {
             if (settings.selectedFamily) familyLayer(familyMap, settings, setSettingsCallback).addTo(layerToReturn)
-            //todo: change mouse event
             else familyCordLayer(familyCoordinatesMap, settings, setSettingsCallback, handleFamilyMarkerClick).addTo(layerToReturn)
         }
 
         // Draw Heatmap, draws a heatmap with a point for each coordinate
+        // As this Layer is part of the component state and has to be applied to the map object directly, it cant be moved to util
         // https://github.com/Leaflet/Leaflet.heat
         if (settings.heatMap) {
             leafletMap?.removeLayer(heatLayer)
@@ -270,6 +281,10 @@ export const WorldMap: FunctionComponent<Props> = ({
         }
     }
 
+    /**
+     * Handler for family selection
+     * @param familyID selected familyID
+     */
     function handleFamilySelection(familyID: number) {
         setSettingsCallback({...settings, selectedFamily: familyID})
         setShowFamilySelectionDialog(false)

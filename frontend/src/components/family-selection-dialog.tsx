@@ -59,13 +59,20 @@ interface Props {
     closeDialog: () => void
 
     /**
-     * Families which the user ca view detailed information about
+     * Families which the user can view detailed information about
      */
     families: number[]
 
     familySelectionCallback: (f: number) => void
 }
 
+/**
+ * A Dialog to select a Family from multiple Families
+ * @param showDialog
+ * @param closeDialog
+ * @param families - The familyIDs available
+ * @param familySelectionCallback - the CallbackFunktion for selecting a Family
+ */
 export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                                         showDialog,
                                                                         closeDialog,
@@ -77,6 +84,9 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
     const [familyDetails, setFamilyDetails] = useState<NodeFamilyIdentifier[]>()
     const classes = useStyle()
 
+    /**
+     * Querry more information about the Families specifyed in "familes" parameter
+     */
     useEffect(() => {
         setIsLoading(true)
         setFamilyDetails([])
@@ -97,6 +107,12 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
             })
     }, [families])
 
+    //todo: duplicat, auslagern
+    /**
+     * Querryes the FamilyIdentifyer object from an array of FamilyIdentifyers with the matching familyID
+     * @param familyDetails - the FamilyIdentifier array to queery from
+     * @param familyDetailsId - The familyID to find
+     */
     function getFamily(familyDetails: NodeFamilyIdentifier[], familyDetailsId: string): NodeFamilyIdentifier | undefined {
         return familyDetails.find((family) => family.id === familyDetailsId)
     }
