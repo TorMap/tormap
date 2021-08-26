@@ -8,11 +8,6 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties("api")
 data class ApiConfig(
     /**
-     * The base url to Onionoo which is an API by the TorProject
-     */
-    val onionooBaseURL: String,
-
-    /**
      * The base url to download descriptors from
      */
     val descriptorBaseURL: String,

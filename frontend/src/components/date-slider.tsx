@@ -5,7 +5,7 @@ import Moment from "react-moment";
 import {KeyboardDatePicker, MuiPickersUtilsProvider} from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 import moment from "moment";
-import {Mark, Settings} from "../types/variousTypes";
+import {Mark} from "../types/variousTypes";
 
 /**
  * Styles according to Material UI doc for components used in DateSlider component

@@ -7,25 +7,24 @@ import "leaflet.heat"
 import {makeStyles} from "@material-ui/core";
 import {
     applyFilter,
-    calculateStatistics,
-    getCountryMap,
     buildFamilyCoordinatesMap,
     buildFamilyMap,
-    buildLatLonMap
+    buildLatLonMap,
+    calculateStatistics,
+    getCountryMap
 } from "../util/aggregate-relays";
 import {
     aggregatedCoordinatesLayer,
     countryLayer,
     countryMarkerLayer,
     defaultMarkerLayer,
-    familyCordLayer, familyLayer
+    familyCordLayer,
+    familyLayer
 } from "../util/layer-construction";
 import {apiBaseUrl} from "../util/Config";
 import {GeoRelayView} from "../types/responses";
 import {RelayDetailsDialog} from "./relay-details-dialog";
-import {FamilyDetailsDialog} from "./family-details-dialog";
 import {FamilySelectionDialog} from "./family-selection-dialog";
-import {settings} from "cluster";
 
 /**
  * Styles according to Material UI doc for components used in WorldMap component
@@ -82,8 +81,8 @@ interface Props {
 
 /*
 Variable needs to be outside component to keep track of the last selected date
-This prevents the case that multiple dates get loaded and the last recived date is displayed.
-Instead only the last requested date will be drawen.
+This prevents the case that multiple dates get loaded and the last received date is displayed.
+Instead only the last requested date will be drawn.
  */
 let latestRequestTimestamp: number | undefined = undefined
 
@@ -107,7 +106,7 @@ export const WorldMap: FunctionComponent<Props> = ({
     const classes = useStyle()
 
     /**
-     * Querry all Relays from the selected date whenever a new date is selected
+     * Query all Relays from the selected date whenever a new date is selected
      */
     useEffect(() => {
         if (dayToDisplay) {
@@ -319,7 +318,6 @@ export const WorldMap: FunctionComponent<Props> = ({
                 familySelectionCallback={handleFamilySelection}
             />
             <TileLayer
-                subdomains="abcd"
                 maxZoom={19}
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                 noWrap={true}

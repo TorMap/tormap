@@ -1,4 +1,4 @@
-package org.tormap.database.repository;
+package org.tormap.database.repository
 
 import org.springframework.data.jpa.repository.Query
 import org.tormap.database.entity.AutonomousSystem
