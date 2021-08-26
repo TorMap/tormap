@@ -70,10 +70,13 @@ viewed in raw JSON under http://localhost:8080/documentation/json.
 #### Database
 
 TorMap uses an embedded H2 database which saves the whole state in a single DB file located
-at `backend/database/tormap.mv.db`. To manually connect to the DB you either can add the datasource in your IDE or
-open http://localhost:8080/h2 while the backend is running. Make sure to configure the connection the same way
-your `application.properties` are set. In an IDE it might be necessary to configure the datasource URL
-with `./backend/...` or an absolute path to ensure the correct working directory is used.
+at `backend/database/tormap.mv.db`. If you want to use a DB already containing a few processed months, you can download
+one from https://lightningpuzzle.com/tormap/ and put it here `backend/database/tormap.mv.db`.
+
+To manually connect to the DB you either can add the datasource in your IDE or open http://localhost:8080/h2 while the
+backend is running. Make sure to configure the connection the same way your `application.properties` are set. In an IDE
+it might be necessary to configure the datasource URL with an absolute path to ensure the correct working directory is
+used.
 
 #### IP to autonomous systems
 
@@ -131,8 +134,8 @@ First make sure you have installed all requirements for development.
 ## Host project
 
 Make sure you have installed all requirements for development. To be able to host, you should have a copy of a release
-or just successfully created your own project build. For now prebuild releases are available
-at https://lightningpuzzle.com/tormap/.
+or just successfully created your own project build. For now prebuild releases and DBs containing a few preprocessed
+months are available at https://lightningpuzzle.com/tormap/.
 
 ### Backend
 
