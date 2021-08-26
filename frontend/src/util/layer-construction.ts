@@ -1,11 +1,10 @@
-
-import L, {circleMarker, GeoJSON, latLng, Layer, LayerGroup, LeafletMouseEvent, PathOptions} from "leaflet";
+import L, {circleMarker, GeoJSON, Layer, LayerGroup, LeafletMouseEvent, PathOptions} from "leaflet";
 import {Colors} from "./Config";
 import {RelayType} from "../types/relay";
 import {Settings} from "../types/variousTypes";
 import worldGeoData from "../data/world.geo.json";
-import {Feature, GeoJsonObject, GeoJsonProperties, GeometryObject} from "geojson";
-import {famCordArr, buildLatLonMap, getRelayType, sortFamilyCoordinatesMap, createLatLonKey} from "./aggregate-relays";
+import {Feature, GeoJsonObject, GeometryObject} from "geojson";
+import {buildLatLonMap, createLatLonKey, famCordArr, getRelayType, sortFamilyCoordinatesMap} from "./aggregate-relays";
 import {getMapColor9} from "./geojson";
 import {GeoRelayView} from "../types/responses";
 
@@ -96,7 +95,6 @@ export const familyLayer = (
     setSettingsCallback: (s: Settings) => void,
 ): LayerGroup => {
     const familyLayer: LayerGroup = new LayerGroup()
-    let index = 0
     familyMap.forEach((family, familyID) => {
         if (familyID !== settings.selectedFamily) return
         const latLonMap: Map<string, GeoRelayView[]> = buildLatLonMap(family)
@@ -126,7 +124,6 @@ export const familyLayer = (
                 })
                 .addTo(familyLayer)
         })
-        index++
     })
     return familyLayer
 }
@@ -149,7 +146,7 @@ export const familyCordLayer = (
     const sortedFamCordMap: Map<string, famCordArr[]> = sortFamilyCoordinatesMap(famCordMap)
     sortedFamCordMap.forEach((famMapForLocation, location) => {
         const coordinates = location.split(",")
-        const latlng: L.LatLngExpression = [+coordinates[0], +coordinates[1]]
+        const latLng: L.LatLngExpression = [+coordinates[0], +coordinates[1]]
         famMapForLocation.forEach((famCordArr) => {
             let hue = famCordArr.familyID % 360
             let sat = "90%"
@@ -168,7 +165,7 @@ export const familyCordLayer = (
 
             const color = `hsl(${hue},${sat},60%)`
             circleMarker(
-                latlng,
+                latLng,
                 {
                     color: color,
                     radius: radius,
@@ -197,11 +194,9 @@ export const countryMarkerLayer = (
     onMarkerClick: (e: LeafletMouseEvent) => void,
 ): LayerGroup => {
     const countryLayer: LayerGroup = new LayerGroup()
-    let index = 0
-    const geoData = worldGeoData
     countryMap.forEach((country, key) => {
         let hue = getMapColor9(key) * 360 / 9
-        country.forEach((relay, i, country) => {
+        country.forEach((relay) => {
             let sat = "90%"
             let radius = 1
 
@@ -220,7 +215,6 @@ export const countryMarkerLayer = (
                 .on("click", onMarkerClick)
                 .addTo(countryLayer)
         })
-        index++
     })
     return countryLayer
 }
@@ -235,7 +229,7 @@ export const countryLayer = (
     settings: Settings,
     setSettingsCallback: (s: Settings) => void
 ): LayerGroup =>{
-    const style = (feature: Feature<GeometryObject, GeoJsonProperties>): PathOptions => {
+    const style = (feature: Feature<GeometryObject>): PathOptions => {
         if (settings.selectedCountry === feature.properties!!.iso_a2) {
             return {
                 fillColor: "rgba(255,255,255,0.7)",
@@ -252,7 +246,7 @@ export const countryLayer = (
     const geoData = worldGeoData
     let filteredGeoData = new GeoJSON(undefined, {
         style: style as PathOptions,
-        onEachFeature(feature: Feature<GeometryObject, GeoJsonProperties>, layer: Layer) {
+        onEachFeature(feature: Feature<GeometryObject>, layer: Layer) {
             onEachCountry(feature, layer, settings, setSettingsCallback)
         }
     })
@@ -273,7 +267,7 @@ export const countryLayer = (
  * @param setSettingsCallback
  */
 const onEachCountry = (
-    feature: Feature<GeometryObject, GeoJsonProperties>,
+    feature: Feature<GeometryObject>,
     layer: Layer,
     settings: Settings,
     setSettingsCallback: (s: Settings) => void

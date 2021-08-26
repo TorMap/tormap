@@ -199,7 +199,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                     dividers
                 >
                     <Typography variant={"body2"}>This site includes IP2Location LITE data available from <Link
-                        href={"http://www.ip2location.com/"} target={"_blank"}>http://www.ip2location.com/</Link> as
+                        href={"https://www.ip2location.com/"} target={"_blank"}>https://www.ip2location.com/</Link> as
                         well as GeoJSON data from <Link href={"https://geojson-maps.ash.ms/"}
                                                         target={"_blank"}>https://geojson-maps.ash.ms/</Link>.</Typography>
                 </DialogContent>
