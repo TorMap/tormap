@@ -1,5 +1,4 @@
 import {
-    CircularProgress,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -10,7 +9,9 @@ import {
     ListItemIcon,
     ListItemText,
     makeStyles,
-    Table, TableCell, TableRow,
+    Table,
+    TableCell,
+    TableRow,
     Tooltip,
     Typography,
     withStyles
@@ -20,7 +21,6 @@ import React, {useEffect, useState} from "react";
 import CloseIcon from "@material-ui/icons/Close";
 import {getIcon, Icon} from "../types/icons";
 import {apiBaseUrl} from "../util/Config";
-import {settings} from "cluster";
 
 const useStyle = makeStyles(() => ({
     closeButton: {
@@ -42,7 +42,7 @@ const useStyle = makeStyles(() => ({
     },
 }))
 
-const FullHeightDialog = withStyles((theme) => ({
+const FullHeightDialog = withStyles(() => ({
     paper: {
         height: '100%'
     },
@@ -87,7 +87,7 @@ export const FamilyDetailsDialog: React.FunctionComponent<Props> = ({
 
 
     /**
-     * Querry more information about the Families specifyed in "familes" parameter
+     * Query more information about the Families specified in "families" parameter
      */
     useEffect(() => {
         setIsLoading(true)
@@ -131,8 +131,8 @@ export const FamilyDetailsDialog: React.FunctionComponent<Props> = ({
 
     //todo: duplicat, auslagern
     /**
-     * Querryes the FamilyIdentifyer object from an array of FamilyIdentifyers with the matching familyID
-     * @param familyDetails - the FamilyIdentifier array to queery from
+     * Queries the FamilyIdentifier object from an array of FamilyIdentifiers with the matching familyID
+     * @param familyDetails - the FamilyIdentifier array to query from
      * @param familyDetailsId - The familyID to find
      */
     function getFamily(familyDetails: NodeFamilyIdentifier[], familyDetailsId: string): NodeFamilyIdentifier | undefined {

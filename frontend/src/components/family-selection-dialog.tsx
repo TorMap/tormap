@@ -1,24 +1,20 @@
 import {
-    CircularProgress,
     Dialog,
     DialogContent,
     DialogTitle,
-    Drawer,
     IconButton,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
     makeStyles,
-    Table, TableBody, TableCell, TableHead, TableRow,
-    Tooltip,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableRow,
     Typography,
     withStyles
 } from "@material-ui/core";
-import {DetailsInfo, NodeFamilyIdentifier} from "../types/responses";
+import {NodeFamilyIdentifier} from "../types/responses";
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@material-ui/icons/Close";
-import {getIcon, Icon} from "../types/icons";
 import {apiBaseUrl} from "../util/Config";
 
 const useStyle = makeStyles(() => ({
@@ -41,7 +37,7 @@ const useStyle = makeStyles(() => ({
     },
 }))
 
-const FullHeightDialog = withStyles((theme) => ({
+const FullHeightDialog = withStyles(() => ({
     paper: {
         height: '100%',
     },
@@ -71,7 +67,7 @@ interface Props {
  * @param showDialog
  * @param closeDialog
  * @param families - The familyIDs available
- * @param familySelectionCallback - the CallbackFunktion for selecting a Family
+ * @param familySelectionCallback - the callback function for selecting a family
  */
 export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                                         showDialog,
@@ -85,7 +81,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
     const classes = useStyle()
 
     /**
-     * Querry more information about the Families specifyed in "familes" parameter
+     * Query more information about the Families specified in "families" parameter
      */
     useEffect(() => {
         setIsLoading(true)
@@ -109,8 +105,8 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
 
     //todo: duplicat, auslagern
     /**
-     * Querryes the FamilyIdentifyer object from an array of FamilyIdentifyers with the matching familyID
-     * @param familyDetails - the FamilyIdentifier array to queery from
+     * Querryes the FamilyIdentifier object from an array of FamilyIdentifiers with the matching familyID
+     * @param familyDetails - the FamilyIdentifier array to query from
      * @param familyDetailsId - The familyID to find
      */
     function getFamily(familyDetails: NodeFamilyIdentifier[], familyDetailsId: string): NodeFamilyIdentifier | undefined {
@@ -155,7 +151,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                     </TableHead>
                                     <TableBody>
                                         {familyDetails.map((family) =>
-                                            <TableRow onClick={event => familySelectionCallback(+family.id)}>
+                                            <TableRow onClick={() => familySelectionCallback(+family.id)}>
                                                 <TableCell scope="row" className={classes.valueName}>
                                                     <Typography>{family.memberCount}</Typography>
                                                 </TableCell>

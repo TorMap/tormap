@@ -1,4 +1,4 @@
-package org.tormap.database.repository;
+package org.tormap.database.repository
 
 import org.springframework.data.repository.CrudRepository
 import org.tormap.database.entity.AutonomousSystem

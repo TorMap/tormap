@@ -4,18 +4,25 @@ import {
     Dialog,
     DialogContent,
     DialogTitle,
-    Drawer, IconButton,
+    Drawer,
+    IconButton,
     List,
     ListItem,
     ListItemIcon,
     ListItemText,
-    makeStyles, Table, TableCell, TableRow, Tooltip, Typography, withStyles
+    makeStyles,
+    Table,
+    TableCell,
+    TableRow,
+    Tooltip,
+    Typography,
+    withStyles
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import {apiBaseUrl} from "../util/Config";
 import {getIcon} from "../types/icons";
 import {findGeoRelayViewByID, getRelayType} from "../util/aggregate-relays";
-import {GeoRelayView, NodeDetails, DetailsInfo, NodeIdentifier} from "../types/responses";
+import {DetailsInfo, GeoRelayView, NodeDetails, NodeIdentifier} from "../types/responses";
 
 
 const useStyle = makeStyles(() => ({
@@ -38,7 +45,7 @@ const useStyle = makeStyles(() => ({
     },
 }))
 
-const FullHeightDialog = withStyles((theme) => ({
+const FullHeightDialog = withStyles(() => ({
     paper: {
         height: '100%'
     },
@@ -71,7 +78,7 @@ const formatBytesToMBPerSecond = (bandwidthInBytes?: number) => bandwidthInBytes
     : undefined
 
 /**
- * Format number of seconds into an string representaiton in hours
+ * Format number of seconds into an string representation in hours
  * @param seconds - number to be formatted
  */
 const formatSecondsToHours = (seconds?: number) => seconds ?
@@ -105,7 +112,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
     const classes = useStyle()
 
     /**
-     * Qerry relayIdentifiers for relays from backend
+     * Query relayIdentifiers for relays from backend
      */
     useEffect(() => {
         setIsLoading(true)
@@ -126,13 +133,13 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                 }
                 setIsLoading(false)
             })
-            .catch(reason => {
+            .catch(() => {
                 setIsLoading(false)
             })
     }, [relays])
 
     /**
-     * Querry more information for the selected relay
+     * Query more information for the selected relay
      */
     useEffect(() => {
         if (nodeDetailsId) {
@@ -165,7 +172,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     ])
                     setIsLoading(false)
                 })
-                .catch(reason => {
+                .catch(() => {
                     setIsLoading(false)
                 })
         }

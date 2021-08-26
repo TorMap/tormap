@@ -44,7 +44,7 @@ interface Props {
 }
 
 /**
- * The Component showing statistict for renderd nodes
+ * The Component showing statistics for rendered nodes
  * @param settings - the App Settings
  * @param stats - the Statistics Object to show
  * @constructor

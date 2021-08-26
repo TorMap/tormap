@@ -1,5 +1,3 @@
-import {IconClassKey} from "@material-ui/core";
-
 export interface Settings {
 
     // Show relay types
