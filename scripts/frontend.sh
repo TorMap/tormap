@@ -1,3 +1,4 @@
+#!/bin/bash
 cd ../frontend || exit
 
 if [ "$(command -v yarn)" ]; then

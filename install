@@ -1,20 +1,26 @@
-#!/bin/sh
+#!/bin/bash
 echo "This script checks if commands for Java, Node.js, yarn and serve are available. If they are not, we will try to install them for you."
 echo " "
 
 # Check if Java is installed
-if [ -z "$(command -v java)" ]; then
-  if [ "$(command -v apt-get)" ]; then
-    # Install default Java jdk
-    sudo apt-get update
-    sudo apt-get install default-jdk
+if [ "$(command -v java)" ]; then
+  if [[ $(java --version) =~ .*(jdk|JDK).* ]]; then
+    echo "Java JDK found on your system"
   else
-    echo "Java not found"
-    echo "Please install Java >= 11 manually and rerun the script!"
+    echo "It seems like you are using a Java JRE version. For development a Java Development Kit (JDK) is needed."
+    echo "Please install a Java JDK version >= 11 manually and set JAVA_HOME accordingly. The command 'java -version' should output a JDK version of Java. Finally rerun this install script!"
     exit 1
   fi
 else
-  echo "Java found on your system"
+  if [ "$(command -v apt-get)" ]; then
+    # Install default Java JDK
+    sudo apt-get update
+    sudo apt-get install default-jdk
+  else
+    echo "Java JDK not found"
+    echo "Please install a Java JDK >= 11 manually and rerun the script!"
+    exit 1
+  fi
 fi
 
 # Check if Node.js and npm are installed
