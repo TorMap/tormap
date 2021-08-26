@@ -127,7 +127,7 @@ function App() {
                     showSnackbarMessage={showSnackbarMessage}
                     closeSnackbar={() => setShowSnackbar(false)}
                 />
-                <DateSlider availableDays={availableDays} setValue={setSliderValue} settings={settings}/>
+                <DateSlider availableDays={availableDays} setValue={setSliderValue} />
                 <AppSettings settings={settings} onChange={handleInputChange}/>
                 {statistics && <MapStats settings={settings} stats={statistics}/>}
             </div>
