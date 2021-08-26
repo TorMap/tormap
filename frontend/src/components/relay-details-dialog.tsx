@@ -84,6 +84,13 @@ const formatSecondsToHours = (seconds?: number) => seconds ?
  */
 const formatBoolean = (value?: boolean) => value === null || value === undefined ? undefined : value ? "yes" : "no"
 
+/**
+ * The Dialog for Relay Details
+ * @param showDialog
+ * @param closeDialog
+ * @param relays - selectable relays
+ * @constructor
+ */
 export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                                                                       showDialog,
                                                                       closeDialog,
@@ -97,7 +104,9 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
 
     const classes = useStyle()
 
-    // Load identifiers for relays
+    /**
+     * Qerry relayIdentifiers for relays from backend
+     */
     useEffect(() => {
         setIsLoading(true)
         setNodeDetailsId(undefined)
@@ -122,7 +131,9 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
             })
     }, [relays])
 
-    // Load details for selected relay
+    /**
+     * Querry more information for the selected relay
+     */
     useEffect(() => {
         if (nodeDetailsId) {
             setIsLoading(true)
