@@ -65,6 +65,13 @@ interface Props {
     families: number[]
 }
 
+
+/**
+ * A Dialog for more Information on Families
+ * @param showDialog
+ * @param closeDialog
+ * @param families - An Array of FamilyIDs that should be selectable
+ */
 export const FamilyDetailsDialog: React.FunctionComponent<Props> = ({
                                                                         showDialog,
                                                                         closeDialog,
@@ -78,6 +85,10 @@ export const FamilyDetailsDialog: React.FunctionComponent<Props> = ({
     const [detailsInfo, setDetailsInfo] = useState<DetailsInfo[] | undefined>()
     const classes = useStyle()
 
+
+    /**
+     * Querry more information about the Families specifyed in "familes" parameter
+     */
     useEffect(() => {
         setIsLoading(true)
         setFamilyDetails([])
@@ -100,7 +111,9 @@ export const FamilyDetailsDialog: React.FunctionComponent<Props> = ({
             .then(() => setIsLoading(false))
     }, [families])
 
-    // get data for selected family
+    /**
+     * Set detailed information about selected familyID
+     */
     useEffect(() => {
         if (familyDetailsId && familyDetails) {
             let family = getFamily(familyDetails, familyDetailsId)
@@ -116,6 +129,12 @@ export const FamilyDetailsDialog: React.FunctionComponent<Props> = ({
         }
     }, [familyDetailsId])
 
+    //todo: duplicat, auslagern
+    /**
+     * Querryes the FamilyIdentifyer object from an array of FamilyIdentifyers with the matching familyID
+     * @param familyDetails - the FamilyIdentifier array to queery from
+     * @param familyDetailsId - The familyID to find
+     */
     function getFamily(familyDetails: NodeFamilyIdentifier[], familyDetailsId: string): NodeFamilyIdentifier | undefined {
         return familyDetails.find((family) => family.id === familyDetailsId)
     }

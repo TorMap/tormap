@@ -41,10 +41,16 @@ interface Props {
     stats: Statistics
 }
 
-//todo: doc
+/**
+ * The Component showing statistict for renderd nodes
+ * @param settings - the App Settings
+ * @param stats - the Statistics Object to show
+ * @constructor
+ */
 export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
     const classes = useStyle()
 
+    // construct the Rows to display
     let rows: StatsRow[] = []
     rows.push({icon: Icon.ExitRelay, title: "Exit Relays", value: stats.relayExitCount})
     rows.push({icon: Icon.GuardRelay, title: "Guard relays", value: stats.relayGuardCount})
