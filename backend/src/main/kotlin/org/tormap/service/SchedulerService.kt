@@ -15,6 +15,7 @@ import org.tormap.database.entity.DescriptorType
 class SchedulerService(
     val apiConfig: ApiConfig,
     val torDescriptorService: TorDescriptorService,
+    val nodeDetailsService: NodeDetailsService,
 ) {
     /**
      * Fetches and processes relay consensus descriptors.
@@ -32,11 +33,20 @@ class SchedulerService(
     /**
      * Fetches and processes relay server descriptors.
      * The years 2005 - 2021 equal about 30 GB in size.
-     * After the download finished and you start with an empty DB this takes about 10 hours depending on your machine.
+     * After the download finished, and you start with an empty DB this takes about 10 hours depending on your machine.
      */
     @Async
     @Scheduled(fixedRateString = "\${scheduler.relayConsensusDescriptorsRate}")
     fun relayServerDescriptors() =
         torDescriptorService.collectAndProcessDescriptors(apiConfig.descriptorPathRelayServers, DescriptorType.SERVER)
+
+    /**
+     * Updates all nodes which do not have any Autonomous System set.
+     * Can take multiple hours depending on how many nodes need to be updated.
+     */
+    @Async
+    @Scheduled(fixedRateString = "\${scheduler.updateNodeAutonomousSystemsRate}")
+    fun updateNodeAutonomousSystems() =
+        nodeDetailsService.updateAutonomousSystems()
 }
 
