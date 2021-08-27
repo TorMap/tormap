@@ -5,7 +5,9 @@ import {
     AccordionSummary,
     makeStyles,
     Table,
-    TableBody, TableCell, TableRow,
+    TableBody,
+    TableCell,
+    TableRow,
     Typography
 } from "@material-ui/core";
 import {Settings, Statistics} from "../types/variousTypes";
@@ -41,15 +43,21 @@ interface Props {
     stats: Statistics
 }
 
-//todo: doc
+/**
+ * The Component showing statistics for rendered nodes
+ * @param settings - the App Settings
+ * @param stats - the Statistics Object to show
+ * @constructor
+ */
 export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
     const classes = useStyle()
 
+    // construct the Rows to display
     let rows: StatsRow[] = []
-    rows.push({icon: Icon.ExitRelay, title: "Exit Relays", value: stats.relayExitCount})
+    rows.push({icon: Icon.ExitRelay, title: "Exit relays", value: stats.relayExitCount})
     rows.push({icon: Icon.GuardRelay, title: "Guard relays", value: stats.relayGuardCount})
-    rows.push({icon: Icon.DefaultRelay, title: "Other Relays", value: stats.relayOtherCount})
-    rows.push({icon: Icon.TotalRelays, title: "Total Relays", value: stats.relayExitCount + stats.relayGuardCount + stats.relayOtherCount})
+    rows.push({icon: Icon.DefaultRelay, title: "Other relays", value: stats.relayOtherCount})
+    rows.push({icon: Icon.TotalRelays, title: "Total relays", value: stats.relayExitCount + stats.relayGuardCount + stats.relayOtherCount})
     if(stats.familyCount) rows.push({icon: Icon.FamilyCount, title: "Families", value: stats.familyCount})
     if(stats.countryCount) rows.push({icon: Icon.CountryCount, title: "Countries", value: stats.countryCount})
 

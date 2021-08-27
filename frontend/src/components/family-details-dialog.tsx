@@ -1,5 +1,4 @@
 import {
-    CircularProgress,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -10,7 +9,9 @@ import {
     ListItemIcon,
     ListItemText,
     makeStyles,
-    Table, TableCell, TableRow,
+    Table,
+    TableCell,
+    TableRow,
     Tooltip,
     Typography,
     withStyles
@@ -19,8 +20,7 @@ import {DetailsInfo, NodeFamilyIdentifier} from "../types/responses";
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@material-ui/icons/Close";
 import {getIcon, Icon} from "../types/icons";
-import {apiBaseUrl} from "../util/Config";
-import {settings} from "cluster";
+import {apiBaseUrl} from "../util/config";
 
 const useStyle = makeStyles(() => ({
     closeButton: {
@@ -42,7 +42,7 @@ const useStyle = makeStyles(() => ({
     },
 }))
 
-const FullHeightDialog = withStyles((theme) => ({
+const FullHeightDialog = withStyles(() => ({
     paper: {
         height: '100%'
     },
@@ -65,6 +65,13 @@ interface Props {
     families: number[]
 }
 
+
+/**
+ * A Dialog for more Information on Families
+ * @param showDialog
+ * @param closeDialog
+ * @param families - An Array of FamilyIDs that should be selectable
+ */
 export const FamilyDetailsDialog: React.FunctionComponent<Props> = ({
                                                                         showDialog,
                                                                         closeDialog,
@@ -78,6 +85,10 @@ export const FamilyDetailsDialog: React.FunctionComponent<Props> = ({
     const [detailsInfo, setDetailsInfo] = useState<DetailsInfo[] | undefined>()
     const classes = useStyle()
 
+
+    /**
+     * Query more information about the Families specified in "families" parameter
+     */
     useEffect(() => {
         setIsLoading(true)
         setFamilyDetails([])
@@ -100,7 +111,9 @@ export const FamilyDetailsDialog: React.FunctionComponent<Props> = ({
             .then(() => setIsLoading(false))
     }, [families])
 
-    // get data for selected family
+    /**
+     * Set detailed information about selected familyID
+     */
     useEffect(() => {
         if (familyDetailsId && familyDetails) {
             let family = getFamily(familyDetails, familyDetailsId)
@@ -116,6 +129,12 @@ export const FamilyDetailsDialog: React.FunctionComponent<Props> = ({
         }
     }, [familyDetailsId])
 
+    //todo: duplicat, auslagern
+    /**
+     * Queries the FamilyIdentifier object from an array of FamilyIdentifiers with the matching familyID
+     * @param familyDetails - the FamilyIdentifier array to query from
+     * @param familyDetailsId - The familyID to find
+     */
     function getFamily(familyDetails: NodeFamilyIdentifier[], familyDetailsId: string): NodeFamilyIdentifier | undefined {
         return familyDetails.find((family) => family.id === familyDetailsId)
     }
