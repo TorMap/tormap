@@ -3,6 +3,7 @@ package org.tormap.database.entity
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity
 
+@Suppress("unused")
 @Entity
 class AutonomousSystem(
     @EmbeddedId

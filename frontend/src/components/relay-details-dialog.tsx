@@ -4,18 +4,25 @@ import {
     Dialog,
     DialogContent,
     DialogTitle,
-    Drawer, IconButton,
+    Drawer,
+    IconButton,
     List,
     ListItem,
     ListItemIcon,
     ListItemText,
-    makeStyles, Table, TableCell, TableRow, Tooltip, Typography, withStyles
+    makeStyles,
+    Table,
+    TableCell,
+    TableRow,
+    Tooltip,
+    Typography,
+    withStyles
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
-import {apiBaseUrl} from "../util/Config";
+import {apiBaseUrl} from "../util/config";
 import {getIcon} from "../types/icons";
 import {findGeoRelayViewByID, getRelayType} from "../util/aggregate-relays";
-import {GeoRelayView, NodeDetails, DetailsInfo, NodeIdentifier} from "../types/responses";
+import {DetailsInfo, GeoRelayView, NodeDetails, NodeIdentifier} from "../types/responses";
 
 
 const useStyle = makeStyles(() => ({
@@ -38,7 +45,7 @@ const useStyle = makeStyles(() => ({
     },
 }))
 
-const FullHeightDialog = withStyles((theme) => ({
+const FullHeightDialog = withStyles(() => ({
     paper: {
         height: '100%'
     },
@@ -71,7 +78,7 @@ const formatBytesToMBPerSecond = (bandwidthInBytes?: number) => bandwidthInBytes
     : undefined
 
 /**
- * Format number of seconds into an string representaiton in hours
+ * Format number of seconds into an string representation in hours
  * @param seconds - number to be formatted
  */
 const formatSecondsToHours = (seconds?: number) => seconds ?
@@ -84,6 +91,13 @@ const formatSecondsToHours = (seconds?: number) => seconds ?
  */
 const formatBoolean = (value?: boolean) => value === null || value === undefined ? undefined : value ? "yes" : "no"
 
+/**
+ * The Dialog for Relay Details
+ * @param showDialog
+ * @param closeDialog
+ * @param relays - selectable relays
+ * @constructor
+ */
 export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                                                                       showDialog,
                                                                       closeDialog,
@@ -97,7 +111,9 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
 
     const classes = useStyle()
 
-    // Load identifiers for relays
+    /**
+     * Query relayIdentifiers for relays from backend
+     */
     useEffect(() => {
         setIsLoading(true)
         setNodeDetailsId(undefined)
@@ -117,12 +133,14 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                 }
                 setIsLoading(false)
             })
-            .catch(reason => {
+            .catch(() => {
                 setIsLoading(false)
             })
     }, [relays])
 
-    // Load details for selected relay
+    /**
+     * Query more information for the selected relay
+     */
     useEffect(() => {
         if (nodeDetailsId) {
             setIsLoading(true)
@@ -154,7 +172,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     ])
                     setIsLoading(false)
                 })
-                .catch(reason => {
+                .catch(() => {
                     setIsLoading(false)
                 })
         }

@@ -1,59 +1,103 @@
-#!/bin/sh
-echo "This will install curl, nodeJS and yarn"
+#!/bin/bash
+echo "This script checks if commands for Java, Node.js, yarn and serve are available. If they are not, we will try to install them for you."
 echo " "
 
-# Check if java is installed
-if [ -z "$(command -v java)" ]; then
-    echo "Java not found"
-    echo "Please install Java >= 11 manually!"
+# Check if Java is installed
+if [ "$(command -v java)" ]; then
+  if [[ $(java --version) =~ .*(jdk|JDK).* ]]; then
+    echo "Java JDK found on your system"
+  else
+    echo "It seems like you are using a Java JRE version. For development a Java Development Kit (JDK) is needed."
+    echo "Please install a Java JDK version >= 11 manually and set JAVA_HOME accordingly. The command 'java -version' should output a JDK version of Java. Finally rerun this install script!"
     exit 1
+  fi
 else
-    echo "Java found on your system"
+  if [ "$(command -v apt-get)" ]; then
+    # Install default Java JDK
+    sudo apt-get update
+    sudo apt-get install default-jdk
+  else
+    echo "Java JDK not found"
+    echo "Please install a Java JDK >= 11 manually and rerun the script!"
+    exit 1
+  fi
 fi
 
-# Check if curl is installed (default for non empty string is -n)
-if [ "$(command -v curl)" ]; then
-  echo "Curl found on your system"
+# Check if Node.js and npm are installed
+if [ "$(command -v node)" ] && [ "$(command -v npm)" ]; then
+  echo 'Node.js and npm found on your system'
 elif [ "$(command -v apt-get)" ]; then
-  # Install curl debian/ubuntu
+  # Debian / Ubuntu
   sudo apt-get update
-  sudo apt-get install curl
+  sudo apt-get install nodejs npm
 elif [ "$(command -v yum)" ]; then
-  # Install curl RHEL/CentOS/Fedora
+  # RHEL / CentOS / Fedora / IBM i
   yum install curl
+elif [ "$(command -v dnf)" ]; then
+  # RHEL / CentOS / Fedora
+  dnf module install nodejs:12
+elif [ "$(command -v pkg)" ]; then
+  # FreeBSD/Android
+  pkg install node
 elif [ "$(command -v zypper)" ]; then
-  # Install curl OpenSUSE
-  zypper install curl
+  # OpenSUSE
+  zypper install nodejs12
 elif [ "$(command -v pacman)" ]; then
-  # Install curl ArchLinux
-  pacman -Sy curl
+  # ArchLinux
+  pacman -S nodejs npm
+elif [ "$(command -v emerge)" ]; then
+  # Gentoo
+  emerge nodejs
+elif [ "$(command -v brew)" ]; then
+  # MacOs
+  brew install node
+elif [ "$(command -v port)" ]; then
+  # MacOs
+  port install nodejs12
+elif [ "$(command -v pkgin)" ]; then
+  # MacOs / NetBSD / SmartOS and illumos
+  pkgin -y install nodejs
+elif [ "$(command -v pkg_add)" ]; then
+  # OpenBSD
+  pkg_add node
+elif [ "$(command -v eopkg)" ]; then
+  # Solus
+  sudo eopkg install nodejs
+elif [ "$(command -v xbps-install)" ]; then
+  # Void Linux
+  xbps-install -Sy nodejs
+elif [ "$(command -v scoop)" ]; then
+  # Scoop
+  scoop install nodejs
+elif [ "$(command -v cinst)" ]; then
+  # cinst
+  cinst nodejs.install
 else
-    echo 'Curl not found'
-    echo 'Please install curl manually!'
-    exit 1
+  echo 'Could not find a suitable package manager.'
+  echo 'Please install everything manually!'
+  exit 1
 fi
 
-if [ "$(command -v node)" ]; then
-  echo 'Node.js found on your system'
-else
-  # Install Node.JS (Ubuntu v13.3.0)
-  curl https://nodejs.org/dist/v12.14.1/node-v12.14.1-linux-x64.tar.xz > node.tar.xz
-  sudo mkdir -p /usr/local/lib/nodejs
-  sudo tar -xJvf node.tar.xz -C /usr/local/lib/nodejs
-  rm node.tar.xz
-
-  # Export node path
-  export PATH=/usr/local/lib/nodejs/node-v12.14.1-linux-x64/bin:$PATH
-  . ~/.profile
-fi
-
-
+# Check if yarn is installed
 if [ "$(command -v yarn)" ]; then
   echo 'yarn found on your system'
+elif [ "$(command -v npm)" ]; then
+  # Install yarn via npm
+  sudo npm install --global yarn
 else
-  # Install yarn (Ubuntu v1.21.1)
-  curl -o- -L https://yarnpkg.com/install.sh | bash
+  echo 'Could not find npm package manager.'
+  echo 'Please install yarn and serve manually!'
+  exit 1
+fi
 
-  echo 'If you want to use yarn in your command line, please save the following line in your user profile:'
-  echo 'export PATH=/usr/local/lib/nodejs/node-v12.14.1-linux-x64/bin:$PATH'
+# Check if serve is installed
+if [ "$(command -v serve)" ]; then
+  echo 'serve found on your system'
+elif [ "$(command -v npm)" ]; then
+  # Install serve
+  sudo npm install --global serve
+else
+  echo 'Could not find npm package manager.'
+  echo 'Please install serve manually!'
+  exit 1
 fi

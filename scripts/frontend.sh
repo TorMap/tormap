@@ -1,13 +1,8 @@
+#!/bin/bash
 cd ../frontend || exit
 
-#Check for command node and export path
-if [ -z "$(command -v node)" ]; then
-  export PATH=/usr/local/lib/nodejs/node-v12.14.1-linux-x64/bin:$PATH
-  . ~/.profile
-fi
-
 if [ "$(command -v yarn)" ]; then
-  yarn > /dev/null 2>&1
+  yarn
   yarn start
 else
   echo 'ERROR: Yarn program not found. Please make sure yarn is installed.'
