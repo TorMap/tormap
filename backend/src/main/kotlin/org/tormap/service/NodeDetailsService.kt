@@ -75,7 +75,7 @@ class NodeDetailsService(
     fun updateAutonomousSystems(months: Set<String>? = null) {
         try {
             val monthsToProcess = months ?: nodeDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
-            logger.info("Updating node's Autonomous System for months: ${monthsToProcess.joinToString(", ")}")
+            logger.info("Updating node Autonomous Systems for months: ${monthsToProcess.joinToString(", ")}")
             monthsToProcess.forEach {
                 var changedNodesCount = 0
                 val nodesWithoutAS = nodeDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(it)
@@ -84,7 +84,7 @@ class NodeDetailsService(
                         changedNodesCount++
                     }
                 }
-                logger.info("For month $it this many node's Autonomous System was changed: $changedNodesCount")
+                logger.info("For month $it this many node Autonomous Systems were changed: $changedNodesCount")
             }
             logger.info("Finished updating Autonomous System in NodeDetails")
         } catch (exception: Exception) {
