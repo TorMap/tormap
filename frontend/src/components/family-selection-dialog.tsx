@@ -15,7 +15,7 @@ import {
 import {NodeFamilyIdentifier} from "../types/responses";
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@material-ui/icons/Close";
-import {apiBaseUrl} from "../util/Config";
+import {apiBaseUrl} from "../util/config";
 
 const useStyle = makeStyles(() => ({
     closeButton: {

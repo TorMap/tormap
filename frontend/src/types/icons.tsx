@@ -1,4 +1,4 @@
-import {Colors} from "../util/Config";
+import {Colors} from "../util/config";
 import DirectionsRunIcon from "@material-ui/icons/DirectionsRun";
 import React from "react";
 import SecurityIcon from "@material-ui/icons/Security";

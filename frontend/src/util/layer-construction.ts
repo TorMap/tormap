@@ -1,5 +1,5 @@
 import L, {circleMarker, GeoJSON, Layer, LayerGroup, LeafletMouseEvent, PathOptions} from "leaflet";
-import {Colors} from "./Config";
+import {Colors} from "./config";
 import {RelayType} from "../types/relay";
 import {Settings} from "../types/variousTypes";
 import worldGeoData from "../data/world.geo.json";
