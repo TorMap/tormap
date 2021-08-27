@@ -37,7 +37,8 @@ percentage below `100%`. This is normal behaviour with Gradle & Spring Boot.
 - Linux: Type `./run` or `bash ./run`
 - Windows: `run.bat`
 
-If the script fails, or you prefer to run the servers manually:
+The `backend` will be available at http://localhost:8080/ and `frontend` at http://localhost:3000/. If the script fails,
+or you prefer to run the servers manually:
 
 1. Go into `backend` directory and run commands
     - `./gradlew` or on Windows `gradlew.bat`
@@ -46,16 +47,17 @@ If the script fails, or you prefer to run the servers manually:
     - `yarn`
     - `yarn start`
 
-In a fresh project without any preprocessed DB or pre-downloaded archive the backend will start to download an archive `>
+In a fresh project without any preprocessed DB or pre-downloaded archive the backend will start to download an
+archive `>
 33 GB` in size. Once the first `3 GB` of consensus descriptors have been downloaded, they will be processed, which will
 take `> 24 hours` to complete. Once `30 GB` of server descriptors have been downloaded, it will take about `7 days` to
-complete processing. Any missing archive descriptors released by the `TorProject` will twice a day automatically be downloaded
-and processed.
+complete processing. Any missing archive descriptors released by the `TorProject` will twice a day automatically be
+downloaded and processed.
 
-Processing of descriptors does not necessarily happen in a chronological order, but one month of
-descriptors is always processed together. While the backend is processing descriptors, the frontend will always be able
-to display finished data. Frontend features like family grouping or relay details will only be available, if the
-corresponding server descriptors have also been processed.
+Processing of descriptors does not necessarily happen in a chronological order, but one month of descriptors is always
+processed together. While the backend is processing descriptors, the frontend will always be able to display finished
+data. Frontend features like family grouping or relay details will only be available, if the corresponding server
+descriptors have also been processed.
 
 ### Backend
 
