@@ -8,7 +8,7 @@ import {Settings, SnackbarMessage, Statistics} from "./types/variousTypes";
 import {MapStats} from "./components/map-stats";
 import {DateSlider} from "./components/date-slider";
 import MuiAlert from '@material-ui/lab/Alert';
-import {apiBaseUrl, defaultSettings} from "./util/Config";
+import {apiBaseUrl, defaultSettings} from "./util/config";
 import {AboutInformation} from "./components/about-information";
 
 

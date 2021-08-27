@@ -21,7 +21,7 @@ import {
     familyCordLayer,
     familyLayer
 } from "../util/layer-construction";
-import {apiBaseUrl} from "../util/Config";
+import {apiBaseUrl} from "../util/config";
 import {GeoRelayView} from "../types/responses";
 import {RelayDetailsDialog} from "./relay-details-dialog";
 import {FamilySelectionDialog} from "./family-selection-dialog";

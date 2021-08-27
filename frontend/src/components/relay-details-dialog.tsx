@@ -19,7 +19,7 @@ import {
     withStyles
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
-import {apiBaseUrl} from "../util/Config";
+import {apiBaseUrl} from "../util/config";
 import {getIcon} from "../types/icons";
 import {findGeoRelayViewByID, getRelayType} from "../util/aggregate-relays";
 import {DetailsInfo, GeoRelayView, NodeDetails, NodeIdentifier} from "../types/responses";
