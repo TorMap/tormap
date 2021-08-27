@@ -1,9 +1,12 @@
 package org.tormap.service
 
 import org.springframework.jdbc.support.incrementer.H2SequenceMaxValueIncrementer
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.tormap.calculateIPv4NumberRepresentation
 import org.tormap.commaSeparatedToList
 import org.tormap.database.entity.NodeDetails
+import org.tormap.database.repository.AutonomousSystemRepositoryImpl
 import org.tormap.database.repository.NodeDetailsRepositoryImpl
 import org.tormap.logger
 
@@ -15,6 +18,7 @@ import org.tormap.logger
 class NodeDetailsService(
     val nodeDetailsRepositoryImpl: NodeDetailsRepositoryImpl,
     val dbSequenceIncrementer: H2SequenceMaxValueIncrementer,
+    val autonomousSystemRepositoryImpl: AutonomousSystemRepositoryImpl,
 ) {
     val logger = logger()
 
@@ -23,13 +27,13 @@ class NodeDetailsService(
      */
     fun updateNodeFamilies(months: Set<String>? = null) {
         try {
-            logger.info("Updating node families")
             val monthsToProcess = months ?: nodeDetailsRepositoryImpl.findDistinctMonths()
+            logger.info("Updating node families for months: ${monthsToProcess.joinToString(", ")}")
             monthsToProcess.forEach {
                 var confirmedFamilyConnectionCount = 0
                 var rejectedFamilyConnectionCount = 0
                 var membersOfProcessedFamilies = mutableMapOf<String, Long>()
-                val requestingNodes = nodeDetailsRepositoryImpl.getAllByMonthEqualsAndFamilyEntriesNotNull(it)
+                val requestingNodes = nodeDetailsRepositoryImpl.findAllByMonthEqualsAndFamilyEntriesNotNull(it)
                 requestingNodes.forEach { requestingNode ->
                     val confirmedFamilyNodes = mutableListOf<NodeDetails>()
                     val month = requestingNode.month
@@ -38,7 +42,7 @@ class NodeDetailsService(
                         try {
                             val newConfirmedMember = confirmFamilyMember(requestingNode, familyEntry, month)
                             if (newConfirmedMember != null) {
-                                if (! membersOfProcessedFamilies.containsKey(newConfirmedMember.fingerprint)) {
+                                if (!membersOfProcessedFamilies.containsKey(newConfirmedMember.fingerprint)) {
                                     confirmedFamilyNodes.add(newConfirmedMember)
                                 }
                                 familyId = membersOfProcessedFamilies[requestingNode.fingerprint]
@@ -65,6 +69,53 @@ class NodeDetailsService(
     }
 
     /**
+     * Updates [NodeDetails.autonomousSystemName] and [NodeDetails.autonomousSystemNumber] for all entities of the requested [months].
+     */
+    @Async
+    fun updateAutonomousSystems(months: Set<String>? = null) {
+        try {
+            val monthsToProcess = months ?: nodeDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
+            logger.info("Updating node's Autonomous System for months: ${monthsToProcess.joinToString(", ")}")
+            monthsToProcess.forEach {
+                var changedNodesCount = 0
+                val nodesWithoutAS = nodeDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(it)
+                nodesWithoutAS.forEach { node ->
+                    if (node.updateAutonomousSystem()) {
+                        changedNodesCount++
+                    }
+                }
+                logger.info("For month $it this many node's Autonomous System was changed: $changedNodesCount")
+            }
+            logger.info("Finished updating Autonomous System in NodeDetails")
+        } catch (exception: Exception) {
+            logger.error("Could not update Autonomous System in NodeDetails. ${exception.message}")
+        }
+    }
+
+    /**
+     * Trys to add an Autonomous System to [this]
+     * @return true if node was changed
+     */
+    private fun NodeDetails.updateAutonomousSystem(): Boolean {
+        if (this.address != null) {
+            val autonomousSystem = try {
+                this.addressNumber = this.addressNumber ?: calculateIPv4NumberRepresentation(this.address!!)
+                autonomousSystemRepositoryImpl.findUsingIPv4(this.addressNumber!!)
+            } catch (exception: Exception) {
+                logger().warn("Could not search autonomousSystem for address ${this.address}")
+                null
+            }
+            if (autonomousSystem != null) {
+                this.autonomousSystemName = autonomousSystem.autonomousSystemName
+                this.autonomousSystemNumber = autonomousSystem.autonomousSystemNumber
+                nodeDetailsRepositoryImpl.save(this)
+                return true
+            }
+        }
+        return false
+    }
+
+    /**
      * Save a new family of nodes by updating their [NodeDetails.familyId]
      */
     private fun saveNodeFamily(
@@ -74,7 +125,7 @@ class NodeDetailsService(
         familyId: Long?,
     ): MutableMap<String, Long> {
         if (confirmedFamilyMembers.isNotEmpty() || familyId != null) {
-            if (! membersOfOtherFamilies.containsKey(requestingNode.fingerprint)) {
+            if (!membersOfOtherFamilies.containsKey(requestingNode.fingerprint)) {
                 confirmedFamilyMembers.add(requestingNode)
             }
             val newFamilyId = familyId ?: dbSequenceIncrementer.nextLongValue()
@@ -109,7 +160,7 @@ class NodeDetailsService(
             }
             nicknameRegex.matches(allegedFamilyMemberId) -> {
                 val allegedFamilyMembers =
-                    nodeDetailsRepositoryImpl.getAllByMonthAndNickname(month, allegedFamilyMemberId)
+                    nodeDetailsRepositoryImpl.findAllByMonthAndNickname(month, allegedFamilyMemberId)
                 return allegedFamilyMembers.firstOrNull { isNodeMemberOfFamily(requestingNode, it) }
             }
             else -> throw Exception("Format of new family member $allegedFamilyMemberId for requestingNode ${requestingNode.fingerprint} not supported!")

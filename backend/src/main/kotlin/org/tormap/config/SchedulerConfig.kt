@@ -11,12 +11,17 @@ import org.springframework.boot.context.properties.ConstructorBinding
  */
 data class SchedulerConfig(
     /**
-     * The rate in which relay consensus descriptors are handled.
+     * The rate at which relay consensus descriptors are handled.
      */
     val relayConsensusDescriptorsRate: String,
 
     /**
-     * The rate in which relay server descriptors are handled.
+     * The rate at which relay server descriptors are handled.
      */
     val relayServerDescriptorsRate: String,
+
+    /**
+     * The rate at which the Autonomous System info in NodeDetails is updated.
+     */
+    val updateNodeAutonomousSystemsRate: String,
 )
