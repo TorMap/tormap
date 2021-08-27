@@ -76,17 +76,17 @@ class TorDescriptorService(
      * Process descriptors which were previously saved to disk at [apiPath]
      */
     private fun processDescriptors(apiPath: String, descriptorType: DescriptorType) {
-        var processingDescriptorDays = mutableSetOf<Future<LocalDate?>>()
+        var descriptorDaysBeingProcessed = mutableSetOf<Future<LocalDate?>>()
         var lastProcessedFile: File? = null
         readDescriptors(apiPath).forEach {
-            processingDescriptorDays.add(processDescriptor(it))
             if (lastProcessedFile == null) {
                 lastProcessedFile = it.descriptorFile
             } else if (it.descriptorFile != lastProcessedFile) {
-                finishDescriptorFile(lastProcessedFile!!, descriptorType, processingDescriptorDays)
+                finishDescriptorFile(lastProcessedFile!!, descriptorType, descriptorDaysBeingProcessed)
                 lastProcessedFile = it.descriptorFile
-                processingDescriptorDays = mutableSetOf()
+                descriptorDaysBeingProcessed = mutableSetOf()
             }
+            descriptorDaysBeingProcessed.add(processDescriptor(it))
         }
     }
 
@@ -98,10 +98,10 @@ class TorDescriptorService(
     fun finishDescriptorFile(
         descriptorFile: File,
         descriptorType: DescriptorType,
-        processingDescriptorDays: MutableSet<Future<LocalDate?>>
+        descriptorDaysBeingProcessed: MutableSet<Future<LocalDate?>>
     ) {
         val processedMonths = mutableSetOf<String>()
-        processingDescriptorDays.forEach {
+        descriptorDaysBeingProcessed.forEach {
             try {
                 val processedDay = it.get()
                 if (processedDay != null) {

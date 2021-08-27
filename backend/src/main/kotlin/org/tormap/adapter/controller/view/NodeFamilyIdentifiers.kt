@@ -11,7 +11,6 @@ import org.tormap.jointToCommaSeparated
 class NodeFamilyIdentifiers(
     val id: Long,
     val memberCount: Long,
-    val fingerprints: String,
     val nicknames: String,
     autonomousSystems: String,
 ) {
