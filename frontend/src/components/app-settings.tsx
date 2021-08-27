@@ -15,7 +15,7 @@ import {
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import {Settings} from "../types/variousTypes";
 import {RelayFlagName} from "../types/relay";
-import {tooltipTimeDelay} from "../util/Config";
+import {tooltipTimeDelay} from "../util/config";
 
 /**
  * Styles according to Material UI doc for components used in AppSettings component

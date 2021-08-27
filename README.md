@@ -2,9 +2,9 @@
 
 This project visualizes current and past Tor relays on a world map. The backend regularly downloads descriptors
 from [TorProject Archive](https://metrics.torproject.org/collector/archive/) and saves a processed version in a local
-database. Currently the required archive part makes up 33 GB for the available years (2007 - 2021). Processing of a
+database. Currently, the required archive part makes up 33 GB for the available years (2007 - 2021). Processing of a
 descriptor type only starts after all descriptors of the same type have been downloaded and saved to disk. Processed
-data can instantly be fetched by the frontend to be display on the world map.
+data can instantly be fetched by the frontend to be displayed on the world map.
 
 ## Development
 
@@ -13,8 +13,8 @@ data can instantly be fetched by the frontend to be display on the world map.
 Make sure you have at least 100 GB of free disk space, since the downloaded archive and local DB will take up a lot of
 space.
 
-On most `Unix` systems you can use the install script `./install`. It will try to use your package manager to install
-missing requirements. Depending on your shell you run the script with `./install` or `bash ./install`.
+On most `Unix` systems you can use the installation script `./install`. It will try to use your package manager to
+install missing requirements. Depending on your shell you run the script with `./install` or `bash ./install`.
 
 If you use Windows or the `./install` script failed, please install these manually:
 
@@ -24,14 +24,20 @@ If you use Windows or the `./install` script failed, please install these manual
 - [yarn](https://yarnpkg.com/en/docs/install)
 - [serve](https://www.npmjs.com/package/serve)
 
+Troubleshooting:
+
+- Make sure `JAVA_HOME` points to a Java JDK version >= 11.
+
 ### Run development servers
 
-Make sure you have installed all requirements.
+Make sure you have installed all requirements. The `./run` script will start the backend and frontend servers in
+separate terminals. Once you kill the terminal, the server is shutdown. The backend console will stay at an executing
+percentage below `100%`. This is normal behaviour with Gradle & Spring Boot.
 
 - Linux: Type `./run` or `bash ./run`
 - Windows: `run.bat`
 
-If the script fails or you prefer to run the servers manually:
+If the script fails, or you prefer to run the servers manually:
 
 1. Go into `backend` directory and run commands
     - `./gradlew` or on Windows `gradlew.bat`
@@ -39,6 +45,14 @@ If the script fails or you prefer to run the servers manually:
 2. Go into `frontend` directory and run commands
     - `yarn`
     - `yarn start`
+
+In a fresh project without any preprocessed DB or pre-downloaded archive the backend will start to download an archive >
+33 GB in size. Once the first 3 GB of consensus descriptors have been downloaded, they will be processed, which will
+take > 24 hours to complete. Once 30 GB of server descriptors have been downloaded, it will take about 7 days to
+complete processing. Processing of descriptors does not necessarily happen in a chronological order, but one month of
+descriptors is always processed together. While the backend is processing descriptors, the frontend will always be able
+to display finished data. Frontend features like family grouping or relay details will only be available, if the
+corresponding server descriptors have also been processed.
 
 ### Backend
 
@@ -61,6 +75,13 @@ instead of `./gradlew` for all following commands.
   baselineVersion
 - `./gradlew flywayRepair`: Repairs the schema history table
 - `./gradlew dokkaHtml`: generate code documentation in HTML format in `build/dokka/`
+
+#### Config
+
+The main `backend` config is located at `backend/srv/main/resorces/application.properties`. Logging options can be
+configured with
+`backend/srv/main/resorces/logback-spring.xml`. Dependencies are managed with `Gradle` and located
+at `backend/build.gradle.kts`.
 
 #### OpenAPI specification
 
@@ -113,6 +134,12 @@ the [Create React App documentation](https://facebook.github.io/create-react-app
 - `yarn`: installs required frontend packages
 - `yarn start`: creates build, runs it and listens on http://localhost:3000 (page reloads if you save frontend changes)
 - `yarn build`: creates production ready build in `build` folder
+
+#### Config
+
+The main `frontend` config is located at `frontend/srv/util/config.ts`. Further environment options like enable/disable
+Browser autostart can be configured in `frontend/.env`. Dependencies are managed with `yarn` and located
+in `frontend/package.json`. Compiler options for `TypeScript` are located at `frontend/tsconfig.json`.
 
 ## Build project
 
