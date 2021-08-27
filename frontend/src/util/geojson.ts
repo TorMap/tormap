@@ -6,8 +6,8 @@ import worldGeoData from "../data/world.geo.json";
  */
 export function getMapColor9(iso_a2: string): number {
     const geoData = worldGeoData
-    const mapcolor9 = geoData.features.find(feature => feature.properties.iso_a2 === iso_a2)?.properties.mapcolor9
-    if (mapcolor9 !== undefined) return mapcolor9
+    const mapColor9 = geoData.features.find(feature => feature.properties.iso_a2 === iso_a2)?.properties.mapcolor9
+    if (mapColor9 !== undefined) return mapColor9
     return 0
 }
 

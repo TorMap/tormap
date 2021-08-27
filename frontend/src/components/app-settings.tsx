@@ -2,18 +2,20 @@ import React, {FunctionComponent,} from "react";
 import {
     Accordion,
     AccordionDetails,
-    AccordionSummary, Button,
+    AccordionSummary,
     Checkbox,
     FormControlLabel,
-    FormGroup, Link,
+    FormGroup,
+    Link,
     makeStyles,
-    Switch, Tooltip,
+    Switch,
+    Tooltip,
     Typography,
 } from "@material-ui/core";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import {Settings} from "../types/variousTypes";
 import {RelayFlagName} from "../types/relay";
-import {tooltipTimeDelay} from "../util/Config";
+import {tooltipTimeDelay} from "../util/config";
 
 /**
  * Styles according to Material UI doc for components used in AppSettings component
@@ -42,7 +44,12 @@ interface Props {
     onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-//todo:
+/**
+ * The settings component.
+ * @param settings - the App settings
+ * @param onChange - changeHandler for settings
+ * @constructor
+ */
 export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
     const classes = useStyle()
 
@@ -136,7 +143,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                     <FormGroup>
                         <Tooltip
                             title={
-                                "A router is 'Valid' if it is running a version of Tor not known to be broken, and the directory authority has not blacklisted it as suspicious."
+                                "A router is 'Valid' if it is running a version of Tor not known to be broken, and the directory authorities have not blacklisted it as suspicious."
                             }
                             placement={"left"}
                             enterDelay={tooltipTimeDelay}>
@@ -147,7 +154,8 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                         </Tooltip>
                         <Tooltip
                             title={
-                                ""
+                                "Directory authorities no longer assign these flags.\n" +
+                                "They were once used to determine whether a relay's nickname was canonically linked to its public key."
                             }
                             placement={"left"}
                             enterDelay={tooltipTimeDelay}>
@@ -181,7 +189,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                         </Tooltip>
                         <Tooltip
                             title={
-                                "A router is Stable if it is active, and either its Weighted MTBF is at least the median for known active routers or its Weighted MTBF corresponds to at least 7 days. Routers are never called Stable if they are running a version of Tor known to drop circuits stupidly."
+                                "A router is Stable if it is active, and either it's Weighted MTBF is at least the median for known active routers or it's weighted MTBF corresponds to at least 7 days. Routers are never called Stable if they are running a version of Tor known to drop circuits stupidly."
                             }
                             placement={"left"}
                             enterDelay={tooltipTimeDelay}>
@@ -192,7 +200,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                         </Tooltip>
                         <Tooltip
                             title={
-                                "A router is called an 'Exit' iff it allows exits to atleast one /8 address space on each of ports 80 and 443. (Up untilTor version 0.3.2, the flag was assigned if relays exit to at leasttwo of the ports 80, 443, and 6667.)"
+                                "A router is called an 'Exit' if it allows exits on both ports 80 and 443. (Up untilTor version 0.3.2, the flag was assigned if relays exit to at least two of the ports 80, 443, and 6667)"
                             }
                             placement={"left"}
                             enterDelay={tooltipTimeDelay}>
@@ -203,7 +211,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                         </Tooltip>
                         <Tooltip
                             title={
-                                "A router is 'Fast' if it is active, and its bandwidth is either in the top 7/8ths for known active routers or at least 100KB/s."
+                                "A router is 'Fast' if it is active, and it's bandwidth is either in the top 7/8 ths for known active routers or at least 100KB/s fast."
                             }
                             placement={"left"}
                             enterDelay={tooltipTimeDelay}>
@@ -214,7 +222,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                         </Tooltip>
                         <Tooltip
                             title={
-                                "A Guard router is a possible entry point to the network"
+                                "A Guard router is a possible entry point to the network."
                             }
                             placement={"left"}
                             enterDelay={tooltipTimeDelay}>
@@ -258,7 +266,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                         </Tooltip>
                         <Tooltip
                             title={
-                                "authorities should not vote on this flag; it is produced as part of the consensus for consensus method 22 or later."
+                                "Authorities should not vote on this flag. It is produced as part of the consensus for consensus method 22 or later."
                             }
                             placement={"left"}
                             enterDelay={tooltipTimeDelay}>
@@ -269,7 +277,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                         </Tooltip>
                         <Tooltip
                             title={
-                                "authorities should vote to assign this flag if the published time on the descriptor is over 18 hours in the past.  (This flag was added in 0.4.0.1-alpha.)"
+                                "Authorities should vote to assign this flag if the published time on the descriptor is over 18 hours in the past. (This flag was added in 0.4.0.1-alpha.)"
                             }
                             placement={"left"}
                             enterDelay={tooltipTimeDelay}>
@@ -280,7 +288,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                         </Tooltip>
                         <Tooltip
                             title={
-                                "authorities SHOULD NOT accept more than 2 relays on a single IP. If this happens, the authority *should* vote for the excess relays, but should omit the Running or Valid flags and instead should assign the flag."
+                                "Authorities SHOULD NOT accept more than 2 relays on a single IP. If this happens, the authorities *should* vote for the excess relays, but should omit the Running or Valid flags and instead should assign the flag Sybil."
                             }
                             placement={"left"}
                             enterDelay={tooltipTimeDelay}>
@@ -291,7 +299,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                         </Tooltip>
                         <Tooltip
                             title={
-                                "Any router that is determined to get the BadExit flag doesn't count when computing bandwidth weights."
+                                "Any router that is determined to get the BadExit flag doesn't count into computing bandwidth weights."
                             }
                             placement={"left"}
                             enterDelay={tooltipTimeDelay}>
@@ -300,8 +308,8 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                                                    name={"mi" + RelayFlagName.BadExit}/>}
                                 label={RelayFlagName.BadExit}/>
                         </Tooltip>
-                        <Link href={"https://github.com/torproject/torspec/blob/main/dir-spec.txt"}>
-                            more information on flags and their meaning
+                        <Link href={"https://github.com/torproject/torspec/blob/main/dir-spec.txt"} target={"_blank"}>
+                            More information about flags
                         </Link>
                     </FormGroup>
                 </AccordionDetails>

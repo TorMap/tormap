@@ -3,7 +3,7 @@
 import {useEffect, useState} from "react";
 
 /**
- * new React-Hook for handeling
+ * new React-Hook for handling
  * @param value Value to debounce
  * @param delay Time without changes to update value
  */

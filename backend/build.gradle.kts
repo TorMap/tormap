@@ -38,12 +38,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-    // Annotation processing
-    val configurationProcessor = "org.springframework.boot:spring-boot-configuration-processor"
-    kapt(configurationProcessor)
-    kaptTest(configurationProcessor)
-    annotationProcessor(configurationProcessor)
-
     // OpenAPI generation and Swagger UI https://springdoc.org/
     implementation("org.springdoc:springdoc-openapi-ui:1.3.+")
     implementation("org.springdoc:springdoc-openapi-kotlin:1.3.+")
@@ -65,11 +59,6 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-core:2.12.4")
     implementation("org.slf4j:slf4j-api:1.7.22")
     implementation("org.tukaani:xz:1.6")
-}
-
-// Annotation processing
-kapt {
-    annotationProcessor("org.springframework.boot.configurationprocessor.ConfigurationMetadataAnnotationProcessor")
 }
 
 // Allow JPA annotations for Kotlin classes
