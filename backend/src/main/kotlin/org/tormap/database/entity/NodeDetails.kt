@@ -19,6 +19,7 @@ import javax.persistence.*
         Index(columnList = "fingerprint, month", unique = true, name = "fingerprint_month_index"),
         Index(columnList = "nickname, month", name = "nickname_month_index"),
         Index(columnList = "familyId", name = "familyId_index"),
+        Index(columnList = "autonomousSystemNumber", name = "autonomousSystemNumber_number_index"),
     ]
 )
 class NodeDetails(
@@ -41,6 +42,12 @@ class NodeDetails(
     }
 
     var allowSingleHopExits: Boolean = descriptor.allowSingleHopExits
+
+    @Column(length = 255)
+    var autonomousSystemName: String? = null
+
+    @Column(length = 10)
+    var autonomousSystemNumber: String? = null
 
     @Column(length = 19)
     var nickname: String? = descriptor.nickname

@@ -5,7 +5,6 @@ import org.springframework.scheduling.annotation.AsyncResult
 import org.springframework.stereotype.Service
 import org.tormap.config.ApiConfig
 import org.tormap.database.entity.*
-import org.tormap.database.repository.AutonomousSystemRepositoryImpl
 import org.tormap.database.repository.DescriptorsFileRepository
 import org.tormap.database.repository.GeoRelayRepositoryImpl
 import org.tormap.database.repository.NodeDetailsRepository
@@ -34,7 +33,6 @@ class TorDescriptorService(
     val geoRelayRepositoryImpl: GeoRelayRepositoryImpl,
     val nodeDetailsRepository: NodeDetailsRepository,
     val descriptorsFileRepository: DescriptorsFileRepository,
-    val autonomousSystemRepositoryImpl: AutonomousSystemRepositoryImpl,
     val ipLookupService: IpLookupService,
     val nodeDetailsService: NodeDetailsService,
 ) {
@@ -114,6 +112,7 @@ class TorDescriptorService(
             }
         }
         if (descriptorType == DescriptorType.SERVER) {
+            nodeDetailsService.updateAutonomousSystems(processedMonths)
             nodeDetailsService.updateNodeFamilies(processedMonths)
         }
         descriptorsFileRepository.save(
