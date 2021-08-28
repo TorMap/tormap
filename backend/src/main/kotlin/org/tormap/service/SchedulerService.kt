@@ -44,7 +44,6 @@ class SchedulerService(
      * Updates all nodes which do not have any Autonomous System set.
      * Can take multiple hours depending on how many nodes need to be updated.
      */
-    @Async
     @Scheduled(fixedRateString = "\${scheduler.updateNodeAutonomousSystemsRate}")
     fun updateNodeAutonomousSystems() =
         nodeDetailsService.updateAutonomousSystems()

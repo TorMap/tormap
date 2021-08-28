@@ -77,7 +77,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                                     }) => {
 
     const [isLoading, setIsLoading] = useState(true)
-    const [familyDetails, setFamilyDetails] = useState<NodeFamilyIdentifier[]>()
+    const [familyIdentifiers, setFamilyIdentifiers] = useState<NodeFamilyIdentifier[]>()
     const classes = useStyle()
 
     /**
@@ -85,8 +85,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
      */
     useEffect(() => {
         setIsLoading(true)
-        setFamilyDetails([])
-        //todo: fetch details
+        setFamilyIdentifiers([])
         fetch(`${apiBaseUrl}/archive/node/family/identifiers`, {
             headers: {
                 'Content-Type': 'application/json',
@@ -96,23 +95,12 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
         })
             .then(response => response.json())
             .then(identifiers => {
-                setFamilyDetails(identifiers)
+                setFamilyIdentifiers(identifiers)
                 setIsLoading(false)
                 console.log(families)
                 console.log(identifiers)
             })
     }, [families])
-
-    //todo: duplicat, auslagern
-    /**
-     * Querryes the FamilyIdentifier object from an array of FamilyIdentifiers with the matching familyID
-     * @param familyDetails - the FamilyIdentifier array to query from
-     * @param familyDetailsId - The familyID to find
-     */
-    function getFamily(familyDetails: NodeFamilyIdentifier[], familyDetailsId: string): NodeFamilyIdentifier | undefined {
-        return familyDetails.find((family) => family.id === familyDetailsId)
-    }
-
 
     return (
         <FullHeightDialog
@@ -134,7 +122,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                     dividers
                 >
                     <div>
-                        {!isLoading ? familyDetails ?
+                        {!isLoading ? familyIdentifiers ?
                                 <Table size={"small"}>
                                     <TableHead>
                                         <TableRow>
@@ -150,7 +138,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {familyDetails.map((family) =>
+                                        {familyIdentifiers.map((family) =>
                                             <TableRow onClick={() => familySelectionCallback(+family.id)}>
                                                 <TableCell scope="row" className={classes.valueName}>
                                                     <Typography>{family.memberCount}</Typography>
