@@ -94,7 +94,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
             body: JSON.stringify(families),
         })
             .then(response => response.json())
-            .then(identifiers => {
+            .then((identifiers: NodeFamilyIdentifier[]) => {
                 setFamilyIdentifiers(identifiers)
                 setIsLoading(false)
                 console.log(families)
@@ -139,7 +139,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                     </TableHead>
                                     <TableBody>
                                         {familyIdentifiers.map((family) =>
-                                            <TableRow onClick={() => familySelectionCallback(+family.id)}>
+                                            <TableRow onClick={() => familySelectionCallback(family.id)}>
                                                 <TableCell scope="row" className={classes.valueName}>
                                                     <Typography>{family.memberCount}</Typography>
                                                 </TableCell>
