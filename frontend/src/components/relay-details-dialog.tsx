@@ -104,7 +104,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                                                                       relays,
                                                                   }) => {
     const [relayIdentifiers, setRelayIdentifiers] = useState<NodeIdentifier[]>([])
-    const [nodeDetailsId, setNodeDetailsId] = useState<number | undefined>()
+    const [nodeDetailsId, setNodeDetailsId] = useState<number>()
     const [rawRelayDetails, setRawRelayDetails] = useState<NodeDetails>()
     const [relayDetails, setRelayDetails] = useState<DetailsInfo[]>()
     const [isLoading, setIsLoading] = useState(true)
@@ -126,10 +126,10 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
             body: JSON.stringify(relays.map(relay => relay.detailsId)),
         })
             .then(response => response.json())
-            .then(identifiers => {
+            .then((identifiers: NodeIdentifier[]) => {
                 setRelayIdentifiers(identifiers)
                 if (identifiers.length > 0) {
-                    setNodeDetailsId(+identifiers[0].id)
+                    setNodeDetailsId(identifiers[0].id)
                 }
                 setIsLoading(false)
             })
@@ -227,15 +227,15 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     anchor={"left"}
                     variant={"permanent"}>
                     <List>
-                        {relayIdentifiers.map((relay) =>
-                            (relay.id &&
-                                <Tooltip title={relay.fingerprint} arrow={true} classes={{tooltip: classes.noMaxWidth}}>
+                        {relayIdentifiers.map((identifier) =>
+                            (identifier.id &&
+                                <Tooltip title={identifier.fingerprint} arrow={true} classes={{tooltip: classes.noMaxWidth}}>
                                     <div>
-                                        <ListItem button key={relay.id}
-                                                  selected={+relay.id === nodeDetailsId}
-                                                  onClick={() => setNodeDetailsId(+relay.id)}>
-                                            <ListItemIcon>{getIcon(getRelayType(findGeoRelayViewByID(relay.id, relays)))}</ListItemIcon>
-                                            <ListItemText primary={relay.nickname}/>
+                                        <ListItem button key={identifier.id}
+                                                  selected={identifier.id === nodeDetailsId}
+                                                  onClick={() => setNodeDetailsId(identifier.id)}>
+                                            <ListItemIcon>{getIcon(getRelayType(relays.find((relay) => relay.detailsId === identifier.id)))}</ListItemIcon>
+                                            <ListItemText primary={identifier.nickname}/>
                                         </ListItem>
                                     </div>
                                 </Tooltip>))}

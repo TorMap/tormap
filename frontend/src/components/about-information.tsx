@@ -55,7 +55,6 @@ export const AboutInformation: React.FunctionComponent = () => {
     const [showDialog, setShowDialog] = useState(false)
     const classes = useStyle()
 
-
     return (
         <div>
             <Button onClick={() => setShowDialog(true)}>

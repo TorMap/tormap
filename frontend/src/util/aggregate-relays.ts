@@ -242,10 +242,6 @@ export function getRelayType(relay?: GeoRelayView): RelayType | undefined {
  * @param id detailsID of the relay
  * @param relays GeoRelayView[] to be searched
  */
-export function findGeoRelayViewByID(id: string | number, relays: GeoRelayView[]): GeoRelayView | undefined {
-    //id has to be of type string
-    if (typeof id === "number") {
-        id = id.toString()
-    }
-    return relays.find((relay) => relay.detailsId == id)
+export function findGeoRelayViewByID(id: number, relays: GeoRelayView[]): GeoRelayView | undefined {
+    return relays.find((relay) => relay.detailsId === id)
 }
