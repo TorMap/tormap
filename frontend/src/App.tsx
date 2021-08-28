@@ -77,7 +77,7 @@ function App() {
         setIsLoading(true)
         fetch(`${apiBaseUrl}/archive/geo/relay/days`)
             .then(response => response.json())
-            .then(availableDays => {
+            .then((availableDays: string[]) => {
                 setAvailableDays(availableDays)
                 setSliderValue(availableDays.length - 1)
                 setIsLoading(false)

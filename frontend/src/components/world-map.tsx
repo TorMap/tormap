@@ -115,7 +115,7 @@ export const WorldMap: FunctionComponent<Props> = ({
             setLoadingStateCallback(true)
             fetch(`${apiBaseUrl}/archive/geo/relay/day/${dayToDisplay}`)
                 .then(response => response.json())
-                .then(newRelays => {
+                .then((newRelays: GeoRelayView[]) => {
                     setLoadingStateCallback(false)
                     if (currentTimeStamp === latestRequestTimestamp) setRelays(newRelays)
                 })
@@ -281,7 +281,7 @@ export const WorldMap: FunctionComponent<Props> = ({
         if (relays) {
             drawLayerGroup(relaysToLayerGroup())
         }
-    }, [heatLayer, leafletMap, markerLayer, relays, settings])
+    }, [relays, settings])
 
     /**
      * Handler for family selection

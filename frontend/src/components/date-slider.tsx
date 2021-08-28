@@ -88,7 +88,7 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue}) 
     // handle debouncing of the slider value
     useEffect(() => {
         setValue(debouncedSliderValue)
-    },[setValue, debouncedSliderValue])
+    },[debouncedSliderValue])
 
     return (
         <div className={classes.slider}>

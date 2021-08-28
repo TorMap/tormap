@@ -5,7 +5,7 @@ export interface GeoRelayView {
     long: number
     country: string
     flags?: RelayFlag[]
-    detailsId: string
+    detailsId: number
     familyId: number
 }
 
@@ -41,13 +41,13 @@ export interface DetailsInfo {
 }
 
 export interface NodeIdentifier {
-    id: string,
+    id: number,
     fingerprint: string
     nickname: string
 }
 
 export interface NodeFamilyIdentifier {
-    id: string
+    id: number
     memberCount: number
     fingerprints: string
     nicknames: string
