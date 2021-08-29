@@ -35,7 +35,7 @@ separate terminals. Once you kill the terminal, the server is shutdown. The back
 percentage below `100%`. This is normal behaviour with Gradle & Spring Boot.
 
 - Linux: Type `./run` or `bash ./run`
-- Windows: `run.bat`
+- Windows: Type `run.bat`
 
 The `backend` will be available at http://localhost:8080/ and `frontend` at http://localhost:3000/. If the script fails,
 or you prefer to run the servers manually:
