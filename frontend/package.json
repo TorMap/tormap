@@ -1,6 +1,6 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
+  "name": "tormap",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@date-io/date-fns": "1.x",
