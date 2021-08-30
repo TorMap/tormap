@@ -130,16 +130,19 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                 <Typography>Family members</Typography>
                                             </TableCell>
                                             <TableCell scope="row">
-                                                <Typography>Autonomous System</Typography>
+                                                <Typography>Autonomous Systems</Typography>
                                             </TableCell>
                                             <TableCell scope="row">
-                                                <Typography>nicknames</Typography>
+                                                <Typography>Relay Nicknames</Typography>
                                             </TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
                                         {familyIdentifiers.map((family) =>
-                                            <TableRow onClick={() => familySelectionCallback(family.id)}>
+                                            <TableRow
+                                                onClick={() => familySelectionCallback(family.id)}
+                                                hover={true}
+                                            >
                                                 <TableCell scope="row" className={classes.valueName}>
                                                     <Typography>{family.memberCount}</Typography>
                                                 </TableCell>
