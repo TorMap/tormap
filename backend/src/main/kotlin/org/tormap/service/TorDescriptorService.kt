@@ -45,15 +45,15 @@ class TorDescriptorService(
      */
     fun collectAndProcessDescriptors(apiPath: String, descriptorType: DescriptorType) {
         try {
-            logger.info("Collecting descriptors from api path $apiPath")
+            logger.info("Collecting descriptors from api path $apiPath ...")
             collectDescriptors(apiPath)
             logger.info("Finished collecting descriptors from api path $apiPath")
 
-            logger.info("Processing descriptors from api path $apiPath")
+            logger.info("Processing descriptors from api path $apiPath ...")
             processDescriptors(apiPath, descriptorType)
             logger.info("Finished processing descriptors from api path $apiPath")
         } catch (exception: Exception) {
-            logger.error("Could not collect or process descriptors from api path $apiPath. ${exception.message}")
+            logger.error("Could not collect or process descriptors from api path $apiPath ! ${exception.message}")
         }
     }
 
@@ -109,7 +109,7 @@ class TorDescriptorService(
                     processedMonths.add(YearMonth.from(processedDay).toString())
                 }
             } catch (exception: Exception) {
-                logger.error("Could not complete processing a descriptor. ${exception.message}")
+                logger.error("Could not finish processing a descriptor! ${exception.message}")
             }
         }
         if (descriptorType == DescriptorType.SERVER) {
@@ -165,7 +165,7 @@ class TorDescriptorService(
                 else -> throw Exception("Type ${descriptor.javaClass.name} is not supported!")
             }
         } catch (exception: Exception) {
-            logger.error("Could not process descriptor part of ${descriptor.descriptorFile.name}: ${exception.message}")
+            logger.error("Could not process descriptor part of ${descriptor.descriptorFile.name} ! ${exception.message}")
             AsyncResult(null)
         }
     }
@@ -200,7 +200,6 @@ class TorDescriptorService(
             }
         }
         geoRelayRepositoryImpl.saveAll(nodesToSave)
-        logger.debug("Processed relay consensus descriptor for day $descriptorDay")
         return descriptorDay
     }
 
