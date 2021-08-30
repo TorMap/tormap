@@ -209,27 +209,6 @@ export const WorldMap: FunctionComponent<Props> = ({
                     setSettingsCallback({...settings, selectedCountry: undefined})
                 }
 
-                // Draw Country's, used to draw all countries to the map if at least one relay is hosted there
-                if (leafletMap && countryMap.size > 0 && settings.sortCountry) {
-                    countryLayer(countryMap, settings, setSettingsCallback).addTo(layerToReturn)
-                }
-
-                // Draw aggregated marker's, used to draw all markers to the map with more than 4 relays on the same coordinate
-                if (settings.aggregateCoordinates) {
-                    aggregatedCoordinatesLayer(latLonMap, openRelayDetailsDialog).addTo(layerToReturn)
-                }
-
-                // Draw marker's, used to draw all markers to the map with colors according to their type
-                if (!settings.sortCountry) {
-                    defaultMarkerLayer(latLonMap, openRelayDetailsDialog).addTo(layerToReturn)
-                }
-
-                // Draw familyCord marker's, used to draw all markers to the map with colors according to their family
-                if (settings.sortFamily) {
-                    if (settings.selectedFamily) familyLayer(familyMap, settings, setSettingsCallback).addTo(layerToReturn)
-                    else familyCordLayer(familyCoordinatesMap, settings, setSettingsCallback, handleFamilyMarkerClick).addTo(layerToReturn)
-                }
-
                 // Draw Heatmap, draws a heatmap with a point for each coordinate
                 // As this Layer is part of the component state and has to be applied to the map object directly, it cant be moved to util
                 // https://github.com/Leaflet/Leaflet.heat
@@ -249,6 +228,29 @@ export const WorldMap: FunctionComponent<Props> = ({
                 } else {
                     leafletMap?.removeLayer(heatLayer)
                 }
+
+                // Draw Country's, used to draw all countries to the map if at least one relay is hosted there
+                if (leafletMap && countryMap.size > 0 && settings.sortCountry) {
+                    countryLayer(countryMap, settings, setSettingsCallback).addTo(layerToReturn)
+                }
+
+                // Draw aggregated marker's, used to draw all markers to the map with more than 4 relays on the same coordinate
+                if (settings.aggregateCoordinates) {
+                    aggregatedCoordinatesLayer(latLonMap, openRelayDetailsDialog).addTo(layerToReturn)
+                }
+
+                // Draw familyCord marker's, used to draw all markers to the map with colors according to their family
+                if (settings.sortFamily) {
+                    if (settings.selectedFamily) familyLayer(familyMap, settings, setSettingsCallback).addTo(layerToReturn)
+                    else familyCordLayer(familyCoordinatesMap, settings, setSettingsCallback, handleFamilyMarkerClick).addTo(layerToReturn)
+                }
+
+                // Draw marker's, used to draw all markers to the map with colors according to their type
+                if (!settings.sortCountry) {
+                    defaultMarkerLayer(latLonMap, openRelayDetailsDialog).addTo(layerToReturn)
+                }
+
+
 
                 // Draw country marker's, used to draw all markers to the map with colors according to their country
                 if (settings.sortCountry) {
