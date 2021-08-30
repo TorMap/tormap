@@ -96,7 +96,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                                                        closeSnackbar,
                                                    }) => {
     const [showFamilySelectionDialog, setShowFamilySelectionDialog] = useState(false)
-    const [familiesForDetailsDialog, setFamiliesForDetailsDialog] = useState<number[]>([])
+    const [familiesForSelectionDialog, setFamiliesForSelectionDialog] = useState<number[]>([])
     const [showRelayDetailsDialog, setShowRelayDetailsDialog] = useState(false)
     const [relaysForDetailsDialog, setRelaysForDetailsDialog] = useState<GeoRelayView[]>([])
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
@@ -152,9 +152,13 @@ export const WorldMap: FunctionComponent<Props> = ({
                 const familyMap = buildFamilyMap(relaysAtCoordinate)
                 let families: number[] = []
                 familyMap.forEach((family, familyID) => {
-                    if (family.length > 1) families.push(familyID)
+                    families.push(familyID)
                 })
-                setFamiliesForDetailsDialog(families)
+                if(families.length === 1){
+                    setSettingsCallback({...settings, selectedFamily: families[0]})
+                    return
+                }
+                setFamiliesForSelectionDialog(families)
                 setShowFamilySelectionDialog(true)
             }
         }
@@ -319,7 +323,7 @@ export const WorldMap: FunctionComponent<Props> = ({
             <FamilySelectionDialog
                 showDialog={showFamilySelectionDialog}
                 closeDialog={() => setShowFamilySelectionDialog(false)}
-                families={familiesForDetailsDialog}
+                families={familiesForSelectionDialog}
                 familySelectionCallback={handleFamilySelection}
             />
             <TileLayer
