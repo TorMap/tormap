@@ -40,6 +40,15 @@ class SchedulerService(
     fun relayServerDescriptors() =
         torDescriptorService.collectAndProcessDescriptors(apiConfig.descriptorPathRelayServers, DescriptorType.SERVER)
 
+
+    /**
+     * Updates all months where no node families are set.
+     * Can take a few minutes depending on how many months need to updated.
+     */
+    @Scheduled(fixedRateString = "\${scheduler.updateNodeFamilies}")
+    fun updateNodeFamilies() =
+        nodeDetailsService.updateNodeFamilies()
+
     /**
      * Updates all nodes which do not have any Autonomous System set.
      * Can take multiple hours depending on how many nodes need to be updated.

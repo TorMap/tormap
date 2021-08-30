@@ -24,4 +24,9 @@ data class SchedulerConfig(
      * The rate at which the Autonomous System info in NodeDetails is updated.
      */
     val updateNodeAutonomousSystemsRate: String,
+
+    /**
+     * The rate at which the families of NodeDetails are updated.
+     */
+    val updateNodeFamilies: String,
 )
