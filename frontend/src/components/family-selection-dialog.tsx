@@ -147,7 +147,12 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                     <Typography>{family.memberCount}</Typography>
                                                 </TableCell>
                                                 <TableCell scope="row">
-                                                    <Typography>{family.autonomousSystems}</Typography>
+                                                    <Typography>
+                                                        {(family.autonomousSystems.length >= 0) ?
+                                                            (family.autonomousSystems) :
+                                                            "This data is not available yet."
+                                                        }
+                                                    </Typography>
                                                 </TableCell>
                                                 <TableCell scope="row">
                                                     <Typography>{family.nicknames}</Typography>
