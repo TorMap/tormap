@@ -25,32 +25,54 @@ class NodeDetailsService(
     /**
      * Updates [NodeDetails.familyId] for all entities of the requested [months].
      */
-    fun updateNodeFamilies(months: Set<String>? = null, overwriteExisingFamilyMonths: Boolean = false) {
+    fun updateNodeFamilies(months: Set<String>? = null, overwriteExistingFamilies: Boolean = false) {
         try {
             val monthsToProcess = when {
                 months != null -> months
-                overwriteExisingFamilyMonths -> nodeDetailsRepositoryImpl.findDistinctMonths()
-                else -> nodeDetailsRepositoryImpl.findDistinctMonthsAndFamilyIdsNull()
+                else -> {
+                    var monthFamilyMemberCount = nodeDetailsRepositoryImpl.findDistinctMonthFamilyMemberCount()
+                    if (!overwriteExistingFamilies) {
+                        monthFamilyMemberCount = monthFamilyMemberCount.filter { it.count > 0 }
+                    }
+                    monthFamilyMemberCount.map { it.month }
+                }
             }
             logger.info("Updating node families for months: ${monthsToProcess.joinToString(", ")}")
-            monthsToProcess.forEach {
+            monthsToProcess.forEach { month ->
+                nodeDetailsRepositoryImpl.clearFamiliesFromMonth(month)
                 var confirmedFamilyConnectionCount = 0
                 var rejectedFamilyConnectionCount = 0
-                var membersOfProcessedFamilies = mutableMapOf<String, Long>()
-                val requestingNodes = nodeDetailsRepositoryImpl.findAllByMonthEqualsAndFamilyEntriesNotNull(it)
-                requestingNodes.forEach { requestingNode ->
-                    val confirmedFamilyNodes = mutableListOf<NodeDetails>()
-                    val month = requestingNode.month
-                    var familyId: Long? = null
+                val families = mutableListOf<Set<NodeDetails>>()
+                val requestingFamilyNodes = nodeDetailsRepositoryImpl.findAllByMonthEqualsAndFamilyEntriesNotNull(month)
+                requestingFamilyNodes.forEach { requestingNode ->
                     requestingNode.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
                         try {
-                            val newConfirmedMember = confirmFamilyMember(requestingNode, familyEntry, month)
-                            if (newConfirmedMember != null) {
-                                if (!membersOfProcessedFamilies.containsKey(newConfirmedMember.fingerprint)) {
-                                    confirmedFamilyNodes.add(newConfirmedMember)
+                            val newConfirmedMember =
+                                confirmFamilyMember(requestingNode, familyEntry, requestingFamilyNodes)
+                            if (newConfirmedMember != null && requestingNode != newConfirmedMember) {
+                                val existingFamilyRequestingNodeIndex =
+                                    families.indexOfFirst { it.contains(requestingNode) }
+                                val existingFamilyNewConfirmedMemberIndex =
+                                    families.indexOfFirst { it.contains(newConfirmedMember) }
+
+                                if (
+                                    existingFamilyRequestingNodeIndex >= 0
+                                    && existingFamilyNewConfirmedMemberIndex >= 0
+                                    && existingFamilyRequestingNodeIndex != existingFamilyNewConfirmedMemberIndex
+                                ) {
+                                    families[existingFamilyRequestingNodeIndex] =
+                                        families[existingFamilyRequestingNodeIndex].plus(families[existingFamilyNewConfirmedMemberIndex])
+                                    families.removeAt(existingFamilyNewConfirmedMemberIndex)
+                                } else if (existingFamilyRequestingNodeIndex >= 0) {
+                                    families[existingFamilyRequestingNodeIndex] =
+                                        families[existingFamilyRequestingNodeIndex].plus(newConfirmedMember)
+                                } else if (existingFamilyNewConfirmedMemberIndex >= 0) {
+                                    families[existingFamilyNewConfirmedMemberIndex] =
+                                        families[existingFamilyNewConfirmedMemberIndex].plus(requestingNode)
+                                } else {
+                                    families.add(setOf(requestingNode, newConfirmedMember))
                                 }
-                                familyId = membersOfProcessedFamilies[requestingNode.fingerprint]
-                                    ?: membersOfProcessedFamilies[newConfirmedMember.fingerprint]
+
                                 confirmedFamilyConnectionCount++
                             } else {
                                 rejectedFamilyConnectionCount++
@@ -60,11 +82,10 @@ class NodeDetailsService(
                             rejectedFamilyConnectionCount++
                         }
                     }
-                    membersOfProcessedFamilies =
-                        saveNodeFamily(requestingNode, confirmedFamilyNodes, membersOfProcessedFamilies, familyId)
                 }
+                saveFamilies(families)
                 val totalFamilyConnectionCount = confirmedFamilyConnectionCount + rejectedFamilyConnectionCount
-                logger.info("For month $it this many family connections were rejected: $rejectedFamilyConnectionCount / $totalFamilyConnectionCount")
+                logger.info("For month $month this many family connections were rejected: $rejectedFamilyConnectionCount / $totalFamilyConnectionCount")
             }
             logger.info("Finished updating node families")
         } catch (exception: Exception) {
@@ -122,50 +143,37 @@ class NodeDetailsService(
     /**
      * Save a new family of nodes by updating their [NodeDetails.familyId]
      */
-    private fun saveNodeFamily(
-        requestingNode: NodeDetails,
-        confirmedFamilyMembers: MutableList<NodeDetails>,
-        membersOfOtherFamilies: MutableMap<String, Long>,
-        familyId: Long?,
-    ): MutableMap<String, Long> {
-        if (confirmedFamilyMembers.isNotEmpty() || familyId != null) {
-            if (!membersOfOtherFamilies.containsKey(requestingNode.fingerprint)) {
-                confirmedFamilyMembers.add(requestingNode)
-            }
-            val newFamilyId = familyId ?: dbSequenceIncrementer.nextLongValue()
-            confirmedFamilyMembers.forEach {
-                it.familyId = newFamilyId
-                membersOfOtherFamilies[it.fingerprint] = newFamilyId
-            }
-            nodeDetailsRepositoryImpl.saveAll(confirmedFamilyMembers)
+    private fun saveFamilies(
+        families: List<Set<NodeDetails>>
+    ) {
+        families.forEach { family ->
+            val familyId = dbSequenceIncrementer.nextLongValue()
+            family.forEach { it.familyId = familyId }
+            nodeDetailsRepositoryImpl.saveAll(family)
         }
-        return membersOfOtherFamilies
     }
 
     /**
-     * Extract the fingerprint of a [allegedFamilyMemberId] for a [requestingNode] in a given [month]
+     * Extract the fingerprint of a [allegedFamilyMemberId] and check if it is a family member of the [requestingNode]
      */
     private fun confirmFamilyMember(
         requestingNode: NodeDetails,
         allegedFamilyMemberId: String,
-        month: String,
+        requestingFamilyNodes: List<NodeDetails>,
     ): NodeDetails? {
         val fingerprintRegex = Regex("^\\$[A-F0-9]{40}.*$")
         val nicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
         when {
             fingerprintRegex.matches(allegedFamilyMemberId) -> {
-                val allegedFamilyMember = nodeDetailsRepositoryImpl.findByMonthAndFingerprintAndFamilyEntriesNotNull(
-                    month,
-                    allegedFamilyMemberId.substring(1, 41),
-                )
+                val allegedFamilyMember =
+                    requestingFamilyNodes.find { it.fingerprint == allegedFamilyMemberId.substring(1, 41) }
                 if (isNodeMemberOfFamily(requestingNode, allegedFamilyMember)) {
-                    return allegedFamilyMember!!
+                    return allegedFamilyMember
                 }
             }
             nicknameRegex.matches(allegedFamilyMemberId) -> {
-                val allegedFamilyMembers =
-                    nodeDetailsRepositoryImpl.findAllByMonthAndNickname(month, allegedFamilyMemberId)
-                return allegedFamilyMembers.firstOrNull { isNodeMemberOfFamily(requestingNode, it) }
+                requestingFamilyNodes.filter { it.nickname == allegedFamilyMemberId }
+                    .firstOrNull { isNodeMemberOfFamily(requestingNode, it) }
             }
             else -> throw Exception("Format of new family member $allegedFamilyMemberId for requestingNode ${requestingNode.fingerprint} not supported!")
         }

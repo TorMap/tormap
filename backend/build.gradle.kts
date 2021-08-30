@@ -70,7 +70,7 @@ allOpen {
 
 // Connect migration tool to DB
 flyway {
-    url = "jdbc:h2:./database/tormap;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=5"
+    url = "jdbc:h2:./database/tormap;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=5;LOCK_TIMEOUT=30000"
     user = "sa"
 }
 

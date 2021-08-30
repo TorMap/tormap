@@ -39,7 +39,7 @@
   </root>
 
   <!-- LOG "org.tormap*" at TRACE level -->
-  <logger name="org.tormap" level="trace" additivity="false">
+  <logger name="org.tormap" level="info" additivity="false">
     <appender-ref ref="RollingFile" />
     <appender-ref ref="Console" />
   </logger>

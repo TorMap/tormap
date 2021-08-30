@@ -4,6 +4,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.tormap.config.ApiConfig
+import org.tormap.config.SchedulerConfig
 import org.tormap.database.entity.DescriptorType
 
 
@@ -14,6 +15,7 @@ import org.tormap.database.entity.DescriptorType
 @Component
 class SchedulerService(
     val apiConfig: ApiConfig,
+    val schedulerConfig: SchedulerConfig,
     val torDescriptorService: TorDescriptorService,
     val nodeDetailsService: NodeDetailsService,
 ) {
@@ -45,14 +47,16 @@ class SchedulerService(
      * Updates all months where no node families are set.
      * Can take a few minutes depending on how many months need to updated.
      */
-    @Scheduled(fixedRateString = "\${scheduler.updateNodeFamilies}")
+    @Async
+    @Scheduled(fixedRateString = "\${scheduler.updateNodeFamiliesRate}")
     fun updateNodeFamilies() =
-        nodeDetailsService.updateNodeFamilies()
+        nodeDetailsService.updateNodeFamilies(null, schedulerConfig.updateNodeFamiliesOverwriteAll)
 
     /**
      * Updates all nodes which do not have any Autonomous System set.
      * Can take multiple hours depending on how many nodes need to be updated.
      */
+    @Async
     @Scheduled(fixedRateString = "\${scheduler.updateNodeAutonomousSystemsRate}")
     fun updateNodeAutonomousSystems() =
         nodeDetailsService.updateAutonomousSystems()
