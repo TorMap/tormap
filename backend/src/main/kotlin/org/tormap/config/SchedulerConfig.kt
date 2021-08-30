@@ -28,5 +28,10 @@ data class SchedulerConfig(
     /**
      * The rate at which the families of NodeDetails are updated.
      */
-    val updateNodeFamilies: String,
+    val updateNodeFamiliesRate: String,
+
+    /**
+     * Whether all previously calculated families should be overridden
+     */
+    val updateNodeFamiliesOverwriteAll: Boolean,
 )
