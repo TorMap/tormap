@@ -38,8 +38,8 @@
     <appender-ref ref="Console" />
   </root>
 
-  <!-- LOG "org.tormap*" at TRACE level -->
-  <logger name="org.tormap" level="info" additivity="false">
+  <!-- LOG "org.tormap*" at DEBUG level -->
+  <logger name="org.tormap" level="debug" additivity="false">
     <appender-ref ref="RollingFile" />
     <appender-ref ref="Console" />
   </logger>

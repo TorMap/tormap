@@ -39,7 +39,6 @@ class NodeDetailsService(
             }
             logger.info("Updating node families for months: ${monthsToProcess.joinToString(", ")}")
             monthsToProcess.forEach { month ->
-                nodeDetailsRepositoryImpl.clearFamiliesFromMonth(month)
                 var confirmedFamilyConnectionCount = 0
                 var rejectedFamilyConnectionCount = 0
                 val families = mutableListOf<Set<NodeDetails>>()
@@ -83,9 +82,10 @@ class NodeDetailsService(
                         }
                     }
                 }
+                nodeDetailsRepositoryImpl.clearFamiliesFromMonth(month)
                 saveFamilies(families)
                 val totalFamilyConnectionCount = confirmedFamilyConnectionCount + rejectedFamilyConnectionCount
-                logger.info("For month $month this many family connections were rejected: $rejectedFamilyConnectionCount / $totalFamilyConnectionCount")
+                logger.info("Finished families for month $month. Rejected $rejectedFamilyConnectionCount / $totalFamilyConnectionCount connections. Found ${families.size} different families.")
             }
             logger.info("Finished updating node families")
         } catch (exception: Exception) {
@@ -161,17 +161,16 @@ class NodeDetailsService(
         allegedFamilyMemberId: String,
         requestingFamilyNodes: List<NodeDetails>,
     ): NodeDetails? {
-        val fingerprintRegex = Regex("^\\$[A-F0-9]{40}.*$")
-        val nicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
         when {
-            fingerprintRegex.matches(allegedFamilyMemberId) -> {
+            familyEntryFingerprintRegex.matches(allegedFamilyMemberId) -> {
+                val allegedFamilyMemberFingerprint = extractFingerprintFromFamilyEntry(allegedFamilyMemberId)
                 val allegedFamilyMember =
-                    requestingFamilyNodes.find { it.fingerprint == allegedFamilyMemberId.substring(1, 41) }
+                    requestingFamilyNodes.find { it.fingerprint == allegedFamilyMemberFingerprint }
                 if (isNodeMemberOfFamily(requestingNode, allegedFamilyMember)) {
                     return allegedFamilyMember
                 }
             }
-            nicknameRegex.matches(allegedFamilyMemberId) -> {
+            familyEntryNicknameRegex.matches(allegedFamilyMemberId) -> {
                 requestingFamilyNodes.filter { it.nickname == allegedFamilyMemberId }
                     .firstOrNull { isNodeMemberOfFamily(requestingNode, it) }
             }
@@ -187,7 +186,20 @@ class NodeDetailsService(
         requestingNode: NodeDetails,
         allegedFamilyMember: NodeDetails?,
     ) = allegedFamilyMember?.familyEntries?.commaSeparatedToList()?.any {
-        it == "$" + requestingNode.fingerprint || it == requestingNode.nickname
+        when {
+            familyEntryFingerprintRegex.matches(it) -> {
+                requestingNode.fingerprint == extractFingerprintFromFamilyEntry(it)
+            }
+            familyEntryNicknameRegex.matches(it) -> {
+                requestingNode.nickname == it
+            }
+            else -> throw Exception("Format of new family member ${allegedFamilyMember.id} for requestingNode ${requestingNode.fingerprint} not supported!")
+        }
     } ?: false
+
+    private fun extractFingerprintFromFamilyEntry(familyEntry: String) = familyEntry.substring(1, 41)
+
+    val familyEntryFingerprintRegex = Regex("^\\$[A-F0-9]{40}.*$")
+    val familyEntryNicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
 }
 
