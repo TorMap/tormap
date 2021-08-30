@@ -96,7 +96,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                                                        closeSnackbar,
                                                    }) => {
     const [showFamilySelectionDialog, setShowFamilySelectionDialog] = useState(false)
-    const [familiesForDetailsDialog, setFamiliesForDetailsDialog] = useState<number[]>([])
+    const [familiesForSelectionDialog, setFamiliesForSelectionDialog] = useState<number[]>([])
     const [showRelayDetailsDialog, setShowRelayDetailsDialog] = useState(false)
     const [relaysForDetailsDialog, setRelaysForDetailsDialog] = useState<GeoRelayView[]>([])
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
@@ -152,9 +152,13 @@ export const WorldMap: FunctionComponent<Props> = ({
                 const familyMap = buildFamilyMap(relaysAtCoordinate)
                 let families: number[] = []
                 familyMap.forEach((family, familyID) => {
-                    if (family.length > 1) families.push(familyID)
+                    families.push(familyID)
                 })
-                setFamiliesForDetailsDialog(families)
+                if(families.length === 1){
+                    setSettingsCallback({...settings, selectedFamily: families[0]})
+                    return
+                }
+                setFamiliesForSelectionDialog(families)
                 setShowFamilySelectionDialog(true)
             }
         }
@@ -209,27 +213,6 @@ export const WorldMap: FunctionComponent<Props> = ({
                     setSettingsCallback({...settings, selectedCountry: undefined})
                 }
 
-                // Draw Country's, used to draw all countries to the map if at least one relay is hosted there
-                if (leafletMap && countryMap.size > 0 && settings.sortCountry) {
-                    countryLayer(countryMap, settings, setSettingsCallback).addTo(layerToReturn)
-                }
-
-                // Draw aggregated marker's, used to draw all markers to the map with more than 4 relays on the same coordinate
-                if (settings.aggregateCoordinates) {
-                    aggregatedCoordinatesLayer(latLonMap, openRelayDetailsDialog).addTo(layerToReturn)
-                }
-
-                // Draw marker's, used to draw all markers to the map with colors according to their type
-                if (!settings.sortCountry) {
-                    defaultMarkerLayer(latLonMap, openRelayDetailsDialog).addTo(layerToReturn)
-                }
-
-                // Draw familyCord marker's, used to draw all markers to the map with colors according to their family
-                if (settings.sortFamily) {
-                    if (settings.selectedFamily) familyLayer(familyMap, settings, setSettingsCallback).addTo(layerToReturn)
-                    else familyCordLayer(familyCoordinatesMap, settings, setSettingsCallback, handleFamilyMarkerClick).addTo(layerToReturn)
-                }
-
                 // Draw Heatmap, draws a heatmap with a point for each coordinate
                 // As this Layer is part of the component state and has to be applied to the map object directly, it cant be moved to util
                 // https://github.com/Leaflet/Leaflet.heat
@@ -243,12 +226,35 @@ export const WorldMap: FunctionComponent<Props> = ({
                         max: 1,
                         blur: 35,
                         minOpacity: .55,
-                        gradient: {0.4: '#2e53dc', 0.65: '#c924ae', .75: '#ff4646', .83: "#ff0000"}
+                        gradient: {0.4: '#2e53dc', 0.65: '#c924ae', .75: '#ff4646', .83: "#ff0000"},
                     }).addTo(leafletMap)
                     setHeatLayer(heat)
                 } else {
                     leafletMap?.removeLayer(heatLayer)
                 }
+
+                // Draw Country's, used to draw all countries to the map if at least one relay is hosted there
+                if (leafletMap && countryMap.size > 0 && settings.sortCountry) {
+                    countryLayer(countryMap, settings, setSettingsCallback).addTo(layerToReturn)
+                }
+
+                // Draw aggregated marker's, used to draw all markers to the map with more than 4 relays on the same coordinate
+                if (settings.aggregateCoordinates) {
+                    aggregatedCoordinatesLayer(latLonMap, openRelayDetailsDialog).addTo(layerToReturn)
+                }
+
+                // Draw familyCord marker's, used to draw all markers to the map with colors according to their family
+                if (settings.sortFamily) {
+                    if (settings.selectedFamily) familyLayer(familyMap, settings, setSettingsCallback).addTo(layerToReturn)
+                    else familyCordLayer(familyCoordinatesMap, settings, setSettingsCallback, handleFamilyMarkerClick).addTo(layerToReturn)
+                }
+
+                // Draw marker's, used to draw all markers to the map with colors according to their type
+                if (!settings.sortCountry) {
+                    defaultMarkerLayer(latLonMap, openRelayDetailsDialog).addTo(layerToReturn)
+                }
+
+
 
                 // Draw country marker's, used to draw all markers to the map with colors according to their country
                 if (settings.sortCountry) {
@@ -317,7 +323,7 @@ export const WorldMap: FunctionComponent<Props> = ({
             <FamilySelectionDialog
                 showDialog={showFamilySelectionDialog}
                 closeDialog={() => setShowFamilySelectionDialog(false)}
-                families={familiesForDetailsDialog}
+                families={familiesForSelectionDialog}
                 familySelectionCallback={handleFamilySelection}
             />
             <TileLayer
