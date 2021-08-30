@@ -19,6 +19,7 @@ import org.torproject.descriptor.index.DescriptorIndexCollector
 import java.io.File
 import java.math.RoundingMode
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.concurrent.Future
 
@@ -78,7 +79,7 @@ class TorDescriptorService(
     private fun processDescriptors(apiPath: String, descriptorType: DescriptorType) {
         var descriptorDaysBeingProcessed = mutableSetOf<Future<LocalDate?>>()
         var lastProcessedFile: File? = null
-        readDescriptors(apiPath).forEach {
+        readDescriptors(apiPath, descriptorType).forEach {
             if (lastProcessedFile == null) {
                 lastProcessedFile = it.descriptorFile
             } else if (it.descriptorFile != lastProcessedFile) {
@@ -112,15 +113,25 @@ class TorDescriptorService(
             }
         }
         if (descriptorType == DescriptorType.SERVER) {
-            nodeDetailsService.updateAutonomousSystems(processedMonths)
             nodeDetailsService.updateNodeFamilies(processedMonths)
+            nodeDetailsService.updateAutonomousSystems(processedMonths)
         }
-        descriptorsFileRepository.save(
-            DescriptorsFile(
-                DescriptorsFileId(descriptorFile.name, descriptorType),
-                descriptorFile.lastModified()
+        val descriptorsFileId = DescriptorsFileId(descriptorFile.name, descriptorType)
+        val checkDescriptorsFile =
+            descriptorsFileRepository.findById(descriptorsFileId)
+        if (checkDescriptorsFile.isPresent) {
+            val existingDescriptorsFile = checkDescriptorsFile.get()
+            existingDescriptorsFile.lastModified = descriptorFile.lastModified()
+            existingDescriptorsFile.processedAt = LocalDateTime.now()
+            descriptorsFileRepository.save(existingDescriptorsFile)
+        } else {
+            descriptorsFileRepository.save(
+                DescriptorsFile(
+                    descriptorsFileId,
+                    descriptorFile.lastModified()
+                )
             )
-        )
+        }
         logger.info("Finished processing descriptors file ${descriptorFile.name}")
     }
 
@@ -128,10 +139,10 @@ class TorDescriptorService(
      * Read descriptors which were previously saved to disk at [apiPath].
      * A reader can consume quite some memory. Try not to create multiple readers in a short time.
      */
-    private fun readDescriptors(apiPath: String): MutableIterable<Descriptor> {
+    private fun readDescriptors(apiPath: String, descriptorType: DescriptorType): MutableIterable<Descriptor> {
         val descriptorReader = DescriptorReaderImpl()
         val parentDirectory = File(apiConfig.descriptorDownloadDirectory + apiPath)
-        val excludedFiles = descriptorsFileRepository.findAll()
+        val excludedFiles = descriptorsFileRepository.findAllById_TypeEquals(descriptorType)
         descriptorReader.excludedFiles = excludedFiles.associate {
             Pair(
                 parentDirectory.absolutePath + File.separator + it.id.filename,
