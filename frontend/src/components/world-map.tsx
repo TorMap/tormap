@@ -222,7 +222,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                         max: 1,
                         blur: 35,
                         minOpacity: .55,
-                        gradient: {0.4: '#2e53dc', 0.65: '#c924ae', .75: '#ff4646', .83: "#ff0000"}
+                        gradient: {0.4: '#2e53dc', 0.65: '#c924ae', .75: '#ff4646', .83: "#ff0000"},
                     }).addTo(leafletMap)
                     setHeatLayer(heat)
                 } else {
