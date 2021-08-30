@@ -30,7 +30,7 @@ class IpLookupService(
         else if (ip2locationResult.latitude == null || ip2locationResult.longitude == null) throw GeoException()
         ip2locationResult
     } catch (exception: Exception) {
-        logger.warn("Location lookup failed for IP address $ipAddress! ${exception.javaClass}: ${exception.message}")
+        logger.warn("Location lookup failed for IP address $ipAddress ! ${exception.javaClass}: ${exception.message}")
         null
     }
 }
