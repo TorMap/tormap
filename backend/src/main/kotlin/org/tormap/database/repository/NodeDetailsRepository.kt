@@ -5,8 +5,6 @@ import org.tormap.database.entity.NodeDetails
 
 interface NodeDetailsRepository : CrudRepository<NodeDetails, Long> {
     fun findByMonthAndFingerprint(month: String, fingerprint: String): NodeDetails?
-    fun findByMonthAndFingerprintAndFamilyEntriesNotNull(month: String, fingerprint: String): NodeDetails?
-    fun findAllByMonthAndNickname(month: String, nickname: String): List<NodeDetails>
     fun findAllByMonthEqualsAndFamilyEntriesNotNull(month: String): List<NodeDetails>
     fun findAllByMonthEqualsAndAutonomousSystemNumberNull(month: String): List<NodeDetails>
     fun findAllByFamilyId(familyId: Long): List<NodeDetails>
