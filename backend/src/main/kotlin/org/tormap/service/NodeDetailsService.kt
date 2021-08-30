@@ -9,6 +9,7 @@ import org.tormap.database.entity.NodeDetails
 import org.tormap.database.repository.AutonomousSystemRepositoryImpl
 import org.tormap.database.repository.NodeDetailsRepositoryImpl
 import org.tormap.logger
+import javax.transaction.Transactional
 
 
 /**
@@ -39,57 +40,62 @@ class NodeDetailsService(
             }
             logger.info("Updating node families for months: ${monthsToProcess.joinToString(", ")}")
             monthsToProcess.forEach { month ->
-                var confirmedFamilyConnectionCount = 0
-                var rejectedFamilyConnectionCount = 0
-                val families = mutableListOf<Set<NodeDetails>>()
-                val requestingFamilyNodes = nodeDetailsRepositoryImpl.findAllByMonthEqualsAndFamilyEntriesNotNull(month)
-                requestingFamilyNodes.forEach { requestingNode ->
-                    requestingNode.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
-                        try {
-                            val newConfirmedMember =
-                                confirmFamilyMember(requestingNode, familyEntry, requestingFamilyNodes)
-                            if (newConfirmedMember != null && requestingNode != newConfirmedMember) {
-                                val existingFamilyRequestingNodeIndex =
-                                    families.indexOfFirst { it.contains(requestingNode) }
-                                val existingFamilyNewConfirmedMemberIndex =
-                                    families.indexOfFirst { it.contains(newConfirmedMember) }
+                try {
+                    var confirmedFamilyConnectionCount = 0
+                    var rejectedFamilyConnectionCount = 0
+                    val families = mutableListOf<Set<NodeDetails>>()
+                    val requestingFamilyNodes =
+                        nodeDetailsRepositoryImpl.findAllByMonthEqualsAndFamilyEntriesNotNull(month)
+                    requestingFamilyNodes.forEach { requestingNode ->
+                        requestingNode.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
+                            try {
+                                val newConfirmedMember =
+                                    confirmFamilyMember(requestingNode, familyEntry, requestingFamilyNodes)
+                                if (newConfirmedMember != null && requestingNode != newConfirmedMember) {
+                                    val existingFamilyRequestingNodeIndex =
+                                        families.indexOfFirst { it.contains(requestingNode) }
+                                    val existingFamilyNewConfirmedMemberIndex =
+                                        families.indexOfFirst { it.contains(newConfirmedMember) }
 
-                                if (
-                                    existingFamilyRequestingNodeIndex >= 0
-                                    && existingFamilyNewConfirmedMemberIndex >= 0
-                                    && existingFamilyRequestingNodeIndex != existingFamilyNewConfirmedMemberIndex
-                                ) {
-                                    families[existingFamilyRequestingNodeIndex] =
-                                        families[existingFamilyRequestingNodeIndex].plus(families[existingFamilyNewConfirmedMemberIndex])
-                                    families.removeAt(existingFamilyNewConfirmedMemberIndex)
-                                } else if (existingFamilyRequestingNodeIndex >= 0) {
-                                    families[existingFamilyRequestingNodeIndex] =
-                                        families[existingFamilyRequestingNodeIndex].plus(newConfirmedMember)
-                                } else if (existingFamilyNewConfirmedMemberIndex >= 0) {
-                                    families[existingFamilyNewConfirmedMemberIndex] =
-                                        families[existingFamilyNewConfirmedMemberIndex].plus(requestingNode)
+                                    if (
+                                        existingFamilyRequestingNodeIndex >= 0
+                                        && existingFamilyNewConfirmedMemberIndex >= 0
+                                        && existingFamilyRequestingNodeIndex != existingFamilyNewConfirmedMemberIndex
+                                    ) {
+                                        families[existingFamilyRequestingNodeIndex] =
+                                            families[existingFamilyRequestingNodeIndex].plus(families[existingFamilyNewConfirmedMemberIndex])
+                                        families.removeAt(existingFamilyNewConfirmedMemberIndex)
+                                    } else if (existingFamilyRequestingNodeIndex >= 0) {
+                                        families[existingFamilyRequestingNodeIndex] =
+                                            families[existingFamilyRequestingNodeIndex].plus(newConfirmedMember)
+                                    } else if (existingFamilyNewConfirmedMemberIndex >= 0) {
+                                        families[existingFamilyNewConfirmedMemberIndex] =
+                                            families[existingFamilyNewConfirmedMemberIndex].plus(requestingNode)
+                                    } else {
+                                        families.add(setOf(requestingNode, newConfirmedMember))
+                                    }
+
+                                    confirmedFamilyConnectionCount++
                                 } else {
-                                    families.add(setOf(requestingNode, newConfirmedMember))
+                                    rejectedFamilyConnectionCount++
                                 }
-
-                                confirmedFamilyConnectionCount++
-                            } else {
+                            } catch (exception: Exception) {
+                                logger.debug(exception.message)
                                 rejectedFamilyConnectionCount++
                             }
-                        } catch (exception: Exception) {
-                            logger.debug(exception.message)
-                            rejectedFamilyConnectionCount++
                         }
                     }
+                    nodeDetailsRepositoryImpl.clearFamiliesFromMonth(month)
+                    saveFamilies(families)
+                    val totalFamilyConnectionCount = confirmedFamilyConnectionCount + rejectedFamilyConnectionCount
+                    logger.info("Finished families for month $month. Rejected $rejectedFamilyConnectionCount / $totalFamilyConnectionCount connections. Found ${families.size} different families.")
+                } catch (exception: Exception) {
+                    logger.error("Could not update node families for month $month! ${exception.message}")
                 }
-                nodeDetailsRepositoryImpl.clearFamiliesFromMonth(month)
-                saveFamilies(families)
-                val totalFamilyConnectionCount = confirmedFamilyConnectionCount + rejectedFamilyConnectionCount
-                logger.info("Finished families for month $month. Rejected $rejectedFamilyConnectionCount / $totalFamilyConnectionCount connections. Found ${families.size} different families.")
             }
             logger.info("Finished updating node families")
         } catch (exception: Exception) {
-            logger.error("Could not update node families. ${exception.message}")
+            logger.error("Could not update node families! ${exception.message}")
         }
     }
 
@@ -143,7 +149,8 @@ class NodeDetailsService(
     /**
      * Save a new family of nodes by updating their [NodeDetails.familyId]
      */
-    private fun saveFamilies(
+    @Transactional
+    fun saveFamilies(
         families: List<Set<NodeDetails>>
     ) {
         families.forEach { family ->
