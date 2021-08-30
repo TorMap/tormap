@@ -49,13 +49,12 @@ or you prefer to run the servers manually:
 
 In a fresh project without any preprocessed DB or pre-downloaded archive the backend will start to download an
 archive `>
-33 GB` in size. Once the first `3 GB` of consensus descriptors have been downloaded, they will be processed, which will
-take `> 24 hours` to complete. Once `30 GB` of server descriptors have been downloaded, it will take about `7 days` to
-complete processing. Any missing archive descriptors released by the `TorProject` will twice a day automatically be
-downloaded and processed.
+33 GB` in size. Once the first `3 GB` of consensus descriptors have been downloaded, they will start processing.
+Once `30 GB` of server descriptors have been downloaded, it will take `1-2 days` to complete processing. Any missing
+descriptors released by the `TorProject` will twice a day be automatically downloaded and processed.
 
 Processing of descriptors does not necessarily happen in a chronological order, but one month of descriptors is always
-processed together. While the backend is processing descriptors, the frontend will always be able to display finished
+processed together. Different descriptor types are handled in parallel. While the backend is processing descriptors, the frontend will always be able to display finished
 data. Frontend features like family grouping or relay details will only be available, if the corresponding server
 descriptors have also been processed.
 
