@@ -8,6 +8,9 @@ interface NodeDetailsRepositoryImpl : NodeDetailsRepository {
     @Query("SELECT DISTINCT month FROM NodeDetails ORDER BY month")
     fun findDistinctMonths(): Set<String>
 
+    @Query("SELECT DISTINCT month FROM NodeDetails WHERE count(familyId) = 0 GROUP BY month ORDER BY month")
+    fun findDistinctMonthsAndFamilyIdsNull(): Set<String>
+
     @Query("SELECT DISTINCT month FROM NodeDetails WHERE autonomousSystemNumber IS NULL ORDER BY month")
     fun findDistinctMonthsAndAutonomousSystemNumberNull(): Set<String>
 

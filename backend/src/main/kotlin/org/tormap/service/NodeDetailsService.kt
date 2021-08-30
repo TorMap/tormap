@@ -25,9 +25,13 @@ class NodeDetailsService(
     /**
      * Updates [NodeDetails.familyId] for all entities of the requested [months].
      */
-    fun updateNodeFamilies(months: Set<String>? = null) {
+    fun updateNodeFamilies(months: Set<String>? = null, overwriteExisingFamilyMonths: Boolean = false) {
         try {
-            val monthsToProcess = months ?: nodeDetailsRepositoryImpl.findDistinctMonths()
+            val monthsToProcess = when {
+                months != null -> months
+                overwriteExisingFamilyMonths -> nodeDetailsRepositoryImpl.findDistinctMonths()
+                else -> nodeDetailsRepositoryImpl.findDistinctMonthsAndFamilyIdsNull()
+            }
             logger.info("Updating node families for months: ${monthsToProcess.joinToString(", ")}")
             monthsToProcess.forEach {
                 var confirmedFamilyConnectionCount = 0
