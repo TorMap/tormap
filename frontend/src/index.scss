@@ -13,3 +13,7 @@ code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.leaflet-map-pane canvas.leaflet-heatmap-layer{
+    z-index: 50 !important;
+}

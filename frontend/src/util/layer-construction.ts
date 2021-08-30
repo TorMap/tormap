@@ -25,7 +25,7 @@ export const aggregatedCoordinatesLayer = (
         circleMarker(
             [+coordinates[0], +coordinates[1]],
             {
-                radius: relays.length,
+                radius: calcRadiusForValue(relays.length),
                 color: "#ffffff",
                 weight: .3,
                 className: key
@@ -99,9 +99,9 @@ export const familyLayer = (
         if (familyID !== settings.selectedFamily) return
         const latLonMap: Map<string, GeoRelayView[]> = buildLatLonMap(family)
         latLonMap.forEach((relays, key) => {
-            let hue = familyID % 360
+            let hue = (familyID % 8) * (360/8)
             let sat = "90%"
-            let radius = 10 + relays.length
+            let radius = calcRadiusForValue(relays.length)
 
             const coordinates = key.split(",")
 
@@ -111,8 +111,8 @@ export const familyLayer = (
                 {
                     color: color,
                     radius: radius,
-                    fillOpacity: .3,
-                    weight: .1,
+                    fillOpacity: .2,
+                    weight: 1,
                 },
             )
                 .on("click", () => {
@@ -128,7 +128,6 @@ export const familyLayer = (
     return familyLayer
 }
 
-//todo: scaling anpassen
 /**
  * Returns a Layer with markers for families with size relative to number of relays in given family on a coordinate. And scales families size so there are no markers with same size
  * @param famCordMap
@@ -148,10 +147,10 @@ export const familyCordLayer = (
         const coordinates = location.split(",")
         const latLng: L.LatLngExpression = [+coordinates[0], +coordinates[1]]
         famMapForLocation.forEach((famCordArr) => {
-            let hue = famCordArr.familyID % 360
+            let hue = (famCordArr.familyID % 8) * (360/8)
             let sat = "90%"
-            let radius = 5 + (famCordArr.relays.length + famCordArr.padding)
-            let fillOpacity = .25
+            let radius = calcRadiusForValue(famCordArr.relays.length + famCordArr.padding)
+            let fillOpacity = .2
 
             let selected = true
 
@@ -170,7 +169,7 @@ export const familyCordLayer = (
                     color: color,
                     radius: radius,
                     fillOpacity: fillOpacity,
-                    weight: .5,
+                    weight: 1,
                     className: location,
                 }
             )
@@ -279,4 +278,20 @@ const onEachCountry = (
             else setSettingsCallback({...settings, selectedCountry: undefined})
         }
     });
+}
+/**
+ * Maps a number of range x1 to y1 to the range x2 to y2
+ */
+const mapRange = (value: number, x1: number, y1: number, x2: number, y2: number): number => (value - x1) * (y2 - x2) / (y1 - x1) + x2;
+
+/**
+ * Returns a scaled value, for better scaling of markers
+ * @param value
+ */
+const calcRadiusForValue = (value: number): number => {
+    if (value < 10) return 10
+    else if (value < 100) return mapRange(value, 10, 100, 10, 50)
+    else if (value < 200) return mapRange(value, 100, 200, 50, 70)
+    else if (value < 300) return mapRange(value, 200, 300, 70, 100)
+    else return 100
 }
