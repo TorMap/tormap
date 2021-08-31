@@ -251,7 +251,8 @@ export const WorldMap: FunctionComponent<Props> = ({
 
                 // Draw marker's, used to draw all markers to the map with colors according to their type
                 if (!settings.sortCountry) {
-                    defaultMarkerLayer(latLonMap, openRelayDetailsDialog).addTo(layerToReturn)
+                    const singleColor = settings.sortFamily
+                    defaultMarkerLayer(latLonMap, singleColor, openRelayDetailsDialog).addTo(layerToReturn)
                 }
 
 

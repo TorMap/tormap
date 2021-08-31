@@ -14,6 +14,7 @@ code {
     monospace;
 }
 
-.leaflet-map-pane canvas.leaflet-heatmap-layer{
+//pet the heatmap to the background
+canvas.leaflet-heatmap-layer{
     z-index: 50 !important;
 }
