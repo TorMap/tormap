@@ -116,7 +116,7 @@ class TorDescriptorService(
             nodeDetailsService.updateNodeFamilies(processedMonths)
             nodeDetailsService.updateAutonomousSystems(processedMonths)
         }
-        val descriptorsFileId = DescriptorsFileId(descriptorFile.name, descriptorType)
+        val descriptorsFileId = DescriptorsFileId(descriptorType, descriptorFile.name)
         val checkDescriptorsFile =
             descriptorsFileRepository.findById(descriptorsFileId)
         if (checkDescriptorsFile.isPresent) {

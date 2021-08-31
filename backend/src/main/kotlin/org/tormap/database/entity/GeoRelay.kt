@@ -12,8 +12,7 @@ import javax.persistence.*
 @Entity
 @Table(
     indexes = [
-        Index(columnList = "fingerprint, day", unique = true, name = "fingerprint_day_index"),
-        Index(columnList = "day", name = "day_index"),
+        Index(columnList = "day, fingerprint", name = "day_fingerprint_index", unique = true),
     ]
 )
 class GeoRelay(
@@ -21,13 +20,15 @@ class GeoRelay(
     var day: LocalDate,
     var latitude: BigDecimal,
     var longitude: BigDecimal,
+
+    @Column(length = 2, columnDefinition = "char(2)")
     var countryCode: String?,
 
     @Id
     @GeneratedValue
     val id: Long? = null,
 ) {
-    @Column(length = 40)
+    @Column(length = 40, columnDefinition = "char(40)")
     var fingerprint: String = networkStatusEntry.fingerprint
 
     var flags: String? = try {
@@ -44,8 +45,8 @@ class GeoRelay(
  */
 enum class TorRelayFlag {
     Valid, // if the router has been 'validated'
-    Named,
-    Unnamed,
+    Named, // If the router has a nickname
+    Unnamed, // If the router has no nickname
     Running, // if the router is currently usable over all its published ORPorts
     Stable, // if the router is suitable for long-lived circuits
     Exit, // if the router is more useful for building general-purpose exit circuits than for relay circuits
@@ -56,6 +57,6 @@ enum class TorRelayFlag {
     HSDir, // if the router is considered a v2 hidden service directory
     NoEdConsensus, // if any Ed25519 key in the router's descriptor or micro descriptor does not reflect authority consensus
     StaleDesc, // if the router should upload a new descriptor because the old one is too old
-    Sybil,
+    Sybil, // If more than 2 relays run on the same IP
     BadExit, // if the router is believed to be useless as an exit node
 }
