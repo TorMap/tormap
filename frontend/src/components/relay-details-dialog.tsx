@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from "react";
 import {
+    Box,
     CircularProgress,
     Dialog,
     DialogContent,
-    DialogTitle,
-    Drawer,
+    DialogTitle, Grid,
     IconButton,
     List,
     ListItem,
@@ -21,7 +21,7 @@ import {
 import CloseIcon from "@material-ui/icons/Close";
 import {apiBaseUrl} from "../util/config";
 import {getIcon} from "../types/icons";
-import {findGeoRelayViewByID, getRelayType} from "../util/aggregate-relays";
+import {getRelayType} from "../util/aggregate-relays";
 import {DetailsInfo, GeoRelayView, NodeDetails, NodeIdentifier} from "../types/responses";
 
 
@@ -31,23 +31,28 @@ const useStyle = makeStyles(() => ({
         right: "10px",
         top: "10px",
     },
-    drawer: {
-        width: "250px",
-    },
-    infoPadding: {
-        paddingLeft: "270px",
-    },
     valueName: {
         minWidth: "150px",
     },
     noMaxWidth: {
         maxWidth: "none",
     },
+    scroll: {
+        height: "800px",
+        overflowY: "scroll",
+    },
+    title: {
+        display: "inline",
+    },
+    titleTypeIcon: {
+        display: "inline",
+        paddingRight: "16px",
+    }
 }))
 
 const FullHeightDialog = withStyles(() => ({
     paper: {
-        height: '100%'
+        //height: '100%'
     },
 }))(Dialog);
 
@@ -187,60 +192,63 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
             fullWidth={true}
         >
             <div>
-                {!isLoading && <DialogTitle className={relays.length > 1 ? classes.infoPadding : undefined}>
+                <DialogTitle>
+                    <div className={classes.titleTypeIcon}>
+                        {nodeDetailsId ? getIcon(getRelayType(relays.find((relay) => relay.detailsId === nodeDetailsId))) : null}
+                    </div>
                     <Typography
-                        variant="h6">{nodeDetailsId ? (rawRelayDetails?.nickname) : (`No information`)}</Typography>
+                        className={classes.title}
+                        variant="h6">
+                        {nodeDetailsId ? (rawRelayDetails?.nickname)
+                        : isLoading ? "loading..." : "no information"}
+                    </Typography>
                     <IconButton aria-label="close" className={classes.closeButton} onClick={closeDialog}>
                         <CloseIcon/>
                     </IconButton>
-                </DialogTitle>}
+                </DialogTitle>
                 <DialogContent
-                    dividers
-                    className={relays.length > 1 ? classes.infoPadding : undefined}>
-                    <div>
-                        {isLoading ?
-                            <CircularProgress color={"inherit"}/> : nodeDetailsId ?
-                                <Table size={"small"}>
-                                    {relayDetails?.map((relayInfo) =>
-                                        relayInfo.value &&
-                                        <TableRow>
-                                            <TableCell scope="row" className={classes.valueName}>
-                                                <Typography>{relayInfo.name}</Typography>
-                                            </TableCell>
-                                            <TableCell scope="row">
-                                                <Typography>{relayInfo.value}</Typography>
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </Table>
-                                 : <p>We do not have any information about this relay for this date.</p>}
-                    </div>
+                    dividers>
+                    <Grid container>
+                        <Grid item xs={3}>
+                            <Box className={classes.scroll}>
+                                <List>
+                                    {relayIdentifiers.map((identifier) =>
+                                        (identifier.id &&
+                                            <Tooltip title={identifier.fingerprint} arrow={true} classes={{tooltip: classes.noMaxWidth}}>
+                                                <div>
+                                                    <ListItem button key={identifier.id}
+                                                              selected={identifier.id === nodeDetailsId}
+                                                              onClick={() => setNodeDetailsId(identifier.id)}>
+                                                        <ListItemIcon>{getIcon(getRelayType(relays.find((relay) => relay.detailsId === identifier.id)))}</ListItemIcon>
+                                                        <ListItemText primary={identifier.nickname}/>
+                                                    </ListItem>
+                                                </div>
+                                            </Tooltip>))}
+                                </List>
+                            </Box>
+                        </Grid>
+                        <Grid item xs={9}>
+                            <Box className={classes.scroll}>
+                                {isLoading ?
+                                    <CircularProgress color={"inherit"}/> : nodeDetailsId ?
+                                        <Table size={"small"}>
+                                            {relayDetails?.map((relayInfo) =>
+                                                relayInfo.value &&
+                                                <TableRow>
+                                                    <TableCell scope="row" className={classes.valueName}>
+                                                        <Typography>{relayInfo.name}</Typography>
+                                                    </TableCell>
+                                                    <TableCell scope="row">
+                                                        <Typography>{relayInfo.value}</Typography>
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                        </Table>
+                                        : <p>We do not have any information about this relay for this date.</p>}
+                            </Box>
+                        </Grid>
+                    </Grid>
                 </DialogContent>
-                {relays.length > 1 && <Drawer
-                    className={classes.drawer}
-                    PaperProps={{
-                        style: {
-                            position: "absolute",
-                            width: "250px",
-                        }
-                    }}
-                    anchor={"left"}
-                    variant={"permanent"}>
-                    <List>
-                        {relayIdentifiers.map((identifier) =>
-                            (identifier.id &&
-                                <Tooltip title={identifier.fingerprint} arrow={true} classes={{tooltip: classes.noMaxWidth}}>
-                                    <div>
-                                        <ListItem button key={identifier.id}
-                                                  selected={identifier.id === nodeDetailsId}
-                                                  onClick={() => setNodeDetailsId(identifier.id)}>
-                                            <ListItemIcon>{getIcon(getRelayType(relays.find((relay) => relay.detailsId === identifier.id)))}</ListItemIcon>
-                                            <ListItemText primary={identifier.nickname}/>
-                                        </ListItem>
-                                    </div>
-                                </Tooltip>))}
-                    </List>
-                </Drawer>}
             </div>
         </FullHeightDialog>
     )
