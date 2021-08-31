@@ -8,7 +8,7 @@ import javax.persistence.Embeddable
 class IpRangeId(
     var ipFrom: Long,
     var ipTo: Long,
-): Serializable {
+) : Serializable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false

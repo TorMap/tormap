@@ -2,7 +2,6 @@ package org.tormap.database.entity
 
 import java.io.Serializable
 import java.time.LocalDateTime
-import java.util.*
 import javax.persistence.Embeddable
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity
@@ -25,16 +24,26 @@ class DescriptorsFile(
  */
 @Embeddable
 class DescriptorsFileId(
-    var filename: String,
-
     @Enumerated
     var type: DescriptorType,
-) : Serializable {
-    override fun equals(other: Any?): Boolean =
-        other is DescriptorsFileId && Objects.equals(other, this)
 
-    override fun hashCode(): Int =
-        Objects.hash(this.filename, this.type)
+    var filename: String,
+) : Serializable {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is DescriptorsFileId) return false
+
+        if (type != other.type) return false
+        if (filename != other.filename) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = type.hashCode()
+        result = 31 * result + filename.hashCode()
+        return result
+    }
 }
 
 enum class DescriptorType {
