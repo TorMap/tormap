@@ -31,8 +31,9 @@ Troubleshooting:
 ### Run development servers
 
 Make sure you have installed all requirements. The `./run` script will start the backend and frontend servers in
-separate terminals. Once you kill the terminal, the server is shutdown. The backend console will stay at an executing
-percentage below `100%`. This is normal behaviour with Gradle & Spring Boot.
+separate terminals/tabs. If you have tmux installed, a new tmux session named `tormap` will be started. Once you kill
+the terminal, the server is shutdown. The backend console will stay at an executing percentage below `100%`. This is
+normal behaviour with Gradle & Spring Boot.
 
 - Linux: Type `./run` or `bash ./run`
 - Windows: Type `run.bat`
@@ -54,9 +55,9 @@ Once `30 GB` of server descriptors have been downloaded, it will take `1-2 days`
 descriptors released by the `TorProject` will twice a day be automatically downloaded and processed.
 
 Processing of descriptors does not necessarily happen in a chronological order, but one month of descriptors is always
-processed together. Different descriptor types are handled in parallel. While the backend is processing descriptors, the frontend will always be able to display finished
-data. Frontend features like family grouping or relay details will only be available, if the corresponding server
-descriptors have also been processed.
+processed together. Different descriptor types are handled in parallel. While the backend is processing descriptors, the
+frontend will always be able to display finished data. Frontend features like family grouping or relay details will only
+be available, if the corresponding server descriptors have also been processed.
 
 ### Backend
 
@@ -69,6 +70,7 @@ Make sure you are in the `backend` directory. On `Windows` use `gradlew.bat`
 instead of `./gradlew` for all following commands.
 
 - `./gradlew`: installs required backend packages
+- `./gradlew build`: creates build and runs Flyway database migrations
 - `./gradlew bootRun`: creates build, runs it and listens on http://localhost:8080/
 - `./gradlew bootJar`: creates build with a fat JAR which contains all dependencies and resources in `build/libs/`
 - `./gradlew flywayMigrate`: Migrates the database
@@ -103,22 +105,26 @@ backend is running. Make sure to configure the connection the same way your `app
 it might be necessary to configure the datasource URL with an absolute path to ensure the correct working directory is
 used.
 
-#### IP to autonomous systems
+#### IP to Autonomous Systems
 
-If you are not starting with a preprocessed TorMap DB you will need to import a CSV file containing autonomous systems
-into the local H2 database. It is advised to reimport a new CSV file every few months, to keep the IP ranges up to date.
+TorMap uses previously imported Autonomous System (AS) data from `IP2Location` to get the AS of a Tor node's IP address.
+The mapping is done after a server descriptors file was processed and additionally every 12 hours (configurable). If you
+are not starting with a preprocessed TorMap DB you will need to import a CSV file containing autonomous systems into the
+local H2 database. It is advised to reimport a new CSV file every few months, to keep the IP ranges up to date.
 
 1. Create a free account at https://lite.ip2location.com/sign-up
 2. Download latest IPv4 CSV file from https://lite.ip2location.com/database-asn or use the CSV file located
    at `backend/database/ip2location/IP2LOCATION-LITE-ASN.CSV`
-3. Run following commands on the TorMap DB:
+3. Run command `./gradlew build` in `backend` directory
+4. Connect to a DB query console and run following commands:
     - `TRUNCATE TABLE AUTONOMOUS_SYSTEM;`
     - `INSERT INTO AUTONOMOUS_SYSTEM SELECT * FROM CSVREAD('<absolute_path_to_csv_file>');`
 
 #### IP to geo location
 
-TorMap uses a binary DB file from `IP2Location` to map IPv4 addresses of Tor nodes to geo locations. It is advised to
-replace the binary file every few months, to keep the IP ranges up to date.
+TorMap uses a binary DB file from `IP2Location` to map IPv4 addresses of Tor nodes to geo locations. The mapping is
+applied when a consensus descriptor is being processed. It is advised to replace the binary file every few months, to keep
+the IP ranges up to date.
 
 1. Create a free account at https://lite.ip2location.com/sign-up
 2. Download latest IPv4 BIN file
@@ -165,8 +171,8 @@ First make sure you have installed all requirements for development.
 ## Host project
 
 Make sure you have installed all requirements for development. To be able to host, you should have a copy of a release
-or just successfully created your own project build. For now prebuild releases and DBs containing a few preprocessed
-months are available at https://lightningpuzzle.com/tormap/.
+or just successfully created your own project build. For now prebuild releases and DBs are available
+at https://lightningpuzzle.com/tormap/.
 
 ### Backend
 
