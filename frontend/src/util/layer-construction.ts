@@ -44,6 +44,7 @@ export const aggregatedCoordinatesLayer = (
  */
 export const defaultMarkerLayer = (
     latLonMap: Map<string, GeoRelayView[]>,
+    singleColor: boolean,
     onMarkerClick: (e: LeafletMouseEvent) => void,
 ): LayerGroup => {
     const defaultLayer = new LayerGroup()
@@ -66,6 +67,7 @@ export const defaultMarkerLayer = (
                     break
                 }
             }
+            if (singleColor) color = "#989898"
 
             circleMarker(
                 [relay.lat, relay.long],
