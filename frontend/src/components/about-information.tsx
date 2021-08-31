@@ -135,7 +135,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                                     title="Tim Kilb"
                                 />
                                 <List dense={true}>
-                                    <ListItem button component="a" href="https://www.timkilb.de" target={"_blank"}>
+                                    <ListItem button component="a" href="https://www.timkilb.com" target={"_blank"}>
                                         <ListItemIcon>
                                             <LanguageIcon/>
                                         </ListItemIcon>
