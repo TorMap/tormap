@@ -1,80 +1,69 @@
 create sequence if not exists HIBERNATE_SEQUENCE;
 
-create table if not exists descriptors_file
+create table if not exists DESCRIPTORS_FILE
 (
-    filename      VARCHAR(255) not null,
-    type          INTEGER      not null,
-    last_modified BIGINT       not null,
-    processed_at  TIMESTAMP,
-    primary key (filename, type)
+    FILENAME      VARCHAR(255) not null,
+    TYPE          INTEGER      not null,
+    LAST_MODIFIED BIGINT       not null,
+    PROCESSED_AT  TIMESTAMP,
+    primary key (TYPE, FILENAME)
 );
 
-create table if not exists geo_relay
+create table if not exists GEO_RELAY
 (
-    id           BIGINT not null
+    ID           BIGINT not null
         primary key,
-    country_code VARCHAR(2),
-    day          DATE,
-    fingerprint  VARCHAR(40),
-    flags        VARCHAR(255),
-    latitude     DECIMAL(6, 4),
-    longitude    DECIMAL(7, 4),
-    constraint fingerprint_day_index
-        unique (fingerprint, day)
+    COUNTRY_CODE CHAR(2),
+    DAY          DATE,
+    FINGERPRINT  CHAR(40),
+    FLAGS        VARCHAR(255),
+    LATITUDE     DECIMAL(6, 4),
+    LONGITUDE    DECIMAL(7, 4),
+    constraint DAY_FINGERPRINT_INDEX
+        unique (DAY, FINGERPRINT)
 );
 
-create index if not exists day_index
-    on geo_relay (day);
-
-create table if not exists node_details
+create table if not exists NODE_DETAILS
 (
-    id                        BIGINT  not null
+    ID                        BIGINT  not null
         primary key,
-    address                   VARCHAR(15),
-    allow_single_hop_exits    BOOLEAN not null,
-    autonomous_system_name    varchar(255),
-    autonomous_system_number  varchar(10),
-    bandwidth_burst           INTEGER not null,
-    bandwidth_observed        INTEGER not null,
-    bandwidth_rate            INTEGER not null,
-    caches_extra_info         BOOLEAN not null,
-    circuit_protocol_versions VARCHAR(255),
-    contact                   VARCHAR(255),
-    day                       DATE,
-    family_entries            CLOB,
-    family_id                 BIGINT,
-    fingerprint               VARCHAR(40),
-    is_hibernating            BOOLEAN not null,
-    is_hidden_service_dir     BOOLEAN not null,
-    link_protocol_versions    VARCHAR(255),
-    month                     VARCHAR(255),
-    nickname                  VARCHAR(19),
-    platform                  VARCHAR(255),
-    protocols                 VARCHAR(255),
-    tunnelled_dir_server      BOOLEAN not null,
-    uptime                    BIGINT,
-    constraint fingerprint_month_index
-        unique (fingerprint, month)
+    ADDRESS                   VARCHAR(15),
+    ADDRESS_NUMBER            BIGINT,
+    ALLOW_SINGLE_HOP_EXITS    BOOLEAN not null,
+    AUTONOMOUS_SYSTEM_NAME    VARCHAR(255),
+    AUTONOMOUS_SYSTEM_NUMBER  VARCHAR(10),
+    BANDWIDTH_BURST           INTEGER not null,
+    BANDWIDTH_OBSERVED        INTEGER not null,
+    BANDWIDTH_RATE            INTEGER not null,
+    CACHES_EXTRA_INFO         BOOLEAN not null,
+    CIRCUIT_PROTOCOL_VERSIONS VARCHAR(255),
+    CONTACT                   VARCHAR(255),
+    DAY                       DATE,
+    FAMILY_ENTRIES            CLOB,
+    FAMILY_ID                 BIGINT,
+    FINGERPRINT               CHAR(40),
+    IS_HIBERNATING            BOOLEAN not null,
+    IS_HIDDEN_SERVICE_DIR     BOOLEAN not null,
+    LINK_PROTOCOL_VERSIONS    VARCHAR(255),
+    MONTH                     CHAR(7),
+    NICKNAME                  VARCHAR(19),
+    PLATFORM                  VARCHAR(255),
+    PROTOCOLS                 VARCHAR(255),
+    TUNNELLED_DIR_SERVER      BOOLEAN not null,
+    UPTIME                    BIGINT,
+    constraint MONTH_FINGERPRINT_INDEX
+        unique (MONTH, FINGERPRINT)
 );
-
-create index if not exists NICKNAME_MONTH_INDEX
-    on NODE_DETAILS (NICKNAME, MONTH);
-
-create index if not exists FAMILY_INDEX
-    on NODE_DETAILS (FAMILY_ID);
 
 create index if not exists FAMILYID_INDEX
     on NODE_DETAILS (FAMILY_ID);
 
-create index if not exists AUTONOMOUSSYSTEMNUMBER_NUMBER_INDEX
-    on NODE_DETAILS (AUTONOMOUS_SYSTEM_NUMBER);
-
-CREATE TABLE IF NOT EXISTS autonomous_system
+create table if not exists AUTONOMOUS_SYSTEM
 (
-    ip_from bigint       NOT NULL,
-    ip_to   bigint       NOT NULL,
-    cidr    varchar(43)  NOT NULL,
-    autonomous_system_number     varchar(10)  NOT NULL,
-    autonomous_system_name      varchar(255) NOT NULL,
-    PRIMARY KEY (ip_from, ip_to)
+    IP_FROM                  BIGINT       not null,
+    IP_TO                    BIGINT       not null,
+    CIDR                     VARCHAR(43)  not null,
+    AUTONOMOUS_SYSTEM_NUMBER VARCHAR(10)  not null,
+    AUTONOMOUS_SYSTEM_NAME   VARCHAR(255) not null,
+    primary key (IP_FROM, IP_TO)
 );
