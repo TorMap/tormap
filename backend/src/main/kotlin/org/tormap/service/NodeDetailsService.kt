@@ -33,7 +33,7 @@ class NodeDetailsService(
                 else -> {
                     var monthFamilyMemberCount = nodeDetailsRepositoryImpl.findDistinctMonthFamilyMemberCount()
                     if (!overwriteExistingFamilies) {
-                        monthFamilyMemberCount = monthFamilyMemberCount.filter { it.count > 0 }
+                        monthFamilyMemberCount = monthFamilyMemberCount.filter { it.count == 0L }
                     }
                     monthFamilyMemberCount.map { it.month }
                 }

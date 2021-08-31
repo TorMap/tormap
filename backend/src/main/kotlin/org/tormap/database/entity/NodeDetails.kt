@@ -16,15 +16,16 @@ import javax.persistence.*
 @Entity
 @Table(
     indexes = [
-        Index(columnList = "fingerprint, month", unique = true, name = "fingerprint_month_index"),
-        Index(columnList = "nickname, month", name = "nickname_month_index"),
+        Index(columnList = "month, fingerprint", name = "month_fingerprint_index", unique = true),
         Index(columnList = "familyId", name = "familyId_index"),
-        Index(columnList = "autonomousSystemNumber", name = "autonomousSystemNumber_number_index"),
     ]
 )
 class NodeDetails(
     descriptor: ServerDescriptor,
+
+    @Column(length = 7, columnDefinition = "char(7)")
     var month: String,
+
     var day: LocalDate,
 
     @Id
@@ -64,7 +65,7 @@ class NodeDetails(
         "${it.key} (${it.value.jointToCommaSeparated()})"
     }?.jointToCommaSeparated().stripLengthForDB()
 
-    @Column(length = 40)
+    @Column(length = 40, columnDefinition = "char(40)")
     var fingerprint: String = descriptor.fingerprint
 
     var isHibernating: Boolean = descriptor.isHibernating
