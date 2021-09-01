@@ -14,7 +14,8 @@ import {NodeFamilyIdentifier} from "../types/responses";
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@material-ui/icons/Close";
 import {apiBaseUrl} from "../util/config";
-import {FullHeightDialog} from "../types/variousTypes";
+import {SnackbarMessage, FullHeightDialog} from "../types/ui";
+
 
 const useStyle = makeStyles(() => ({
     closeButton: {
@@ -57,21 +58,34 @@ interface Props {
      */
     families: number[]
 
+    /**
+     * Callback for setting a family as selected
+     * @param f the family ID
+     */
     familySelectionCallback: (f: number) => void
+
+    /**
+     * Show a message in the snackbar
+     * @param message - what to display to user and at which severity
+     */
+    showSnackbarMessage: (message: SnackbarMessage) => void
 }
 
 /**
+ *
  * A Dialog to select a Family from multiple Families
  * @param showDialog
  * @param closeDialog
  * @param families - The familyIDs available
  * @param familySelectionCallback - the callback function for selecting a family
+ * @param showSnackbarMessage
  */
 export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                                           showDialog,
                                                                           closeDialog,
                                                                           families,
-                                                                          familySelectionCallback
+                                                                          familySelectionCallback,
+                                                                          showSnackbarMessage,
                                                                       }) => {
 
     const [isLoading, setIsLoading] = useState(true)
@@ -94,10 +108,13 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
             })
                 .then(response => response.json())
                 .then((identifiers: NodeFamilyIdentifier[]) => {
+                    console.log(identifiers)
                     setFamilyIdentifiers(identifiers)
                     setIsLoading(false)
                     console.log(families)
-                    console.log(identifiers)
+                })
+                .catch(reason => {
+                    showSnackbarMessage({message: `${reason}`, severity: "error"})
                 })
         }
     }, [families])
@@ -150,10 +167,9 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                 </TableCell>
                                                 <TableCell scope="row">
                                                     <Typography>
-                                                        {(family.autonomousSystems.length >= 0) ?
+                                                        {(family.autonomousSystems) ?
                                                             (family.autonomousSystems) :
-                                                            "This data is not available yet."
-                                                        }
+                                                            "This data is not available yet."}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell scope="row">

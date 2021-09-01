@@ -1,4 +1,4 @@
-import {Settings, Statistics} from "../types/variousTypes";
+import {Settings, Statistics} from "../types/app-state";
 import {RelayFlag, RelayFlags, RelayType} from "../types/relay";
 import {GeoRelayView} from "../types/responses";
 

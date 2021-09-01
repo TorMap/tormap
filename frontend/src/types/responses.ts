@@ -51,5 +51,5 @@ export interface NodeFamilyIdentifier {
     memberCount: number
     fingerprints: string
     nicknames: string
-    autonomousSystems: string
+    autonomousSystems?: string
 }
