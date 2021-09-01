@@ -1,7 +1,7 @@
 import L, {circleMarker, GeoJSON, Layer, LayerGroup, LeafletMouseEvent, PathOptions} from "leaflet";
 import {Colors} from "./config";
 import {RelayType} from "../types/relay";
-import {Settings} from "../types/variousTypes";
+import {Settings} from "../types/app-state";
 import worldGeoData from "../data/world.geo.json";
 import {Feature, GeoJsonObject, GeometryObject} from "geojson";
 import {buildLatLonMap, createLatLonKey, famCordArr, getRelayType, sortFamilyCoordinatesMap} from "./aggregate-relays";
@@ -40,6 +40,7 @@ export const aggregatedCoordinatesLayer = (
 /**
  * Returns a Layer with markers for each relay.
  * @param latLonMap
+ * @param singleColor wheter all markers should have the same color
  * @param onMarkerClick
  */
 export const defaultMarkerLayer = (

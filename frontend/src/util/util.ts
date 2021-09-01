@@ -27,3 +27,8 @@ export function useDebounce<T>(value: T, delay: number): T {
     );
     return debouncedValue;
 }
+
+/**
+ * Helper to check if object contains key
+ */
+export const nameOfFactory = <T>() => (name: keyof T) => name;

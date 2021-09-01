@@ -2,7 +2,7 @@ import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useEffect, useState} from "react";
 import L, {Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
 import 'leaflet/dist/leaflet.css';
-import {Settings, SnackbarMessage, Statistics} from "../types/variousTypes";
+import {Settings, Statistics} from "../types/app-state";
 import "leaflet.heat"
 import {makeStyles} from "@material-ui/core";
 import {
@@ -25,6 +25,7 @@ import {apiBaseUrl} from "../util/config";
 import {GeoRelayView} from "../types/responses";
 import {RelayDetailsDialog} from "./relay-details-dialog";
 import {FamilySelectionDialog} from "./family-selection-dialog";
+import {SnackbarMessage} from "../types/ui";
 
 /**
  * Styles according to Material UI doc for components used in WorldMap component
@@ -320,12 +321,14 @@ export const WorldMap: FunctionComponent<Props> = ({
                 showDialog={showRelayDetailsDialog}
                 closeDialog={() => setShowRelayDetailsDialog(false)}
                 relays={relaysForDetailsDialog}
+                showSnackbarMessage={showSnackbarMessage}
             />
             <FamilySelectionDialog
                 showDialog={showFamilySelectionDialog}
                 closeDialog={() => setShowFamilySelectionDialog(false)}
                 families={familiesForSelectionDialog}
                 familySelectionCallback={handleFamilySelection}
+                showSnackbarMessage={showSnackbarMessage}
             />
             <TileLayer
                 maxZoom={19}
