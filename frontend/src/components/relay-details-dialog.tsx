@@ -24,7 +24,7 @@ import {apiBaseUrl} from "../util/config";
 import {getIcon} from "../types/icons";
 import {getRelayType} from "../util/aggregate-relays";
 import {DetailsInfo, GeoRelayView, NodeDetails, NodeIdentifier} from "../types/responses";
-import {FullHeightDialog} from "../types/variousTypes";
+import {SnackbarMessage, FullHeightDialog} from "../types/ui";
 
 
 const useStyle = makeStyles(() => ({
@@ -68,6 +68,12 @@ interface Props {
      * Relays which the user can view detailed information about
      */
     relays: GeoRelayView[]
+
+    /**
+     * Show a message in the snackbar
+     * @param message - what to display to user and at which severity
+     */
+    showSnackbarMessage: (message: SnackbarMessage) => void
 }
 
 /**
@@ -97,12 +103,13 @@ const formatBoolean = (value?: boolean) => value === null || value === undefined
  * @param showDialog
  * @param closeDialog
  * @param relays - selectable relays
- * @constructor
+ * @param showSnackbarMessage
  */
 export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                                                                        showDialog,
                                                                        closeDialog,
                                                                        relays,
+                                                                       showSnackbarMessage,
                                                                    }) => {
     const [relayIdentifiers, setRelayIdentifiers] = useState<NodeIdentifier[]>([])
     const [nodeDetailsId, setNodeDetailsId] = useState<number>()
@@ -135,8 +142,8 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     }
                     setIsLoading(false)
                 })
-                .catch(() => {
-                    setIsLoading(false)
+                .catch(reason => {
+                    showSnackbarMessage({message: `${reason}`, severity: "error"})
                 })
         }
     }, [relays])
@@ -175,8 +182,8 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     ])
                     setIsLoading(false)
                 })
-                .catch(() => {
-                    setIsLoading(false)
+                .catch(reason => {
+                    showSnackbarMessage({message: `${reason}`, severity: "error"})
                 })
         }
     }, [nodeDetailsId])
