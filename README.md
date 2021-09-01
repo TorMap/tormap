@@ -178,7 +178,6 @@ or just successfully created your own project build.
 
 ### Preprocessed databases
 - https://timkilb.com/databases/tormap-full-DB-2021-09-01-version-1.1.0.zip
-- https://timkilb.com/databases/tormap-small-DB-2021-09-01-version-1.1.0.zip
 - https://timkilb.com/databases/tormap-only-AS-DB-2021-09-01-version-1.1.0.zip
 
 ### Start backend
