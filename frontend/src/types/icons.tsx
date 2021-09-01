@@ -9,29 +9,25 @@ import PublicIcon from "@material-ui/icons/Public";
 import {RelayType} from "./relay";
 
 /**
- * Icon-Types
+ * Returns the Icon's JSX.Element
+ * @param relayType the Icon-/ Relay-Type
  */
-export enum Icon {
-    ExitRelay,
-    GuardRelay,
-    DefaultRelay,
-    TotalRelays,
-    FamilyCount,
-    CountryCount,
+export function getIcon(relayType?: RelayType): JSX.Element | null {
+    switch (relayType) {
+        case RelayType.Exit:
+            return ExitRelayIcon
+        case RelayType.Guard:
+            return GuardRelayIcon
+        case RelayType.Other:
+            return OtherRelayIcon
+        default:
+            return null
+    }
 }
 
-/**
- * Returns the Icon's JSX.Element
- * @param icon the Icon-/ Relay-Type
- */
-export function getIcon(icon: Icon | RelayType | undefined): JSX.Element | null{
-    switch (icon){
-        case Icon.ExitRelay || RelayType.Exit: return <DirectionsRunIcon style={{color: Colors.Exit}}/>
-        case Icon.GuardRelay || RelayType.Guard: return <SecurityIcon style={{color: Colors.Guard}}/>
-        case Icon.DefaultRelay || RelayType.Other: return <TimelineIcon style={{color: Colors.Default}}/>
-        case Icon.TotalRelays: return <SubdirectoryArrowRightIcon/>
-        case Icon.FamilyCount: return <GroupIcon/>
-        case Icon.CountryCount: return <PublicIcon/>
-    }
-    return null
-}
+export const ExitRelayIcon = <DirectionsRunIcon style={{color: Colors.Exit}}/>
+export const GuardRelayIcon = <SecurityIcon style={{color: Colors.Guard}}/>
+export const OtherRelayIcon = <TimelineIcon style={{color: Colors.Default}}/>
+export const TotalRelaysIcon = <SubdirectoryArrowRightIcon/>
+export const FamilyCountIcon = <GroupIcon/>
+export const CountryCountIcon = <PublicIcon/>
