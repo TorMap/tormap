@@ -14,7 +14,7 @@ import {
     Typography,
 } from "@material-ui/core";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import {nameOfFactory, Settings} from "../types/variousTypes";
+import {nameOfFactory, Settings} from "../types/app-state";
 import {RelayFlag, RelayFlagLabel, RelayType, RelayTypeLabel} from "../types/relay";
 import {tooltipTimeDelay} from "../util/config";
 import {getIcon} from "../types/icons";
@@ -120,11 +120,6 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                             label={"Family"}
                             name={nameOfSetting("sortFamily")}
                         />
-                        {//todo: family selection buttons
-                            /*(settings.sortFamily ? (
-                        <FormControlLabel control={<Button onClick={}/>} label={"select Family"}/>
-                        <FormControlLabel control={<Button onClick={}/>} label={"about Family"}/>
-                        ) : null)*/}
                         <FormControlLabel
                             key={"Country"}
                             control={<Switch checked={settings.sortCountry} onChange={onChange}/>}

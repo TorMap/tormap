@@ -4,12 +4,13 @@ import {CircularProgress, createMuiTheme, Link, makeStyles, Snackbar, ThemeProvi
 import "@material-ui/styles";
 import "./index.scss";
 import {AppSettings, relaysMustIncludeFlagInput, showRelayTypesInput} from "./components/app-settings";
-import {Settings, SnackbarMessage, Statistics} from "./types/variousTypes";
+import {Settings, Statistics} from "./types/app-state";
 import {MapStats} from "./components/map-stats";
 import {DateSlider} from "./components/date-slider";
 import MuiAlert from '@material-ui/lab/Alert';
 import {apiBaseUrl, defaultSettings} from "./util/config";
 import {AboutInformation} from "./components/about-information";
+import {SnackbarMessage} from "./types/ui";
 
 
 /**
