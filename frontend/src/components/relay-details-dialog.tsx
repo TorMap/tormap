@@ -24,7 +24,7 @@ import {apiBaseUrl} from "../util/config";
 import {getIcon} from "../types/icons";
 import {getRelayType} from "../util/aggregate-relays";
 import {DetailsInfo, GeoRelayView, NodeDetails, NodeIdentifier} from "../types/responses";
-import {SnackbarMessage, FullHeightDialog} from "../types/ui";
+import {SnackbarMessage, FullHeightDialog, ErrorMessages} from "../types/ui";
 
 
 const useStyle = makeStyles(() => ({
@@ -142,8 +142,9 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     }
                     setIsLoading(false)
                 })
-                .catch(reason => {
-                    showSnackbarMessage({message: `${reason}`, severity: "error"})
+                .catch(() => {
+                    showSnackbarMessage({message: `${ErrorMessages.ConectionToBackendFailed}`, severity: "error"})
+                    setIsLoading(false)
                 })
         }
     }, [relays])
@@ -182,8 +183,8 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     ])
                     setIsLoading(false)
                 })
-                .catch(reason => {
-                    showSnackbarMessage({message: `${reason}`, severity: "error"})
+                .catch(() => {
+                    showSnackbarMessage({message: `${ErrorMessages.ConectionToBackendFailed}`, severity: "error"})
                 })
         }
     }, [nodeDetailsId])

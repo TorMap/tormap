@@ -155,12 +155,8 @@ export const familyCordLayer = (
             let radius = calcRadiusForValue(famCordArr.relays.length + famCordArr.padding)
             let fillOpacity = .2
 
-            let selected = true
-
-            if (settings.selectedFamily !== undefined && settings.selectedFamily !== famCordArr.familyID) selected = false
-            if (settings.selectedFamily !== undefined && settings.selectedFamily && settings.selectedFamily !== famCordArr.familyID) sat = "0%"
-
-            if (!selected) {
+            // not selected
+            if (settings.selectedFamily !== undefined && settings.selectedFamily !== famCordArr.familyID) {
                 sat = "0%"
                 fillOpacity = 0
             }
@@ -202,8 +198,8 @@ export const countryMarkerLayer = (
             let sat = "90%"
             let radius = 1
 
-            if (settings.selectedCountry !== undefined && settings.selectedCountry !== relay.country) sat = "30%"
-            if (settings.selectedCountry !== undefined && settings.selectedCountry && settings.selectedCountry !== relay.country) sat = "0%"
+            // not selected
+            if (settings.selectedCountry !== undefined && settings.selectedCountry !== relay.country) sat = "0%"
 
             const color = `hsl(${hue},${sat},60%)`
             circleMarker(
@@ -231,6 +227,7 @@ export const countryLayer = (
     settings: Settings,
     setSettingsCallback: (s: Settings) => void
 ): LayerGroup =>{
+    // style for countries
     const style = (feature: Feature<GeometryObject>): PathOptions => {
         if (settings.selectedCountry === feature.properties!!.iso_a2) {
             return {
@@ -245,6 +242,7 @@ export const countryLayer = (
         }
     }
 
+    // draw countries according above style
     const geoData = worldGeoData
     let filteredGeoData = new GeoJSON(undefined, {
         style: style as PathOptions,
@@ -263,7 +261,7 @@ export const countryLayer = (
 
 /**
  * Helper for adding events to countries
- * @param feature
+ * @param feature the GeoJSON-feature the event belongs to
  * @param layer
  * @param settings
  * @param setSettingsCallback

@@ -10,7 +10,7 @@ import {DateSlider} from "./components/date-slider";
 import MuiAlert from '@material-ui/lab/Alert';
 import {apiBaseUrl, defaultSettings} from "./util/config";
 import {AboutInformation} from "./components/about-information";
-import {SnackbarMessage} from "./types/ui";
+import {ErrorMessages, SnackbarMessage} from "./types/ui";
 
 
 /**
@@ -98,8 +98,8 @@ function App() {
                 setSliderValue(availableDays.length - 1)
                 setIsLoading(false)
             })
-            .catch(reason => {
-                showSnackbarMessage({message: `${reason.message}`, severity: "error"})
+            .catch(() => {
+                showSnackbarMessage({message: `${ErrorMessages.ConectionToBackendFailed}`, severity: "error"})
                 setIsLoading(false)
             })
     }, [])
