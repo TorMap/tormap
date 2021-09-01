@@ -1,5 +1,5 @@
 import {Settings, Statistics} from "../types/variousTypes";
-import {RelayFlag, RelayType} from "../types/relay";
+import {RelayFlag, RelayFlags, RelayType} from "../types/relay";
 import {GeoRelayView} from "../types/responses";
 
 /**
@@ -10,62 +10,28 @@ import {GeoRelayView} from "../types/responses";
 export const applyFilter = (relays: GeoRelayView[], settings: Settings): GeoRelayView[] => {
     let filtered: GeoRelayView[] = []
     relays.forEach(relay => {
-        //Filter must include settings
-        if (settings.miValid && !relay.flags?.includes(RelayFlag.Valid)) {
-            return
-        }
-        if (settings.miNamed && !relay.flags?.includes(RelayFlag.Named)) {
-            return
-        }
-        if (settings.miUnnamed && !relay.flags?.includes(RelayFlag.Unnamed)) {
-            return
-        }
-        if (settings.miRunning && !relay.flags?.includes(RelayFlag.Running)) {
-            return
-        }
-        if (settings.miStable && !relay.flags?.includes(RelayFlag.Stable)) {
-            return
-        }
-        if (settings.miExit && !relay.flags?.includes(RelayFlag.Exit)) {
-            return
-        }
-        if (settings.miFast && !relay.flags?.includes(RelayFlag.Fast)) {
-            return
-        }
-        if (settings.miGuard && !relay.flags?.includes(RelayFlag.Guard)) {
-            return
-        }
-        if (settings.miAuthority && !relay.flags?.includes(RelayFlag.Authority)) {
-            return
-        }
-        if (settings.miV2Dir && !relay.flags?.includes(RelayFlag.V2Dir)) {
-            return
-        }
-        if (settings.miHSDir && !relay.flags?.includes(RelayFlag.HSDir)) {
-            return
-        }
-        if (settings.miNoEdConsensus && !relay.flags?.includes(RelayFlag.NoEdConsensus)) {
-            return
-        }
-        if (settings.miStaleDesc && !relay.flags?.includes(RelayFlag.StaleDesc)) {
-            return
-        }
-        if (settings.miSybil && !relay.flags?.includes(RelayFlag.Sybil)) {
-            return
-        }
-        if (settings.miBadExit && !relay.flags?.includes(RelayFlag.BadExit)) {
+        // Filter relay flags
+        let relayMissesRequiredFlag = false
+        RelayFlags.forEach(flag => {
+                if (settings.relaysMustIncludeFlag[flag] && !relay.flags?.includes(flag)) {
+                    relayMissesRequiredFlag = true
+                    return
+                }
+            }
+        )
+        if (relayMissesRequiredFlag) {
             return
         }
 
-        //Filter relay types
-        if (!settings.Exit && relay.flags?.includes(RelayFlag.Exit)) {
+        // Filter relay types
+        if (!settings.showRelayTypes[RelayType.Exit] && relay.flags?.includes(RelayFlag.Exit)) {
             return
         }
-        if (!settings.Guard && (relay.flags?.includes(RelayFlag.Guard))
+        if (!settings.showRelayTypes[RelayType.Guard] && (relay.flags?.includes(RelayFlag.Guard))
             && !(relay.flags?.includes(RelayFlag.Exit))) {
             return
         }
-        if (!settings.Default && (!relay.flags?.includes(RelayFlag.Guard)
+        if (!settings.showRelayTypes[RelayType.Other] && (!relay.flags?.includes(RelayFlag.Guard)
             && !relay.flags?.includes(RelayFlag.Exit))) {
             return
         }
@@ -145,7 +111,7 @@ export const sortFamilyCoordinatesMap = (famCordMap: Map<string, Map<number, Geo
                 if (relays.length > largest.relays.length) largest = {relays: relays, familyID: famID, padding: 0}
             })
             if (sorted.length > 0) {
-                sorted.map(value => value.padding = value.padding + sorted[sorted.length-1].relays.length)
+                sorted.map(value => value.padding = value.padding + sorted[sorted.length - 1].relays.length)
             }
             sorted.push(largest)
             famMapForLocation.delete(largest.familyID)
@@ -231,7 +197,7 @@ export function getRelayType(relay?: GeoRelayView): RelayType | undefined {
     } else if (relay.flags?.includes(RelayFlag.Guard)) {
         return RelayType.Guard
     } else {
-        return RelayType.default
+        return RelayType.Other
     }
 }
 

@@ -9,6 +9,7 @@ export interface RelayView {
     flags?: RelayFlag[]
 }
 
+// Order of flags must be kept in sync with backend
 export enum RelayFlag {
     Valid,
     Named,
@@ -26,22 +27,53 @@ export enum RelayFlag {
     Sybil,
     BadExit,
 }
-export enum RelayFlagName {
-    Valid = "Valid",
-    Named = "Named",
-    Unnamed = "Unnamed",
-    Running = "Running",
-    Stable = "Stable",
-    Exit = "Exit",
-    Fast = "Fast",
-    Guard = "Guard",
-    Authority = "Authority",
-    V2Dir = "V2Dir",
-    HSDir = "HSDir",
-    NoEdConsensus = "NoEdConsensus",
-    StaleDesc = "StaleDesc",
-    Sybil = "Sybil",
-    BadExit = "BadExit",
+
+export const RelayFlags: RelayFlag[] = [
+    RelayFlag.Valid,
+    RelayFlag.Named,
+    RelayFlag.Unnamed,
+    RelayFlag.Running,
+    RelayFlag.Stable,
+    RelayFlag.Exit,
+    RelayFlag.Fast,
+    RelayFlag.Guard,
+    RelayFlag.Authority,
+    RelayFlag.V2Dir,
+    RelayFlag.HSDir,
+    RelayFlag.NoEdConsensus,
+    RelayFlag.StaleDesc,
+    RelayFlag.Sybil,
+    RelayFlag.BadExit,
+]
+
+export const RelayFlagLabel: Record<RelayFlag, string> = {
+    [RelayFlag.Valid]: "Valid",
+    [RelayFlag.Named]: "Named",
+    [RelayFlag.Unnamed]: "Unnamed",
+    [RelayFlag.Running]: "Running",
+    [RelayFlag.Stable]: "Stable",
+    [RelayFlag.Exit]: "Exit",
+    [RelayFlag.Fast]: "Fast",
+    [RelayFlag.Guard]: "Guard",
+    [RelayFlag.Authority]: "Authority",
+    [RelayFlag.V2Dir]: "V2Dir",
+    [RelayFlag.HSDir]: "HSDir",
+    [RelayFlag.NoEdConsensus]: "NoEdConsensus",
+    [RelayFlag.StaleDesc]: "StaleDesc",
+    [RelayFlag.Sybil]: "Sybil",
+    [RelayFlag.BadExit]: "BadExit",
+}
+
+export enum RelayType {
+    Exit,
+    Guard,
+    Other,
+}
+
+export const RelayTypeLabel: Record<RelayType, string> = {
+    [RelayType.Exit]: "Exit",
+    [RelayType.Guard]: "Guard",
+    [RelayType.Other]: "Other",
 }
 
 export interface Relay {
@@ -96,10 +128,4 @@ export interface ExitPolicySummary {
     id: number
     reject?: Array<String>
     accept?: Array<String>
-}
-
-export enum RelayType {
-    Exit,
-    Guard,
-    default,
 }

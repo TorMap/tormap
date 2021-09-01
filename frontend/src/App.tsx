@@ -3,7 +3,7 @@ import {WorldMap} from "./components/world-map";
 import {CircularProgress, createMuiTheme, Link, makeStyles, Snackbar, ThemeProvider} from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
-import {AppSettings} from "./components/app-settings";
+import {AppSettings, relaysMustIncludeFlagInput, showRelayTypesInput} from "./components/app-settings";
 import {Settings, SnackbarMessage, Statistics} from "./types/variousTypes";
 import {MapStats} from "./components/map-stats";
 import {DateSlider} from "./components/date-slider";
@@ -69,7 +69,16 @@ function App() {
      * @param event
      */
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setSettings({...settings, [event.target.name]: event.target.checked})
+        switch (event.target.name) {
+            case showRelayTypesInput:
+                setSettings({...settings, showRelayTypes: {...settings.showRelayTypes, [event.target.id]: event.target.checked}})
+                break;
+            case relaysMustIncludeFlagInput:
+                setSettings({...settings, relaysMustIncludeFlag: {...settings.relaysMustIncludeFlag, [event.target.id]: event.target.checked}})
+                break;
+            default:
+                setSettings({...settings, [event.target.name]: event.target.checked})
+        }
     };
 
     // Loads available days from the backend

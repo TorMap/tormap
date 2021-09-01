@@ -52,14 +52,18 @@ interface Props {
 export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
     const classes = useStyle()
 
-    // construct the Rows to display
+    // Construct the stats rows to display
     let rows: StatsRow[] = []
     rows.push({icon: Icon.ExitRelay, title: "Exit relays", value: stats.relayExitCount})
     rows.push({icon: Icon.GuardRelay, title: "Guard relays", value: stats.relayGuardCount})
     rows.push({icon: Icon.DefaultRelay, title: "Other relays", value: stats.relayOtherCount})
-    rows.push({icon: Icon.TotalRelays, title: "Total relays", value: stats.relayExitCount + stats.relayGuardCount + stats.relayOtherCount})
-    if(stats.familyCount) rows.push({icon: Icon.FamilyCount, title: "Families", value: stats.familyCount})
-    if(stats.countryCount) rows.push({icon: Icon.CountryCount, title: "Countries", value: stats.countryCount})
+    rows.push({
+        icon: Icon.TotalRelays,
+        title: "Total relays",
+        value: stats.relayExitCount + stats.relayGuardCount + stats.relayOtherCount
+    })
+    if (stats.familyCount) rows.push({icon: Icon.FamilyCount, title: "Families", value: stats.familyCount})
+    if (stats.countryCount) rows.push({icon: Icon.CountryCount, title: "Countries", value: stats.countryCount})
 
     return (
         <div className={classes.root}>
@@ -77,19 +81,19 @@ export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
                 <AccordionDetails classes={{root: classes.noPadding}}>
                     <Table size="small">
                         <TableBody>
-                            {rows.map(row =>
-                                (<TableRow>
-                                        <TableCell scope="row">
-                                            {icon !== undefined ? getIcon(row.icon) : null}
-                                        </TableCell>
-                                        <TableCell scope="row">
-                                            <Typography>{row.title}</Typography>
-                                        </TableCell>
-                                        <TableCell align={"right"}>
-                                            {row.value}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                            {rows.map(statsRow =>
+                                <TableRow key={statsRow.title}>
+                                    <TableCell scope="row">
+                                        {icon !== undefined ? getIcon(statsRow.icon) : null}
+                                    </TableCell>
+                                    <TableCell scope="row">
+                                        <Typography>{statsRow.title}</Typography>
+                                    </TableCell>
+                                    <TableCell align={"right"}>
+                                        {statsRow.value}
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </AccordionDetails>
