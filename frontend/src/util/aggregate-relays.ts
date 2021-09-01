@@ -68,13 +68,15 @@ export const buildFamilyMap = (relays: GeoRelayView[]): Map<number, GeoRelayView
     let familyMap: Map<number, GeoRelayView[]> = new Map<number, GeoRelayView[]>()
     relays.forEach(relay => {
         if (relay.familyId !== null) {
-            const key: number = relay.familyId
-            if (familyMap.has(key)) {
-                let old = familyMap.get(key)!!
-                old.push(relay)
-                familyMap.set(key, old)
-            } else {
-                familyMap.set(key, [relay])
+            const key = relay.familyId
+            if (key) {
+                if (familyMap.has(key)) {
+                    let old = familyMap.get(key)!!
+                    old.push(relay)
+                    familyMap.set(key, old)
+                } else {
+                    familyMap.set(key, [relay])
+                }
             }
         }
     })

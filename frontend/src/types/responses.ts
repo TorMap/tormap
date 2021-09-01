@@ -4,9 +4,9 @@ export interface GeoRelayView {
     lat: number
     long: number
     country: string
-    flags?: RelayFlag[]
-    detailsId: number
-    familyId: number
+    flags?: RelayFlag[] | null
+    detailsId?: number | null
+    familyId?: number | null
 }
 
 export interface NodeDetails {
