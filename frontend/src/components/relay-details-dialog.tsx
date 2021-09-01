@@ -4,7 +4,8 @@ import {
     CircularProgress,
     Dialog,
     DialogContent,
-    DialogTitle, Grid,
+    DialogTitle,
+    Grid,
     IconButton,
     List,
     ListItem,
@@ -12,6 +13,7 @@ import {
     ListItemText,
     makeStyles,
     Table,
+    TableBody,
     TableCell,
     TableRow,
     Tooltip,
@@ -104,10 +106,10 @@ const formatBoolean = (value?: boolean) => value === null || value === undefined
  * @constructor
  */
 export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
-                                                                      showDialog,
-                                                                      closeDialog,
-                                                                      relays,
-                                                                  }) => {
+                                                                       showDialog,
+                                                                       closeDialog,
+                                                                       relays,
+                                                                   }) => {
     const [relayIdentifiers, setRelayIdentifiers] = useState<NodeIdentifier[]>([])
     const [nodeDetailsId, setNodeDetailsId] = useState<number>()
     const [rawRelayDetails, setRawRelayDetails] = useState<NodeDetails>()
@@ -200,7 +202,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                         className={classes.title}
                         variant="h6">
                         {nodeDetailsId ? (rawRelayDetails?.nickname)
-                        : isLoading ? "loading..." : "no information"}
+                            : isLoading ? "loading..." : "no information"}
                     </Typography>
                     <IconButton aria-label="close" className={classes.closeButton} onClick={closeDialog}>
                         <CloseIcon/>
@@ -214,15 +216,24 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                                 <List>
                                     {relayIdentifiers.map((identifier) =>
                                         (identifier.id &&
-                                            <Tooltip title={identifier.fingerprint} arrow={true} classes={{tooltip: classes.noMaxWidth}}>
-                                                <div>
-                                                    <ListItem button key={identifier.id}
-                                                              selected={identifier.id === nodeDetailsId}
-                                                              onClick={() => setNodeDetailsId(identifier.id)}>
-                                                        <ListItemIcon>{getIcon(getRelayType(relays.find((relay) => relay.detailsId === identifier.id)))}</ListItemIcon>
-                                                        <ListItemText primary={identifier.nickname}/>
-                                                    </ListItem>
-                                                </div>
+                                            <Tooltip
+                                                key={identifier.id}
+                                                title={identifier.fingerprint}
+                                                arrow={true}
+                                                classes={{tooltip: classes.noMaxWidth}}
+                                            >
+                                                <ListItem
+                                                    button={true}
+                                                    selected={identifier.id === nodeDetailsId}
+                                                    onClick={() => setNodeDetailsId(identifier.id)}
+                                                >
+                                                    <ListItemIcon>
+                                                        {getIcon(getRelayType(relays.find(
+                                                            (relay) => relay.detailsId === identifier.id)
+                                                        ))}
+                                                    </ListItemIcon>
+                                                    <ListItemText primary={identifier.nickname}/>
+                                                </ListItem>
                                             </Tooltip>))}
                                 </List>
                             </Box>
@@ -232,17 +243,19 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                                 {isLoading ?
                                     <CircularProgress color={"inherit"}/> : nodeDetailsId ?
                                         <Table size={"small"}>
-                                            {relayDetails?.map((relayInfo) =>
-                                                relayInfo.value &&
-                                                <TableRow>
-                                                    <TableCell scope="row" className={classes.valueName}>
-                                                        <Typography>{relayInfo.name}</Typography>
-                                                    </TableCell>
-                                                    <TableCell scope="row">
-                                                        <Typography>{relayInfo.value}</Typography>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
+                                            <TableBody>
+                                                {relayDetails?.map((relayInfo) =>
+                                                    relayInfo.value &&
+                                                    <TableRow key={relayInfo.name}>
+                                                        <TableCell scope="row" className={classes.valueName}>
+                                                            <Typography>{relayInfo.name}</Typography>
+                                                        </TableCell>
+                                                        <TableCell scope="row">
+                                                            <Typography>{relayInfo.value}</Typography>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
+                                            </TableBody>
                                         </Table>
                                         : <p>We do not have any information about this relay for this date.</p>}
                             </Box>

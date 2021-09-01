@@ -140,6 +140,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                     <TableBody>
                                         {familyIdentifiers.map((family) =>
                                             <TableRow
+                                                key={family.id}
                                                 onClick={() => familySelectionCallback(family.id)}
                                                 hover={true}
                                             >
