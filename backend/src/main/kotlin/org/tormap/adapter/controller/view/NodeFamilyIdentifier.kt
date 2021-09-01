@@ -6,13 +6,13 @@ import org.tormap.commaSeparatedToList
 import org.tormap.jointToCommaSeparated
 
 /**
- * Identifiers of a family
+ * Identifier of a family
  */
-class NodeFamilyIdentifiers(
+class NodeFamilyIdentifier(
     val id: Long,
     val memberCount: Long,
     val nicknames: String,
-    autonomousSystems: String,
+    autonomousSystems: String?,
 ) {
-    val autonomousSystems = autonomousSystems.commaSeparatedToList().toSet().jointToCommaSeparated()
+    val autonomousSystems = autonomousSystems?.commaSeparatedToList()?.toSet()?.jointToCommaSeparated()
 }
