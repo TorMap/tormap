@@ -1,11 +1,10 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
 import {makeStyles, Slider,} from "@material-ui/core";
-import {useDebounce} from "../util/hooks";
+import {useDebounce} from "../util/util";
 import Moment from "react-moment";
 import {KeyboardDatePicker, MuiPickersUtilsProvider} from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 import moment from "moment";
-import {Mark} from "../types/variousTypes";
 
 /**
  * Styles according to Material UI doc for components used in DateSlider component
@@ -139,4 +138,9 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue}) 
         </div>
     )
 
+}
+
+interface Mark {
+    value: number
+    label: JSX.Element
 }
