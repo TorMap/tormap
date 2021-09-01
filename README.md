@@ -166,7 +166,7 @@ First make sure you have installed all requirements for development.
 
 1. Go to `frontend` directory where file `package.json` is located
 2. Run command: `yarn build`
-3. A `build` folder should be generated containing all necessary frontend files
+3. A `frontend/build` folder should be generated containing all necessary frontend files
 
 ## Host project
 
