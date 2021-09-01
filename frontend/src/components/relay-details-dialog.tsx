@@ -42,6 +42,7 @@ const useStyle = makeStyles(() => ({
     scroll: {
         height: "800px",
         overflowY: "scroll",
+        overflowX: "hidden",
     },
     title: {
         display: "inline",
