@@ -1,5 +1,4 @@
 import {RelayFlag, RelayType} from "./relay";
-import {Dialog, withStyles} from "@material-ui/core";
 
 export interface Settings {
     showRelayTypes: Record<RelayType, boolean>
@@ -14,8 +13,6 @@ export interface Settings {
     heatMap: boolean
 }
 
-export const nameOfFactory = <T>() => (name: keyof T) => name;
-
 export interface Statistics {
     relayGuardCount: number
     relayExitCount: number
@@ -23,20 +20,3 @@ export interface Statistics {
     familyCount?: number
     countryCount?: number
 }
-
-export type SnackbarMessage = {
-    message: string,
-    severity: "error" | "warning" | "info" | "success",
-}
-
-export interface Mark {
-    value: number
-    label: JSX.Element
-}
-
-
-export const FullHeightDialog = withStyles(() => ({
-    paper: {
-        height: '100vh',
-    },
-}))(Dialog);

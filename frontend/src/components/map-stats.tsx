@@ -10,7 +10,7 @@ import {
     TableRow,
     Typography
 } from "@material-ui/core";
-import {Settings, Statistics} from "../types/variousTypes";
+import {Settings, Statistics} from "../types/app-state";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import {
     CountryCountIcon,

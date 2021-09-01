@@ -1,4 +1,4 @@
-import {Settings} from "../types/variousTypes";
+import {Settings} from "../types/app-state";
 import {RelayFlag, RelayType} from "../types/relay";
 
 export const apiBaseUrl = "http://localhost:8080"
