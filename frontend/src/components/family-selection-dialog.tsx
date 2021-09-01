@@ -1,5 +1,4 @@
 import {
-    Dialog,
     DialogContent,
     DialogTitle,
     IconButton,
@@ -9,13 +8,13 @@ import {
     TableCell,
     TableHead,
     TableRow,
-    Typography,
-    withStyles
+    Typography
 } from "@material-ui/core";
 import {NodeFamilyIdentifier} from "../types/responses";
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@material-ui/icons/Close";
 import {apiBaseUrl} from "../util/config";
+import {FullHeightDialog} from "../types/variousTypes";
 
 const useStyle = makeStyles(() => ({
     closeButton: {
@@ -35,13 +34,12 @@ const useStyle = makeStyles(() => ({
     noMaxWidth: {
         maxWidth: "none",
     },
-}))
-
-const FullHeightDialog = withStyles(() => ({
-    paper: {
-        height: '100%',
+    tableRow: {
+        "&:hover": {
+            cursor: "pointer",
+        }
     },
-}))(Dialog);
+}))
 
 interface Props {
     /**
@@ -70,11 +68,11 @@ interface Props {
  * @param familySelectionCallback - the callback function for selecting a family
  */
 export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
-                                                                        showDialog,
-                                                                        closeDialog,
-                                                                        families,
+                                                                          showDialog,
+                                                                          closeDialog,
+                                                                          families,
                                                                           familySelectionCallback
-                                                                    }) => {
+                                                                      }) => {
 
     const [isLoading, setIsLoading] = useState(true)
     const [familyIdentifiers, setFamilyIdentifiers] = useState<NodeFamilyIdentifier[]>()
@@ -145,6 +143,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                 key={family.id}
                                                 onClick={() => familySelectionCallback(family.id)}
                                                 hover={true}
+                                                className={classes.tableRow}
                                             >
                                                 <TableCell scope="row" className={classes.valueName}>
                                                     <Typography>{family.memberCount}</Typography>
@@ -165,7 +164,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                     </TableBody>
                                 </Table>
                                 : <p>We do not have any information about these families for this date.</p>
-                        : <p>loading...</p>}
+                            : <p>loading...</p>}
                     </div>
                 </DialogContent>
             </div>
