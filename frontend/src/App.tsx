@@ -55,7 +55,7 @@ function App() {
                     fontSize: ".85em",
                 }
             },
-            MuiLink:{
+            MuiLink: {
                 root: {
                     color: "rgba(255, 255, 255, 0.7)",
                     fontSize: ".9em"
@@ -71,10 +71,16 @@ function App() {
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         switch (event.target.name) {
             case showRelayTypesInput:
-                setSettings({...settings, showRelayTypes: {...settings.showRelayTypes, [event.target.id]: event.target.checked}})
+                setSettings({
+                    ...settings,
+                    showRelayTypes: {...settings.showRelayTypes, [event.target.id]: event.target.checked}
+                })
                 break;
             case relaysMustIncludeFlagInput:
-                setSettings({...settings, relaysMustIncludeFlag: {...settings.relaysMustIncludeFlag, [event.target.id]: event.target.checked}})
+                setSettings({
+                    ...settings,
+                    relaysMustIncludeFlag: {...settings.relaysMustIncludeFlag, [event.target.id]: event.target.checked}
+                })
                 break;
             default:
                 setSettings({...settings, [event.target.name]: event.target.checked})
@@ -123,9 +129,9 @@ function App() {
         <ThemeProvider theme={theme}>
             <div>
                 {isLoading &&
-                    <div className={classes.progressCircle}>
-                        <CircularProgress color={"inherit"}/>
-                    </div>
+                <div className={classes.progressCircle}>
+                    <CircularProgress color={"inherit"}/>
+                </div>
                 }
                 <WorldMap
                     dayToDisplay={sliderValue >= 0 ? availableDays[sliderValue] : undefined}
@@ -136,7 +142,7 @@ function App() {
                     showSnackbarMessage={showSnackbarMessage}
                     closeSnackbar={() => setShowSnackbar(false)}
                 />
-                <DateSlider availableDays={availableDays} setValue={setSliderValue} />
+                <DateSlider availableDays={availableDays} setValue={setSliderValue}/>
                 <AppSettings settings={settings} onChange={handleInputChange}/>
                 {statistics && <MapStats settings={settings} stats={statistics}/>}
             </div>

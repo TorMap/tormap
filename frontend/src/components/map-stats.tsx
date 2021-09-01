@@ -1,4 +1,4 @@
-import React, {FunctionComponent} from "react";
+import React, {FunctionComponent, ReactElement} from "react";
 import {
     Accordion,
     AccordionDetails,
@@ -12,8 +12,14 @@ import {
 } from "@material-ui/core";
 import {Settings, Statistics} from "../types/variousTypes";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import {getIcon, Icon} from "../types/icons";
-import {icon} from "leaflet";
+import {
+    CountryCountIcon,
+    ExitRelayIcon,
+    FamilyCountIcon,
+    GuardRelayIcon,
+    OtherRelayIcon,
+    TotalRelaysIcon
+} from "../types/icons";
 import {getFullName} from "../util/geojson";
 
 /**
@@ -54,16 +60,16 @@ export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
 
     // Construct the stats rows to display
     let rows: StatsRow[] = []
-    rows.push({icon: Icon.ExitRelay, title: "Exit relays", value: stats.relayExitCount})
-    rows.push({icon: Icon.GuardRelay, title: "Guard relays", value: stats.relayGuardCount})
-    rows.push({icon: Icon.DefaultRelay, title: "Other relays", value: stats.relayOtherCount})
+    rows.push({icon: ExitRelayIcon, title: "Exit relays", value: stats.relayExitCount})
+    rows.push({icon: GuardRelayIcon, title: "Guard relays", value: stats.relayGuardCount})
+    rows.push({icon: OtherRelayIcon, title: "Other relays", value: stats.relayOtherCount})
     rows.push({
-        icon: Icon.TotalRelays,
+        icon: TotalRelaysIcon,
         title: "Total relays",
         value: stats.relayExitCount + stats.relayGuardCount + stats.relayOtherCount
     })
-    if (stats.familyCount) rows.push({icon: Icon.FamilyCount, title: "Families", value: stats.familyCount})
-    if (stats.countryCount) rows.push({icon: Icon.CountryCount, title: "Countries", value: stats.countryCount})
+    if (stats.familyCount) rows.push({icon: FamilyCountIcon, title: "Families", value: stats.familyCount})
+    if (stats.countryCount) rows.push({icon: CountryCountIcon, title: "Countries", value: stats.countryCount})
 
     return (
         <div className={classes.root}>
@@ -84,7 +90,7 @@ export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
                             {rows.map(statsRow =>
                                 <TableRow key={statsRow.title}>
                                     <TableCell scope="row">
-                                        {icon !== undefined ? getIcon(statsRow.icon) : null}
+                                        {statsRow.icon}
                                     </TableCell>
                                     <TableCell scope="row">
                                         <Typography>{statsRow.title}</Typography>
@@ -103,7 +109,7 @@ export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
 }
 
 interface StatsRow {
-    icon?: Icon
+    icon: ReactElement
     title: string
     value: string | number
 }
