@@ -1,4 +1,5 @@
 import {RelayFlag, RelayType} from "./relay";
+import {Dialog, withStyles} from "@material-ui/core";
 
 export interface Settings {
     showRelayTypes: Record<RelayType, boolean>
@@ -32,3 +33,10 @@ export interface Mark {
     value: number
     label: JSX.Element
 }
+
+
+export const FullHeightDialog = withStyles(() => ({
+    paper: {
+        height: '100vh',
+    },
+}))(Dialog);

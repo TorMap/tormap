@@ -13,6 +13,7 @@ import javax.persistence.*
 @Table(
     indexes = [
         Index(columnList = "day, fingerprint", name = "day_fingerprint_index", unique = true),
+        Index(columnList = "day", name = "day_index"),
     ]
 )
 class GeoRelay(
