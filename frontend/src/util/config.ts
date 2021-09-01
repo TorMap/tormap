@@ -1,44 +1,49 @@
 import {Settings} from "../types/variousTypes";
+import {RelayFlag, RelayType} from "../types/relay";
 
 export const apiBaseUrl = "http://localhost:8080"
 
 // Default settings, that are selected on page load
 export const defaultSettings: Settings = {
-    Guard: true,
-    Exit: true,
-    Default: true,
+    showRelayTypes: {
+        [RelayType.Exit]: true,
+        [RelayType.Guard]: true,
+        [RelayType.Other]: true,
+    },
 
-    miValid: false,
-    miNamed: false,
-    miUnnamed: false,
-    miRunning: false,
-    miStable: false,
-    miExit: false,
-    miFast: false,
-    miGuard: false,
-    miAuthority: false,
-    miV2Dir: false,
-    miHSDir: false,
-    miNoEdConsensus: false,
-    miStaleDesc: false,
-    miSybil: false,
-    miBadExit: false,
+    relaysMustIncludeFlag: {
+        [RelayFlag.Authority]: false,
+        [RelayFlag.BadExit]: false,
+        [RelayFlag.Exit]: false,
+        [RelayFlag.Fast]: false,
+        [RelayFlag.Guard]: false,
+        [RelayFlag.HSDir]: false,
+        [RelayFlag.Named]: false,
+        [RelayFlag.NoEdConsensus]: false,
+        [RelayFlag.Running]: false,
+        [RelayFlag.Stable]: false,
+        [RelayFlag.StaleDesc]: false,
+        [RelayFlag.Sybil]: false,
+        [RelayFlag.Unnamed]: false,
+        [RelayFlag.Valid]: false,
+        [RelayFlag.V2Dir]: false,
+    },
 
-    aggregateCoordinates: false,
-    heatMap: false,
-
+    // Group relays by settings
     sortCountry: false,
     selectedCountry: undefined,
     sortFamily: false,
     selectedFamily: undefined,
+    aggregateCoordinates: false,
+    heatMap: false,
 }
 
 // The time it takes before the tooltip is shown
-export const tooltipTimeDelay = 1000
+export const tooltipTimeDelay = 750
 
 // Colors for node types
 export const Colors = {
-    Exit: "#f96969",
-    Guard: "#fcb045",
-    Default: "#b337c6",
+    Exit: "#FF4848",
+    Guard: "#FFD371",
+    Default: "#b78aff",
 }

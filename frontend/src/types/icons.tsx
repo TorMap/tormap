@@ -28,7 +28,7 @@ export function getIcon(icon: Icon | RelayType | undefined): JSX.Element | null{
     switch (icon){
         case Icon.ExitRelay || RelayType.Exit: return <DirectionsRunIcon style={{color: Colors.Exit}}/>
         case Icon.GuardRelay || RelayType.Guard: return <SecurityIcon style={{color: Colors.Guard}}/>
-        case Icon.DefaultRelay || RelayType.default: return <TimelineIcon style={{color: Colors.Default}}/>
+        case Icon.DefaultRelay || RelayType.Other: return <TimelineIcon style={{color: Colors.Default}}/>
         case Icon.TotalRelays: return <SubdirectoryArrowRightIcon/>
         case Icon.FamilyCount: return <GroupIcon/>
         case Icon.CountryCount: return <PublicIcon/>
