@@ -174,11 +174,11 @@ Make sure you have installed all requirements for development. To be able to hos
 or just successfully created your own project build.
 
 ### Releases
-- https://timkilb.com/releases/tormap-version-1.1.0.zip
+- http://timkilb.com/releases/tormap-version-1.1.0.zip
 
 ### Preprocessed databases
-- https://timkilb.com/databases/tormap-full-DB-2021-09-01-version-1.1.0.zip
-- https://timkilb.com/databases/tormap-only-AS-DB-2021-09-01-version-1.1.0.zip
+- http://timkilb.com/databases/tormap-full-DB-2021-09-01-version-1.1.0.zip
+- http://timkilb.com/databases/tormap-only-AS-DB-2021-09-01-version-1.1.0.zip
 
 ### Start backend
 
