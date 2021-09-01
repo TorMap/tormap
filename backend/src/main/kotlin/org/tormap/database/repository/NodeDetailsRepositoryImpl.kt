@@ -2,7 +2,7 @@ package org.tormap.database.repository
 
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
-import org.tormap.adapter.controller.view.NodeFamilyIdentifiers
+import org.tormap.adapter.controller.view.NodeFamilyIdentifier
 import org.tormap.adapter.controller.view.NodeIdentifiers
 import javax.transaction.Transactional
 
@@ -25,7 +25,7 @@ interface NodeDetailsRepositoryImpl : NodeDetailsRepository {
             "WHERE familyId in :ids " +
             "GROUP BY familyId"
     )
-    fun findFamilyIdentifiers(ids: List<Long>): List<NodeFamilyIdentifiers>
+    fun findFamilyIdentifiers(ids: List<Long>): List<NodeFamilyIdentifier>
 
     @Transactional
     @Modifying
