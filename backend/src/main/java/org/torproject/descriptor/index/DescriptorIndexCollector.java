@@ -170,7 +170,7 @@ public class DescriptorIndexCollector implements DescriptorCollector {
             public FileVisitResult visitFile(Path path,
                 BasicFileAttributes bfa) {
               locals.put(path.toFile().getAbsolutePath()
-                  .replace(localDir.getAbsolutePath() + "/", ""),
+                  .replace(localDir.getAbsolutePath() + File.separator, ""),
                       path.toFile().lastModified());
               return FileVisitResult.CONTINUE;
             }
