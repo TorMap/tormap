@@ -14,10 +14,11 @@ import {
     Typography,
 } from "@material-ui/core";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import {nameOfFactory, Settings} from "../types/app-state";
+import {Settings} from "../types/app-state";
 import {RelayFlag, RelayFlagLabel, RelayType, RelayTypeLabel} from "../types/relay";
 import {tooltipTimeDelay} from "../util/config";
 import {getIcon} from "../types/icons";
+import {nameOfFactory} from "../util/util";
 
 /**
  * Styles according to Material UI doc for components used in AppSettings component
