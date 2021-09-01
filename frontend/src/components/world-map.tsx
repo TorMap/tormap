@@ -25,7 +25,7 @@ import {apiBaseUrl} from "../util/config";
 import {GeoRelayView} from "../types/responses";
 import {RelayDetailsDialog} from "./relay-details-dialog";
 import {FamilySelectionDialog} from "./family-selection-dialog";
-import {SnackbarMessage} from "../types/ui";
+import {ErrorMessages, SnackbarMessage} from "../types/ui";
 
 /**
  * Styles according to Material UI doc for components used in WorldMap component
@@ -83,7 +83,7 @@ interface Props {
 /*
 Variable needs to be outside component to keep track of the last selected date
 This prevents the case that multiple dates get loaded and the last received date is displayed.
-Instead only the last requested date will be drawn.
+Instead only the last selected date will be drawn.
  */
 let latestRequestTimestamp: number | undefined = undefined
 
@@ -120,8 +120,8 @@ export const WorldMap: FunctionComponent<Props> = ({
                     setLoadingStateCallback(false)
                     if (currentTimeStamp === latestRequestTimestamp) setRelays(newRelays)
                 })
-                .catch(reason => {
-                    showSnackbarMessage({message: `${reason}`, severity: "error"})
+                .catch(() => {
+                    showSnackbarMessage({message: ErrorMessages.ConectionToBackendFailed, severity: "error"})
                 })
             latestRequestTimestamp = currentTimeStamp
         }
@@ -188,7 +188,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                 // Filter relays
                 let filteredRelays = applyFilter(relays, settings)
                 if (!filteredRelays.length) {
-                    showSnackbarMessage({message: "There are no relays with the filtered flags!", severity: "warning"})
+                    showSnackbarMessage({message: ErrorMessages.NoRelaysWithFlags, severity: "warning"})
                     return layerToReturn
                 }
 
@@ -215,7 +215,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                 }
 
                 // Draw Heatmap, draws a heatmap with a point for each coordinate
-                // As this Layer is part of the component state and has to be applied to the map object directly, it cant be moved to util
+                // As this Layer is part of the component state and has to be applied to the map object directly, it cant be moved to util/layer-construction.ts
                 // https://github.com/Leaflet/Leaflet.heat
                 if (settings.heatMap) {
                     leafletMap?.removeLayer(heatLayer)
@@ -231,6 +231,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                     }).addTo(leafletMap)
                     setHeatLayer(heat)
                 } else {
+                    //remove the heatmap layer if it should not be displayed
                     leafletMap?.removeLayer(heatLayer)
                 }
 

@@ -24,15 +24,14 @@ export const applyFilter = (relays: GeoRelayView[], settings: Settings): GeoRela
         }
 
         // Filter relay types
-        if (!settings.showRelayTypes[RelayType.Exit] && relay.flags?.includes(RelayFlag.Exit)) {
+        const relayType = getRelayType(relay)
+        if (!settings.showRelayTypes[RelayType.Exit] && relayType === RelayType.Exit) {
             return
         }
-        if (!settings.showRelayTypes[RelayType.Guard] && (relay.flags?.includes(RelayFlag.Guard))
-            && !(relay.flags?.includes(RelayFlag.Exit))) {
+        if (!settings.showRelayTypes[RelayType.Guard] && relayType === RelayType.Guard) {
             return
         }
-        if (!settings.showRelayTypes[RelayType.Other] && (!relay.flags?.includes(RelayFlag.Guard)
-            && !relay.flags?.includes(RelayFlag.Exit))) {
+        if (!settings.showRelayTypes[RelayType.Other] && relayType === RelayType.Other) {
             return
         }
         filtered.push(relay)
@@ -79,9 +78,6 @@ export const buildFamilyMap = (relays: GeoRelayView[]): Map<number, GeoRelayView
             }
         }
     })
-    familyMap.forEach((family, key) => {
-        if (family.length < 2) familyMap.delete(key)
-    })
     return familyMap
 }
 
@@ -99,27 +95,32 @@ export const buildFamilyCoordinatesMap = (latLonMap: Map<string, GeoRelayView[]>
 
 /**
  * Returns a Key-Value-Map where Key is the coordinate pair as string and Value is an Array of famCordArr-Objects that are sorted for family size
+ * The largest Family on this coordinate is first
  * @param famCordMap famCordMap-Object to sort
  */
 export const sortFamilyCoordinatesMap = (famCordMap: Map<string, Map<number, GeoRelayView[]>>): Map<string, famCordArr[]> => {
     let output: Map<string, famCordArr[]> = new Map<string, famCordArr[]>()
+    // For each coordinate
     famCordMap.forEach((famMapForLocation, coordinateKey) => {
         let sorted: famCordArr[] = []
+        // For each family at coordinate
         while (famMapForLocation.size > 0) {
             let largest: famCordArr = {relays: [], familyID: 0, padding: 0}
+            // Find largest
             famMapForLocation.forEach((relays, famID) => {
                 if (relays.length > largest.relays.length) largest = {relays: relays, familyID: famID, padding: 0}
             })
+            // Add padding to all larger ones (so there are no markers with same size on same coordinate)
             if (sorted.length > 0) {
                 sorted.map(value => value.padding = value.padding + sorted[sorted.length - 1].relays.length)
             }
+            // Cleanup for next iteration
             sorted.push(largest)
             famMapForLocation.delete(largest.familyID)
             largest = {relays: [], familyID: 0, padding: 0}
         }
         output.set(coordinateKey, sorted)
     })
-
     return output
 }
 
@@ -130,7 +131,7 @@ export type famCordArr = {
 }
 
 /**
- * Returns a Key-Value-Map where Key is the countries ISO-2 ID
+ * Returns a Key-Value-Map where Key is the countries ISO-3166-A2 ID
  * @param relays Relays
  */
 export const getCountryMap = (relays: GeoRelayView[]): Map<string, GeoRelayView[]> => {
@@ -187,7 +188,7 @@ export const calculateStatistics = (
 }
 
 /**
- * Returns the type of the relay
+ * Returns the type of a relay
  * @param relay
  */
 export function getRelayType(relay?: GeoRelayView): RelayType | undefined {

@@ -14,7 +14,7 @@ import {NodeFamilyIdentifier} from "../types/responses";
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@material-ui/icons/Close";
 import {apiBaseUrl} from "../util/config";
-import {SnackbarMessage, FullHeightDialog} from "../types/ui";
+import {SnackbarMessage, FullHeightDialog, ErrorMessages} from "../types/ui";
 
 
 const useStyle = makeStyles(() => ({
@@ -113,8 +113,9 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                     setIsLoading(false)
                     console.log(families)
                 })
-                .catch(reason => {
-                    showSnackbarMessage({message: `${reason}`, severity: "error"})
+                .catch(() => {
+                    showSnackbarMessage({message: `${ErrorMessages.ConectionToBackendFailed}`, severity: "error"})
+                    setIsLoading(false)
                 })
         }
     }, [families])

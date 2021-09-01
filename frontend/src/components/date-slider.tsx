@@ -66,6 +66,7 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue}) 
     // calculate the marks for the slider
     useEffect(() => {
         if (availableDays.length !== 0) {
+            // the count of marks
             let markCount = 6
             markCount--
             let marks = []
