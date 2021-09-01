@@ -20,7 +20,7 @@ interface NodeDetailsRepositoryImpl : NodeDetailsRepository {
     )
     fun findNodeIdentifiers(ids: List<Long>): List<NodeIdentifiers>
 
-    @Query("SELECT new org.tormap.adapter.controller.view.NodeFamilyIdentifiers(familyId, count(id), function('LISTAGG', nickname, ', '), function('LISTAGG', autonomousSystemName, ', ')) " +
+    @Query("SELECT new org.tormap.adapter.controller.view.NodeFamilyIdentifier(familyId, count(id), function('LISTAGG', nickname, ', '), function('LISTAGG', autonomousSystemName, ', ')) " +
             "FROM NodeDetails " +
             "WHERE familyId in :ids " +
             "GROUP BY familyId"
