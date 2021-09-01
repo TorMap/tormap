@@ -122,27 +122,29 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
      * Query relayIdentifiers for relays from backend
      */
     useEffect(() => {
-        setIsLoading(true)
         setNodeDetailsId(undefined)
         setRelayIdentifiers([])
-        fetch(`${apiBaseUrl}/archive/node/identifiers`, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            method: "post",
-            body: JSON.stringify(relays.map(relay => relay.detailsId)),
-        })
-            .then(response => response.json())
-            .then((identifiers: NodeIdentifier[]) => {
-                setRelayIdentifiers(identifiers)
-                if (identifiers.length > 0) {
-                    setNodeDetailsId(identifiers[0].id)
-                }
-                setIsLoading(false)
+        if (relays.length > 0) {
+            setIsLoading(true)
+            fetch(`${apiBaseUrl}/archive/node/identifiers`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                method: "post",
+                body: JSON.stringify(relays.map(relay => relay.detailsId)),
             })
-            .catch(() => {
-                setIsLoading(false)
-            })
+                .then(response => response.json())
+                .then((identifiers: NodeIdentifier[]) => {
+                    setRelayIdentifiers(identifiers)
+                    if (identifiers.length > 0) {
+                        setNodeDetailsId(identifiers[0].id)
+                    }
+                    setIsLoading(false)
+                })
+                .catch(() => {
+                    setIsLoading(false)
+                })
+        }
     }, [relays])
 
     /**

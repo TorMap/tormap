@@ -84,22 +84,24 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
      * Query more information about the Families specified in "families" parameter
      */
     useEffect(() => {
-        setIsLoading(true)
         setFamilyIdentifiers([])
-        fetch(`${apiBaseUrl}/archive/node/family/identifiers`, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            method: "post",
-            body: JSON.stringify(families),
-        })
-            .then(response => response.json())
-            .then((identifiers: NodeFamilyIdentifier[]) => {
-                setFamilyIdentifiers(identifiers)
-                setIsLoading(false)
-                console.log(families)
-                console.log(identifiers)
+        if (families.length > 0) {
+            setIsLoading(true)
+            fetch(`${apiBaseUrl}/archive/node/family/identifiers`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                method: "post",
+                body: JSON.stringify(families),
             })
+                .then(response => response.json())
+                .then((identifiers: NodeFamilyIdentifier[]) => {
+                    setFamilyIdentifiers(identifiers)
+                    setIsLoading(false)
+                    console.log(families)
+                    console.log(identifiers)
+                })
+        }
     }, [families])
 
     return (
