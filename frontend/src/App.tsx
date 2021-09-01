@@ -10,7 +10,7 @@ import {DateSlider} from "./components/date-slider";
 import MuiAlert from '@material-ui/lab/Alert';
 import {apiBaseUrl, defaultSettings} from "./util/config";
 import {AboutInformation} from "./components/about-information";
-import {ErrorMessages, SnackbarMessage} from "./types/ui";
+import {SnackbarMessage, SnackbarMessages} from "./types/ui";
 
 
 /**
@@ -34,6 +34,9 @@ const useStyle = makeStyles(() => ({
         bottom: "0px",
         fontSize: ".7rem",
     },
+    snackbar: {
+        color: "#2a2a2a"
+    }
 }))
 
 function App() {
@@ -99,7 +102,7 @@ function App() {
                 setIsLoading(false)
             })
             .catch(() => {
-                showSnackbarMessage({message: `${ErrorMessages.ConectionToBackendFailed}`, severity: "error"})
+                showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
                 setIsLoading(false)
             })
     }, [])
@@ -158,6 +161,7 @@ function App() {
                     variant="filled"
                     onClose={handleCloseSnackbar}
                     severity={snackbarMessage.severity}
+                    className={classes.snackbar}
                 >
                     {snackbarMessage.message}
                 </MuiAlert>
