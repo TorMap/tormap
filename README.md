@@ -142,13 +142,13 @@ Make sure you are in the `frontend` directory. You can learn more about the foll
 the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 - `yarn`: installs required frontend packages
-- `yarn start`: creates build, runs it and listens on http://localhost:3000 (page reloads if you save frontend changes)
+- `yarn start`: creates build, runs it and listens by default on http://localhost:3000 (page reloads if you save frontend changes)
 - `yarn build`: creates production ready build in `build` folder
 
 #### Config
 
 The main `frontend` config is located at `frontend/srv/util/config.ts`. Further environment options like enable/disable
-Browser autostart can be configured in `frontend/.env`. Dependencies are managed with `yarn` and located
+Browser autostart and default port can be configured in `frontend/.env`. Dependencies are managed with `yarn` and located
 in `frontend/package.json`. Compiler options for `TypeScript` are located at `frontend/tsconfig.json`.
 
 ## Build project
