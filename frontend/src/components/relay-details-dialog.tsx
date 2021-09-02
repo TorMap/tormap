@@ -22,9 +22,10 @@ import {
 import CloseIcon from "@material-ui/icons/Close";
 import {apiBaseUrl} from "../util/config";
 import {getIcon} from "../types/icons";
-import {getRelayType} from "../util/aggregate-relays";
+import {findGeoRelayViewByID, getRelayType} from "../util/aggregate-relays";
 import {DetailsInfo, GeoRelayView, NodeDetails, NodeIdentifier} from "../types/responses";
 import {FullHeightDialog, SnackbarMessage, SnackbarMessages} from "../types/ui";
+import {RelayFlag, RelayFlagLabel} from "../types/relay";
 
 /**
  * Styles according to Material UI doc for components used in AppSettings component
@@ -163,6 +164,13 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
      * Query more information for the selected relay
      */
     useEffect(() => {
+        function constructFlagString (flags: RelayFlag[] | null | undefined): string {
+            if (flags) {
+                return flags.map(flag => RelayFlagLabel[flag]).join(", ")
+            }
+            return "no flags assigned"
+        }
+
         if (nodeDetailsId) {
             setIsLoading(true)
             fetch(`${apiBaseUrl}/archive/node/details/${nodeDetailsId}`)
@@ -172,6 +180,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     setRelayDetails([
                         {name: "Fingerprint", value: relay.fingerprint},
                         {name: "IP address", value: relay.address},
+                        {name: "Flags assigned by authorities", value: constructFlagString(findGeoRelayViewByID(relay.id, relays)?.flags)},
                         {name: "Autonomous System", value: relay.autonomousSystemName},
                         {name: "Autonomous System Number", value: relay.autonomousSystemNumber},
                         {name: "Platform", value: relay.platform},
