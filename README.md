@@ -166,21 +166,27 @@ First make sure you have installed all requirements for development.
 
 1. Go to `frontend` directory where file `package.json` is located
 2. Run command: `yarn build`
-3. A `build` folder should be generated containing all necessary frontend files
+3. A `frontend/build` folder should be generated containing all necessary frontend files
 
 ## Host project
 
 Make sure you have installed all requirements for development. To be able to host, you should have a copy of a release
-or just successfully created your own project build. For now prebuild releases and DBs are available
-at https://lightningpuzzle.com/tormap/.
+or just successfully created your own project build.
 
-### Backend
+### Releases
+- http://timkilb.com/releases/tormap-version-1.1.0.zip
+
+### Preprocessed databases
+- http://timkilb.com/databases/tormap-full-DB-2021-09-01-version-1.1.0.zip
+- http://timkilb.com/databases/tormap-only-AS-DB-2021-09-01-version-1.1.0.zip
+
+### Start backend
 
 1. Go into the directory where the `.jar` file is located
 2. Run command `java -jar <backend jar file>`
 3. Backend should be available at http://localhost:8080
 
-### Frontend
+### Start frontend
 
 1. Go into the directory where `index.html` is located
 2. Run command: `serve -l 3000`

@@ -14,7 +14,7 @@ import {NodeFamilyIdentifier} from "../types/responses";
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@material-ui/icons/Close";
 import {apiBaseUrl} from "../util/config";
-import {SnackbarMessage, FullHeightDialog, ErrorMessages} from "../types/ui";
+import {FullHeightDialog, SnackbarMessage, SnackbarMessages} from "../types/ui";
 
 /**
  * Styles according to Material UI doc for components used in AppSettings component
@@ -116,7 +116,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                     console.log(families)
                 })
                 .catch(() => {
-                    showSnackbarMessage({message: `${ErrorMessages.ConectionToBackendFailed}`, severity: "error"})
+                    showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
                     setIsLoading(false)
                 })
         }

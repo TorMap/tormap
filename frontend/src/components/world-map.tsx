@@ -25,7 +25,7 @@ import {apiBaseUrl} from "../util/config";
 import {GeoRelayView} from "../types/responses";
 import {RelayDetailsDialog} from "./relay-details-dialog";
 import {FamilySelectionDialog} from "./family-selection-dialog";
-import {ErrorMessages, SnackbarMessage} from "../types/ui";
+import {SnackbarMessage, SnackbarMessages} from "../types/ui";
 
 /**
  * Styles according to Material UI doc for components used in WorldMap component
@@ -131,7 +131,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                     if (currentTimeStamp === latestRequestTimestamp) setRelays(newRelays)
                 })
                 .catch(() => {
-                    showSnackbarMessage({message: ErrorMessages.ConectionToBackendFailed, severity: "error"})
+                    showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
                 })
             latestRequestTimestamp = currentTimeStamp
         }
@@ -198,7 +198,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                 // Filter relays
                 let filteredRelays = applyFilter(relays, settings)
                 if (!filteredRelays.length) {
-                    showSnackbarMessage({message: ErrorMessages.NoRelaysWithFlags, severity: "warning"})
+                    showSnackbarMessage({message: SnackbarMessages.NoRelaysWithFlags, severity: "warning"})
                     return layerToReturn
                 }
 
@@ -211,7 +211,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                     setSettingsCallback({...settings, selectedFamily: undefined})
                 }
                 if (settings.sortFamily && familyMap.size === 0) showSnackbarMessage({
-                    message: "There are no families available for this day!",
+                    message: SnackbarMessages.NoFamilyData,
                     severity: "warning"
                 })
 
