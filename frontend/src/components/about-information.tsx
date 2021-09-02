@@ -90,9 +90,11 @@ export const AboutInformation: React.FunctionComponent = () => {
                         details like IP address, contact or Autonomous System info of a relay is as easy as selecting it
                         on the map.<br/>
                         The project was developed by two students for their practical P4-Projekt at the <Link
-                        href={"https://www.tu-darmstadt.de/"} target={"_blank"}>Technische
-                        Universität Darmstadt</Link> as part of the <Link href={"https://panda-projekt.de/"}
-                                                                          target={"_blank"}>PANDA-Projekt</Link>.<br/>
+                        href={"https://www.tu-darmstadt.de/"} target={"_blank"}>Technical University of
+                        Darmstadt</Link> as part of the <Link href={"https://panda-projekt.de/"}
+                                                              target={"_blank"}>PANDA project</Link> and supervised by
+                        Florian Platzer (<Link
+                        href={"mailto:florian.platzer@sit.fraunhofer.de"} target={"_blank"}>florian.platzer@sit.fraunhofer.de</Link>).<br/>
                         PANDA is a joint project by the <Link href={"https://www.sit.fraunhofer.de/"} target={"_blank"}>Frauenhofer
                         SIT</Link> and the TU
                         Darmstadt which is funded/grant-aided by the <Link href={"https://panda-projekt.de/"}
