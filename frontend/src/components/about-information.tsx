@@ -23,7 +23,9 @@ import panda from "../data/about-logos/panda-logo-300x113-white.png";
 import LanguageIcon from '@material-ui/icons/Language';
 import InfoIcon from '@material-ui/icons/Info';
 
-
+/**
+ * Styles according to Material UI doc for components used in AppSettings component
+ */
 const useStyle = makeStyles(() => ({
     about: {
         position: "fixed",
@@ -51,6 +53,10 @@ const useStyle = makeStyles(() => ({
     },
 }))
 
+/**
+ * A component for displaying information about TorMap
+ * @constructor
+ */
 export const AboutInformation: React.FunctionComponent = () => {
     const [showDialog, setShowDialog] = useState(false)
     const classes = useStyle()

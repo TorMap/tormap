@@ -47,6 +47,11 @@ interface Props {
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+/**
+ * A component for changing the app settings
+ * @param settings the settings
+ * @param onChange the changeHandler for changing settings
+ */
 export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
     const classes = useStyle()
 

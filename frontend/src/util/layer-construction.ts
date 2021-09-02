@@ -10,8 +10,8 @@ import {GeoRelayView} from "../types/responses";
 
 /**
  * Returns a Layer with markers with size relative to number of relays on a coordinate.
- * @param latLonMap
- * @param onMarkerClick event handler
+ * @param latLonMap - The LatLonMap
+ * @param onMarkerClick - Event handler for clicking on a marker
  */
 export const aggregatedCoordinatesLayer = (
     latLonMap: Map<string, GeoRelayView[]>,
@@ -39,9 +39,9 @@ export const aggregatedCoordinatesLayer = (
 
 /**
  * Returns a Layer with markers for each relay.
- * @param latLonMap
- * @param singleColor wheter all markers should have the same color
- * @param onMarkerClick
+ * @param latLonMap - The LatLonMap
+ * @param singleColor - Whether all markers should have the same color
+ * @param onMarkerClick - Event handler for clicking on a marker
  */
 export const defaultMarkerLayer = (
     latLonMap: Map<string, GeoRelayView[]>,
@@ -88,9 +88,9 @@ export const defaultMarkerLayer = (
 
 /**
  * Returns a Layer with markers for families with size relative to number of relays in given family on a coordinate.
- * @param familyMap
- * @param settings App settings
- * @param setSettingsCallback
+ * @param familyMap - The FamilyMap
+ * @param settings - The app settings
+ * @param setSettingsCallback - The callback for changing settings
  */
 export const familyLayer = (
     familyMap: Map<number, GeoRelayView[]>,
@@ -133,10 +133,10 @@ export const familyLayer = (
 
 /**
  * Returns a Layer with markers for families with size relative to number of relays in given family on a coordinate. And scales families size so there are no markers with same size
- * @param famCordMap
- * @param settings
- * @param setSettingsCallback
- * @param onMarkerClick
+ * @param famCordMap - The famCordMap
+ * @param settings - The app settings
+ * @param setSettingsCallback - The callback for changing settings
+ * @param onMarkerClick - Event handler for clicking on a marker
  */
 export const familyCordLayer = (
     famCordMap: Map<string, Map<number, GeoRelayView[]>>,
@@ -182,9 +182,9 @@ export const familyCordLayer = (
 
 /**
  * Returns a Layer with markers for each relay. Color is same for countries in same country.
- * @param countryMap
- * @param settings
- * @param onMarkerClick
+ * @param countryMap - The CountryMap
+ * @param settings - The app settings
+ * @param onMarkerClick - Event handler for clicking on a marker
  */
 export const countryMarkerLayer = (
     countryMap: Map<string, GeoRelayView[]>,
@@ -218,9 +218,9 @@ export const countryMarkerLayer = (
 }
 /**
  * Returns an Layer with all Countries that contain relays
- * @param countryMap
- * @param settings
- * @param setSettingsCallback
+ * @param countryMap - The CountryMap
+ * @param settings - The app settings
+ * @param setSettingsCallback - The callback for changing settings
  */
 export const countryLayer = (
     countryMap: Map<string, GeoRelayView[]>,
@@ -261,10 +261,10 @@ export const countryLayer = (
 
 /**
  * Helper for adding events to countries
- * @param feature the GeoJSON-feature the event belongs to
- * @param layer
- * @param settings
- * @param setSettingsCallback
+ * @param feature - The GeoJSON-feature the event belongs to
+ * @param layer - The layer the event is bound to
+ * @param settings - The app settings
+ * @param setSettingsCallback - The callback for changing settings
  */
 const onEachCountry = (
     feature: Feature<GeometryObject>,
