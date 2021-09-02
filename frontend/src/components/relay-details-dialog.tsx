@@ -24,7 +24,7 @@ import {apiBaseUrl} from "../util/config";
 import {getIcon} from "../types/icons";
 import {getRelayType} from "../util/aggregate-relays";
 import {DetailsInfo, GeoRelayView, NodeDetails, NodeIdentifier} from "../types/responses";
-import {SnackbarMessage, FullHeightDialog, ErrorMessages} from "../types/ui";
+import {FullHeightDialog, SnackbarMessage, SnackbarMessages} from "../types/ui";
 
 /**
  * Styles according to Material UI doc for components used in AppSettings component
@@ -127,14 +127,20 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
     useEffect(() => {
         setNodeDetailsId(undefined)
         setRelayIdentifiers([])
-        if (relays.length > 0) {
+        const relayDetailsIds = relays.filter(relay => relay.detailsId).map(relay => relay.detailsId)
+        if (relays.length > 0 && relayDetailsIds.length === 0) {
+            showSnackbarMessage({message: SnackbarMessages.NoNodeDetails, severity: "warning"})
+            closeDialog()
+        } else if (relayDetailsIds.length === 1) {
+            setNodeDetailsId(relayDetailsIds[0]!!)
+        } else if (relayDetailsIds.length > 1) {
             setIsLoading(true)
             fetch(`${apiBaseUrl}/archive/node/identifiers`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 method: "post",
-                body: JSON.stringify(relays.map(relay => relay.detailsId)),
+                body: JSON.stringify(relayDetailsIds),
             })
                 .then(response => response.json())
                 .then((identifiers: NodeIdentifier[]) => {
@@ -145,10 +151,12 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     setIsLoading(false)
                 })
                 .catch(() => {
-                    showSnackbarMessage({message: `${ErrorMessages.ConectionToBackendFailed}`, severity: "error"})
+                    showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
                     setIsLoading(false)
+                    closeDialog()
                 })
         }
+
     }, [relays])
 
     /**
@@ -186,7 +194,8 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     setIsLoading(false)
                 })
                 .catch(() => {
-                    showSnackbarMessage({message: `${ErrorMessages.ConectionToBackendFailed}`, severity: "error"})
+                    showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
+                    setIsLoading(false)
                 })
         }
     }, [nodeDetailsId])
@@ -207,7 +216,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     className={classes.title}
                     variant="h6">
                     {nodeDetailsId ? (rawRelayDetails?.nickname)
-                        : isLoading ? "loading..." : "no information"}
+                        : isLoading ? "Loading ..." : "No details available"}
                 </Typography>
                 <IconButton aria-label="close" className={classes.closeButton} onClick={closeDialog}>
                     <CloseIcon/>
@@ -264,7 +273,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                                             )}
                                         </TableBody>
                                     </Table>
-                                    : <p>We do not have any information about this relay for this date.</p>}
+                                    : <p>Currently we do not have more information about this relay for this month.</p>}
                         </Box>
                     </Grid>
                 </Grid>
