@@ -16,7 +16,9 @@ import CloseIcon from "@material-ui/icons/Close";
 import {apiBaseUrl} from "../util/config";
 import {SnackbarMessage, FullHeightDialog, ErrorMessages} from "../types/ui";
 
-
+/**
+ * Styles according to Material UI doc for components used in AppSettings component
+ */
 const useStyle = makeStyles(() => ({
     closeButton: {
         position: "absolute",
@@ -74,11 +76,11 @@ interface Props {
 /**
  *
  * A Dialog to select a Family from multiple Families
- * @param showDialog
- * @param closeDialog
- * @param families - The familyIDs available
+ * @param showDialog - Whether the family selection dialog should be displayed
+ * @param closeDialog - Event handler for closing the dialog
+ * @param families - The familyIDs available to select
  * @param familySelectionCallback - the callback function for selecting a family
- * @param showSnackbarMessage
+ * @param showSnackbarMessage - The event handler for showing a snackbar message
  */
 export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                                           showDialog,
