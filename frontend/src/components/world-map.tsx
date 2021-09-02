@@ -87,6 +87,16 @@ Instead only the last selected date will be drawn.
  */
 let latestRequestTimestamp: number | undefined = undefined
 
+/**
+ *
+ * @param dayToDisplay - The date to display
+ * @param settings - The app settings
+ * @param setSettingsCallback - The callback function for setting the app settings
+ * @param setLoadingStateCallback - The callback function for setting wheather the app is loading data from the backend
+ * @param setStatisticsCallback - The callback function for setting the statistics
+ * @param showSnackbarMessage - The event handler for showing a snackbar message
+ * @param closeSnackbar - The event handler for closing the snackbar message
+ */
 export const WorldMap: FunctionComponent<Props> = ({
                                                        dayToDisplay,
                                                        settings,

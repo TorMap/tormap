@@ -53,7 +53,6 @@ interface Props {
  * The Component showing statistics for rendered nodes
  * @param settings - the App Settings
  * @param stats - the Statistics Object to show
- * @constructor
  */
 export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
     const classes = useStyle()

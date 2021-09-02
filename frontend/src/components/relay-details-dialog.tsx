@@ -26,7 +26,9 @@ import {getRelayType} from "../util/aggregate-relays";
 import {DetailsInfo, GeoRelayView, NodeDetails, NodeIdentifier} from "../types/responses";
 import {SnackbarMessage, FullHeightDialog, ErrorMessages} from "../types/ui";
 
-
+/**
+ * Styles according to Material UI doc for components used in AppSettings component
+ */
 const useStyle = makeStyles(() => ({
     closeButton: {
         position: "absolute",
@@ -100,10 +102,10 @@ const formatBoolean = (value?: boolean) => value === null || value === undefined
 
 /**
  * The Dialog for Relay Details
- * @param showDialog
- * @param closeDialog
- * @param relays - selectable relays
- * @param showSnackbarMessage
+ * @param showDialog - Whether the details dialog should be displayed
+ * @param closeDialog - Event handler for closing the dialog
+ * @param relays - Selectable relays
+ * @param showSnackbarMessage - The event handler for showing a snackbar message
  */
 export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                                                                        showDialog,
