@@ -6,6 +6,8 @@ database. Currently, the required archive part makes up 33 GB for the available 
 descriptor type only starts after all descriptors of the same type have been downloaded and saved to disk. Processed
 data can instantly be fetched by the frontend to be displayed on the world map.
 
+![UI screenshot](docs/UI-screenshot.jpg)
+
 ## Development
 
 ### Requirements
