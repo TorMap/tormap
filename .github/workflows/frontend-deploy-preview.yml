@@ -1,0 +1,29 @@
+name: Build and Deploy to Firebase hosting preview URL
+
+on:
+  pull_request:
+    paths:
+      - 'frontend/**'
+
+jobs:
+  build-and-preview:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build
+        run: cd frontend && yarn && yarn build
+
+      - name: Deploy
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_TORMAP_36F44 }}'
+          projectId: tormap-36f44
+          entryPoint: ./frontend
+          expires: 30d
+        env:
+          FIREBASE_CLI_PREVIEWS: hostingchannels

@@ -74,6 +74,10 @@ flyway {
     user = "sa"
 }
 
+tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage>{
+    imageName="tormap/tormap"
+}
+
 // Configure KotlinDoc generation
 tasks.dokkaHtml.configure {
     outputDirectory.set(buildDir.resolve("dokka"))
