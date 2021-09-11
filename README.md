@@ -75,6 +75,7 @@ instead of `./gradlew` for all following commands.
 - `./gradlew build`: creates build and runs Flyway database migrations
 - `./gradlew bootRun`: creates build, runs it and listens on http://localhost:8080/
 - `./gradlew bootJar`: creates build with a fat JAR which contains all dependencies and resources in `build/libs/`
+- `./gradlew bootBuildImage`: creates build and a docker image (make sure local docker daemon is running)
 - `./gradlew flywayMigrate`: Migrates the database
 - `./gradlew flywayClean`: Drops all objects in the configured schemas
 - `./gradlew flywayInfo`: Prints the details and status information about all the migrations

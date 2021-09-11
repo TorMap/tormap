@@ -1,1 +1,1 @@
-rootProject.name = "TorMap"
+rootProject.name = "tormap"
