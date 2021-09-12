@@ -1,10 +1,10 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {WorldMap} from "./components/world-map";
 import {
     CircularProgress,
     createMuiTheme,
     Dialog,
-    DialogContent, DialogTitle,
+    DialogTitle,
     Link,
     makeStyles,
     Snackbar,
@@ -100,6 +100,11 @@ function App() {
         }
     };
 
+    const showSnackbarMessageCallback = useCallback((message: SnackbarMessage) => {
+        setSnackbarMessage(message)
+        setShowSnackbar(true)
+    }, [])
+
     // Loads available days from the backend
     useEffect(() => {
         setIsLoading(true)
@@ -111,10 +116,10 @@ function App() {
                 setIsLoading(false)
             })
             .catch(() => {
-                showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
+                showSnackbarMessageCallback({message: SnackbarMessages.ConnectionFailed, severity: "error"})
                 setIsLoading(false)
             })
-    }, [])
+    }, [showSnackbarMessageCallback])
 
     // Resets selection if grouping gets disabled
     useEffect(() => {
@@ -126,21 +131,16 @@ function App() {
         }
     }, [settings])
 
-    const handleCloseSnackbar = (event?: React.SyntheticEvent, reason?: string) => {
+    const closeSnackbarCallback = useCallback((event?: React.SyntheticEvent, reason?: string) => {
         if (reason === 'clickaway') {
             return;
         }
         setShowSnackbar(false)
-    }
-
-    const showSnackbarMessage = (message: SnackbarMessage) => {
-        setSnackbarMessage(message)
-        setShowSnackbar(true)
-    }
+    }, [])
 
     return (
         <ThemeProvider theme={theme}>
-            <Dialog open={true}>
+            <Dialog open={false}>
                 <DialogTitle>Work in progress! Check back in a few more days :)</DialogTitle>
             </Dialog>
             <div>
@@ -152,26 +152,26 @@ function App() {
                 <WorldMap
                     dayToDisplay={sliderValue >= 0 ? availableDays[sliderValue] : undefined}
                     settings={settings}
-                    setSettingsCallback={setSettings}
-                    setLoadingStateCallback={setIsLoading}
-                    setStatisticsCallback={setStatistics}
-                    showSnackbarMessage={showSnackbarMessage}
-                    closeSnackbar={() => setShowSnackbar(false)}
+                    setSettings={useCallback(setSettings, [setSettings])}
+                    setIsLoading={useCallback(setIsLoading, [setIsLoading])}
+                    setStatistics={useCallback(setStatistics, [setStatistics])}
+                    showSnackbarMessage={showSnackbarMessageCallback}
+                    closeSnackbar={useCallback(() => setShowSnackbar(false), [])}
                 />
-                <DateSlider availableDays={availableDays} setValue={setSliderValue}/>
+                <DateSlider availableDays={availableDays} setValue={useCallback(setSliderValue, [setSliderValue])}/>
                 <AppSettings settings={settings} onChange={handleInputChange}/>
                 {statistics && <MapStats settings={settings} stats={statistics}/>}
             </div>
             <Snackbar
                 open={showSnackbar}
                 autoHideDuration={snackbarMessage.severity === "error" ? null : 6000}
-                onClose={handleCloseSnackbar}
+                onClose={closeSnackbarCallback}
                 anchorOrigin={{vertical: "top", horizontal: "center"}}
             >
                 <MuiAlert
                     elevation={6}
                     variant="filled"
-                    onClose={handleCloseSnackbar}
+                    onClose={closeSnackbarCallback}
                     severity={snackbarMessage.severity}
                     className={classes.snackbar}
                 >

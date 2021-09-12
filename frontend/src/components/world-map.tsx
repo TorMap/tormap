@@ -1,5 +1,5 @@
 import {MapContainer, TileLayer} from "react-leaflet";
-import React, {FunctionComponent, useEffect, useState} from "react";
+import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
 import L, {Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import {Settings, Statistics} from "../types/app-state";
@@ -54,19 +54,19 @@ interface Props {
      * A callback to change settings
      * @param s the settings variable that should be changed
      */
-    setSettingsCallback: (s: Settings) => void
+    setSettings: (s: Settings) => void
 
     /**
      * A variable callback whether the map is currently fetching a new date
      * @param b whether the map is currently fetching a new date
      */
-    setLoadingStateCallback: (b: boolean) => void
+    setIsLoading: (b: boolean) => void
 
     /**
      * A callback to change statistics
      * @param stats - the statistic variable that should be changed
      */
-    setStatisticsCallback: (stats: Statistics) => void
+    setStatistics: (stats: Statistics) => void
 
     /**
      * Show a message in the snackbar
@@ -87,22 +87,12 @@ Instead only the last selected date will be drawn.
  */
 let latestRequestTimestamp: number | undefined = undefined
 
-/**
- *
- * @param dayToDisplay - The date to display
- * @param settings - The app settings
- * @param setSettingsCallback - The callback function for setting the app settings
- * @param setLoadingStateCallback - The callback function for setting wheather the app is loading data from the backend
- * @param setStatisticsCallback - The callback function for setting the statistics
- * @param showSnackbarMessage - The event handler for showing a snackbar message
- * @param closeSnackbar - The event handler for closing the snackbar message
- */
 export const WorldMap: FunctionComponent<Props> = ({
                                                        dayToDisplay,
                                                        settings,
-                                                       setSettingsCallback,
-                                                       setLoadingStateCallback,
-                                                       setStatisticsCallback,
+                                                       setSettings,
+                                                       setIsLoading,
+                                                       setStatistics,
                                                        showSnackbarMessage,
                                                        closeSnackbar,
                                                    }) => {
@@ -123,11 +113,11 @@ export const WorldMap: FunctionComponent<Props> = ({
         if (dayToDisplay) {
             console.log("fetching")
             let currentTimeStamp = Date.now()
-            setLoadingStateCallback(true)
+            setIsLoading(true)
             fetch(`${apiBaseUrl}/archive/geo/relay/day/${dayToDisplay}`)
                 .then(response => response.json())
                 .then((newRelays: GeoRelayView[]) => {
-                    setLoadingStateCallback(false)
+                    setIsLoading(false)
                     if (currentTimeStamp === latestRequestTimestamp) setRelays(newRelays)
                 })
                 .catch(() => {
@@ -135,7 +125,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                 })
             latestRequestTimestamp = currentTimeStamp
         }
-    }, [dayToDisplay])
+    }, [dayToDisplay, setIsLoading, showSnackbarMessage])
 
     /**
      * Redraw relays whenever settings get changed or an new relays got downloaded
@@ -166,7 +156,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                     families.push(familyID)
                 })
                 if(families.length === 1){
-                    setSettingsCallback({...settings, selectedFamily: families[0]})
+                    setSettings({...settings, selectedFamily: families[0]})
                     return
                 }
                 setFamiliesForSelectionDialog(families)
@@ -208,7 +198,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                 // Map for family's, used to get an Array of GeoRelayView with relays in the same family
                 const familyMap: Map<number, GeoRelayView[]> = buildFamilyMap(filteredRelays)
                 if (settings.selectedFamily && !familyMap.has(settings.selectedFamily)) {
-                    setSettingsCallback({...settings, selectedFamily: undefined})
+                    setSettings({...settings, selectedFamily: undefined})
                 }
                 if (settings.sortFamily && familyMap.size === 0) showSnackbarMessage({
                     message: SnackbarMessages.NoFamilyData,
@@ -221,7 +211,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                 // Map for country's, used to get an Array of GeoRelayView with relays in the same country
                 const countryMap: Map<string, GeoRelayView[]> = getCountryMap(filteredRelays)
                 if (settings.selectedCountry && !countryMap.has(settings.selectedCountry)) {
-                    setSettingsCallback({...settings, selectedCountry: undefined})
+                    setSettings({...settings, selectedCountry: undefined})
                 }
 
                 // Draw Heatmap, draws a heatmap with a point for each coordinate
@@ -247,7 +237,7 @@ export const WorldMap: FunctionComponent<Props> = ({
 
                 // Draw Country's, used to draw all countries to the map if at least one relay is hosted there
                 if (leafletMap && countryMap.size > 0 && settings.sortCountry) {
-                    countryLayer(countryMap, settings, setSettingsCallback).addTo(layerToReturn)
+                    countryLayer(countryMap, settings, setSettings).addTo(layerToReturn)
                 }
 
                 // Draw aggregated marker's, used to draw all markers to the map with more than 4 relays on the same coordinate
@@ -257,8 +247,8 @@ export const WorldMap: FunctionComponent<Props> = ({
 
                 // Draw familyCord marker's, used to draw all markers to the map with colors according to their family
                 if (settings.sortFamily) {
-                    if (settings.selectedFamily) familyLayer(familyMap, settings, setSettingsCallback).addTo(layerToReturn)
-                    else familyCordLayer(familyCoordinatesMap, settings, setSettingsCallback, handleFamilyMarkerClick).addTo(layerToReturn)
+                    if (settings.selectedFamily) familyLayer(familyMap, settings, setSettings).addTo(layerToReturn)
+                    else familyCordLayer(familyCoordinatesMap, settings, setSettings, handleFamilyMarkerClick).addTo(layerToReturn)
                 }
 
                 // Draw marker's, used to draw all markers to the map with colors according to their type
@@ -266,8 +256,6 @@ export const WorldMap: FunctionComponent<Props> = ({
                     const singleColor = settings.sortFamily
                     defaultMarkerLayer(latLonMap, singleColor, openRelayDetailsDialog).addTo(layerToReturn)
                 }
-
-
 
                 // Draw country marker's, used to draw all markers to the map with colors according to their country
                 if (settings.sortCountry) {
@@ -288,7 +276,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                     filteredRelays = familyMap.get(settings.selectedFamily)!!
                 }
 
-                setStatisticsCallback(calculateStatistics(filteredRelays, countryMap, familyMap, settings))
+                setStatistics(calculateStatistics(filteredRelays, countryMap, familyMap, settings))
 
                 console.timeLog(`relaysToLayerGroup`, `New Layer with ${filteredRelays.length} elements finished`)
                 console.timeEnd(`relaysToLayerGroup`,)
@@ -300,14 +288,16 @@ export const WorldMap: FunctionComponent<Props> = ({
         if (relays) {
             drawLayerGroup(relaysToLayerGroup())
         }
-    }, [relays, settings])
+        // TODO add missing dependencies and refactor useEffect
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [closeSnackbar, relays, setSettings, setStatistics, settings, showSnackbarMessage])
 
     /**
      * Handler for family selection
      * @param familyID selected familyID
      */
     function handleFamilySelection(familyID: number) {
-        setSettingsCallback({...settings, selectedFamily: familyID})
+        setSettings({...settings, selectedFamily: familyID})
         setShowFamilySelectionDialog(false)
     }
 
@@ -330,7 +320,7 @@ export const WorldMap: FunctionComponent<Props> = ({
         >
             <RelayDetailsDialog
                 showDialog={showRelayDetailsDialog}
-                closeDialog={() => setShowRelayDetailsDialog(false)}
+                closeDialog={useCallback(() => setShowRelayDetailsDialog(false), [])}
                 relays={relaysForDetailsDialog}
                 showSnackbarMessage={showSnackbarMessage}
             />

@@ -148,6 +148,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     setRelayIdentifiers(identifiers)
                     if (identifiers.length > 0) {
                         setNodeDetailsId(identifiers[0].id)
+
                     }
                     setIsLoading(false)
                 })
@@ -157,8 +158,8 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     closeDialog()
                 })
         }
-
-    }, [relays])
+       
+    }, [closeDialog, relays, showSnackbarMessage])
 
     /**
      * Query more information for the selected relay
@@ -207,7 +208,8 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     setIsLoading(false)
                 })
         }
-    }, [nodeDetailsId])
+       
+    }, [nodeDetailsId, relays, showSnackbarMessage])
 
     return (
         <FullHeightDialog
@@ -225,7 +227,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     className={classes.title}
                     variant="h6">
                     {nodeDetailsId ? (rawRelayDetails?.nickname)
-                        : isLoading ? "Loading ..." : "No details available"}
+                        : isLoading ? "Loading..." : "No details available"}
                 </Typography>
                 <IconButton aria-label="close" className={classes.closeButton} onClick={closeDialog}>
                     <CloseIcon/>
