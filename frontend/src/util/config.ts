@@ -1,7 +1,7 @@
 import {Settings} from "../types/app-state";
 import {RelayFlag, RelayType} from "../types/relay";
 
-export const apiBaseUrl = "http://localhost:8080"
+export const apiBaseUrl = process.env.REACT_APP_BACKEND_API_URL
 
 // Default settings, that are selected on page load
 export const defaultSettings: Settings = {
