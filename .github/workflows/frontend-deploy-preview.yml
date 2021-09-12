@@ -1,4 +1,4 @@
-name: Build and Deploy to Firebase hosting preview URL
+name: Build and deploy to Firebase hosting preview URL
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-preview:
-    name: Build & Deploy
+    name: Build and deploy preview
     runs-on: ubuntu-latest
 
     steps:
