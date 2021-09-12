@@ -7,9 +7,11 @@ on:
       - main
     paths:
       - 'frontend/**'
+      - '.github/workflows/frontend-deploy-prod.yml'
+
 jobs:
   build-and-deploy:
-    name: Build & Deploy
+    name: Build and deploy production
     runs-on: ubuntu-latest
 
     steps:
