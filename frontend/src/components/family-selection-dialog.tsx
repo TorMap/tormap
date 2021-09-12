@@ -120,7 +120,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                     setIsLoading(false)
                 })
         }
-    }, [families])
+    }, [families, showSnackbarMessage])
 
     return (
         <FullHeightDialog
