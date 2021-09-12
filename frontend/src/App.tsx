@@ -140,7 +140,7 @@ function App() {
 
     return (
         <ThemeProvider theme={theme}>
-            <Dialog open={false}>
+            <Dialog open={true}>
                 <DialogTitle>Work in progress! Check back in a few more days :)</DialogTitle>
             </Dialog>
             <div>
