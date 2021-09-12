@@ -1,6 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import {WorldMap} from "./components/world-map";
-import {CircularProgress, createMuiTheme, Link, makeStyles, Snackbar, ThemeProvider} from "@material-ui/core";
+import {
+    CircularProgress,
+    createMuiTheme,
+    Dialog,
+    DialogContent, DialogTitle,
+    Link,
+    makeStyles,
+    Snackbar,
+    ThemeProvider
+} from "@material-ui/core";
 import "@material-ui/styles";
 import "./index.scss";
 import {AppSettings, relaysMustIncludeFlagInput, showRelayTypesInput} from "./components/app-settings";
@@ -131,6 +140,9 @@ function App() {
 
     return (
         <ThemeProvider theme={theme}>
+            <Dialog open={true}>
+                <DialogTitle>Work in progress! Check back in a few more days :)</DialogTitle>
+            </Dialog>
             <div>
                 {isLoading &&
                 <div className={classes.progressCircle}>

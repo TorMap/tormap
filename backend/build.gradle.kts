@@ -75,7 +75,7 @@ flyway {
 }
 
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage>{
-    imageName="tormap/tormap"
+    imageName="juliushenke/tormap"
 }
 
 // Configure KotlinDoc generation
