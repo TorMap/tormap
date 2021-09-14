@@ -74,8 +74,11 @@ flyway {
     user = "sa"
 }
 
-tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage>{
-    imageName="juliushenke/tormap"
+tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage> {
+    imageName = "juliushenke/tormap"
+
+    val relativePathIp2LocationDB = "/resources/database/ip2location/"
+    bindings = listOf("${rootProject.projectDir.absolutePath}$relativePathIp2LocationDB:/workspace$relativePathIp2LocationDB")
 }
 
 // Configure KotlinDoc generation
