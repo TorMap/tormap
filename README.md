@@ -2,7 +2,7 @@
 
 This project visualizes current and past Tor relays on a world map. The backend regularly downloads descriptors
 from [TorProject Archive](https://metrics.torproject.org/collector/archive/) and saves a processed version in a local
-database. Currently, the required archive part makes up 33 GB for the available years (2007 - 2021). Processing of a
+database. Currently, the required archive part makes up 33 GB for the available consensus descriptor years (2007 - 2021). Processing of a
 descriptor type only starts after all descriptors of the same type have been downloaded and saved to disk. Processed
 data can instantly be fetched by the frontend to be displayed on the world map.
 
@@ -24,7 +24,6 @@ If you use Windows or the `./install` script failed, please install these manual
   / [OpenJDK](https://openjdk.java.net/install/index.html) >= Java version 11
 - [NodeJS](https://nodejs.org/en/)
 - [yarn](https://yarnpkg.com/en/docs/install)
-- [serve](https://www.npmjs.com/package/serve)
 
 Troubleshooting:
 
@@ -100,13 +99,17 @@ viewed in raw JSON under http://localhost:8080/documentation/json.
 #### Database
 
 TorMap uses an embedded H2 database which saves the whole state in a single DB file located
-at `backend/database/tormap.mv.db`. If you want to use a DB already containing a few processed months, you can download
-one from https://lightningpuzzle.com/tormap/ and put it here `backend/database/tormap.mv.db`.
+at `backend/resources/database/tormap.mv.db`. If you want to use a DB already containing a few processed months, you can download
+one from https://lightningpuzzle.com/tormap/ and put it here `backend/resources/database/tormap.mv.db`.
 
 To manually connect to the DB you either can add the datasource in your IDE or open http://localhost:8080/h2 while the
 backend is running. Make sure to configure the connection the same way your `application.properties` are set. In an IDE
 it might be necessary to configure the datasource URL with an absolute path to ensure the correct working directory is
 used.
+
+Preprocessed databases:
+- http://timkilb.com/databases/tormap-full-DB-2021-09-01-version-1.1.0.zip
+- http://timkilb.com/databases/tormap-only-AS-DB-2021-09-01-version-1.1.0.zip
 
 #### IP to Autonomous Systems
 
@@ -116,8 +119,7 @@ are not starting with a preprocessed TorMap DB you will need to import a CSV fil
 local H2 database. It is advised to reimport a new CSV file every few months, to keep the IP ranges up to date.
 
 1. Create a free account at https://lite.ip2location.com/sign-up
-2. Download latest IPv4 CSV file from https://lite.ip2location.com/database-asn or use the CSV file located
-   at `backend/database/ip2location/IP2LOCATION-LITE-ASN.CSV`
+2. Download latest IPv4 CSV file from https://lite.ip2location.com/database-asn
 3. Run command `./gradlew build` in `backend` directory
 4. Connect to a DB query console and run following commands:
     - `TRUNCATE TABLE AUTONOMOUS_SYSTEM;`
@@ -132,7 +134,7 @@ the IP ranges up to date.
 1. Create a free account at https://lite.ip2location.com/sign-up
 2. Download latest IPv4 BIN file
    from https://lite.ip2location.com/database/db5-ip-country-region-city-latitude-longitude
-3. Replace old BIN file with new one in `backend/database/ip2location/IP2LOCATION-LITE-DB5.BIN`
+3. Replace old BIN file with new one in `backend/resources/database/ip2location/IP2LOCATION-LITE-DB5.BIN`
 
 ### Frontend
 
@@ -154,45 +156,34 @@ The main `frontend` config is located at `frontend/srv/util/config.ts`. Further 
 Browser autostart and default port can be configured in `frontend/.env`. Dependencies are managed with `yarn` and located
 in `frontend/package.json`. Compiler options for `TypeScript` are located at `frontend/tsconfig.json`.
 
-## Build project
+## Build and run project
 
 First make sure you have installed all requirements for development.
 
 ### Backend
 
+Build fat JAR:
 1. Go to `backend` directory where file `gradlew` is located
 2. Run command: `./gradlew && ./gradlew bootJar`
 3. A fat jar containing all packages should now be located in `backend/build/libs/`.
-4. Create a folder containing a copy of the generated jar and the `backend/database` folder.
+4. Create a folder containing a copy of the generated jar and the `backend/resources` folder. 
+5. Go into the directory where the `.jar` file is located 
+6. Run command `java -jar <backend jar file>`
+7. Backend should be available at http://localhost:8080
+
+Build docker image:
+1. Go to `backend` directory where file `gradlew` is located
+2. Make sure [docker](https://docs.docker.com/get-docker/) is installed and the docker daemon is running
+3. Run command: `./gradlew && ./gradlew bootBuildImage`
+4. A new image named juliushenke/tormap should be available in your local docker registry
+5. Run image in new container with command: `docker run -p 8080:8080 juliushenke/tormap` (optionally add the flag `-v ~/tormap.mv.db:/workspace/resources/database/tormap.mv.db` to mount a preprocessed DB from your host file system into the container)
+6. Backend should be available at http://localhost:8080
 
 ### Frontend
 
 1. Go to `frontend` directory where file `package.json` is located
 2. Run command: `yarn build`
 3. A `frontend/build` folder should be generated containing all necessary frontend files
-
-## Host project
-
-Make sure you have installed all requirements for development. To be able to host, you should have a copy of a release
-or just successfully created your own project build.
-
-### Releases
-- http://timkilb.com/releases/tormap-version-1.1.0.zip
-
-### Preprocessed databases
-- http://timkilb.com/databases/tormap-full-DB-2021-09-01-version-1.1.0.zip
-- http://timkilb.com/databases/tormap-only-AS-DB-2021-09-01-version-1.1.0.zip
-
-### Start backend
-
-1. Go into the directory where the `.jar` file is located
-2. Run command `java -jar <backend jar file>`
-3. Backend should be available at http://localhost:8080
-
-### Start frontend
-
-1. Go into the directory where `index.html` is located
-2. Run command: `serve -l 3000`
-3. Frontend should be available at http://localhost:3000
-
-
+4. Go into the directory where `index.html` is located
+5. Install [serve](https://www.npmjs.com/package/serve) and run command: `serve -l 3000`
+6. Frontend should be available at http://localhost:3000
