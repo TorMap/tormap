@@ -18,6 +18,7 @@ import {
     Typography
 } from "@material-ui/core";
 import GitHubIcon from '@material-ui/icons/GitHub';
+import TwitterIcon from '@material-ui/icons/Twitter';
 import CloseIcon from "@material-ui/icons/Close";
 import panda from "../data/about-logos/panda-logo-300x113-white.png";
 import LanguageIcon from '@material-ui/icons/Language';
@@ -81,20 +82,18 @@ export const AboutInformation: React.FunctionComponent = () => {
                         The Tor network currently consists of thousands of nodes which route anonymous internet traffic
                         daily. The nonprofit organization <Link href={"https://www.torproject.org/"}
                                                                 target={"_blank"}>TorProject</Link> already provides
-                        an <Link href={"https://metrics.torproject.org/collector.html"}
-                                 target={"_blank"}>archive</Link> with raw historic data about the network. This raw
-                        data is difficult to analyze and
-                        grasp.<br/>
-                        With our app TorMap we want to visualize, group and filter public Tor relays on a world
+                        a large <Link href={"https://metrics.torproject.org/collector.html"}
+                                 target={"_blank"}>archive</Link> with raw historic data about the network.<br/>
+                        With our app TorMap we visualize, group and filter public Tor relays on a world
                         map. The state of the network can be viewed for any day between October 2007 and today. Getting
                         details like IP address, contact or Autonomous System info of a relay is as easy as selecting it
                         on the map.<br/>
                         The project was developed by two students for their practical P4-Projekt at the <Link
                         href={"https://www.tu-darmstadt.de/"} target={"_blank"}>Technical University of
                         Darmstadt</Link> as part of the <Link href={"https://panda-projekt.de/"}
-                                                              target={"_blank"}>PANDA project</Link> and supervised by
-                        Florian Platzer (<Link
-                        href={"mailto:florian.platzer@sit.fraunhofer.de"} target={"_blank"}>florian.platzer@sit.fraunhofer.de</Link>).<br/>
+                                                              target={"_blank"}>PANDA project</Link> and supervised
+                        by <Link
+                        href={"mailto:florian.platzer@sit.fraunhofer.de"} target={"_blank"}>Florian Platzer</Link>.<br/>
                         PANDA is a joint project by the <Link href={"https://www.sit.fraunhofer.de/"} target={"_blank"}>Frauenhofer
                         SIT</Link> and the TU
                         Darmstadt which is funded/grant-aided by the <Link href={"https://panda-projekt.de/"}
@@ -134,6 +133,15 @@ export const AboutInformation: React.FunctionComponent = () => {
                                             GitHub
                                         </ListItemText>
                                     </ListItem>
+                                    <ListItem button component="a" href="https://twitter.com/Julius_Henke"
+                                              target={"_blank"}>
+                                        <ListItemIcon>
+                                            <TwitterIcon />
+                                        </ListItemIcon>
+                                        <ListItemText>
+                                            Twitter
+                                        </ListItemText>
+                                    </ListItem>
                                 </List>
                             </Card>
                         </Grid>
@@ -143,14 +151,15 @@ export const AboutInformation: React.FunctionComponent = () => {
                                     title="Tim Kilb"
                                 />
                                 <List dense={true}>
-                                    <ListItem button component="a" href="https://www.timkilb.com" target={"_blank"}>
-                                        <ListItemIcon>
-                                            <LanguageIcon/>
-                                        </ListItemIcon>
-                                        <ListItemText>
-                                            Website
-                                        </ListItemText>
-                                    </ListItem>
+                                    {/* TODO uncomment when ready*/}
+                                    {/*<ListItem button component="a" href="https://www.timkilb.com" target={"_blank"}>*/}
+                                    {/*    <ListItemIcon>*/}
+                                    {/*        <LanguageIcon/>*/}
+                                    {/*    </ListItemIcon>*/}
+                                    {/*    <ListItemText>*/}
+                                    {/*        Website*/}
+                                    {/*    </ListItemText>*/}
+                                    {/*</ListItem>*/}
                                     <ListItem button component="a" href="https://github.com/TimKilb" target={"_blank"}>
                                         <ListItemIcon>
                                             <GitHubIcon/>
