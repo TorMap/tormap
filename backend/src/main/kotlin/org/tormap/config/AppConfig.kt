@@ -23,7 +23,11 @@ class AppConfig(
 ) : WebMvcConfigurer {
 
     override fun addCorsMappings(registry: CorsRegistry) {
-        registry.addMapping("/**").allowedMethods("*")
+        registry
+            .addMapping("/**")
+            .allowedMethods("*")
+            .allowedHeaders("*")
+            .allowedOrigins("*")
     }
 
     @Bean
