@@ -1,11 +1,11 @@
 @file:Suppress("unused")
 
-package org.tormap.adapter.controller.view
+package org.tormap.adapter.dto
 
 /**
  * Identifiers of a node
  */
-class NodeIdentifiers(
+class NodeIdentifiersDto(
     val id: Long,
     val fingerprint: String,
     val nickname: String,

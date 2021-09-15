@@ -35,7 +35,6 @@ dependencies {
     // Spring Boot https://spring.io/projects/spring-boot
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-jdbc")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/

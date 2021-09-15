@@ -2,8 +2,8 @@ package org.tormap.database.repository
 
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
-import org.tormap.adapter.controller.view.NodeFamilyIdentifier
-import org.tormap.adapter.controller.view.NodeIdentifiers
+import org.tormap.adapter.dto.NodeFamilyIdentifiersDto
+import org.tormap.adapter.dto.NodeIdentifiersDto
 import javax.transaction.Transactional
 
 interface NodeDetailsRepositoryImpl : NodeDetailsRepository {
@@ -14,18 +14,20 @@ interface NodeDetailsRepositoryImpl : NodeDetailsRepository {
     @Query("SELECT DISTINCT month FROM NodeDetails WHERE autonomousSystemNumber IS NULL ORDER BY month")
     fun findDistinctMonthsAndAutonomousSystemNumberNull(): Set<String>
 
-    @Query("SELECT new org.tormap.adapter.controller.view.NodeIdentifiers(id, fingerprint, nickname) " +
+    @Query(
+        "SELECT new org.tormap.adapter.dto.NodeIdentifiersDto(id, fingerprint, nickname) " +
             "FROM NodeDetails " +
             "WHERE id in :ids"
     )
-    fun findNodeIdentifiers(ids: List<Long>): List<NodeIdentifiers>
+    fun findNodeIdentifiers(ids: List<Long>): List<NodeIdentifiersDto>
 
-    @Query("SELECT new org.tormap.adapter.controller.view.NodeFamilyIdentifier(familyId, count(id), function('LISTAGG', nickname, ', '), function('LISTAGG', autonomousSystemName, ', ')) " +
+    @Query(
+        "SELECT new org.tormap.adapter.dto.NodeFamilyIdentifiersDto(familyId, count(id), function('LISTAGG', nickname, ', '), function('LISTAGG', autonomousSystemName, ', ')) " +
             "FROM NodeDetails " +
             "WHERE familyId in :ids " +
             "GROUP BY familyId"
     )
-    fun findFamilyIdentifiers(ids: List<Long>): List<NodeFamilyIdentifier>
+    fun findFamilyIdentifiers(ids: List<Long>): List<NodeFamilyIdentifiersDto>
 
     @Transactional
     @Modifying

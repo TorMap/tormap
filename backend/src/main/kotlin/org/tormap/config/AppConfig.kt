@@ -18,8 +18,8 @@ import javax.sql.DataSource
 @ConfigurationPropertiesScan
 @EnableAsync
 class AppConfig(
-    val databaseConfig: DatabaseConfig,
-    val dataSource: DataSource,
+    private val databaseConfig: DatabaseConfig,
+    private val dataSource: DataSource,
 ) : WebMvcConfigurer {
 
     override fun addCorsMappings(registry: CorsRegistry) {
