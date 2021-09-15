@@ -2,7 +2,7 @@ package org.tormap.service
 
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import org.tormap.config.ApiConfig
 import org.tormap.config.SchedulerConfig
 import org.tormap.database.entity.DescriptorType
@@ -12,12 +12,12 @@ import org.tormap.database.entity.DescriptorType
  * This scheduler sets reoccurring events to collect and process data about Tor nodes
  * Functions marked with @Async will be run in parallel on separate threads if available.
  */
-@Component
+@Service
 class SchedulerService(
-    val apiConfig: ApiConfig,
-    val schedulerConfig: SchedulerConfig,
-    val torDescriptorService: TorDescriptorService,
-    val nodeDetailsService: NodeDetailsService,
+    private val apiConfig: ApiConfig,
+    private val schedulerConfig: SchedulerConfig,
+    private val torDescriptorService: TorDescriptorService,
+    private val nodeDetailsService: NodeDetailsService,
 ) {
     /**
      * Fetches and processes relay consensus descriptors.
