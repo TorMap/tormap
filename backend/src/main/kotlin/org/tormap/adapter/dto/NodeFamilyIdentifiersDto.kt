@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package org.tormap.adapter.controller.view
+package org.tormap.adapter.dto
 
 import org.tormap.commaSeparatedToList
 import org.tormap.jointToCommaSeparated
@@ -8,7 +8,7 @@ import org.tormap.jointToCommaSeparated
 /**
  * Identifier of a family
  */
-class NodeFamilyIdentifier(
+class NodeFamilyIdentifiersDto(
     val id: Long,
     val memberCount: Long,
     val nicknames: String,

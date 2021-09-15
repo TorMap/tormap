@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package org.tormap.adapter.controller.view
+package org.tormap.adapter.dto
 
 import org.tormap.commaSeparatedToList
 import org.tormap.database.entity.GeoRelay
@@ -9,7 +9,7 @@ import java.math.BigDecimal
 /**
  * A [GeoRelay] with minimal data for fast frontend response times
  */
-class GeoRelayView(
+class GeoRelayDto(
     latitude: BigDecimal,
     longitude: BigDecimal,
     countryCode: String?,

@@ -31,14 +31,14 @@ import java.util.concurrent.Future
 @Service
 class TorDescriptorService(
     private val apiConfig: ApiConfig,
-    val geoRelayRepositoryImpl: GeoRelayRepositoryImpl,
-    val nodeDetailsRepository: NodeDetailsRepository,
-    val descriptorsFileRepository: DescriptorsFileRepository,
-    val ipLookupService: IpLookupService,
-    val nodeDetailsService: NodeDetailsService,
+    private val geoRelayRepositoryImpl: GeoRelayRepositoryImpl,
+    private val nodeDetailsRepository: NodeDetailsRepository,
+    private val descriptorsFileRepository: DescriptorsFileRepository,
+    private val ipLookupService: IpLookupService,
+    private val nodeDetailsService: NodeDetailsService,
 ) {
-    val logger = logger()
-    val descriptorCollector: DescriptorCollector = DescriptorIndexCollector()
+    private val logger = logger()
+    private val descriptorCollector: DescriptorCollector = DescriptorIndexCollector()
 
     /**
      * Collect and process descriptors from a specific the TorProject collector [apiPath]
