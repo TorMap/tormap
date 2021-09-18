@@ -1,11 +1,9 @@
 package org.tormap.database.entity
 
+import org.tormap.stripLengthForDB
 import java.io.Serializable
 import java.time.LocalDateTime
-import javax.persistence.Embeddable
-import javax.persistence.EmbeddedId
-import javax.persistence.Entity
-import javax.persistence.Enumerated
+import javax.persistence.*
 
 /**
  * This entity is used to record which descriptors files have been processed
@@ -16,8 +14,13 @@ class DescriptorsFile(
     @EmbeddedId
     var id: DescriptorsFileId,
     var lastModified: Long,
-    var processedAt: LocalDateTime = LocalDateTime.now()
-)
+    errors: String? = null,
+    var processedAt: LocalDateTime = LocalDateTime.now(),
+) {
+    @Lob
+    var errors: String? = errors.stripLengthForDB(4098)
+        set (value) { field = value.stripLengthForDB(4098) }
+}
 
 /**
  * This represents a composite id
