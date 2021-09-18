@@ -77,7 +77,7 @@ class TorDescriptorService(
      * Process descriptors which were previously saved to disk at [apiPath]
      */
     private fun processDescriptors(apiPath: String, descriptorType: DescriptorType) {
-        var descriptorDaysBeingProcessed = mutableSetOf<Future<LocalDate?>>()
+        var descriptorDaysBeingProcessed = mutableSetOf<Future<ProcessedDescriptorInfo>>()
         var lastProcessedFile: File? = null
         readDescriptors(apiPath, descriptorType).forEach {
             if (lastProcessedFile == null) {
@@ -99,17 +99,20 @@ class TorDescriptorService(
     fun finishDescriptorFile(
         descriptorFile: File,
         descriptorType: DescriptorType,
-        descriptorDaysBeingProcessed: MutableSet<Future<LocalDate?>>
+        descriptorDaysBeingProcessed: MutableSet<Future<ProcessedDescriptorInfo>>
     ) {
         val processedMonths = mutableSetOf<String>()
+        var errors: String? = null
         descriptorDaysBeingProcessed.forEach {
-            try {
-                val processedDay = it.get()
-                if (processedDay != null) {
-                    processedMonths.add(YearMonth.from(processedDay).toString())
+            errors += System.lineSeparator() + try {
+                val processedDescriptor = it.get()
+                if (processedDescriptor.descriptorDay != null) {
+                    processedMonths.add(YearMonth.from(processedDescriptor.descriptorDay).toString())
                 }
+                processedDescriptor.error
             } catch (exception: Exception) {
                 logger.error("Could not finish processing a descriptor! ${exception.message}")
+                exception.message
             }
         }
         if (descriptorType == DescriptorType.SERVER) {
@@ -117,21 +120,15 @@ class TorDescriptorService(
             nodeDetailsService.updateAutonomousSystems(processedMonths)
         }
         val descriptorsFileId = DescriptorsFileId(descriptorType, descriptorFile.name)
-        val checkDescriptorsFile =
-            descriptorsFileRepository.findById(descriptorsFileId)
-        if (checkDescriptorsFile.isPresent) {
-            val existingDescriptorsFile = checkDescriptorsFile.get()
-            existingDescriptorsFile.lastModified = descriptorFile.lastModified()
-            existingDescriptorsFile.processedAt = LocalDateTime.now()
-            descriptorsFileRepository.save(existingDescriptorsFile)
-        } else {
-            descriptorsFileRepository.save(
-                DescriptorsFile(
-                    descriptorsFileId,
-                    descriptorFile.lastModified()
-                )
+        val descriptorsFile = descriptorsFileRepository.findById(descriptorsFileId).orElseGet {
+            DescriptorsFile(
+                descriptorsFileId,
+                descriptorFile.lastModified(),
             )
         }
+        descriptorsFile.processedAt = LocalDateTime.now()
+        descriptorsFile.errors = errors
+        descriptorsFileRepository.save(descriptorsFile)
         logger.info("Finished processing descriptors file ${descriptorFile.name}")
     }
 
@@ -142,7 +139,7 @@ class TorDescriptorService(
     private fun readDescriptors(apiPath: String, descriptorType: DescriptorType): MutableIterable<Descriptor> {
         val descriptorReader = DescriptorReaderImpl()
         val parentDirectory = File(apiConfig.descriptorDownloadDirectory + apiPath)
-        val excludedFiles = descriptorsFileRepository.findAllById_TypeEquals(descriptorType)
+        val excludedFiles = descriptorsFileRepository.findAllById_TypeEqualsAndErrorsNull(descriptorType)
         descriptorReader.excludedFiles = excludedFiles.associate {
             Pair(
                 parentDirectory.absolutePath + File.separator + it.id.filename,
@@ -157,7 +154,7 @@ class TorDescriptorService(
      * Process a [descriptor] depending on it's type
      */
     @Async
-    fun processDescriptor(descriptor: Descriptor): Future<LocalDate?> {
+    fun processDescriptor(descriptor: Descriptor): Future<ProcessedDescriptorInfo> {
         return try {
             return when (descriptor) {
                 is RelayNetworkStatusConsensus -> AsyncResult(processRelayConsensusDescriptor(descriptor))
@@ -166,7 +163,7 @@ class TorDescriptorService(
             }
         } catch (exception: Exception) {
             logger.error("Could not process descriptor part of ${descriptor.descriptorFile.name} ! ${exception.message}")
-            AsyncResult(null)
+            AsyncResult(ProcessedDescriptorInfo(error = exception.message))
         }
     }
 
@@ -174,7 +171,7 @@ class TorDescriptorService(
      * Use a [RelayNetworkStatusConsensus] descriptor to save [GeoRelay]s in the DB.
      * The location is retrieved based on the relay's IP addresses.
      */
-    private fun processRelayConsensusDescriptor(descriptor: RelayNetworkStatusConsensus): LocalDate {
+    private fun processRelayConsensusDescriptor(descriptor: RelayNetworkStatusConsensus): ProcessedDescriptorInfo {
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.validAfterMillis)
         val nodesToSave = mutableListOf<GeoRelay>()
         descriptor.statusEntries.forEach {
@@ -200,14 +197,14 @@ class TorDescriptorService(
             }
         }
         geoRelayRepositoryImpl.saveAll(nodesToSave)
-        return descriptorDay
+        return ProcessedDescriptorInfo(descriptorDay)
     }
 
     /**
      * Use a server descriptor to save [NodeDetails] in the DB.
      * Only saves a node if no more recent matching fingerprint is found.
      */
-    private fun processServerDescriptor(descriptor: ServerDescriptor): LocalDate {
+    private fun processServerDescriptor(descriptor: ServerDescriptor): ProcessedDescriptorInfo {
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.publishedMillis)
         val descriptorMonth = YearMonth.from(descriptorDay).toString()
         val existingNode =
@@ -222,7 +219,12 @@ class TorDescriptorService(
                 )
             )
         }
-        return descriptorDay
+        return ProcessedDescriptorInfo(descriptorDay)
     }
 }
+
+class ProcessedDescriptorInfo(
+    var descriptorDay: LocalDate? = null,
+    var error: String? = null,
+)
 
