@@ -104,7 +104,7 @@ class TorDescriptorService(
         val processedMonths = mutableSetOf<String>()
         var errors: String? = null
         descriptorDaysBeingProcessed.forEach {
-            errors += System.lineSeparator() + try {
+            val error = try {
                 val processedDescriptor = it.get()
                 if (processedDescriptor.descriptorDay != null) {
                     processedMonths.add(YearMonth.from(processedDescriptor.descriptorDay).toString())
@@ -113,6 +113,9 @@ class TorDescriptorService(
             } catch (exception: Exception) {
                 logger.error("Could not finish processing a descriptor! ${exception.message}")
                 exception.message
+            }
+            if (error != null) {
+                errors += System.lineSeparator() + error
             }
         }
         if (descriptorType == DescriptorType.SERVER) {
