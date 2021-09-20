@@ -126,6 +126,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
      * Query relayIdentifiers for relays from backend
      */
     useEffect(() => {
+        setIsLoading(true)
         setNodeDetailsId(undefined)
         setRelayIdentifiers([])
         const relayDetailsIds = relays.filter(relay => relay.detailsId).map(relay => relay.detailsId)
@@ -134,8 +135,8 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
             closeDialog()
         } else if (relayDetailsIds.length === 1) {
             setNodeDetailsId(relayDetailsIds[0]!!)
+            setIsLoading(false)
         } else if (relayDetailsIds.length > 1) {
-            setIsLoading(true)
             fetch(`${apiBaseUrl}/archive/node/identifiers`, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -148,24 +149,22 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     setRelayIdentifiers(identifiers)
                     if (identifiers.length > 0) {
                         setNodeDetailsId(identifiers[0].id)
-
                     }
                     setIsLoading(false)
                 })
                 .catch(() => {
                     showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
-                    setIsLoading(false)
                     closeDialog()
                 })
         }
-       
+
     }, [closeDialog, relays, showSnackbarMessage])
 
     /**
      * Query more information for the selected relay
      */
     useEffect(() => {
-        function constructFlagString (flags: RelayFlag[] | null | undefined): string {
+        function constructFlagString(flags: RelayFlag[] | null | undefined): string {
             if (flags) {
                 return flags.map(flag => RelayFlagLabel[flag]).join(", ")
             }
@@ -174,6 +173,8 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
 
         if (nodeDetailsId) {
             setIsLoading(true)
+            setRawRelayDetails(undefined)
+            setRelayDetails(undefined)
             fetch(`${apiBaseUrl}/archive/node/details/${nodeDetailsId}`)
                 .then(response => response.json())
                 .then((relay: NodeDetails) => {
@@ -181,7 +182,10 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     setRelayDetails([
                         {name: "Fingerprint", value: relay.fingerprint},
                         {name: "IP address", value: relay.address},
-                        {name: "Flags assigned by authorities", value: constructFlagString(findGeoRelayViewByID(relay.id, relays)?.flags)},
+                        {
+                            name: "Flags assigned by authorities",
+                            value: constructFlagString(findGeoRelayViewByID(relay.id, relays)?.flags)
+                        },
                         {name: "Autonomous System", value: relay.autonomousSystemName},
                         {name: "Autonomous System Number", value: relay.autonomousSystemNumber},
                         {name: "Platform", value: relay.platform},
@@ -208,7 +212,6 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     setIsLoading(false)
                 })
         }
-       
     }, [nodeDetailsId, relays, showSnackbarMessage])
 
     return (
@@ -226,8 +229,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                 <Typography
                     className={classes.title}
                     variant="h6">
-                    {nodeDetailsId ? (rawRelayDetails?.nickname)
-                        : isLoading ? "Loading..." : "No details available"}
+                    {nodeDetailsId ? (rawRelayDetails?.nickname) : "Loading..."}
                 </Typography>
                 <IconButton aria-label="close" className={classes.closeButton} onClick={closeDialog}>
                     <CloseIcon/>
@@ -267,24 +269,23 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     }
                     <Grid item xs={relayIdentifiers.length > 1 ? 9 : 12}>
                         <Box className={classes.scroll}>
-                            {isLoading ?
-                                <CircularProgress color={"inherit"}/> : nodeDetailsId ?
-                                    <Table size={"small"}>
-                                        <TableBody>
-                                            {relayDetails?.map((relayInfo) =>
-                                                relayInfo.value &&
-                                                <TableRow key={relayInfo.name}>
-                                                    <TableCell scope="row" className={classes.valueName}>
-                                                        <Typography>{relayInfo.name}</Typography>
-                                                    </TableCell>
-                                                    <TableCell scope="row">
-                                                        <Typography>{relayInfo.value}</Typography>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                    : <p>Currently we do not have more information about this relay for this month.</p>}
+                            {isLoading || nodeDetailsId === undefined ? <CircularProgress color={"inherit"}/> :
+                                <Table size={"small"}>
+                                    <TableBody>
+                                        {relayDetails?.map((relayInfo) =>
+                                            relayInfo.value &&
+                                            <TableRow key={relayInfo.name}>
+                                                <TableCell scope="row" className={classes.valueName}>
+                                                    <Typography>{relayInfo.name}</Typography>
+                                                </TableCell>
+                                                <TableCell scope="row">
+                                                    <Typography>{relayInfo.value}</Typography>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            }
                         </Box>
                     </Grid>
                 </Grid>

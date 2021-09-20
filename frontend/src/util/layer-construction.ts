@@ -4,7 +4,7 @@ import {RelayType} from "../types/relay";
 import {Settings} from "../types/app-state";
 import worldGeoData from "../data/world.geo.json";
 import {Feature, GeoJsonObject, GeometryObject} from "geojson";
-import {buildLatLonMap, createLatLonKey, famCordArr, getRelayType, sortFamilyCoordinatesMap} from "./aggregate-relays";
+import {buildRelayCoordinatesMap, createLatLonKey, famCordArr, getRelayType, sortFamilyCoordinatesMap} from "./aggregate-relays";
 import {getMapColor9} from "./geojson";
 import {GeoRelayView} from "../types/responses";
 
@@ -43,7 +43,7 @@ export const aggregatedCoordinatesLayer = (
  * @param singleColor - Whether all markers should have the same color
  * @param onMarkerClick - Event handler for clicking on a marker
  */
-export const defaultMarkerLayer = (
+export const relayLayer = (
     latLonMap: Map<string, GeoRelayView[]>,
     singleColor: boolean,
     onMarkerClick: (e: LeafletMouseEvent) => void,
@@ -92,7 +92,7 @@ export const defaultMarkerLayer = (
  * @param settings - The app settings
  * @param setSettingsCallback - The callback for changing settings
  */
-export const familyLayer = (
+export const relayFamilyLayer = (
     familyMap: Map<number, GeoRelayView[]>,
     settings: Settings,
     setSettingsCallback: (s: Settings) => void,
@@ -100,7 +100,7 @@ export const familyLayer = (
     const familyLayer: LayerGroup = new LayerGroup()
     familyMap.forEach((family, familyID) => {
         if (familyID !== settings.selectedFamily) return
-        const latLonMap: Map<string, GeoRelayView[]> = buildLatLonMap(family)
+        const latLonMap: Map<string, GeoRelayView[]> = buildRelayCoordinatesMap(family)
         latLonMap.forEach((relays, key) => {
             let hue = (familyID % 8) * (360/8)
             let sat = "90%"
@@ -138,7 +138,7 @@ export const familyLayer = (
  * @param setSettingsCallback - The callback for changing settings
  * @param onMarkerClick - Event handler for clicking on a marker
  */
-export const familyCordLayer = (
+export const relayFamilyCoordinatesLayer = (
     famCordMap: Map<string, Map<number, GeoRelayView[]>>,
     settings: Settings,
     setSettingsCallback: (s: Settings) => void,
@@ -176,8 +176,20 @@ export const familyCordLayer = (
                 .addTo(familyLayer)
         })
     })
-    console.log(sortedFamCordMap)
     return familyLayer
+}
+
+export const buildRelayHeatmapLayer = (relays: GeoRelayView[]): LayerGroup => {
+    let coordinates = new Array<number[]>()
+    relays.forEach(relay => coordinates.push([relay.lat, relay.long, 1]))
+    // @ts-ignore TODO fix typescript error
+    return L.heatLayer(coordinates, {
+        radius: 25,
+        max: 1,
+        blur: 35,
+        minOpacity: .55,
+        gradient: {0.4: '#2e53dc', 0.65: '#c924ae', .75: '#ff4646', .83: "#ff0000"},
+    })
 }
 
 /**
@@ -186,7 +198,7 @@ export const familyCordLayer = (
  * @param settings - The app settings
  * @param onMarkerClick - Event handler for clicking on a marker
  */
-export const countryMarkerLayer = (
+export const relayCountryLayer = (
     countryMap: Map<string, GeoRelayView[]>,
     settings: Settings,
     onMarkerClick: (e: LeafletMouseEvent) => void,
@@ -216,6 +228,7 @@ export const countryMarkerLayer = (
     })
     return countryLayer
 }
+
 /**
  * Returns an Layer with all Countries that contain relays
  * @param countryMap - The CountryMap
