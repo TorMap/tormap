@@ -122,8 +122,6 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue}) 
                     onChange={(date, value) => {
                         if (availableDays.includes(value!!)) {
                             setSliderValue(availableDays.findIndex(element => element === value))
-                        }else{
-                            console.log(`Day ${value} is not available at the moment`)
                         }
                     }}
                     KeyboardButtonProps={{

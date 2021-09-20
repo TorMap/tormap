@@ -115,7 +115,7 @@ class TorDescriptorService(
                 exception.message
             }
             if (error != null) {
-                errors += System.lineSeparator() + error
+                errors += error + System.lineSeparator()
             }
         }
         if (descriptorType == DescriptorType.SERVER) {
