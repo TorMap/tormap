@@ -1,4 +1,4 @@
-import worldGeoData from "../data/world.geo.json";
+import worldGeoData from "../resources/world.geo.json";
 
 /**
  * Returns a color for a country so that no touching countries have the same color

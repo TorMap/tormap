@@ -2,7 +2,7 @@ import L, {circleMarker, GeoJSON, Layer, LayerGroup, LeafletMouseEvent, PathOpti
 import {Colors} from "./config";
 import {RelayType} from "../types/relay";
 import {Settings} from "../types/app-state";
-import worldGeoData from "../data/world.geo.json";
+import worldGeoData from "../resources/world.geo.json";
 import {Feature, GeoJsonObject, GeometryObject} from "geojson";
 import {buildRelayCoordinatesMap, createLatLonKey, famCordArr, getRelayType, sortFamilyCoordinatesMap} from "./aggregate-relays";
 import {getMapColor9} from "./geojson";
