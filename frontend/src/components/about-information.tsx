@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import {
+    Avatar,
     Box,
     Button,
     Card,
@@ -24,11 +25,15 @@ import CloseIcon from "@material-ui/icons/Close";
 import LanguageIcon from '@material-ui/icons/Language';
 import InfoIcon from '@material-ui/icons/Info';
 import {Icon} from "@iconify/react";
+import TorMapLogo from "../resources/logo.png";
 
 /**
  * Styles according to Material UI doc for components used in AppSettings component
  */
 const useStyle = makeStyles(() => ({
+    logo: {
+        marginRight: "10px",
+    },
     about: {
         position: "fixed",
         top: "90px",
@@ -73,7 +78,8 @@ export const AboutInformation: React.FunctionComponent = () => {
             </Button>
             <Dialog open={showDialog} fullWidth={true} maxWidth={"md"} onBackdropClick={() => setShowDialog(false)}>
                 <DialogTitle>
-                    <Box display="flex">
+                    <Box display="flex" alignItems={"center"}>
+                        <Avatar className={classes.logo} src={TorMapLogo} alt={"TorMap logo"} />
                         <Typography variant="h6">
                             About TorMap
                         </Typography>

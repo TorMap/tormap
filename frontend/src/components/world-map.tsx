@@ -1,6 +1,6 @@
 import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useCallback, useEffect, useMemo, useState} from "react";
-import L, {Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
+import {Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import {Settings, Statistics} from "../types/app-state";
 import "leaflet.heat"
