@@ -92,7 +92,7 @@ export const relayLayer = (
  * @param settings - The app settings
  * @param setSettingsCallback - The callback for changing settings
  */
-export const relayFamilyLayer = (
+export const buildRelayFamilyLayer = (
     familyMap: Map<number, GeoRelayView[]>,
     settings: Settings,
     setSettingsCallback: (s: Settings) => void,
@@ -138,7 +138,7 @@ export const relayFamilyLayer = (
  * @param setSettingsCallback - The callback for changing settings
  * @param onMarkerClick - Event handler for clicking on a marker
  */
-export const relayFamilyCoordinatesLayer = (
+export const buildRelayFamilyCoordinatesLayer = (
     famCordMap: Map<string, Map<number, GeoRelayView[]>>,
     settings: Settings,
     setSettingsCallback: (s: Settings) => void,
@@ -198,7 +198,7 @@ export const buildRelayHeatmapLayer = (relays: GeoRelayView[]): LayerGroup => {
  * @param settings - The app settings
  * @param onMarkerClick - Event handler for clicking on a marker
  */
-export const relayCountryLayer = (
+export const buildRelayCountryLayer = (
     countryMap: Map<string, GeoRelayView[]>,
     settings: Settings,
     onMarkerClick: (e: LeafletMouseEvent) => void,
@@ -235,7 +235,7 @@ export const relayCountryLayer = (
  * @param settings - The app settings
  * @param setSettingsCallback - The callback for changing settings
  */
-export const countryLayer = (
+export const buildCountryLayer = (
     countryMap: Map<string, GeoRelayView[]>,
     settings: Settings,
     setSettingsCallback: (s: Settings) => void
