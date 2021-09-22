@@ -1,6 +1,6 @@
 import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useCallback, useEffect, useMemo, useState} from "react";
-import {Layer, LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
+import {LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import {Settings, Statistics} from "../types/app-state";
 import "leaflet.heat"
@@ -15,11 +15,11 @@ import {
 } from "../util/aggregate-relays";
 import {
     aggregatedCoordinatesLayer,
-    countryLayer,
-    relayCountryLayer,
+    buildCountryLayer,
+    buildRelayCountryLayer,
     relayLayer,
-    relayFamilyCoordinatesLayer,
-    relayFamilyLayer, buildRelayHeatmapLayer
+    buildRelayFamilyCoordinatesLayer,
+    buildRelayFamilyLayer, buildRelayHeatmapLayer
 } from "../util/layer-construction";
 import {apiBaseUrl} from "../util/config";
 import {GeoRelayView} from "../types/responses";
@@ -102,7 +102,6 @@ export const WorldMap: FunctionComponent<Props> = ({
     const [relaysForDetailsDialog, setRelaysForDetailsDialog] = useState<GeoRelayView[]>([])
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
     const [markerLayer] = useState<LayerGroup>(new LayerGroup())
-    const [relayHeatmapLayerReference, setRelayHeatmapLayerReference] = useState<Layer>(new Layer())
     const [relays, setRelays] = useState<GeoRelayView[]>()
     const classes = useStyle()
 
@@ -123,6 +122,9 @@ export const WorldMap: FunctionComponent<Props> = ({
 
     // Leaflet layer with heatmap of relay geo location
     const relayHeatmapLayer = useMemo(() => buildRelayHeatmapLayer(filteredRelays), [filteredRelays])
+
+    // Leaflet layer with selectable country borders
+    const countryLayer = useMemo(() => buildCountryLayer(relayCountryMap, settings, setSettings), [relayCountryMap, setSettings, settings])
 
     /**
      * Query all Relays from the selected date whenever a new date is selected
@@ -217,17 +219,13 @@ export const WorldMap: FunctionComponent<Props> = ({
                 }
 
                 // Draw Heatmap, draws a heatmap with a point for each coordinate
-                // As this Layer is part of the component state and has to be applied to the map object directly, it cant be moved to util/layer-construction.ts
-                // https://github.com/Leaflet/Leaflet.heat
-                leafletMap?.removeLayer(relayHeatmapLayerReference)
                 if (settings.heatMap) {
-                    leafletMap?.addLayer(relayHeatmapLayer)
-                    setRelayHeatmapLayerReference(relayHeatmapLayer)
+                    layerToReturn.addLayer(relayHeatmapLayer)
                 }
 
                 // Draw Country's, used to draw all countries to the map if at least one relay is hosted there
                 if (leafletMap && relayCountryMap.size > 0 && settings.sortCountry) {
-                    countryLayer(relayCountryMap, settings, setSettings).addTo(layerToReturn)
+                    layerToReturn.addLayer(countryLayer)
                 }
 
                 // Draw aggregated marker's, used to draw all markers to the map with more than 4 relays on the same coordinate
@@ -237,8 +235,8 @@ export const WorldMap: FunctionComponent<Props> = ({
 
                 // Draw familyCord marker's, used to draw all markers to the map with colors according to their family
                 if (settings.sortFamily) {
-                    if (settings.selectedFamily) relayFamilyLayer(relayFamilyMap, settings, setSettings).addTo(layerToReturn)
-                    else relayFamilyCoordinatesLayer(relayFamilyCoordinatesMap, settings, setSettings, handleFamilyMarkerClick).addTo(layerToReturn)
+                    if (settings.selectedFamily) buildRelayFamilyLayer(relayFamilyMap, settings, setSettings).addTo(layerToReturn)
+                    else buildRelayFamilyCoordinatesLayer(relayFamilyCoordinatesMap, settings, setSettings, handleFamilyMarkerClick).addTo(layerToReturn)
                 }
 
                 // Draw marker's, used to draw all markers to the map with colors according to their type
@@ -249,7 +247,7 @@ export const WorldMap: FunctionComponent<Props> = ({
 
                 // Draw country marker's, used to draw all markers to the map with colors according to their country
                 if (settings.sortCountry) {
-                    relayCountryLayer(relayCountryMap, settings, openRelayDetailsDialog).addTo(layerToReturn)
+                    buildRelayCountryLayer(relayCountryMap, settings, openRelayDetailsDialog).addTo(layerToReturn)
                 }
 
                 setStatistics(calculateStatistics(relayCountryMap, relayFamilyMap, settings))
