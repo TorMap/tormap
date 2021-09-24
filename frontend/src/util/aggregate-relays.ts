@@ -159,7 +159,7 @@ export const buildRelayCountryMap = (relays: GeoRelayView[]): Map<string, GeoRel
  * @param familyMap - The FamilyMap
  * @param settings - Tha app settings
  */
-export const calculateStatistics = (
+export const buildStatistics = (
     countryMap: Map<string, GeoRelayView[]>,
     familyMap: Map<number, GeoRelayView[]>,
     settings: Settings
