@@ -13,7 +13,7 @@ import {GeoRelayView} from "../types/responses";
  * @param latLonMap - The LatLonMap
  * @param onMarkerClick - Event handler for clicking on a marker
  */
-export const aggregatedCoordinatesLayer = (
+export const buildAggregatedCoordinatesLayer = (
     latLonMap: Map<string, GeoRelayView[]>,
     onMarkerClick: (e: LeafletMouseEvent) => void,
 ): LayerGroup => {
@@ -43,7 +43,7 @@ export const aggregatedCoordinatesLayer = (
  * @param singleColor - Whether all markers should have the same color
  * @param onMarkerClick - Event handler for clicking on a marker
  */
-export const relayLayer = (
+export const buildRelayLayer = (
     latLonMap: Map<string, GeoRelayView[]>,
     singleColor: boolean,
     onMarkerClick: (e: LeafletMouseEvent) => void,
