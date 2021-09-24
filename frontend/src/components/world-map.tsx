@@ -10,14 +10,14 @@ import {
     buildFamilyCoordinatesMap,
     buildRelayFamilyMap,
     buildRelayCoordinatesMap,
-    calculateStatistics,
+    buildStatistics,
     buildRelayCountryMap
 } from "../util/aggregate-relays";
 import {
-    aggregatedCoordinatesLayer,
+    buildAggregatedCoordinatesLayer,
     buildCountryLayer,
     buildRelayCountryLayer,
-    relayLayer,
+    buildRelayLayer,
     buildRelayFamilyCoordinatesLayer,
     buildRelayFamilyLayer, buildRelayHeatmapLayer
 } from "../util/layer-construction";
@@ -101,7 +101,7 @@ export const WorldMap: FunctionComponent<Props> = ({
     const [showRelayDetailsDialog, setShowRelayDetailsDialog] = useState(false)
     const [relaysForDetailsDialog, setRelaysForDetailsDialog] = useState<GeoRelayView[]>([])
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
-    const [markerLayer] = useState<LayerGroup>(new LayerGroup())
+    const [leafletMarkerLayer] = useState<LayerGroup>(new LayerGroup())
     const [relays, setRelays] = useState<GeoRelayView[]>()
     const classes = useStyle()
 
@@ -120,11 +120,117 @@ export const WorldMap: FunctionComponent<Props> = ({
     // Map of relays in the same country
     const relayCountryMap = useMemo(() => buildRelayCountryMap(filteredRelays), [filteredRelays])
 
+    /**
+     * After a marker was clicked on the map the corresponding relays are passed to the details dialog
+     * @param event - The leaflet marker click event
+     */
+    const openRelayDetailsDialog = useCallback((event: LeafletMouseEvent) => {
+        if (relays) {
+            const relaysAtCoordinate = relayCoordinatesMap.get(event.target.options.className)!!
+            setRelaysForDetailsDialog(relaysAtCoordinate)
+            setShowRelayDetailsDialog(true)
+        }
+    }, [relayCoordinatesMap, relays])
+
     // Leaflet layer with heatmap of relay geo location
     const relayHeatmapLayer = useMemo(() => buildRelayHeatmapLayer(filteredRelays), [filteredRelays])
 
     // Leaflet layer with selectable country borders
     const countryLayer = useMemo(() => buildCountryLayer(relayCountryMap, settings, setSettings), [relayCountryMap, setSettings, settings])
+
+    // Leaflet layer with selectable country borders
+    const aggregatedCoordinatesLayer = useMemo(() => buildAggregatedCoordinatesLayer(relayCoordinatesMap, openRelayDetailsDialog), [openRelayDetailsDialog, relayCoordinatesMap])
+
+    // Leaflet layer with selectable country borders
+    const relayFamilyLayer = useMemo(() => buildRelayFamilyLayer(relayFamilyMap, settings, setSettings), [relayFamilyMap, setSettings, settings])
+
+    // Leaflet layer with selectable country borders
+    const relayFamilyCoordinatesLayer = useMemo(() =>
+        buildRelayFamilyCoordinatesLayer(relayFamilyCoordinatesMap, settings, setSettings, (event: LeafletMouseEvent) => {
+            if (relays) {
+                const relaysAtCoordinate = relayCoordinatesMap.get(event.target.options.className)!!
+                const familyMap = buildRelayFamilyMap(relaysAtCoordinate)
+                let families: number[] = []
+                familyMap.forEach((family, familyID) => {
+                    families.push(familyID)
+                })
+                if (families.length === 1) {
+                    setSettings({...settings, selectedFamily: families[0]})
+                    return
+                }
+                setFamiliesForSelectionDialog(families)
+                setShowFamilySelectionDialog(true)
+            }
+        }), [relayCoordinatesMap, relayFamilyCoordinatesMap, relays, setSettings, settings]
+    )
+
+    // Leaflet layer with selectable country borders
+    const relayLayer = useMemo(() => buildRelayLayer(relayCoordinatesMap, settings.sortFamily, openRelayDetailsDialog), [openRelayDetailsDialog, relayCoordinatesMap, settings.sortFamily])
+
+    // Leaflet layer with selectable country borders
+    const relayCountryLayer = useMemo(() => buildRelayCountryLayer(relayCountryMap, settings, openRelayDetailsDialog), [openRelayDetailsDialog, relayCountryMap, settings])
+
+    // Leaflet layer with selectable country borders
+    const statistics = useMemo(() => buildStatistics(relayCountryMap, relayFamilyMap, settings), [relayCountryMap, relayFamilyMap, settings])
+
+    // Leaflet layer with selectable country borders
+    const leafletLayerGroup = useMemo(() => {
+        const layerGroup = new LayerGroup()
+
+        if (relays) {
+            if (!filteredRelays.length) {
+                showSnackbarMessage({message: SnackbarMessages.NoRelaysWithFlags, severity: "warning"})
+                return layerGroup
+            }
+
+            if (settings.selectedFamily && !relayFamilyMap.has(settings.selectedFamily)) {
+                setSettings({...settings, selectedFamily: undefined})
+            }
+            if (settings.sortFamily && relayFamilyMap.size === 0) showSnackbarMessage({
+                message: SnackbarMessages.NoFamilyData,
+                severity: "warning"
+            })
+
+            if (settings.selectedCountry && !relayCountryMap.has(settings.selectedCountry)) {
+                setSettings({...settings, selectedCountry: undefined})
+            }
+
+            // Draw Heatmap, draws a heatmap with a point for each coordinate
+            if (settings.heatMap) {
+                layerGroup.addLayer(relayHeatmapLayer)
+            }
+
+            // Draw Country's, used to draw all countries to the map if at least one relay is hosted there
+            if (leafletMap && relayCountryMap.size > 0 && settings.sortCountry) {
+                layerGroup.addLayer(countryLayer)
+            }
+
+            // Draw aggregated marker's, used to draw all markers to the map with more than 4 relays on the same coordinate
+            if (settings.aggregateCoordinates) {
+                aggregatedCoordinatesLayer.addTo(layerGroup)
+            }
+
+            // Draw familyCord marker's, used to draw all markers to the map with colors according to their family
+            if (settings.sortFamily) {
+                if (settings.selectedFamily) relayFamilyLayer.addTo(layerGroup)
+                else relayFamilyCoordinatesLayer.addTo(layerGroup)
+            }
+
+            // Draw marker's, used to draw all markers to the map with colors according to their type
+            if (!settings.sortCountry) {
+                relayLayer.addTo(layerGroup)
+            }
+
+            // Draw country marker's, used to draw all markers to the map with colors according to their country
+            if (settings.sortCountry) {
+                relayCountryLayer.addTo(layerGroup)
+            }
+
+            setStatistics(statistics)
+        }
+        return layerGroup
+    }, [aggregatedCoordinatesLayer, countryLayer, filteredRelays.length, leafletMap, relayCountryLayer, relayCountryMap, relayFamilyCoordinatesLayer, relayFamilyLayer, relayFamilyMap, relayHeatmapLayer, relayLayer, relays, setSettings, setStatistics, settings, showSnackbarMessage, statistics])
+
 
     /**
      * Query all Relays from the selected date whenever a new date is selected
@@ -140,6 +246,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                     if (currentTimeStamp === latestRequestTimestamp) setRelays(newRelays)
                 })
                 .catch(() => {
+                    setIsLoading(false)
                     showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
                 })
             latestRequestTimestamp = currentTimeStamp
@@ -147,121 +254,16 @@ export const WorldMap: FunctionComponent<Props> = ({
     }, [dayToDisplay, setIsLoading, showSnackbarMessage])
 
     /**
-     * Redraw relays whenever settings get changed or an new relays got downloaded
+     * Redraw relays whenever settings get changed or an new relays got downloaded.
+     * Draws a group of layers according to settings on the map.
      */
     useEffect(() => {
-        /**
-         * After a marker was clicked on the map the corresponding relays are passed to the details dialog
-         * @param event - The leaflet marker click event
-         */
-        function openRelayDetailsDialog(event: LeafletMouseEvent) {
-            if (relays) {
-                const relaysAtCoordinate = relayCoordinatesMap.get(event.target.options.className)!!
-                setRelaysForDetailsDialog(relaysAtCoordinate)
-                setShowRelayDetailsDialog(true)
-            }
-        }
-
-        /**
-         * After a marker was clicked on the map the corresponding families are passed to the family selection dialog
-         * @param event - The leaflet marker click event
-         */
-        function handleFamilyMarkerClick(event: LeafletMouseEvent) {
-            if (relays) {
-                const relaysAtCoordinate = relayCoordinatesMap.get(event.target.options.className)!!
-                const familyMap = buildRelayFamilyMap(relaysAtCoordinate)
-                let families: number[] = []
-                familyMap.forEach((family, familyID) => {
-                    families.push(familyID)
-                })
-                if (families.length === 1) {
-                    setSettings({...settings, selectedFamily: families[0]})
-                    return
-                }
-                setFamiliesForSelectionDialog(families)
-                setShowFamilySelectionDialog(true)
-            }
-        }
-
-        /**
-         * Draws a group of layers on the map
-         * @param layerGroup - The group of layers to be drawn
-         */
-        function drawLayerGroup(layerGroup: LayerGroup) {
-            markerLayer.clearLayers()
-            const layers = layerGroup.getLayers()
-            layers.forEach((layer) => layer.addTo(markerLayer))
-        }
-
-        /**
-         * Processes relays according to settings and create multiple layers which can be added to the world map
-         * @return LayerGroup - The layer group which contains all relevant layers
-         */
-        function relaysToLayerGroup(): LayerGroup {
-            const layerToReturn = new LayerGroup()
-
-            if (relays) {
-                if (!filteredRelays.length) {
-                    showSnackbarMessage({message: SnackbarMessages.NoRelaysWithFlags, severity: "warning"})
-                    return layerToReturn
-                }
-
-                if (settings.selectedFamily && !relayFamilyMap.has(settings.selectedFamily)) {
-                    setSettings({...settings, selectedFamily: undefined})
-                }
-                if (settings.sortFamily && relayFamilyMap.size === 0) showSnackbarMessage({
-                    message: SnackbarMessages.NoFamilyData,
-                    severity: "warning"
-                })
-
-                if (settings.selectedCountry && !relayCountryMap.has(settings.selectedCountry)) {
-                    setSettings({...settings, selectedCountry: undefined})
-                }
-
-                // Draw Heatmap, draws a heatmap with a point for each coordinate
-                if (settings.heatMap) {
-                    layerToReturn.addLayer(relayHeatmapLayer)
-                }
-
-                // Draw Country's, used to draw all countries to the map if at least one relay is hosted there
-                if (leafletMap && relayCountryMap.size > 0 && settings.sortCountry) {
-                    layerToReturn.addLayer(countryLayer)
-                }
-
-                // Draw aggregated marker's, used to draw all markers to the map with more than 4 relays on the same coordinate
-                if (settings.aggregateCoordinates) {
-                    aggregatedCoordinatesLayer(relayCoordinatesMap, openRelayDetailsDialog).addTo(layerToReturn)
-                }
-
-                // Draw familyCord marker's, used to draw all markers to the map with colors according to their family
-                if (settings.sortFamily) {
-                    if (settings.selectedFamily) buildRelayFamilyLayer(relayFamilyMap, settings, setSettings).addTo(layerToReturn)
-                    else buildRelayFamilyCoordinatesLayer(relayFamilyCoordinatesMap, settings, setSettings, handleFamilyMarkerClick).addTo(layerToReturn)
-                }
-
-                // Draw marker's, used to draw all markers to the map with colors according to their type
-                if (!settings.sortCountry) {
-                    const singleColor = settings.sortFamily
-                    relayLayer(relayCoordinatesMap, singleColor, openRelayDetailsDialog).addTo(layerToReturn)
-                }
-
-                // Draw country marker's, used to draw all markers to the map with colors according to their country
-                if (settings.sortCountry) {
-                    buildRelayCountryLayer(relayCountryMap, settings, openRelayDetailsDialog).addTo(layerToReturn)
-                }
-
-                setStatistics(calculateStatistics(relayCountryMap, relayFamilyMap, settings))
-            }
-            return layerToReturn
-        }
-
         closeSnackbar()
         if (relays) {
-            drawLayerGroup(relaysToLayerGroup())
+            leafletMarkerLayer.clearLayers()
+            leafletLayerGroup.getLayers().forEach((layer) => layer.addTo(leafletMarkerLayer))
         }
-        // TODO add missing dependencies and refactor useEffect
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [closeSnackbar, relays, setSettings, setStatistics, settings, showSnackbarMessage])
+    }, [closeSnackbar, leafletLayerGroup, leafletMarkerLayer, relays])
 
     /**
      * Handler for family selection
@@ -285,7 +287,7 @@ export const WorldMap: FunctionComponent<Props> = ({
             preferCanvas={true}
             attributionControl={false}
             whenCreated={(newMap: LeafletMap) => {
-                markerLayer.addTo(newMap)
+                leafletMarkerLayer.addTo(newMap)
                 setLeafletMap(newMap)
             }}
         >
@@ -299,7 +301,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                 showDialog={showFamilySelectionDialog}
                 closeDialog={() => setShowFamilySelectionDialog(false)}
                 families={familiesForSelectionDialog}
-                familySelectionCallback={handleFamilySelection}
+                familySelectionCallback={useCallback(handleFamilySelection, [setSettings, settings])}
                 showSnackbarMessage={showSnackbarMessage}
             />
             <TileLayer
