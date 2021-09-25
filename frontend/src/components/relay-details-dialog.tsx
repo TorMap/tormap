@@ -118,7 +118,6 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
     const [nodeDetailsId, setNodeDetailsId] = useState<number>()
     const [rawRelayDetails, setRawRelayDetails] = useState<NodeDetails>()
     const [relayDetails, setRelayDetails] = useState<DetailsInfo[]>()
-    const [isLoading, setIsLoading] = useState(true)
 
     const classes = useStyle()
 
@@ -126,8 +125,9 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
      * Query relayIdentifiers for relays from backend
      */
     useEffect(() => {
-        setIsLoading(true)
         setNodeDetailsId(undefined)
+        setRawRelayDetails(undefined)
+        setRelayDetails(undefined)
         setRelayIdentifiers([])
         const relayDetailsIds = relays.filter(relay => relay.detailsId).map(relay => relay.detailsId)
         if (relays.length > 0 && relayDetailsIds.length === 0) {
@@ -135,7 +135,6 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
             closeDialog()
         } else if (relayDetailsIds.length === 1) {
             setNodeDetailsId(relayDetailsIds[0]!!)
-            setIsLoading(false)
         } else if (relayDetailsIds.length > 1) {
             fetch(`${apiBaseUrl}/archive/node/identifiers`, {
                 headers: {
@@ -150,7 +149,6 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     if (identifiers.length > 0) {
                         setNodeDetailsId(identifiers[0].id)
                     }
-                    setIsLoading(false)
                 })
                 .catch(() => {
                     showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
@@ -171,10 +169,9 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
             return "no flags assigned"
         }
 
+        setRawRelayDetails(undefined)
+        setRelayDetails(undefined)
         if (nodeDetailsId) {
-            setIsLoading(true)
-            setRawRelayDetails(undefined)
-            setRelayDetails(undefined)
             fetch(`${apiBaseUrl}/archive/node/details/${nodeDetailsId}`)
                 .then(response => response.json())
                 .then((relay: NodeDetails) => {
@@ -205,11 +202,9 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                         {name: "Family members", value: relay.familyEntries},
                         {name: "Infos published by relay on", value: relay.day},
                     ])
-                    setIsLoading(false)
                 })
                 .catch(() => {
                     showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
-                    setIsLoading(false)
                 })
         }
     }, [nodeDetailsId, relays, showSnackbarMessage])
@@ -223,20 +218,24 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
             fullWidth={true}
         >
             <DialogTitle>
-                <div className={classes.titleTypeIcon}>
-                    {nodeDetailsId ? getIcon(getRelayType(relays.find((relay) => relay.detailsId === nodeDetailsId))) : null}
-                </div>
-                <Typography
-                    className={classes.title}
-                    variant="h6">
-                    {nodeDetailsId ? (rawRelayDetails?.nickname) : "Loading..."}
-                </Typography>
+                {rawRelayDetails ?
+                    <Box display="flex" alignItems={"center"}>
+                        <div className={classes.titleTypeIcon}>
+                            {nodeDetailsId ? getIcon(getRelayType(relays.find((relay) => relay.detailsId === nodeDetailsId))) : null}
+                        </div>
+                        <Typography
+                            className={classes.title}
+                            variant="h6">
+                            {rawRelayDetails.nickname}
+                        </Typography>
+                    </Box> : <CircularProgress color={"inherit"} size={24}/>
+                }
                 <IconButton aria-label="close" className={classes.closeButton} onClick={closeDialog}>
                     <CloseIcon/>
                 </IconButton>
             </DialogTitle>
             <Divider/>
-            <DialogContent>
+            <div>
                 <Grid container>
                     {relayIdentifiers.length > 1 &&
                     <Grid item xs={3}>
@@ -262,17 +261,19 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                                                 </ListItemIcon>
                                                 <ListItemText primary={identifier.nickname}/>
                                             </ListItem>
-                                        </Tooltip>))}
+                                        </Tooltip>
+                                    )
+                                )}
                             </List>
                         </Box>
                     </Grid>
                     }
                     <Grid item xs={relayIdentifiers.length > 1 ? 9 : 12}>
-                        <Box className={classes.scroll}>
-                            {isLoading || nodeDetailsId === undefined ? <CircularProgress color={"inherit"}/> :
+                        <Box className={classes.scroll} p={2}>
+                            {relayDetails ?
                                 <Table size={"small"}>
                                     <TableBody>
-                                        {relayDetails?.map((relayInfo) =>
+                                        {relayDetails.map((relayInfo) =>
                                             relayInfo.value &&
                                             <TableRow key={relayInfo.name}>
                                                 <TableCell scope="row" className={classes.valueName}>
@@ -284,12 +285,12 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                                             </TableRow>
                                         )}
                                     </TableBody>
-                                </Table>
+                                </Table> : <CircularProgress color={"inherit"} size={24}/>
                             }
                         </Box>
                     </Grid>
                 </Grid>
-            </DialogContent>
+            </div>
         </FullHeightDialog>
     )
 }
