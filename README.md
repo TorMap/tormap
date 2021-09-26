@@ -29,6 +29,7 @@ Troubleshooting:
 
 - Make sure `JAVA_HOME` points to a Java JDK version >= 11.
 
+
 ### Run development servers
 
 Make sure you have installed all requirements. The `./run` script will start the backend and frontend servers in
@@ -99,11 +100,10 @@ viewed in raw JSON under http://localhost:8080/openapi.
 #### Database
 
 TorMap uses an embedded H2 database which saves the whole state in a single DB file located
-at `backend/resources/database/tormap.mv.db`. If you want to use a DB already containing a few processed months, you can download
-one from https://lightningpuzzle.com/tormap/ and put it here `backend/resources/database/tormap.mv.db`.
+at `backend/resources/database/tormap.mv.db`.
 
 To manually connect to the DB you either can add the datasource in your IDE or open http://localhost:8080/h2 while the
-backend is running. Make sure to configure the connection the same way your `application.yml` are set. In an IDE
+backend is running. Make sure to configure the connection the same way your `application.yml` is set. In an IDE
 it might be necessary to configure the datasource URL with an absolute path to ensure the correct working directory is
 used.
 
@@ -174,7 +174,7 @@ Build fat JAR:
 Build docker image:
 1. Go to `backend` directory where file `gradlew` is located
 2. Make sure [docker](https://docs.docker.com/get-docker/) is installed and the docker daemon is running
-3. Run command: `./gradlew && ./gradlew bootBuildImage`
+3. Run command: `./gradlew && ./gradlew -Pprod bootBuildImage`
 4. A new image named juliushenke/tormap should be available in your local docker registry
 5. Run image in new container with command: `docker run -p 8080:8080 juliushenke/tormap` (optionally add the flag `-v ~/tormap.mv.db:/workspace/resources/database/tormap.mv.db` to mount a preprocessed DB from your host file system into the container)
 6. Backend should be available at http://localhost:8080
