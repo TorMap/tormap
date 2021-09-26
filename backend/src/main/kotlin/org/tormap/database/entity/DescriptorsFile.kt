@@ -14,11 +14,13 @@ class DescriptorsFile(
     @EmbeddedId
     var id: DescriptorsFileId,
     var lastModified: Long,
-    errors: String? = null,
     var processedAt: LocalDateTime = LocalDateTime.now(),
+    error: String? = null,
 ) {
-    var error: String? = errors.stripLengthForDB()
-        set (value) { field = value.stripLengthForDB() }
+    var error: String? = error.stripLengthForDB()
+        set(value) {
+            field = value.stripLengthForDB()
+        }
 }
 
 /**

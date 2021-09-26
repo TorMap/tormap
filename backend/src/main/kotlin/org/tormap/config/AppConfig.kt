@@ -1,6 +1,7 @@
 package org.tormap.config
 
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
+import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.jdbc.support.incrementer.H2SequenceMaxValueIncrementer
@@ -17,6 +18,7 @@ import javax.sql.DataSource
 @EnableScheduling
 @ConfigurationPropertiesScan
 @EnableAsync
+@EnableCaching
 class AppConfig(
     private val databaseConfig: DatabaseConfig,
     private val dataSource: DataSource,
