@@ -171,7 +171,7 @@ export const WorldMap: FunctionComponent<Props> = ({
     const relayCountryLayer = useMemo(() => buildRelayCountryLayer(relayCountryMap, settings, openRelayDetailsDialog), [openRelayDetailsDialog, relayCountryMap, settings])
 
     // Leaflet layer with selectable country borders
-    const statistics = useMemo(() => buildStatistics(relayCountryMap, relayFamilyMap, settings), [relayCountryMap, relayFamilyMap, settings])
+    const statistics = useMemo(() => buildStatistics(filteredRelays, relayCountryMap, relayFamilyMap, settings), [filteredRelays, relayCountryMap, relayFamilyMap, settings])
 
     // Leaflet layer with selectable country borders
     const leafletLayerGroup = useMemo(() => {

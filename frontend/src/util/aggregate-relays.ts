@@ -155,26 +155,28 @@ export const buildRelayCountryMap = (relays: GeoRelayView[]): Map<string, GeoRel
 
 /**
  * Returns a Statistics-Object for given parameters
- * @param countryMap - The countryMap
- * @param familyMap - The FamilyMap
+ * @param filteredRelays - The already filtered relays
+ * @param relayCountryMap - A map of relays with the same country
+ * @param relayFamilyMap - A map of relays with the same family
  * @param settings - Tha app settings
  */
 export const buildStatistics = (
-    countryMap: Map<string, GeoRelayView[]>,
-    familyMap: Map<number, GeoRelayView[]>,
+    filteredRelays: GeoRelayView[],
+    relayCountryMap: Map<string, GeoRelayView[]>,
+    relayFamilyMap: Map<number, GeoRelayView[]>,
     settings: Settings
 ): Statistics => {
-    let relays: GeoRelayView[] = []
-    if (settings.selectedCountry && settings.selectedFamily && familyMap && countryMap) {
-        familyMap.get(settings.selectedFamily)?.forEach(familyRelay => {
-            countryMap.get(settings.selectedCountry!!)?.forEach(countryRelay => {
-                if (familyRelay.detailsId === countryRelay.detailsId) relays.push(familyRelay)
+    if (settings.selectedCountry && settings.selectedFamily) {
+        filteredRelays = []
+        relayFamilyMap.get(settings.selectedFamily)?.forEach(familyRelay => {
+            relayCountryMap.get(settings.selectedCountry!!)?.forEach(countryRelay => {
+                if (familyRelay.detailsId === countryRelay.detailsId) filteredRelays.push(familyRelay)
             })
         })
-    } else if (settings.selectedCountry && countryMap.has(settings.selectedCountry)) {
-        relays = countryMap.get(settings.selectedCountry)!!
-    } else if (settings.selectedFamily && familyMap.has(settings.selectedFamily)) {
-        relays = familyMap.get(settings.selectedFamily)!!
+    } else if (settings.selectedCountry && relayCountryMap.has(settings.selectedCountry)) {
+        filteredRelays = relayCountryMap.get(settings.selectedCountry)!!
+    } else if (settings.selectedFamily && relayFamilyMap.has(settings.selectedFamily)) {
+        filteredRelays = relayFamilyMap.get(settings.selectedFamily)!!
     }
 
     let stats: Statistics = {
@@ -183,10 +185,10 @@ export const buildStatistics = (
         relayOtherCount: 0,
     }
     if (!settings.selectedCountry && !settings.selectedFamily) {
-        stats.countryCount = countryMap.size
-        stats.familyCount = familyMap.size
+        stats.countryCount = relayCountryMap.size
+        stats.familyCount = relayFamilyMap.size
     }
-    relays.forEach(relay => {
+    filteredRelays.forEach(relay => {
         const type = getRelayType(relay)
         switch (type) {
             case RelayType.Exit:
