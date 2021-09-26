@@ -79,7 +79,7 @@ export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
                     id="panel2a-header"
                 >
                     <Typography className={"heading"}>
-                        Stats{settings.selectedFamily ? " for selected family" : null}
+                        Stats{settings.selectedFamily ? " for family" : null}
                         {settings.selectedCountry ? " in " + getFullName(settings.selectedCountry) : null}
                     </Typography>
                 </AccordionSummary>
