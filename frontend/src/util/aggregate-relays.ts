@@ -7,7 +7,7 @@ import {GeoRelayView} from "../types/responses";
  * @param relays - The relays to filter
  * @param settings - The app settings for filtering
  */
-export const applyFilter = (relays: GeoRelayView[], settings: Settings): GeoRelayView[] => {
+export const applyRelayFilter = (relays: GeoRelayView[], settings: Settings): GeoRelayView[] => {
     let filtered: GeoRelayView[] = []
     relays.forEach(relay => {
         // Filter relay flags
@@ -43,7 +43,7 @@ export const applyFilter = (relays: GeoRelayView[], settings: Settings): GeoRela
  * Returns a Key-Value-Map where Key is the coordinate pair as string and Value is a GeoRelayView[] with all Relays at this coordinate pair
  * @param relays - The relays
  */
-export const buildLatLonMap = (relays: GeoRelayView[]): Map<string, GeoRelayView[]> => {
+export const buildRelayCoordinatesMap = (relays: GeoRelayView[]): Map<string, GeoRelayView[]> => {
     let latLonMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
     relays.forEach(relay => {
         const key: string = createLatLonKey(relay)
@@ -64,7 +64,7 @@ export const createLatLonKey = (relay: GeoRelayView) => `${relay.lat},${relay.lo
  * Returns a Key-Value-Map where Key is the Family ID and Value is a GeoRelayView[] with all Relays that are part of this Family
  * @param relays - The relays
  */
-export const buildFamilyMap = (relays: GeoRelayView[]): Map<number, GeoRelayView[]> => {
+export const buildRelayFamilyMap = (relays: GeoRelayView[]): Map<number, GeoRelayView[]> => {
     let familyMap: Map<number, GeoRelayView[]> = new Map<number, GeoRelayView[]>()
     relays.forEach(relay => {
         if (relay.familyId !== null) {
@@ -90,7 +90,7 @@ export const buildFamilyMap = (relays: GeoRelayView[]): Map<number, GeoRelayView
 export const buildFamilyCoordinatesMap = (latLonMap: Map<string, GeoRelayView[]>): Map<string, Map<number, GeoRelayView[]>> => {
     let famCordMap: Map<string, Map<number, GeoRelayView[]>> = new Map<string, Map<number, GeoRelayView[]>>()
     latLonMap.forEach((relaysOnLocation, location) => {
-        famCordMap.set(location, buildFamilyMap(relaysOnLocation))
+        famCordMap.set(location, buildRelayFamilyMap(relaysOnLocation))
     })
     return famCordMap
 }
@@ -136,7 +136,7 @@ export type famCordArr = {
  * Returns a Key-Value-Map where Key is the countries ISO-3166-A2 ID
  * @param relays - The relays
  */
-export const getCountryMap = (relays: GeoRelayView[]): Map<string, GeoRelayView[]> => {
+export const buildRelayCountryMap = (relays: GeoRelayView[]): Map<string, GeoRelayView[]> => {
     let countryMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
     relays.forEach(relay => {
         if (relay.country !== undefined) {
@@ -155,17 +155,28 @@ export const getCountryMap = (relays: GeoRelayView[]): Map<string, GeoRelayView[
 
 /**
  * Returns a Statistics-Object for given parameters
- * @param relays - The relays
  * @param countryMap - The countryMap
  * @param familyMap - The FamilyMap
  * @param settings - Tha app settings
  */
-export const calculateStatistics = (
-    relays: GeoRelayView[],
+export const buildStatistics = (
     countryMap: Map<string, GeoRelayView[]>,
     familyMap: Map<number, GeoRelayView[]>,
     settings: Settings
 ): Statistics => {
+    let relays: GeoRelayView[] = []
+    if (settings.selectedCountry && settings.selectedFamily && familyMap && countryMap) {
+        familyMap.get(settings.selectedFamily)?.forEach(familyRelay => {
+            countryMap.get(settings.selectedCountry!!)?.forEach(countryRelay => {
+                if (familyRelay.detailsId === countryRelay.detailsId) relays.push(familyRelay)
+            })
+        })
+    } else if (settings.selectedCountry && countryMap.has(settings.selectedCountry)) {
+        relays = countryMap.get(settings.selectedCountry)!!
+    } else if (settings.selectedFamily && familyMap.has(settings.selectedFamily)) {
+        relays = familyMap.get(settings.selectedFamily)!!
+    }
+
     let stats: Statistics = {
         relayGuardCount: 0,
         relayExitCount: 0,

@@ -1,8 +1,9 @@
 package org.tormap.adapter.controller
 
+import org.springframework.cache.annotation.CachePut
 import org.springframework.web.bind.annotation.*
 import org.tormap.adapter.controller.exception.NodeNotFoundException
-import org.tormap.adapter.controller.view.GeoRelayView
+import org.tormap.adapter.dto.GeoRelayDto
 import org.tormap.database.entity.NodeDetails
 import org.tormap.database.repository.GeoRelayRepositoryImpl
 import org.tormap.database.repository.NodeDetailsRepositoryImpl
@@ -15,11 +16,12 @@ class ArchiveDataController(
     val geoRelayRepository: GeoRelayRepositoryImpl,
     val nodeDetailsRepositoryImpl: NodeDetailsRepositoryImpl,
 ) {
+    @CachePut("geo-relay-days")
     @GetMapping("/geo/relay/days")
     fun getDaysForGeoRelays() = geoRelayRepository.findDistinctDays()
 
     @GetMapping("/geo/relay/day/{day}")
-    fun getGeoRelaysByDay(@PathVariable day: String): List<GeoRelayView> =
+    fun getGeoRelaysByDay(@PathVariable day: String): List<GeoRelayDto> =
         geoRelayRepository.findAllUsingDay(LocalDate.parse(day))
 
     @GetMapping("/node/details/{id}")
@@ -28,12 +30,12 @@ class ArchiveDataController(
         return if (details.isPresent) details.get() else throw NodeNotFoundException()
     }
 
-    @GetMapping("/node/family/{id}")
-    fun getNodeFamily(@PathVariable id: Long) = nodeDetailsRepositoryImpl.findAllByFamilyId(id)
+    @GetMapping("/node/family/{familyId}")
+    fun getNodesOfFamily(@PathVariable familyId: Long) = nodeDetailsRepositoryImpl.findAllByFamilyId(familyId)
 
     @PostMapping("/node/identifiers")
     fun getNodeIdentifiers(@RequestBody ids: List<Long>) = nodeDetailsRepositoryImpl.findNodeIdentifiers(ids)
 
     @PostMapping("/node/family/identifiers")
-    fun getNodeFamilyIdentifiers(@RequestBody ids: List<Long>) = nodeDetailsRepositoryImpl.findFamilyIdentifiers(ids)
+    fun getNodeFamilyIdentifiers(@RequestBody familyIds: List<Long>) = nodeDetailsRepositoryImpl.findFamilyIdentifiers(familyIds)
 }

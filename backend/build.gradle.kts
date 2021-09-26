@@ -35,7 +35,7 @@ dependencies {
     // Spring Boot https://spring.io/projects/spring-boot
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-cache")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
@@ -77,7 +77,7 @@ flyway {
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage> {
     imageName = "juliushenke/tormap"
 
-    val relativePathIp2LocationDB = "/resources/database/ip2location/"
+    val relativePathIp2LocationDB = "/ip2location/"
     bindings = listOf("${rootProject.projectDir.absolutePath}$relativePathIp2LocationDB:/workspace$relativePathIp2LocationDB")
 }
 

@@ -1,8 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {
     Box,
-    CircularProgress,
-    DialogContent,
+    CircularProgress, DialogContent,
     DialogTitle,
     Divider,
     Grid,
@@ -118,7 +117,6 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
     const [nodeDetailsId, setNodeDetailsId] = useState<number>()
     const [rawRelayDetails, setRawRelayDetails] = useState<NodeDetails>()
     const [relayDetails, setRelayDetails] = useState<DetailsInfo[]>()
-    const [isLoading, setIsLoading] = useState(true)
 
     const classes = useStyle()
 
@@ -127,6 +125,8 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
      */
     useEffect(() => {
         setNodeDetailsId(undefined)
+        setRawRelayDetails(undefined)
+        setRelayDetails(undefined)
         setRelayIdentifiers([])
         const relayDetailsIds = relays.filter(relay => relay.detailsId).map(relay => relay.detailsId)
         if (relays.length > 0 && relayDetailsIds.length === 0) {
@@ -135,7 +135,6 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
         } else if (relayDetailsIds.length === 1) {
             setNodeDetailsId(relayDetailsIds[0]!!)
         } else if (relayDetailsIds.length > 1) {
-            setIsLoading(true)
             fetch(`${apiBaseUrl}/archive/node/identifiers`, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -148,32 +147,30 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     setRelayIdentifiers(identifiers)
                     if (identifiers.length > 0) {
                         setNodeDetailsId(identifiers[0].id)
-
                     }
-                    setIsLoading(false)
                 })
                 .catch(() => {
                     showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
-                    setIsLoading(false)
                     closeDialog()
                 })
         }
-       
+
     }, [closeDialog, relays, showSnackbarMessage])
 
     /**
      * Query more information for the selected relay
      */
     useEffect(() => {
-        function constructFlagString (flags: RelayFlag[] | null | undefined): string {
+        function constructFlagString(flags: RelayFlag[] | null | undefined): string {
             if (flags) {
                 return flags.map(flag => RelayFlagLabel[flag]).join(", ")
             }
             return "no flags assigned"
         }
 
+        setRawRelayDetails(undefined)
+        setRelayDetails(undefined)
         if (nodeDetailsId) {
-            setIsLoading(true)
             fetch(`${apiBaseUrl}/archive/node/details/${nodeDetailsId}`)
                 .then(response => response.json())
                 .then((relay: NodeDetails) => {
@@ -181,7 +178,10 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     setRelayDetails([
                         {name: "Fingerprint", value: relay.fingerprint},
                         {name: "IP address", value: relay.address},
-                        {name: "Flags assigned by authorities", value: constructFlagString(findGeoRelayViewByID(relay.id, relays)?.flags)},
+                        {
+                            name: "Flags assigned by authorities",
+                            value: constructFlagString(findGeoRelayViewByID(relay.id, relays)?.flags)
+                        },
                         {name: "Autonomous System", value: relay.autonomousSystemName},
                         {name: "Autonomous System Number", value: relay.autonomousSystemNumber},
                         {name: "Platform", value: relay.platform},
@@ -201,14 +201,11 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                         {name: "Family members", value: relay.familyEntries},
                         {name: "Infos published by relay on", value: relay.day},
                     ])
-                    setIsLoading(false)
                 })
                 .catch(() => {
                     showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
-                    setIsLoading(false)
                 })
         }
-       
     }, [nodeDetailsId, relays, showSnackbarMessage])
 
     return (
@@ -220,15 +217,18 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
             fullWidth={true}
         >
             <DialogTitle>
-                <div className={classes.titleTypeIcon}>
-                    {nodeDetailsId ? getIcon(getRelayType(relays.find((relay) => relay.detailsId === nodeDetailsId))) : null}
-                </div>
-                <Typography
-                    className={classes.title}
-                    variant="h6">
-                    {nodeDetailsId ? (rawRelayDetails?.nickname)
-                        : isLoading ? "Loading..." : "No details available"}
-                </Typography>
+                {rawRelayDetails ?
+                    <Box display="flex" alignItems={"center"}>
+                        <div className={classes.titleTypeIcon}>
+                            {nodeDetailsId ? getIcon(getRelayType(relays.find((relay) => relay.detailsId === nodeDetailsId))) : null}
+                        </div>
+                        <Typography
+                            className={classes.title}
+                            variant="h6">
+                            {rawRelayDetails.nickname}
+                        </Typography>
+                    </Box> : <CircularProgress color={"inherit"} size={24}/>
+                }
                 <IconButton aria-label="close" className={classes.closeButton} onClick={closeDialog}>
                     <CloseIcon/>
                 </IconButton>
@@ -260,31 +260,32 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                                                 </ListItemIcon>
                                                 <ListItemText primary={identifier.nickname}/>
                                             </ListItem>
-                                        </Tooltip>))}
+                                        </Tooltip>
+                                    )
+                                )}
                             </List>
                         </Box>
                     </Grid>
                     }
                     <Grid item xs={relayIdentifiers.length > 1 ? 9 : 12}>
-                        <Box className={classes.scroll}>
-                            {isLoading ?
-                                <CircularProgress color={"inherit"}/> : nodeDetailsId ?
-                                    <Table size={"small"}>
-                                        <TableBody>
-                                            {relayDetails?.map((relayInfo) =>
-                                                relayInfo.value &&
-                                                <TableRow key={relayInfo.name}>
-                                                    <TableCell scope="row" className={classes.valueName}>
-                                                        <Typography>{relayInfo.name}</Typography>
-                                                    </TableCell>
-                                                    <TableCell scope="row">
-                                                        <Typography>{relayInfo.value}</Typography>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                    : <p>Currently we do not have more information about this relay for this month.</p>}
+                        <Box className={classes.scroll} p={2}>
+                            {relayDetails ?
+                                <Table size={"small"}>
+                                    <TableBody>
+                                        {relayDetails.map((relayInfo) =>
+                                            relayInfo.value &&
+                                            <TableRow key={relayInfo.name}>
+                                                <TableCell scope="row" className={classes.valueName}>
+                                                    <Typography>{relayInfo.name}</Typography>
+                                                </TableCell>
+                                                <TableCell scope="row">
+                                                    <Typography>{relayInfo.value}</Typography>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table> : <CircularProgress color={"inherit"} size={24}/>
+                            }
                         </Box>
                     </Grid>
                 </Grid>

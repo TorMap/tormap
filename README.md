@@ -86,15 +86,15 @@ instead of `./gradlew` for all following commands.
 
 #### Config
 
-The main `backend` config is located at `backend/srv/main/resorces/application.properties`. Logging options can be
+The main `backend` config is located at `backend/srv/main/resorces/application.yml`. Logging options can be
 configured with
 `backend/srv/main/resorces/logback-spring.xml`. Dependencies are managed with `Gradle` and located
 at `backend/build.gradle.kts`.
 
 #### OpenAPI specification
 
-An interactive Swagger UI is available under http://localhost:8080/documentation and the specification can also be
-viewed in raw JSON under http://localhost:8080/documentation/json.
+An interactive Swagger UI is available under http://localhost:8080 and the specification can also be
+viewed in raw JSON under http://localhost:8080/openapi.
 
 #### Database
 
@@ -103,7 +103,7 @@ at `backend/resources/database/tormap.mv.db`. If you want to use a DB already co
 one from https://lightningpuzzle.com/tormap/ and put it here `backend/resources/database/tormap.mv.db`.
 
 To manually connect to the DB you either can add the datasource in your IDE or open http://localhost:8080/h2 while the
-backend is running. Make sure to configure the connection the same way your `application.properties` are set. In an IDE
+backend is running. Make sure to configure the connection the same way your `application.yml` are set. In an IDE
 it might be necessary to configure the datasource URL with an absolute path to ensure the correct working directory is
 used.
 
@@ -134,7 +134,7 @@ the IP ranges up to date.
 1. Create a free account at https://lite.ip2location.com/sign-up
 2. Download latest IPv4 BIN file
    from https://lite.ip2location.com/database/db5-ip-country-region-city-latitude-longitude
-3. Replace old BIN file with new one in `backend/resources/database/ip2location/IP2LOCATION-LITE-DB5.BIN`
+3. Replace old BIN file with new one in `backend/ip2location/IP2LOCATION-LITE-DB5.BIN`
 
 ### Frontend
 
