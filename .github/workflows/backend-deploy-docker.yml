@@ -23,7 +23,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build image
-        run: cd backend && ./gradlew bootBuildImage
+        run: cd backend && ./gradlew -Pprod bootBuildImage
 
       - name: Push image to DockerHub
         run: docker push juliushenke/tormap:latest
