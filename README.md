@@ -134,7 +134,7 @@ the IP ranges up to date.
 1. Create a free account at https://lite.ip2location.com/sign-up
 2. Download latest IPv4 BIN file
    from https://lite.ip2location.com/database/db5-ip-country-region-city-latitude-longitude
-3. Replace old BIN file with new one in `backend/resources/database/ip2location/IP2LOCATION-LITE-DB5.BIN`
+3. Replace old BIN file with new one in `backend/ip2location/IP2LOCATION-LITE-DB5.BIN`
 
 ### Frontend
 
