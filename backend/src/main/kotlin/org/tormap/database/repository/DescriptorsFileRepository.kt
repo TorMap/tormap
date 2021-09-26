@@ -10,5 +10,5 @@ import org.tormap.database.entity.DescriptorsFileId
  * Repository to interact with DB
  */
 interface DescriptorsFileRepository : CrudRepository<DescriptorsFile, DescriptorsFileId> {
-    fun findAllById_TypeEquals(descriptorType: DescriptorType): List<DescriptorsFile>
+    fun findAllById_TypeEqualsAndErrorNull(descriptorType: DescriptorType): List<DescriptorsFile>
 }

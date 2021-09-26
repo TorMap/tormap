@@ -21,9 +21,9 @@ fun millisSinceEpochToLocalDate(millisSinceEpoch: Long): LocalDate = LocalDate.o
     ZoneId.of("UTC")
 )
 
-fun String?.stripLengthForDB() = when {
-        this == null || this.length <= 255 -> this
-        else -> this.substring(0, 252) + "..."
+fun String?.stripLengthForDB(maximumCharacters: Int = 255) = when {
+        this == null || this.length <= maximumCharacters -> this
+        else -> this.substring(0, maximumCharacters - 3) + "..."
     }
 
 /**

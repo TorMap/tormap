@@ -17,11 +17,11 @@ import javax.transaction.Transactional
  */
 @Service
 class NodeDetailsService(
-    val nodeDetailsRepositoryImpl: NodeDetailsRepositoryImpl,
-    val dbSequenceIncrementer: H2SequenceMaxValueIncrementer,
-    val autonomousSystemRepositoryImpl: AutonomousSystemRepositoryImpl,
+    private val nodeDetailsRepositoryImpl: NodeDetailsRepositoryImpl,
+    private val dbSequenceIncrementer: H2SequenceMaxValueIncrementer,
+    private val autonomousSystemRepositoryImpl: AutonomousSystemRepositoryImpl,
 ) {
-    val logger = logger()
+    private val logger = logger()
 
     /**
      * Updates [NodeDetails.familyId] for all entities of the requested [months].
@@ -41,54 +41,7 @@ class NodeDetailsService(
             logger.info("Updating node families for months: ${monthsToProcess.joinToString(", ")}")
             monthsToProcess.forEach { month ->
                 try {
-                    var confirmedFamilyConnectionCount = 0
-                    var rejectedFamilyConnectionCount = 0
-                    val families = mutableListOf<Set<NodeDetails>>()
-                    val requestingFamilyNodes =
-                        nodeDetailsRepositoryImpl.findAllByMonthEqualsAndFamilyEntriesNotNull(month)
-                    requestingFamilyNodes.forEach { requestingNode ->
-                        requestingNode.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
-                            try {
-                                val newConfirmedMember =
-                                    confirmFamilyMember(requestingNode, familyEntry, requestingFamilyNodes)
-                                if (newConfirmedMember != null && requestingNode != newConfirmedMember) {
-                                    val existingFamilyRequestingNodeIndex =
-                                        families.indexOfFirst { it.contains(requestingNode) }
-                                    val existingFamilyNewConfirmedMemberIndex =
-                                        families.indexOfFirst { it.contains(newConfirmedMember) }
-
-                                    if (
-                                        existingFamilyRequestingNodeIndex >= 0
-                                        && existingFamilyNewConfirmedMemberIndex >= 0
-                                        && existingFamilyRequestingNodeIndex != existingFamilyNewConfirmedMemberIndex
-                                    ) {
-                                        families[existingFamilyRequestingNodeIndex] =
-                                            families[existingFamilyRequestingNodeIndex].plus(families[existingFamilyNewConfirmedMemberIndex])
-                                        families.removeAt(existingFamilyNewConfirmedMemberIndex)
-                                    } else if (existingFamilyRequestingNodeIndex >= 0) {
-                                        families[existingFamilyRequestingNodeIndex] =
-                                            families[existingFamilyRequestingNodeIndex].plus(newConfirmedMember)
-                                    } else if (existingFamilyNewConfirmedMemberIndex >= 0) {
-                                        families[existingFamilyNewConfirmedMemberIndex] =
-                                            families[existingFamilyNewConfirmedMemberIndex].plus(requestingNode)
-                                    } else {
-                                        families.add(setOf(requestingNode, newConfirmedMember))
-                                    }
-
-                                    confirmedFamilyConnectionCount++
-                                } else {
-                                    rejectedFamilyConnectionCount++
-                                }
-                            } catch (exception: Exception) {
-                                logger.debug(exception.message)
-                                rejectedFamilyConnectionCount++
-                            }
-                        }
-                    }
-                    nodeDetailsRepositoryImpl.clearFamiliesFromMonth(month)
-                    saveFamilies(families)
-                    val totalFamilyConnectionCount = confirmedFamilyConnectionCount + rejectedFamilyConnectionCount
-                    logger.info("Finished families for month $month. Rejected $rejectedFamilyConnectionCount / $totalFamilyConnectionCount connections. Found ${families.size} different families.")
+                    updateNodeFamiliesForMonth(month)
                 } catch (exception: Exception) {
                     logger.error("Could not update node families for month $month! ${exception.message}")
                 }
@@ -121,6 +74,60 @@ class NodeDetailsService(
         } catch (exception: Exception) {
             logger.error("Could not update Autonomous System! ${exception.message}")
         }
+    }
+
+    /**
+     * Updates [NodeDetails.familyId] for all entities of the requested [month].
+     */
+    private fun updateNodeFamiliesForMonth(month: String) {
+        var confirmedFamilyConnectionCount = 0
+        var rejectedFamilyConnectionCount = 0
+        val families = mutableListOf<Set<NodeDetails>>()
+        val requestingFamilyNodes =
+            nodeDetailsRepositoryImpl.findAllByMonthEqualsAndFamilyEntriesNotNull(month)
+        requestingFamilyNodes.forEach { requestingNode ->
+            requestingNode.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
+                try {
+                    val newConfirmedMember =
+                        confirmFamilyMember(requestingNode, familyEntry, requestingFamilyNodes)
+                    if (newConfirmedMember != null && requestingNode != newConfirmedMember) {
+                        val existingFamilyRequestingNodeIndex =
+                            families.indexOfFirst { it.contains(requestingNode) }
+                        val existingFamilyNewConfirmedMemberIndex =
+                            families.indexOfFirst { it.contains(newConfirmedMember) }
+
+                        if (
+                            existingFamilyRequestingNodeIndex >= 0
+                            && existingFamilyNewConfirmedMemberIndex >= 0
+                            && existingFamilyRequestingNodeIndex != existingFamilyNewConfirmedMemberIndex
+                        ) {
+                            families[existingFamilyRequestingNodeIndex] =
+                                families[existingFamilyRequestingNodeIndex].plus(families[existingFamilyNewConfirmedMemberIndex])
+                            families.removeAt(existingFamilyNewConfirmedMemberIndex)
+                        } else if (existingFamilyRequestingNodeIndex >= 0) {
+                            families[existingFamilyRequestingNodeIndex] =
+                                families[existingFamilyRequestingNodeIndex].plus(newConfirmedMember)
+                        } else if (existingFamilyNewConfirmedMemberIndex >= 0) {
+                            families[existingFamilyNewConfirmedMemberIndex] =
+                                families[existingFamilyNewConfirmedMemberIndex].plus(requestingNode)
+                        } else {
+                            families.add(setOf(requestingNode, newConfirmedMember))
+                        }
+
+                        confirmedFamilyConnectionCount++
+                    } else {
+                        rejectedFamilyConnectionCount++
+                    }
+                } catch (exception: Exception) {
+                    logger.debug(exception.message)
+                    rejectedFamilyConnectionCount++
+                }
+            }
+        }
+        nodeDetailsRepositoryImpl.clearFamiliesFromMonth(month)
+        saveFamilies(families)
+        val totalFamilyConnectionCount = confirmedFamilyConnectionCount + rejectedFamilyConnectionCount
+        logger.info("Finished families for month $month. Rejected $rejectedFamilyConnectionCount / $totalFamilyConnectionCount connections. Found ${families.size} different families.")
     }
 
     /**
@@ -206,7 +213,7 @@ class NodeDetailsService(
 
     private fun extractFingerprintFromFamilyEntry(familyEntry: String) = familyEntry.substring(1, 41)
 
-    val familyEntryFingerprintRegex = Regex("^\\$[A-F0-9]{40}.*$")
-    val familyEntryNicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
+    private val familyEntryFingerprintRegex = Regex("^\\$[A-F0-9]{40}.*$")
+    private val familyEntryNicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
 }
 
