@@ -46,7 +46,7 @@ function App() {
     const [showSnackbar, setShowSnackbar] = useState(false)
     const [snackbarMessage, setSnackbarMessage] = useState<SnackbarMessage>({message: "", severity: "info"})
     const [settings, setSettings] = useState<Settings>(defaultSettings)
-    const [statistics, setStatistics] = useState<Statistics | undefined>(undefined)
+    const [statistics, setStatistics] = useState<Statistics>()
     const classes = useStyle()
 
     const [theme] = useState(createMuiTheme({
