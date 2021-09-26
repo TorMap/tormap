@@ -110,10 +110,8 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
             })
                 .then(response => response.json())
                 .then((identifiers: NodeFamilyIdentifier[]) => {
-                    console.log(identifiers)
                     setFamilyIdentifiers(identifiers)
                     setIsLoading(false)
-                    console.log(families)
                 })
                 .catch(() => {
                     showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})

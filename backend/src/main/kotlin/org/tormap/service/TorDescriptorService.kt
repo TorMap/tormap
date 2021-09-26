@@ -3,6 +3,7 @@ package org.tormap.service
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.AsyncResult
 import org.springframework.stereotype.Service
+import org.tormap.adapter.controller.ArchiveDataController
 import org.tormap.config.ApiConfig
 import org.tormap.database.entity.*
 import org.tormap.database.repository.DescriptorsFileRepository
@@ -31,14 +32,15 @@ import java.util.concurrent.Future
 @Service
 class TorDescriptorService(
     private val apiConfig: ApiConfig,
-    val geoRelayRepositoryImpl: GeoRelayRepositoryImpl,
-    val nodeDetailsRepository: NodeDetailsRepository,
-    val descriptorsFileRepository: DescriptorsFileRepository,
-    val ipLookupService: IpLookupService,
-    val nodeDetailsService: NodeDetailsService,
+    private val geoRelayRepositoryImpl: GeoRelayRepositoryImpl,
+    private val nodeDetailsRepository: NodeDetailsRepository,
+    private val descriptorsFileRepository: DescriptorsFileRepository,
+    private val ipLookupService: IpLookupService,
+    private val nodeDetailsService: NodeDetailsService,
+    private val archiveDataController: ArchiveDataController,
 ) {
-    val logger = logger()
-    val descriptorCollector: DescriptorCollector = DescriptorIndexCollector()
+    private val logger = logger()
+    private val descriptorCollector: DescriptorCollector = DescriptorIndexCollector()
 
     /**
      * Collect and process descriptors from a specific the TorProject collector [apiPath]
@@ -77,7 +79,7 @@ class TorDescriptorService(
      * Process descriptors which were previously saved to disk at [apiPath]
      */
     private fun processDescriptors(apiPath: String, descriptorType: DescriptorType) {
-        var descriptorDaysBeingProcessed = mutableSetOf<Future<LocalDate?>>()
+        var descriptorDaysBeingProcessed = mutableSetOf<Future<ProcessedDescriptorInfo>>()
         var lastProcessedFile: File? = null
         readDescriptors(apiPath, descriptorType).forEach {
             if (lastProcessedFile == null) {
@@ -99,39 +101,37 @@ class TorDescriptorService(
     fun finishDescriptorFile(
         descriptorFile: File,
         descriptorType: DescriptorType,
-        descriptorDaysBeingProcessed: MutableSet<Future<LocalDate?>>
+        descriptorDaysBeingProcessed: MutableSet<Future<ProcessedDescriptorInfo>>
     ) {
         val processedMonths = mutableSetOf<String>()
+        var lastError: String? = null
         descriptorDaysBeingProcessed.forEach {
-            try {
-                val processedDay = it.get()
-                if (processedDay != null) {
-                    processedMonths.add(YearMonth.from(processedDay).toString())
+            lastError = try {
+                val processedDescriptor = it.get()
+                if (processedDescriptor.descriptorDay != null) {
+                    processedMonths.add(YearMonth.from(processedDescriptor.descriptorDay).toString())
                 }
+                processedDescriptor.error
             } catch (exception: Exception) {
-                logger.error("Could not finish processing a descriptor! ${exception.message}")
-            }
+                val message = "Could not finish processing a descriptor! ${exception.message}"
+                logger.error(message)
+                message
+            } ?: lastError
         }
         if (descriptorType == DescriptorType.SERVER) {
             nodeDetailsService.updateNodeFamilies(processedMonths)
             nodeDetailsService.updateAutonomousSystems(processedMonths)
         }
         val descriptorsFileId = DescriptorsFileId(descriptorType, descriptorFile.name)
-        val checkDescriptorsFile =
-            descriptorsFileRepository.findById(descriptorsFileId)
-        if (checkDescriptorsFile.isPresent) {
-            val existingDescriptorsFile = checkDescriptorsFile.get()
-            existingDescriptorsFile.lastModified = descriptorFile.lastModified()
-            existingDescriptorsFile.processedAt = LocalDateTime.now()
-            descriptorsFileRepository.save(existingDescriptorsFile)
-        } else {
-            descriptorsFileRepository.save(
-                DescriptorsFile(
-                    descriptorsFileId,
-                    descriptorFile.lastModified()
-                )
+        val descriptorsFile = descriptorsFileRepository.findById(descriptorsFileId).orElseGet {
+            DescriptorsFile(
+                descriptorsFileId,
+                descriptorFile.lastModified(),
             )
         }
+        descriptorsFile.processedAt = LocalDateTime.now()
+        descriptorsFile.error = lastError
+        descriptorsFileRepository.save(descriptorsFile)
         logger.info("Finished processing descriptors file ${descriptorFile.name}")
     }
 
@@ -142,7 +142,7 @@ class TorDescriptorService(
     private fun readDescriptors(apiPath: String, descriptorType: DescriptorType): MutableIterable<Descriptor> {
         val descriptorReader = DescriptorReaderImpl()
         val parentDirectory = File(apiConfig.descriptorDownloadDirectory + apiPath)
-        val excludedFiles = descriptorsFileRepository.findAllById_TypeEquals(descriptorType)
+        val excludedFiles = descriptorsFileRepository.findAllById_TypeEqualsAndErrorNull(descriptorType)
         descriptorReader.excludedFiles = excludedFiles.associate {
             Pair(
                 parentDirectory.absolutePath + File.separator + it.id.filename,
@@ -157,7 +157,7 @@ class TorDescriptorService(
      * Process a [descriptor] depending on it's type
      */
     @Async
-    fun processDescriptor(descriptor: Descriptor): Future<LocalDate?> {
+    fun processDescriptor(descriptor: Descriptor): Future<ProcessedDescriptorInfo> {
         return try {
             return when (descriptor) {
                 is RelayNetworkStatusConsensus -> AsyncResult(processRelayConsensusDescriptor(descriptor))
@@ -166,7 +166,7 @@ class TorDescriptorService(
             }
         } catch (exception: Exception) {
             logger.error("Could not process descriptor part of ${descriptor.descriptorFile.name} ! ${exception.message}")
-            AsyncResult(null)
+            AsyncResult(ProcessedDescriptorInfo(error = exception.message))
         }
     }
 
@@ -174,7 +174,7 @@ class TorDescriptorService(
      * Use a [RelayNetworkStatusConsensus] descriptor to save [GeoRelay]s in the DB.
      * The location is retrieved based on the relay's IP addresses.
      */
-    private fun processRelayConsensusDescriptor(descriptor: RelayNetworkStatusConsensus): LocalDate {
+    private fun processRelayConsensusDescriptor(descriptor: RelayNetworkStatusConsensus): ProcessedDescriptorInfo {
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.validAfterMillis)
         val nodesToSave = mutableListOf<GeoRelay>()
         descriptor.statusEntries.forEach {
@@ -200,14 +200,18 @@ class TorDescriptorService(
             }
         }
         geoRelayRepositoryImpl.saveAll(nodesToSave)
-        return descriptorDay
+        updateGeoRelayDaysCache()
+        return ProcessedDescriptorInfo(descriptorDay)
     }
+
+    @Async
+    fun updateGeoRelayDaysCache() = archiveDataController.getDaysForGeoRelays()
 
     /**
      * Use a server descriptor to save [NodeDetails] in the DB.
      * Only saves a node if no more recent matching fingerprint is found.
      */
-    private fun processServerDescriptor(descriptor: ServerDescriptor): LocalDate {
+    private fun processServerDescriptor(descriptor: ServerDescriptor): ProcessedDescriptorInfo {
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.publishedMillis)
         val descriptorMonth = YearMonth.from(descriptorDay).toString()
         val existingNode =
@@ -222,7 +226,12 @@ class TorDescriptorService(
                 )
             )
         }
-        return descriptorDay
+        return ProcessedDescriptorInfo(descriptorDay)
     }
 }
+
+class ProcessedDescriptorInfo(
+    var descriptorDay: LocalDate? = null,
+    var error: String? = null,
+)
 

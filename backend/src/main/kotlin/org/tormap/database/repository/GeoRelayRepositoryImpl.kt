@@ -1,7 +1,7 @@
 package org.tormap.database.repository
 
 import org.springframework.data.jpa.repository.Query
-import org.tormap.adapter.controller.view.GeoRelayView
+import org.tormap.adapter.dto.GeoRelayDto
 import java.time.LocalDate
 
 
@@ -13,11 +13,11 @@ interface GeoRelayRepositoryImpl : GeoRelayRepository {
     fun findDistinctDays(): Set<LocalDate>
 
     @Query(
-        "SELECT new org.tormap.adapter.controller.view.GeoRelayView(g.latitude, g.longitude, g.countryCode, g.flags, n.id, n.familyId) FROM GeoRelay g " +
+        "SELECT new org.tormap.adapter.dto.GeoRelayDto(g.latitude, g.longitude, g.countryCode, g.flags, n.id, n.familyId) FROM GeoRelay g " +
                 "LEFT JOIN FETCH NodeDetails n " +
                 "ON g.fingerprint = n.fingerprint " +
                 "AND function('FORMATDATETIME', g.day, 'yyyy-MM') = n.month " +
                 "WHERE g.day = :day"
     )
-    fun findAllUsingDay(day: LocalDate): List<GeoRelayView>
+    fun findAllUsingDay(day: LocalDate): List<GeoRelayDto>
 }
