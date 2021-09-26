@@ -118,12 +118,9 @@ class TorDescriptorService(
                 message
             } ?: lastError
         }
-        when (descriptorType) {
-            DescriptorType.RELAY_CONSENSUS -> archiveDataController.getDaysForGeoRelays() // updates cache
-            DescriptorType.SERVER -> {
-                nodeDetailsService.updateNodeFamilies(processedMonths)
-                nodeDetailsService.updateAutonomousSystems(processedMonths)
-            }
+        if (descriptorType == DescriptorType.SERVER) {
+            nodeDetailsService.updateNodeFamilies(processedMonths)
+            nodeDetailsService.updateAutonomousSystems(processedMonths)
         }
         val descriptorsFileId = DescriptorsFileId(descriptorType, descriptorFile.name)
         val descriptorsFile = descriptorsFileRepository.findById(descriptorsFileId).orElseGet {
@@ -203,8 +200,12 @@ class TorDescriptorService(
             }
         }
         geoRelayRepositoryImpl.saveAll(nodesToSave)
+        updateGeoRelayDaysCache()
         return ProcessedDescriptorInfo(descriptorDay)
     }
+
+    @Async
+    fun updateGeoRelayDaysCache() = archiveDataController.getDaysForGeoRelays()
 
     /**
      * Use a server descriptor to save [NodeDetails] in the DB.
