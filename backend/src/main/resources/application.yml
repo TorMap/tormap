@@ -1,0 +1,54 @@
+api:
+    descriptorBaseURL: https://collector.torproject.org
+    descriptorDownloadDirectory: resources/descriptors
+    descriptorPathRelayConsensuses: /archive/relay-descriptors/consensuses/
+    descriptorPathRelayServers: /archive/relay-descriptors/server-descriptors/
+database:
+    defaultSequenceName: HIBERNATE_SEQUENCE
+    ip2locationDatabaseFile: ip2location/IP2LOCATION-LITE-DB5.BIN
+    shouldCacheIPLookup: true
+scheduler:
+    relayConsensusDescriptorsRate: PT12H
+    relayServerDescriptorsRate: PT12H
+    updateNodeAutonomousSystemsRate: PT12H
+    updateNodeFamiliesOverwriteAll: false
+    updateNodeFamiliesRate: PT12H
+server:
+    port: 8080
+spring:
+    codec:
+        max-in-memory-size: 10MB
+    datasource:
+        password: ''
+        url: jdbc:h2:./resources/database/tormap;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=5;LOCK_TIMEOUT=30000
+        username: sa
+    flyway:
+        baselineOnMigrate: true
+        locations: classpath:database/migration
+    h2:
+        console:
+            enabled: true
+            path: /h2
+    jpa:
+        database-platform: org.tormap.database.CustomH2Dialect
+        hibernate:
+            ddl-auto: validate
+        open-in-view: false
+    output:
+        ansi:
+            enabled: ALWAYS
+springdoc:
+    api-docs:
+        path: /openapi
+    swagger-ui:
+        path: /
+
+---
+
+spring:
+    h2:
+        console:
+            enabled: false
+    config:
+        activate:
+            on-profile: prod
