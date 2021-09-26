@@ -3,6 +3,7 @@ package org.tormap.service
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.AsyncResult
 import org.springframework.stereotype.Service
+import org.tormap.adapter.controller.ArchiveDataController
 import org.tormap.config.ApiConfig
 import org.tormap.database.entity.*
 import org.tormap.database.repository.DescriptorsFileRepository
@@ -36,6 +37,7 @@ class TorDescriptorService(
     private val descriptorsFileRepository: DescriptorsFileRepository,
     private val ipLookupService: IpLookupService,
     private val nodeDetailsService: NodeDetailsService,
+    private val archiveDataController: ArchiveDataController,
 ) {
     private val logger = logger()
     private val descriptorCollector: DescriptorCollector = DescriptorIndexCollector()
@@ -116,9 +118,12 @@ class TorDescriptorService(
                 message
             } ?: lastError
         }
-        if (descriptorType == DescriptorType.SERVER) {
-            nodeDetailsService.updateNodeFamilies(processedMonths)
-            nodeDetailsService.updateAutonomousSystems(processedMonths)
+        when (descriptorType) {
+            DescriptorType.RELAY_CONSENSUS -> archiveDataController.getDaysForGeoRelays() // updates cache
+            DescriptorType.SERVER -> {
+                nodeDetailsService.updateNodeFamilies(processedMonths)
+                nodeDetailsService.updateAutonomousSystems(processedMonths)
+            }
         }
         val descriptorsFileId = DescriptorsFileId(descriptorType, descriptorFile.name)
         val descriptorsFile = descriptorsFileRepository.findById(descriptorsFileId).orElseGet {
@@ -140,7 +145,7 @@ class TorDescriptorService(
     private fun readDescriptors(apiPath: String, descriptorType: DescriptorType): MutableIterable<Descriptor> {
         val descriptorReader = DescriptorReaderImpl()
         val parentDirectory = File(apiConfig.descriptorDownloadDirectory + apiPath)
-        val excludedFiles = descriptorsFileRepository.findAllById_TypeEqualsAndErrorsNull(descriptorType)
+        val excludedFiles = descriptorsFileRepository.findAllById_TypeEqualsAndErrorNull(descriptorType)
         descriptorReader.excludedFiles = excludedFiles.associate {
             Pair(
                 parentDirectory.absolutePath + File.separator + it.id.filename,

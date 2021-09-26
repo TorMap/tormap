@@ -1,5 +1,6 @@
 package org.tormap.adapter.controller
 
+import org.springframework.cache.annotation.CachePut
 import org.springframework.web.bind.annotation.*
 import org.tormap.adapter.controller.exception.NodeNotFoundException
 import org.tormap.adapter.dto.GeoRelayDto
@@ -15,6 +16,7 @@ class ArchiveDataController(
     val geoRelayRepository: GeoRelayRepositoryImpl,
     val nodeDetailsRepositoryImpl: NodeDetailsRepositoryImpl,
 ) {
+    @CachePut("geo-relay-days")
     @GetMapping("/geo/relay/days")
     fun getDaysForGeoRelays() = geoRelayRepository.findDistinctDays()
 
