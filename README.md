@@ -86,7 +86,7 @@ instead of `./gradlew` for all following commands.
 
 #### Config
 
-The main `backend` config is located at `backend/srv/main/resorces/application.properties`. Logging options can be
+The main `backend` config is located at `backend/srv/main/resorces/application.yml`. Logging options can be
 configured with
 `backend/srv/main/resorces/logback-spring.xml`. Dependencies are managed with `Gradle` and located
 at `backend/build.gradle.kts`.
@@ -103,7 +103,7 @@ at `backend/resources/database/tormap.mv.db`. If you want to use a DB already co
 one from https://lightningpuzzle.com/tormap/ and put it here `backend/resources/database/tormap.mv.db`.
 
 To manually connect to the DB you either can add the datasource in your IDE or open http://localhost:8080/h2 while the
-backend is running. Make sure to configure the connection the same way your `application.properties` are set. In an IDE
+backend is running. Make sure to configure the connection the same way your `application.yml` are set. In an IDE
 it might be necessary to configure the datasource URL with an absolute path to ensure the correct working directory is
 used.
 
