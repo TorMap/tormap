@@ -109,7 +109,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                         href={"mailto:florian.platzer@sit.fraunhofer.de"} target={"_blank"}>Florian Platzer</Link>.<br/>
                         PANDA is a joint project by the <Link href={"https://www.sit.fraunhofer.de/"} target={"_blank"}>Frauenhofer
                         SIT</Link> and the TU
-                        Darmstadt which is funded/grant-aided by the <Link href={"https://panda-projekt.de/"}
+                        Darmstadt which is funded/grant-aided by the <Link href={"https://www.bmbf.de/"}
                                                                            target={"_blank"}>BMBF</Link>.
                         The interdisciplinary team behind the project is researching the Darknet with a view on
                         technical-, social- and philosophical science.
