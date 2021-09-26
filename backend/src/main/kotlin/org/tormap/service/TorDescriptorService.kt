@@ -102,21 +102,19 @@ class TorDescriptorService(
         descriptorDaysBeingProcessed: MutableSet<Future<ProcessedDescriptorInfo>>
     ) {
         val processedMonths = mutableSetOf<String>()
-        var errors: String? = null
+        var lastError: String? = null
         descriptorDaysBeingProcessed.forEach {
-            val error = try {
+            lastError = try {
                 val processedDescriptor = it.get()
                 if (processedDescriptor.descriptorDay != null) {
                     processedMonths.add(YearMonth.from(processedDescriptor.descriptorDay).toString())
                 }
                 processedDescriptor.error
             } catch (exception: Exception) {
-                logger.error("Could not finish processing a descriptor! ${exception.message}")
-                exception.message
-            }
-            if (error != null) {
-                errors += error + System.lineSeparator()
-            }
+                val message = "Could not finish processing a descriptor! ${exception.message}"
+                logger.error(message)
+                message
+            } ?: lastError
         }
         if (descriptorType == DescriptorType.SERVER) {
             nodeDetailsService.updateNodeFamilies(processedMonths)
@@ -130,7 +128,7 @@ class TorDescriptorService(
             )
         }
         descriptorsFile.processedAt = LocalDateTime.now()
-        descriptorsFile.errors = errors
+        descriptorsFile.error = lastError
         descriptorsFileRepository.save(descriptorsFile)
         logger.info("Finished processing descriptors file ${descriptorFile.name}")
     }

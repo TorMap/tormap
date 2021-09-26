@@ -17,9 +17,8 @@ class DescriptorsFile(
     errors: String? = null,
     var processedAt: LocalDateTime = LocalDateTime.now(),
 ) {
-    @Lob
-    var errors: String? = errors.stripLengthForDB(4098)
-        set (value) { field = value.stripLengthForDB(4098) }
+    var error: String? = errors.stripLengthForDB()
+        set (value) { field = value.stripLengthForDB() }
 }
 
 /**
