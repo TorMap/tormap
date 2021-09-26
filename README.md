@@ -93,8 +93,8 @@ at `backend/build.gradle.kts`.
 
 #### OpenAPI specification
 
-An interactive Swagger UI is available under http://localhost:8080/documentation and the specification can also be
-viewed in raw JSON under http://localhost:8080/documentation/json.
+An interactive Swagger UI is available under http://localhost:8080 and the specification can also be
+viewed in raw JSON under http://localhost:8080/openapi.
 
 #### Database
 
