@@ -1,8 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {
     Box,
-    CircularProgress,
-    DialogContent,
+    CircularProgress, DialogContent,
     DialogTitle,
     Divider,
     Grid,
@@ -235,7 +234,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                 </IconButton>
             </DialogTitle>
             <Divider/>
-            <div>
+            <DialogContent>
                 <Grid container>
                     {relayIdentifiers.length > 1 &&
                     <Grid item xs={3}>
@@ -290,7 +289,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                         </Box>
                     </Grid>
                 </Grid>
-            </div>
+            </DialogContent>
         </FullHeightDialog>
     )
 }

@@ -76,7 +76,7 @@ flyway {
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage> {
     imageName = "juliushenke/tormap"
 
-    val relativePathIp2LocationDB = "/resources/database/ip2location/"
+    val relativePathIp2LocationDB = "/ip2location/"
     bindings = listOf("${rootProject.projectDir.absolutePath}$relativePathIp2LocationDB:/workspace$relativePathIp2LocationDB")
 }
 
