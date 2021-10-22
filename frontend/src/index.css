@@ -18,7 +18,7 @@ code {
     monospace;
 }
 
-//pet the heatmap to the background
+/*pet the heatmap to the background*/
 canvas.leaflet-heatmap-layer{
     z-index: 50 !important;
 }

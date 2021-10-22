@@ -8,24 +8,26 @@ import {makeStyles} from "@material-ui/core";
 import {
     applyRelayFilter,
     buildFamilyCoordinatesMap,
-    buildRelayFamilyMap,
     buildRelayCoordinatesMap,
-    buildStatistics,
-    buildRelayCountryMap
+    buildRelayCountryMap,
+    buildRelayFamilyMap,
+    buildStatistics
 } from "../util/aggregate-relays";
 import {
     buildAggregatedCoordinatesLayer,
     buildCountryLayer,
     buildRelayCountryLayer,
-    buildRelayLayer,
     buildRelayFamilyCoordinatesLayer,
-    buildRelayFamilyLayer, buildRelayHeatmapLayer
+    buildRelayFamilyLayer,
+    buildRelayHeatmapLayer,
+    buildRelayLayer
 } from "../util/layer-construction";
-import {apiBaseUrl} from "../util/config";
+import {backendApiUrl} from "../util/config";
 import {GeoRelayView} from "../types/responses";
 import {RelayDetailsDialog} from "./relay-details-dialog";
 import {FamilySelectionDialog} from "./family-selection-dialog";
 import {SnackbarMessage, SnackbarMessages} from "../types/ui";
+import {backend} from "../util/util";
 
 /**
  * Styles according to Material UI doc for components used in WorldMap component
@@ -239,16 +241,13 @@ export const WorldMap: FunctionComponent<Props> = ({
         if (dayToDisplay) {
             let currentTimeStamp = Date.now()
             setIsLoading(true)
-            fetch(`${apiBaseUrl}/archive/geo/relay/day/${dayToDisplay}`)
-                .then(response => response.json())
-                .then((newRelays: GeoRelayView[]) => {
-                    setIsLoading(false)
-                    if (currentTimeStamp === latestRequestTimestamp) setRelays(newRelays)
-                })
-                .catch(() => {
-                    setIsLoading(false)
-                    showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
-                })
+            backend.get<GeoRelayView[]>(`${backendApiUrl}/archive/geo/relay/day/${dayToDisplay}`).then(response => {
+                setIsLoading(false)
+                if (currentTimeStamp === latestRequestTimestamp) setRelays(response.data)
+            }).catch(() => {
+                setIsLoading(false)
+                showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
+            })
             latestRequestTimestamp = currentTimeStamp
         }
     }, [dayToDisplay, setIsLoading, showSnackbarMessage])

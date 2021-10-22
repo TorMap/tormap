@@ -13,8 +13,8 @@ import {
 import {NodeFamilyIdentifier} from "../types/responses";
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@material-ui/icons/Close";
-import {apiBaseUrl} from "../util/config";
 import {FullHeightDialog, SnackbarMessage, SnackbarMessages} from "../types/ui";
+import {backend} from "../util/util";
 
 /**
  * Styles according to Material UI doc for components used in AppSettings component
@@ -101,22 +101,16 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
         setFamilyIdentifiers([])
         if (families.length > 0) {
             setIsLoading(true)
-            fetch(`${apiBaseUrl}/archive/node/family/identifiers`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                method: "post",
-                body: JSON.stringify(families),
+            backend.post<NodeFamilyIdentifier[]>(
+                '/archive/node/family/identifiers',
+                families
+            ).then(response => {
+                setFamilyIdentifiers(response.data)
+                setIsLoading(false)
+            }).catch(() => {
+                showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
+                setIsLoading(false)
             })
-                .then(response => response.json())
-                .then((identifiers: NodeFamilyIdentifier[]) => {
-                    setFamilyIdentifiers(identifiers)
-                    setIsLoading(false)
-                })
-                .catch(() => {
-                    showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
-                    setIsLoading(false)
-                })
         }
     }, [families, showSnackbarMessage])
 

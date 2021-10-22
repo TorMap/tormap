@@ -1,8 +1,8 @@
 import {Dialog, withStyles} from "@material-ui/core";
 
 export type SnackbarMessage = {
-    message: string,
-    severity: "error" | "warning" | "info" | "success",
+    message: string
+    severity: "error" | "warning" | "info" | "success"
 }
 
 export enum SnackbarMessages {
