@@ -41,7 +41,7 @@ export interface DetailsInfo {
 }
 
 export interface NodeIdentifier {
-    id: number,
+    id: number
     fingerprint: string
     nickname: string
 }

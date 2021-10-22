@@ -1,6 +1,6 @@
-// Hook
-// T is a generic type for value parameter, our case this will be string
 import {useEffect, useState} from "react";
+import axios from "axios";
+import {backendApiUrl} from "./config";
 
 /**
  * new React-Hook for handling
@@ -32,3 +32,10 @@ export function useDebounce<T>(value: T, delay: number): T {
  * Helper to check if object contains key
  */
 export const nameOfFactory = <T>() => (name: keyof T) => name;
+
+export const backend = axios.create({
+    baseURL: backendApiUrl,
+    headers: {
+        "Content-type": "application/json"
+    }
+});
