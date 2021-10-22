@@ -23,9 +23,10 @@ import CloseIcon from "@material-ui/icons/Close";
 import {getIcon} from "../types/icons";
 import {findGeoRelayViewByID, getRelayType} from "../util/aggregate-relays";
 import {DetailsInfo, GeoRelayView, NodeDetails, NodeIdentifier} from "../types/responses";
-import {FullHeightDialog, SnackbarMessage, SnackbarMessages} from "../types/ui";
+import {FullHeightDialog, SnackbarMessage} from "../types/ui";
 import {RelayFlag, RelayFlagLabel} from "../types/relay";
 import {backend} from "../util/util";
+import {useSnackbar} from "notistack";
 
 /**
  * Styles according to Material UI doc for components used in AppSettings component
@@ -71,12 +72,6 @@ interface Props {
      * Relays which the user can view detailed information about
      */
     relays: GeoRelayView[]
-
-    /**
-     * Show a message in the snackbar
-     * @param message - what to display to user and at which severity
-     */
-    showSnackbarMessage: (message: SnackbarMessage) => void
 }
 
 /**
@@ -106,13 +101,12 @@ const formatBoolean = (value?: boolean) => value === null || value === undefined
  * @param showDialog - Whether the details dialog should be displayed
  * @param closeDialog - Event handler for closing the dialog
  * @param relays - Selectable relays
- * @param showSnackbarMessage - The event handler for showing a snackbar message
+ * @param enqueueSnackbar - The event handler for showing a snackbar message
  */
 export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                                                                        showDialog,
                                                                        closeDialog,
                                                                        relays,
-                                                                       showSnackbarMessage,
                                                                    }) => {
     const [relayIdentifiers, setRelayIdentifiers] = useState<NodeIdentifier[]>([])
     const [nodeDetailsId, setNodeDetailsId] = useState<number>()
@@ -120,6 +114,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
     const [relayDetails, setRelayDetails] = useState<DetailsInfo[]>()
 
     const classes = useStyle()
+    const { enqueueSnackbar } = useSnackbar();
 
     /**
      * Query relayIdentifiers for relays from backend
@@ -131,7 +126,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
         setRelayIdentifiers([])
         const relayDetailsIds = relays.filter(relay => relay.detailsId).map(relay => relay.detailsId)
         if (relays.length > 0 && relayDetailsIds.length === 0) {
-            showSnackbarMessage(SnackbarMessages.NoRelayDetails)
+            enqueueSnackbar(SnackbarMessage.NoRelayDetails, {variant: "warning"})
             closeDialog()
         } else if (relayDetailsIds.length === 1) {
             setNodeDetailsId(relayDetailsIds[0]!!)
@@ -143,12 +138,12 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     setNodeDetailsId(requestedRelayIdentifiers[0].id)
                 }
             }).catch(() => {
-                showSnackbarMessage(SnackbarMessages.ConnectionFailed)
+                enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
                 closeDialog()
             })
         }
 
-    }, [closeDialog, relays, showSnackbarMessage])
+    }, [closeDialog, relays, enqueueSnackbar])
 
     /**
      * Query more information for the selected relay
@@ -195,10 +190,10 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                 ])
             })
                 .catch(() => {
-                    showSnackbarMessage(SnackbarMessages.ConnectionFailed)
+                    enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
                 })
         }
-    }, [nodeDetailsId, relays, showSnackbarMessage])
+    }, [nodeDetailsId, relays, enqueueSnackbar])
 
     return (
         <FullHeightDialog

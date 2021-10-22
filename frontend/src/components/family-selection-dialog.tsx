@@ -13,8 +13,9 @@ import {
 import {NodeFamilyIdentifier} from "../types/responses";
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@material-ui/icons/Close";
-import {FullHeightDialog, SnackbarMessage, SnackbarMessages} from "../types/ui";
+import {FullHeightDialog, SnackbarMessage} from "../types/ui";
 import {backend} from "../util/util";
+import {useSnackbar} from "notistack";
 
 /**
  * Styles according to Material UI doc for components used in AppSettings component
@@ -65,12 +66,6 @@ interface Props {
      * @param f the family ID
      */
     familySelectionCallback: (f: number) => void
-
-    /**
-     * Show a message in the snackbar
-     * @param message - what to display to user and at which severity
-     */
-    showSnackbarMessage: (message: SnackbarMessage) => void
 }
 
 /**
@@ -87,12 +82,13 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                                           closeDialog,
                                                                           families,
                                                                           familySelectionCallback,
-                                                                          showSnackbarMessage,
                                                                       }) => {
 
     const [isLoading, setIsLoading] = useState(true)
     const [familyIdentifiers, setFamilyIdentifiers] = useState<NodeFamilyIdentifier[]>()
+
     const classes = useStyle()
+    const { enqueueSnackbar } = useSnackbar();
 
     /**
      * Query more information about the Families specified in "families" parameter
@@ -108,11 +104,11 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                 setFamilyIdentifiers(response.data)
                 setIsLoading(false)
             }).catch(() => {
-                showSnackbarMessage(SnackbarMessages.ConnectionFailed)
+                enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
                 setIsLoading(false)
             })
         }
-    }, [families, showSnackbarMessage])
+    }, [enqueueSnackbar, families])
 
     return (
         <FullHeightDialog
