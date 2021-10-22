@@ -26,8 +26,9 @@ import {backendApiUrl} from "../util/config";
 import {GeoRelayView} from "../types/responses";
 import {RelayDetailsDialog} from "./relay-details-dialog";
 import {FamilySelectionDialog} from "./family-selection-dialog";
-import {SnackbarMessage, SnackbarMessages} from "../types/ui";
+import {SnackbarMessage} from "../types/ui";
 import {backend} from "../util/util";
+import {useSnackbar} from "notistack";
 
 /**
  * Styles according to Material UI doc for components used in WorldMap component
@@ -69,17 +70,6 @@ interface Props {
      * @param stats - the statistic variable that should be changed
      */
     setStatistics: (stats: Statistics) => void
-
-    /**
-     * Show a message in the snackbar
-     * @param message - what to display to user and at which severity
-     */
-    showSnackbarMessage: (message: SnackbarMessage) => void
-
-    /**
-     * Hide the snackbar
-     */
-    closeSnackbar: () => void
 }
 
 /*
@@ -95,8 +85,6 @@ export const WorldMap: FunctionComponent<Props> = ({
                                                        setSettings,
                                                        setIsLoading,
                                                        setStatistics,
-                                                       showSnackbarMessage,
-                                                       closeSnackbar,
                                                    }) => {
     const [showFamilySelectionDialog, setShowFamilySelectionDialog] = useState(false)
     const [familiesForSelectionDialog, setFamiliesForSelectionDialog] = useState<number[]>([])
@@ -105,7 +93,9 @@ export const WorldMap: FunctionComponent<Props> = ({
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
     const [leafletMarkerLayer] = useState<LayerGroup>(new LayerGroup())
     const [relays, setRelays] = useState<GeoRelayView[]>()
+
     const classes = useStyle()
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
     // Remaining relays after filters from settings are applied
     const filteredRelays = useMemo(() => relays ? applyRelayFilter(relays, settings) : [], [relays, settings])
@@ -180,16 +170,21 @@ export const WorldMap: FunctionComponent<Props> = ({
         const layerGroup = new LayerGroup()
 
         if (relays) {
-            if (!filteredRelays.length) {
-                showSnackbarMessage(SnackbarMessages.NoRelaysWithFlags)
+            if (filteredRelays.length) {
+                closeSnackbar(SnackbarMessage.NoRelaysWithFlags)
+            } else {
+                enqueueSnackbar(SnackbarMessage.NoRelaysWithFlags, {variant: "warning", key: SnackbarMessage.NoRelaysWithFlags})
                 return layerGroup
             }
 
             if (settings.selectedFamily && !relayFamilyMap.has(settings.selectedFamily)) {
                 setSettings({...settings, selectedFamily: undefined})
             }
+
             if (settings.sortFamily && relayFamilyMap.size === 0) {
-                showSnackbarMessage(SnackbarMessages.NoFamilyData)
+                enqueueSnackbar(SnackbarMessage.NoFamilyData, {variant: "warning", key: SnackbarMessage.NoFamilyData})
+            } else {
+                closeSnackbar(SnackbarMessage.NoFamilyData)
             }
 
             if (settings.selectedCountry && !relayCountryMap.has(settings.selectedCountry)) {
@@ -230,7 +225,7 @@ export const WorldMap: FunctionComponent<Props> = ({
             setStatistics(statistics)
         }
         return layerGroup
-    }, [aggregatedCoordinatesLayer, countryLayer, filteredRelays.length, leafletMap, relayCountryLayer, relayCountryMap, relayFamilyCoordinatesLayer, relayFamilyLayer, relayFamilyMap, relayHeatmapLayer, relayLayer, relays, setSettings, setStatistics, settings, showSnackbarMessage, statistics])
+    }, [aggregatedCoordinatesLayer, closeSnackbar, countryLayer, enqueueSnackbar, filteredRelays.length, leafletMap, relayCountryLayer, relayCountryMap, relayFamilyCoordinatesLayer, relayFamilyLayer, relayFamilyMap, relayHeatmapLayer, relayLayer, relays, setSettings, setStatistics, settings, statistics])
 
 
     /**
@@ -245,23 +240,22 @@ export const WorldMap: FunctionComponent<Props> = ({
                 if (currentTimeStamp === latestRequestTimestamp) setRelays(response.data)
             }).catch(() => {
                 setIsLoading(false)
-                showSnackbarMessage(SnackbarMessages.ConnectionFailed)
+                enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
             })
             latestRequestTimestamp = currentTimeStamp
         }
-    }, [dayToDisplay, setIsLoading, showSnackbarMessage])
+    }, [dayToDisplay, enqueueSnackbar, setIsLoading])
 
     /**
      * Redraw relays whenever settings get changed or an new relays got downloaded.
      * Draws a group of layers according to settings on the map.
      */
     useEffect(() => {
-        closeSnackbar()
         if (relays) {
             leafletMarkerLayer.clearLayers()
             leafletLayerGroup.getLayers().forEach((layer) => layer.addTo(leafletMarkerLayer))
         }
-    }, [closeSnackbar, leafletLayerGroup, leafletMarkerLayer, relays])
+    }, [leafletLayerGroup, leafletMarkerLayer, relays])
 
     /**
      * Handler for family selection
@@ -293,14 +287,12 @@ export const WorldMap: FunctionComponent<Props> = ({
                 showDialog={showRelayDetailsDialog}
                 closeDialog={useCallback(() => setShowRelayDetailsDialog(false), [])}
                 relays={relaysForDetailsDialog}
-                showSnackbarMessage={showSnackbarMessage}
             />
             <FamilySelectionDialog
                 showDialog={showFamilySelectionDialog}
                 closeDialog={() => setShowFamilySelectionDialog(false)}
                 families={familiesForSelectionDialog}
                 familySelectionCallback={useCallback(handleFamilySelection, [setSettings, settings])}
-                showSnackbarMessage={showSnackbarMessage}
             />
             <TileLayer
                 maxZoom={19}
