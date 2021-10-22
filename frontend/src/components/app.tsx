@@ -105,7 +105,7 @@ export const App: FunctionComponent = () => {
             setSliderValue(response.data.length - 1)
             setIsLoading(false)
         }).catch(() => {
-            showSnackbarMessageCallback({message: SnackbarMessages.ConnectionFailed, severity: "error"})
+            showSnackbarMessageCallback(SnackbarMessages.ConnectionFailed)
             setIsLoading(false)
         })
     }, [showSnackbarMessageCallback])

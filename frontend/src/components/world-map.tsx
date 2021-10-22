@@ -181,17 +181,16 @@ export const WorldMap: FunctionComponent<Props> = ({
 
         if (relays) {
             if (!filteredRelays.length) {
-                showSnackbarMessage({message: SnackbarMessages.NoRelaysWithFlags, severity: "warning"})
+                showSnackbarMessage(SnackbarMessages.NoRelaysWithFlags)
                 return layerGroup
             }
 
             if (settings.selectedFamily && !relayFamilyMap.has(settings.selectedFamily)) {
                 setSettings({...settings, selectedFamily: undefined})
             }
-            if (settings.sortFamily && relayFamilyMap.size === 0) showSnackbarMessage({
-                message: SnackbarMessages.NoFamilyData,
-                severity: "warning"
-            })
+            if (settings.sortFamily && relayFamilyMap.size === 0) {
+                showSnackbarMessage(SnackbarMessages.NoFamilyData)
+            }
 
             if (settings.selectedCountry && !relayCountryMap.has(settings.selectedCountry)) {
                 setSettings({...settings, selectedCountry: undefined})
@@ -246,7 +245,7 @@ export const WorldMap: FunctionComponent<Props> = ({
                 if (currentTimeStamp === latestRequestTimestamp) setRelays(response.data)
             }).catch(() => {
                 setIsLoading(false)
-                showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
+                showSnackbarMessage(SnackbarMessages.ConnectionFailed)
             })
             latestRequestTimestamp = currentTimeStamp
         }
