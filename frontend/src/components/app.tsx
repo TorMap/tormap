@@ -1,17 +1,17 @@
 import React, {FunctionComponent, useCallback, useEffect, useState} from 'react';
 import {WorldMap} from "./world-map";
-import {CircularProgress, createMuiTheme, Link, makeStyles, Snackbar, ThemeProvider} from "@material-ui/core";
+import {CircularProgress, Link, makeStyles} from "@material-ui/core";
 import "@material-ui/styles";
 import "../index.css";
 import {AppSettings, relaysMustIncludeFlagInput, showRelayTypesInput} from "./app-settings";
 import {Settings, Statistics} from "../types/app-state";
 import {MapStats} from "./map-stats";
 import {DateSlider} from "./date-slider";
-import MuiAlert from '@material-ui/lab/Alert';
 import {defaultSettings} from "../util/config";
 import {AboutInformation} from "./about-information";
-import {SnackbarMessage, SnackbarMessages} from "../types/ui";
 import {backend} from "../util/util";
+import {useSnackbar} from "notistack";
+import {SnackbarMessage} from "../types/ui";
 
 
 /**
@@ -35,39 +35,17 @@ const useStyle = makeStyles(() => ({
         bottom: "0px",
         fontSize: ".7rem",
     },
-    snackbar: {
-        color: "#2a2a2a"
-    }
 }))
 
 export const App: FunctionComponent = () => {
     const [availableDays, setAvailableDays] = useState<string[]>([])
     const [sliderValue, setSliderValue] = useState<number>(-1)
     const [isLoading, setIsLoading] = useState(true)
-    const [showSnackbar, setShowSnackbar] = useState(false)
-    const [snackbarMessage, setSnackbarMessage] = useState<SnackbarMessage>({message: "", severity: "info"})
     const [settings, setSettings] = useState<Settings>(defaultSettings)
     const [statistics, setStatistics] = useState<Statistics>()
-    const classes = useStyle()
 
-    const [theme] = useState(createMuiTheme({
-        palette: {
-            type: "dark",
-        },
-        overrides: {
-            MuiTooltip: {
-                tooltip: {
-                    fontSize: ".85em",
-                }
-            },
-            MuiLink: {
-                root: {
-                    color: "rgba(255, 255, 255, 0.7)",
-                    fontSize: ".9em"
-                }
-            }
-        }
-    }))
+    const classes = useStyle()
+    const {enqueueSnackbar} = useSnackbar();
 
     /**
      * input event handler for setting changes
@@ -92,11 +70,6 @@ export const App: FunctionComponent = () => {
         }
     };
 
-    const showSnackbarMessageCallback = useCallback((message: SnackbarMessage) => {
-        setSnackbarMessage(message)
-        setShowSnackbar(true)
-    }, [])
-
     // Loads available days from the backend
     useEffect(() => {
         setIsLoading(true)
@@ -105,10 +78,10 @@ export const App: FunctionComponent = () => {
             setSliderValue(response.data.length - 1)
             setIsLoading(false)
         }).catch(() => {
-            showSnackbarMessageCallback(SnackbarMessages.ConnectionFailed)
+            enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
             setIsLoading(false)
         })
-    }, [showSnackbarMessageCallback])
+    }, [enqueueSnackbar])
 
     // Resets selection if grouping gets disabled
     useEffect(() => {
@@ -120,56 +93,29 @@ export const App: FunctionComponent = () => {
         }
     }, [settings])
 
-    const closeSnackbarCallback = useCallback((event?: React.SyntheticEvent, reason?: string) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-        setShowSnackbar(false)
-    }, [])
-
     return (
-        <ThemeProvider theme={theme}>
-            <div>
-                {isLoading &&
-                <div className={classes.progressCircle}>
-                    <CircularProgress color={"inherit"}/>
-                </div>
-                }
-                <WorldMap
-                    dayToDisplay={sliderValue >= 0 ? availableDays[sliderValue] : undefined}
-                    settings={settings}
-                    setSettings={useCallback(setSettings, [setSettings])}
-                    setIsLoading={useCallback(setIsLoading, [setIsLoading])}
-                    setStatistics={useCallback(setStatistics, [setStatistics])}
-                    showSnackbarMessage={showSnackbarMessageCallback}
-                    closeSnackbar={useCallback(() => setShowSnackbar(false), [])}
-                />
-                <DateSlider availableDays={availableDays} setValue={useCallback(setSliderValue, [setSliderValue])}/>
-                <AppSettings settings={settings} onChange={handleInputChange}/>
-                {statistics && <MapStats settings={settings} stats={statistics}/>}
+        <div>
+            {isLoading &&
+            <div className={classes.progressCircle}>
+                <CircularProgress color={"inherit"}/>
             </div>
-            <Snackbar
-                open={showSnackbar}
-                autoHideDuration={snackbarMessage.severity === "error" ? null : 6000}
-                onClose={closeSnackbarCallback}
-                anchorOrigin={{vertical: "top", horizontal: "center"}}
-            >
-                <MuiAlert
-                    elevation={6}
-                    variant="filled"
-                    onClose={closeSnackbarCallback}
-                    severity={snackbarMessage.severity}
-                    className={classes.snackbar}
-                >
-                    {snackbarMessage.message}
-                </MuiAlert>
-            </Snackbar>
+            }
+            <WorldMap
+                dayToDisplay={sliderValue >= 0 ? availableDays[sliderValue] : undefined}
+                settings={settings}
+                setSettings={useCallback(setSettings, [setSettings])}
+                setIsLoading={useCallback(setIsLoading, [setIsLoading])}
+                setStatistics={useCallback(setStatistics, [setStatistics])}
+            />
+            <DateSlider availableDays={availableDays} setValue={useCallback(setSliderValue, [setSliderValue])}/>
+            <AppSettings settings={settings} onChange={handleInputChange}/>
+            {statistics && <MapStats settings={settings} stats={statistics}/>}
             <span className={classes.attribution}>
-                <Link href="https://leafletjs.com" target={"_blank"}>Leaflet</Link> | &copy;&nbsp;
+                    <Link href="https://leafletjs.com" target={"_blank"}>Leaflet</Link> | &copy;&nbsp;
                 <Link href="https://www.openstreetmap.org/copyright" target={"_blank"}>OpenStreetMap</Link>&nbsp;
                 contributors &copy; <Link href="https://carto.com/attributions" target={"_blank"}>CARTO</Link>
-            </span>
+                </span>
             <AboutInformation/>
-        </ThemeProvider>
+        </div>
     )
 }
