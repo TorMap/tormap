@@ -131,7 +131,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
         setRelayIdentifiers([])
         const relayDetailsIds = relays.filter(relay => relay.detailsId).map(relay => relay.detailsId)
         if (relays.length > 0 && relayDetailsIds.length === 0) {
-            showSnackbarMessage({message: SnackbarMessages.NoNodeDetails, severity: "warning"})
+            showSnackbarMessage(SnackbarMessages.NoRelayDetails)
             closeDialog()
         } else if (relayDetailsIds.length === 1) {
             setNodeDetailsId(relayDetailsIds[0]!!)
@@ -143,7 +143,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     setNodeDetailsId(requestedRelayIdentifiers[0].id)
                 }
             }).catch(() => {
-                showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
+                showSnackbarMessage(SnackbarMessages.ConnectionFailed)
                 closeDialog()
             })
         }
@@ -195,7 +195,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                 ])
             })
                 .catch(() => {
-                    showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
+                    showSnackbarMessage(SnackbarMessages.ConnectionFailed)
                 })
         }
     }, [nodeDetailsId, relays, showSnackbarMessage])

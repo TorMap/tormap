@@ -108,7 +108,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                 setFamilyIdentifiers(response.data)
                 setIsLoading(false)
             }).catch(() => {
-                showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
+                showSnackbarMessage(SnackbarMessages.ConnectionFailed)
                 setIsLoading(false)
             })
         }
