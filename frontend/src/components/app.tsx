@@ -1,16 +1,17 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import {WorldMap} from "./components/world-map";
+import React, {FunctionComponent, useCallback, useEffect, useState} from 'react';
+import {WorldMap} from "./world-map";
 import {CircularProgress, createMuiTheme, Link, makeStyles, Snackbar, ThemeProvider} from "@material-ui/core";
 import "@material-ui/styles";
-import "./index.scss";
-import {AppSettings, relaysMustIncludeFlagInput, showRelayTypesInput} from "./components/app-settings";
-import {Settings, Statistics} from "./types/app-state";
-import {MapStats} from "./components/map-stats";
-import {DateSlider} from "./components/date-slider";
+import "../index.css";
+import {AppSettings, relaysMustIncludeFlagInput, showRelayTypesInput} from "./app-settings";
+import {Settings, Statistics} from "../types/app-state";
+import {MapStats} from "./map-stats";
+import {DateSlider} from "./date-slider";
 import MuiAlert from '@material-ui/lab/Alert';
-import {apiBaseUrl, defaultSettings} from "./util/config";
-import {AboutInformation} from "./components/about-information";
-import {SnackbarMessage, SnackbarMessages} from "./types/ui";
+import {defaultSettings} from "../util/config";
+import {AboutInformation} from "./about-information";
+import {SnackbarMessage, SnackbarMessages} from "../types/ui";
+import {backend} from "../util/util";
 
 
 /**
@@ -39,7 +40,7 @@ const useStyle = makeStyles(() => ({
     }
 }))
 
-function App() {
+export const App: FunctionComponent = () => {
     const [availableDays, setAvailableDays] = useState<string[]>([])
     const [sliderValue, setSliderValue] = useState<number>(-1)
     const [isLoading, setIsLoading] = useState(true)
@@ -99,17 +100,14 @@ function App() {
     // Loads available days from the backend
     useEffect(() => {
         setIsLoading(true)
-        fetch(`${apiBaseUrl}/archive/geo/relay/days`)
-            .then(response => response.json())
-            .then((availableDays: string[]) => {
-                setAvailableDays(availableDays)
-                setSliderValue(availableDays.length - 1)
-                setIsLoading(false)
-            })
-            .catch(() => {
-                showSnackbarMessageCallback({message: SnackbarMessages.ConnectionFailed, severity: "error"})
-                setIsLoading(false)
-            })
+        backend.get<string[]>('/archive/geo/relay/days').then(response => {
+            setAvailableDays(response.data)
+            setSliderValue(response.data.length - 1)
+            setIsLoading(false)
+        }).catch(() => {
+            showSnackbarMessageCallback({message: SnackbarMessages.ConnectionFailed, severity: "error"})
+            setIsLoading(false)
+        })
     }, [showSnackbarMessageCallback])
 
     // Resets selection if grouping gets disabled
@@ -175,5 +173,3 @@ function App() {
         </ThemeProvider>
     )
 }
-
-export default App;

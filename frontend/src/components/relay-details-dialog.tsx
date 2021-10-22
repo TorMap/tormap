@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from "react";
 import {
     Box,
-    CircularProgress, DialogContent,
+    CircularProgress,
+    DialogContent,
     DialogTitle,
     Divider,
     Grid,
@@ -19,12 +20,12 @@ import {
     Typography
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
-import {apiBaseUrl} from "../util/config";
 import {getIcon} from "../types/icons";
 import {findGeoRelayViewByID, getRelayType} from "../util/aggregate-relays";
 import {DetailsInfo, GeoRelayView, NodeDetails, NodeIdentifier} from "../types/responses";
 import {FullHeightDialog, SnackbarMessage, SnackbarMessages} from "../types/ui";
 import {RelayFlag, RelayFlagLabel} from "../types/relay";
+import {backend} from "../util/util";
 
 /**
  * Styles according to Material UI doc for components used in AppSettings component
@@ -135,24 +136,16 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
         } else if (relayDetailsIds.length === 1) {
             setNodeDetailsId(relayDetailsIds[0]!!)
         } else if (relayDetailsIds.length > 1) {
-            fetch(`${apiBaseUrl}/archive/node/identifiers`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                method: "post",
-                body: JSON.stringify(relayDetailsIds),
+            backend.post<NodeIdentifier[]>('/archive/node/identifiers', relayDetailsIds).then(response => {
+                const requestedRelayIdentifiers = response.data
+                setRelayIdentifiers(requestedRelayIdentifiers)
+                if (requestedRelayIdentifiers.length > 0) {
+                    setNodeDetailsId(requestedRelayIdentifiers[0].id)
+                }
+            }).catch(() => {
+                showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
+                closeDialog()
             })
-                .then(response => response.json())
-                .then((identifiers: NodeIdentifier[]) => {
-                    setRelayIdentifiers(identifiers)
-                    if (identifiers.length > 0) {
-                        setNodeDetailsId(identifiers[0].id)
-                    }
-                })
-                .catch(() => {
-                    showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
-                    closeDialog()
-                })
         }
 
     }, [closeDialog, relays, showSnackbarMessage])
@@ -171,37 +164,36 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
         setRawRelayDetails(undefined)
         setRelayDetails(undefined)
         if (nodeDetailsId) {
-            fetch(`${apiBaseUrl}/archive/node/details/${nodeDetailsId}`)
-                .then(response => response.json())
-                .then((relay: NodeDetails) => {
-                    setRawRelayDetails(relay)
-                    setRelayDetails([
-                        {name: "Fingerprint", value: relay.fingerprint},
-                        {name: "IP address", value: relay.address},
-                        {
-                            name: "Flags assigned by authorities",
-                            value: constructFlagString(findGeoRelayViewByID(relay.id, relays)?.flags)
-                        },
-                        {name: "Autonomous System", value: relay.autonomousSystemName},
-                        {name: "Autonomous System Number", value: relay.autonomousSystemNumber},
-                        {name: "Platform", value: relay.platform},
-                        {name: "Uptime", value: formatSecondsToHours(relay.uptime)},
-                        {name: "Contact", value: relay.contact},
-                        {name: "Bandwidth for short intervals", value: formatBytesToMBPerSecond(relay.bandwidthBurst)},
-                        {name: "Bandwidth for long periods", value: formatBytesToMBPerSecond(relay.bandwidthRate)},
-                        {name: "Bandwidth observed", value: formatBytesToMBPerSecond(relay.bandwidthObserved)},
-                        {name: "Supported protocols", value: relay.protocols},
-                        {name: "Allows single hop exit", value: formatBoolean(relay.allowSingleHopExits)},
-                        {name: "Is hibernating", value: formatBoolean(relay.isHibernating)},
-                        {name: "Caches extra info", value: formatBoolean(relay.cachesExtraInfo)},
-                        {name: "Is a hidden service directory", value: formatBoolean(relay.isHiddenServiceDir)},
-                        {name: "Accepts tunneled directory requests", value: formatBoolean(relay.tunnelledDirServer)},
-                        {name: "Link protocol versions", value: relay.linkProtocolVersions},
-                        {name: "Circuit protocol versions", value: relay.circuitProtocolVersions},
-                        {name: "Family members", value: relay.familyEntries},
-                        {name: "Infos published by relay on", value: relay.day},
-                    ])
-                })
+            backend.get<NodeDetails>(`/archive/node/details/${nodeDetailsId}`).then(response => {
+                const relay = response.data
+                setRawRelayDetails(relay)
+                setRelayDetails([
+                    {name: "Fingerprint", value: relay.fingerprint},
+                    {name: "IP address", value: relay.address},
+                    {
+                        name: "Flags assigned by authorities",
+                        value: constructFlagString(findGeoRelayViewByID(relay.id, relays)?.flags)
+                    },
+                    {name: "Autonomous System", value: relay.autonomousSystemName},
+                    {name: "Autonomous System Number", value: relay.autonomousSystemNumber},
+                    {name: "Platform", value: relay.platform},
+                    {name: "Uptime", value: formatSecondsToHours(relay.uptime)},
+                    {name: "Contact", value: relay.contact},
+                    {name: "Bandwidth for short intervals", value: formatBytesToMBPerSecond(relay.bandwidthBurst)},
+                    {name: "Bandwidth for long periods", value: formatBytesToMBPerSecond(relay.bandwidthRate)},
+                    {name: "Bandwidth observed", value: formatBytesToMBPerSecond(relay.bandwidthObserved)},
+                    {name: "Supported protocols", value: relay.protocols},
+                    {name: "Allows single hop exit", value: formatBoolean(relay.allowSingleHopExits)},
+                    {name: "Is hibernating", value: formatBoolean(relay.isHibernating)},
+                    {name: "Caches extra info", value: formatBoolean(relay.cachesExtraInfo)},
+                    {name: "Is a hidden service directory", value: formatBoolean(relay.isHiddenServiceDir)},
+                    {name: "Accepts tunneled directory requests", value: formatBoolean(relay.tunnelledDirServer)},
+                    {name: "Link protocol versions", value: relay.linkProtocolVersions},
+                    {name: "Circuit protocol versions", value: relay.circuitProtocolVersions},
+                    {name: "Family members", value: relay.familyEntries},
+                    {name: "Infos published by relay on", value: relay.day},
+                ])
+            })
                 .catch(() => {
                     showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
                 })
