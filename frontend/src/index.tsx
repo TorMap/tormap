@@ -19,9 +19,9 @@ const theme = createMuiTheme({
         MuiLink: {
             root: {
                 color: "rgba(255, 255, 255, 0.7)",
-                fontSize: ".9em"
+                fontSize: ".9em",
             }
-        }
+        },
     }
 })
 
