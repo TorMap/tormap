@@ -43,6 +43,9 @@ const useStyle = makeStyles(() => ({
             cursor: "pointer",
         }
     },
+    tableHead: {
+        fontWeight: "bold",
+    },
 }))
 
 interface Props {
@@ -134,14 +137,14 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                 <Table size={"small"}>
                                     <TableHead>
                                         <TableRow>
+                                            <TableCell scope="row">
+                                                <Typography className={classes.tableHead}>Relay nicknames</Typography>
+                                            </TableCell>
                                             <TableCell scope="" className={classes.valueName}>
-                                                <Typography>Family members</Typography>
+                                                <Typography className={classes.tableHead}>Member count</Typography>
                                             </TableCell>
                                             <TableCell scope="row">
-                                                <Typography>Autonomous Systems</Typography>
-                                            </TableCell>
-                                            <TableCell scope="row">
-                                                <Typography>Relay Nicknames</Typography>
+                                                <Typography className={classes.tableHead}>Autonomous Systems</Typography>
                                             </TableCell>
                                         </TableRow>
                                     </TableHead>
@@ -153,6 +156,9 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                 hover={true}
                                                 className={classes.tableRow}
                                             >
+                                                <TableCell scope="row">
+                                                    <Typography>{family.nicknames}</Typography>
+                                                </TableCell>
                                                 <TableCell scope="row" className={classes.valueName}>
                                                     <Typography>{family.memberCount}</Typography>
                                                 </TableCell>
@@ -162,9 +168,6 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                             (family.autonomousSystems) :
                                                             "This data is not available yet."}
                                                     </Typography>
-                                                </TableCell>
-                                                <TableCell scope="row">
-                                                    <Typography>{family.nicknames}</Typography>
                                                 </TableCell>
                                             </TableRow>
                                         )}
