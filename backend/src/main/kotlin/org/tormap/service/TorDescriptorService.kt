@@ -1,5 +1,7 @@
 package org.tormap.service
 
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Caching
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.AsyncResult
 import org.springframework.stereotype.Service
@@ -200,12 +202,21 @@ class TorDescriptorService(
             }
         }
         geoRelayRepositoryImpl.saveAll(nodesToSave)
-        updateGeoRelayDaysCache()
+        updateGeoRelayCaches(descriptorDay.toString())
         return ProcessedDescriptorInfo(descriptorDay)
     }
 
     @Async
-    fun updateGeoRelayDaysCache() = archiveDataController.getDaysForGeoRelays()
+    @Caching(
+        evict = [
+            CacheEvict("geo-relay-days"),
+            CacheEvict("geo-relay-day", key = "#day")
+        ]
+    )
+    fun updateGeoRelayCaches(day: String) {
+        archiveDataController.getDaysForGeoRelays()
+        archiveDataController.getGeoRelaysByDay(day)
+    }
 
     /**
      * Use a server descriptor to save [NodeDetails] in the DB.

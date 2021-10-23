@@ -24,22 +24,24 @@ class NodeDetailsService(
     private val logger = logger()
 
     /**
+     * Updates [NodeDetails.familyId] for all entities and if desired also [overwriteExistingFamilies].
+     */
+    fun updateAllNodeFamilies(overwriteExistingFamilies: Boolean) {
+        var monthFamilyMemberCount = nodeDetailsRepositoryImpl.findDistinctMonthFamilyMemberCount()
+        if (!overwriteExistingFamilies) {
+            monthFamilyMemberCount = monthFamilyMemberCount.filter { it.count == 0L }
+        }
+        updateNodeFamilies(monthFamilyMemberCount.map { it.month }.toSet())
+    }
+
+
+    /**
      * Updates [NodeDetails.familyId] for all entities of the requested [months].
      */
-    fun updateNodeFamilies(months: Set<String>? = null, overwriteExistingFamilies: Boolean = false) {
+    fun updateNodeFamilies(months: Set<String>) {
         try {
-            val monthsToProcess = when {
-                months != null -> months
-                else -> {
-                    var monthFamilyMemberCount = nodeDetailsRepositoryImpl.findDistinctMonthFamilyMemberCount()
-                    if (!overwriteExistingFamilies) {
-                        monthFamilyMemberCount = monthFamilyMemberCount.filter { it.count == 0L }
-                    }
-                    monthFamilyMemberCount.map { it.month }
-                }
-            }
-            logger.info("Updating node families for months: ${monthsToProcess.joinToString(", ")}")
-            monthsToProcess.forEach { month ->
+            logger.info("Updating node families for months: ${months.joinToString(", ")}")
+            months.forEach { month ->
                 try {
                     updateNodeFamiliesForMonth(month)
                 } catch (exception: Exception) {

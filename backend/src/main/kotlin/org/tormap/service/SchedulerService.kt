@@ -50,7 +50,7 @@ class SchedulerService(
     @Async
     @Scheduled(fixedRateString = "\${scheduler.updateNodeFamiliesRate}")
     fun updateNodeFamilies() =
-        nodeDetailsService.updateNodeFamilies(null, schedulerConfig.updateNodeFamiliesOverwriteAll)
+        nodeDetailsService.updateAllNodeFamilies(schedulerConfig.updateNodeFamiliesOverwriteAll)
 
     /**
      * Updates all nodes which do not have any Autonomous System set.
