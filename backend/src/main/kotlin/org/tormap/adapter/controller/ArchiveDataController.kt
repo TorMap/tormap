@@ -1,6 +1,5 @@
 package org.tormap.adapter.controller
 
-import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.web.bind.annotation.*
 import org.tormap.adapter.controller.exception.NodeNotFoundException
