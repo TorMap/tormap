@@ -1,6 +1,6 @@
 import React, {FunctionComponent, useCallback, useEffect, useState} from 'react';
 import {WorldMap} from "./world-map";
-import {CircularProgress, Link, makeStyles} from "@material-ui/core";
+import {Button, CircularProgress, Link, makeStyles} from "@material-ui/core";
 import "@material-ui/styles";
 import "../index.css";
 import {AppSettings, relaysMustIncludeFlagInput, showRelayTypesInput} from "./app-settings";
@@ -43,9 +43,10 @@ export const App: FunctionComponent = () => {
     const [isLoading, setIsLoading] = useState(true)
     const [settings, setSettings] = useState<Settings>(defaultSettings)
     const [statistics, setStatistics] = useState<Statistics>()
+    const [connectionRetryCount, setConnectionRetryCount] = useState<number>(0)
 
     const classes = useStyle()
-    const {enqueueSnackbar} = useSnackbar();
+    const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
     /**
      * input event handler for setting changes
@@ -72,16 +73,22 @@ export const App: FunctionComponent = () => {
 
     // Loads available days from the backend
     useEffect(() => {
+        closeSnackbar()
         setIsLoading(true)
         backend.get<string[]>('/archive/geo/relay/days').then(response => {
             setAvailableDays(response.data)
             setSliderValue(response.data.length - 1)
             setIsLoading(false)
         }).catch(() => {
-            enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
+            enqueueSnackbar(SnackbarMessage.ConnectionFailed, {
+                variant: "error",
+                action: <Button onClick={() => setConnectionRetryCount(previous => previous + 1)}>Retry</Button>,
+                persist: true,
+                preventDuplicate: false,
+            })
             setIsLoading(false)
         })
-    }, [enqueueSnackbar])
+    }, [connectionRetryCount, closeSnackbar, enqueueSnackbar])
 
     // Resets selection if grouping gets disabled
     useEffect(() => {
