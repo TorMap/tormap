@@ -13,8 +13,9 @@ import {
 import {NodeFamilyIdentifier} from "../types/responses";
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@material-ui/icons/Close";
-import {apiBaseUrl} from "../util/config";
-import {FullHeightDialog, SnackbarMessage, SnackbarMessages} from "../types/ui";
+import {FullHeightDialog, SnackbarMessage} from "../types/ui";
+import {backend} from "../util/util";
+import {useSnackbar} from "notistack";
 
 /**
  * Styles according to Material UI doc for components used in AppSettings component
@@ -42,6 +43,9 @@ const useStyle = makeStyles(() => ({
             cursor: "pointer",
         }
     },
+    tableHead: {
+        fontWeight: "bold",
+    },
 }))
 
 interface Props {
@@ -65,12 +69,6 @@ interface Props {
      * @param f the family ID
      */
     familySelectionCallback: (f: number) => void
-
-    /**
-     * Show a message in the snackbar
-     * @param message - what to display to user and at which severity
-     */
-    showSnackbarMessage: (message: SnackbarMessage) => void
 }
 
 /**
@@ -87,12 +85,13 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                                           closeDialog,
                                                                           families,
                                                                           familySelectionCallback,
-                                                                          showSnackbarMessage,
                                                                       }) => {
 
     const [isLoading, setIsLoading] = useState(true)
     const [familyIdentifiers, setFamilyIdentifiers] = useState<NodeFamilyIdentifier[]>()
+
     const classes = useStyle()
+    const { enqueueSnackbar } = useSnackbar();
 
     /**
      * Query more information about the Families specified in "families" parameter
@@ -101,24 +100,18 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
         setFamilyIdentifiers([])
         if (families.length > 0) {
             setIsLoading(true)
-            fetch(`${apiBaseUrl}/archive/node/family/identifiers`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                method: "post",
-                body: JSON.stringify(families),
+            backend.post<NodeFamilyIdentifier[]>(
+                '/archive/node/family/identifiers',
+                families
+            ).then(response => {
+                setFamilyIdentifiers(response.data)
+                setIsLoading(false)
+            }).catch(() => {
+                enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
+                setIsLoading(false)
             })
-                .then(response => response.json())
-                .then((identifiers: NodeFamilyIdentifier[]) => {
-                    setFamilyIdentifiers(identifiers)
-                    setIsLoading(false)
-                })
-                .catch(() => {
-                    showSnackbarMessage({message: SnackbarMessages.ConnectionFailed, severity: "error"})
-                    setIsLoading(false)
-                })
         }
-    }, [families, showSnackbarMessage])
+    }, [enqueueSnackbar, families])
 
     return (
         <FullHeightDialog
@@ -144,14 +137,14 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                 <Table size={"small"}>
                                     <TableHead>
                                         <TableRow>
+                                            <TableCell scope="row">
+                                                <Typography className={classes.tableHead}>Relay nicknames</Typography>
+                                            </TableCell>
                                             <TableCell scope="" className={classes.valueName}>
-                                                <Typography>Family members</Typography>
+                                                <Typography className={classes.tableHead}>Member count</Typography>
                                             </TableCell>
                                             <TableCell scope="row">
-                                                <Typography>Autonomous Systems</Typography>
-                                            </TableCell>
-                                            <TableCell scope="row">
-                                                <Typography>Relay Nicknames</Typography>
+                                                <Typography className={classes.tableHead}>Autonomous Systems</Typography>
                                             </TableCell>
                                         </TableRow>
                                     </TableHead>
@@ -163,6 +156,9 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                 hover={true}
                                                 className={classes.tableRow}
                                             >
+                                                <TableCell scope="row">
+                                                    <Typography>{family.nicknames}</Typography>
+                                                </TableCell>
                                                 <TableCell scope="row" className={classes.valueName}>
                                                     <Typography>{family.memberCount}</Typography>
                                                 </TableCell>
@@ -172,9 +168,6 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                             (family.autonomousSystems) :
                                                             "This data is not available yet."}
                                                     </Typography>
-                                                </TableCell>
-                                                <TableCell scope="row">
-                                                    <Typography>{family.nicknames}</Typography>
                                                 </TableCell>
                                             </TableRow>
                                         )}
