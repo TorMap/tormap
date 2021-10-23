@@ -1,6 +1,7 @@
 package org.tormap.adapter.controller
 
 import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.web.bind.annotation.*
 import org.tormap.adapter.controller.exception.NodeNotFoundException
 import org.tormap.adapter.dto.GeoRelayDto
@@ -16,10 +17,11 @@ class ArchiveDataController(
     val geoRelayRepository: GeoRelayRepositoryImpl,
     val nodeDetailsRepositoryImpl: NodeDetailsRepositoryImpl,
 ) {
-    @CachePut("geo-relay-days")
+    @Cacheable("geo-relay-days")
     @GetMapping("/geo/relay/days")
     fun getDaysForGeoRelays() = geoRelayRepository.findDistinctDays()
 
+    @Cacheable("geo-relay-day", key = "#day")
     @GetMapping("/geo/relay/day/{day}")
     fun getGeoRelaysByDay(@PathVariable day: String): List<GeoRelayDto> =
         geoRelayRepository.findAllUsingDay(LocalDate.parse(day))
@@ -37,5 +39,6 @@ class ArchiveDataController(
     fun getNodeIdentifiers(@RequestBody ids: List<Long>) = nodeDetailsRepositoryImpl.findNodeIdentifiers(ids)
 
     @PostMapping("/node/family/identifiers")
-    fun getNodeFamilyIdentifiers(@RequestBody familyIds: List<Long>) = nodeDetailsRepositoryImpl.findFamilyIdentifiers(familyIds)
+    fun getNodeFamilyIdentifiers(@RequestBody familyIds: List<Long>) =
+        nodeDetailsRepositoryImpl.findFamilyIdentifiers(familyIds)
 }
