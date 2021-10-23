@@ -16,8 +16,6 @@ scheduler:
 server:
     port: 8080
 spring:
-    codec:
-        max-in-memory-size: 10MB
     datasource:
         password: ''
         url: jdbc:h2:./resources/database/tormap;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=5;LOCK_TIMEOUT=30000
