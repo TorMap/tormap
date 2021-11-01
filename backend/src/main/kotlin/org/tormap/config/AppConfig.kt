@@ -37,4 +37,8 @@ class AppConfig(
         return H2SequenceMaxValueIncrementer(dataSource, databaseConfig.defaultSequenceName)
     }
 
+    @Bean
+    fun shallowEtagHeaderFilter(): Filter {
+        return new ShallowEtagHeaderFilter();
+    }
 }
