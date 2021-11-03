@@ -12,11 +12,11 @@ plugins {
     id("org.jetbrains.dokka") version "1.5.0"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "2.5.3"
+    id("org.springframework.boot") version "2.5.6"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 
     // Database migration tool https://flywaydb.org/documentation/usage/gradle/
-    id("org.flywaydb.flyway") version "7.12.1"
+    id("org.flywaydb.flyway") version "8.0.3"
 }
 
 group = "org.tormap"
@@ -39,11 +39,11 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-    implementation("org.springdoc:springdoc-openapi-ui:1.3.+")
-    implementation("org.springdoc:springdoc-openapi-kotlin:1.3.+")
+    implementation("org.springdoc:springdoc-openapi-ui:1.5.11")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.5.11")
 
     // Serialization
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
 
     // Latest stable H2 database driver https://www.h2database.com/
     runtimeOnly("com.h2database:h2:1.4.199")
