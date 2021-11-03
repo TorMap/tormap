@@ -11,8 +11,8 @@ scheduler:
     relayConsensusDescriptorsRate: PT12H
     relayServerDescriptorsRate: PT12H
     updateNodeAutonomousSystemsRate: PT12H
-    updateNodeFamiliesOverwriteAll: false
     updateNodeFamiliesRate: PT12H
+    updateNodeFamiliesOverwriteAll: false
 server:
     port: 8080
 spring:
