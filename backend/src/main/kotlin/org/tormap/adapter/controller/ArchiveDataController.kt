@@ -9,7 +9,6 @@ import org.tormap.database.repository.GeoRelayRepositoryImpl
 import org.tormap.database.repository.NodeDetailsRepositoryImpl
 import java.time.LocalDate
 
-@CrossOrigin
 @RestController
 @RequestMapping("archive")
 class ArchiveDataController(
