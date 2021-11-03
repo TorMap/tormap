@@ -11,15 +11,15 @@ scheduler:
     relayConsensusDescriptorsRate: PT12H
     relayServerDescriptorsRate: PT12H
     updateNodeAutonomousSystemsRate: PT12H
-    updateNodeFamiliesOverwriteAll: false
     updateNodeFamiliesRate: PT12H
+    updateNodeFamiliesOverwriteAll: false
 server:
     port: 8080
 spring:
     datasource:
-        password: ''
         url: jdbc:h2:./resources/database/tormap;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=5;LOCK_TIMEOUT=30000
         username: sa
+        password: ''
     flyway:
         baselineOnMigrate: true
         locations: classpath:database/migration
