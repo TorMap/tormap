@@ -70,10 +70,11 @@ allOpen {
 
 // Connect migration tool to DB
 flyway {
-    url = "jdbc:h2:./database/tormap;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=5;LOCK_TIMEOUT=30000"
+    url = "jdbc:h2:./resources/database/tormap;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=5;LOCK_TIMEOUT=30000"
     user = "sa"
 }
 
+// Build image for docker https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#build-image
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage> {
     imageName = "juliushenke/tormap"
 
