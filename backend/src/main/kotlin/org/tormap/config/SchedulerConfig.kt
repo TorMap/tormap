@@ -11,27 +11,37 @@ import org.springframework.boot.context.properties.ConstructorBinding
  */
 data class SchedulerConfig(
     /**
-     * The rate at which relay consensus descriptors are handled.
+     * The rate at which archive relay consensus descriptors are handled.
      */
-    val relayConsensusDescriptorsRate: String,
+    val archiveRelayConsensuses: String,
 
     /**
-     * The rate at which relay server descriptors are handled.
+     * The rate at which archive relay server descriptors are handled.
      */
-    val relayServerDescriptorsRate: String,
+    val archiveRelayServers: String,
+
+    /**
+     * The rate at which recent relay consensus descriptors are handled.
+     */
+    val recentRelayConsensuses: String,
+
+    /**
+     * The rate at which recent relay server descriptors are handled.
+     */
+    val recentRelayServers: String,
 
     /**
      * The rate at which the Autonomous System info in NodeDetails is updated.
      */
-    val updateNodeAutonomousSystemsRate: String,
+    val updateNodeAutonomousSystems: String,
 
     /**
      * The rate at which the families of NodeDetails are updated.
      */
-    val updateNodeFamiliesRate: String,
+    val updateNodeFamilies: String,
 
     /**
      * Whether all previously calculated families should be overridden
      */
-    val updateNodeFamiliesOverwriteAll: Boolean,
+    val shouldOverwriteFamilies: Boolean,
 )

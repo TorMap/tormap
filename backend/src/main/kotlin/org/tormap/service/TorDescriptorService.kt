@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.AsyncResult
 import org.springframework.stereotype.Service
 import org.tormap.adapter.controller.ArchiveDataController
-import org.tormap.config.ApiConfig
+import org.tormap.config.DescriptorConfig
 import org.tormap.database.entity.*
 import org.tormap.database.repository.DescriptorsFileRepository
 import org.tormap.database.repository.GeoRelayRepositoryImpl
@@ -33,7 +33,7 @@ import java.util.concurrent.Future
  */
 @Service
 class TorDescriptorService(
-    private val apiConfig: ApiConfig,
+    private val descriptorConfig: DescriptorConfig,
     private val geoRelayRepositoryImpl: GeoRelayRepositoryImpl,
     private val nodeDetailsRepository: NodeDetailsRepository,
     private val descriptorsFileRepository: DescriptorsFileRepository,
@@ -49,15 +49,17 @@ class TorDescriptorService(
      */
     fun collectAndProcessDescriptors(apiPath: String, descriptorType: DescriptorType) {
         try {
-            logger.info("Collecting descriptors from api path $apiPath ...")
-            collectDescriptors(apiPath)
-            logger.info("Finished collecting descriptors from api path $apiPath")
+            logger.info("Collecting descriptors from api path: $apiPath ...")
+            val isRecentDescriptorType =
+                descriptorType === DescriptorType.RECENT_RELAY_CONSENSUS || descriptorType === DescriptorType.RECENT_RELAY_CONSENSUS
+            collectDescriptors(apiPath, isRecentDescriptorType)
+            logger.info("Finished collecting descriptors from api path: $apiPath")
 
             logger.info("Processing descriptors from api path $apiPath ...")
             processDescriptors(apiPath, descriptorType)
-            logger.info("Finished processing descriptors from api path $apiPath")
+            logger.info("Finished processing descriptors from api path: $apiPath")
         } catch (exception: Exception) {
-            logger.error("Could not collect or process descriptors from api path $apiPath ! ${exception.message}")
+            logger.error("Could not collect or process descriptors from api path: $apiPath ! ${exception.message}")
         }
     }
 
@@ -66,14 +68,13 @@ class TorDescriptorService(
      */
     private fun collectDescriptors(
         apiPath: String,
-        minLastModifiedMilliseconds: Long = 0L,
-        shouldDeleteLocalFilesNotFoundOnRemote: Boolean = false
+        shouldDeleteLocalFilesNotFoundOnRemote: Boolean
     ) =
         descriptorCollector.collectDescriptors(
-            apiConfig.descriptorBaseURL,
+            descriptorConfig.apiBaseURL,
             arrayOf(apiPath),
-            minLastModifiedMilliseconds,
-            File(apiConfig.descriptorDownloadDirectory),
+            0L,
+            File(descriptorConfig.localDownloadDirectory),
             shouldDeleteLocalFilesNotFoundOnRemote,
         )
 
@@ -97,7 +98,7 @@ class TorDescriptorService(
 
     /**
      * Waits until all descriptors of the [descriptorFile] are processed and finally saves finished [DescriptorsFile].
-     * Updates the [NodeDetails.familyId] of processed months when [descriptorType] is [DescriptorType.SERVER].
+     * Updates the [NodeDetails.familyId] of processed months when [descriptorType] is [DescriptorType.ARCHIVE_RELAY_SERVER].
      */
     @Async
     fun finishDescriptorFile(
@@ -120,7 +121,7 @@ class TorDescriptorService(
                 message
             } ?: lastError
         }
-        if (descriptorType == DescriptorType.SERVER) {
+        if (descriptorType == DescriptorType.ARCHIVE_RELAY_SERVER) {
             nodeDetailsService.updateNodeFamilies(processedMonths)
             nodeDetailsService.updateAutonomousSystems(processedMonths)
         }
@@ -143,7 +144,7 @@ class TorDescriptorService(
      */
     private fun readDescriptors(apiPath: String, descriptorType: DescriptorType): MutableIterable<Descriptor> {
         val descriptorReader = DescriptorReaderImpl()
-        val parentDirectory = File(apiConfig.descriptorDownloadDirectory + apiPath)
+        val parentDirectory = File(descriptorConfig.localDownloadDirectory + apiPath)
         val excludedFiles = descriptorsFileRepository.findAllById_TypeEqualsAndErrorNull(descriptorType)
         descriptorReader.excludedFiles = excludedFiles.associate {
             Pair(
