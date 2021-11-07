@@ -51,6 +51,8 @@ class DescriptorsFileId(
 }
 
 enum class DescriptorType {
-    RELAY_CONSENSUS,
-    SERVER,
+    ARCHIVE_RELAY_CONSENSUS,
+    ARCHIVE_RELAY_SERVER,
+    RECENT_RELAY_CONSENSUS,
+    RECENT_RELAY_SERVER,
 }
