@@ -13,6 +13,7 @@ import org.tormap.database.entity.DescriptorType
  * Functions marked with @Async will be run in parallel on separate threads if available.
  */
 @Service
+@Async
 class SchedulerService(
     private val descriptorConfig: DescriptorConfig,
     private val schedulerConfig: SchedulerConfig,
@@ -24,7 +25,6 @@ class SchedulerService(
      * The years 2007 - 2021 equal about 3 GB in size.
      * After the download finished, and you start with an empty DB this takes about 20 hours depending on your machine.
      */
-    @Async
     @Scheduled(fixedRateString = "\${scheduler.archiveRelayConsensuses}")
     fun archiveRelayConsensuses() =
         torDescriptorService.collectAndProcessDescriptors(
@@ -37,7 +37,6 @@ class SchedulerService(
      * The years 2005 - 2021 equal about 30 GB in size.
      * After the download finished, and you start with an empty DB this takes about 10 hours depending on your machine.
      */
-    @Async
     @Scheduled(fixedRateString = "\${scheduler.archiveRelayServers}")
     fun archiveRelayServers() =
         torDescriptorService.collectAndProcessDescriptors(
@@ -50,7 +49,6 @@ class SchedulerService(
      * The 3 days of descriptors equals about 175 MB.
      * Can take a few minutes depending on your machine.
      */
-    @Async
     @Scheduled(fixedRateString = "\${scheduler.recentRelayConsensuses}")
     fun recentRelayConsensuses() =
         torDescriptorService.collectAndProcessDescriptors(
@@ -63,7 +61,6 @@ class SchedulerService(
      * The 3 days of descriptors equals about 150 MB.
      * Can take a few minutes depending on your machine.
      */
-    @Async
     @Scheduled(fixedRateString = "\${scheduler.recentRelayServers}")
     fun recentRelayServers() =
         torDescriptorService.collectAndProcessDescriptors(
@@ -76,7 +73,6 @@ class SchedulerService(
      * Updates all nodes which do not have a family set and optionally can overwrite existing family structures.
      * Can take a few minutes depending on how many months are updated.
      */
-    @Async
     @Scheduled(fixedRateString = "\${scheduler.updateNodeFamilies}")
     fun updateNodeFamilies() =
         nodeDetailsService.updateAllNodeFamilies(schedulerConfig.shouldOverwriteFamilies)
@@ -85,7 +81,6 @@ class SchedulerService(
      * Updates all nodes which do not have any Autonomous System set.
      * Can take multiple hours depending on how many nodes are updated.
      */
-    @Async
     @Scheduled(fixedRateString = "\${scheduler.updateNodeAutonomousSystems}")
     fun updateNodeAutonomousSystems() =
         nodeDetailsService.updateAutonomousSystems()
