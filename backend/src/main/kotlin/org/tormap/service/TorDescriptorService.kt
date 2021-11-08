@@ -21,9 +21,11 @@ import org.torproject.descriptor.impl.DescriptorReaderImpl
 import org.torproject.descriptor.index.DescriptorIndexCollector
 import java.io.File
 import java.math.RoundingMode
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.Future
 
 
@@ -50,9 +52,7 @@ class TorDescriptorService(
     fun collectAndProcessDescriptors(apiPath: String, descriptorType: DescriptorType) {
         try {
             logger.info("Collecting descriptors from api path: $apiPath ...")
-            val isRecentDescriptorType =
-                descriptorType === DescriptorType.RECENT_RELAY_CONSENSUS || descriptorType === DescriptorType.RECENT_RELAY_CONSENSUS
-            collectDescriptors(apiPath, isRecentDescriptorType)
+            collectDescriptors(apiPath, descriptorType.isRecent())
             logger.info("Finished collecting descriptors from api path: $apiPath")
 
             logger.info("Processing descriptors from api path $apiPath ...")
@@ -121,7 +121,7 @@ class TorDescriptorService(
                 message
             } ?: lastError
         }
-        if (descriptorType == DescriptorType.ARCHIVE_RELAY_SERVER) {
+        if (descriptorType == DescriptorType.ARCHIVE_RELAY_SERVER) { // TODO handle recent relay servers
             nodeDetailsService.updateNodeFamilies(processedMonths)
             nodeDetailsService.updateAutonomousSystems(processedMonths)
         }
@@ -145,6 +145,12 @@ class TorDescriptorService(
     private fun readDescriptors(apiPath: String, descriptorType: DescriptorType): MutableIterable<Descriptor> {
         val descriptorReader = DescriptorReaderImpl()
         val parentDirectory = File(descriptorConfig.localDownloadDirectory + apiPath)
+        if (descriptorType.isRecent()) {
+            descriptorsFileRepository.deleteAllById_TypeEqualsAndLastModifiedAfter(
+                descriptorType,
+                Instant.now().minus(4, ChronoUnit.DAYS).toEpochMilli()
+            )
+        }
         val excludedFiles = descriptorsFileRepository.findAllById_TypeEqualsAndErrorNull(descriptorType)
         descriptorReader.excludedFiles = excludedFiles.associate {
             Pair(

@@ -4,7 +4,7 @@ descriptor:
     archiveRelayConsensuses: /archive/relay-descriptors/consensuses/
     archiveRelayServers: /archive/relay-descriptors/server-descriptors/
     recentRelayConsensuses: /recent/relay-descriptors/consensuses/
-    recentRelayServers: /recent/relay-descriptors/consensuses/
+    recentRelayServers: /recent/relay-descriptors/server-descriptors/
 database:
     defaultSequenceName: HIBERNATE_SEQUENCE
     ip2locationDatabaseFile: ip2location/IP2LOCATION-LITE-DB5.BIN
