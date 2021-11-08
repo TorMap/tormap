@@ -146,7 +146,7 @@ class TorDescriptorService(
         val descriptorReader = DescriptorReaderImpl()
         val parentDirectory = File(descriptorConfig.localDownloadDirectory + apiPath)
         if (descriptorType.isRecent()) {
-            descriptorsFileRepository.deleteAllById_TypeEqualsAndLastModifiedAfter(
+            descriptorsFileRepository.deleteAllById_TypeEqualsAndLastModifiedBefore(
                 descriptorType,
                 Instant.now().minus(4, ChronoUnit.DAYS).toEpochMilli()
             )
