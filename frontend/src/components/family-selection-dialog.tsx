@@ -178,7 +178,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                     <Typography>
                                                         {(family.autonomousSystems) ?
                                                             (family.autonomousSystems) :
-                                                            "This data is not available yet."}
+                                                            "data not yet available"}
                                                     </Typography>
                                                 </TableCell>
                                             </TableRow>
