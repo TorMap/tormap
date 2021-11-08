@@ -70,7 +70,9 @@ class NodeDetailsService(
                         changedNodesCount++
                     }
                 }
-                logger.info("For month $it this many Autonomous Systems were changed: $changedNodesCount")
+                if (changedNodesCount > 0) {
+                    logger.info("Finished Autonomous Systems for month $it. Updated $changedNodesCount nodes.")
+                }
             }
             logger.info("Finished updating Autonomous System")
         } catch (exception: Exception) {

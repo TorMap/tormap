@@ -18,5 +18,5 @@ interface DescriptorsFileRepository : CrudRepository<DescriptorsFile, Descriptor
 
     @Transactional
     @Modifying
-    fun deleteAllById_TypeEqualsAndLastModifiedAfter(descriptorType: DescriptorType, lastModifiedAfter: Long)
+    fun deleteAllById_TypeEqualsAndLastModifiedBefore(descriptorType: DescriptorType, lastModifiedBefore: Long)
 }
