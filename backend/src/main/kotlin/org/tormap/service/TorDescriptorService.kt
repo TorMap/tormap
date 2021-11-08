@@ -51,15 +51,15 @@ class TorDescriptorService(
      */
     fun collectAndProcessDescriptors(apiPath: String, descriptorType: DescriptorType) {
         try {
-            logger.info("Collecting descriptors from api path: $apiPath ...")
+            logger.info("Collecting descriptors from API path: $apiPath ...")
             collectDescriptors(apiPath, descriptorType.isRecent())
-            logger.info("Finished collecting descriptors from api path: $apiPath")
+            logger.info("Finished collecting descriptors from API path: $apiPath")
 
-            logger.info("Processing descriptors from api path $apiPath ...")
+            logger.info("Processing descriptors from API path $apiPath ...")
             processDescriptors(apiPath, descriptorType)
-            logger.info("Finished processing descriptors from api path: $apiPath")
+            logger.info("Finished processing descriptors from API path: $apiPath")
         } catch (exception: Exception) {
-            logger.error("Could not collect or process descriptors from api path: $apiPath ! ${exception.message}")
+            logger.error("Could not collect or process descriptors from API path: $apiPath ! ${exception.message}")
         }
     }
 
@@ -83,16 +83,26 @@ class TorDescriptorService(
      */
     private fun processDescriptors(apiPath: String, descriptorType: DescriptorType) {
         var descriptorDaysBeingProcessed = mutableSetOf<Future<ProcessedDescriptorInfo>>()
+        val processedMonths = mutableSetOf<String>()
         var lastProcessedFile: File? = null
         readDescriptors(apiPath, descriptorType).forEach {
             if (lastProcessedFile == null) {
                 lastProcessedFile = it.descriptorFile
             } else if (it.descriptorFile != lastProcessedFile) {
-                finishDescriptorFile(lastProcessedFile!!, descriptorType, descriptorDaysBeingProcessed)
+                processedMonths.addAll(
+                    finishDescriptorFile(
+                        lastProcessedFile!!,
+                        descriptorType,
+                        descriptorDaysBeingProcessed
+                    )
+                )
                 lastProcessedFile = it.descriptorFile
                 descriptorDaysBeingProcessed = mutableSetOf()
             }
             descriptorDaysBeingProcessed.add(processDescriptor(it))
+        }
+        if (descriptorType === DescriptorType.RECENT_RELAY_SERVER) {
+            updateRelayDetails(processedMonths)
         }
     }
 
@@ -105,7 +115,7 @@ class TorDescriptorService(
         descriptorFile: File,
         descriptorType: DescriptorType,
         descriptorDaysBeingProcessed: MutableSet<Future<ProcessedDescriptorInfo>>
-    ) {
+    ): MutableSet<String> {
         val processedMonths = mutableSetOf<String>()
         var lastError: String? = null
         descriptorDaysBeingProcessed.forEach {
@@ -121,10 +131,19 @@ class TorDescriptorService(
                 message
             } ?: lastError
         }
-        if (descriptorType == DescriptorType.ARCHIVE_RELAY_SERVER) { // TODO handle recent relay servers
-            nodeDetailsService.updateNodeFamilies(processedMonths)
-            nodeDetailsService.updateAutonomousSystems(processedMonths)
+        if (descriptorType == DescriptorType.ARCHIVE_RELAY_SERVER) {
+            updateRelayDetails(processedMonths)
         }
+        saveFinishedDescriptorFile(descriptorFile, descriptorType, lastError)
+        return processedMonths
+    }
+
+    private fun updateRelayDetails(processedMonths: MutableSet<String>) {
+        nodeDetailsService.updateNodeFamilies(processedMonths)
+        nodeDetailsService.updateAutonomousSystems(processedMonths)
+    }
+
+    private fun saveFinishedDescriptorFile(descriptorFile: File, descriptorType: DescriptorType, error: String?) {
         val descriptorsFileId = DescriptorsFileId(descriptorType, descriptorFile.name)
         val descriptorsFile = descriptorsFileRepository.findById(descriptorsFileId).orElseGet {
             DescriptorsFile(
@@ -133,7 +152,7 @@ class TorDescriptorService(
             )
         }
         descriptorsFile.processedAt = LocalDateTime.now()
-        descriptorsFile.error = lastError
+        descriptorsFile.error = error
         descriptorsFileRepository.save(descriptorsFile)
         logger.info("Finished processing descriptors file ${descriptorFile.name}")
     }

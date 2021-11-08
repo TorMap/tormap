@@ -10,7 +10,7 @@ import org.tormap.database.entity.DescriptorType
 
 /**
  * This scheduler sets reoccurring events to collect and process data about Tor nodes
- * Functions marked with @Async will be run in parallel on separate threads if available.
+ * With the @Async class annotation all methods run in parallel on separate threads if available.
  */
 @Service
 @Async
@@ -67,7 +67,6 @@ class SchedulerService(
             descriptorConfig.recentRelayServers,
             DescriptorType.RECENT_RELAY_SERVER
         )
-
 
     /**
      * Updates all nodes which do not have a family set and optionally can overwrite existing family structures.
