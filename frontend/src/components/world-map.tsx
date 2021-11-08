@@ -93,9 +93,10 @@ export const WorldMap: FunctionComponent<Props> = ({
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
     const [leafletMarkerLayer] = useState<LayerGroup>(new LayerGroup())
     const [relays, setRelays] = useState<GeoRelayView[]>()
+    const [refreshDayCount, setRefreshDayCount] = useState(0)
 
     const classes = useStyle()
-    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
     // Remaining relays after filters from settings are applied
     const filteredRelays = useMemo(() => relays ? applyRelayFilter(relays, settings) : [], [relays, settings])
@@ -130,10 +131,10 @@ export const WorldMap: FunctionComponent<Props> = ({
     // Leaflet layer with selectable country borders
     const countryLayer = useMemo(() => buildCountryLayer(relayCountryMap, settings, setSettings), [relayCountryMap, setSettings, settings])
 
-    // Leaflet layer with selectable country borders
+    // Leaflet layer with aggregated coordinates
     const aggregatedCoordinatesLayer = useMemo(() => buildAggregatedCoordinatesLayer(relayCoordinatesMap, openRelayDetailsDialog), [openRelayDetailsDialog, relayCoordinatesMap])
 
-    // Leaflet layer with selectable country borders
+    // Leaflet layer with selectable families
     const relayFamilyLayer = useMemo(() => buildRelayFamilyLayer(relayFamilyMap, settings, setSettings), [relayFamilyMap, setSettings, settings])
 
     // Leaflet layer with selectable country borders
@@ -173,7 +174,10 @@ export const WorldMap: FunctionComponent<Props> = ({
             if (filteredRelays.length) {
                 closeSnackbar(SnackbarMessage.NoRelaysWithFlags)
             } else {
-                enqueueSnackbar(SnackbarMessage.NoRelaysWithFlags, {variant: "warning", key: SnackbarMessage.NoRelaysWithFlags})
+                enqueueSnackbar(SnackbarMessage.NoRelaysWithFlags, {
+                    variant: "warning",
+                    key: SnackbarMessage.NoRelaysWithFlags
+                })
                 return layerGroup
             }
 
@@ -244,7 +248,7 @@ export const WorldMap: FunctionComponent<Props> = ({
             })
             latestRequestTimestamp = currentTimeStamp
         }
-    }, [dayToDisplay, enqueueSnackbar, setIsLoading])
+    }, [dayToDisplay, enqueueSnackbar, setIsLoading, refreshDayCount])
 
     /**
      * Redraw relays whenever settings get changed or an new relays got downloaded.
@@ -290,8 +294,9 @@ export const WorldMap: FunctionComponent<Props> = ({
             />
             <FamilySelectionDialog
                 showDialog={showFamilySelectionDialog}
-                closeDialog={() => setShowFamilySelectionDialog(false)}
-                families={familiesForSelectionDialog}
+                closeDialog={useCallback(() => setShowFamilySelectionDialog(false), [])}
+                refreshDayData={useCallback(() => setRefreshDayCount(prevState => prevState + 1), [])}
+                familyIds={familiesForSelectionDialog}
                 familySelectionCallback={useCallback(handleFamilySelection, [setSettings, settings])}
             />
             <TileLayer
