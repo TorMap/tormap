@@ -47,7 +47,7 @@ class SchedulerService(
     /**
      * Fetches and processes relay consensus descriptors of the last 3 days.
      * The 3 days of descriptors equals about 175 MB.
-     * Can take a few minutes depending on your machine.
+     * Can take 20 minutes depending on your machine.
      */
     @Scheduled(fixedRateString = "\${scheduler.recentRelayConsensuses}")
     fun recentRelayConsensuses() =
@@ -59,7 +59,7 @@ class SchedulerService(
     /**
      * Fetches and processes relay server descriptors of the last 3 days.
      * The 3 days of descriptors equals about 150 MB.
-     * Can take a few minutes depending on your machine.
+     * Can take 20 minutes depending on your machine.
      */
     @Scheduled(fixedRateString = "\${scheduler.recentRelayServers}")
     fun recentRelayServers() =

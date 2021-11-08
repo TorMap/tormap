@@ -58,4 +58,4 @@ enum class DescriptorType {
 }
 
 fun DescriptorType.isRecent() =
-    this === DescriptorType.RECENT_RELAY_CONSENSUS || this === DescriptorType.RECENT_RELAY_CONSENSUS
+    this === DescriptorType.RECENT_RELAY_CONSENSUS || this === DescriptorType.RECENT_RELAY_SERVER
