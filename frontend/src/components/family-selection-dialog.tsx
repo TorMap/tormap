@@ -60,9 +60,14 @@ interface Props {
     closeDialog: () => void
 
     /**
+     * Trigger download of the current day
+     */
+    refreshDayData: () => void
+
+    /**
      * Families which the user can view detailed information about
      */
-    families: number[]
+    familyIds: number[]
 
     /**
      * Callback for setting a family as selected
@@ -78,12 +83,12 @@ interface Props {
  * @param closeDialog - Event handler for closing the dialog
  * @param families - The familyIDs available to select
  * @param familySelectionCallback - the callback function for selecting a family
- * @param showSnackbarMessage - The event handler for showing a snackbar message
  */
 export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                                           showDialog,
                                                                           closeDialog,
-                                                                          families,
+                                                                          refreshDayData,
+                                                                          familyIds,
                                                                           familySelectionCallback,
                                                                       }) => {
 
@@ -98,27 +103,34 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
      */
     useEffect(() => {
         setFamilyIdentifiers([])
-        if (families.length > 0) {
+        if (familyIds.length > 0) {
             setIsLoading(true)
             backend.post<NodeFamilyIdentifier[]>(
                 '/archive/node/family/identifiers',
-                families
+                familyIds
             ).then(response => {
-                setFamilyIdentifiers(response.data)
+                const identifiers = response.data
+                if (identifiers.length > 0) {
+                    setFamilyIdentifiers(response.data)
+                } else {
+                    closeDialog()
+                    enqueueSnackbar(SnackbarMessage.UpdatedData, {variant: "success"})
+                    refreshDayData()
+                }
                 setIsLoading(false)
             }).catch(() => {
                 enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
                 setIsLoading(false)
             })
         }
-    }, [enqueueSnackbar, families])
+    }, [closeDialog, enqueueSnackbar, familyIds, refreshDayData])
 
     return (
         <FullHeightDialog
             open={showDialog}
             onClose={closeDialog}
             onBackdropClick={closeDialog}
-            maxWidth={families.length > 1 ? "lg" : "md"}
+            maxWidth={familyIds.length > 1 ? "lg" : "md"}
             fullWidth={true}
         >
             <div>
