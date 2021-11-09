@@ -1,18 +1,22 @@
-api:
-    descriptorBaseURL: https://collector.torproject.org
-    descriptorDownloadDirectory: resources/descriptors
-    descriptorPathRelayConsensuses: /archive/relay-descriptors/consensuses/
-    descriptorPathRelayServers: /archive/relay-descriptors/server-descriptors/
+descriptor:
+    apiBaseURL: https://collector.torproject.org
+    localDownloadDirectory: resources/descriptors
+    archiveRelayConsensuses: /archive/relay-descriptors/consensuses/
+    archiveRelayServers: /archive/relay-descriptors/server-descriptors/
+    recentRelayConsensuses: /recent/relay-descriptors/consensuses/
+    recentRelayServers: /recent/relay-descriptors/server-descriptors/
 database:
     defaultSequenceName: HIBERNATE_SEQUENCE
     ip2locationDatabaseFile: ip2location/IP2LOCATION-LITE-DB5.BIN
     shouldCacheIPLookup: true
 scheduler:
-    relayConsensusDescriptorsRate: PT12H
-    relayServerDescriptorsRate: PT12H
-    updateNodeAutonomousSystemsRate: PT12H
-    updateNodeFamiliesRate: PT12H
-    updateNodeFamiliesOverwriteAll: false
+    archiveRelayConsensuses: PT12H
+    archiveRelayServers: PT12H
+    recentRelayConsensuses: PT1H
+    recentRelayServers: PT1H
+    updateNodeAutonomousSystems: PT12H
+    updateNodeFamilies: PT12H
+    shouldOverwriteFamilies: false
 server:
     port: 8080
 spring:

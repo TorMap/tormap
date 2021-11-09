@@ -43,11 +43,6 @@ const useStyle = makeStyles(() => ({
     noMaxWidth: {
         maxWidth: "none",
     },
-    scroll: {
-        height: "calc(80vh - 0px)",
-        overflowY: "scroll",
-        overflowX: "hidden",
-    },
     title: {
         display: "inline",
     },
@@ -225,7 +220,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                 <Grid container>
                     {relayIdentifiers.length > 1 &&
                     <Grid item xs={3}>
-                        <Box className={classes.scroll}>
+                        <Box>
                             <List>
                                 {relayIdentifiers.map((identifier) =>
                                     (identifier.id &&
@@ -255,7 +250,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                     </Grid>
                     }
                     <Grid item xs={relayIdentifiers.length > 1 ? 9 : 12}>
-                        <Box className={classes.scroll} p={2}>
+                        <Box p={2}>
                             {relayDetails ?
                                 <Table size={"small"}>
                                     <TableBody>

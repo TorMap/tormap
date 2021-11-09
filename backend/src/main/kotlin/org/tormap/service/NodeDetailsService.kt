@@ -1,14 +1,17 @@
 package org.tormap.service
 
+import org.springframework.cache.CacheManager
 import org.springframework.jdbc.support.incrementer.H2SequenceMaxValueIncrementer
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.tormap.adapter.controller.ArchiveDataController
 import org.tormap.calculateIPv4NumberRepresentation
 import org.tormap.commaSeparatedToList
 import org.tormap.database.entity.NodeDetails
 import org.tormap.database.repository.AutonomousSystemRepositoryImpl
 import org.tormap.database.repository.NodeDetailsRepositoryImpl
 import org.tormap.logger
+import java.time.YearMonth
 import javax.transaction.Transactional
 
 
@@ -20,7 +23,9 @@ class NodeDetailsService(
     private val nodeDetailsRepositoryImpl: NodeDetailsRepositoryImpl,
     private val dbSequenceIncrementer: H2SequenceMaxValueIncrementer,
     private val autonomousSystemRepositoryImpl: AutonomousSystemRepositoryImpl,
-) {
+    private val cacheManager: CacheManager,
+    private val archiveDataController: ArchiveDataController,
+    ) {
     private val logger = logger()
 
     /**
@@ -44,6 +49,7 @@ class NodeDetailsService(
             months.forEach { month ->
                 try {
                     updateNodeFamiliesForMonth(month)
+                    updateGeoRelayDayCache(month)
                 } catch (exception: Exception) {
                     logger.error("Could not update node families for month $month! ${exception.message}")
                 }
@@ -51,6 +57,16 @@ class NodeDetailsService(
             logger.info("Finished updating node families")
         } catch (exception: Exception) {
             logger.error("Could not update node families! ${exception.message}")
+        }
+    }
+
+    @Async
+    fun updateGeoRelayDayCache(month: String) {
+        val yearMonth = YearMonth.parse(month)
+        yearMonth.atDay(1).datesUntil(yearMonth.plusMonths(1).atDay(1)).forEach {
+            val day = it.toString()
+            cacheManager.getCache("geo-relay-day")?.evict(day)
+            archiveDataController.getGeoRelaysByDay(day)
         }
     }
 
@@ -70,7 +86,9 @@ class NodeDetailsService(
                         changedNodesCount++
                     }
                 }
-                logger.info("For month $it this many Autonomous Systems were changed: $changedNodesCount")
+                if (changedNodesCount > 0) {
+                    logger.info("Finished Autonomous Systems for month $it. Updated $changedNodesCount nodes.")
+                }
             }
             logger.info("Finished updating Autonomous System")
         } catch (exception: Exception) {

@@ -3,61 +3,84 @@ package org.tormap.service
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import org.tormap.config.ApiConfig
+import org.tormap.config.DescriptorConfig
 import org.tormap.config.SchedulerConfig
 import org.tormap.database.entity.DescriptorType
 
 
 /**
  * This scheduler sets reoccurring events to collect and process data about Tor nodes
- * Functions marked with @Async will be run in parallel on separate threads if available.
+ * With the @Async class annotation all methods run in parallel on separate threads if available.
  */
 @Service
+@Async
 class SchedulerService(
-    private val apiConfig: ApiConfig,
+    private val descriptorConfig: DescriptorConfig,
     private val schedulerConfig: SchedulerConfig,
     private val torDescriptorService: TorDescriptorService,
     private val nodeDetailsService: NodeDetailsService,
 ) {
     /**
-     * Fetches and processes relay consensus descriptors.
+     * Fetches and processes archive relay consensus descriptors.
      * The years 2007 - 2021 equal about 3 GB in size.
-     * After the download finished and you start with an empty DB this takes about 20 hours depending on your machine.
+     * After the download finished, and you start with an empty DB this takes about 20 hours depending on your machine.
      */
-    @Async
-    @Scheduled(fixedRateString = "\${scheduler.relayConsensusDescriptorsRate}")
-    fun relayConsensusDescriptors() =
+    @Scheduled(fixedRateString = "\${scheduler.archiveRelayConsensuses}")
+    fun archiveRelayConsensuses() =
         torDescriptorService.collectAndProcessDescriptors(
-            apiConfig.descriptorPathRelayConsensuses,
-            DescriptorType.RELAY_CONSENSUS
+            descriptorConfig.archiveRelayConsensuses,
+            DescriptorType.ARCHIVE_RELAY_CONSENSUS
         )
 
     /**
-     * Fetches and processes relay server descriptors.
+     * Fetches and processes archive relay server descriptors.
      * The years 2005 - 2021 equal about 30 GB in size.
      * After the download finished, and you start with an empty DB this takes about 10 hours depending on your machine.
      */
-    @Async
-    @Scheduled(fixedRateString = "\${scheduler.relayConsensusDescriptorsRate}")
-    fun relayServerDescriptors() =
-        torDescriptorService.collectAndProcessDescriptors(apiConfig.descriptorPathRelayServers, DescriptorType.SERVER)
-
+    @Scheduled(fixedRateString = "\${scheduler.archiveRelayServers}")
+    fun archiveRelayServers() =
+        torDescriptorService.collectAndProcessDescriptors(
+            descriptorConfig.archiveRelayServers,
+            DescriptorType.ARCHIVE_RELAY_SERVER
+        )
 
     /**
-     * Updates all months where no node families are set.
-     * Can take a few minutes depending on how many months need to updated.
+     * Fetches and processes relay consensus descriptors of the last 3 days.
+     * The 3 days of descriptors equals about 175 MB.
+     * Can take 20 minutes depending on your machine.
      */
-    @Async
-    @Scheduled(fixedRateString = "\${scheduler.updateNodeFamiliesRate}")
+    @Scheduled(fixedRateString = "\${scheduler.recentRelayConsensuses}")
+    fun recentRelayConsensuses() =
+        torDescriptorService.collectAndProcessDescriptors(
+            descriptorConfig.recentRelayConsensuses,
+            DescriptorType.RECENT_RELAY_CONSENSUS
+        )
+
+    /**
+     * Fetches and processes relay server descriptors of the last 3 days.
+     * The 3 days of descriptors equals about 150 MB.
+     * Can take 20 minutes depending on your machine.
+     */
+    @Scheduled(fixedRateString = "\${scheduler.recentRelayServers}")
+    fun recentRelayServers() =
+        torDescriptorService.collectAndProcessDescriptors(
+            descriptorConfig.recentRelayServers,
+            DescriptorType.RECENT_RELAY_SERVER
+        )
+
+    /**
+     * Updates all nodes which do not have a family set and optionally can overwrite existing family structures.
+     * Can take a few minutes depending on how many months are updated.
+     */
+    @Scheduled(fixedRateString = "\${scheduler.updateNodeFamilies}")
     fun updateNodeFamilies() =
-        nodeDetailsService.updateAllNodeFamilies(schedulerConfig.updateNodeFamiliesOverwriteAll)
+        nodeDetailsService.updateAllNodeFamilies(schedulerConfig.shouldOverwriteFamilies)
 
     /**
      * Updates all nodes which do not have any Autonomous System set.
-     * Can take multiple hours depending on how many nodes need to be updated.
+     * Can take multiple hours depending on how many nodes are updated.
      */
-    @Async
-    @Scheduled(fixedRateString = "\${scheduler.updateNodeAutonomousSystemsRate}")
+    @Scheduled(fixedRateString = "\${scheduler.updateNodeAutonomousSystems}")
     fun updateNodeAutonomousSystems() =
         nodeDetailsService.updateAutonomousSystems()
 }
