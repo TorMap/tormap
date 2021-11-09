@@ -3,31 +3,11 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import "react-sliding-pane/dist/react-sliding-pane.css";
 import {App} from "./components/app";
-import {createMuiTheme, ThemeProvider} from "@mui/material";
+import {createTheme, ThemeProvider} from "@mui/material";
 import {SnackbarProvider} from "notistack";
+import {TorMapTheme} from "./types/MuiTheme";
 
-const theme = createMuiTheme({
-    palette: {
-        mode: "dark",
-    },
-    components: {
-        MuiTooltip: {
-            styleOverrides: {
-                tooltip: {
-                    fontSize: ".85em",
-                }
-            }
-        },
-        MuiLink: {
-            styleOverrides: {
-                root:{
-                    color: "rgba(255, 255, 255, 0.7)",
-                    fontSize: ".9em",
-                }
-            }
-        }
-    },
-})
+const theme = createTheme(TorMapTheme)
 
 ReactDOM.render(
     <React.StrictMode>
