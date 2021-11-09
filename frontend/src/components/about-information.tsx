@@ -15,53 +15,16 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
-    makeStyles,
     Typography
-} from "@material-ui/core";
-import GitHubIcon from '@material-ui/icons/GitHub';
-import EmailIcon from '@material-ui/icons/Email';
-import TwitterIcon from '@material-ui/icons/Twitter';
-import CloseIcon from "@material-ui/icons/Close";
-import LanguageIcon from '@material-ui/icons/Language';
-import InfoIcon from '@material-ui/icons/Info';
+} from "@mui/material";
+import GitHubIcon from '@mui/icons-material/GitHub';
+import EmailIcon from '@mui/icons-material/Email';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import CloseIcon from "@mui/icons-material/Close";
+import LanguageIcon from '@mui/icons-material/Language';
+import InfoIcon from '@mui/icons-material/Info';
 import {Icon} from "@iconify/react";
 import TorMapLogo from "../resources/logo.png";
-
-/**
- * Styles according to Material UI doc for components used in AppSettings component
- */
-const useStyle = makeStyles(() => ({
-    logo: {
-        marginRight: "10px",
-    },
-    about: {
-        position: "fixed",
-        top: "90px",
-        left: "10px",
-        color: "white",
-    },
-    closeButton: {
-        position: "absolute",
-        right: "10px",
-        top: "10px",
-    },
-    paper: {
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100%",
-    },
-    image: {
-        display: "block",
-        margin: "auto",
-        height: "25px",
-        textAlign: "center",
-    },
-    iconLink: {
-        marginTop: "5px",
-        marginLeft: "15px",
-    }
-}))
 
 /**
  * A component for displaying information about TorMap
@@ -69,22 +32,30 @@ const useStyle = makeStyles(() => ({
  */
 export const AboutInformation: React.FunctionComponent = () => {
     const [showDialog, setShowDialog] = useState(false)
-    const classes = useStyle()
 
     return (
         <div>
             <Button onClick={() => setShowDialog(true)}>
-                <InfoIcon className={classes.about} fontSize={"large"}/>
+                <InfoIcon sx={{
+                    position: "fixed",
+                    top: "90px",
+                    left: "10px",
+                    color: "white",
+                }} fontSize={"large"}/>
             </Button>
             <Dialog open={showDialog} fullWidth={true} maxWidth={"md"} onBackdropClick={() => setShowDialog(false)}>
                 <DialogTitle>
                     <Box display="flex" alignItems={"center"}>
-                        <Avatar className={classes.logo} src={TorMapLogo} alt={"TorMap logo"} />
+                        <Avatar sx={{marginRight: "10px"}} src={TorMapLogo} alt={"TorMap logo"} />
                         <Typography variant="h6">
                             About TorMap
                         </Typography>
                     </Box>
-                    <IconButton aria-label="close" className={classes.closeButton} onClick={() => setShowDialog(false)}>
+                    <IconButton aria-label="close" sx={{
+                        position: "absolute",
+                        right: "10px",
+                        top: "10px",
+                    }} onClick={() => setShowDialog(false)}>
                         <CloseIcon/>
                     </IconButton>
                 </DialogTitle>
