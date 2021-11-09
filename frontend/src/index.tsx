@@ -3,26 +3,30 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import "react-sliding-pane/dist/react-sliding-pane.css";
 import {App} from "./components/app";
-import {createMuiTheme, ThemeProvider} from "@material-ui/core";
+import {createMuiTheme, ThemeProvider} from "@mui/material";
 import {SnackbarProvider} from "notistack";
 
 const theme = createMuiTheme({
     palette: {
-        type: "dark",
+        mode: "dark",
     },
-    overrides: {
+    components: {
         MuiTooltip: {
-            tooltip: {
-                fontSize: ".85em",
+            styleOverrides: {
+                tooltip: {
+                    fontSize: ".85em",
+                }
             }
         },
         MuiLink: {
-            root: {
-                color: "rgba(255, 255, 255, 0.7)",
-                fontSize: ".9em",
+            styleOverrides: {
+                root:{
+                    color: "rgba(255, 255, 255, 0.7)",
+                    fontSize: ".9em",
+                }
             }
-        },
-    }
+        }
+    },
 })
 
 ReactDOM.render(
