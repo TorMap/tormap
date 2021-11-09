@@ -8,30 +8,16 @@ import {
     FormControlLabel,
     FormGroup,
     Link,
-    makeStyles,
     Switch,
     Tooltip,
     Typography,
-} from "@material-ui/core";
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+} from "@mui/material";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {Settings} from "../types/app-state";
 import {RelayFlag, RelayFlagLabel, RelayType, RelayTypeLabel} from "../types/relay";
 import {tooltipTimeDelay} from "../util/config";
 import {getIcon} from "../types/icons";
 import {nameOfFactory} from "../util/util";
-
-/**
- * Styles according to Material UI doc for components used in AppSettings component
- */
-const useStyle = makeStyles(() => ({
-    accordion: {
-        position: "absolute",
-        right: "1%",
-        top: "15px",
-        paddingBottom: "10px",
-        maxWidth: "20%",
-    },
-}))
 
 interface Props {
 
@@ -53,8 +39,6 @@ interface Props {
  * @param onChange the changeHandler for changing settings
  */
 export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
-    const classes = useStyle()
-
     const nameOfSetting = nameOfFactory<Settings>()
 
     // Construct relay type options to display
@@ -109,7 +93,13 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
     }]
 
     return (
-        <div className={classes.accordion}>
+        <Box sx={{
+            position: "absolute",
+            right: "1%",
+            top: "15px",
+            paddingBottom: "10px",
+            maxWidth: "20%",
+        }}>
             <Accordion>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
@@ -217,7 +207,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>
-        </div>
+        </Box>
     )
 }
 
