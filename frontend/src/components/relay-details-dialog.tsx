@@ -11,14 +11,13 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
-    makeStyles,
     Table,
     TableBody,
     TableCell,
     TableRow,
     Tooltip,
     Typography
-} from "@material-ui/core";
+} from "@mui/material";
 import CloseIcon from "@material-ui/icons/Close";
 import {getIcon} from "../types/icons";
 import {findGeoRelayViewByID, getRelayType} from "../util/aggregate-relays";
@@ -27,30 +26,6 @@ import {FullHeightDialog, SnackbarMessage} from "../types/ui";
 import {RelayFlag, RelayFlagLabel} from "../types/relay";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
-
-/**
- * Styles according to Material UI doc for components used in AppSettings component
- */
-const useStyle = makeStyles(() => ({
-    closeButton: {
-        position: "absolute",
-        right: "10px",
-        top: "10px",
-    },
-    valueName: {
-        minWidth: "150px",
-    },
-    noMaxWidth: {
-        maxWidth: "none",
-    },
-    title: {
-        display: "inline",
-    },
-    titleTypeIcon: {
-        display: "inline",
-        paddingRight: "16px",
-    },
-}))
 
 interface Props {
     /**
@@ -108,7 +83,6 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
     const [rawRelayDetails, setRawRelayDetails] = useState<NodeDetails>()
     const [relayDetails, setRelayDetails] = useState<DetailsInfo[]>()
 
-    const classes = useStyle()
     const { enqueueSnackbar } = useSnackbar();
 
     /**
@@ -201,17 +175,24 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
             <DialogTitle>
                 {rawRelayDetails ?
                     <Box display="flex" alignItems={"center"}>
-                        <div className={classes.titleTypeIcon}>
+                        <Box sx={{
+                            display: "inline",
+                            paddingRight: "16px",
+                        }}>
                             {nodeDetailsId ? getIcon(getRelayType(relays.find((relay) => relay.detailsId === nodeDetailsId))) : null}
-                        </div>
+                        </Box>
                         <Typography
-                            className={classes.title}
+                            sx={{display: "inline"}}
                             variant="h6">
                             {rawRelayDetails.nickname}
                         </Typography>
                     </Box> : <CircularProgress color={"inherit"} size={24}/>
                 }
-                <IconButton aria-label="close" className={classes.closeButton} onClick={closeDialog}>
+                <IconButton aria-label="close" sx={{
+                    position: "absolute",
+                    right: "10px",
+                    top: "10px",
+                }} onClick={closeDialog}>
                     <CloseIcon/>
                 </IconButton>
             </DialogTitle>
@@ -228,7 +209,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                                             key={identifier.id}
                                             title={identifier.fingerprint}
                                             arrow={true}
-                                            classes={{tooltip: classes.noMaxWidth}}
+                                            sx={{maxWidth: "none",}}
                                         >
                                             <ListItem
                                                 button={true}
@@ -257,7 +238,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                                         {relayDetails.map((relayInfo) =>
                                             relayInfo.value &&
                                             <TableRow key={relayInfo.name}>
-                                                <TableCell scope="row" className={classes.valueName}>
+                                                <TableCell scope="row" sx={{minWidth: "150px",}}>
                                                     <Typography>{relayInfo.name}</Typography>
                                                 </TableCell>
                                                 <TableCell scope="row">
