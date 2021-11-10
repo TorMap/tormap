@@ -1,34 +1,16 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
-import {makeStyles, Slider,} from "@material-ui/core";
+import {makeStyles} from "@material-ui/core";
 import {useDebounce} from "../util/util";
 import Moment from "react-moment";
 import {KeyboardDatePicker, MuiPickersUtilsProvider} from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 import moment from "moment";
+import {Slider, Box} from "@mui/material";
 
 /**
  * Styles according to Material UI doc for components used in DateSlider component
  */
 const useStyle = makeStyles(() => ({
-    slider: {
-        position: "fixed",
-        bottom: "1%",
-        width: "50%",
-        left: "25%",
-    },
-    sliderValueLabel: {
-        top: "-41px",
-        left: "calc(-50% - 8px)",
-        fontSize: ".7rem",
-        "& span":{
-            width: "40px",
-            height: "40px",
-            "& span":{
-                padding: "14px 5px 0px 5px",
-                textAlign: "center",
-            }
-        }
-    },
     datePicker: {
         position: "fixed",
         bottom: "15px",
@@ -91,14 +73,16 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue}) 
     },[debouncedSliderValue, setValue])
 
     return (
-        <div className={classes.slider}>
+        <Box sx={{
+            position: "fixed",
+            bottom: "1%",
+            width: "50%",
+            left: "25%",
+        }}>
             <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <Slider
                     disabled={(availableDays.length === 0)}
                     value={sliderValue}
-                    classes={{
-                        valueLabel: classes.sliderValueLabel,
-                    }}
                     onChange={(event: any, newValue: number | number[]) => {
                         setSliderValue(newValue as number)
                     }}
@@ -134,7 +118,7 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue}) 
                     className={classes.datePicker}
                 />
             </MuiPickersUtilsProvider>
-        </div>
+        </Box>
     )
 
 }
