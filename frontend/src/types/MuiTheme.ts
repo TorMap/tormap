@@ -30,5 +30,6 @@ export const TorMapTheme: ThemeOptions = {
                     padding: "0px"
                 }
             }
-        }
-    },}
+        },
+    },
+}
