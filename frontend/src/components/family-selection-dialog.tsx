@@ -2,14 +2,13 @@ import {
     DialogContent,
     DialogTitle,
     IconButton,
-    makeStyles,
     Table,
     TableBody,
     TableCell,
     TableHead,
     TableRow,
     Typography
-} from "@material-ui/core";
+} from "@mui/material";
 import {NodeFamilyIdentifier} from "../types/responses";
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@material-ui/icons/Close";
@@ -17,36 +16,6 @@ import {FullHeightDialog, SnackbarMessage} from "../types/ui";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
 
-/**
- * Styles according to Material UI doc for components used in AppSettings component
- */
-const useStyle = makeStyles(() => ({
-    closeButton: {
-        position: "absolute",
-        right: "10px",
-        top: "10px",
-    },
-    drawer: {
-        width: "250px",
-    },
-    infoPadding: {
-        paddingLeft: "270px",
-    },
-    valueName: {
-        minWidth: "150px",
-    },
-    noMaxWidth: {
-        maxWidth: "none",
-    },
-    tableRow: {
-        "&:hover": {
-            cursor: "pointer",
-        }
-    },
-    tableHead: {
-        fontWeight: "bold",
-    },
-}))
 
 interface Props {
     /**
@@ -95,7 +64,6 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
     const [isLoading, setIsLoading] = useState(true)
     const [familyIdentifiers, setFamilyIdentifiers] = useState<NodeFamilyIdentifier[]>()
 
-    const classes = useStyle()
     const { enqueueSnackbar } = useSnackbar();
 
     /**
@@ -137,7 +105,11 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                 <DialogTitle>
                     <Typography
                         variant="h6">Select a family</Typography>
-                    <IconButton aria-label="close" className={classes.closeButton} onClick={closeDialog}>
+                    <IconButton aria-label="close" sx={{
+                        position: "absolute",
+                        right: "10px",
+                        top: "10px",
+                    }} onClick={closeDialog}>
                         <CloseIcon/>
                     </IconButton>
                 </DialogTitle>
@@ -150,13 +122,13 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                     <TableHead>
                                         <TableRow>
                                             <TableCell scope="row">
-                                                <Typography className={classes.tableHead}>Relay nicknames</Typography>
+                                                <Typography sx={{fontWeight: "bold",}}>Relay nicknames</Typography>
                                             </TableCell>
-                                            <TableCell scope="" className={classes.valueName}>
-                                                <Typography className={classes.tableHead}>Member count</Typography>
+                                            <TableCell scope="" sx={{minWidth: "150px",}}>
+                                                <Typography sx={{fontWeight: "bold",}}>Member count</Typography>
                                             </TableCell>
                                             <TableCell scope="row">
-                                                <Typography className={classes.tableHead}>Autonomous Systems</Typography>
+                                                <Typography sx={{fontWeight: "bold",}}>Autonomous Systems</Typography>
                                             </TableCell>
                                         </TableRow>
                                     </TableHead>
@@ -166,12 +138,15 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                                                 key={family.id}
                                                 onClick={() => familySelectionCallback(family.id)}
                                                 hover={true}
-                                                className={classes.tableRow}
+                                                sx={{"&:hover": {
+                                                        cursor: "pointer",
+                                                    }
+                                                }}
                                             >
                                                 <TableCell scope="row">
                                                     <Typography>{family.nicknames}</Typography>
                                                 </TableCell>
-                                                <TableCell scope="row" className={classes.valueName}>
+                                                <TableCell scope="row" sx={{minWidth: "150px",}}>
                                                     <Typography>{family.memberCount}</Typography>
                                                 </TableCell>
                                                 <TableCell scope="row">

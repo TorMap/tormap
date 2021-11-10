@@ -100,7 +100,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
             paddingBottom: "10px",
             maxWidth: "20%",
         }}>
-            <Accordion>
+            <Accordion elevation={24}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
                     aria-controls="panel2a-content"
@@ -137,7 +137,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>
-            <Accordion>
+            <Accordion elevation={24}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
                     aria-controls="panel2a-content"
@@ -172,7 +172,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>
-            <Accordion>
+            <Accordion elevation={24}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
                     aria-controls="panel2a-content"

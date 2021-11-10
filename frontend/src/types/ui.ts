@@ -1,4 +1,5 @@
-import {Dialog, withStyles} from "@material-ui/core";
+import {Dialog} from "@mui/material";
+import {styled} from '@mui/material/styles';
 
 export enum SnackbarMessage {
     ConnectionFailed = "Connection failed! Maybe the server is being upgraded.",
@@ -8,8 +9,8 @@ export enum SnackbarMessage {
     NoRelayDetails = "Currently we have no details about this relay for this month.",
 }
 
-export const FullHeightDialog = withStyles(() => ({
+export const FullHeightDialog = styled(Dialog)(() => ({
     paper: {
         height: '100%',
     },
-}))(Dialog);
+}));
