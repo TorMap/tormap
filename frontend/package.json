@@ -25,6 +25,7 @@
     "@types/react-dom": "^17.0.0",
     "axios": "^0.23.0",
     "date-fns": "^2.23.0",
+    "dateformat": "^5.0.2",
     "leaflet": "^1.7.1",
     "leaflet.heat": "^0.2.0",
     "moment": "^2.29.1",
@@ -62,6 +63,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.14.2",
     "@iconify/react": "^3.0.1",
+    "@types/dateformat": "^5.0.0",
     "@types/leaflet": "^1.7.1",
     "css-loader": "^5.2.6",
     "style-loader": "^2.0.0"
