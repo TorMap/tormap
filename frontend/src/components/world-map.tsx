@@ -4,7 +4,6 @@ import {LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import {Settings, Statistics} from "../types/app-state";
 import "leaflet.heat"
-import {makeStyles} from "@material-ui/core";
 import {
     applyRelayFilter,
     buildFamilyCoordinatesMap,
@@ -30,17 +29,6 @@ import {SnackbarMessage} from "../types/ui";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
 
-/**
- * Styles according to Material UI doc for components used in WorldMap component
- */
-const useStyle = makeStyles(() => ({
-    leafletContainer: {
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: "#262626",
-        position: "fixed",
-    }
-}))
 
 interface Props {
     /**
@@ -95,7 +83,6 @@ export const WorldMap: FunctionComponent<Props> = ({
     const [relays, setRelays] = useState<GeoRelayView[]>()
     const [refreshDayCount, setRefreshDayCount] = useState(0)
 
-    const classes = useStyle()
     const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
     // Remaining relays after filters from settings are applied
@@ -272,7 +259,12 @@ export const WorldMap: FunctionComponent<Props> = ({
 
     return (
         <MapContainer
-            className={classes.leafletContainer}
+            style={{
+                width: "100vw",
+                height: "100vh",
+                backgroundColor: "#262626",
+                position: "fixed",
+            }}
             center={[15, 0]}
             minZoom={2}
             zoom={3}
