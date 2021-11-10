@@ -1,23 +1,12 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
-import {makeStyles} from "@material-ui/core";
 import {useDebounce} from "../util/util";
 import Moment from "react-moment";
-import {KeyboardDatePicker, MuiPickersUtilsProvider} from "@material-ui/pickers";
-import DateFnsUtils from "@date-io/date-fns";
 import moment from "moment";
-import {Slider, Box} from "@mui/material";
-
-/**
- * Styles according to Material UI doc for components used in DateSlider component
- */
-const useStyle = makeStyles(() => ({
-    datePicker: {
-        position: "fixed",
-        bottom: "15px",
-        right: "1%",
-        maxWidth: "20%",
-    },
-}))
+import {Box, Slider, TextField} from "@mui/material";
+import {DatePicker, LocalizationProvider} from "@mui/lab";
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import dateFormat from "dateformat";
+import {enCA} from "date-fns/locale";
 
 interface Props {
 
@@ -42,7 +31,6 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue}) 
 
     const [sliderValue, setSliderValue] = useState<number>(-1)
     const [sliderMarks, setSliderMarks] = useState<Mark[]>([])
-    const classes = useStyle()
     const debouncedSliderValue = useDebounce<number>(sliderValue, 500);
 
     // calculate the marks for the slider
@@ -75,11 +63,10 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue}) 
     return (
         <Box sx={{
             position: "fixed",
-            bottom: "1%",
+            bottom: "2%",
             width: "50%",
             left: "25%",
         }}>
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
                 <Slider
                     disabled={(availableDays.length === 0)}
                     value={sliderValue}
@@ -94,30 +81,36 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue}) 
                     valueLabelFormat={(x) => <Moment date={availableDays[x]} format={"YYYY-MM-DD"}/>}
                     track={false}
                 />
-                <KeyboardDatePicker
-                    autoOk
-                    variant="inline"
-                    format="yyyy-MM-dd"
-                    margin="normal"
-                    id="date-picker-2"
-                    minDate={availableDays[0]}
-                    maxDate={availableDays[availableDays.length-1]}
-                    value={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}
-                    onChange={(date, value) => {
-                        if (availableDays.includes(value!!)) {
-                            setSliderValue(availableDays.findIndex(element => element === value))
+                <LocalizationProvider dateAdapter={AdapterDateFns} locale={enCA}>
+                    <DatePicker
+                        value={debouncedSliderValue >= 0 ? availableDays[debouncedSliderValue] : undefined}
+                        renderInput={(params) =>
+                            <TextField variant={"standard"}
+                                       {...params}
+                                       sx={{
+                                            position: "fixed",
+                                            right: "2%",
+                                            maxWidth: "20%",
+                                        }}
+                                       helperText={"A day in the life of the Tor Network"}
+
+                            />
                         }
-                    }}
-                    KeyboardButtonProps={{
-                        'aria-label': 'change date',
-                    }}
-                    helperText={`Day in the life of the tor network`}
-                    shouldDisableDate={date => {
-                        return !(availableDays.includes(moment(date).format("YYYY-MM-DD")))
-                    }}
-                    className={classes.datePicker}
-                />
-            </MuiPickersUtilsProvider>
+                        onChange={(date) => {
+                            const day: string = dateFormat(date!!, "yyyy-mm-dd")
+                            if (availableDays.includes(day)) {
+                                setSliderValue(availableDays.findIndex(element => element === day))
+                            }
+                        }}
+                        onError={() => console.log("error")}
+                        minDate={new Date(availableDays[0])}
+                        maxDate={new Date(availableDays[availableDays.length-1])}
+                        shouldDisableDate={date => {
+                            return !(availableDays.includes(moment(date).format("YYYY-MM-DD")))
+                        }}
+                        views={["year","month","day"]}
+                    />
+                </LocalizationProvider>
         </Box>
     )
 
