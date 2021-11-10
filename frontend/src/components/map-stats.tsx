@@ -2,14 +2,13 @@ import React, {FunctionComponent, ReactElement} from "react";
 import {
     Accordion,
     AccordionDetails,
-    AccordionSummary,
-    makeStyles,
+    AccordionSummary, Box,
     Table,
     TableBody,
     TableCell,
     TableRow,
     Typography
-} from "@material-ui/core";
+} from "@mui/material";
 import {Settings, Statistics} from "../types/app-state";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import {
@@ -21,21 +20,6 @@ import {
     TotalRelaysIcon
 } from "../types/icons";
 import {getFullName} from "../util/geojson";
-
-/**
- * Styles according to Material UI doc for components used in MapStats component
- */
-const useStyle = makeStyles(() => ({
-    root: {
-        position: "fixed",
-        left: "1%",
-        bottom: "15px",
-        maxWidth: "20%",
-    },
-    noPadding: {
-        padding: 0,
-    }
-}))
 
 interface Props {
     /**
@@ -55,8 +39,6 @@ interface Props {
  * @param stats - the Statistics Object to show
  */
 export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
-    const classes = useStyle()
-
     // Construct the stats rows to display
     let rows: StatsRow[] = []
     rows.push({icon: ExitRelayIcon, title: "Exit relays", value: stats.relayExitCount})
@@ -71,8 +53,13 @@ export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
     if (stats.countryCount) rows.push({icon: CountryCountIcon, title: "Countries", value: stats.countryCount})
 
     return (
-        <div className={classes.root}>
-            <Accordion defaultExpanded={true}>
+        <Box sx={{
+            position: "fixed",
+            left: "1%",
+            bottom: "15px",
+            maxWidth: "20%",
+        }} >
+            <Accordion defaultExpanded={true} elevation={24}>
                 <AccordionSummary
                     expandIcon={<ExpandLessIcon/>}
                     aria-controls="panel2a-content"
@@ -83,8 +70,8 @@ export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
                         {settings.selectedCountry ? " in " + getFullName(settings.selectedCountry) : null}
                     </Typography>
                 </AccordionSummary>
-                <AccordionDetails classes={{root: classes.noPadding}}>
-                    <Table size="small">
+                <AccordionDetails>
+                    <Table size={"small"}>
                         <TableBody>
                             {rows.map(statsRow =>
                                 <TableRow key={statsRow.title}>
@@ -103,7 +90,7 @@ export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
                     </Table>
                 </AccordionDetails>
             </Accordion>
-        </div>
+        </Box>
     )
 }
 
