@@ -40,19 +40,6 @@ class AppConfig(
     }
 
     /**
-     * Set default Content-Type to application/json and disabled whitelabel error page by ignoring a clients accept
-     * header.
-     */
-    override fun configureContentNegotiation(configurer: ContentNegotiationConfigurer) {
-        val parameterMap: Map<String, String> = mapOf("charset" to StandardCharsets.UTF_8.name())
-
-        configurer.apply {
-            ignoreAcceptHeader(true)
-            defaultContentType(MediaType(MediaType.APPLICATION_JSON, parameterMap))
-        }
-    }
-
-    /**
      * Access the H2 DB sequence incrementer to get the next sequence value
      */
     @Bean
