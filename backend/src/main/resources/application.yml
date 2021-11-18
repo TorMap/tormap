@@ -9,6 +9,17 @@ database:
     defaultSequenceName: HIBERNATE_SEQUENCE
     ip2locationDatabaseFile: ip2location/IP2LOCATION-LITE-DB5.BIN
     shouldCacheIPLookup: true
+management:
+    endpoint:
+        logfile:
+            external-file: logs/spring-boot-logger.log
+    endpoints:
+        web:
+            exposure:
+                include: health,info,caches,httptrace,flyway,logfile,mappings,scheduledtasks
+logging:
+    file:
+        path: logs/spring-boot-logger.log
 scheduler:
     archiveRelayConsensuses: PT12H
     archiveRelayServers: PT12H
@@ -39,6 +50,10 @@ spring:
     output:
         ansi:
             enabled: ALWAYS
+    security:
+        user:
+            name: dev
+            password: dev
 springdoc:
     api-docs:
         path: /openapi
