@@ -17,6 +17,7 @@ management:
         web:
             exposure:
                 include: health,info,caches,httptrace,flyway,logfile,mappings,scheduledtasks
+            base-path: /actuator
 logging:
     file:
         path: logs/spring-boot-logger.log
@@ -42,6 +43,8 @@ spring:
         console:
             enabled: true
             path: /h2
+            settings:
+                web-allow-others: true
     jpa:
         database-platform: org.tormap.database.CustomH2Dialect
         hibernate:
@@ -59,13 +62,3 @@ springdoc:
         path: /openapi
     swagger-ui:
         path: /
-
----
-
-spring:
-    h2:
-        console:
-            enabled: false
-    config:
-        activate:
-            on-profile: prod
