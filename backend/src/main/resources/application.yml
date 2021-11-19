@@ -58,8 +58,7 @@ spring:
             enabled: ALWAYS
     security:
         user:
-            name: dev
-            password: dev
+            name: admin
 springdoc:
     api-docs:
         path: /openapi

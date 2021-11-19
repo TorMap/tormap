@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    val kotlinVersion = "1.5.21"
+    val kotlinVersion = "1.6.0"
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
@@ -20,7 +20,7 @@ plugins {
 }
 
 group = "org.tormap"
-version = "1.1.1"
+version = "1.1.2"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
@@ -39,6 +39,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-security")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
     implementation("org.springdoc:springdoc-openapi-ui:1.5.11")
