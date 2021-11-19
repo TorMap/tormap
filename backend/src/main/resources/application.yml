@@ -14,9 +14,12 @@ management:
         logfile:
             external-file: logs/spring-boot-logger.log
     endpoints:
+        jmx:
+            exposure:
+                include:
         web:
             exposure:
-                include: health,info,caches,httptrace,flyway,logfile,mappings,scheduledtasks
+                include: health,info,caches,httptrace,flyway,logfile,mappings,scheduledtasks,threaddump,heapdump
             base-path: /actuator
 logging:
     file:
