@@ -3,48 +3,28 @@ import {WorldMap} from "./world-map";
 import {Box, Button, CircularProgress, Link} from "@mui/material";
 import "@material-ui/styles";
 import "../index.css";
-import {AppSettings, relaysMustIncludeFlagInput, showRelayTypesInput} from "./app-settings";
-import {Settings, Statistics} from "../types/app-state";
+import {AppSettings} from "./app-settings";
+import {Statistics} from "../types/app-state";
 import {MapStats} from "./map-stats";
 import {DateSlider} from "./date-slider";
-import {defaultSettings} from "../util/config";
 import {AboutInformation} from "./about-information";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
 import {SnackbarMessage} from "../types/ui";
+import {useSettings} from "../util/SettingsContext";
 
 export const App: FunctionComponent = () => {
     const [availableDays, setAvailableDays] = useState<string[]>([])
     const [sliderValue, setSliderValue] = useState<number>(-1)
     const [isLoading, setIsLoading] = useState(true)
-    const [settings, setSettings] = useState<Settings>(defaultSettings)
     const [statistics, setStatistics] = useState<Statistics>()
     const [connectionRetryCount, setConnectionRetryCount] = useState<number>(0)
 
-    const {enqueueSnackbar, closeSnackbar} = useSnackbar();
+    const settings = useSettings().settings
+    const setSettings = useSettings().setSettings
 
-    /**
-     * input event handler for setting changes
-     * @param event
-     */
-    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        switch (event.target.name) {
-            case showRelayTypesInput:
-                setSettings({
-                    ...settings,
-                    showRelayTypes: {...settings.showRelayTypes, [event.target.id]: event.target.checked}
-                })
-                break;
-            case relaysMustIncludeFlagInput:
-                setSettings({
-                    ...settings,
-                    relaysMustIncludeFlag: {...settings.relaysMustIncludeFlag, [event.target.id]: event.target.checked}
-                })
-                break;
-            default:
-                setSettings({...settings, [event.target.name]: event.target.checked})
-        }
-    };
+
+    const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
     // Loads available days from the backend
     useEffect(() => {
@@ -73,7 +53,7 @@ export const App: FunctionComponent = () => {
         if (!settings.sortFamily && settings.selectedFamily) {
             setSettings({...settings, selectedFamily: undefined})
         }
-    }, [settings])
+    }, [settings, setSettings])
 
     return (
         <div>
@@ -92,14 +72,12 @@ export const App: FunctionComponent = () => {
             }
             <WorldMap
                 dayToDisplay={sliderValue >= 0 ? availableDays[sliderValue] : undefined}
-                settings={settings}
-                setSettings={useCallback(setSettings, [setSettings])}
                 setIsLoading={useCallback(setIsLoading, [setIsLoading])}
                 setStatistics={useCallback(setStatistics, [setStatistics])}
             />
             <DateSlider availableDays={availableDays} setValue={useCallback(setSliderValue, [setSliderValue])}/>
-            <AppSettings settings={settings} onChange={handleInputChange}/>
-            {statistics && <MapStats settings={settings} stats={statistics}/>}
+            <AppSettings/>
+            {statistics && <MapStats stats={statistics}/>}
             <Box sx={{
                 color: "#b4b4b4",
                 background: "#262626",
