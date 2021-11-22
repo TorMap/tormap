@@ -1,5 +1,6 @@
 import {Dialog} from "@mui/material";
 import {styled} from '@mui/material/styles';
+import {Statistics} from "./app-state";
 
 export enum SnackbarMessage {
     ConnectionFailed = "Connection failed! Maybe the server is being upgraded.",
@@ -14,3 +15,23 @@ export const FullHeightDialog = styled(Dialog)(() => ({
         height: '100%',
     },
 }));
+
+export interface UIProps {
+    /**
+     * A String array of available days available at the backend
+     */
+    availableDays: string[]
+
+    sliderValue: number
+
+    /**
+     * A callback function to update the selected day
+     * @param n the nth entry in availableDays array
+     */
+    setSliderValue: (n: number) => void
+
+    /**
+     * The currently map statistics of the currently rendered information
+     */
+    statistics?: Statistics
+}
