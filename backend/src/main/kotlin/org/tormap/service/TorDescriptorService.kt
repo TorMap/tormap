@@ -139,6 +139,7 @@ class TorDescriptorService(
     }
 
     private fun updateRelayDetails(processedMonths: MutableSet<String>) {
+        nodeDetailsRepository.flush()
         nodeDetailsService.updateNodeFamilies(processedMonths)
         nodeDetailsService.updateAutonomousSystems(processedMonths)
     }
@@ -227,7 +228,7 @@ class TorDescriptorService(
                 }
             }
         }
-        geoRelayRepositoryImpl.saveAll(nodesToSave)
+        geoRelayRepositoryImpl.saveAllAndFlush(nodesToSave)
         updateGeoRelayCaches(descriptorDay.toString())
         return ProcessedDescriptorInfo(descriptorDay)
     }
