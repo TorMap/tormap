@@ -2,6 +2,7 @@
 
 package org.tormap.database.repository
 
+import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.repository.CrudRepository
 import org.tormap.database.entity.DescriptorType
@@ -13,7 +14,7 @@ import javax.transaction.Transactional
 /**
  * Repository to interact with DB
  */
-interface DescriptorsFileRepository : CrudRepository<DescriptorsFile, DescriptorsFileId> {
+interface DescriptorsFileRepository : JpaRepository<DescriptorsFile, DescriptorsFileId> {
     fun findAllById_TypeEqualsAndErrorNull(descriptorType: DescriptorType): List<DescriptorsFile>
 
     @Transactional
