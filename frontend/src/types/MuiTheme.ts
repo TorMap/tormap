@@ -31,5 +31,12 @@ export const TorMapTheme: ThemeOptions = {
                 }
             }
         },
+        MuiFormControlLabel:{
+            styleOverrides: {
+                root: {
+                    marginLeft: "0px"
+                }
+            }
+        }
     },
 }

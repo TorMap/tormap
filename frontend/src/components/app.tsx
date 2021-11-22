@@ -3,15 +3,13 @@ import {WorldMap} from "./world-map";
 import {Box, Button, CircularProgress, Link} from "@mui/material";
 import "@material-ui/styles";
 import "../index.css";
-import {AppSettings} from "./app-settings";
 import {Statistics} from "../types/app-state";
-import {MapStats} from "./map-stats";
-import {DateSlider} from "./date-slider";
 import {AboutInformation} from "./about-information";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
 import {SnackbarMessage} from "../types/ui";
 import {useSettings} from "../util/SettingsContext";
+import {UI} from "./UI";
 
 export const App: FunctionComponent = () => {
     const [availableDays, setAvailableDays] = useState<string[]>([])
@@ -75,9 +73,12 @@ export const App: FunctionComponent = () => {
                 setIsLoading={useCallback(setIsLoading, [setIsLoading])}
                 setStatistics={useCallback(setStatistics, [setStatistics])}
             />
-            <DateSlider availableDays={availableDays} setValue={useCallback(setSliderValue, [setSliderValue])}/>
-            <AppSettings/>
-            {statistics && <MapStats stats={statistics}/>}
+            <UI
+                availableDays={availableDays}
+                sliderValue={sliderValue}
+                setSliderValue={setSliderValue}
+                statistics={statistics}
+            />
             <Box sx={{
                 color: "#b4b4b4",
                 background: "#262626",
