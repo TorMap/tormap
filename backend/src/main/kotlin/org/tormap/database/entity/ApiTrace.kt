@@ -3,10 +3,8 @@ package org.tormap.database.entity
 import org.springframework.boot.actuate.trace.http.HttpTrace
 import java.time.Instant
 import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.Index
-import javax.persistence.Table
 import javax.persistence.Enumerated
+import javax.persistence.Id
 
 @Suppress("unused")
 @Entity

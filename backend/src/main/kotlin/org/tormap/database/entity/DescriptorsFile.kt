@@ -3,7 +3,10 @@ package org.tormap.database.entity
 import org.tormap.stripLengthForDB
 import java.io.Serializable
 import java.time.LocalDateTime
-import javax.persistence.*
+import javax.persistence.Embeddable
+import javax.persistence.EmbeddedId
+import javax.persistence.Entity
+import javax.persistence.Enumerated
 
 /**
  * This entity is used to record which descriptors files have been processed

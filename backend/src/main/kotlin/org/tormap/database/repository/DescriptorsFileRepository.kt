@@ -4,7 +4,6 @@ package org.tormap.database.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
-import org.springframework.data.repository.CrudRepository
 import org.tormap.database.entity.DescriptorType
 import org.tormap.database.entity.DescriptorsFile
 import org.tormap.database.entity.DescriptorsFileId
