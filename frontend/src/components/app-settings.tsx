@@ -18,19 +18,9 @@ import {RelayFlag, RelayFlagLabel, RelayType, RelayTypeLabel} from "../types/rel
 import {tooltipTimeDelay} from "../util/config";
 import {getIcon} from "../types/icons";
 import {nameOfFactory} from "../util/util";
+import {useSettings} from "../util/SettingsContext";
 
 interface Props {
-
-    /**
-     * The currently applied app settings
-     */
-    settings: Settings
-
-    /**
-     * A callback to handle the change of setting elements
-     * @param event the event of a controlling component (E.g. switches, checkboxes...)
-     */
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 /**
@@ -38,8 +28,12 @@ interface Props {
  * @param settings the settings
  * @param onChange the changeHandler for changing settings
  */
-export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
+export const AppSettings: FunctionComponent<Props> = () => {
     const nameOfSetting = nameOfFactory<Settings>()
+
+
+    const settings = useSettings().settings
+    const onChange = useSettings().changeSettings
 
     // Construct relay type options to display
     const showRelayTypes: RelayType[] = [RelayType.Exit, RelayType.Guard, RelayType.Other]

@@ -2,14 +2,15 @@ import React, {FunctionComponent, ReactElement} from "react";
 import {
     Accordion,
     AccordionDetails,
-    AccordionSummary, Box,
+    AccordionSummary,
+    Box,
     Table,
     TableBody,
     TableCell,
     TableRow,
     Typography
 } from "@mui/material";
-import {Settings, Statistics} from "../types/app-state";
+import {Statistics} from "../types/app-state";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import {
     CountryCountIcon,
@@ -20,12 +21,9 @@ import {
     TotalRelaysIcon
 } from "../types/icons";
 import {getFullName} from "../util/geojson";
+import {useSettings} from "../util/SettingsContext";
 
 interface Props {
-    /**
-     * The currently applied app settings
-     */
-    settings: Settings
 
     /**
      * The currently map statistics of the currently rendered information
@@ -38,7 +36,10 @@ interface Props {
  * @param settings - the App Settings
  * @param stats - the Statistics Object to show
  */
-export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
+export const MapStats: FunctionComponent<Props> = ({stats}) => {
+
+    const settings = useSettings().settings
+
     // Construct the stats rows to display
     let rows: StatsRow[] = []
     rows.push({icon: ExitRelayIcon, title: "Exit relays", value: stats.relayExitCount})

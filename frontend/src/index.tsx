@@ -6,6 +6,8 @@ import {App} from "./components/app";
 import {createTheme, ThemeProvider} from "@mui/material";
 import {SnackbarProvider} from "notistack";
 import {TorMapTheme} from "./types/MuiTheme";
+import {SettingsProvider} from "./util/SettingsContext";
+import {defaultSettings} from "./util/config";
 
 const theme = createTheme(TorMapTheme)
 
@@ -19,7 +21,9 @@ ReactDOM.render(
                 anchorOrigin={{vertical: "top", horizontal: "center"}}
                 preventDuplicate={true}
             >
-                <App/>
+                <SettingsProvider defaultSettings={defaultSettings}>
+                    <App/>
+                </SettingsProvider>
             </SnackbarProvider>
         </ThemeProvider>
     </React.StrictMode>,

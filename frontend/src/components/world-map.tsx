@@ -2,7 +2,7 @@ import {MapContainer, TileLayer} from "react-leaflet";
 import React, {FunctionComponent, useCallback, useEffect, useMemo, useState} from "react";
 import {LayerGroup, LeafletMouseEvent, Map as LeafletMap} from "leaflet";
 import 'leaflet/dist/leaflet.css';
-import {Settings, Statistics} from "../types/app-state";
+import {Statistics} from "../types/app-state";
 import "leaflet.heat"
 import {
     applyRelayFilter,
@@ -28,6 +28,7 @@ import {FamilySelectionDialog} from "./family-selection-dialog";
 import {SnackbarMessage} from "../types/ui";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
+import {useSettings} from "../util/SettingsContext";
 
 
 interface Props {
@@ -36,16 +37,6 @@ interface Props {
      */
     dayToDisplay?: string
 
-    /**
-     * the app settings
-     */
-    settings: Settings
-
-    /**
-     * A callback to change settings
-     * @param s the settings variable that should be changed
-     */
-    setSettings: (s: Settings) => void
 
     /**
      * A variable callback whether the map is currently fetching a new date
@@ -69,8 +60,6 @@ let latestRequestTimestamp: number | undefined = undefined
 
 export const WorldMap: FunctionComponent<Props> = ({
                                                        dayToDisplay,
-                                                       settings,
-                                                       setSettings,
                                                        setIsLoading,
                                                        setStatistics,
                                                    }) => {
@@ -82,6 +71,9 @@ export const WorldMap: FunctionComponent<Props> = ({
     const [leafletMarkerLayer] = useState<LayerGroup>(new LayerGroup())
     const [relays, setRelays] = useState<GeoRelayView[]>()
     const [refreshDayCount, setRefreshDayCount] = useState(0)
+
+    const settings = useSettings().settings
+    const setSettings = useSettings().setSettings
 
     const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
