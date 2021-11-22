@@ -25,7 +25,7 @@ class NodeDetailsService(
     private val autonomousSystemRepositoryImpl: AutonomousSystemRepositoryImpl,
     private val cacheManager: CacheManager,
     private val archiveDataController: ArchiveDataController,
-    ) {
+) {
     private val logger = logger()
 
     /**
@@ -86,6 +86,7 @@ class NodeDetailsService(
                         changedNodesCount++
                     }
                 }
+                nodeDetailsRepositoryImpl.flush()
                 if (changedNodesCount > 0) {
                     logger.info("Finished Autonomous Systems for month $it. Updated $changedNodesCount nodes.")
                 }
@@ -185,6 +186,7 @@ class NodeDetailsService(
             family.forEach { it.familyId = familyId }
             nodeDetailsRepositoryImpl.saveAll(family)
         }
+        nodeDetailsRepositoryImpl.flush()
     }
 
     /**
