@@ -21,14 +21,13 @@ import {nameOfFactory} from "../util/util";
 import {useSettings} from "../util/SettingsContext";
 
 interface Props {
+    elevation: number
 }
 
 /**
  * A component for changing the app settings
- * @param settings the settings
- * @param onChange the changeHandler for changing settings
  */
-export const AppSettings: FunctionComponent<Props> = () => {
+export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     const nameOfSetting = nameOfFactory<Settings>()
 
 
@@ -87,14 +86,8 @@ export const AppSettings: FunctionComponent<Props> = () => {
     }]
 
     return (
-        <Box sx={{
-            position: "absolute",
-            right: "1%",
-            top: "15px",
-            paddingBottom: "10px",
-            maxWidth: "20%",
-        }}>
-            <Accordion elevation={24}>
+        <Box>
+            <Accordion elevation={elevation}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
                     aria-controls="panel2a-content"
@@ -131,7 +124,7 @@ export const AppSettings: FunctionComponent<Props> = () => {
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>
-            <Accordion elevation={24}>
+            <Accordion elevation={elevation}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
                     aria-controls="panel2a-content"
@@ -166,7 +159,7 @@ export const AppSettings: FunctionComponent<Props> = () => {
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>
-            <Accordion elevation={24}>
+            <Accordion elevation={elevation}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
                     aria-controls="panel2a-content"

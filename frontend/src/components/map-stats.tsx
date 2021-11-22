@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import {Statistics} from "../types/app-state";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import {
     CountryCountIcon,
     ExitRelayIcon,
@@ -29,6 +30,10 @@ interface Props {
      * The currently map statistics of the currently rendered information
      */
     stats: Statistics
+
+    defaultExpanded?: boolean
+
+    elevation?: number
 }
 
 /**
@@ -36,7 +41,7 @@ interface Props {
  * @param settings - the App Settings
  * @param stats - the Statistics Object to show
  */
-export const MapStats: FunctionComponent<Props> = ({stats}) => {
+export const MapStats: FunctionComponent<Props> = ({ defaultExpanded= true, elevation= 24, stats}) => {
 
     const settings = useSettings().settings
 
@@ -54,15 +59,10 @@ export const MapStats: FunctionComponent<Props> = ({stats}) => {
     if (stats.countryCount) rows.push({icon: CountryCountIcon, title: "Countries", value: stats.countryCount})
 
     return (
-        <Box sx={{
-            position: "fixed",
-            left: "1%",
-            bottom: "15px",
-            maxWidth: "20%",
-        }} >
-            <Accordion defaultExpanded={true} elevation={24}>
+        <Box>
+            <Accordion defaultExpanded={defaultExpanded} elevation={elevation}>
                 <AccordionSummary
-                    expandIcon={<ExpandLessIcon/>}
+                    expandIcon={defaultExpanded ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
                     aria-controls="panel2a-content"
                     id="panel2a-header"
                 >
