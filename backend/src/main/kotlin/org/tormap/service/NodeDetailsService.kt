@@ -12,7 +12,6 @@ import org.tormap.database.repository.AutonomousSystemRepositoryImpl
 import org.tormap.database.repository.NodeDetailsRepositoryImpl
 import org.tormap.logger
 import java.time.YearMonth
-import javax.persistence.EntityManager
 import javax.transaction.Transactional
 
 
