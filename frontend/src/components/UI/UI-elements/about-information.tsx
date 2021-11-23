@@ -89,7 +89,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                         anonymous communication as a whole.
                     </Typography>
                     <Grid container spacing={3}>
-                        <Grid item xs={3}>
+                        <Grid item xs={12} sm={4}>
                             <Card elevation={20}>
                                 <CardHeader
                                     title="TorMap"
@@ -125,7 +125,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                                 </List>
                             </Card>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item xs={12} sm={4}>
                             <Card elevation={20}>
                                 <CardHeader
                                     title="Julius Henke"
@@ -160,7 +160,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                                 </List>
                             </Card>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item xs={12} sm={4}>
                             <Card elevation={20}>
                                 <CardHeader
                                     title="Tim Kilb"
