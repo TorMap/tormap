@@ -7,7 +7,8 @@ import {
     Divider,
     Grid,
     IconButton,
-    Typography, useMediaQuery,
+    Typography,
+    useMediaQuery,
     useTheme
 } from "@mui/material";
 import CloseIcon from "@material-ui/icons/Close";
