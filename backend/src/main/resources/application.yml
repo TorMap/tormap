@@ -21,6 +21,10 @@ management:
             exposure:
                 include: health,info,caches,httptrace,flyway,logfile,mappings,scheduledtasks,threaddump,heapdump
             base-path: /actuator
+    trace:
+        http:
+            include: PRINCIPAL,REMOTE_ADDRESS,REQUEST_HEADERS,RESPONSE_HEADERS,SESSION_ID,TIME_TAKEN
+            maxInMemory: 100
 logging:
     file:
         path: logs/spring-boot-logger.log
@@ -31,7 +35,7 @@ scheduler:
     recentRelayServers: PT1H
     updateNodeAutonomousSystems: PT12H
     updateNodeFamilies: PT12H
-    shouldOverwriteFamilies: false
+    shouldOverwriteFamilies: true
 server:
     port: 8080
 spring:
