@@ -27,7 +27,7 @@ export interface UIProps {
     /**
      * The value of currently selected day
      */
-    sliderValue: number
+    sliderValue?: number
 
     /**
      * A callback function to update the selected day

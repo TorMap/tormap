@@ -29,13 +29,14 @@ import {SnackbarMessage} from "../types/ui";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
 import {useSettings} from "../util/SettingsContext";
+import {useDate} from "../util/DateContext";
 
 
 interface Props {
     /**
      * This days data will be fetched from backend and visualized on the map
      */
-    dayToDisplay?: string
+    //dayToDisplay?: string
 
 
     /**
@@ -59,7 +60,6 @@ Instead only the last selected date will be drawn.
 let latestRequestTimestamp: number | undefined = undefined
 
 export const WorldMap: FunctionComponent<Props> = ({
-                                                       dayToDisplay,
                                                        setIsLoading,
                                                        setStatistics,
                                                    }) => {
@@ -76,6 +76,8 @@ export const WorldMap: FunctionComponent<Props> = ({
     const setSettings = useSettings().setSettings
 
     const {enqueueSnackbar, closeSnackbar} = useSnackbar();
+
+    const dayToDisplay = useDate().selectedDate
 
     // Remaining relays after filters from settings are applied
     const filteredRelays = useMemo(() => relays ? applyRelayFilter(relays, settings) : [], [relays, settings])
