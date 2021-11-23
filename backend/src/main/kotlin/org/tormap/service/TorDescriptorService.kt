@@ -205,7 +205,6 @@ class TorDescriptorService(
      */
     private fun processRelayConsensusDescriptor(descriptor: RelayNetworkStatusConsensus): ProcessedDescriptorInfo {
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.validAfterMillis)
-        val nodesToSave = mutableListOf<GeoRelay>()
         descriptor.statusEntries.forEach {
             val networkStatusEntry = it.value
             if (!geoRelayRepositoryImpl.existsByDayAndFingerprint(
@@ -216,19 +215,17 @@ class TorDescriptorService(
                 val location = ipLookupService.getLocationForIpAddress(networkStatusEntry.address)
                 val geoDecimalPlaces = 4
                 if (location != null) {
-                    nodesToSave.add(
-                        GeoRelay(
-                            networkStatusEntry,
-                            descriptorDay,
-                            location.latitude!!.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN),
-                            location.longitude!!.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN),
-                            location.countryShort,
-                        )
-                    )
+                    geoRelayRepositoryImpl.save(GeoRelay(
+                        networkStatusEntry,
+                        descriptorDay,
+                        location.latitude!!.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN),
+                        location.longitude!!.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN),
+                        location.countryShort,
+                    ))
                 }
             }
         }
-        geoRelayRepositoryImpl.saveAllAndFlush(nodesToSave)
+        geoRelayRepositoryImpl.flush()
         updateGeoRelayCaches(descriptorDay.toString())
         return ProcessedDescriptorInfo(descriptorDay)
     }
