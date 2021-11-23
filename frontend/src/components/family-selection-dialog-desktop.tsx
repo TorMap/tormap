@@ -1,20 +1,11 @@
-import {
-    DialogContent,
-    DialogTitle,
-    IconButton,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableRow,
-    Typography
-} from "@mui/material";
+import {DialogContent, DialogTitle, IconButton, Typography, useMediaQuery, useTheme} from "@mui/material";
 import {NodeFamilyIdentifier} from "../types/responses";
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@material-ui/icons/Close";
 import {FullHeightDialog, SnackbarMessage} from "../types/ui";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
+import {FamiliesTable} from "./UI/dialogs/FamiliesTable";
 
 
 interface Props {
@@ -53,7 +44,7 @@ interface Props {
  * @param families - The familyIDs available to select
  * @param familySelectionCallback - the callback function for selecting a family
  */
-export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
+export const FamilySelectionDialogDesktop: React.FunctionComponent<Props> = ({
                                                                           showDialog,
                                                                           closeDialog,
                                                                           refreshDayData,
@@ -93,13 +84,16 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
         }
     }, [closeDialog, enqueueSnackbar, familyIds, refreshDayData])
 
+    const theme = useTheme()
+    const desktop = useMediaQuery(theme.breakpoints.up("lg"))
+
     return (
         <FullHeightDialog
             open={showDialog}
             onClose={closeDialog}
             onBackdropClick={closeDialog}
             maxWidth={familyIds.length > 1 ? "lg" : "md"}
-            fullWidth={true}
+            fullWidth={!desktop}
         >
             <div>
                 <DialogTitle>
@@ -117,50 +111,8 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
                     dividers
                 >
                     <div>
-                        {!isLoading ? familyIdentifiers ?
-                                <Table size={"small"}>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell scope="row">
-                                                <Typography sx={{fontWeight: "bold",}}>Relay nicknames</Typography>
-                                            </TableCell>
-                                            <TableCell scope="" sx={{minWidth: "150px",}}>
-                                                <Typography sx={{fontWeight: "bold",}}>Member count</Typography>
-                                            </TableCell>
-                                            <TableCell scope="row">
-                                                <Typography sx={{fontWeight: "bold",}}>Autonomous Systems</Typography>
-                                            </TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {familyIdentifiers.map((family) =>
-                                            <TableRow
-                                                key={family.id}
-                                                onClick={() => familySelectionCallback(family.id)}
-                                                hover={true}
-                                                sx={{"&:hover": {
-                                                        cursor: "pointer",
-                                                    }
-                                                }}
-                                            >
-                                                <TableCell scope="row">
-                                                    <Typography>{family.nicknames}</Typography>
-                                                </TableCell>
-                                                <TableCell scope="row" sx={{minWidth: "150px",}}>
-                                                    <Typography>{family.memberCount}</Typography>
-                                                </TableCell>
-                                                <TableCell scope="row">
-                                                    <Typography>
-                                                        {(family.autonomousSystems) ?
-                                                            (family.autonomousSystems) :
-                                                            "data not yet available"}
-                                                    </Typography>
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                                : <p>We do not have any information about these families for this date.</p>
+                        {!isLoading ? <FamiliesTable familyIdentifiers={familyIdentifiers}
+                                                     familySelectionCallback={familySelectionCallback}/>
                             : <p>loading...</p>}
                     </div>
                 </DialogContent>

@@ -23,8 +23,8 @@ import {
 } from "../util/layer-construction";
 import {backendApiUrl} from "../util/config";
 import {GeoRelayView} from "../types/responses";
-import {RelayDetailsDialog} from "./relay-details-dialog";
-import {FamilySelectionDialog} from "./family-selection-dialog";
+import {RelayDetailsDialogDektop} from "./relay-details-dialog-dektop";
+import {FamilySelectionDialogDesktop} from "./family-selection-dialog-desktop";
 import {SnackbarMessage} from "../types/ui";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
@@ -271,12 +271,12 @@ export const WorldMap: FunctionComponent<Props> = ({
                 setLeafletMap(newMap)
             }}
         >
-            <RelayDetailsDialog
+            <RelayDetailsDialogDektop
                 showDialog={showRelayDetailsDialog}
                 closeDialog={useCallback(() => setShowRelayDetailsDialog(false), [])}
                 relays={relaysForDetailsDialog}
             />
-            <FamilySelectionDialog
+            <FamilySelectionDialogDesktop
                 showDialog={showFamilySelectionDialog}
                 closeDialog={useCallback(() => setShowFamilySelectionDialog(false), [])}
                 refreshDayData={useCallback(() => setRefreshDayCount(prevState => prevState + 1), [])}
