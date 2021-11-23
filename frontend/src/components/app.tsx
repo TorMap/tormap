@@ -11,10 +11,11 @@ import {SnackbarMessage} from "../types/ui";
 import {useSettings} from "../util/SettingsContext";
 import {UI} from "./UI/UI";
 import {LoadingAnimation} from "./UI/UI-elements/LoadingAnimation";
+import {useDate} from "../util/DateContext";
 
 export const App: FunctionComponent = () => {
-    const [availableDays, setAvailableDays] = useState<string[]>([])
-    const [sliderValue, setSliderValue] = useState<number>(-1)
+    //const [availableDays, setAvailableDays] = useState<string[]>([])
+    //const [sliderValue, setSliderValue] = useState<number>(-1)
     const [isLoading, setIsLoading] = useState(true)
     const [statistics, setStatistics] = useState<Statistics>()
     const [connectionRetryCount, setConnectionRetryCount] = useState<number>(0)
@@ -23,13 +24,21 @@ export const App: FunctionComponent = () => {
     const setSettings = useSettings().setSettings
     const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
+    const selectedDate = useDate().selectedDate
+    const availableDays = useDate().availableDays
+    const setAvailableDays = useDate().setAvailableDays
+    const sliderValue = useDate().sliderValue
+    const setSliderValue = useDate().setSliderValue
+
+    useEffect(() => {console.log(selectedDate)},[selectedDate])
+
+    // todo Move to Date context?
     // Loads available days from the backend
     useEffect(() => {
         closeSnackbar()
         setIsLoading(true)
         backend.get<string[]>('/archive/geo/relay/days').then(response => {
             setAvailableDays(response.data)
-            setSliderValue(response.data.length - 1)
             setIsLoading(false)
         }).catch(() => {
             enqueueSnackbar(SnackbarMessage.ConnectionFailed, {
@@ -40,8 +49,9 @@ export const App: FunctionComponent = () => {
             })
             setIsLoading(false)
         })
-    }, [connectionRetryCount, closeSnackbar, enqueueSnackbar])
+    }, [connectionRetryCount, closeSnackbar, enqueueSnackbar, setAvailableDays])
 
+    // todo Move to Settings context?
     // Resets selection if grouping gets disabled
     useEffect(() => {
         if (!settings.sortCountry && settings.selectedCountry) {
@@ -56,7 +66,6 @@ export const App: FunctionComponent = () => {
         <div>
             {isLoading ? <LoadingAnimation /> : null}
             <WorldMap
-                dayToDisplay={sliderValue >= 0 ? availableDays[sliderValue] : undefined}
                 setIsLoading={useCallback(setIsLoading, [setIsLoading])}
                 setStatistics={useCallback(setStatistics, [setStatistics])}
             />

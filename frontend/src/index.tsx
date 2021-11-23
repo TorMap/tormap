@@ -8,6 +8,7 @@ import {SnackbarProvider} from "notistack";
 import {TorMapTheme} from "./types/MuiTheme";
 import {SettingsProvider} from "./util/SettingsContext";
 import {defaultSettings} from "./util/config";
+import {DateProvider} from "./util/DateContext";
 
 const theme = createTheme(TorMapTheme)
 
@@ -22,7 +23,9 @@ ReactDOM.render(
                 preventDuplicate={true}
             >
                 <SettingsProvider defaultSettings={defaultSettings}>
-                    <App/>
+                    <DateProvider>
+                        <App/>
+                    </DateProvider>
                 </SettingsProvider>
             </SnackbarProvider>
         </ThemeProvider>

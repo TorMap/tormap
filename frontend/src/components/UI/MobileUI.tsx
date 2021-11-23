@@ -64,7 +64,7 @@ export const MobileUI: FunctionComponent<UIProps> = ({
                 </AppBar>
                 <LocalizationProvider dateAdapter={AdapterDateFns} locale={enCA}>
                     <DatePicker
-                        value={sliderValue >= 0 ? availableDays[sliderValue] : undefined}
+                        value={sliderValue ? availableDays[sliderValue] : undefined}
                         renderInput={(params) =>
                             <TextField variant={"standard"}
                                        {...params}
