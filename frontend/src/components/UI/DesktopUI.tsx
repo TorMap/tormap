@@ -1,10 +1,18 @@
 import React, {FunctionComponent, useCallback} from "react";
-import {UIProps} from "../types/ui";
-import {DateSlider} from "./date-slider";
+import {UIProps} from "../../types/ui";
+import {DateSlider} from "./UI-elements/date-slider";
 import {Box} from "@mui/material";
-import {AppSettings} from "./app-settings";
-import {MapStats} from "./map-stats";
+import {AppSettings} from "./UI-elements/app-settings";
+import {MapStats} from "./UI-elements/map-stats";
 
+/**
+ * A component wrapping all UI elements for Desktop devices
+ *
+ * @param availableDays - Days available for display
+ * @param sliderValue - the current slider value
+ * @param setSliderValue - a callback for setting the slider value
+ * @param statistics - a Statistics object for data to display
+ */
 export const DesktopUI: FunctionComponent<UIProps> = ({availableDays, setSliderValue, statistics}) =>{
 
     return (
@@ -26,7 +34,7 @@ export const DesktopUI: FunctionComponent<UIProps> = ({availableDays, setSliderV
                     bottom: "15px",
                     maxWidth: "20%",
                 }} >
-                    <MapStats stats={statistics}/>
+                    <MapStats stats={statistics} elevation={24} defaultExpanded={true}/>
                 </Box>
             }
         </Box>
