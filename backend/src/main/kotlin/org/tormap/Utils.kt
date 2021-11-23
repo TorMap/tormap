@@ -22,9 +22,9 @@ fun millisSinceEpochToLocalDate(millisSinceEpoch: Long): LocalDate = LocalDate.o
 )
 
 fun String?.stripLengthForDB(maximumCharacters: Int = 255) = when {
-        this == null || this.length <= maximumCharacters -> this
-        else -> this.substring(0, maximumCharacters - 3) + "..."
-    }
+    this == null || this.length <= maximumCharacters -> this
+    else -> this.substring(0, maximumCharacters - 3) + "..."
+}
 
 /**
  * Transform a string representation of an [ipv4Address] to a number representation

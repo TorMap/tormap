@@ -27,12 +27,14 @@ class IpLookupService(
     fun getLocationForIpAddress(ipAddress: String): IPResult? = try {
         val ip2locationResult = ip2locationDatabaseReader!!.ipQuery(ipAddress)
         if (ip2locationResult.status != "OK") throw Exception(ip2locationResult.status)
-        else if (ip2locationResult.latitude == null || ip2locationResult.longitude == null) throw GeoException()
+        else if (ip2locationResult.containsEmptyLocation()) throw Exception("Location incomplete")
         ip2locationResult
     } catch (exception: Exception) {
-        logger.warn("Location lookup failed for IP address $ipAddress ! ${exception.javaClass}: ${exception.message}")
+        logger.debug("Location lookup failed for IP address $ipAddress! ${exception.message}")
         null
     }
-}
 
-class GeoException : Exception("Latitude and longitude missing!")
+    fun IPResult.containsEmptyLocation() =
+        listOf(this.latitude, this.longitude, this.countryShort).any { it == null || it == "-"} ||
+                (this.latitude == 0f && this.longitude == 0f)
+}
