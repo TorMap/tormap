@@ -1,6 +1,8 @@
-import {Dialog} from "@mui/material";
+import {Dialog, Slide} from "@mui/material";
 import {styled} from '@mui/material/styles';
 import {Statistics} from "./app-state";
+import React from "react";
+import {TransitionProps} from "@mui/material/transitions";
 
 export enum SnackbarMessage {
     ConnectionFailed = "Connection failed! Maybe the server is being upgraded.",
@@ -22,6 +24,9 @@ export interface UIProps {
      */
     availableDays: string[]
 
+    /**
+     * The value of currently selected day
+     */
     sliderValue: number
 
     /**
@@ -35,3 +40,13 @@ export interface UIProps {
      */
     statistics?: Statistics
 }
+
+//animation for Dialog sliding in
+export const Transition = React.forwardRef(function Transition(
+    props: TransitionProps & {
+        children: React.ReactElement;
+    },
+    ref: React.Ref<unknown>,
+) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});

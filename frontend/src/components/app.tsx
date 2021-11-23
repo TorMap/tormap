@@ -1,15 +1,16 @@
 import React, {FunctionComponent, useCallback, useEffect, useState} from 'react';
 import {WorldMap} from "./world-map";
-import {Box, Button, CircularProgress, Link} from "@mui/material";
+import {Box, Button, Link} from "@mui/material";
 import "@material-ui/styles";
 import "../index.css";
 import {Statistics} from "../types/app-state";
-import {AboutInformation} from "./about-information";
+import {AboutInformation} from "./UI/UI-elements/about-information";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
 import {SnackbarMessage} from "../types/ui";
 import {useSettings} from "../util/SettingsContext";
-import {UI} from "./UI";
+import {UI} from "./UI/UI";
+import {LoadingAnimation} from "./UI/UI-elements/LoadingAnimation";
 
 export const App: FunctionComponent = () => {
     const [availableDays, setAvailableDays] = useState<string[]>([])
@@ -20,8 +21,6 @@ export const App: FunctionComponent = () => {
 
     const settings = useSettings().settings
     const setSettings = useSettings().setSettings
-
-
     const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
     // Loads available days from the backend
@@ -55,19 +54,7 @@ export const App: FunctionComponent = () => {
 
     return (
         <div>
-            {isLoading &&
-                <CircularProgress
-                    color={"inherit"}
-                    sx={{
-                    position: "fixed",
-                    left: "calc(50% - 25px)",
-                    top: "calc(50% - 25px)",
-                    margin: "auto",
-                    backgroundColor: "transparent",
-                    color: "rgba(255,255,255,.6)",
-                    zIndex: 1000,
-                }}/>
-            }
+            {isLoading ? <LoadingAnimation /> : null}
             <WorldMap
                 dayToDisplay={sliderValue >= 0 ? availableDays[sliderValue] : undefined}
                 setIsLoading={useCallback(setIsLoading, [setIsLoading])}
@@ -93,7 +80,6 @@ export const App: FunctionComponent = () => {
                     contributors &copy; <Link href="https://carto.com/attributions" target={"_blank"}>CARTO</Link>
                 </span>
             </Box>
-
             <AboutInformation/>
         </div>
     )

@@ -10,7 +10,7 @@ import {
     TableRow,
     Typography
 } from "@mui/material";
-import {Statistics} from "../types/app-state";
+import {Statistics} from "../../../types/app-state";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import {
@@ -20,9 +20,9 @@ import {
     GuardRelayIcon,
     OtherRelayIcon,
     TotalRelaysIcon
-} from "../types/icons";
-import {getFullName} from "../util/geojson";
-import {useSettings} from "../util/SettingsContext";
+} from "../../../types/icons";
+import {getFullName} from "../../../util/geojson";
+import {useSettings} from "../../../util/SettingsContext";
 
 interface Props {
 
@@ -31,9 +31,15 @@ interface Props {
      */
     stats: Statistics
 
-    defaultExpanded?: boolean
+    /**
+     * whether the statistics are expanded by default
+     */
+    defaultExpanded: boolean
 
-    elevation?: number
+    /**
+     * elevation for material ui styling
+     */
+    elevation: number
 }
 
 /**
@@ -41,7 +47,7 @@ interface Props {
  * @param settings - the App Settings
  * @param stats - the Statistics Object to show
  */
-export const MapStats: FunctionComponent<Props> = ({ defaultExpanded= true, elevation= 24, stats}) => {
+export const MapStats: FunctionComponent<Props> = ({ defaultExpanded, elevation, stats}) => {
 
     const settings = useSettings().settings
 

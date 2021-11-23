@@ -24,11 +24,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import LanguageIcon from '@mui/icons-material/Language';
 import InfoIcon from '@mui/icons-material/Info';
 import {Icon} from "@iconify/react";
-import TorMapLogo from "../resources/logo.png";
+import TorMapLogo from "../../../resources/logo.png";
 
 /**
  * A component for displaying information about TorMap
- * @constructor
  */
 export const AboutInformation: React.FunctionComponent = () => {
     const [showDialog, setShowDialog] = useState(false)
