@@ -7,16 +7,8 @@ import {
     Divider,
     Grid,
     IconButton,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    Table,
-    TableBody,
-    TableCell,
-    TableRow,
-    Tooltip,
-    Typography
+    Typography, useMediaQuery,
+    useTheme
 } from "@mui/material";
 import CloseIcon from "@material-ui/icons/Close";
 import {getIcon} from "../types/icons";
@@ -26,6 +18,8 @@ import {FullHeightDialog, SnackbarMessage} from "../types/ui";
 import {RelayFlag, RelayFlagLabel} from "../types/relay";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
+import {RelayList} from "./UI/dialogs/RelayList";
+import {RelayDetails} from "./UI/dialogs/RelayDetails";
 
 interface Props {
     /**
@@ -73,7 +67,7 @@ const formatBoolean = (value?: boolean) => value === null || value === undefined
  * @param relays - Selectable relays
  * @param enqueueSnackbar - The event handler for showing a snackbar message
  */
-export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
+export const RelayDetailsDialogDektop: React.FunctionComponent<Props> = ({
                                                                        showDialog,
                                                                        closeDialog,
                                                                        relays,
@@ -164,6 +158,9 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
         }
     }, [nodeDetailsId, relays, enqueueSnackbar])
 
+    const theme = useTheme()
+    const desktop = useMediaQuery(theme.breakpoints.up("lg"))
+
     return (
         <FullHeightDialog
             open={showDialog}
@@ -171,6 +168,7 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
             onBackdropClick={closeDialog}
             maxWidth={relays.length > 1 ? "lg" : "md"}
             fullWidth={true}
+            fullScreen={!desktop}
         >
             <DialogTitle>
                 {rawRelayDetails ?
@@ -184,7 +182,8 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
                         <Typography
                             sx={{display: "inline"}}
                             variant="h6">
-                            {rawRelayDetails.nickname}
+                            {relayIdentifiers.find((identifier) => {return identifier.id === nodeDetailsId})?.nickname
+                            || rawRelayDetails.nickname}
                         </Typography>
                     </Box> : <CircularProgress color={"inherit"} size={24}/>
                 }
@@ -199,57 +198,16 @@ export const RelayDetailsDialog: React.FunctionComponent<Props> = ({
             <Divider/>
             <DialogContent>
                 <Grid container>
-                    {relayIdentifiers.length > 1 &&
-                    <Grid item xs={3}>
-                        <Box>
-                            <List>
-                                {relayIdentifiers.map((identifier) =>
-                                    (identifier.id &&
-                                        <Tooltip
-                                            key={identifier.id}
-                                            title={identifier.fingerprint}
-                                            arrow={true}
-                                            sx={{maxWidth: "none",}}
-                                        >
-                                            <ListItem
-                                                button={true}
-                                                selected={identifier.id === nodeDetailsId}
-                                                onClick={() => setNodeDetailsId(identifier.id)}
-                                            >
-                                                <ListItemIcon>
-                                                    {getIcon(getRelayType(relays.find(
-                                                        (relay) => relay.detailsId === identifier.id)
-                                                    ))}
-                                                </ListItemIcon>
-                                                <ListItemText primary={identifier.nickname}/>
-                                            </ListItem>
-                                        </Tooltip>
-                                    )
-                                )}
-                            </List>
-                        </Box>
+                    <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 3 : 0}>
+                        <RelayList
+                            relays={relays}
+                            relayIdentifiers={relayIdentifiers}
+                            nodeDetailsId={nodeDetailsId}
+                            setNodeDetailsId={setNodeDetailsId}
+                        />
                     </Grid>
-                    }
-                    <Grid item xs={relayIdentifiers.length > 1 ? 9 : 12}>
-                        <Box p={2}>
-                            {relayDetails ?
-                                <Table size={"small"}>
-                                    <TableBody>
-                                        {relayDetails.map((relayInfo) =>
-                                            relayInfo.value &&
-                                            <TableRow key={relayInfo.name}>
-                                                <TableCell scope="row" sx={{minWidth: "150px",}}>
-                                                    <Typography>{relayInfo.name}</Typography>
-                                                </TableCell>
-                                                <TableCell scope="row">
-                                                    <Typography>{relayInfo.value}</Typography>
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table> : <CircularProgress color={"inherit"} size={24}/>
-                            }
-                        </Box>
+                    <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 9 : 12}>
+                        <RelayDetails relayDetails={relayDetails}/>
                     </Grid>
                 </Grid>
             </DialogContent>

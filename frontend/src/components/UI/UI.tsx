@@ -11,13 +11,12 @@ import {MobileUI} from "./MobileUI";
  * @param sliderValue - the current slider value
  * @param setSliderValue - a callback for setting the slider value
  * @param statistics - a Statistics object for data to display
- * @constructor
  */
 export const UI: FunctionComponent<UIProps> = ({availableDays, sliderValue, setSliderValue, statistics}) => {
 
     const theme = useTheme()
-    const uiBreak = useMediaQuery(theme.breakpoints.up("lg"))
+    const desktop = useMediaQuery(theme.breakpoints.up("lg"))
 
-    return (uiBreak ? <DesktopUI availableDays={availableDays} sliderValue={sliderValue} setSliderValue={setSliderValue} statistics={statistics}/>
+    return (desktop ? <DesktopUI availableDays={availableDays} sliderValue={sliderValue} setSliderValue={setSliderValue} statistics={statistics}/>
         : <MobileUI availableDays={availableDays} sliderValue={sliderValue} setSliderValue={setSliderValue} statistics={statistics}/>)
 }
