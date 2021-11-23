@@ -1,28 +1,30 @@
 import React, {FunctionComponent, useState} from "react";
-import {UIProps} from "../types/ui";
-import {AppBar, Box, Button, Dialog, Fab, IconButton, Slide, TextField, Toolbar, Typography} from "@mui/material";
+import {Transition, UIProps} from "../../types/ui";
+import {AppBar, Box, Button, Dialog, Fab, IconButton, TextField, Toolbar, Typography} from "@mui/material";
 import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from "@material-ui/icons/Close";
-import {TransitionProps} from "@mui/material/transitions";
-import {AppSettings} from "./app-settings";
-import {MapStats} from "./map-stats";
+import {AppSettings} from "./UI-elements/app-settings";
+import {MapStats} from "./UI-elements/map-stats";
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import {enCA} from "date-fns/locale";
 import {DatePicker, LocalizationProvider} from "@mui/lab";
 import dateFormat from "dateformat";
 import moment from "moment";
 
-const Transition = React.forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement;
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
-
-export const MobileUI: FunctionComponent<UIProps> = ({availableDays, sliderValue, setSliderValue, statistics}) => {
-
+/**
+ * A component wrapping all UI elements for Mobile devices
+ *
+ * @param availableDays - Days available for display
+ * @param sliderValue - the current slider value
+ * @param setSliderValue - a callback for setting the slider value
+ * @param statistics - a Statistics object for data to display
+ */
+export const MobileUI: FunctionComponent<UIProps> = ({
+                                                         availableDays,
+                                                         sliderValue,
+                                                         setSliderValue,
+                                                         statistics
+}) => {
     const [open, setOpen] = useState(false);
 
     return (

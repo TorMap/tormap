@@ -1,6 +1,6 @@
 import React, {useContext, useState} from 'react';
 import {Settings} from "../types/app-state";
-import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/app-settings";
+import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/UI/UI-elements/app-settings";
 
 interface SettingsInterface {
     settings: Settings
@@ -10,6 +10,9 @@ interface SettingsInterface {
 
 const SettingsContext = React.createContext<SettingsInterface | null>(null)
 
+/**
+ * The Context Hook for Settings provided in the SettingsProvider
+ */
 export function useSettings() {
     return useContext(SettingsContext)!
 }
@@ -19,6 +22,11 @@ interface SettingsProviderProps {
     defaultSettings: Settings;
 }
 
+/**
+ * A provider, providing a Settings context that handles all settings
+ * @param defaultSettings - a Settings object with the default settings
+ * @param children - the child elements in the DOM
+ */
 export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = ({defaultSettings, children }) => {
     const [settings, setSettings] = useState<Settings>(defaultSettings)
 
