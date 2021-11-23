@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {Settings} from "../types/app-state";
 import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/UI/UI-elements/app-settings";
 
@@ -30,6 +30,16 @@ interface SettingsProviderProps {
  */
 export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = ({defaultSettings, children }) => {
     const [settings, setSettings] = useState<Settings>(defaultSettings)
+
+    // Resets selection if grouping gets disabled
+    useEffect(() => {
+        if (!settings.sortCountry && settings.selectedCountry) {
+            setSettings({...settings, selectedCountry: undefined})
+        }
+        if (!settings.sortFamily && settings.selectedFamily) {
+            setSettings({...settings, selectedFamily: undefined})
+        }
+    }, [settings, setSettings])
 
     /**
      * input event handler for setting changes

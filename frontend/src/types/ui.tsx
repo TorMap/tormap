@@ -20,22 +20,6 @@ export const FullHeightDialog = styled(Dialog)(() => ({
 
 export interface UIProps {
     /**
-     * A String array of available days available at the backend
-     */
-    availableDays: string[]
-
-    /**
-     * The value of currently selected day
-     */
-    sliderValue?: number
-
-    /**
-     * A callback function to update the selected day
-     * @param n the nth entry in availableDays array
-     */
-    setSliderValue: (n: number) => void
-
-    /**
      * The currently map statistics of the currently rendered information
      */
     statistics?: Statistics

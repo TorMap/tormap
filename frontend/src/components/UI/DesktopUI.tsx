@@ -23,7 +23,7 @@ export const DesktopUI: FunctionComponent<UIProps> = ({statistics}) =>{
             }}>
                 <DateSlider />
             </Box>
-            <TorUsageDatePicker />
+            <TorUsageDatePicker/>
             <Box sx={{
                 position: "absolute",
                 right: "1%",

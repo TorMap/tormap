@@ -1,30 +1,18 @@
 import React, {FunctionComponent, useState} from "react";
 import {Transition, UIProps} from "../../types/ui";
-import {AppBar, Box, Button, Dialog, Fab, IconButton, TextField, Toolbar, Typography} from "@mui/material";
+import {AppBar, Box, Button, Dialog, Fab, IconButton, Toolbar, Typography} from "@mui/material";
 import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from "@material-ui/icons/Close";
 import {AppSettings} from "./UI-elements/app-settings";
 import {MapStats} from "./UI-elements/map-stats";
-import AdapterDateFns from "@mui/lab/AdapterDateFns";
-import {enCA} from "date-fns/locale";
-import {DatePicker, LocalizationProvider} from "@mui/lab";
-import dateFormat from "dateformat";
-import moment from "moment";
+import {TorUsageDatePickerMobile} from "./UI-elements/date-picker-mobile";
 
 /**
  * A component wrapping all UI elements for Mobile devices
  *
- * @param availableDays - Days available for display
- * @param sliderValue - the current slider value
- * @param setSliderValue - a callback for setting the slider value
  * @param statistics - a Statistics object for data to display
  */
-export const MobileUI: FunctionComponent<UIProps> = ({
-                                                         availableDays,
-                                                         sliderValue,
-                                                         setSliderValue,
-                                                         statistics
-}) => {
+export const MobileUI: FunctionComponent<UIProps> = ({statistics}) => {
     const [open, setOpen] = useState(false);
 
     return (
@@ -62,34 +50,7 @@ export const MobileUI: FunctionComponent<UIProps> = ({
                         </Button>
                     </Toolbar>
                 </AppBar>
-                <LocalizationProvider dateAdapter={AdapterDateFns} locale={enCA}>
-                    <DatePicker
-                        value={sliderValue ? availableDays[sliderValue] : undefined}
-                        renderInput={(params) =>
-                            <TextField variant={"standard"}
-                                       {...params}
-                                       sx={{
-                                           padding: 2
-                                       }}
-                                       helperText={"A day in the life of the Tor Network"}
-
-                            />
-                        }
-                        onChange={(date) => {
-                            const day: string = dateFormat(date!!, "yyyy-mm-dd")
-                            if (availableDays.includes(day)) {
-                                setSliderValue(availableDays.findIndex(element => element === day))
-                            }
-                        }}
-                        onError={() => console.log("error")}
-                        minDate={new Date(availableDays[0])}
-                        maxDate={new Date(availableDays[availableDays.length-1])}
-                        shouldDisableDate={date => {
-                            return !(availableDays.includes(moment(date).format("YYYY-MM-DD")))
-                        }}
-                        views={["year","month","day"]}
-                    />
-                </LocalizationProvider>
+                <TorUsageDatePickerMobile />
                 <AppSettings elevation={0}/>
                 <Box height={"10px"}/>
                 {statistics && <MapStats stats={statistics} elevation={0} defaultExpanded={false}/>}
