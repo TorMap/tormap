@@ -8,27 +8,20 @@ import {AboutInformation} from "./UI/UI-elements/about-information";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
 import {SnackbarMessage} from "../types/ui";
-import {useSettings} from "../util/SettingsContext";
 import {UI} from "./UI/UI";
 import {LoadingAnimation} from "./UI/UI-elements/LoadingAnimation";
 import {useDate} from "../util/DateContext";
 
 export const App: FunctionComponent = () => {
-    //const [availableDays, setAvailableDays] = useState<string[]>([])
-    //const [sliderValue, setSliderValue] = useState<number>(-1)
     const [isLoading, setIsLoading] = useState(true)
     const [statistics, setStatistics] = useState<Statistics>()
     const [connectionRetryCount, setConnectionRetryCount] = useState<number>(0)
 
-    const settings = useSettings().settings
-    const setSettings = useSettings().setSettings
     const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
-    const selectedDate = useDate().selectedDate
-    const availableDays = useDate().availableDays
-    const setAvailableDays = useDate().setAvailableDays
-    const sliderValue = useDate().sliderValue
-    const setSliderValue = useDate().setSliderValue
+    const date = useDate()
+    const selectedDate = date.selectedDate
+    const setAvailableDays = date.setAvailableDays
 
     useEffect(() => {console.log(selectedDate)},[selectedDate])
 
@@ -51,17 +44,6 @@ export const App: FunctionComponent = () => {
         })
     }, [connectionRetryCount, closeSnackbar, enqueueSnackbar, setAvailableDays])
 
-    // todo Move to Settings context?
-    // Resets selection if grouping gets disabled
-    useEffect(() => {
-        if (!settings.sortCountry && settings.selectedCountry) {
-            setSettings({...settings, selectedCountry: undefined})
-        }
-        if (!settings.sortFamily && settings.selectedFamily) {
-            setSettings({...settings, selectedFamily: undefined})
-        }
-    }, [settings, setSettings])
-
     return (
         <div>
             {isLoading ? <LoadingAnimation /> : null}
@@ -69,12 +51,7 @@ export const App: FunctionComponent = () => {
                 setIsLoading={useCallback(setIsLoading, [setIsLoading])}
                 setStatistics={useCallback(setStatistics, [setStatistics])}
             />
-            <UI
-                availableDays={availableDays}
-                sliderValue={sliderValue}
-                setSliderValue={setSliderValue}
-                statistics={statistics}
-            />
+            <UI statistics={statistics} />
             <Box sx={{
                 color: "#b4b4b4",
                 background: "#262626",
