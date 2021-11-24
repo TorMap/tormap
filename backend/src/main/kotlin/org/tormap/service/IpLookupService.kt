@@ -6,7 +6,7 @@ import com.maxmind.db.CHMCache
 import com.maxmind.geoip2.DatabaseReader
 import com.maxmind.geoip2.model.CityResponse
 import org.springframework.stereotype.Service
-import org.tormap.config.IpLookupConfig
+import org.tormap.config.properties.IpLookupConfig
 import org.tormap.logger
 import java.io.File
 import java.math.BigDecimal

@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.AsyncResult
 import org.springframework.stereotype.Service
 import org.tormap.adapter.controller.ArchiveDataController
-import org.tormap.config.DescriptorConfig
+import org.tormap.config.properties.DescriptorConfig
 import org.tormap.database.entity.*
 import org.tormap.database.repository.DescriptorsFileRepository
 import org.tormap.database.repository.GeoRelayRepositoryImpl
