@@ -30,14 +30,15 @@ management:
 logging:
     file:
         path: logs/spring-boot-logger.log
-scheduler:
-    archiveRelayConsensuses: PT12H
-    archiveRelayServers: PT12H
-    recentRelayConsensuses: PT1H
-    recentRelayServers: PT1H
-    updateNodeAutonomousSystems: PT12H
-    updateNodeFamilies: PT12H
+schedule:
     shouldOverwriteFamilies: true
+    rate:
+        archiveRelayConsensuses: PT12H
+        archiveRelayServers: PT12H
+        recentRelayConsensuses: PT1H
+        recentRelayServers: PT1H
+        updateNodeAutonomousSystems: PT12H
+        updateNodeFamilies: PT12H
 server:
     port: 8080
 spring:

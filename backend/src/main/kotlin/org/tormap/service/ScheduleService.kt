@@ -3,8 +3,8 @@ package org.tormap.service
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import org.tormap.config.DescriptorConfig
-import org.tormap.config.SchedulerConfig
+import org.tormap.config.properties.DescriptorConfig
+import org.tormap.config.properties.ScheduleConfig
 import org.tormap.database.entity.DescriptorType
 
 
@@ -14,9 +14,9 @@ import org.tormap.database.entity.DescriptorType
  */
 @Service
 @Async
-class SchedulerService(
+class ScheduleService(
     private val descriptorConfig: DescriptorConfig,
-    private val schedulerConfig: SchedulerConfig,
+    private val scheduleConfig: ScheduleConfig,
     private val torDescriptorService: TorDescriptorService,
     private val nodeDetailsService: NodeDetailsService,
 ) {
@@ -25,7 +25,7 @@ class SchedulerService(
      * The years 2007 - 2021 equal about 3 GB in size.
      * After the download finished, and you start with an empty DB this takes about 20 hours depending on your machine.
      */
-    @Scheduled(fixedRateString = "\${scheduler.archiveRelayConsensuses}")
+    @Scheduled(fixedRateString = "\${schedule.rate.archiveRelayConsensuses}")
     fun archiveRelayConsensuses() =
         torDescriptorService.collectAndProcessDescriptors(
             descriptorConfig.archiveRelayConsensuses,
@@ -37,7 +37,7 @@ class SchedulerService(
      * The years 2005 - 2021 equal about 30 GB in size.
      * After the download finished, and you start with an empty DB this takes about 10 hours depending on your machine.
      */
-    @Scheduled(fixedRateString = "\${scheduler.archiveRelayServers}")
+    @Scheduled(fixedRateString = "\${schedule.rate.archiveRelayServers}")
     fun archiveRelayServers() =
         torDescriptorService.collectAndProcessDescriptors(
             descriptorConfig.archiveRelayServers,
@@ -49,7 +49,7 @@ class SchedulerService(
      * The 3 days of descriptors equals about 175 MB.
      * Can take 20 minutes depending on your machine.
      */
-    @Scheduled(fixedRateString = "\${scheduler.recentRelayConsensuses}")
+    @Scheduled(fixedRateString = "\${schedule.rate.recentRelayConsensuses}")
     fun recentRelayConsensuses() =
         torDescriptorService.collectAndProcessDescriptors(
             descriptorConfig.recentRelayConsensuses,
@@ -61,7 +61,7 @@ class SchedulerService(
      * The 3 days of descriptors equals about 150 MB.
      * Can take 20 minutes depending on your machine.
      */
-    @Scheduled(fixedRateString = "\${scheduler.recentRelayServers}")
+    @Scheduled(fixedRateString = "\${schedule.rate.recentRelayServers}")
     fun recentRelayServers() =
         torDescriptorService.collectAndProcessDescriptors(
             descriptorConfig.recentRelayServers,
@@ -72,15 +72,15 @@ class SchedulerService(
      * Updates all nodes which do not have a family set and optionally can overwrite existing family structures.
      * Can take a few minutes depending on how many months are updated.
      */
-    @Scheduled(fixedRateString = "\${scheduler.updateNodeFamilies}")
+    @Scheduled(fixedRateString = "\${schedule.rate.updateNodeFamilies}")
     fun updateNodeFamilies() =
-        nodeDetailsService.updateAllNodeFamilies(schedulerConfig.shouldOverwriteFamilies)
+        nodeDetailsService.updateAllNodeFamilies(scheduleConfig.shouldOverwriteFamilies)
 
     /**
      * Updates all nodes which do not have any Autonomous System set.
      * Can take multiple hours depending on how many nodes are updated.
      */
-    @Scheduled(fixedRateString = "\${scheduler.updateNodeAutonomousSystems}")
+    @Scheduled(fixedRateString = "\${schedule.rate.updateNodeAutonomousSystems}")
     fun updateNodeAutonomousSystems() =
         nodeDetailsService.updateAutonomousSystems()
 }
