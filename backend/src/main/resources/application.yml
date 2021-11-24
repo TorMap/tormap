@@ -5,10 +5,12 @@ descriptor:
     archiveRelayServers: /archive/relay-descriptors/server-descriptors/
     recentRelayConsensuses: /recent/relay-descriptors/consensuses/
     recentRelayServers: /recent/relay-descriptors/server-descriptors/
-database:
-    defaultSequenceName: HIBERNATE_SEQUENCE
-    ip2locationDatabaseFile: ip-lookup/location/ip2location/IP2LOCATION-LITE-DB5.BIN
-    shouldCacheIPLookup: true
+ip-lookup:
+    shouldCache: true
+    locationLookup:
+        ip2locationDatabaseFile: ip-lookup/location/ip2location/IP2LOCATION-LITE-DB5.BIN
+        maxMindDatabaseFile: ip-lookup/location/maxmind/GeoLite2-City.mmdb
+        dbipDatabaseFile: ip-lookup/location/dbip/dbip-city-lite.mmdb
 management:
     endpoint:
         logfile:
@@ -47,6 +49,7 @@ spring:
         baselineOnMigrate: true
         locations: classpath:database/migration
     h2:
+        defaultSequenceName: HIBERNATE_SEQUENCE
         console:
             enabled: true
             path: /h2
