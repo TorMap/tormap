@@ -54,6 +54,9 @@ dependencies {
     // Run Flyway DB migration tool on startup https://flywaydb.org/
     implementation("org.flywaydb:flyway-core")
 
+    // IP to geo location lookups
+    implementation("com.maxmind.geoip2:geoip2:2.16.1")
+
     // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
     implementation("commons-codec:commons-codec:1.10")
     implementation("org.apache.commons:commons-compress:1.13")
@@ -81,8 +84,8 @@ flyway {
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage> {
     imageName = "juliushenke/tormap"
 
-    val relativePathIp2LocationDB = "/ip2location/"
-    bindings = listOf("${rootProject.projectDir.absolutePath}$relativePathIp2LocationDB:/workspace$relativePathIp2LocationDB")
+    val relativePathIpLookupLocation = "/ip-lookup/location/"
+    bindings = listOf("${rootProject.projectDir.absolutePath}$relativePathIpLookupLocation:/workspace$relativePathIpLookupLocation")
 }
 
 // Configure KotlinDoc generation

@@ -7,7 +7,7 @@ descriptor:
     recentRelayServers: /recent/relay-descriptors/server-descriptors/
 database:
     defaultSequenceName: HIBERNATE_SEQUENCE
-    ip2locationDatabaseFile: ip2location/IP2LOCATION-LITE-DB5.BIN
+    ip2locationDatabaseFile: ip-lookup/location/ip2location/IP2LOCATION-LITE-DB5.BIN
     shouldCacheIPLookup: true
 management:
     endpoint:
