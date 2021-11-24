@@ -1,15 +1,28 @@
-package org.tormap.config
+package org.tormap.config.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 
 
 @ConstructorBinding
-@ConfigurationProperties("scheduler")
+@ConfigurationProperties("schedule")
+data class ScheduleConfig(
+
+    /**
+     * Whether all previously calculated families should be overridden
+     */
+    val shouldOverwriteFamilies: Boolean,
+
+    /**
+     * In what interval tasks are run
+     */
+    val rate: RateConfig,
+)
+
 /**
  * For all following rates, please provide milliseconds or a [Duration](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-) compliant term!
  */
-data class SchedulerConfig(
+data class RateConfig(
     /**
      * The rate at which archive relay consensus descriptors are handled.
      */
@@ -39,9 +52,4 @@ data class SchedulerConfig(
      * The rate at which the families of NodeDetails are updated.
      */
     val updateNodeFamilies: String,
-
-    /**
-     * Whether all previously calculated families should be overridden
-     */
-    val shouldOverwriteFamilies: Boolean,
 )
