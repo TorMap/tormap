@@ -20,7 +20,6 @@ import org.torproject.descriptor.ServerDescriptor
 import org.torproject.descriptor.impl.DescriptorReaderImpl
 import org.torproject.descriptor.index.DescriptorIndexCollector
 import java.io.File
-import java.math.RoundingMode
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -213,14 +212,13 @@ class TorDescriptorService(
                 )
             ) {
                 val location = ipLookupService.getLocationForIpAddress(networkStatusEntry.address)
-                val geoDecimalPlaces = 4
                 if (location != null) {
                     geoRelayRepositoryImpl.save(GeoRelay(
                         networkStatusEntry,
                         descriptorDay,
-                        location.latitude!!.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN),
-                        location.longitude!!.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN),
-                        location.countryShort,
+                        location.latitude,
+                        location.longitude,
+                        location.countryCode,
                     ))
                 }
             }
