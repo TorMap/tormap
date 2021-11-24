@@ -9,6 +9,8 @@ build/
 descriptors/
 .log
 tormap.*.db
+**/*password.txt
+resources/**
 
 ### STS ###
 .apt_generated
