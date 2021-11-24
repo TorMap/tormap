@@ -67,6 +67,7 @@ spring:
     security:
         user:
             name: admin
+            passwordFile: resources/admin-password.txt
 springdoc:
     api-docs:
         path: /openapi
