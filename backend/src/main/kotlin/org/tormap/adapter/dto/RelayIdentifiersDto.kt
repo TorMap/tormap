@@ -3,7 +3,7 @@
 package org.tormap.adapter.dto
 
 /**
- * Identifiers of a node
+ * Identifiers of a relay
  */
 class RelayIdentifiersDto(
     val id: Long,

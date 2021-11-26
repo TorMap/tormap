@@ -33,12 +33,12 @@ logging:
 schedule:
     shouldOverwriteFamilies: false
     rate:
-        archiveRelayConsensuses: PT12H
-        archiveRelayServers: PT12H
         recentRelayConsensuses: PT1H
         recentRelayServers: PT1H
-        updateNodeAutonomousSystems: PT12H
-        updateNodeFamilies: PT12H
+        archiveRelayConsensuses: PT12H
+        archiveRelayServers: PT12H
+        updateRelayAutonomousSystems: PT12H
+        updateRelayFamilies: PT12H
 server:
     port: 8080
 spring:
@@ -59,7 +59,7 @@ spring:
     jpa:
         database-platform: org.tormap.database.CustomH2Dialect
         hibernate:
-            ddl-auto: update
+            ddl-auto: validate
         open-in-view: false
     output:
         ansi:

@@ -4,6 +4,7 @@ import org.springframework.cache.CacheManager
 import org.springframework.jdbc.support.incrementer.H2SequenceMaxValueIncrementer
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.tormap.CacheName
 import org.tormap.adapter.controller.ArchiveDataController
 import org.tormap.commaSeparatedToList
 import org.tormap.database.entity.RelayDetails
@@ -27,43 +28,43 @@ class RelayDetailsService(
     private val logger = logger()
 
     /**
-     * Updates [RelayDetails.familyId] for all entities and if desired also [overwriteExistingFamilies].
+     * Updates [RelayDetails.familyId] for all entities and if desired can also [overwriteExistingFamilies].
      */
-    fun updateAllNodeFamilies(overwriteExistingFamilies: Boolean) {
+    fun updateAllFamilies(overwriteExistingFamilies: Boolean) {
         var monthFamilyMemberCount = relayDetailsRepositoryImpl.findDistinctMonthFamilyMemberCount()
         if (!overwriteExistingFamilies) {
             monthFamilyMemberCount = monthFamilyMemberCount.filter { it.count == 0L }
         }
-        updateNodeFamilies(monthFamilyMemberCount.map { it.month }.toSet())
+        updateFamilies(monthFamilyMemberCount.map { it.month }.toSet())
     }
 
 
     /**
      * Updates [RelayDetails.familyId] for all entities of the requested [months].
      */
-    fun updateNodeFamilies(months: Set<String>) {
+    fun updateFamilies(months: Set<String>) {
         try {
-            logger.info("Updating node families for months: ${months.joinToString(", ")}")
+            logger.info("Updating relay families for months: ${months.joinToString(", ")}")
             months.forEach { month ->
                 try {
-                    updateNodeFamiliesForMonth(month)
-                    updateGeoRelayDayCache(month)
+                    updateFamiliesForMonth(month)
+                    updateRelayLocationDayCache(month)
                 } catch (exception: Exception) {
-                    logger.error("Could not update node families for month $month! ${exception.message}")
+                    logger.error("Could not update relay families for month $month! ${exception.message}")
                 }
             }
-            logger.info("Finished updating node families")
+            logger.info("Finished updating relay families")
         } catch (exception: Exception) {
-            logger.error("Could not update node families! ${exception.message}")
+            logger.error("Could not update relay families! ${exception.message}")
         }
     }
 
     @Async
-    fun updateGeoRelayDayCache(month: String) {
+    fun updateRelayLocationDayCache(month: String) {
         val yearMonth = YearMonth.parse(month)
         yearMonth.atDay(1).datesUntil(yearMonth.plusMonths(1).atDay(1)).forEach {
             val day = it.toString()
-            cacheManager.getCache("geo-relay-day")?.evict(day)
+            cacheManager.getCache(CacheName.RELAY_LOCATION_DAY)?.evict(day)
             archiveDataController.getGeoRelaysByDay(day)
         }
     }
@@ -77,16 +78,17 @@ class RelayDetailsService(
             val monthsToProcess = months ?: relayDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
             logger.info("Updating Autonomous Systems for months: ${monthsToProcess.joinToString(", ")}")
             monthsToProcess.forEach {
-                var changedNodesCount = 0
-                val nodesWithoutAS = relayDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(it)
-                nodesWithoutAS.forEach { node ->
-                    if (node.updateAutonomousSystem()) {
-                        changedNodesCount++
+                var changedRelaysCount = 0
+                val relaysWithoutAutonomousSystem =
+                    relayDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(it)
+                relaysWithoutAutonomousSystem.forEach { relay ->
+                    if (relay.updateAutonomousSystem()) {
+                        changedRelaysCount++
                     }
                 }
                 relayDetailsRepositoryImpl.flush()
-                if (changedNodesCount > 0) {
-                    logger.info("Finished Autonomous Systems for month $it. Updated $changedNodesCount nodes.")
+                if (changedRelaysCount > 0) {
+                    logger.info("Finished Autonomous Systems for month $it. Updated $changedRelaysCount relays.")
                 }
             }
             logger.info("Finished updating Autonomous System")
@@ -98,39 +100,39 @@ class RelayDetailsService(
     /**
      * Updates [RelayDetails.familyId] for all entities of the requested [month].
      */
-    private fun updateNodeFamiliesForMonth(month: String) {
+    private fun updateFamiliesForMonth(month: String) {
         var confirmedFamilyConnectionCount = 0
         var rejectedFamilyConnectionCount = 0
         val families = mutableListOf<Set<RelayDetails>>()
-        val requestingFamilyNodes =
+        val requestingRelays =
             relayDetailsRepositoryImpl.findAllByMonthEqualsAndFamilyEntriesNotNull(month)
-        requestingFamilyNodes.forEach { requestingNode ->
-            requestingNode.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
+        requestingRelays.forEach { requestingRelay ->
+            requestingRelay.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
                 try {
                     val newConfirmedMember =
-                        confirmFamilyMember(requestingNode, familyEntry, requestingFamilyNodes)
-                    if (newConfirmedMember != null && requestingNode != newConfirmedMember) {
-                        val existingFamilyRequestingNodeIndex =
-                            families.indexOfFirst { it.contains(requestingNode) }
+                        requestingRelay.confirmFamilyMember(familyEntry, requestingRelays)
+                    if (newConfirmedMember != null && requestingRelay != newConfirmedMember) {
+                        val existingFamilyRequestingRelayIndex =
+                            families.indexOfFirst { it.contains(requestingRelay) }
                         val existingFamilyNewConfirmedMemberIndex =
                             families.indexOfFirst { it.contains(newConfirmedMember) }
 
                         if (
-                            existingFamilyRequestingNodeIndex >= 0
+                            existingFamilyRequestingRelayIndex >= 0
                             && existingFamilyNewConfirmedMemberIndex >= 0
-                            && existingFamilyRequestingNodeIndex != existingFamilyNewConfirmedMemberIndex
+                            && existingFamilyRequestingRelayIndex != existingFamilyNewConfirmedMemberIndex
                         ) {
-                            families[existingFamilyRequestingNodeIndex] =
-                                families[existingFamilyRequestingNodeIndex].plus(families[existingFamilyNewConfirmedMemberIndex])
+                            families[existingFamilyRequestingRelayIndex] =
+                                families[existingFamilyRequestingRelayIndex].plus(families[existingFamilyNewConfirmedMemberIndex])
                             families.removeAt(existingFamilyNewConfirmedMemberIndex)
-                        } else if (existingFamilyRequestingNodeIndex >= 0) {
-                            families[existingFamilyRequestingNodeIndex] =
-                                families[existingFamilyRequestingNodeIndex].plus(newConfirmedMember)
+                        } else if (existingFamilyRequestingRelayIndex >= 0) {
+                            families[existingFamilyRequestingRelayIndex] =
+                                families[existingFamilyRequestingRelayIndex].plus(newConfirmedMember)
                         } else if (existingFamilyNewConfirmedMemberIndex >= 0) {
                             families[existingFamilyNewConfirmedMemberIndex] =
-                                families[existingFamilyNewConfirmedMemberIndex].plus(requestingNode)
+                                families[existingFamilyNewConfirmedMemberIndex].plus(requestingRelay)
                         } else {
-                            families.add(setOf(requestingNode, newConfirmedMember))
+                            families.add(setOf(requestingRelay, newConfirmedMember))
                         }
 
                         confirmedFamilyConnectionCount++
@@ -176,52 +178,49 @@ class RelayDetailsService(
         families.forEach { family ->
             val familyId = dbSequenceIncrementer.nextLongValue()
             family.forEach { it.familyId = familyId }
-            relayDetailsRepositoryImpl.saveAll(family)
+            relayDetailsRepositoryImpl.saveAllAndFlush(family)
         }
-        relayDetailsRepositoryImpl.flush()
     }
 
     /**
-     * Extract the fingerprint of a [allegedFamilyMemberId] and check if it is a family member of the [requestingNode]
+     * Extract the fingerprint of a [allegedFamilyMemberId] and check if it is a family member of this [RelayDetails]
      */
-    private fun confirmFamilyMember(
-        requestingNode: RelayDetails,
+    private fun RelayDetails.confirmFamilyMember(
         allegedFamilyMemberId: String,
-        requestingFamilyNodes: List<RelayDetails>,
+        relaysWithFamilyEntries: List<RelayDetails>,
     ): RelayDetails? {
         when {
             familyEntryFingerprintRegex.matches(allegedFamilyMemberId) -> {
                 val allegedFamilyMemberFingerprint = extractFingerprintFromFamilyEntry(allegedFamilyMemberId)
                 val allegedFamilyMember =
-                    requestingFamilyNodes.find { it.fingerprint == allegedFamilyMemberFingerprint }
-                if (isNodeMemberOfFamily(requestingNode, allegedFamilyMember)) {
+                    relaysWithFamilyEntries.find { it.fingerprint == allegedFamilyMemberFingerprint }
+                if (this.isMemberOfFamily(allegedFamilyMember)) {
                     return allegedFamilyMember
                 }
             }
             familyEntryNicknameRegex.matches(allegedFamilyMemberId) -> {
-                requestingFamilyNodes.filter { it.nickname == allegedFamilyMemberId }
-                    .firstOrNull { isNodeMemberOfFamily(requestingNode, it) }
+                relaysWithFamilyEntries.filter { it.nickname == allegedFamilyMemberId }
+                    .firstOrNull { this.isMemberOfFamily(it) }
             }
-            else -> throw Exception("Format of new family member $allegedFamilyMemberId for requestingNode ${requestingNode.fingerprint} not supported!")
+            else -> throw Exception("Format of new family member $allegedFamilyMemberId for requestingRelay ${this.fingerprint} not supported!")
         }
         return null
     }
 
     /**
-     * Determines if the [requestingNode] shares a family with the [allegedFamilyMember].
+     * Determines if this [RelayDetails] shares a family with the [allegedFamilyMember].
      */
-    private fun isNodeMemberOfFamily(
-        requestingNode: RelayDetails,
-        allegedFamilyMember: RelayDetails?,
+    private fun RelayDetails.isMemberOfFamily(
+        allegedFamilyMember: RelayDetails?
     ) = allegedFamilyMember?.familyEntries?.commaSeparatedToList()?.any {
         when {
             familyEntryFingerprintRegex.matches(it) -> {
-                requestingNode.fingerprint == extractFingerprintFromFamilyEntry(it)
+                this.fingerprint == extractFingerprintFromFamilyEntry(it)
             }
             familyEntryNicknameRegex.matches(it) -> {
-                requestingNode.nickname == it
+                this.nickname == it
             }
-            else -> throw Exception("Format of new family member ${allegedFamilyMember.id} for requestingNode ${requestingNode.fingerprint} not supported!")
+            else -> throw Exception("Format of new family member ${allegedFamilyMember.id} for requestingRelay ${this.fingerprint} not supported!")
         }
     } ?: false
 
