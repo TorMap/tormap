@@ -84,8 +84,8 @@ flyway {
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage> {
     imageName = "juliushenke/tormap"
 
-    val relativePathIpLookupLocation = "/ip-lookup/location/"
-    bindings = listOf("${rootProject.projectDir.absolutePath}$relativePathIpLookupLocation:/workspace$relativePathIpLookupLocation")
+    val relativePathIpLookup = "/ip-lookup/"
+    bindings = listOf("${rootProject.projectDir.absolutePath}$relativePathIpLookup:/workspace$relativePathIpLookup")
 }
 
 // Configure KotlinDoc generation
