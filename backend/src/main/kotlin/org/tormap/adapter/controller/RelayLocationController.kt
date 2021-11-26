@@ -17,10 +17,10 @@ class RelayLocationController(
 ) {
     @Cacheable(CacheName.RELAY_LOCATION_DAYS)
     @GetMapping("days")
-    fun getDaysForGeoRelays() = relayLocationRepositoryImpl.findDistinctDays()
+    fun getDays() = relayLocationRepositoryImpl.findDistinctDays()
 
     @Cacheable(CacheName.RELAY_LOCATION_DAY, key = "#day")
     @GetMapping("day/{day}")
-    fun getGeoRelaysByDay(@PathVariable day: String): List<RelayLocationDto> =
+    fun getDay(@PathVariable day: String): List<RelayLocationDto> =
         relayLocationRepositoryImpl.findAllUsingDay(LocalDate.parse(day))
 }

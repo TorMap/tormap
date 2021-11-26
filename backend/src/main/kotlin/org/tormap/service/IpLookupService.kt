@@ -44,7 +44,7 @@ class IpLookupService(
     fun lookupAutonomousSystem(ipAddress: String): AsnResponse? = try {
         maxmindAutonomousSystemDB.asn(InetAddress.getByName(ipAddress))
     } catch (exception: Exception) {
-        logger.warn("Autonomous System lookup for IP $ipAddress with provider MaxMind failed! ${exception.javaClass}: ${exception.message}")
+        logger.debug("Autonomous System lookup for IP $ipAddress with provider MaxMind failed! ${exception.javaClass}: ${exception.message}")
         null
     }
 
