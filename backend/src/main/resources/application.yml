@@ -9,6 +9,8 @@ ip-lookup:
     shouldCache: true
     locationLookup:
         dbipDatabaseFile: ip-lookup/location/dbip/dbip-city-lite.mmdb
+    autonomousSystemLookup:
+        maxmindDatabaseFile: ip-lookup/autonomous-system/maxmind/GeoLite2-ASN.mmdb
 management:
     endpoint:
         logfile:

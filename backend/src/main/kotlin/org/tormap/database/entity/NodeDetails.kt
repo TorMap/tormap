@@ -1,8 +1,6 @@
 package org.tormap.database.entity
 
-import org.tormap.calculateIPv4NumberRepresentation
 import org.tormap.jointToCommaSeparated
-import org.tormap.logger
 import org.tormap.stripLengthForDB
 import org.torproject.descriptor.ServerDescriptor
 import java.time.LocalDate
@@ -28,6 +26,11 @@ class NodeDetails(
 
     var day: LocalDate,
 
+    @Column(length = 255)
+    var autonomousSystemName: String? = null,
+
+    var autonomousSystemNumber: Int? = null,
+
     @Id
     @GeneratedValue
     val id: Long? = null,
@@ -35,20 +38,7 @@ class NodeDetails(
     @Column(length = 15)
     var address: String? = descriptor.address
 
-    var addressNumber: Long? = try {
-        calculateIPv4NumberRepresentation(descriptor.address)
-    } catch (exception: Exception) {
-        logger().warn("Could not calculate addressNumber for address ${descriptor.address}")
-        null
-    }
-
     var allowSingleHopExits: Boolean = descriptor.allowSingleHopExits
-
-    @Column(length = 255)
-    var autonomousSystemName: String? = null
-
-    @Column(length = 10)
-    var autonomousSystemNumber: String? = null
 
     @Column(length = 19)
     var nickname: String? = descriptor.nickname

@@ -2,6 +2,7 @@ package org.tormap.service
 
 import com.maxmind.db.CHMCache
 import com.maxmind.geoip2.DatabaseReader
+import com.maxmind.geoip2.model.AsnResponse
 import com.maxmind.geoip2.model.CityResponse
 import org.springframework.stereotype.Service
 import org.tormap.config.properties.IpLookupConfig
@@ -20,21 +21,36 @@ class IpLookupService(
     ipLookupConfig: IpLookupConfig,
 ) {
     private val logger = logger()
-    private var dbipLocationDatabaseReader =
+    private var dbipLocationDB =
         maxmindTypeDatabaseReader(ipLookupConfig.locationLookup.dbipDatabaseFile, ipLookupConfig.shouldCache)
-
+    private var maxmindAutonomousSystemDB =
+        maxmindTypeDatabaseReader(ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile, ipLookupConfig.shouldCache)
 
     /**
      * Get the approximate geo location of an [ipAddress]
      * by looking it up with two different file based DB providers (IP2Location & Maxmind)
      */
-    fun getLocationForIpAddress(ipAddress: String): Location? = try {
-        Location(dbipLocationDatabaseReader.city(InetAddress.getByName(ipAddress)))
+    fun lookupLocation(ipAddress: String): Location? = try {
+        Location(dbipLocationDB.city(InetAddress.getByName(ipAddress)))
     } catch (exception: Exception) {
-        logger.debug("Location lookup for IP $ipAddress with provider dbip failed! ${exception.javaClass}: ${exception.message}")
+        logger.warn("Location lookup for IP $ipAddress with provider dbip failed! ${exception.javaClass}: ${exception.message}")
         null
     }
 
+    /**
+     * Get the approximate geo location of an [ipAddress]
+     * by looking it up with two different file based DB providers (IP2Location & Maxmind)
+     */
+    fun lookupAutonomousSystem(ipAddress: String): AsnResponse? = try {
+        maxmindAutonomousSystemDB.asn(InetAddress.getByName(ipAddress))
+    } catch (exception: Exception) {
+        logger.warn("Autonomous System lookup for IP $ipAddress with provider MaxMind failed! ${exception.javaClass}: ${exception.message}")
+        null
+    }
+
+    /**
+     * Create a database reader for the [.mmdb file format](https://maxmind.github.io/MaxMind-DB/)
+     */
     private fun maxmindTypeDatabaseReader(databaseFilePath: String, shouldCache: Boolean) =
         if (shouldCache)
             DatabaseReader.Builder(File(databaseFilePath)).withCache(CHMCache()).build()
