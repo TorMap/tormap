@@ -3,16 +3,16 @@
 package org.tormap.adapter.dto
 
 import org.tormap.commaSeparatedToList
-import org.tormap.database.entity.GeoRelay
+import org.tormap.database.entity.RelayLocation
 import java.math.BigDecimal
 
 /**
- * A [GeoRelay] with minimal data for fast frontend response times
+ * A [RelayLocation] with minimal data for fast frontend response times
  */
-class GeoRelayDto(
+class RelayLocationDto(
     latitude: BigDecimal,
     longitude: BigDecimal,
-    countryCode: String?,
+    countryCode: String,
     flags: String?,
     val detailsId: Long?,
     val familyId: Long?,

@@ -3,8 +3,8 @@ package org.tormap.service
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import org.tormap.config.properties.DescriptorConfig
-import org.tormap.config.properties.ScheduleConfig
+import org.tormap.config.value.DescriptorConfig
+import org.tormap.config.value.ScheduleConfig
 import org.tormap.database.entity.DescriptorType
 
 
@@ -18,7 +18,7 @@ class ScheduleService(
     private val descriptorConfig: DescriptorConfig,
     private val scheduleConfig: ScheduleConfig,
     private val torDescriptorService: TorDescriptorService,
-    private val nodeDetailsService: NodeDetailsService,
+    private val relayDetailsService: RelayDetailsService,
 ) {
     /**
      * Fetches and processes archive relay consensus descriptors.
@@ -74,7 +74,7 @@ class ScheduleService(
      */
     @Scheduled(fixedRateString = "\${schedule.rate.updateNodeFamilies}")
     fun updateNodeFamilies() =
-        nodeDetailsService.updateAllNodeFamilies(scheduleConfig.shouldOverwriteFamilies)
+        relayDetailsService.updateAllNodeFamilies(scheduleConfig.shouldOverwriteFamilies)
 
     /**
      * Updates all nodes which do not have any Autonomous System set.
@@ -82,6 +82,6 @@ class ScheduleService(
      */
     @Scheduled(fixedRateString = "\${schedule.rate.updateNodeAutonomousSystems}")
     fun updateNodeAutonomousSystems() =
-        nodeDetailsService.updateAutonomousSystems()
+        relayDetailsService.updateAutonomousSystems()
 }
 

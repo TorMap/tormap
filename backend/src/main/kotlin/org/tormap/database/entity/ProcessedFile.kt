@@ -13,9 +13,9 @@ import javax.persistence.Enumerated
  */
 @Suppress("unused")
 @Entity
-class DescriptorsFile(
+class ProcessedFile(
     @EmbeddedId
-    var id: DescriptorsFileId,
+    var id: DescriptorFileId,
     var lastModified: Long,
     var processedAt: LocalDateTime = LocalDateTime.now(),
     error: String? = null,
@@ -30,7 +30,7 @@ class DescriptorsFile(
  * This represents a composite id
  */
 @Embeddable
-class DescriptorsFileId(
+class DescriptorFileId(
     @Enumerated
     var type: DescriptorType,
 
@@ -38,7 +38,7 @@ class DescriptorsFileId(
 ) : Serializable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is DescriptorsFileId) return false
+        if (other !is DescriptorFileId) return false
 
         if (type != other.type) return false
         if (filename != other.filename) return false

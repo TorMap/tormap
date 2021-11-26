@@ -8,12 +8,12 @@ import javax.persistence.*
 @Entity
 @Table(
     indexes = [
-        Index(columnList = "timestamp", name = "timestamp_index"),
-        Index(columnList = "method", name = "method_index"),
-        Index(columnList = "responseStatus", name = "responseStatus_index"),
+        Index(columnList = "timestamp"),
+        Index(columnList = "method"),
+        Index(columnList = "responseStatus"),
     ]
 )
-class ApiTrace(trace: HttpTrace) {
+class UserTrace(trace: HttpTrace) {
     @Id
     @GeneratedValue
     val id: Long? = null
@@ -23,8 +23,10 @@ class ApiTrace(trace: HttpTrace) {
     @Enumerated
     var method: RequestMethod = RequestMethod.valueOf(trace.request.method.uppercase())
     var responseStatus: Int = trace.response.status
-    var userAgent: String? = trace.request.headers["user-agent"]?.firstOrNull()
     var timeTaken: Long = trace.timeTaken
+    var deviceClass: String? = null
+    var operatingSystem: String? = null
+    var agentMajorVersion: String? = null
 
     @Column(length = 2, columnDefinition = "char(2)")
     var countryCode: String? = null
