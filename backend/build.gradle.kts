@@ -54,8 +54,11 @@ dependencies {
     // Run Flyway DB migration tool on startup https://flywaydb.org/
     implementation("org.flywaydb:flyway-core")
 
-    // IP to geo location lookups
+    // Read .mmdb (MaxMind) DB files for IP lookups https://maxmind.github.io/MaxMind-DB/
     implementation("com.maxmind.geoip2:geoip2:2.16.1")
+
+    // Anaylz user agent https://yauaa.basjes.nl/
+    implementation("nl.basjes.parse.useragent:yauaa:6.3")
 
     // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
     implementation("commons-codec:commons-codec:1.10")

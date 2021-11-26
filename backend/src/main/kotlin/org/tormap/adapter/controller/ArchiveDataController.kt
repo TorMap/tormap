@@ -2,18 +2,19 @@ package org.tormap.adapter.controller
 
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.web.bind.annotation.*
-import org.tormap.adapter.controller.exception.NodeNotFoundException
-import org.tormap.adapter.dto.GeoRelayDto
-import org.tormap.database.entity.NodeDetails
-import org.tormap.database.repository.GeoRelayRepositoryImpl
-import org.tormap.database.repository.NodeDetailsRepositoryImpl
+import org.tormap.adapter.controller.exception.RelayNotFoundException
+import org.tormap.adapter.dto.RelayLocationDto
+import org.tormap.database.entity.RelayDetails
+import org.tormap.database.repository.RelayLocationRepositoryImpl
+import org.tormap.database.repository.RelayDetailsRepositoryImpl
 import java.time.LocalDate
 
+// TODO Remove after backend deploy & frontend migration
 @RestController
 @RequestMapping("archive")
 class ArchiveDataController(
-    val geoRelayRepository: GeoRelayRepositoryImpl,
-    val nodeDetailsRepositoryImpl: NodeDetailsRepositoryImpl,
+    val geoRelayRepository: RelayLocationRepositoryImpl,
+    val nodeDetailsRepositoryImpl: RelayDetailsRepositoryImpl,
 ) {
     @Cacheable("geo-relay-days")
     @GetMapping("/geo/relay/days")
@@ -21,20 +22,20 @@ class ArchiveDataController(
 
     @Cacheable("geo-relay-day", key = "#day")
     @GetMapping("/geo/relay/day/{day}")
-    fun getGeoRelaysByDay(@PathVariable day: String): List<GeoRelayDto> =
+    fun getGeoRelaysByDay(@PathVariable day: String): List<RelayLocationDto> =
         geoRelayRepository.findAllUsingDay(LocalDate.parse(day))
 
     @GetMapping("/node/details/{id}")
-    fun getNodeDetails(@PathVariable id: Long): NodeDetails {
+    fun getNodeDetails(@PathVariable id: Long): RelayDetails {
         val details = nodeDetailsRepositoryImpl.findById(id)
-        return if (details.isPresent) details.get() else throw NodeNotFoundException()
+        return if (details.isPresent) details.get() else throw RelayNotFoundException()
     }
 
     @GetMapping("/node/family/{familyId}")
     fun getNodesOfFamily(@PathVariable familyId: Long) = nodeDetailsRepositoryImpl.findAllByFamilyId(familyId)
 
     @PostMapping("/node/identifiers")
-    fun getNodeIdentifiers(@RequestBody ids: List<Long>) = nodeDetailsRepositoryImpl.findNodeIdentifiers(ids)
+    fun getNodeIdentifiers(@RequestBody ids: List<Long>) = nodeDetailsRepositoryImpl.findRelayIdentifiers(ids)
 
     @PostMapping("/node/family/identifiers")
     fun getNodeFamilyIdentifiers(@RequestBody familyIds: List<Long>) =

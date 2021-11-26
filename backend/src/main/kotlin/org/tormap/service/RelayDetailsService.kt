@@ -6,19 +6,19 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.tormap.adapter.controller.ArchiveDataController
 import org.tormap.commaSeparatedToList
-import org.tormap.database.entity.NodeDetails
-import org.tormap.database.repository.NodeDetailsRepositoryImpl
+import org.tormap.database.entity.RelayDetails
+import org.tormap.database.repository.RelayDetailsRepositoryImpl
 import org.tormap.logger
 import java.time.YearMonth
 import javax.transaction.Transactional
 
 
 /**
- * This service deals with [NodeDetails] entities
+ * This service deals with [RelayDetails] entities
  */
 @Service
-class NodeDetailsService(
-    private val nodeDetailsRepositoryImpl: NodeDetailsRepositoryImpl,
+class RelayDetailsService(
+    private val relayDetailsRepositoryImpl: RelayDetailsRepositoryImpl,
     private val dbSequenceIncrementer: H2SequenceMaxValueIncrementer,
     private val ipLookupService: IpLookupService,
     private val cacheManager: CacheManager,
@@ -27,10 +27,10 @@ class NodeDetailsService(
     private val logger = logger()
 
     /**
-     * Updates [NodeDetails.familyId] for all entities and if desired also [overwriteExistingFamilies].
+     * Updates [RelayDetails.familyId] for all entities and if desired also [overwriteExistingFamilies].
      */
     fun updateAllNodeFamilies(overwriteExistingFamilies: Boolean) {
-        var monthFamilyMemberCount = nodeDetailsRepositoryImpl.findDistinctMonthFamilyMemberCount()
+        var monthFamilyMemberCount = relayDetailsRepositoryImpl.findDistinctMonthFamilyMemberCount()
         if (!overwriteExistingFamilies) {
             monthFamilyMemberCount = monthFamilyMemberCount.filter { it.count == 0L }
         }
@@ -39,7 +39,7 @@ class NodeDetailsService(
 
 
     /**
-     * Updates [NodeDetails.familyId] for all entities of the requested [months].
+     * Updates [RelayDetails.familyId] for all entities of the requested [months].
      */
     fun updateNodeFamilies(months: Set<String>) {
         try {
@@ -69,22 +69,22 @@ class NodeDetailsService(
     }
 
     /**
-     * Updates [NodeDetails.autonomousSystemName] and [NodeDetails.autonomousSystemNumber] for all entities of the requested [months].
+     * Updates [RelayDetails.autonomousSystemName] and [RelayDetails.autonomousSystemNumber] for all entities of the requested [months].
      */
     @Async
     fun updateAutonomousSystems(months: Set<String>? = null) {
         try {
-            val monthsToProcess = months ?: nodeDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
+            val monthsToProcess = months ?: relayDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
             logger.info("Updating Autonomous Systems for months: ${monthsToProcess.joinToString(", ")}")
             monthsToProcess.forEach {
                 var changedNodesCount = 0
-                val nodesWithoutAS = nodeDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(it)
+                val nodesWithoutAS = relayDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(it)
                 nodesWithoutAS.forEach { node ->
                     if (node.updateAutonomousSystem()) {
                         changedNodesCount++
                     }
                 }
-                nodeDetailsRepositoryImpl.flush()
+                relayDetailsRepositoryImpl.flush()
                 if (changedNodesCount > 0) {
                     logger.info("Finished Autonomous Systems for month $it. Updated $changedNodesCount nodes.")
                 }
@@ -96,14 +96,14 @@ class NodeDetailsService(
     }
 
     /**
-     * Updates [NodeDetails.familyId] for all entities of the requested [month].
+     * Updates [RelayDetails.familyId] for all entities of the requested [month].
      */
     private fun updateNodeFamiliesForMonth(month: String) {
         var confirmedFamilyConnectionCount = 0
         var rejectedFamilyConnectionCount = 0
-        val families = mutableListOf<Set<NodeDetails>>()
+        val families = mutableListOf<Set<RelayDetails>>()
         val requestingFamilyNodes =
-            nodeDetailsRepositoryImpl.findAllByMonthEqualsAndFamilyEntriesNotNull(month)
+            relayDetailsRepositoryImpl.findAllByMonthEqualsAndFamilyEntriesNotNull(month)
         requestingFamilyNodes.forEach { requestingNode ->
             requestingNode.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
                 try {
@@ -143,7 +143,7 @@ class NodeDetailsService(
                 }
             }
         }
-        nodeDetailsRepositoryImpl.clearFamiliesFromMonth(month)
+        relayDetailsRepositoryImpl.clearFamiliesFromMonth(month)
         saveFamilies(families)
         val totalFamilyConnectionCount = confirmedFamilyConnectionCount + rejectedFamilyConnectionCount
         logger.info("Finished families for month $month. Rejected $rejectedFamilyConnectionCount / $totalFamilyConnectionCount connections. Found ${families.size} different families.")
@@ -153,13 +153,13 @@ class NodeDetailsService(
      * Trys to add an Autonomous System to [this]
      * @return true if node was changed
      */
-    private fun NodeDetails.updateAutonomousSystem(): Boolean {
+    private fun RelayDetails.updateAutonomousSystem(): Boolean {
         if (this.address != null) {
             val autonomousSystem = ipLookupService.lookupAutonomousSystem(this.address!!)
             if (autonomousSystem != null) {
                 this.autonomousSystemName = autonomousSystem.autonomousSystemOrganization
                 this.autonomousSystemNumber = autonomousSystem.autonomousSystemNumber
-                nodeDetailsRepositoryImpl.save(this)
+                relayDetailsRepositoryImpl.save(this)
                 return true
             }
         }
@@ -167,28 +167,28 @@ class NodeDetailsService(
     }
 
     /**
-     * Save a new family of nodes by updating their [NodeDetails.familyId]
+     * Save a new family of nodes by updating their [RelayDetails.familyId]
      */
     @Transactional
     fun saveFamilies(
-        families: List<Set<NodeDetails>>
+        families: List<Set<RelayDetails>>
     ) {
         families.forEach { family ->
             val familyId = dbSequenceIncrementer.nextLongValue()
             family.forEach { it.familyId = familyId }
-            nodeDetailsRepositoryImpl.saveAll(family)
+            relayDetailsRepositoryImpl.saveAll(family)
         }
-        nodeDetailsRepositoryImpl.flush()
+        relayDetailsRepositoryImpl.flush()
     }
 
     /**
      * Extract the fingerprint of a [allegedFamilyMemberId] and check if it is a family member of the [requestingNode]
      */
     private fun confirmFamilyMember(
-        requestingNode: NodeDetails,
+        requestingNode: RelayDetails,
         allegedFamilyMemberId: String,
-        requestingFamilyNodes: List<NodeDetails>,
-    ): NodeDetails? {
+        requestingFamilyNodes: List<RelayDetails>,
+    ): RelayDetails? {
         when {
             familyEntryFingerprintRegex.matches(allegedFamilyMemberId) -> {
                 val allegedFamilyMemberFingerprint = extractFingerprintFromFamilyEntry(allegedFamilyMemberId)
@@ -211,8 +211,8 @@ class NodeDetailsService(
      * Determines if the [requestingNode] shares a family with the [allegedFamilyMember].
      */
     private fun isNodeMemberOfFamily(
-        requestingNode: NodeDetails,
-        allegedFamilyMember: NodeDetails?,
+        requestingNode: RelayDetails,
+        allegedFamilyMember: RelayDetails?,
     ) = allegedFamilyMember?.familyEntries?.commaSeparatedToList()?.any {
         when {
             familyEntryFingerprintRegex.matches(it) -> {

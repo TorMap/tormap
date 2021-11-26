@@ -8,7 +8,7 @@ import org.tormap.jointToCommaSeparated
 /**
  * Identifier of a family
  */
-class NodeFamilyIdentifiersDto(
+class RelayFamilyIdentifiersDto(
     val id: Long,
     val memberCount: Long,
     val nicknames: String,

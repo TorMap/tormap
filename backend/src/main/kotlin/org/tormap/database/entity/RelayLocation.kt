@@ -12,18 +12,18 @@ import javax.persistence.*
 @Entity
 @Table(
     indexes = [
-        Index(columnList = "day, fingerprint", name = "day_fingerprint_index", unique = true),
-        Index(columnList = "day", name = "day_index"),
+        Index(columnList = "day, fingerprint", unique = true),
+        Index(columnList = "day"),
     ]
 )
-class GeoRelay(
+class RelayLocation(
     networkStatusEntry: NetworkStatusEntry,
     var day: LocalDate,
     var latitude: BigDecimal,
     var longitude: BigDecimal,
 
     @Column(length = 2, columnDefinition = "char(2)")
-    var countryCode: String?,
+    var countryCode: String,
 ) {
     @Id
     @GeneratedValue

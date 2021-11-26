@@ -25,3 +25,8 @@ fun String?.stripLengthForDB(maximumCharacters: Int = 255) = when {
     this == null || this.length <= maximumCharacters -> this
     else -> this.substring(0, maximumCharacters - 3) + "..."
 }
+
+object CacheName {
+    const val RELAY_LOCATION_DAYS = "RELAY_LOCATION_DAYS"
+    const val RELAY_LOCATION_DAY = "RELAY_LOCATION_DAY"
+}
