@@ -15,7 +15,13 @@ data class IpLookupConfig(
     /**
      * Config for looking up location
      */
-    val locationLookup: LocationLookupConfig
+    val locationLookup: LocationLookupConfig,
+
+
+    /**
+     * Config for looking up autonomous system
+     */
+    val autonomousSystemLookup: AutonomousSystemLookupConfig,
 )
 
 data class LocationLookupConfig(
@@ -24,4 +30,12 @@ data class LocationLookupConfig(
      * Relative backend path to the dbip DB file
      */
     val dbipDatabaseFile: String,
+)
+
+data class AutonomousSystemLookupConfig(
+
+    /**
+     * Relative backend path to the MaxMind DB file
+     */
+    val maxmindDatabaseFile: String,
 )

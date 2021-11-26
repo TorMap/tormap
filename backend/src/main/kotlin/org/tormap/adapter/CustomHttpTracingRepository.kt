@@ -38,7 +38,7 @@ class CustomHttpTraceRepository(
             val apiTrace = ApiTrace(it)
             val ipAddress = it.request.remoteAddress ?: it.request.headers["X-FORWARDED-FOR"]?.firstOrNull()
             if (ipAddress != null) {
-                val location = ipLookupService.getLocationForIpAddress(ipAddress)
+                val location = ipLookupService.lookupLocation(ipAddress)
                 apiTrace.countryCode = location?.countryCode
             }
             apiTraceRepository.save(apiTrace)

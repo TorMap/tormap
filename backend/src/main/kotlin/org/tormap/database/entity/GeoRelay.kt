@@ -24,11 +24,11 @@ class GeoRelay(
 
     @Column(length = 2, columnDefinition = "char(2)")
     var countryCode: String?,
-
+) {
     @Id
     @GeneratedValue
-    val id: Long? = null,
-) {
+    val id: Long? = null
+
     @Column(length = 40, columnDefinition = "char(40)")
     var fingerprint: String = networkStatusEntry.fingerprint
 

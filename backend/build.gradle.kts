@@ -49,7 +49,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
 
     // Latest stable H2 database driver https://www.h2database.com/
-    runtimeOnly("com.h2database:h2:1.4.199")
+    runtimeOnly("com.h2database:h2:1.4.200")
 
     // Run Flyway DB migration tool on startup https://flywaydb.org/
     implementation("org.flywaydb:flyway-core")
