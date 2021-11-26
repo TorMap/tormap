@@ -37,8 +37,9 @@ class SecurityConfig(
         } else {
             passwordFile.writeText(password)
         }
-        logger.info("Admin password:")
-        logger.info(password)
+        logger.info("------------------------------------------------------")
+        logger.info("Admin password: $password")
+        logger.info("------------------------------------------------------")
 
         auth.inMemoryAuthentication()
             .withUser(adminUserName)

@@ -1,6 +1,6 @@
 create sequence if not exists HIBERNATE_SEQUENCE;
 
-create table PROCESSED_FILE
+create table if not exists PROCESSED_FILE
 (
     FILENAME      VARCHAR(255) not null,
     TYPE          INTEGER      not null,
@@ -10,7 +10,7 @@ create table PROCESSED_FILE
     primary key (FILENAME, TYPE)
 );
 
-create table RELAY_DETAILS
+create table if not exists RELAY_DETAILS
 (
     ID                        BIGINT  not null
         primary key,
@@ -41,10 +41,10 @@ create table RELAY_DETAILS
         unique (MONTH, FINGERPRINT)
 );
 
-create index IDXCQ3LHP78MBMUB50NO34JX9YUD
+create index if not exists IDXCQ3LHP78MBMUB50NO34JX9YUD
     on RELAY_DETAILS (FAMILY_ID);
 
-create table RELAY_LOCATION
+create table if not exists RELAY_LOCATION
 (
     ID           BIGINT not null
         primary key,
@@ -58,10 +58,10 @@ create table RELAY_LOCATION
         unique (DAY, FINGERPRINT)
 );
 
-create index IDX7AFGO3A18QK33VQ1E11CFNV81
+create index if not exists IDX7AFGO3A18QK33VQ1E11CFNV81
     on RELAY_LOCATION (DAY);
 
-create table USER_TRACE
+create table if not exists USER_TRACE
 (
     ID                  BIGINT  not null
         primary key,
@@ -76,11 +76,11 @@ create table USER_TRACE
     URI                 VARCHAR(255)
 );
 
-create index IDX24NOI93PUMMSW06GWGFJAA8HA
+create index if not exists IDX24NOI93PUMMSW06GWGFJAA8HA
     on USER_TRACE (TIMESTAMP);
 
-create index IDXPAS47VYVU0O6HKFNT39W1OFDS
+create index if not exists IDXPAS47VYVU0O6HKFNT39W1OFDS
     on USER_TRACE (METHOD);
 
-create index IDX7KD9LCF6BEYWA50YYYKKXVLFH
+create index if not exists IDX7KD9LCF6BEYWA50YYYKKXVLFH
     on USER_TRACE (RESPONSE_STATUS);
