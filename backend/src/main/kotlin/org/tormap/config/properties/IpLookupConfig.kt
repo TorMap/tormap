@@ -21,16 +21,6 @@ data class IpLookupConfig(
 data class LocationLookupConfig(
 
     /**
-     * Relative backend path to the ip2location DB file
-     */
-    val ip2locationDatabaseFile: String,
-
-    /**
-     * Relative backend path to the maxmind DB file
-     */
-    val maxMindDatabaseFile: String,
-
-    /**
      * Relative backend path to the dbip DB file
      */
     val dbipDatabaseFile: String,

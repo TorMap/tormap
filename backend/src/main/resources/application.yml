@@ -8,8 +8,6 @@ descriptor:
 ip-lookup:
     shouldCache: true
     locationLookup:
-        ip2locationDatabaseFile: ip-lookup/location/ip2location/IP2LOCATION-LITE-DB5.BIN
-        maxMindDatabaseFile: ip-lookup/location/maxmind/GeoLite2-City.mmdb
         dbipDatabaseFile: ip-lookup/location/dbip/dbip-city-lite.mmdb
 management:
     endpoint:
@@ -31,7 +29,7 @@ logging:
     file:
         path: logs/spring-boot-logger.log
 schedule:
-    shouldOverwriteFamilies: true
+    shouldOverwriteFamilies: false
     rate:
         archiveRelayConsensuses: PT12H
         archiveRelayServers: PT12H
