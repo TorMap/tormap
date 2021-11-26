@@ -222,11 +222,12 @@ export const AboutInformation: React.FunctionComponent = () => {
                     dividers
                 >
                     <Typography variant={"body2"}>
-                        This site includes IP2Location LITE data available from <Link
-                        href={"https://www.ip2location.com/"}
-                        target={"_blank"}>https://www.ip2location.com/</Link> as
-                        well as GeoJSON data from <Link href={"https://geojson-maps.ash.ms/"}
-                                                        target={"_blank"}>https://geojson-maps.ash.ms/</Link>.
+                        We use <Link href={"https://db-ip.com"} target={"_blank"}>IP Geolocation data by DB-IP</Link>,
+                        <Link href={"https://www.maxmind.com/"} target={"_blank"}>Autonomous System data by
+                            MaxMind</Link>
+                        and GeoJSON data from
+                        <Link href={"https://geojson-maps.ash.ms/"}
+                              target={"_blank"}>https://geojson-maps.ash.ms/</Link>.
                     </Typography>
                 </DialogContent>
             </Dialog>

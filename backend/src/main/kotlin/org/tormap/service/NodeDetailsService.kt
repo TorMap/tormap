@@ -5,10 +5,8 @@ import org.springframework.jdbc.support.incrementer.H2SequenceMaxValueIncremente
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.tormap.adapter.controller.ArchiveDataController
-import org.tormap.calculateIPv4NumberRepresentation
 import org.tormap.commaSeparatedToList
 import org.tormap.database.entity.NodeDetails
-import org.tormap.database.repository.AutonomousSystemRepositoryImpl
 import org.tormap.database.repository.NodeDetailsRepositoryImpl
 import org.tormap.logger
 import java.time.YearMonth
@@ -22,7 +20,7 @@ import javax.transaction.Transactional
 class NodeDetailsService(
     private val nodeDetailsRepositoryImpl: NodeDetailsRepositoryImpl,
     private val dbSequenceIncrementer: H2SequenceMaxValueIncrementer,
-    private val autonomousSystemRepositoryImpl: AutonomousSystemRepositoryImpl,
+    private val ipLookupService: IpLookupService,
     private val cacheManager: CacheManager,
     private val archiveDataController: ArchiveDataController,
 ) {
@@ -157,15 +155,9 @@ class NodeDetailsService(
      */
     private fun NodeDetails.updateAutonomousSystem(): Boolean {
         if (this.address != null) {
-            val autonomousSystem = try {
-                this.addressNumber = this.addressNumber ?: calculateIPv4NumberRepresentation(this.address!!)
-                autonomousSystemRepositoryImpl.findUsingIPv4(this.addressNumber!!)
-            } catch (exception: Exception) {
-                logger().warn("Could not search autonomousSystem for address ${this.address}")
-                null
-            }
+            val autonomousSystem = ipLookupService.lookupAutonomousSystem(this.address!!)
             if (autonomousSystem != null) {
-                this.autonomousSystemName = autonomousSystem.autonomousSystemName
+                this.autonomousSystemName = autonomousSystem.autonomousSystemOrganization
                 this.autonomousSystemNumber = autonomousSystem.autonomousSystemNumber
                 nodeDetailsRepositoryImpl.save(this)
                 return true

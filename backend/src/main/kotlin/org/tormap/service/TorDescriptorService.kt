@@ -211,7 +211,7 @@ class TorDescriptorService(
                     networkStatusEntry.fingerprint
                 )
             ) {
-                val location = ipLookupService.getLocationForIpAddress(networkStatusEntry.address)
+                val location = ipLookupService.lookupLocation(networkStatusEntry.address)
                 if (location != null) {
                     geoRelayRepositoryImpl.save(GeoRelay(
                         networkStatusEntry,
@@ -250,11 +250,14 @@ class TorDescriptorService(
         val existingNode =
             nodeDetailsRepository.findByMonthAndFingerprint(descriptorMonth, descriptor.fingerprint)
         if (existingNode == null || existingNode.day < descriptorDay) {
+            val autonomousSystem = ipLookupService.lookupAutonomousSystem(descriptor.address)
             nodeDetailsRepository.save(
                 NodeDetails(
                     descriptor,
                     descriptorMonth,
                     descriptorDay,
+                    autonomousSystem?.autonomousSystemOrganization,
+                    autonomousSystem?.autonomousSystemNumber,
                     existingNode?.id,
                 )
             )
