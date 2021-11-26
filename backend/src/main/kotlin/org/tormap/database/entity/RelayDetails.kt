@@ -14,11 +14,11 @@ import javax.persistence.*
 @Entity
 @Table(
     indexes = [
-        Index(columnList = "month, fingerprint", name = "month_fingerprint_index", unique = true),
-        Index(columnList = "familyId", name = "familyId_index"),
+        Index(columnList = "month, fingerprint", unique = true),
+        Index(columnList = "familyId"),
     ]
 )
-class NodeDetails(
+class RelayDetails(
     descriptor: ServerDescriptor,
 
     @Column(length = 7, columnDefinition = "char(7)")

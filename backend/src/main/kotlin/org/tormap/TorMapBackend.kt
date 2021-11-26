@@ -6,11 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import java.time.ZonedDateTime
 
-/**
- * Configures basic Spring Boot application
- */
 @SpringBootApplication
-class TorMapApplication : ApplicationRunner {
+class TorMapBackend : ApplicationRunner {
 
     override fun run(args: ApplicationArguments) {
         logger().info("TorMap backend started successfully, running in timezone: " + ZonedDateTime.now().zone)
@@ -22,5 +19,5 @@ class TorMapApplication : ApplicationRunner {
  * Main method that starts backend application
  */
 fun main(args: Array<String>) {
-    runApplication<TorMapApplication>(*args)
+    runApplication<TorMapBackend>(*args)
 }

@@ -59,7 +59,7 @@ spring:
     jpa:
         database-platform: org.tormap.database.CustomH2Dialect
         hibernate:
-            ddl-auto: validate
+            ddl-auto: update
         open-in-view: false
     output:
         ansi:
