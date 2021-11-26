@@ -1,7 +1,5 @@
 package org.tormap.service
 
-import com.ip2location.IP2Location
-import com.ip2location.IPResult
 import com.maxmind.db.CHMCache
 import com.maxmind.geoip2.DatabaseReader
 import com.maxmind.geoip2.model.CityResponse
@@ -22,64 +20,35 @@ class IpLookupService(
     ipLookupConfig: IpLookupConfig,
 ) {
     private val logger = logger()
-    private var ip2locationDatabaseReader: IP2Location = IP2Location().open(
-        ipLookupConfig.locationLookup.ip2locationDatabaseFile,
-        ipLookupConfig.shouldCache,
-    )
-    private var maxMindDatabaseReader =
-        maxmindFormatDatabaseReader(ipLookupConfig.locationLookup.maxMindDatabaseFile, ipLookupConfig.shouldCache)
-    private var dbipDatabaseReader =
-        maxmindFormatDatabaseReader(ipLookupConfig.locationLookup.dbipDatabaseFile, ipLookupConfig.shouldCache)
+    private var dbipLocationDatabaseReader =
+        maxmindTypeDatabaseReader(ipLookupConfig.locationLookup.dbipDatabaseFile, ipLookupConfig.shouldCache)
 
 
     /**
      * Get the approximate geo location of an [ipAddress]
      * by looking it up with two different file based DB providers (IP2Location & Maxmind)
      */
-    fun getLocationForIpAddress(ipAddress: String): Location? {
-        val location = lookupLocationWithProvider(ipAddress, "dbip") {
-            Location(dbipDatabaseReader.city(InetAddress.getByName(ipAddress)))
-        } ?: lookupLocationWithProvider(ipAddress, "IP2Location") {
-            val ip2locationResult = ip2locationDatabaseReader.ipQuery(ipAddress)
-            if (ip2locationResult.status != "OK") throw Exception(ip2locationResult.status)
-            Location(ip2locationResult)
-        } ?: lookupLocationWithProvider(ipAddress, "MaxMind") {
-            Location(maxMindDatabaseReader.city(InetAddress.getByName(ipAddress)))
-        }
-        if (location == null) {
-            logger.warn("Location lookup for IP $ipAddress failed for all providers!")
-        }
-        return location
-    }
-
-    private fun lookupLocationWithProvider(ipAddress: String, lookupProvider: String, lookup: () -> Location) = try {
-        lookup()
+    fun getLocationForIpAddress(ipAddress: String): Location? = try {
+        Location(dbipLocationDatabaseReader.city(InetAddress.getByName(ipAddress)))
     } catch (exception: Exception) {
-        logger.debug("Location lookup for IP $ipAddress with provider $lookupProvider failed! ${exception.javaClass}: ${exception.message}")
+        logger.debug("Location lookup for IP $ipAddress with provider dbip failed! ${exception.javaClass}: ${exception.message}")
         null
     }
 
-    private fun maxmindFormatDatabaseReader(databaseFilePath: String, shouldCache: Boolean) =
+    private fun maxmindTypeDatabaseReader(databaseFilePath: String, shouldCache: Boolean) =
         if (shouldCache)
             DatabaseReader.Builder(File(databaseFilePath)).withCache(CHMCache()).build()
         else
             DatabaseReader.Builder(File(databaseFilePath)).build()
 }
 
-class Location {
+class Location(maxMindCityResponse: CityResponse) {
     private val geoDecimalPlaces = 4
     var latitude: BigDecimal
     var longitude: BigDecimal
     var countryCode: String
 
-    constructor (ip2locationResult: IPResult) {
-        this.latitude = ip2locationResult.latitude!!.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN)
-        this.longitude = ip2locationResult.longitude!!.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN)
-        this.countryCode = ip2locationResult.countryShort!!
-        this.ensureCompleteLocation()
-    }
-
-    constructor (maxMindCityResponse: CityResponse) {
+    init {
         this.latitude =
             maxMindCityResponse.location.latitude.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN)
         this.longitude =
