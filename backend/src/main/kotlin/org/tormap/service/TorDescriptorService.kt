@@ -102,7 +102,7 @@ class TorDescriptorService(
             descriptorDaysBeingProcessed.add(processDescriptor(it))
         }
         if (descriptorType === DescriptorType.RECENT_RELAY_SERVER) {
-            updateRelayDetails(processedMonths)
+            updateRelayFamilies(processedMonths)
         }
     }
 
@@ -132,16 +132,15 @@ class TorDescriptorService(
             } ?: lastError
         }
         if (descriptorType == DescriptorType.ARCHIVE_RELAY_SERVER) {
-            updateRelayDetails(processedMonths)
+            updateRelayFamilies(processedMonths)
         }
         saveFinishedDescriptorFile(descriptorFile, descriptorType, lastError)
         return processedMonths
     }
 
-    private fun updateRelayDetails(processedMonths: MutableSet<String>) {
+    private fun updateRelayFamilies(processedMonths: MutableSet<String>) {
         relayDetailsRepository.flush()
         relayDetailsService.updateFamilies(processedMonths)
-        relayDetailsService.updateAutonomousSystems(processedMonths)
     }
 
     private fun saveFinishedDescriptorFile(descriptorFile: File, descriptorType: DescriptorType, error: String?) {
