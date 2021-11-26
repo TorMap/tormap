@@ -24,16 +24,6 @@ data class ScheduleConfig(
  */
 data class RateConfig(
     /**
-     * The rate at which archive relay consensus descriptors are handled.
-     */
-    val archiveRelayConsensuses: String,
-
-    /**
-     * The rate at which archive relay server descriptors are handled.
-     */
-    val archiveRelayServers: String,
-
-    /**
      * The rate at which recent relay consensus descriptors are handled.
      */
     val recentRelayConsensuses: String,
@@ -44,12 +34,22 @@ data class RateConfig(
     val recentRelayServers: String,
 
     /**
-     * The rate at which the Autonomous System info in NodeDetails is updated.
+     * The rate at which archive relay consensus descriptors are handled.
      */
-    val updateNodeAutonomousSystems: String,
+    val archiveRelayConsensuses: String,
 
     /**
-     * The rate at which the families of NodeDetails are updated.
+     * The rate at which archive relay server descriptors are handled.
      */
-    val updateNodeFamilies: String,
+    val archiveRelayServers: String,
+
+    /**
+     * The rate at which missing Autonomous System info of relays is updated.
+     */
+    val updateRelayAutonomousSystems: String,
+
+    /**
+     * The rate at which missing families of relays are updated.
+     */
+    val updateRelayFamilies: String,
 )
