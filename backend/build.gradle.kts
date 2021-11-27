@@ -1,5 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+group = "org.tormap"
+version = "1.1.2"
+java.sourceCompatibility = JavaVersion.VERSION_11
+
 plugins {
     val kotlinVersion = "1.6.0"
     kotlin("jvm") version kotlinVersion
@@ -18,10 +22,6 @@ plugins {
     // Database migration tool https://flywaydb.org/documentation/usage/gradle/
     id("org.flywaydb.flyway") version "8.0.3"
 }
-
-group = "org.tormap"
-version = "1.1.2"
-java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
     mavenCentral()
@@ -42,8 +42,8 @@ dependencies {
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-    implementation("org.springdoc:springdoc-openapi-ui:1.5.11")
-    implementation("org.springdoc:springdoc-openapi-kotlin:1.5.11")
+    implementation("org.springdoc:springdoc-openapi-ui:1.5.12")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.5.12")
 
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
