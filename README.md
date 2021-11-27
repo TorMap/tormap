@@ -58,7 +58,7 @@ descriptors released by the `TorProject` will twice a day be automatically downl
 Processing of descriptors does not necessarily happen in a chronological order, but one month of descriptors is always
 processed together. Different descriptor types are handled in parallel. While the backend is processing descriptors, the
 frontend will always be able to display finished data. Frontend features like family grouping or relay details will only
-be available, if the corresponding server descriptors have also been processed.
+be available, if the corresponding relay server descriptors have been processed.
 
 ### Backend
 
@@ -105,41 +105,44 @@ To manually connect to the DB you either can add the datasource in your IDE or o
 backend is running. Make sure to configure the connection the same way your `application.yml` is set. In an IDE it might
 be necessary to configure the datasource URL with an absolute path to ensure the correct working directory is used.
 
-Preprocessed databases:
+Preprocessed DBs can be downloaded to speed up project deployment. Please make sure the major version (2.x.x) of the
+provided download matches the TorMap backend version you want to deploy (check version in `backend/build.gradle.kts`).:
 
-- http://timkilb.com/databases/tormap-full-DB-2021-09-01-version-1.1.0.zip
-- http://timkilb.com/databases/tormap-only-AS-DB-2021-09-01-version-1.1.0.zip
+DB download folder:
+https://mega.nz/folder/905XAC4Z#wwpWQm7w_R7tdAJHjMHkNg
 
-#### IP to Autonomous Systems
+#### IP lookups
 
-TorMap uses previously imported Autonomous System (AS) data from `IP2Location` to get the AS of a Tor node's IP address.
-The mapping is done after a server descriptors file was processed and additionally every 12 hours (configurable). If you
-are not starting with a preprocessed TorMap DB you will need to import a CSV file containing autonomous systems into the
-local H2 database. You can use the existing file (`backend/ip2location/IP2LOCATION-LITE-ASN.CSV`), but it is advised to
-reimport a new CSV file every few months, to keep the IP ranges up to date.
+TorMap uses DB files in [MaxMind DB file format](https://maxmind.github.io/MaxMind-DB/) (
+.mmdb) to map IPv4 addresses of Tor relays to geo locations and autonomous systems. The mapping is applied when
+descriptors are being processed and missing autonomous systems info is also updated regularly.
 
-1. Create a free account at https://lite.ip2location.com/sign-up
-2. Download latest IPv4 CSV file from https://lite.ip2location.com/database-asn
-3. Run command `./gradlew build` in `backend` directory
-4. Connect to a DB query console and run following commands:
-    - `TRUNCATE TABLE AUTONOMOUS_SYSTEM;`
-    - `INSERT INTO AUTONOMOUS_SYSTEM SELECT * FROM CSVREAD('<absolute_path_to_csv_file>');`
+IP ranges and their geographic location changes over time. We only use the current IP to location data although the
+location of some relays in the past might have been different. It is advised to replace the `.mmdb` DB files every few
+months, to keep the IP ranges up to date.
 
-#### IP to geo location
+Replacing existing DB files:
 
-TorMap uses a binary DB file from `IP2Location` to map IPv4 addresses of Tor nodes to geo locations. The mapping is
-applied when a consensus descriptor is being processed. It is advised to replace the binary file every few months, to
-keep the IP ranges up to date.
+1. Download latest MMDB file from https://db-ip.com/db/download/ip-to-country-lite
+2. Replace `backend/ip-lookup/location/dbip/dbip-city-lite.mmdb`
+3. Create account and download latest GeoLite2 ASN MMDB file from https://www.maxmind.com/
+4. Replace `backend/ip-lookup/autonomous-system/maxmind/GeoLite2-ASN.mmdb`
 
-1. Create a free account at https://lite.ip2location.com/sign-up
-2. Download latest IPv4 BIN file
-   from https://lite.ip2location.com/database/db5-ip-country-region-city-latitude-longitude
-3. Replace old BIN file with new one in `backend/ip2location/IP2LOCATION-LITE-DB5.BIN`
+#### Admin access
+
+When the backend is started, an admin password is displayed in the console. After the first startup it is saved
+in `backend/resources/admin-password.txt` for future runs. While the backend is running you can login
+with `username=admin` and the password at `http://localhost:8080/login`.
+
+This grants you access to:
+
+- Spring actuator endpoints http://localhost:8080/actuator
+- H2 DB web console http://localhost:8080/h2
 
 ### Frontend
 
 The frontend uses a [ReactJS](https://reactjs.org/) web app together with [TypeScript](https://www.typescriptlang.org/)
-and [Material-UI](https://material-ui.com/).
+and [Material-UI](https://mui.com/).
 
 #### CLI commands
 
@@ -177,11 +180,11 @@ Build docker image:
 
 1. Go to `backend` directory where file `gradlew` is located
 2. Make sure [docker](https://docs.docker.com/get-docker/) is installed and the docker daemon is running
-3. Run command: `./gradlew && ./gradlew -Pprod bootBuildImage`
+3. Run command: `./gradlew && ./gradlew bootBuildImage`
 4. A new image named juliushenke/tormap should be available in your local docker registry
 5. Run image in new container with command: `docker run -p 8080:8080 juliushenke/tormap` (optionally add the
-   flag `-v ~/tormap.mv.db:/workspace/resources/database/tormap.mv.db` to mount a preprocessed DB from your host file
-   system into the container)
+   flag `-v ~/resources:/workspace/resources/` to mount a preprocessed resources like the DB from your host file system
+   into the container)
 6. Backend should be available at http://localhost:8080
 
 ### Frontend

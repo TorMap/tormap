@@ -5,12 +5,13 @@ import org.springframework.cache.annotation.Caching
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.AsyncResult
 import org.springframework.stereotype.Service
+import org.tormap.CacheName
 import org.tormap.adapter.controller.ArchiveDataController
-import org.tormap.config.DescriptorConfig
+import org.tormap.config.value.DescriptorConfig
 import org.tormap.database.entity.*
-import org.tormap.database.repository.DescriptorsFileRepository
-import org.tormap.database.repository.GeoRelayRepositoryImpl
-import org.tormap.database.repository.NodeDetailsRepository
+import org.tormap.database.repository.ProcessedFileRepository
+import org.tormap.database.repository.RelayLocationRepositoryImpl
+import org.tormap.database.repository.RelayDetailsRepository
 import org.tormap.logger
 import org.tormap.millisSinceEpochToLocalDate
 import org.torproject.descriptor.Descriptor
@@ -20,7 +21,6 @@ import org.torproject.descriptor.ServerDescriptor
 import org.torproject.descriptor.impl.DescriptorReaderImpl
 import org.torproject.descriptor.index.DescriptorIndexCollector
 import java.io.File
-import java.math.RoundingMode
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -36,11 +36,11 @@ import java.util.concurrent.Future
 @Service
 class TorDescriptorService(
     private val descriptorConfig: DescriptorConfig,
-    private val geoRelayRepositoryImpl: GeoRelayRepositoryImpl,
-    private val nodeDetailsRepository: NodeDetailsRepository,
-    private val descriptorsFileRepository: DescriptorsFileRepository,
+    private val relayLocationRepositoryImpl: RelayLocationRepositoryImpl,
+    private val relayDetailsRepository: RelayDetailsRepository,
+    private val processedFileRepository: ProcessedFileRepository,
     private val ipLookupService: IpLookupService,
-    private val nodeDetailsService: NodeDetailsService,
+    private val relayDetailsService: RelayDetailsService,
     private val archiveDataController: ArchiveDataController,
 ) {
     private val logger = logger()
@@ -102,13 +102,13 @@ class TorDescriptorService(
             descriptorDaysBeingProcessed.add(processDescriptor(it))
         }
         if (descriptorType === DescriptorType.RECENT_RELAY_SERVER) {
-            updateRelayDetails(processedMonths)
+            updateRelayFamilies(processedMonths)
         }
     }
 
     /**
-     * Waits until all descriptors of the [descriptorFile] are processed and finally saves finished [DescriptorsFile].
-     * Updates the [NodeDetails.familyId] of processed months when [descriptorType] is [DescriptorType.ARCHIVE_RELAY_SERVER].
+     * Waits until all descriptors of the [descriptorFile] are processed and finally saves finished [ProcessedFile].
+     * Updates the [RelayDetails.familyId] of processed months when [descriptorType] is [DescriptorType.ARCHIVE_RELAY_SERVER].
      */
     @Async
     fun finishDescriptorFile(
@@ -132,29 +132,28 @@ class TorDescriptorService(
             } ?: lastError
         }
         if (descriptorType == DescriptorType.ARCHIVE_RELAY_SERVER) {
-            updateRelayDetails(processedMonths)
+            updateRelayFamilies(processedMonths)
         }
         saveFinishedDescriptorFile(descriptorFile, descriptorType, lastError)
         return processedMonths
     }
 
-    private fun updateRelayDetails(processedMonths: MutableSet<String>) {
-        nodeDetailsRepository.flush()
-        nodeDetailsService.updateNodeFamilies(processedMonths)
-        nodeDetailsService.updateAutonomousSystems(processedMonths)
+    private fun updateRelayFamilies(processedMonths: MutableSet<String>) {
+        relayDetailsRepository.flush()
+        relayDetailsService.updateFamilies(processedMonths)
     }
 
     private fun saveFinishedDescriptorFile(descriptorFile: File, descriptorType: DescriptorType, error: String?) {
-        val descriptorsFileId = DescriptorsFileId(descriptorType, descriptorFile.name)
-        val descriptorsFile = descriptorsFileRepository.findById(descriptorsFileId).orElseGet {
-            DescriptorsFile(
-                descriptorsFileId,
+        val descriptorsDescriptorFileId = DescriptorFileId(descriptorType, descriptorFile.name)
+        val descriptorsFile = processedFileRepository.findById(descriptorsDescriptorFileId).orElseGet {
+            ProcessedFile(
+                descriptorsDescriptorFileId,
                 descriptorFile.lastModified(),
             )
         }
         descriptorsFile.processedAt = LocalDateTime.now()
         descriptorsFile.error = error
-        descriptorsFileRepository.save(descriptorsFile)
+        processedFileRepository.saveAndFlush(descriptorsFile)
         logger.info("Finished processing descriptors file ${descriptorFile.name}")
     }
 
@@ -166,12 +165,12 @@ class TorDescriptorService(
         val descriptorReader = DescriptorReaderImpl()
         val parentDirectory = File(descriptorConfig.localDownloadDirectory + apiPath)
         if (descriptorType.isRecent()) {
-            descriptorsFileRepository.deleteAllById_TypeEqualsAndLastModifiedBefore(
+            processedFileRepository.deleteAllById_TypeEqualsAndLastModifiedBefore(
                 descriptorType,
                 Instant.now().minus(4, ChronoUnit.DAYS).toEpochMilli()
             )
         }
-        val excludedFiles = descriptorsFileRepository.findAllById_TypeEqualsAndErrorNull(descriptorType)
+        val excludedFiles = processedFileRepository.findAllById_TypeEqualsAndErrorNull(descriptorType)
         descriptorReader.excludedFiles = excludedFiles.associate {
             Pair(
                 parentDirectory.absolutePath + File.separator + it.id.filename,
@@ -200,67 +199,66 @@ class TorDescriptorService(
     }
 
     /**
-     * Use a [RelayNetworkStatusConsensus] descriptor to save [GeoRelay]s in the DB.
+     * Use a [RelayNetworkStatusConsensus] descriptor to save [RelayLocation]s in the DB.
      * The location is retrieved based on the relay's IP addresses.
      */
     private fun processRelayConsensusDescriptor(descriptor: RelayNetworkStatusConsensus): ProcessedDescriptorInfo {
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.validAfterMillis)
-        val nodesToSave = mutableListOf<GeoRelay>()
         descriptor.statusEntries.forEach {
             val networkStatusEntry = it.value
-            if (!geoRelayRepositoryImpl.existsByDayAndFingerprint(
+            if (!relayLocationRepositoryImpl.existsByDayAndFingerprint(
                     descriptorDay,
                     networkStatusEntry.fingerprint
                 )
             ) {
-                val location = ipLookupService.getLocationForIpAddress(networkStatusEntry.address)
-                val geoDecimalPlaces = 4
+                val location = ipLookupService.lookupLocation(networkStatusEntry.address)
                 if (location != null) {
-                    nodesToSave.add(
-                        GeoRelay(
-                            networkStatusEntry,
-                            descriptorDay,
-                            location.latitude!!.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN),
-                            location.longitude!!.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN),
-                            location.countryShort,
-                        )
-                    )
+                    relayLocationRepositoryImpl.save(RelayLocation(
+                        networkStatusEntry,
+                        descriptorDay,
+                        location.latitude,
+                        location.longitude,
+                        location.countryCode,
+                    ))
                 }
             }
         }
-        geoRelayRepositoryImpl.saveAllAndFlush(nodesToSave)
-        updateGeoRelayCaches(descriptorDay.toString())
+        relayLocationRepositoryImpl.flush()
+        updateRelayLocationCaches(descriptorDay.toString())
         return ProcessedDescriptorInfo(descriptorDay)
     }
 
     @Async
     @Caching(
         evict = [
-            CacheEvict("geo-relay-days"),
-            CacheEvict("geo-relay-day", key = "#day")
+            CacheEvict(CacheName.RELAY_LOCATION_DAYS),
+            CacheEvict(CacheName.RELAY_LOCATION_DAY, key = "#day")
         ]
     )
-    fun updateGeoRelayCaches(day: String) {
+    fun updateRelayLocationCaches(day: String) {
         archiveDataController.getDaysForGeoRelays()
         archiveDataController.getGeoRelaysByDay(day)
     }
 
     /**
-     * Use a server descriptor to save [NodeDetails] in the DB.
-     * Only saves a node if no more recent matching fingerprint is found.
+     * Use a server descriptor to save [RelayDetails] in the DB.
+     * Only saves a relay if no more recent matching fingerprint is found.
      */
     private fun processServerDescriptor(descriptor: ServerDescriptor): ProcessedDescriptorInfo {
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.publishedMillis)
         val descriptorMonth = YearMonth.from(descriptorDay).toString()
-        val existingNode =
-            nodeDetailsRepository.findByMonthAndFingerprint(descriptorMonth, descriptor.fingerprint)
-        if (existingNode == null || existingNode.day < descriptorDay) {
-            nodeDetailsRepository.save(
-                NodeDetails(
+        val existingRelay =
+            relayDetailsRepository.findByMonthAndFingerprint(descriptorMonth, descriptor.fingerprint)
+        if (existingRelay == null || existingRelay.day < descriptorDay) {
+            val autonomousSystem = ipLookupService.lookupAutonomousSystem(descriptor.address)
+            relayDetailsRepository.save(
+                RelayDetails(
                     descriptor,
                     descriptorMonth,
                     descriptorDay,
-                    existingNode?.id,
+                    autonomousSystem?.autonomousSystemOrganization,
+                    autonomousSystem?.autonomousSystemNumber,
+                    existingRelay?.id,
                 )
             )
         }
