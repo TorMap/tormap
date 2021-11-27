@@ -105,6 +105,12 @@ To manually connect to the DB you either can add the datasource in your IDE or o
 backend is running. Make sure to configure the connection the same way your `application.yml` is set. In an IDE it might
 be necessary to configure the datasource URL with an absolute path to ensure the correct working directory is used.
 
+Preprocessed DBs can be downloaded to speed up project deployment. Please make sure the major version (2.x.x) of the
+provided download matches the TorMap backend version you want to deploy (check version in `backend/build.gradle.kts`).:
+
+DB download folder:
+https://mega.nz/folder/905XAC4Z#wwpWQm7w_R7tdAJHjMHkNg
+
 #### IP lookups
 
 TorMap uses DB files in [MaxMind DB file format](https://maxmind.github.io/MaxMind-DB/) (
@@ -129,6 +135,7 @@ in `backend/resources/admin-password.txt` for future runs. While the backend is 
 with `username=admin` and the password at `http://localhost:8080/login`.
 
 This grants you access to:
+
 - Spring actuator endpoints http://localhost:8080/actuator
 - H2 DB web console http://localhost:8080/h2
 
