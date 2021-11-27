@@ -1,5 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+group = "org.tormap"
+version = "1.1.2"
+java.sourceCompatibility = JavaVersion.VERSION_11
+
 plugins {
     val kotlinVersion = "1.6.0"
     kotlin("jvm") version kotlinVersion
@@ -18,10 +22,6 @@ plugins {
     // Database migration tool https://flywaydb.org/documentation/usage/gradle/
     id("org.flywaydb.flyway") version "8.0.3"
 }
-
-group = "org.tormap"
-version = "1.1.2"
-java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
     mavenCentral()
@@ -42,17 +42,23 @@ dependencies {
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-    implementation("org.springdoc:springdoc-openapi-ui:1.5.11")
-    implementation("org.springdoc:springdoc-openapi-kotlin:1.5.11")
+    implementation("org.springdoc:springdoc-openapi-ui:1.5.12")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.5.12")
 
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
 
     // Latest stable H2 database driver https://www.h2database.com/
-    runtimeOnly("com.h2database:h2:1.4.199")
+    runtimeOnly("com.h2database:h2:1.4.200")
 
     // Run Flyway DB migration tool on startup https://flywaydb.org/
     implementation("org.flywaydb:flyway-core")
+
+    // Read .mmdb (MaxMind) DB files for IP lookups https://maxmind.github.io/MaxMind-DB/
+    implementation("com.maxmind.geoip2:geoip2:2.16.1")
+
+    // Anaylz user agent https://yauaa.basjes.nl/
+    implementation("nl.basjes.parse.useragent:yauaa:6.3")
 
     // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
     implementation("commons-codec:commons-codec:1.10")
@@ -81,8 +87,8 @@ flyway {
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage> {
     imageName = "juliushenke/tormap"
 
-    val relativePathIp2LocationDB = "/ip2location/"
-    bindings = listOf("${rootProject.projectDir.absolutePath}$relativePathIp2LocationDB:/workspace$relativePathIp2LocationDB")
+    val relativePathIpLookup = "/ip-lookup/"
+    bindings = listOf("${rootProject.projectDir.absolutePath}$relativePathIpLookup:/workspace$relativePathIpLookup")
 }
 
 // Configure KotlinDoc generation
