@@ -1,5 +1,6 @@
 package org.tormap.config
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
@@ -21,8 +22,10 @@ import javax.sql.DataSource
 @EnableAsync
 @EnableCaching
 class AppConfig(
-    private val databaseConfig: DatabaseConfig,
     private val dataSource: DataSource,
+
+    @Value("\${spring.h2.defaultSequenceName}")
+    private val h2DefaultSequenceName: String,
 ) : WebMvcConfigurer {
 
     /**
@@ -40,7 +43,7 @@ class AppConfig(
      * Access the H2 DB sequence incrementer to get the next sequence value
      */
     @Bean
-    fun h2SequenceMaxValueIncrementer() = H2SequenceMaxValueIncrementer(dataSource, databaseConfig.defaultSequenceName)
+    fun h2SequenceMaxValueIncrementer() = H2SequenceMaxValueIncrementer(dataSource, h2DefaultSequenceName)
 
     /**
      * Include an unique ETag hash for each response to enable client side caching.

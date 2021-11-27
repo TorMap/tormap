@@ -1,37 +1,23 @@
 create sequence if not exists HIBERNATE_SEQUENCE;
 
-create table if not exists DESCRIPTORS_FILE
+create table if not exists PROCESSED_FILE
 (
     FILENAME      VARCHAR(255) not null,
     TYPE          INTEGER      not null,
+    ERROR         VARCHAR(255),
     LAST_MODIFIED BIGINT       not null,
     PROCESSED_AT  TIMESTAMP,
-    primary key (TYPE, FILENAME)
+    primary key (FILENAME, TYPE)
 );
 
-create table if not exists GEO_RELAY
-(
-    ID           BIGINT not null
-        primary key,
-    COUNTRY_CODE CHAR(2),
-    DAY          DATE,
-    FINGERPRINT  CHAR(40),
-    FLAGS        VARCHAR(255),
-    LATITUDE     DECIMAL(6, 4),
-    LONGITUDE    DECIMAL(7, 4),
-    constraint DAY_FINGERPRINT_INDEX
-        unique (DAY, FINGERPRINT)
-);
-
-create table if not exists NODE_DETAILS
+create table if not exists RELAY_DETAILS
 (
     ID                        BIGINT  not null
         primary key,
     ADDRESS                   VARCHAR(15),
-    ADDRESS_NUMBER            BIGINT,
     ALLOW_SINGLE_HOP_EXITS    BOOLEAN not null,
     AUTONOMOUS_SYSTEM_NAME    VARCHAR(255),
-    AUTONOMOUS_SYSTEM_NUMBER  VARCHAR(10),
+    AUTONOMOUS_SYSTEM_NUMBER  INTEGER,
     BANDWIDTH_BURST           INTEGER not null,
     BANDWIDTH_OBSERVED        INTEGER not null,
     BANDWIDTH_RATE            INTEGER not null,
@@ -51,19 +37,50 @@ create table if not exists NODE_DETAILS
     PROTOCOLS                 VARCHAR(255),
     TUNNELLED_DIR_SERVER      BOOLEAN not null,
     UPTIME                    BIGINT,
-    constraint MONTH_FINGERPRINT_INDEX
+    constraint UKDJ8S83CN1FWMFUOJB7GMDQJPB
         unique (MONTH, FINGERPRINT)
 );
 
-create index if not exists FAMILYID_INDEX
-    on NODE_DETAILS (FAMILY_ID);
+create index if not exists IDXCQ3LHP78MBMUB50NO34JX9YUD
+    on RELAY_DETAILS (FAMILY_ID);
 
-create table if not exists AUTONOMOUS_SYSTEM
+create table if not exists RELAY_LOCATION
 (
-    IP_FROM                  BIGINT       not null,
-    IP_TO                    BIGINT       not null,
-    CIDR                     VARCHAR(43)  not null,
-    AUTONOMOUS_SYSTEM_NUMBER VARCHAR(10)  not null,
-    AUTONOMOUS_SYSTEM_NAME   VARCHAR(255) not null,
-    primary key (IP_FROM, IP_TO)
+    ID           BIGINT not null
+        primary key,
+    COUNTRY_CODE CHAR(2),
+    DAY          DATE,
+    FINGERPRINT  CHAR(40),
+    FLAGS        VARCHAR(255),
+    LATITUDE     DECIMAL(19, 2),
+    LONGITUDE    DECIMAL(19, 2),
+    constraint UKS31O09JOXQGOQOOLNUJ89FKTA
+        unique (DAY, FINGERPRINT)
 );
+
+create index if not exists IDX7AFGO3A18QK33VQ1E11CFNV81
+    on RELAY_LOCATION (DAY);
+
+create table if not exists USER_TRACE
+(
+    ID                  BIGINT  not null
+        primary key,
+    AGENT_MAJOR_VERSION VARCHAR(255),
+    COUNTRY_CODE        CHAR(2),
+    DEVICE_CLASS        VARCHAR(255),
+    METHOD              INTEGER,
+    OPERATING_SYSTEM    VARCHAR(255),
+    RESPONSE_STATUS     INTEGER not null,
+    TIME_TAKEN          BIGINT  not null,
+    TIMESTAMP           TIMESTAMP,
+    URI                 VARCHAR(255)
+);
+
+create index if not exists IDX24NOI93PUMMSW06GWGFJAA8HA
+    on USER_TRACE (TIMESTAMP);
+
+create index if not exists IDXPAS47VYVU0O6HKFNT39W1OFDS
+    on USER_TRACE (METHOD);
+
+create index if not exists IDX7KD9LCF6BEYWA50YYYKKXVLFH
+    on USER_TRACE (RESPONSE_STATUS);
