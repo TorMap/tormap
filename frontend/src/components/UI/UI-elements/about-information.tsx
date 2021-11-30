@@ -8,7 +8,6 @@ import {
     Dialog,
     DialogContent,
     DialogTitle,
-    Divider,
     Grid,
     IconButton,
     Link,
