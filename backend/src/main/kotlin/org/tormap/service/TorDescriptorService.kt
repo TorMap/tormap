@@ -14,15 +14,11 @@ import org.tormap.database.repository.RelayLocationRepositoryImpl
 import org.tormap.database.repository.RelayDetailsRepository
 import org.tormap.logger
 import org.tormap.millisSinceEpochToLocalDate
-import org.torproject.descriptor.Descriptor
-import org.torproject.descriptor.DescriptorCollector
-import org.torproject.descriptor.RelayNetworkStatusConsensus
-import org.torproject.descriptor.ServerDescriptor
+import org.torproject.descriptor.*
 import org.torproject.descriptor.impl.DescriptorReaderImpl
 import org.torproject.descriptor.index.DescriptorIndexCollector
 import java.io.File
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
@@ -31,7 +27,7 @@ import java.util.concurrent.Future
 
 /**
  * This service can collect and process Tor descriptors.
- * Descriptors are downloaded from this remote collector endpoint: [https://metrics.torproject.org/collector/]
+ * Descriptors are by default downloaded from a remote collector endpoint: [https://metrics.torproject.org/collector/]
  */
 @Service
 class TorDescriptorService(
@@ -51,15 +47,15 @@ class TorDescriptorService(
      */
     fun collectAndProcessDescriptors(apiPath: String, descriptorType: DescriptorType) {
         try {
-            logger.info("Collecting descriptors from API path: $apiPath ...")
+            logger.info("... Collecting descriptors from API path: $apiPath")
             collectDescriptors(apiPath, descriptorType.isRecent())
             logger.info("Finished collecting descriptors from API path: $apiPath")
 
-            logger.info("Processing descriptors from API path $apiPath ...")
+            logger.info("... Processing descriptors from API path $apiPath")
             processDescriptors(apiPath, descriptorType)
             logger.info("Finished processing descriptors from API path: $apiPath")
         } catch (exception: Exception) {
-            logger.error("Could not collect or process descriptors from API path: $apiPath ! ${exception.message}")
+            logger.error("Could not collect or process descriptors from API path: $apiPath! ${exception.message}")
         }
     }
 
@@ -82,7 +78,7 @@ class TorDescriptorService(
      * Process descriptors which were previously saved to disk at [apiPath]
      */
     private fun processDescriptors(apiPath: String, descriptorType: DescriptorType) {
-        var descriptorDaysBeingProcessed = mutableSetOf<Future<ProcessedDescriptorInfo>>()
+        var descriptorsBeingProcessed = mutableSetOf<Future<ProcessedDescriptorInfo>>()
         val processedMonths = mutableSetOf<String>()
         var lastProcessedFile: File? = null
         readDescriptors(apiPath, descriptorType).forEach {
@@ -93,16 +89,16 @@ class TorDescriptorService(
                     finishDescriptorFile(
                         lastProcessedFile!!,
                         descriptorType,
-                        descriptorDaysBeingProcessed
+                        descriptorsBeingProcessed
                     )
                 )
                 lastProcessedFile = it.descriptorFile
-                descriptorDaysBeingProcessed = mutableSetOf()
+                descriptorsBeingProcessed = mutableSetOf()
             }
-            descriptorDaysBeingProcessed.add(processDescriptor(it))
+            descriptorsBeingProcessed.add(processDescriptor(it))
         }
         if (descriptorType === DescriptorType.RECENT_RELAY_SERVER) {
-            updateRelayFamilies(processedMonths)
+            relayDetailsService.updateFamilies(processedMonths)
         }
     }
 
@@ -121,28 +117,27 @@ class TorDescriptorService(
         descriptorDaysBeingProcessed.forEach {
             lastError = try {
                 val processedDescriptor = it.get()
-                if (processedDescriptor.descriptorDay != null) {
-                    processedMonths.add(YearMonth.from(processedDescriptor.descriptorDay).toString())
+                if (processedDescriptor.yearMonth != null) {
+                    processedMonths.add(processedDescriptor.yearMonth!!)
                 }
                 processedDescriptor.error
             } catch (exception: Exception) {
                 val message = "Could not finish processing a descriptor! ${exception.message}"
-                logger.error(message)
+                logger.warn(message)
                 message
             } ?: lastError
         }
         if (descriptorType == DescriptorType.ARCHIVE_RELAY_SERVER) {
-            updateRelayFamilies(processedMonths)
+            relayDetailsService.updateFamilies(processedMonths)
         }
         saveFinishedDescriptorFile(descriptorFile, descriptorType, lastError)
         return processedMonths
     }
 
-    private fun updateRelayFamilies(processedMonths: MutableSet<String>) {
-        relayDetailsRepository.flush()
-        relayDetailsService.updateFamilies(processedMonths)
-    }
-
+    /**
+     * Saves a reference of the finished [descriptorFile] to the DB.
+     * Next time this [descriptorFile] will be excluded from processing if no [error] was found or a newer version exists.
+     */
     private fun saveFinishedDescriptorFile(descriptorFile: File, descriptorType: DescriptorType, error: String?) {
         val descriptorsDescriptorFileId = DescriptorFileId(descriptorType, descriptorFile.name)
         val descriptorsFile = processedFileRepository.findById(descriptorsDescriptorFileId).orElseGet {
@@ -190,10 +185,14 @@ class TorDescriptorService(
             return when (descriptor) {
                 is RelayNetworkStatusConsensus -> AsyncResult(processRelayConsensusDescriptor(descriptor))
                 is ServerDescriptor -> AsyncResult(processServerDescriptor(descriptor))
-                else -> throw Exception("Type ${descriptor.javaClass.name} is not supported!")
+                is UnparseableDescriptor -> {
+                    logger.debug("Unparsable descriptor in file ${descriptor.descriptorFile.name}: ${descriptor.descriptorParseException.message}")
+                    AsyncResult(ProcessedDescriptorInfo())
+                }
+                else -> throw Exception("Descriptor type ${descriptor.javaClass.name} is not yet supported!")
             }
         } catch (exception: Exception) {
-            logger.error("Could not process descriptor part of ${descriptor.descriptorFile.name} ! ${exception.message}")
+            logger.error("Could not process descriptor part of ${descriptor.descriptorFile.name}! ${exception.message}")
             AsyncResult(ProcessedDescriptorInfo(error = exception.message))
         }
     }
@@ -225,9 +224,12 @@ class TorDescriptorService(
         }
         relayLocationRepositoryImpl.flush()
         updateRelayLocationCaches(descriptorDay.toString())
-        return ProcessedDescriptorInfo(descriptorDay)
+        return ProcessedDescriptorInfo(YearMonth.from(descriptorDay).toString())
     }
 
+    /**
+     * Update the cache for available relay location days and the given [day]
+     */
     @Async
     @Caching(
         evict = [
@@ -262,12 +264,11 @@ class TorDescriptorService(
                 )
             )
         }
-        return ProcessedDescriptorInfo(descriptorDay)
+        return ProcessedDescriptorInfo(descriptorMonth)
     }
 }
 
 class ProcessedDescriptorInfo(
-    var descriptorDay: LocalDate? = null,
+    var yearMonth: String? = null,
     var error: String? = null,
 )
-

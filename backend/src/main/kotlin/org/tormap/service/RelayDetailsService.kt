@@ -44,7 +44,8 @@ class RelayDetailsService(
      */
     fun updateFamilies(months: Set<String>) {
         try {
-            logger.info("Updating relay families for months: ${months.joinToString(", ")}")
+            logger.info("... Updating relay families for months: ${months.joinToString(", ")}")
+            relayDetailsRepositoryImpl.flush()
             months.forEach { month ->
                 try {
                     updateFamiliesForMonth(month)
@@ -59,6 +60,9 @@ class RelayDetailsService(
         }
     }
 
+    /**
+     * Updates the relay location cache for all days of a given [month]
+     */
     @Async
     fun updateRelayLocationDayCache(month: String) {
         val yearMonth = YearMonth.parse(month)
@@ -70,13 +74,14 @@ class RelayDetailsService(
     }
 
     /**
-     * Updates [RelayDetails.autonomousSystemName] and [RelayDetails.autonomousSystemNumber] for all entities of the requested [months].
+     * Updates [RelayDetails.autonomousSystemName] and [RelayDetails.autonomousSystemNumber] for all [RelayDetails] missing this info.
      */
     @Async
-    fun updateAutonomousSystems(months: Set<String>? = null) {
+    fun updateAutonomousSystems() {
         try {
-            val monthsToProcess = months ?: relayDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
-            logger.info("Updating Autonomous Systems for months: ${monthsToProcess.joinToString(", ")}")
+            relayDetailsRepositoryImpl.flush()
+            val monthsToProcess = relayDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
+            logger.info("... Updating Autonomous Systems for months: ${monthsToProcess.joinToString(", ")}")
             monthsToProcess.forEach {
                 var changedRelaysCount = 0
                 val relaysWithoutAutonomousSystem =
@@ -98,60 +103,6 @@ class RelayDetailsService(
     }
 
     /**
-     * Updates [RelayDetails.familyId] for all entities of the requested [month].
-     */
-    private fun updateFamiliesForMonth(month: String) {
-        var confirmedFamilyConnectionCount = 0
-        var rejectedFamilyConnectionCount = 0
-        val families = mutableListOf<Set<RelayDetails>>()
-        val requestingRelays =
-            relayDetailsRepositoryImpl.findAllByMonthEqualsAndFamilyEntriesNotNull(month)
-        requestingRelays.forEach { requestingRelay ->
-            requestingRelay.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
-                try {
-                    val newConfirmedMember =
-                        requestingRelay.confirmFamilyMember(familyEntry, requestingRelays)
-                    if (newConfirmedMember != null && requestingRelay != newConfirmedMember) {
-                        val existingFamilyRequestingRelayIndex =
-                            families.indexOfFirst { it.contains(requestingRelay) }
-                        val existingFamilyNewConfirmedMemberIndex =
-                            families.indexOfFirst { it.contains(newConfirmedMember) }
-
-                        if (
-                            existingFamilyRequestingRelayIndex >= 0
-                            && existingFamilyNewConfirmedMemberIndex >= 0
-                            && existingFamilyRequestingRelayIndex != existingFamilyNewConfirmedMemberIndex
-                        ) {
-                            families[existingFamilyRequestingRelayIndex] =
-                                families[existingFamilyRequestingRelayIndex].plus(families[existingFamilyNewConfirmedMemberIndex])
-                            families.removeAt(existingFamilyNewConfirmedMemberIndex)
-                        } else if (existingFamilyRequestingRelayIndex >= 0) {
-                            families[existingFamilyRequestingRelayIndex] =
-                                families[existingFamilyRequestingRelayIndex].plus(newConfirmedMember)
-                        } else if (existingFamilyNewConfirmedMemberIndex >= 0) {
-                            families[existingFamilyNewConfirmedMemberIndex] =
-                                families[existingFamilyNewConfirmedMemberIndex].plus(requestingRelay)
-                        } else {
-                            families.add(setOf(requestingRelay, newConfirmedMember))
-                        }
-
-                        confirmedFamilyConnectionCount++
-                    } else {
-                        rejectedFamilyConnectionCount++
-                    }
-                } catch (exception: Exception) {
-                    logger.debug(exception.message)
-                    rejectedFamilyConnectionCount++
-                }
-            }
-        }
-        relayDetailsRepositoryImpl.clearFamiliesFromMonth(month)
-        saveFamilies(families)
-        val totalFamilyConnectionCount = confirmedFamilyConnectionCount + rejectedFamilyConnectionCount
-        logger.info("Finished families for month $month. Rejected $rejectedFamilyConnectionCount / $totalFamilyConnectionCount connections. Found ${families.size} different families.")
-    }
-
-    /**
      * Trys to add an Autonomous System to [this]
      * @return true if node was changed
      */
@@ -169,13 +120,69 @@ class RelayDetailsService(
     }
 
     /**
-     * Save a new family of nodes by updating their [RelayDetails.familyId]
+     * Updates [RelayDetails.familyId] of all entities for the given [month].
+     */
+    private fun updateFamiliesForMonth(month: String) {
+        var confirmedFamilyConnectionCount = 0
+        var rejectedFamilyConnectionCount = 0
+        val families = mutableListOf<Set<RelayDetails>>()
+        val requestingRelays =
+            relayDetailsRepositoryImpl.findAllByMonthEqualsAndFamilyEntriesNotNull(month)
+        requestingRelays.forEach { requestingRelay ->
+            requestingRelay.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
+                try {
+                    val newConfirmedMember =
+                        requestingRelay.confirmFamilyMember(familyEntry, requestingRelays)
+                    if (newConfirmedMember != null && requestingRelay != newConfirmedMember) {
+                        families.addFamilyMember(requestingRelay, newConfirmedMember)
+                        confirmedFamilyConnectionCount++
+                    } else {
+                        rejectedFamilyConnectionCount++
+                    }
+                } catch (exception: Exception) {
+                    logger.debug(exception.message)
+                    rejectedFamilyConnectionCount++
+                }
+            }
+        }
+        relayDetailsRepositoryImpl.clearFamiliesFromMonth(month)
+        families.saveToDatabase()
+        val totalFamilyConnectionCount = confirmedFamilyConnectionCount + rejectedFamilyConnectionCount
+        logger.info("Finished families for month $month. Rejected $rejectedFamilyConnectionCount / $totalFamilyConnectionCount connections. Found ${families.size} different families.")
+    }
+
+    /**
+     * Check to which family the [requestingRelay] and the [newMember] belong
+     */
+    private fun MutableList<Set<RelayDetails>>.addFamilyMember(
+        requestingRelay: RelayDetails,
+        newMember: RelayDetails
+    ) {
+        val requestingRelayIndex = this.indexOfFirst { it.contains(requestingRelay) }
+        val newMemberIndex = this.indexOfFirst { it.contains(newMember) }
+
+        if (
+            requestingRelayIndex >= 0
+            && newMemberIndex >= 0
+            && requestingRelayIndex != newMemberIndex
+        ) {
+            this[requestingRelayIndex] = this[requestingRelayIndex].plus(this[newMemberIndex])
+            this.removeAt(newMemberIndex)
+        } else if (requestingRelayIndex >= 0) {
+            this[requestingRelayIndex] = this[requestingRelayIndex].plus(newMember)
+        } else if (newMemberIndex >= 0) {
+            this[newMemberIndex] = this[newMemberIndex].plus(requestingRelay)
+        } else {
+            this.add(setOf(requestingRelay, newMember))
+        }
+    }
+
+    /**
+     * Save families of [RelayDetails] by updating their [RelayDetails.familyId]
      */
     @Transactional
-    fun saveFamilies(
-        families: List<Set<RelayDetails>>
-    ) {
-        families.forEach { family ->
+    fun List<Set<RelayDetails>>.saveToDatabase() {
+        this.forEach { family ->
             val familyId = dbSequenceIncrementer.nextLongValue()
             family.forEach { it.familyId = familyId }
             relayDetailsRepositoryImpl.saveAllAndFlush(family)
@@ -202,7 +209,7 @@ class RelayDetailsService(
                 relaysWithFamilyEntries.filter { it.nickname == allegedFamilyMemberId }
                     .firstOrNull { this.isMemberOfFamily(it) }
             }
-            else -> throw Exception("Format of new family member $allegedFamilyMemberId for requestingRelay ${this.fingerprint} not supported!")
+            else -> throw Exception("Format of alleged family member $allegedFamilyMemberId for requestingRelay ${this.fingerprint} not supported!")
         }
         return null
     }
@@ -220,7 +227,7 @@ class RelayDetailsService(
             familyEntryNicknameRegex.matches(it) -> {
                 this.nickname == it
             }
-            else -> throw Exception("Format of new family member ${allegedFamilyMember.id} for requestingRelay ${this.fingerprint} not supported!")
+            else -> false
         }
     } ?: false
 
@@ -229,4 +236,3 @@ class RelayDetailsService(
     private val familyEntryFingerprintRegex = Regex("^\\$[A-F0-9]{40}.*$")
     private val familyEntryNicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
 }
-
