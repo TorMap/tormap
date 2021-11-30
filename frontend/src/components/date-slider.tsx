@@ -127,7 +127,7 @@ export const DateSlider: FunctionComponent<Props> = ({availableDays, setValue}) 
                     KeyboardButtonProps={{
                         'aria-label': 'change date',
                     }}
-                    helperText={`Day in the life of the tor network`}
+                    helperText={`Select a day of interest`}
                     shouldDisableDate={date => {
                         return !(availableDays.includes(moment(date).format("YYYY-MM-DD")))
                     }}
