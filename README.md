@@ -2,9 +2,9 @@
 
 This project visualizes current and past Tor relays on a world map. The backend regularly downloads descriptors
 from [TorProject Archive](https://metrics.torproject.org/collector/archive/) and saves a processed version in a local
-database. Currently, the required archive part makes up 33 GB for the available consensus descriptor years (2007 - 2021). Processing of a
-descriptor type only starts after all descriptors of the same type have been downloaded and saved to disk. Processed
-data can instantly be fetched by the frontend to be displayed on the world map.
+database. Currently, the required archive part makes up 33 GB for the available consensus descriptor years (2007 - 2021)
+. Processing of a descriptor type only starts after all descriptors of the same type have been downloaded and saved to
+disk. Processed data can instantly be fetched by the frontend to be displayed on the world map.
 
 ![UI screenshot](docs/UI-screenshot.jpg)
 
@@ -28,7 +28,6 @@ If you use Windows or the `./install` script failed, please install these manual
 Troubleshooting:
 
 - Make sure `JAVA_HOME` points to a Java JDK version >= 11.
-
 
 ### Run development servers
 
@@ -59,7 +58,7 @@ descriptors released by the `TorProject` will twice a day be automatically downl
 Processing of descriptors does not necessarily happen in a chronological order, but one month of descriptors is always
 processed together. Different descriptor types are handled in parallel. While the backend is processing descriptors, the
 frontend will always be able to display finished data. Frontend features like family grouping or relay details will only
-be available, if the corresponding server descriptors have also been processed.
+be available, if the corresponding relay server descriptors have been processed.
 
 ### Backend
 
@@ -87,15 +86,15 @@ instead of `./gradlew` for all following commands.
 
 #### Config
 
-The main `backend` config is located at `backend/srv/main/resorces/application.yml`. Logging options can be
-configured with
+The main `backend` config is located at `backend/srv/main/resorces/application.yml`. Logging options can be configured
+with
 `backend/srv/main/resorces/logback-spring.xml`. Dependencies are managed with `Gradle` and located
 at `backend/build.gradle.kts`.
 
 #### OpenAPI specification
 
-An interactive Swagger UI is available under http://localhost:8080 and the specification can also be
-viewed in raw JSON under http://localhost:8080/openapi.
+An interactive Swagger UI is available under http://localhost:8080 and the specification can also be viewed in raw JSON
+under http://localhost:8080/openapi.
 
 #### Database
 
@@ -103,43 +102,47 @@ TorMap uses an embedded H2 database which saves the whole state in a single DB f
 at `backend/resources/database/tormap.mv.db`.
 
 To manually connect to the DB you either can add the datasource in your IDE or open http://localhost:8080/h2 while the
-backend is running. Make sure to configure the connection the same way your `application.yml` is set. In an IDE
-it might be necessary to configure the datasource URL with an absolute path to ensure the correct working directory is
-used.
+backend is running. Make sure to configure the connection the same way your `application.yml` is set. In an IDE it might
+be necessary to configure the datasource URL with an absolute path to ensure the correct working directory is used.
 
-Preprocessed databases:
-- http://timkilb.com/databases/tormap-full-DB-2021-09-01-version-1.1.0.zip
-- http://timkilb.com/databases/tormap-only-AS-DB-2021-09-01-version-1.1.0.zip
+Preprocessed DBs can be downloaded to speed up project deployment. Please make sure the major version (2.x.x) of the
+provided download matches the TorMap backend version you want to deploy (check version in `backend/build.gradle.kts`).:
 
-#### IP to Autonomous Systems
+DB download folder:
+https://mega.nz/folder/905XAC4Z#wwpWQm7w_R7tdAJHjMHkNg
 
-TorMap uses previously imported Autonomous System (AS) data from `IP2Location` to get the AS of a Tor node's IP address.
-The mapping is done after a server descriptors file was processed and additionally every 12 hours (configurable). If you
-are not starting with a preprocessed TorMap DB you will need to import a CSV file containing autonomous systems into the
-local H2 database. It is advised to reimport a new CSV file every few months, to keep the IP ranges up to date.
+#### IP lookups
 
-1. Create a free account at https://lite.ip2location.com/sign-up
-2. Download latest IPv4 CSV file from https://lite.ip2location.com/database-asn
-3. Run command `./gradlew build` in `backend` directory
-4. Connect to a DB query console and run following commands:
-    - `TRUNCATE TABLE AUTONOMOUS_SYSTEM;`
-    - `INSERT INTO AUTONOMOUS_SYSTEM SELECT * FROM CSVREAD('<absolute_path_to_csv_file>');`
+TorMap uses DB files in [MaxMind DB file format](https://maxmind.github.io/MaxMind-DB/) (
+.mmdb) to map IPv4 addresses of Tor relays to geo locations and autonomous systems. The mapping is applied when
+descriptors are being processed and missing autonomous systems info is also updated regularly.
 
-#### IP to geo location
+IP ranges and their geographic location changes over time. We only use the current IP to location data although the
+location of some relays in the past might have been different. It is advised to replace the `.mmdb` DB files every few
+months, to keep the IP ranges up to date.
 
-TorMap uses a binary DB file from `IP2Location` to map IPv4 addresses of Tor nodes to geo locations. The mapping is
-applied when a consensus descriptor is being processed. It is advised to replace the binary file every few months, to keep
-the IP ranges up to date.
+Replacing existing DB files:
 
-1. Create a free account at https://lite.ip2location.com/sign-up
-2. Download latest IPv4 BIN file
-   from https://lite.ip2location.com/database/db5-ip-country-region-city-latitude-longitude
-3. Replace old BIN file with new one in `backend/ip2location/IP2LOCATION-LITE-DB5.BIN`
+1. Download latest MMDB file from https://db-ip.com/db/download/ip-to-country-lite
+2. Replace `backend/ip-lookup/location/dbip/dbip-city-lite.mmdb`
+3. Create account and download latest GeoLite2 ASN MMDB file from https://www.maxmind.com/
+4. Replace `backend/ip-lookup/autonomous-system/maxmind/GeoLite2-ASN.mmdb`
+
+#### Admin access
+
+When the backend is started, an admin password is displayed in the console. After the first startup it is saved
+in `backend/resources/admin-password.txt` for future runs. While the backend is running you can login
+with `username=admin` and the password at `http://localhost:8080/login`.
+
+This grants you access to:
+
+- Spring actuator endpoints http://localhost:8080/actuator
+- H2 DB web console http://localhost:8080/h2
 
 ### Frontend
 
 The frontend uses a [ReactJS](https://reactjs.org/) web app together with [TypeScript](https://www.typescriptlang.org/)
-and [Material-UI](https://material-ui.com/).
+and [Material-UI](https://mui.com/).
 
 #### CLI commands
 
@@ -147,14 +150,15 @@ Make sure you are in the `frontend` directory. You can learn more about the foll
 the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 - `yarn`: installs required frontend packages
-- `yarn start`: creates build, runs it and listens by default on http://localhost:3000 (page reloads if you save frontend changes)
+- `yarn start`: creates build, runs it and listens by default on http://localhost:3000 (page reloads if you save
+  frontend changes)
 - `yarn build`: creates production ready build in `build` folder
 
 #### Config
 
 The main `frontend` config is located at `frontend/srv/util/config.ts`. Further environment options like enable/disable
-Browser autostart and default port can be configured in `frontend/.env`. Dependencies are managed with `yarn` and located
-in `frontend/package.json`. Compiler options for `TypeScript` are located at `frontend/tsconfig.json`.
+Browser autostart and default port can be configured in `frontend/.env`. Dependencies are managed with `yarn` and
+located in `frontend/package.json`. Compiler options for `TypeScript` are located at `frontend/tsconfig.json`.
 
 ## Build and run project
 
@@ -163,20 +167,24 @@ First make sure you have installed all requirements for development.
 ### Backend
 
 Build fat JAR:
+
 1. Go to `backend` directory where file `gradlew` is located
 2. Run command: `./gradlew && ./gradlew bootJar`
 3. A fat jar containing all packages should now be located in `backend/build/libs/`.
-4. Create a folder containing a copy of the generated jar and the `backend/resources` folder. 
-5. Go into the directory where the `.jar` file is located 
+4. Create a folder containing a copy of the generated jar and the `backend/resources` folder.
+5. Go into the directory where the `.jar` file is located
 6. Run command `java -jar <backend jar file>`
 7. Backend should be available at http://localhost:8080
 
 Build docker image:
+
 1. Go to `backend` directory where file `gradlew` is located
 2. Make sure [docker](https://docs.docker.com/get-docker/) is installed and the docker daemon is running
-3. Run command: `./gradlew && ./gradlew -Pprod bootBuildImage`
+3. Run command: `./gradlew && ./gradlew bootBuildImage`
 4. A new image named juliushenke/tormap should be available in your local docker registry
-5. Run image in new container with command: `docker run -p 8080:8080 juliushenke/tormap` (optionally add the flag `-v ~/tormap.mv.db:/workspace/resources/database/tormap.mv.db` to mount a preprocessed DB from your host file system into the container)
+5. Run image in new container with command: `docker run -p 8080:8080 juliushenke/tormap` (optionally add the
+   flag `-v ~/resources:/workspace/resources/` to mount a preprocessed resources like the DB from your host file system
+   into the container)
 6. Backend should be available at http://localhost:8080
 
 ### Frontend
