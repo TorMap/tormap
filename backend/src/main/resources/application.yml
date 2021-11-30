@@ -13,6 +13,8 @@ ip-lookup:
         maxmindDatabaseFile: ip-lookup/autonomous-system/maxmind/GeoLite2-ASN.mmdb
 management:
     endpoint:
+        health:
+            show-details: when_authorized
         logfile:
             external-file: logs/spring-boot-logger.log
     endpoints:
@@ -21,7 +23,7 @@ management:
                 include:
         web:
             exposure:
-                include: health,info,caches,httptrace,flyway,logfile,mappings,scheduledtasks,threaddump,heapdump
+                include: health,info,metrics,caches,httptrace,flyway,logfile,mappings,scheduledtasks,threaddump,heapdump
             base-path: /actuator
     trace:
         http:

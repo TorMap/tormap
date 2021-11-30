@@ -8,6 +8,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.tormap.logger
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.*
 
 
@@ -30,12 +32,13 @@ class SecurityConfig(
 
     @Throws(java.lang.Exception::class)
     override fun configure(auth: AuthenticationManagerBuilder) {
-        val passwordFile = File(adminPasswordFile)
+        val passwordFilePath = Path.of(adminPasswordFile)
         var password = UUID.randomUUID().toString()
-        if (passwordFile.exists()) {
-            password = passwordFile.readText()
+        if (Files.exists(passwordFilePath)) {
+            password = passwordFilePath.toFile().readText()
         } else {
-            passwordFile.writeText(password)
+            Files.createFile(passwordFilePath)
+            passwordFilePath.toFile().writeText(password)
         }
         logger.info("------------------------------------------------------")
         logger.info("Admin password: $password")
