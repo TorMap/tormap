@@ -89,9 +89,9 @@ export const AboutInformation: React.FunctionComponent = () => {
                         only use current IP data, some relays might have been hosted somewhere else, than displayed on
                         our world map.
                     </Typography>
-                    <Divider/>
-                    <br/>
-                    <Grid container spacing={3}>
+                    <Grid container spacing={3} sx={{
+                        paddingTop: "7px",
+                    }}>
                         <Grid item xs={12} sm={4}>
                             <Card elevation={20}>
                                 <CardHeader
