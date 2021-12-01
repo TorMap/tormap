@@ -106,7 +106,7 @@ export const FamilySelectionDialog: React.FunctionComponent<Props> = ({
         if (familyIds.length > 0) {
             setIsLoading(true)
             backend.post<NodeFamilyIdentifier[]>(
-                '/archive/node/family/identifiers',
+                '/relay/details/family/identifiers',
                 familyIds
             ).then(response => {
                 const identifiers = response.data
