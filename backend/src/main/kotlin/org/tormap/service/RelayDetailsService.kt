@@ -1,16 +1,13 @@
 package org.tormap.service
 
-import org.springframework.cache.CacheManager
 import org.springframework.jdbc.support.incrementer.H2SequenceMaxValueIncrementer
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
-import org.tormap.CacheName
-import org.tormap.adapter.controller.ArchiveDataController
+import org.tormap.adapter.controller.RelayLocationController
 import org.tormap.commaSeparatedToList
 import org.tormap.database.entity.RelayDetails
 import org.tormap.database.repository.RelayDetailsRepositoryImpl
 import org.tormap.logger
-import java.time.YearMonth
 import javax.transaction.Transactional
 
 
@@ -22,8 +19,7 @@ class RelayDetailsService(
     private val relayDetailsRepositoryImpl: RelayDetailsRepositoryImpl,
     private val dbSequenceIncrementer: H2SequenceMaxValueIncrementer,
     private val ipLookupService: IpLookupService,
-    private val cacheManager: CacheManager,
-    private val archiveDataController: ArchiveDataController,
+    private val relayLocationController: RelayLocationController,
 ) {
     private val logger = logger()
 
@@ -49,7 +45,7 @@ class RelayDetailsService(
             months.forEach { month ->
                 try {
                     updateFamiliesForMonth(month)
-                    updateRelayLocationDayCache(month)
+                    relayLocationController.cacheDaysOfMonth(month)
                 } catch (exception: Exception) {
                     logger.error("Could not update relay families for month $month! ${exception.message}")
                 }
@@ -57,19 +53,6 @@ class RelayDetailsService(
             logger.info("Finished updating relay families")
         } catch (exception: Exception) {
             logger.error("Could not update relay families! ${exception.message}")
-        }
-    }
-
-    /**
-     * Updates the relay location cache for all days of a given [month]
-     */
-    @Async
-    fun updateRelayLocationDayCache(month: String) {
-        val yearMonth = YearMonth.parse(month)
-        yearMonth.atDay(1).datesUntil(yearMonth.plusMonths(1).atDay(1)).forEach {
-            val day = it.toString()
-            cacheManager.getCache(CacheName.RELAY_LOCATION_DAY)?.evict(day)
-            archiveDataController.getGeoRelaysByDay(day)
         }
     }
 
