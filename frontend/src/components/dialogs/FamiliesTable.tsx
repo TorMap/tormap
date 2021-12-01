@@ -1,12 +1,12 @@
 import React, {FunctionComponent} from "react";
 import {Table, TableBody, TableCell, TableHead, TableRow, Typography} from "@mui/material";
-import {NodeFamilyIdentifier} from "../../../types/responses";
+import {RelayFamilyIdentifier} from "../../types/responses";
 
 interface Props {
     /**
      * Family Identifiers
      */
-    familyIdentifiers?: NodeFamilyIdentifier[]
+    familyIdentifiers?: RelayFamilyIdentifier[]
 
     /**
      * Callback for setting a family as selected

@@ -1,17 +1,17 @@
 import React, {FunctionComponent} from "react";
-import {UIProps} from "../../types/ui";
-import {DateSlider} from "./UI-elements/date-slider";
+import {OverlayProps} from "../types/ui";
+import {DateSlider} from "./date/DateSlider";
 import {Box} from "@mui/material";
-import {AppSettings} from "./UI-elements/app-settings";
-import {MapStats} from "./UI-elements/map-stats";
-import {TorUsageDatePicker} from "./UI-elements/date-picker";
+import {AppSettings} from "./accordion/AppSettings";
+import {MapStats} from "./accordion/MapStats";
+import {DatePickerLarge} from "./date/DatePickerLarge";
 
 /**
- * A component wrapping all UI elements for Desktop devices
+ * A component wrapping all UI elements for devices with large screen sizes
  *
  * @param statistics - a Statistics object for data to display
  */
-export const DesktopUI: FunctionComponent<UIProps> = ({statistics}) =>{
+export const OverlayLarge: FunctionComponent<OverlayProps> = ({statistics}) =>{
 
     return (
         <Box>
@@ -23,7 +23,7 @@ export const DesktopUI: FunctionComponent<UIProps> = ({statistics}) =>{
             }}>
                 <DateSlider />
             </Box>
-            <TorUsageDatePicker/>
+            <DatePickerLarge/>
             <Box sx={{
                 position: "absolute",
                 right: "1%",

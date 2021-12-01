@@ -1,11 +1,11 @@
 import {DialogContent, DialogTitle, IconButton, Typography, useMediaQuery, useTheme} from "@mui/material";
-import {NodeFamilyIdentifier} from "../types/responses";
+import {RelayFamilyIdentifier} from "../../types/responses";
 import React, {useEffect, useState} from "react";
 import CloseIcon from "@material-ui/icons/Close";
-import {FullHeightDialog, SnackbarMessage} from "../types/ui";
-import {backend} from "../util/util";
+import {FullHeightDialog, SnackbarMessage} from "../../types/ui";
+import {backend} from "../../util/util";
 import {useSnackbar} from "notistack";
-import {FamiliesTable} from "./UI/dialogs/FamiliesTable";
+import {FamiliesTable} from "./FamiliesTable";
 
 
 interface Props {
@@ -44,7 +44,7 @@ interface Props {
  * @param families - The familyIDs available to select
  * @param familySelectionCallback - the callback function for selecting a family
  */
-export const FamilySelectionDialogDesktop: React.FunctionComponent<Props> = ({
+export const FamilySelectionDialogLarge: React.FunctionComponent<Props> = ({
                                                                           showDialog,
                                                                           closeDialog,
                                                                           refreshDayData,
@@ -53,7 +53,7 @@ export const FamilySelectionDialogDesktop: React.FunctionComponent<Props> = ({
                                                                       }) => {
 
     const [isLoading, setIsLoading] = useState(true)
-    const [familyIdentifiers, setFamilyIdentifiers] = useState<NodeFamilyIdentifier[]>()
+    const [familyIdentifiers, setFamilyIdentifiers] = useState<RelayFamilyIdentifier[]>()
 
     const { enqueueSnackbar } = useSnackbar();
 
@@ -64,8 +64,8 @@ export const FamilySelectionDialogDesktop: React.FunctionComponent<Props> = ({
         setFamilyIdentifiers([])
         if (familyIds.length > 0) {
             setIsLoading(true)
-            backend.post<NodeFamilyIdentifier[]>(
-                '/archive/node/family/identifiers',
+            backend.post<RelayFamilyIdentifier[]>(
+                '/relay/details/family/identifiers',
                 familyIds
             ).then(response => {
                 const identifiers = response.data

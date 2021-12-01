@@ -1,16 +1,16 @@
 import React, {FunctionComponent, useCallback, useEffect, useState} from 'react';
-import {WorldMap} from "./world-map";
+import {WorldMap} from "./WorldMap";
 import {Box, Button, Link} from "@mui/material";
 import "@material-ui/styles";
 import "../index.css";
 import {Statistics} from "../types/app-state";
-import {AboutInformation} from "./UI/UI-elements/about-information";
+import {AboutInformation} from "./dialogs/AboutInformation";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
 import {SnackbarMessage} from "../types/ui";
-import {UI} from "./UI/UI";
-import {LoadingAnimation} from "./UI/UI-elements/LoadingAnimation";
-import {useDate} from "../util/DateContext";
+import {Overlay} from "./Overlay";
+import {LoadingAnimation} from "./loading/LoadingAnimation";
+import {useDate} from "../util/date-context";
 
 export const App: FunctionComponent = () => {
     const [isLoading, setIsLoading] = useState(true)
@@ -51,7 +51,7 @@ export const App: FunctionComponent = () => {
                 setIsLoading={useCallback(setIsLoading, [setIsLoading])}
                 setStatistics={useCallback(setStatistics, [setStatistics])}
             />
-            <UI statistics={statistics} />
+            <Overlay statistics={statistics} />
             <Box sx={{
                 color: "#b4b4b4",
                 background: "#262626",

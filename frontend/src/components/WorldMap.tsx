@@ -21,14 +21,14 @@ import {
     buildRelayHeatmapLayer,
     buildRelayLayer
 } from "../util/layer-construction";
-import {GeoRelayView} from "../types/responses";
-import {RelayDetailsDialogDektop} from "./relay-details-dialog-dektop";
-import {FamilySelectionDialogDesktop} from "./family-selection-dialog-desktop";
+import {RelayLocationDto} from "../types/responses";
+import {RelayDetailsDialogLarge} from "./dialogs/RelayDetailsDialogLarge";
+import {FamilySelectionDialogLarge} from "./dialogs/FamilySelectionDialogLarge";
 import {SnackbarMessage} from "../types/ui";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
-import {useSettings} from "../util/SettingsContext";
-import {useDate} from "../util/DateContext";
+import {useSettings} from "../util/settings-context";
+import {useDate} from "../util/date-context";
 
 
 interface Props {
@@ -65,10 +65,10 @@ export const WorldMap: FunctionComponent<Props> = ({
     const [showFamilySelectionDialog, setShowFamilySelectionDialog] = useState(false)
     const [familiesForSelectionDialog, setFamiliesForSelectionDialog] = useState<number[]>([])
     const [showRelayDetailsDialog, setShowRelayDetailsDialog] = useState(false)
-    const [relaysForDetailsDialog, setRelaysForDetailsDialog] = useState<GeoRelayView[]>([])
+    const [relaysForDetailsDialog, setRelaysForDetailsDialog] = useState<RelayLocationDto[]>([])
     const [leafletMap, setLeafletMap] = useState<LeafletMap>()
     const [leafletMarkerLayer] = useState<LayerGroup>(new LayerGroup())
-    const [relays, setRelays] = useState<GeoRelayView[]>()
+    const [relays, setRelays] = useState<RelayLocationDto[]>()
     const [refreshDayCount, setRefreshDayCount] = useState(0)
 
     const settings = useSettings().settings
@@ -219,7 +219,7 @@ export const WorldMap: FunctionComponent<Props> = ({
         if (dayToDisplay) {
             let currentTimeStamp = Date.now()
             setIsLoading(true)
-            backend.get<GeoRelayView[]>(`/relay/location/day/${dayToDisplay}`).then(response => {
+            backend.get<RelayLocationDto[]>(`/relay/location/day/${dayToDisplay}`).then(response => {
                 setIsLoading(false)
                 if (currentTimeStamp === latestRequestTimestamp) setRelays(response.data)
             }).catch(() => {
@@ -272,12 +272,12 @@ export const WorldMap: FunctionComponent<Props> = ({
                 setLeafletMap(newMap)
             }}
         >
-            <RelayDetailsDialogDektop
+            <RelayDetailsDialogLarge
                 showDialog={showRelayDetailsDialog}
                 closeDialog={useCallback(() => setShowRelayDetailsDialog(false), [])}
                 relays={relaysForDetailsDialog}
             />
-            <FamilySelectionDialogDesktop
+            <FamilySelectionDialogLarge
                 showDialog={showFamilySelectionDialog}
                 closeDialog={useCallback(() => setShowFamilySelectionDialog(false), [])}
                 refreshDayData={useCallback(() => setRefreshDayCount(prevState => prevState + 1), [])}

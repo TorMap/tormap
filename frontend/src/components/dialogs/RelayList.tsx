@@ -1,44 +1,44 @@
 import React, {FunctionComponent} from "react";
 import {List, ListItem, ListItemIcon, ListItemText, Tooltip} from "@mui/material";
-import {getIcon} from "../../../types/icons";
-import {getRelayType} from "../../../util/aggregate-relays";
-import {GeoRelayView, NodeIdentifier} from "../../../types/responses";
+import {getIcon} from "../../types/icons";
+import {getRelayType} from "../../util/aggregate-relays";
+import {RelayLocationDto, RelayIdentifierDto} from "../../types/responses";
 
 interface Props {
     /**
      * Relays which the user can view detailed information about
      */
-    relays: GeoRelayView[]
+    relays: RelayLocationDto[]
 
     /**
      * Relay Identifiers
      */
-    relayIdentifiers: NodeIdentifier[]
+    relayIdentifiers: RelayIdentifierDto[]
 
     /**
      * ID of currently selected Relay
      */
-    nodeDetailsId?: number
+    relayDetailsId?: number
 
     /**
-     * Setter for nodeDetailsId
+     * Setter for the relayDetailsId
      */
-    setNodeDetailsId: (id: number) => void
+    setRelayDetailsId: (id: number) => void
 }
 
 /**
  * A List with Relays to select one
  * @param relays
  * @param relayIdentifiers
- * @param nodeDetailsId
- * @param setNodeDetailsId
+ * @param relayDetailsId
+ * @param setRelayDetailsId
  * @constructor
  */
 export const RelayList: FunctionComponent<Props> = ({
                                                         relays,
                                                         relayIdentifiers,
-                                                        nodeDetailsId,
-                                                        setNodeDetailsId,
+                                                        relayDetailsId,
+                                                        setRelayDetailsId,
                                                     }) => {
     return (
         <List>
@@ -52,8 +52,8 @@ export const RelayList: FunctionComponent<Props> = ({
                     >
                         <ListItem
                             button={true}
-                            selected={identifier.id === nodeDetailsId}
-                            onClick={() => setNodeDetailsId(identifier.id)}
+                            selected={identifier.id === relayDetailsId}
+                            onClick={() => setRelayDetailsId(identifier.id)}
                         >
                             <ListItemIcon>
                                 {getIcon(getRelayType(relays.find(

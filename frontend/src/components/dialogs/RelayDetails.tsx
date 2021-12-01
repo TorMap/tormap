@@ -1,6 +1,6 @@
 import React, {FunctionComponent} from "react";
 import {CircularProgress, Table, TableBody, TableCell, TableRow, Typography} from "@mui/material";
-import {DetailsInfo} from "../../../types/responses";
+import {DetailsInfo} from "../../types/responses";
 
 interface Props {
     /**
