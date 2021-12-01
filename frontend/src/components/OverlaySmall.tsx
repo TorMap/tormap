@@ -1,19 +1,19 @@
 import React, {FunctionComponent, useState} from "react";
-import {Transition, UIProps} from "../../types/ui";
+import {Transition, OverlayProps} from "../types/ui";
 import {AppBar, Box, Button, Dialog, DialogActions, Fab, IconButton, Toolbar, Typography} from "@mui/material";
 import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from "@material-ui/icons/Close";
-import {AppSettings} from "./UI-elements/app-settings";
-import {MapStats} from "./UI-elements/map-stats";
-import {TorUsageDatePickerMobile} from "./UI-elements/date-picker-mobile";
+import {AppSettings} from "./accordion/AppSettings";
+import {MapStats} from "./accordion/MapStats";
+import {DatePickerSmall} from "./date/DatePickerSmall";
 import MapIcon from '@mui/icons-material/Map';
 
 /**
- * A component wrapping all UI elements for Mobile devices
+ * A component wrapping all UI elements for devices with small screen sizes
  *
  * @param statistics - a Statistics object for data to display
  */
-export const MobileUI: FunctionComponent<UIProps> = ({statistics}) => {
+export const OverlaySmall: FunctionComponent<OverlayProps> = ({statistics}) => {
     const [open, setOpen] = useState(false);
 
     return (
@@ -48,7 +48,7 @@ export const MobileUI: FunctionComponent<UIProps> = ({statistics}) => {
                         </Typography>
                     </Toolbar>
                 </AppBar>
-                <TorUsageDatePickerMobile />
+                <DatePickerSmall />
                 <Box sx={{padding: 1}}>
                     <AppSettings elevation={0}/>
                     <Box height={"10px"}/>

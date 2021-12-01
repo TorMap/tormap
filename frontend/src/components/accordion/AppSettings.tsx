@@ -13,12 +13,12 @@ import {
     Typography,
 } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {Settings} from "../../../types/app-state";
-import {RelayFlag, RelayFlagLabel, RelayType, RelayTypeLabel} from "../../../types/relay";
-import {tooltipTimeDelay} from "../../../util/config";
-import {getIcon} from "../../../types/icons";
-import {nameOfFactory} from "../../../util/util";
-import {useSettings} from "../../../util/SettingsContext";
+import {Settings} from "../../types/app-state";
+import {RelayFlag, RelayFlagLabel, RelayType, RelayTypeLabel} from "../../types/relay";
+import {tooltipTimeDelay} from "../../util/config";
+import {getIcon} from "../../types/icons";
+import {nameOfFactory} from "../../util/util";
+import {useSettings} from "../../util/settings-context";
 
 interface Props {
     elevation: number

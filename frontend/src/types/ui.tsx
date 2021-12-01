@@ -18,9 +18,9 @@ export const FullHeightDialog = styled(Dialog)(() => ({
     },
 }));
 
-export interface UIProps {
+export interface OverlayProps {
     /**
-     * The currently map statistics of the currently rendered information
+     * The current map statistics of the currently rendered information
      */
     statistics?: Statistics
 }

@@ -1,14 +1,14 @@
 import {Settings, Statistics} from "../types/app-state";
 import {RelayFlag, RelayFlags, RelayType} from "../types/relay";
-import {GeoRelayView} from "../types/responses";
+import {RelayLocationDto} from "../types/responses";
 
 /**
  * Returns a Array of GeoRelayViews that are filtered according to app settings.
  * @param relays - The relays to filter
  * @param settings - The app settings for filtering
  */
-export const applyRelayFilter = (relays: GeoRelayView[], settings: Settings): GeoRelayView[] => {
-    let filtered: GeoRelayView[] = []
+export const applyRelayFilter = (relays: RelayLocationDto[], settings: Settings): RelayLocationDto[] => {
+    let filtered: RelayLocationDto[] = []
     relays.forEach(relay => {
         // Filter relay flags
         let relayMissesRequiredFlag = false
@@ -43,8 +43,8 @@ export const applyRelayFilter = (relays: GeoRelayView[], settings: Settings): Ge
  * Returns a Key-Value-Map where Key is the coordinate pair as string and Value is a GeoRelayView[] with all Relays at this coordinate pair
  * @param relays - The relays
  */
-export const buildRelayCoordinatesMap = (relays: GeoRelayView[]): Map<string, GeoRelayView[]> => {
-    let latLonMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
+export const buildRelayCoordinatesMap = (relays: RelayLocationDto[]): Map<string, RelayLocationDto[]> => {
+    let latLonMap: Map<string, RelayLocationDto[]> = new Map<string, RelayLocationDto[]>()
     relays.forEach(relay => {
         const key: string = createLatLonKey(relay)
         if (latLonMap.has(key)) {
@@ -58,14 +58,14 @@ export const buildRelayCoordinatesMap = (relays: GeoRelayView[]): Map<string, Ge
     return latLonMap
 }
 
-export const createLatLonKey = (relay: GeoRelayView) => `${relay.lat},${relay.long}`
+export const createLatLonKey = (relay: RelayLocationDto) => `${relay.lat},${relay.long}`
 
 /**
  * Returns a Key-Value-Map where Key is the Family ID and Value is a GeoRelayView[] with all Relays that are part of this Family
  * @param relays - The relays
  */
-export const buildRelayFamilyMap = (relays: GeoRelayView[]): Map<number, GeoRelayView[]> => {
-    let familyMap: Map<number, GeoRelayView[]> = new Map<number, GeoRelayView[]>()
+export const buildRelayFamilyMap = (relays: RelayLocationDto[]): Map<number, RelayLocationDto[]> => {
+    let familyMap: Map<number, RelayLocationDto[]> = new Map<number, RelayLocationDto[]>()
     relays.forEach(relay => {
         if (relay.familyId !== null) {
             const key = relay.familyId
@@ -87,8 +87,8 @@ export const buildRelayFamilyMap = (relays: GeoRelayView[]): Map<number, GeoRela
  * Returns a Key-Value-Map where Key is the coordinate pair as string and Value is also a Key-Value-Map where Key is the family ID and value is GeoRelayView[] with all Relays that are part of this Family
  * @param latLonMap - A LatLonMap to build the famCordMap on
  */
-export const buildFamilyCoordinatesMap = (latLonMap: Map<string, GeoRelayView[]>): Map<string, Map<number, GeoRelayView[]>> => {
-    let famCordMap: Map<string, Map<number, GeoRelayView[]>> = new Map<string, Map<number, GeoRelayView[]>>()
+export const buildFamilyCoordinatesMap = (latLonMap: Map<string, RelayLocationDto[]>): Map<string, Map<number, RelayLocationDto[]>> => {
+    let famCordMap: Map<string, Map<number, RelayLocationDto[]>> = new Map<string, Map<number, RelayLocationDto[]>>()
     latLonMap.forEach((relaysOnLocation, location) => {
         famCordMap.set(location, buildRelayFamilyMap(relaysOnLocation))
     })
@@ -100,7 +100,7 @@ export const buildFamilyCoordinatesMap = (latLonMap: Map<string, GeoRelayView[]>
  * The largest Family on this coordinate is first
  * @param famCordMap - The famCordMap-Object to sort
  */
-export const sortFamilyCoordinatesMap = (famCordMap: Map<string, Map<number, GeoRelayView[]>>): Map<string, famCordArr[]> => {
+export const sortFamilyCoordinatesMap = (famCordMap: Map<string, Map<number, RelayLocationDto[]>>): Map<string, famCordArr[]> => {
     let output: Map<string, famCordArr[]> = new Map<string, famCordArr[]>()
     // For each coordinate
     famCordMap.forEach((famMapForLocation, coordinateKey) => {
@@ -128,7 +128,7 @@ export const sortFamilyCoordinatesMap = (famCordMap: Map<string, Map<number, Geo
 
 export type famCordArr = {
     familyID: number,
-    relays: GeoRelayView[],
+    relays: RelayLocationDto[],
     padding: number
 }
 
@@ -136,8 +136,8 @@ export type famCordArr = {
  * Returns a Key-Value-Map where Key is the countries ISO-3166-A2 ID
  * @param relays - The relays
  */
-export const buildRelayCountryMap = (relays: GeoRelayView[]): Map<string, GeoRelayView[]> => {
-    let countryMap: Map<string, GeoRelayView[]> = new Map<string, GeoRelayView[]>()
+export const buildRelayCountryMap = (relays: RelayLocationDto[]): Map<string, RelayLocationDto[]> => {
+    let countryMap: Map<string, RelayLocationDto[]> = new Map<string, RelayLocationDto[]>()
     relays.forEach(relay => {
         if (relay.country !== undefined) {
             const key: string = relay.country
@@ -161,9 +161,9 @@ export const buildRelayCountryMap = (relays: GeoRelayView[]): Map<string, GeoRel
  * @param settings - Tha app settings
  */
 export const buildStatistics = (
-    filteredRelays: GeoRelayView[],
-    relayCountryMap: Map<string, GeoRelayView[]>,
-    relayFamilyMap: Map<number, GeoRelayView[]>,
+    filteredRelays: RelayLocationDto[],
+    relayCountryMap: Map<string, RelayLocationDto[]>,
+    relayFamilyMap: Map<number, RelayLocationDto[]>,
     settings: Settings
 ): Statistics => {
     if (settings.selectedCountry && settings.selectedFamily) {
@@ -206,7 +206,7 @@ export const buildStatistics = (
  * Returns the type of a relay
  * @param relay - The Relay to identify
  */
-export function getRelayType(relay?: GeoRelayView): RelayType | undefined {
+export function getRelayType(relay?: RelayLocationDto): RelayType | undefined {
     if (relay === undefined) return undefined
     if (relay.flags?.includes(RelayFlag.Exit)) {
         return RelayType.Exit
@@ -223,6 +223,6 @@ export function getRelayType(relay?: GeoRelayView): RelayType | undefined {
  * @param id - The detailsID of the searched relay
  * @param relays - The GeoRelayView[] to be searched
  */
-export function findGeoRelayViewByID(id: number, relays: GeoRelayView[]): GeoRelayView | undefined {
+export function findGeoRelayViewByID(id: number, relays: RelayLocationDto[]): RelayLocationDto | undefined {
     return relays.find((relay) => relay.detailsId === id)
 }

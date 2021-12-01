@@ -10,7 +10,7 @@ import {
     TableRow,
     Typography
 } from "@mui/material";
-import {Statistics} from "../../../types/app-state";
+import {Statistics} from "../../types/app-state";
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import {
@@ -20,9 +20,9 @@ import {
     GuardRelayIcon,
     OtherRelayIcon,
     TotalRelaysIcon
-} from "../../../types/icons";
-import {getFullName} from "../../../util/geojson";
-import {useSettings} from "../../../util/SettingsContext";
+} from "../../types/icons";
+import {getFullName} from "../../util/geojson";
+import {useSettings} from "../../util/settings-context";
 
 interface Props {
 
@@ -43,7 +43,7 @@ interface Props {
 }
 
 /**
- * The Component showing statistics for rendered nodes
+ * The Component showing statistics for rendered relays
  * @param settings - the App Settings
  * @param stats - the Statistics Object to show
  */
