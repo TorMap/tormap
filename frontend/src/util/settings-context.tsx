@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {Settings} from "../types/app-state";
-import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/UI/UI-elements/app-settings";
+import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/accordion/AppSettings";
 
 interface SettingsInterface {
     settings: Settings

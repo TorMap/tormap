@@ -12,15 +12,15 @@ import {
     useTheme
 } from "@mui/material";
 import CloseIcon from "@material-ui/icons/Close";
-import {getIcon} from "../types/icons";
-import {findGeoRelayViewByID, getRelayType} from "../util/aggregate-relays";
-import {DetailsInfo, GeoRelayView, NodeDetails, NodeIdentifier} from "../types/responses";
-import {FullHeightDialog, SnackbarMessage} from "../types/ui";
-import {RelayFlag, RelayFlagLabel} from "../types/relay";
-import {backend} from "../util/util";
+import {getIcon} from "../../types/icons";
+import {findGeoRelayViewByID, getRelayType} from "../../util/aggregate-relays";
+import {DetailsInfo, RelayLocationDto, RelayDetailsDto, RelayIdentifierDto} from "../../types/responses";
+import {FullHeightDialog, SnackbarMessage} from "../../types/ui";
+import {RelayFlag, RelayFlagLabel} from "../../types/relay";
+import {backend} from "../../util/util";
 import {useSnackbar} from "notistack";
-import {RelayList} from "./UI/dialogs/RelayList";
-import {RelayDetails} from "./UI/dialogs/RelayDetails";
+import {RelayList} from "./RelayList";
+import {RelayDetails} from "./RelayDetails";
 
 interface Props {
     /**
@@ -36,7 +36,7 @@ interface Props {
     /**
      * Relays which the user can view detailed information about
      */
-    relays: GeoRelayView[]
+    relays: RelayLocationDto[]
 }
 
 /**
@@ -68,14 +68,14 @@ const formatBoolean = (value?: boolean) => value === null || value === undefined
  * @param relays - Selectable relays
  * @param enqueueSnackbar - The event handler for showing a snackbar message
  */
-export const RelayDetailsDialogDektop: React.FunctionComponent<Props> = ({
+export const RelayDetailsDialogLarge: React.FunctionComponent<Props> = ({
                                                                        showDialog,
                                                                        closeDialog,
                                                                        relays,
                                                                    }) => {
-    const [relayIdentifiers, setRelayIdentifiers] = useState<NodeIdentifier[]>([])
-    const [nodeDetailsId, setNodeDetailsId] = useState<number>()
-    const [rawRelayDetails, setRawRelayDetails] = useState<NodeDetails>()
+    const [relayIdentifiers, setRelayIdentifiers] = useState<RelayIdentifierDto[]>([])
+    const [relayDetailsId, setRelayDetailsId] = useState<number>()
+    const [rawRelayDetails, setRawRelayDetails] = useState<RelayDetailsDto>()
     const [relayDetails, setRelayDetails] = useState<DetailsInfo[]>()
 
     const { enqueueSnackbar } = useSnackbar();
@@ -84,7 +84,7 @@ export const RelayDetailsDialogDektop: React.FunctionComponent<Props> = ({
      * Query relayIdentifiers for relays from backend
      */
     useEffect(() => {
-        setNodeDetailsId(undefined)
+        setRelayDetailsId(undefined)
         setRawRelayDetails(undefined)
         setRelayDetails(undefined)
         setRelayIdentifiers([])
@@ -93,13 +93,13 @@ export const RelayDetailsDialogDektop: React.FunctionComponent<Props> = ({
             enqueueSnackbar(SnackbarMessage.NoRelayDetails, {variant: "warning"})
             closeDialog()
         } else if (relayDetailsIds.length === 1) {
-            setNodeDetailsId(relayDetailsIds[0]!!)
+            setRelayDetailsId(relayDetailsIds[0]!!)
         } else if (relayDetailsIds.length > 1) {
-            backend.post<NodeIdentifier[]>('/relay/details/relay/identifiers', relayDetailsIds).then(response => {
+            backend.post<RelayIdentifierDto[]>('/relay/details/relay/identifiers', relayDetailsIds).then(response => {
                 const requestedRelayIdentifiers = response.data
                 setRelayIdentifiers(requestedRelayIdentifiers)
                 if (requestedRelayIdentifiers.length > 0) {
-                    setNodeDetailsId(requestedRelayIdentifiers[0].id)
+                    setRelayDetailsId(requestedRelayIdentifiers[0].id)
                 }
             }).catch(() => {
                 enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
@@ -122,8 +122,8 @@ export const RelayDetailsDialogDektop: React.FunctionComponent<Props> = ({
 
         setRawRelayDetails(undefined)
         setRelayDetails(undefined)
-        if (nodeDetailsId) {
-            backend.get<NodeDetails>(`/relay/details/relay/${nodeDetailsId}`).then(response => {
+        if (relayDetailsId) {
+            backend.get<RelayDetailsDto>(`/relay/details/relay/${relayDetailsId}`).then(response => {
                 const relay = response.data
                 setRawRelayDetails(relay)
                 setRelayDetails([
@@ -157,7 +157,7 @@ export const RelayDetailsDialogDektop: React.FunctionComponent<Props> = ({
                     enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
                 })
         }
-    }, [nodeDetailsId, relays, enqueueSnackbar])
+    }, [relayDetailsId, relays, enqueueSnackbar])
 
     const theme = useTheme()
     const desktop = useMediaQuery(theme.breakpoints.up("lg"))
@@ -178,12 +178,12 @@ export const RelayDetailsDialogDektop: React.FunctionComponent<Props> = ({
                             display: "inline",
                             paddingRight: "16px",
                         }}>
-                            {nodeDetailsId ? getIcon(getRelayType(relays.find((relay) => relay.detailsId === nodeDetailsId))) : null}
+                            {relayDetailsId ? getIcon(getRelayType(relays.find((relay) => relay.detailsId === relayDetailsId))) : null}
                         </Box>
                         <Typography
                             sx={{display: "inline"}}
                             variant="h6">
-                            {relayIdentifiers.find((identifier) => {return identifier.id === nodeDetailsId})?.nickname
+                            {relayIdentifiers.find((identifier) => {return identifier.id === relayDetailsId})?.nickname
                             || rawRelayDetails.nickname}
                         </Typography>
                     </Box> : <CircularProgress color={"inherit"} size={24}/>
@@ -203,8 +203,8 @@ export const RelayDetailsDialogDektop: React.FunctionComponent<Props> = ({
                         <RelayList
                             relays={relays}
                             relayIdentifiers={relayIdentifiers}
-                            nodeDetailsId={nodeDetailsId}
-                            setNodeDetailsId={setNodeDetailsId}
+                            relayDetailsId={relayDetailsId}
+                            setRelayDetailsId={setRelayDetailsId}
                         />
                     </Grid>
                     <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 9 : 12}>

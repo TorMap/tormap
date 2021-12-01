@@ -24,7 +24,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import LanguageIcon from '@mui/icons-material/Language';
 import InfoIcon from '@mui/icons-material/Info';
 import {Icon} from "@iconify/react";
-import TorMapLogo from "../../../resources/logo.png";
+import TorMapLogo from "../../resources/logo.png";
 
 /**
  * A component for displaying information about TorMap
@@ -168,15 +168,6 @@ export const AboutInformation: React.FunctionComponent = () => {
                                     title="Tim Kilb"
                                 />
                                 <List dense={true}>
-                                    {/* TODO uncomment when ready*/}
-                                    {/*<ListItem button component="a" href="https://www.timkilb.com" target={"_blank"}>*/}
-                                    {/*    <ListItemIcon>*/}
-                                    {/*        <LanguageIcon/>*/}
-                                    {/*    </ListItemIcon>*/}
-                                    {/*    <ListItemText>*/}
-                                    {/*        Website*/}
-                                    {/*    </ListItemText>*/}
-                                    {/*</ListItem>*/}
                                     <ListItem button component="a" href="https://github.com/TimKilb" target={"_blank"}>
                                         <ListItemIcon>
                                             <GitHubIcon/>

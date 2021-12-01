@@ -1,8 +1,8 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
-import {useDebounce} from "../../../util/util";
+import {useDebounce} from "../../util/util";
 import Moment from "react-moment";
 import {Box, Slider} from "@mui/material";
-import {useDate} from "../../../util/DateContext";
+import {useDate} from "../../util/date-context";
 
 /**
  * A Slider for date selection

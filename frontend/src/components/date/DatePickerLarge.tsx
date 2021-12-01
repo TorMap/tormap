@@ -5,9 +5,9 @@ import {TextField} from "@mui/material";
 import dateFormat from "dateformat";
 import moment from "moment";
 import {DatePicker, LocalizationProvider} from "@mui/lab";
-import {useDate} from "../../../util/DateContext";
+import {useDate} from "../../util/date-context";
 
-export const TorUsageDatePickerMobile:FunctionComponent = () => {
+export const DatePickerLarge:FunctionComponent = () => {
 
     const date = useDate()
     const selectedDate = date.selectedDate
@@ -27,7 +27,10 @@ export const TorUsageDatePickerMobile:FunctionComponent = () => {
                     <TextField variant={"standard"}
                                {...params}
                                sx={{
-                                   padding: 2
+                                   position: "fixed",
+                                   bottom: "4%",
+                                   right: "2%",
+                                   maxWidth: "20%",
                                }}
                                helperText={"A day in the life of the Tor Network"}
                     />

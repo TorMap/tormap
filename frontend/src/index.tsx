@@ -2,13 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import "react-sliding-pane/dist/react-sliding-pane.css";
-import {App} from "./components/app";
+import {App} from "./components/App";
 import {createTheme, ThemeProvider} from "@mui/material";
 import {SnackbarProvider} from "notistack";
-import {TorMapTheme} from "./types/MuiTheme";
-import {SettingsProvider} from "./util/SettingsContext";
+import {TorMapTheme} from "./types/TorMapTheme";
+import {SettingsProvider} from "./util/settings-context";
 import {defaultSettings} from "./util/config";
-import {DateProvider} from "./util/DateContext";
+import {DateProvider} from "./util/date-context";
 
 const theme = createTheme(TorMapTheme)
 

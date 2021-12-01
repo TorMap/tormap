@@ -1,6 +1,6 @@
 import {RelayFlag} from "./relay";
 
-export interface GeoRelayView {
+export interface RelayLocationDto {
     lat: number
     long: number
     country: string
@@ -9,7 +9,7 @@ export interface GeoRelayView {
     familyId?: number | null
 }
 
-export interface NodeDetails {
+export interface RelayDetailsDto {
     id: number
     month: string
     day: string
@@ -40,13 +40,13 @@ export interface DetailsInfo {
     value: string | number | undefined
 }
 
-export interface NodeIdentifier {
+export interface RelayIdentifierDto {
     id: number
     fingerprint: string
     nickname: string
 }
 
-export interface NodeFamilyIdentifier {
+export interface RelayFamilyIdentifier {
     id: number
     memberCount: number
     fingerprints: string

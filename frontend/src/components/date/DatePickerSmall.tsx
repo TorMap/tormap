@@ -5,10 +5,9 @@ import {TextField} from "@mui/material";
 import dateFormat from "dateformat";
 import moment from "moment";
 import {DatePicker, LocalizationProvider} from "@mui/lab";
-import {useDate} from "../../../util/DateContext";
+import {useDate} from "../../util/date-context";
 
-export const TorUsageDatePicker:FunctionComponent = () => {
-
+export const DatePickerSmall: FunctionComponent = () => {
     const date = useDate()
     const selectedDate = date.selectedDate
     const availableDays = date.availableDays
@@ -27,10 +26,7 @@ export const TorUsageDatePicker:FunctionComponent = () => {
                     <TextField variant={"standard"}
                                {...params}
                                sx={{
-                                   position: "fixed",
-                                   bottom: "4%",
-                                   right: "2%",
-                                   maxWidth: "20%",
+                                   padding: 2
                                }}
                                helperText={"A day in the life of the Tor Network"}
                     />
@@ -43,14 +39,13 @@ export const TorUsageDatePicker:FunctionComponent = () => {
                 }}
                 onAccept={() => setSelectedDate(localSelectedDate!)}
                 minDate={new Date(availableDays[0])}
-                maxDate={new Date(availableDays[availableDays.length-1])}
+                maxDate={new Date(availableDays[availableDays.length - 1])}
                 shouldDisableDate={date => {
                     return !(availableDays.includes(moment(date).format("YYYY-MM-DD")))
                 }}
-                views={["year","month","day"]}
+                views={["year", "month", "day"]}
                 showTodayButton
             />
         </LocalizationProvider>
-
     )
 }
