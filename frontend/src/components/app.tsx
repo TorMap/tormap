@@ -30,7 +30,7 @@ export const App: FunctionComponent = () => {
     useEffect(() => {
         closeSnackbar()
         setIsLoading(true)
-        backend.get<string[]>('/archive/geo/relay/days').then(response => {
+        backend.get<string[]>('/relay/location/days').then(response => {
             setAvailableDays(response.data)
             setIsLoading(false)
         }).catch(() => {
