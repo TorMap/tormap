@@ -21,7 +21,6 @@ import {
     buildRelayHeatmapLayer,
     buildRelayLayer
 } from "../util/layer-construction";
-import {backendApiUrl} from "../util/config";
 import {GeoRelayView} from "../types/responses";
 import {RelayDetailsDialogDektop} from "./relay-details-dialog-dektop";
 import {FamilySelectionDialogDesktop} from "./family-selection-dialog-desktop";
@@ -220,7 +219,7 @@ export const WorldMap: FunctionComponent<Props> = ({
         if (dayToDisplay) {
             let currentTimeStamp = Date.now()
             setIsLoading(true)
-            backend.get<GeoRelayView[]>(`${backendApiUrl}/archive/geo/relay/day/${dayToDisplay}`).then(response => {
+            backend.get<GeoRelayView[]>(`/relay/location/day/${dayToDisplay}`).then(response => {
                 setIsLoading(false)
                 if (currentTimeStamp === latestRequestTimestamp) setRelays(response.data)
             }).catch(() => {

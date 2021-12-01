@@ -1,17 +1,14 @@
 package org.tormap.service
 
-import org.springframework.cache.annotation.CacheEvict
-import org.springframework.cache.annotation.Caching
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.AsyncResult
 import org.springframework.stereotype.Service
-import org.tormap.CacheName
-import org.tormap.adapter.controller.ArchiveDataController
+import org.tormap.adapter.controller.RelayLocationController
 import org.tormap.config.value.DescriptorConfig
 import org.tormap.database.entity.*
 import org.tormap.database.repository.ProcessedFileRepository
-import org.tormap.database.repository.RelayLocationRepositoryImpl
 import org.tormap.database.repository.RelayDetailsRepository
+import org.tormap.database.repository.RelayLocationRepositoryImpl
 import org.tormap.logger
 import org.tormap.millisSinceEpochToLocalDate
 import org.torproject.descriptor.*
@@ -37,7 +34,7 @@ class TorDescriptorService(
     private val processedFileRepository: ProcessedFileRepository,
     private val ipLookupService: IpLookupService,
     private val relayDetailsService: RelayDetailsService,
-    private val archiveDataController: ArchiveDataController,
+    private val relayLocationController: RelayLocationController,
 ) {
     private val logger = logger()
     private val descriptorCollector: DescriptorCollector = DescriptorIndexCollector()
@@ -223,23 +220,8 @@ class TorDescriptorService(
             }
         }
         relayLocationRepositoryImpl.flush()
-        updateRelayLocationCaches(descriptorDay.toString())
+        relayLocationController.cacheNewDay(descriptorDay.toString())
         return ProcessedDescriptorInfo(YearMonth.from(descriptorDay).toString())
-    }
-
-    /**
-     * Update the cache for available relay location days and the given [day]
-     */
-    @Async
-    @Caching(
-        evict = [
-            CacheEvict(CacheName.RELAY_LOCATION_DAYS),
-            CacheEvict(CacheName.RELAY_LOCATION_DAY, key = "#day")
-        ]
-    )
-    fun updateRelayLocationCaches(day: String) {
-        archiveDataController.getDaysForGeoRelays()
-        archiveDataController.getGeoRelaysByDay(day)
     }
 
     /**

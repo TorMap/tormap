@@ -95,7 +95,7 @@ export const RelayDetailsDialogDektop: React.FunctionComponent<Props> = ({
         } else if (relayDetailsIds.length === 1) {
             setNodeDetailsId(relayDetailsIds[0]!!)
         } else if (relayDetailsIds.length > 1) {
-            backend.post<NodeIdentifier[]>('/archive/node/identifiers', relayDetailsIds).then(response => {
+            backend.post<NodeIdentifier[]>('/relay/details/relay/identifiers', relayDetailsIds).then(response => {
                 const requestedRelayIdentifiers = response.data
                 setRelayIdentifiers(requestedRelayIdentifiers)
                 if (requestedRelayIdentifiers.length > 0) {
@@ -123,7 +123,7 @@ export const RelayDetailsDialogDektop: React.FunctionComponent<Props> = ({
         setRawRelayDetails(undefined)
         setRelayDetails(undefined)
         if (nodeDetailsId) {
-            backend.get<NodeDetails>(`/archive/node/details/${nodeDetailsId}`).then(response => {
+            backend.get<NodeDetails>(`/relay/details/relay/${nodeDetailsId}`).then(response => {
                 const relay = response.data
                 setRawRelayDetails(relay)
                 setRelayDetails([
