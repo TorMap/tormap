@@ -2,7 +2,6 @@ import React, {useEffect, useState} from "react";
 import {
     Box,
     CircularProgress,
-    DialogContent,
     DialogTitle,
     Divider,
     Grid,
@@ -69,16 +68,16 @@ const formatBoolean = (value?: boolean) => value === null || value === undefined
  * @param enqueueSnackbar - The event handler for showing a snackbar message
  */
 export const RelayDetailsDialogLarge: React.FunctionComponent<Props> = ({
-                                                                       showDialog,
-                                                                       closeDialog,
-                                                                       relays,
-                                                                   }) => {
+                                                                            showDialog,
+                                                                            closeDialog,
+                                                                            relays,
+                                                                        }) => {
     const [relayIdentifiers, setRelayIdentifiers] = useState<RelayIdentifierDto[]>([])
     const [relayDetailsId, setRelayDetailsId] = useState<number>()
     const [rawRelayDetails, setRawRelayDetails] = useState<RelayDetailsDto>()
     const [relayDetails, setRelayDetails] = useState<DetailsInfo[]>()
 
-    const { enqueueSnackbar } = useSnackbar();
+    const {enqueueSnackbar} = useSnackbar();
 
     /**
      * Query relayIdentifiers for relays from backend
@@ -184,8 +183,10 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<Props> = ({
                         <Typography
                             sx={{display: "inline"}}
                             variant="h6">
-                            {relayIdentifiers.find((identifier) => {return identifier.id === relayDetailsId})?.nickname
-                            || rawRelayDetails.nickname}
+                            {relayIdentifiers.find((identifier) => {
+                                    return identifier.id === relayDetailsId
+                                })?.nickname
+                                || rawRelayDetails.nickname}
                         </Typography>
                     </Box> : <CircularProgress color={"inherit"} size={24}/>
                 }
@@ -198,9 +199,9 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<Props> = ({
                 </IconButton>
             </DialogTitle>
             <Divider/>
-            <DialogContent>
                 <Grid container>
-                    <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 3 : 0}>
+                    <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 3 : 0}
+                          sx={{maxHeight: "65vh", overflow: 'auto'}}>
                         <RelayList
                             relays={relays}
                             relayIdentifiers={relayIdentifiers}
@@ -208,11 +209,11 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<Props> = ({
                             setRelayDetailsId={setRelayDetailsId}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 9 : 12}>
+                    <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 9 : 12}
+                          sx={{maxHeight: "65vh", overflow: 'auto'}}>
                         <RelayDetails relayDetails={relayDetails}/>
                     </Grid>
                 </Grid>
-            </DialogContent>
         </FullHeightDialog>
     )
 }
