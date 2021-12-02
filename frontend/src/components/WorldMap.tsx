@@ -16,8 +16,8 @@ import {
     buildAggregatedCoordinatesLayer,
     buildCountryLayer,
     buildRelayCountryLayer,
-    buildRelayFamilyCoordinatesLayer,
-    buildRelayFamilyLayer,
+    buildFamilyCoordinatesLayer,
+    buildSelectedFamilyLayer,
     buildRelayHeatmapLayer,
     buildRelayLayer
 } from "../util/layer-construction";
@@ -71,27 +71,31 @@ export const WorldMap: FunctionComponent<Props> = ({
     const [relays, setRelays] = useState<RelayLocationDto[]>()
     const [refreshDayCount, setRefreshDayCount] = useState(0)
 
+    const {enqueueSnackbar, closeSnackbar} = useSnackbar();
     const settings = useSettings().settings
     const setSettings = useSettings().setSettings
-
-    const {enqueueSnackbar, closeSnackbar} = useSnackbar();
-
     const dayToDisplay = useDate().selectedDate
 
-    // Remaining relays after filters from settings are applied
-    const filteredRelays = useMemo(() => relays ? applyRelayFilter(relays, settings) : [], [relays, settings])
-
-    // Map of relays with the same coordinates
-    const relayCoordinatesMap = useMemo(() => buildRelayCoordinatesMap(filteredRelays), [filteredRelays])
-
-    // Map of relays with the same family
-    const relayFamilyMap = useMemo(() => buildRelayFamilyMap(filteredRelays), [filteredRelays])
-
-    // Map of families with the same coordinates
-    const relayFamilyCoordinatesMap = useMemo(() => buildFamilyCoordinatesMap(relayCoordinatesMap), [relayCoordinatesMap])
-
-    // Map of relays in the same country
-    const relayCountryMap = useMemo(() => buildRelayCountryMap(filteredRelays), [filteredRelays])
+    const filteredRelays = useMemo(
+        () => relays ? applyRelayFilter(relays, settings) : [],
+        [relays, settings]
+    )
+    const relayCoordinatesMap = useMemo(
+        () => buildRelayCoordinatesMap(filteredRelays),
+        [filteredRelays]
+    )
+    const relayCountryMap = useMemo(
+        () => buildRelayCountryMap(filteredRelays),
+        [filteredRelays]
+    )
+    const relayFamilyMap = useMemo(
+        () => buildRelayFamilyMap(filteredRelays),
+        [filteredRelays]
+    )
+    const relayFamilyCoordinatesMap = useMemo(
+        () => buildFamilyCoordinatesMap(relayCoordinatesMap),
+        [relayCoordinatesMap]
+    )
 
     /**
      * After a marker was clicked on the map the corresponding relays are passed to the details dialog
@@ -105,48 +109,40 @@ export const WorldMap: FunctionComponent<Props> = ({
         }
     }, [relayCoordinatesMap, relays])
 
-    // Leaflet layer with heatmap of relay geo location
-    const relayHeatmapLayer = useMemo(() => buildRelayHeatmapLayer(filteredRelays), [filteredRelays])
-
-    // Leaflet layer with selectable country borders
-    const countryLayer = useMemo(() => buildCountryLayer(relayCountryMap, settings, setSettings), [relayCountryMap, setSettings, settings])
-
-    // Leaflet layer with aggregated coordinates
-    const aggregatedCoordinatesLayer = useMemo(() => buildAggregatedCoordinatesLayer(relayCoordinatesMap, openRelayDetailsDialog), [openRelayDetailsDialog, relayCoordinatesMap])
-
-    // Leaflet layer with selectable families
-    const relayFamilyLayer = useMemo(() => buildRelayFamilyLayer(relayFamilyMap, settings, setSettings), [relayFamilyMap, setSettings, settings])
-
-    // Leaflet layer with selectable country borders
-    const relayFamilyCoordinatesLayer = useMemo(() =>
-        buildRelayFamilyCoordinatesLayer(relayFamilyCoordinatesMap, settings, setSettings, (event: LeafletMouseEvent) => {
-            if (relays) {
-                const relaysAtCoordinate = relayCoordinatesMap.get(event.target.options.className)!!
-                const familyMap = buildRelayFamilyMap(relaysAtCoordinate)
-                let families: number[] = []
-                familyMap.forEach((family, familyID) => {
-                    families.push(familyID)
-                })
-                if (families.length === 1) {
-                    setSettings({...settings, selectedFamily: families[0]})
-                    return
-                }
-                setFamiliesForSelectionDialog(families)
-                setShowFamilySelectionDialog(true)
-            }
-        }), [relayCoordinatesMap, relayFamilyCoordinatesMap, relays, setSettings, settings]
+    const relayLayer = useMemo(
+        () => buildRelayLayer(relayCoordinatesMap, settings.sortFamily, openRelayDetailsDialog),
+        [openRelayDetailsDialog, relayCoordinatesMap, settings.sortFamily]
+    )
+    const relayCountryLayer = useMemo(
+        () => buildRelayCountryLayer(relayCountryMap, settings, openRelayDetailsDialog),
+        [openRelayDetailsDialog, relayCountryMap, settings]
+    )
+    const countryBordersLayer = useMemo(
+        () => buildCountryLayer(relayCountryMap, settings, setSettings),
+        [relayCountryMap, setSettings, settings]
+    )
+    const relayLocationHeatmapLayer = useMemo(
+        () => buildRelayHeatmapLayer(filteredRelays),
+        [filteredRelays]
+    )
+    const aggregatedCoordinatesLayer = useMemo(
+        () => buildAggregatedCoordinatesLayer(relayCoordinatesMap, openRelayDetailsDialog),
+        [openRelayDetailsDialog, relayCoordinatesMap]
+    )
+    const relaySelectedFamilyLayer = useMemo(
+        () => buildSelectedFamilyLayer(relayFamilyMap, settings, setSettings),
+        [relayFamilyMap, setSettings, settings]
+    )
+    const relayFamilyCoordinatesLayer = useMemo(
+        () => buildFamilyCoordinatesLayer(relayFamilyCoordinatesMap, settings, setSettings, setFamiliesForSelectionDialog, setShowFamilySelectionDialog),
+        [relayFamilyCoordinatesMap, settings, setSettings, setFamiliesForSelectionDialog, setShowFamilySelectionDialog]
     )
 
-    // Leaflet layer with selectable country borders
-    const relayLayer = useMemo(() => buildRelayLayer(relayCoordinatesMap, settings.sortFamily, openRelayDetailsDialog), [openRelayDetailsDialog, relayCoordinatesMap, settings.sortFamily])
+    const statistics = useMemo(
+        () => buildStatistics(filteredRelays, relayCountryMap, relayFamilyMap, settings),
+        [filteredRelays, relayCountryMap, relayFamilyMap, settings]
+    )
 
-    // Leaflet layer with selectable country borders
-    const relayCountryLayer = useMemo(() => buildRelayCountryLayer(relayCountryMap, settings, openRelayDetailsDialog), [openRelayDetailsDialog, relayCountryMap, settings])
-
-    // Leaflet layer with selectable country borders
-    const statistics = useMemo(() => buildStatistics(filteredRelays, relayCountryMap, relayFamilyMap, settings), [filteredRelays, relayCountryMap, relayFamilyMap, settings])
-
-    // Leaflet layer with selectable country borders
     const leafletLayerGroup = useMemo(() => {
         const layerGroup = new LayerGroup()
 
@@ -165,51 +161,41 @@ export const WorldMap: FunctionComponent<Props> = ({
                 setSettings({...settings, selectedFamily: undefined})
             }
 
+            if (settings.heatMap) {
+                layerGroup.addLayer(relayLocationHeatmapLayer)
+            }
+
+            if (leafletMap && relayCountryMap.size > 0 && settings.sortCountry) {
+                layerGroup.addLayer(countryBordersLayer)
+            }
+
+            if (settings.aggregateCoordinates) {
+                layerGroup.addLayer(aggregatedCoordinatesLayer)
+            }
+
+            if (settings.sortCountry) {
+                if (settings.selectedCountry && !relayCountryMap.has(settings.selectedCountry)) {
+                    setSettings({...settings, selectedCountry: undefined})
+                }
+                layerGroup.addLayer(relayCountryLayer)
+            } else {
+                layerGroup.addLayer(relayLayer)
+            }
+
+            if (settings.sortFamily) {
+                if (settings.selectedFamily) layerGroup.addLayer(relaySelectedFamilyLayer)
+                else layerGroup.addLayer(relayFamilyCoordinatesLayer)
+            }
             if (settings.sortFamily && relayFamilyMap.size === 0) {
                 enqueueSnackbar(SnackbarMessage.NoFamilyData, {variant: "warning", key: SnackbarMessage.NoFamilyData})
             } else {
                 closeSnackbar(SnackbarMessage.NoFamilyData)
             }
 
-            if (settings.selectedCountry && !relayCountryMap.has(settings.selectedCountry)) {
-                setSettings({...settings, selectedCountry: undefined})
-            }
-
-            // Draw Heatmap, draws a heatmap with a point for each coordinate
-            if (settings.heatMap) {
-                layerGroup.addLayer(relayHeatmapLayer)
-            }
-
-            // Draw Country's, used to draw all countries to the map if at least one relay is hosted there
-            if (leafletMap && relayCountryMap.size > 0 && settings.sortCountry) {
-                layerGroup.addLayer(countryLayer)
-            }
-
-            // Draw aggregated marker's, used to draw all markers to the map with more than 4 relays on the same coordinate
-            if (settings.aggregateCoordinates) {
-                aggregatedCoordinatesLayer.addTo(layerGroup)
-            }
-
-            // Draw familyCord marker's, used to draw all markers to the map with colors according to their family
-            if (settings.sortFamily) {
-                if (settings.selectedFamily) relayFamilyLayer.addTo(layerGroup)
-                else relayFamilyCoordinatesLayer.addTo(layerGroup)
-            }
-
-            // Draw marker's, used to draw all markers to the map with colors according to their type
-            if (!settings.sortCountry) {
-                relayLayer.addTo(layerGroup)
-            }
-
-            // Draw country marker's, used to draw all markers to the map with colors according to their country
-            if (settings.sortCountry) {
-                relayCountryLayer.addTo(layerGroup)
-            }
-
             setStatistics(statistics)
         }
         return layerGroup
-    }, [aggregatedCoordinatesLayer, closeSnackbar, countryLayer, enqueueSnackbar, filteredRelays.length, leafletMap, relayCountryLayer, relayCountryMap, relayFamilyCoordinatesLayer, relayFamilyLayer, relayFamilyMap, relayHeatmapLayer, relayLayer, relays, setSettings, setStatistics, settings, statistics])
+    }, [aggregatedCoordinatesLayer, closeSnackbar, countryBordersLayer, enqueueSnackbar, filteredRelays.length, leafletMap, relayCountryLayer, relayCountryMap, relayFamilyCoordinatesLayer, relaySelectedFamilyLayer, relayFamilyMap, relayLocationHeatmapLayer, relayLayer, relays, setSettings, setStatistics, settings, statistics])
 
 
     /**

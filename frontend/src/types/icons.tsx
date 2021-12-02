@@ -12,7 +12,7 @@ import {RelayType} from "./relay";
  * Returns the Icon's JSX.Element
  * @param relayType the Icon-/ Relay-Type
  */
-export function getIcon(relayType?: RelayType): JSX.Element | null {
+export function getIcon(relayType: RelayType): JSX.Element | null {
     switch (relayType) {
         case RelayType.Exit:
             return ExitRelayIcon
