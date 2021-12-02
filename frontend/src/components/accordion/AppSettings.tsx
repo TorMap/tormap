@@ -95,7 +95,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                 >
                     <Typography className={"heading"}>Group relays by</Typography>
                 </AccordionSummary>
-                <AccordionDetails>
+                <AccordionDetails sx={{padding: "0px 8px 20px 8px"}}>
                     <FormGroup>
                         <FormControlLabel
                             key={"Family"}
@@ -132,7 +132,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                 >
                     <Typography className={"heading"}>Show relay types</Typography>
                 </AccordionSummary>
-                <AccordionDetails>
+                <AccordionDetails sx={{padding: "0px 8px 20px 8px"}}>
                     <FormGroup>
                         {showRelayTypes.map(relayType =>
                             <FormControlLabel
@@ -167,7 +167,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                 >
                     <Typography className={"heading"}>Relays must include flag</Typography>
                 </AccordionSummary>
-                <AccordionDetails>
+                <AccordionDetails sx={{padding: "0px 8px 20px 8px"}}>
                     <FormGroup>
                         {relayMustIncludeFlagOptions.map(option =>
                             <Tooltip
@@ -188,10 +188,12 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                                 />
                             </Tooltip>
                         )}
+                    </FormGroup>
+                    <Box sx={{margin: "8px 8px"}}>
                         <Link href={"https://github.com/torproject/torspec/blob/main/dir-spec.txt"} target={"_blank"}>
                             More information about flags
                         </Link>
-                    </FormGroup>
+                    </Box>
                 </AccordionDetails>
             </Accordion>
         </Box>
