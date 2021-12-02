@@ -10,7 +10,6 @@ import {RelayLocationDto} from "../types/responses";
 export const applyRelayFilter = (relays: RelayLocationDto[], settings: Settings): RelayLocationDto[] => {
     let filtered: RelayLocationDto[] = []
     relays.forEach(relay => {
-        // Filter relay flags
         let relayMissesRequiredFlag = false
         RelayFlags.forEach(flag => {
                 if (settings.relaysMustIncludeFlag[flag] && !relay.flags?.includes(flag)) {
@@ -19,22 +18,10 @@ export const applyRelayFilter = (relays: RelayLocationDto[], settings: Settings)
                 }
             }
         )
-        if (relayMissesRequiredFlag) {
-            return
-        }
-
-        // Filter relay types
         const relayType = getRelayType(relay)
-        if (!settings.showRelayTypes[RelayType.Exit] && relayType === RelayType.Exit) {
-            return
+        if (!relayMissesRequiredFlag && settings.showRelayTypes[relayType]) {
+            filtered.push(relay)
         }
-        if (!settings.showRelayTypes[RelayType.Guard] && relayType === RelayType.Guard) {
-            return
-        }
-        if (!settings.showRelayTypes[RelayType.Other] && relayType === RelayType.Other) {
-            return
-        }
-        filtered.push(relay)
     })
     return filtered
 }
@@ -100,17 +87,17 @@ export const buildFamilyCoordinatesMap = (latLonMap: Map<string, RelayLocationDt
  * The largest Family on this coordinate is first
  * @param famCordMap - The famCordMap-Object to sort
  */
-export const sortFamilyCoordinatesMap = (famCordMap: Map<string, Map<number, RelayLocationDto[]>>): Map<string, famCordArr[]> => {
-    let output: Map<string, famCordArr[]> = new Map<string, famCordArr[]>()
+export const sortFamilyCoordinatesMap = (famCordMap: Map<string, Map<number, RelayLocationDto[]>>): Map<string, RelayFamilyLocation[]> => {
+    let output: Map<string, RelayFamilyLocation[]> = new Map<string, RelayFamilyLocation[]>()
     // For each coordinate
     famCordMap.forEach((famMapForLocation, coordinateKey) => {
-        let sorted: famCordArr[] = []
+        let sorted: RelayFamilyLocation[] = []
         // For each family at coordinate
         while (famMapForLocation.size > 0) {
-            let largest: famCordArr = {relays: [], familyID: 0, padding: 0}
+            let largest: RelayFamilyLocation = {relays: [], familyId: 0, padding: 0}
             // Find largest
             famMapForLocation.forEach((relays, famID) => {
-                if (relays.length > largest.relays.length) largest = {relays: relays, familyID: famID, padding: 0}
+                if (relays.length > largest.relays.length) largest = {relays: relays, familyId: famID, padding: 0}
             })
             // Add padding to all larger ones (so there are no markers with same size on same coordinate)
             if (sorted.length > 0) {
@@ -118,16 +105,16 @@ export const sortFamilyCoordinatesMap = (famCordMap: Map<string, Map<number, Rel
             }
             // Cleanup for next iteration
             sorted.push(largest)
-            famMapForLocation.delete(largest.familyID)
-            largest = {relays: [], familyID: 0, padding: 0}
+            famMapForLocation.delete(largest.familyId)
+            largest = {relays: [], familyId: 0, padding: 0}
         }
         output.set(coordinateKey, sorted)
     })
     return output
 }
 
-export type famCordArr = {
-    familyID: number,
+export type RelayFamilyLocation = {
+    familyId: number,
     relays: RelayLocationDto[],
     padding: number
 }
@@ -206,15 +193,13 @@ export const buildStatistics = (
  * Returns the type of a relay
  * @param relay - The Relay to identify
  */
-export function getRelayType(relay?: RelayLocationDto): RelayType | undefined {
-    if (relay === undefined) return undefined
+export function getRelayType(relay: RelayLocationDto): RelayType {
     if (relay.flags?.includes(RelayFlag.Exit)) {
         return RelayType.Exit
     } else if (relay.flags?.includes(RelayFlag.Guard)) {
         return RelayType.Guard
-    } else {
-        return RelayType.Other
     }
+    return RelayType.Other
 }
 
 /**

@@ -161,6 +161,7 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<Props> = ({
 
     const theme = useTheme()
     const desktop = useMediaQuery(theme.breakpoints.up("lg"))
+    const relay = relays.find((relay) => relayDetailsId && relay.detailsId === relayDetailsId)
 
     return (
         <FullHeightDialog
@@ -178,7 +179,7 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<Props> = ({
                             display: "inline",
                             paddingRight: "16px",
                         }}>
-                            {relayDetailsId ? getIcon(getRelayType(relays.find((relay) => relay.detailsId === relayDetailsId))) : null}
+                            {relay ? getIcon(getRelayType(relay)) : null}
                         </Box>
                         <Typography
                             sx={{display: "inline"}}

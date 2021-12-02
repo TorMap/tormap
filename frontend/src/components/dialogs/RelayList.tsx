@@ -40,6 +40,14 @@ export const RelayList: FunctionComponent<Props> = ({
                                                         relayDetailsId,
                                                         setRelayDetailsId,
                                                     }) => {
+
+    const findIcon = (identifier: RelayIdentifierDto) => {
+        const relay = relays.find(
+            (relay) => relay.detailsId === identifier.id
+        )
+        return relay ? getIcon(getRelayType(relay)) : null
+    }
+
     return (
         <List>
             {relayIdentifiers.map((identifier) =>
@@ -56,9 +64,7 @@ export const RelayList: FunctionComponent<Props> = ({
                             onClick={() => setRelayDetailsId(identifier.id)}
                         >
                             <ListItemIcon>
-                                {getIcon(getRelayType(relays.find(
-                                    (relay) => relay.detailsId === identifier.id)
-                                ))}
+                                {findIcon(identifier)}
                             </ListItemIcon>
                             <ListItemText primary={identifier.nickname}/>
                         </ListItem>
