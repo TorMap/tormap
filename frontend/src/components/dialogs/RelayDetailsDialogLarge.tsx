@@ -5,7 +5,7 @@ import {
     DialogTitle,
     Divider, FormControl,
     Grid,
-    IconButton, InputLabel, Link, MenuItem, Select,
+    IconButton, Link, MenuItem, Select,
     Typography,
     useMediaQuery,
     useTheme
@@ -16,7 +16,7 @@ import {getRelayType} from "../../util/aggregate-relays";
 import {DetailsInfo, RelayLocationDto, RelayDetailsDto, RelayIdentifierDto} from "../../types/responses";
 import {FullHeightDialog, SnackbarMessage} from "../../types/ui";
 import {RelayFlag, RelayFlagLabel, RelayType} from "../../types/relay";
-import {backend, nameOfFactory} from "../../util/util";
+import {backend} from "../../util/util";
 import {useSnackbar} from "notistack";
 import {RelayList} from "./RelayList";
 import {RelayDetails} from "./RelayDetails";
