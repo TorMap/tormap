@@ -1,25 +1,26 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {
     Box,
     CircularProgress,
     DialogTitle,
-    Divider,
+    Divider, FormControl,
     Grid,
-    IconButton,
+    IconButton, InputLabel, Link, MenuItem, Select,
     Typography,
     useMediaQuery,
     useTheme
 } from "@mui/material";
 import CloseIcon from "@material-ui/icons/Close";
 import {getIcon} from "../../types/icons";
-import {findGeoRelayViewByID, getRelayType} from "../../util/aggregate-relays";
+import {getRelayType} from "../../util/aggregate-relays";
 import {DetailsInfo, RelayLocationDto, RelayDetailsDto, RelayIdentifierDto} from "../../types/responses";
 import {FullHeightDialog, SnackbarMessage} from "../../types/ui";
-import {RelayFlag, RelayFlagLabel} from "../../types/relay";
-import {backend} from "../../util/util";
+import {RelayFlag, RelayFlagLabel, RelayType} from "../../types/relay";
+import {backend, nameOfFactory} from "../../util/util";
 import {useSnackbar} from "notistack";
 import {RelayList} from "./RelayList";
 import {RelayDetails} from "./RelayDetails";
+import {SelectChangeEvent} from "@mui/material/Select/SelectInput";
 
 interface Props {
     /**
@@ -76,8 +77,38 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<Props> = ({
     const [relayDetailsId, setRelayDetailsId] = useState<number>()
     const [rawRelayDetails, setRawRelayDetails] = useState<RelayDetailsDto>()
     const [relayDetails, setRelayDetails] = useState<DetailsInfo[]>()
+    const [sortRelaysBy, setSortRelaysBy] = useState<keyof RelayMatch>("relayType")
 
     const {enqueueSnackbar} = useSnackbar();
+
+    const relayDetailsIdToLocationMap = useMemo(() => {
+        const relayDetailsIdToLocationMap = new Map<number, RelayLocationDto>()
+        relays.filter(relay => relay.detailsId).forEach(relay => relayDetailsIdToLocationMap.set(relay.detailsId!!, relay))
+        return relayDetailsIdToLocationMap
+    }, [relays])
+
+    const relayMatches = useMemo(
+        () => {
+            const relayMatches: RelayMatch[] = [];
+            relayIdentifiers.forEach(identifier => {
+                const relayLocation = relayDetailsIdToLocationMap.get(identifier.id)
+                if (relayLocation) {
+                    relayMatches.push({
+                        ...identifier,
+                        location: relayLocation,
+                        relayType: getRelayType(relayLocation)
+                    })
+                }
+            })
+            return relayMatches.sort((a, b) => a.relayType > b.relayType ? 1 : -1)
+        },
+        [relayIdentifiers, relayDetailsIdToLocationMap]
+    )
+
+    const sortedRelayMatches = useMemo(
+        () =>  relayMatches.sort((a, b) => a[sortRelaysBy] > b[sortRelaysBy] ? 1 : -1),
+        [relayMatches, sortRelaysBy]
+    )
 
     /**
      * Query relayIdentifiers for relays from backend
@@ -87,26 +118,25 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<Props> = ({
         setRawRelayDetails(undefined)
         setRelayDetails(undefined)
         setRelayIdentifiers([])
-        const relayDetailsIds = relays.filter(relay => relay.detailsId).map(relay => relay.detailsId)
-        if (relays.length > 0 && relayDetailsIds.length === 0) {
+        if (relays.length > 0 && relayDetailsIdToLocationMap.size === 0) {
             enqueueSnackbar(SnackbarMessage.NoRelayDetails, {variant: "warning"})
             closeDialog()
-        } else if (relayDetailsIds.length === 1) {
-            setRelayDetailsId(relayDetailsIds[0]!!)
-        } else if (relayDetailsIds.length > 1) {
-            backend.post<RelayIdentifierDto[]>('/relay/details/relay/identifiers', relayDetailsIds).then(response => {
+        } else if (relayDetailsIdToLocationMap.size === 1) {
+            setRelayDetailsId(relayDetailsIdToLocationMap.keys().next().value)
+        } else if (relayDetailsIdToLocationMap.size > 1) {
+            backend.post<RelayIdentifierDto[]>(
+                '/relay/details/relay/identifiers',
+                Array.from(relayDetailsIdToLocationMap.keys())
+            ).then(response => {
                 const requestedRelayIdentifiers = response.data
                 setRelayIdentifiers(requestedRelayIdentifiers)
-                if (requestedRelayIdentifiers.length > 0) {
-                    setRelayDetailsId(requestedRelayIdentifiers[0].id)
-                }
             }).catch(() => {
                 enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
                 closeDialog()
             })
         }
 
-    }, [closeDialog, relays, enqueueSnackbar])
+    }, [closeDialog, relays, enqueueSnackbar, relayDetailsIdToLocationMap])
 
     /**
      * Query more information for the selected relay
@@ -119,21 +149,45 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<Props> = ({
             return "no flags assigned"
         }
 
-        setRawRelayDetails(undefined)
-        setRelayDetails(undefined)
-        if (relayDetailsId) {
+        if (!relayDetailsId && sortedRelayMatches.length > 0) {
+            setRelayDetailsId(sortedRelayMatches[0].id)
+        } else if (relayDetailsId) {
             backend.get<RelayDetailsDto>(`/relay/details/relay/${relayDetailsId}`).then(response => {
                 const relay = response.data
                 setRawRelayDetails(relay)
                 setRelayDetails([
-                    {name: "Fingerprint", value: relay.fingerprint},
-                    {name: "IP address", value: relay.address},
+                    {
+                        name: "Fingerprint",
+                        value:
+                            <Link
+                                href={`https://metrics.torproject.org/rs.html#details/${relay.fingerprint}`}
+                                target={"_blank"}>
+                                {relay.fingerprint}
+                            </Link>
+                    },
+                    {
+                        name: "IP address",
+                        value:
+                            <Link
+                                href={`https://metrics.torproject.org/rs.html#search/${relay.address}`}
+                                target={"_blank"}>
+                                {relay.address}
+                            </Link>
+                    },
                     {
                         name: "Flags assigned by authorities",
-                        value: constructFlagString(findGeoRelayViewByID(relay.id, relays)?.flags)
+                        value: constructFlagString(relayDetailsIdToLocationMap.get(relay.id)?.flags)
                     },
                     {name: "Autonomous System", value: relay.autonomousSystemName},
-                    {name: "Autonomous System Number", value: relay.autonomousSystemNumber},
+                    {
+                        name: "Autonomous System Number",
+                        value:
+                            <Link
+                                href={`https://metrics.torproject.org/rs.html#search/as:${relay.autonomousSystemNumber}`}
+                                target={"_blank"}>
+                                {relay.autonomousSystemNumber}
+                            </Link>
+                    },
                     {name: "Platform", value: relay.platform},
                     {name: "Uptime", value: formatSecondsToHours(relay.uptime)},
                     {name: "Contact", value: relay.contact},
@@ -148,7 +202,7 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<Props> = ({
                     {name: "Accepts tunneled directory requests", value: formatBoolean(relay.tunnelledDirServer)},
                     {name: "Link protocol versions", value: relay.linkProtocolVersions},
                     {name: "Circuit protocol versions", value: relay.circuitProtocolVersions},
-                    {name: "Family members", value: relay.familyEntries},
+                    {name: "Self reported family members", value: relay.familyEntries},
                     {name: "Infos published by relay on", value: relay.day},
                 ])
             })
@@ -156,11 +210,20 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<Props> = ({
                     enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
                 })
         }
-    }, [relayDetailsId, relays, enqueueSnackbar])
+    }, [sortedRelayMatches, relayDetailsId, relayDetailsIdToLocationMap, enqueueSnackbar])
 
     const theme = useTheme()
     const desktop = useMediaQuery(theme.breakpoints.up("lg"))
     const relay = relays.find((relay) => relayDetailsId && relay.detailsId === relayDetailsId)
+
+    const handeSelectSortByChange = (event: SelectChangeEvent<keyof RelayMatch>) => {
+        switch (event.target.value) {
+            case "nickname": setSortRelaysBy("nickname")
+                break
+            default: setSortRelaysBy("relayType")
+                break
+        }
+    }
 
     return (
         <FullHeightDialog
@@ -170,50 +233,74 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<Props> = ({
             maxWidth={relays.length > 1 ? "lg" : "md"}
             fullWidth={true}
             fullScreen={!desktop}
+            sx={{
+                paper: {
+                    height: '70vh',
+                },
+            }}
         >
             <DialogTitle>
-                {rawRelayDetails ?
-                    <Box display="flex" alignItems={"center"}>
-                        <Box sx={{
-                            display: "inline",
-                            paddingRight: "16px",
-                        }}>
-                            {relay ? getIcon(getRelayType(relay)) : null}
-                        </Box>
-                        <Typography
-                            sx={{display: "inline"}}
-                            variant="h6">
-                            {relayIdentifiers.find((identifier) => {
-                                    return identifier.id === relayDetailsId
-                                })?.nickname
-                                || rawRelayDetails.nickname}
-                        </Typography>
-                    </Box> : <CircularProgress color={"inherit"} size={24}/>
-                }
-                <IconButton aria-label="close" sx={{
-                    position: "absolute",
-                    right: "10px",
-                    top: "10px",
-                }} onClick={closeDialog}>
-                    <CloseIcon/>
-                </IconButton>
-            </DialogTitle>
-            <Divider/>
                 <Grid container>
-                    <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 3 : 0}
-                          sx={{maxHeight: "65vh", overflow: 'auto'}}>
-                        <RelayList
-                            relays={relays}
-                            relayIdentifiers={relayIdentifiers}
-                            relayDetailsId={relayDetailsId}
-                            setRelayDetailsId={setRelayDetailsId}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 9 : 12}
-                          sx={{maxHeight: "65vh", overflow: 'auto'}}>
-                        <RelayDetails relayDetails={relayDetails}/>
+                    {relayIdentifiers.length > 1 && <Grid item xs={12} sm={3}>
+                        <Typography sx={{display: "inline"}} variant="h6">
+                            Relays
+                        </Typography>
+                        <FormControl variant="standard" sx={{marginLeft: "20px"}}>
+                            <Select
+                                value={sortRelaysBy}
+                                label="Sort by"
+                                onChange={handeSelectSortByChange}
+                            >
+                                <MenuItem value={"relayType"}>Type</MenuItem>
+                                <MenuItem value={"nickname"}>Nickname</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid>}
+                    <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 9 : 12}>
+                        {rawRelayDetails ?
+                            <Box display="flex" alignItems={"center"}>
+                                <Box sx={{
+                                    display: "inline",
+                                    paddingRight: "16px",
+                                }}>
+                                    {relay ? getIcon(getRelayType(relay)) : null}
+                                </Box>
+                                <Typography sx={{display: "inline"}} variant="h6">
+                                    {rawRelayDetails.nickname}
+                                </Typography>
+                            </Box> : <CircularProgress color={"inherit"} size={24}/>
+                        }
+                        <IconButton aria-label="close" sx={{
+                            position: "absolute",
+                            right: "10px",
+                            top: "10px",
+                        }} onClick={closeDialog}>
+                            <CloseIcon/>
+                        </IconButton>
                     </Grid>
                 </Grid>
+
+            </DialogTitle>
+            <Divider/>
+            <Grid container>
+                {relayIdentifiers.length > 1 && <Grid item xs={12} sm={3}
+                                                      sx={{maxHeight: "65vh", overflow: 'auto'}}>
+                    <RelayList
+                        relayMatches={sortedRelayMatches}
+                        relayDetailsId={relayDetailsId}
+                        setRelayDetailsId={setRelayDetailsId}
+                    />
+                </Grid>}
+                <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 9 : 12}
+                      sx={{maxHeight: "65vh", overflow: 'auto'}}>
+                    <RelayDetails relayDetails={relayDetails}/>
+                </Grid>
+            </Grid>
         </FullHeightDialog>
     )
+}
+
+export interface RelayMatch extends RelayIdentifierDto {
+    location: RelayLocationDto
+    relayType: RelayType
 }

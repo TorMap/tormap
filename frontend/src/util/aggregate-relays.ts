@@ -208,6 +208,6 @@ export function getRelayType(relay: RelayLocationDto): RelayType {
  * @param id - The detailsID of the searched relay
  * @param relays - The GeoRelayView[] to be searched
  */
-export function findGeoRelayViewByID(id: number, relays: RelayLocationDto[]): RelayLocationDto | undefined {
+export function findRelayLocationById(id: number, relays: RelayLocationDto[]): RelayLocationDto | undefined {
     return relays.find((relay) => relay.detailsId === id)
 }
