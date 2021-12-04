@@ -1,0 +1,44 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "baseBranches": [
+    "development"
+  ],
+  "labels": [
+    "renovate"
+  ],
+  "assignees": [
+    "JuliusHenke"
+  ],
+  "rebaseWhen": "behind-base-branch",
+  "packageRules": [
+    {
+      "description": "Automatically merge all but major updates",
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Ignore outdated dependencies required by TorProject descriptor library",
+      "managers": [
+        "gradle"
+      ],
+      "packagePatterns": [
+        "^commons-codec",
+        "^org.apache.commons",
+        "^com.fasterxml.jackson.core",
+        "^org.slf4j",
+        "^org.tukaani"
+      ],
+      "enabled": false
+    }
+  ],
+  "automergeType": "branch",
+  "stabilityDays": 3,
+  "prCreation": "not-pending"
+}
