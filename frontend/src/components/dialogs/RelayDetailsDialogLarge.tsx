@@ -10,7 +10,7 @@ import {
     useMediaQuery,
     useTheme
 } from "@mui/material";
-import CloseIcon from "@material-ui/icons/Close";
+import CloseIcon from "@mui/icons-material/Close";
 import {getIcon} from "../../types/icons";
 import {getRelayType} from "../../util/aggregate-relays";
 import {DetailsInfo, RelayLocationDto, RelayDetailsDto, RelayIdentifierDto} from "../../types/responses";

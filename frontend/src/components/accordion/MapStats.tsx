@@ -11,8 +11,8 @@ import {
     Typography
 } from "@mui/material";
 import {Statistics} from "../../types/app-state";
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
     CountryCountIcon,
     ExitRelayIcon,
