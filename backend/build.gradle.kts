@@ -42,7 +42,7 @@ dependencies {
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-    implementation("org.springdoc:springdoc-openapi-ui:1.5.12")
+    implementation("org.springdoc:springdoc-openapi-ui:1.5.13")
     implementation("org.springdoc:springdoc-openapi-kotlin:1.5.13")
 
     // Serialization
