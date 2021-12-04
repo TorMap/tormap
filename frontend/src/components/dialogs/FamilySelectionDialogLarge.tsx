@@ -1,7 +1,7 @@
 import {DialogContent, DialogTitle, IconButton, Typography, useMediaQuery, useTheme} from "@mui/material";
 import {RelayFamilyIdentifier} from "../../types/responses";
 import React, {useEffect, useState} from "react";
-import CloseIcon from "@material-ui/icons/Close";
+import CloseIcon from "@mui/icons-material/Close";
 import {FullHeightDialog, SnackbarMessage} from "../../types/ui";
 import {backend} from "../../util/util";
 import {useSnackbar} from "notistack";
