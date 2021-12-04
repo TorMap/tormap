@@ -2,7 +2,7 @@ import React, {FunctionComponent, useState} from "react";
 import {Transition, OverlayProps} from "../types/ui";
 import {AppBar, Box, Button, Dialog, DialogActions, Fab, IconButton, Toolbar, Typography} from "@mui/material";
 import SettingsIcon from '@mui/icons-material/Settings';
-import CloseIcon from "@material-ui/icons/Close";
+import CloseIcon from "@mui/icons-material/Close";
 import {AppSettings} from "./accordion/AppSettings";
 import {MapStats} from "./accordion/MapStats";
 import {DatePickerSmall} from "./date/DatePickerSmall";

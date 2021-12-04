@@ -1,7 +1,7 @@
 import React, {FunctionComponent, useCallback, useEffect, useState} from 'react';
 import {WorldMap} from "./WorldMap";
 import {Box, Button, Link} from "@mui/material";
-import "@material-ui/styles";
+import "@mui/styles";
 import "../index.css";
 import {Statistics} from "../types/app-state";
 import {AboutInformation} from "./dialogs/AboutInformation";

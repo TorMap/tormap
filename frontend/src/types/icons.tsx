@@ -1,11 +1,11 @@
 import {Colors} from "../util/config";
-import DirectionsRunIcon from "@material-ui/icons/DirectionsRun";
+import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
 import React from "react";
-import SecurityIcon from "@material-ui/icons/Security";
-import TimelineIcon from "@material-ui/icons/Timeline";
-import SubdirectoryArrowRightIcon from "@material-ui/icons/SubdirectoryArrowRight";
-import GroupIcon from "@material-ui/icons/Group";
-import PublicIcon from "@material-ui/icons/Public";
+import SecurityIcon from "@mui/icons-material/Security";
+import TimelineIcon from "@mui/icons-material/Timeline";
+import SubdirectoryArrowRightIcon from "@mui/icons-material/SubdirectoryArrowRight";
+import GroupIcon from "@mui/icons-material/Group";
+import PublicIcon from "@mui/icons-material/Public";
 import {RelayType} from "./relay";
 
 /**
