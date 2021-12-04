@@ -16,7 +16,7 @@ plugins {
     id("org.jetbrains.dokka") version "1.6.0"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "2.5.6"
+    id("org.springframework.boot") version "2.6.1"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 
     // Database migration tool https://flywaydb.org/documentation/usage/gradle/
