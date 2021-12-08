@@ -1,52 +1,44 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {FunctionComponent, useEffect, useMemo, useState} from "react";
 import {
     Box,
     CircularProgress,
+    Dialog,
+    DialogContent,
     DialogTitle,
-    Divider,
-    FormControl,
-    Grid,
-    IconButton,
+    FormControl, IconButton,
     Link,
     MenuItem,
     Select,
-    Typography,
-    useMediaQuery,
-    useTheme
+    Typography
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import {getIcon} from "../../types/icons";
-import {getRelayType} from "../../util/aggregate-relays";
+import {RelayMatch} from "./RelayDetailsDialogLarge";
 import {DetailsInfo, RelayDetailsDto, RelayIdentifierDto, RelayLocationDto} from "../../types/responses";
-import {FullHeightDialog, SnackbarMessage} from "../../types/ui";
-import {RelayFlag, RelayFlagLabel, RelayType} from "../../types/relay";
-import {backend} from "../../util/util";
 import {useSnackbar} from "notistack";
-import {RelayList} from "./RelayList";
-import {RelayDetails} from "./RelayDetails";
+import {getRelayType} from "../../util/aggregate-relays";
+import {SnackbarMessage} from "../../types/ui";
+import {backend} from "../../util/util";
+import {RelayFlag, RelayFlagLabel} from "../../types/relay";
 import {SelectChangeEvent} from "@mui/material/Select/SelectInput";
 import {DetailsProps, formatBoolean, formatBytesToMBPerSecond, formatSecondsToHours} from "./DetailsDialogUtil";
+import {RelayDetails} from "./RelayDetails";
+import {getIcon} from "../../types/icons";
+import {RelayList} from "./RelayList";
+import CloseIcon from "@mui/icons-material/Close";
 
 
-/**
- * The Dialog for Relay Details
- * @param showDialog - Whether the details dialog should be displayed
- * @param closeDialog - Event handler for closing the dialog
- * @param relays - Selectable relays
- * @param enqueueSnackbar - The event handler for showing a snackbar message
- */
-export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsProps> = ({
-                                                                            showDialog,
-                                                                            closeDialog,
-                                                                            relays,
-                                                                        }) => {
+export const RelayDetailsDialogSmall: FunctionComponent<DetailsProps> = ({
+                                                                     showDialog,
+                                                                     closeDialog,
+                                                                     relays,
+                                                                 }) => {
     const [relayIdentifiers, setRelayIdentifiers] = useState<RelayIdentifierDto[]>([])
     const [relayDetailsId, setRelayDetailsId] = useState<number>()
     const [rawRelayDetails, setRawRelayDetails] = useState<RelayDetailsDto>()
     const [relayDetails, setRelayDetails] = useState<DetailsInfo[]>()
     const [sortRelaysBy, setSortRelaysBy] = useState<keyof RelayMatch>("relayType")
-
     const {enqueueSnackbar} = useSnackbar();
+
+    const [showDetailsDialog, setShowDetailsDialog] = useState(false)
 
     //Todo: duplicate code
     const relayDetailsIdToLocationMap = useMemo(() => {
@@ -184,8 +176,6 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsProps> = ({
         }
     }, [sortedRelayMatches, relayDetailsId, relayDetailsIdToLocationMap, enqueueSnackbar])
 
-    const theme = useTheme()
-    const desktop = useMediaQuery(theme.breakpoints.up("lg"))
     //Todo: duplicate code
     const relay = relays.find((relay) => relayDetailsId && relay.detailsId === relayDetailsId)
 
@@ -199,38 +189,71 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsProps> = ({
         }
     }
 
+    // show relay details directly if only one relay is selectable
+    useEffect(() => {
+        if (relays.length === 1) setShowDetailsDialog(true);
+    }, [relays])
+
+    const handleDetailsDialogClose = () => {
+        if (relays.length === 1) {
+            closeDialog()
+            setShowDetailsDialog(false)
+        }
+        else {
+            setShowDetailsDialog(false)
+            setRelayDetailsId(undefined)
+        }
+    }
+
+    const handleSelectDetails = (id: number) => {
+        setRelayDetailsId(id)
+        setShowDetailsDialog(true)
+    }
+
     return (
-        <FullHeightDialog
-            open={showDialog}
-            onClose={closeDialog}
-            onBackdropClick={closeDialog}
-            maxWidth={relays.length > 1 ? "lg" : "md"}
-            fullWidth={true}
-            fullScreen={!desktop}
-            sx={{
-                paper: {
-                    height: '70vh',
-                },
-            }}
-        >
-            <DialogTitle>
-                <Grid container>
-                    {relayIdentifiers.length > 1 && <Grid item xs={12} sm={3}>
-                        <Typography sx={{display: "inline"}} variant="h6">
-                            Relays
-                        </Typography>
-                        <FormControl variant="standard" sx={{marginLeft: "20px"}}>
-                            <Select
-                                value={sortRelaysBy}
-                                label="Sort by"
-                                onChange={handeSelectSortByChange}
-                            >
-                                <MenuItem value={"relayType"}>Type</MenuItem>
-                                <MenuItem value={"nickname"}>Nickname</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>}
-                    <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 9 : 12}>
+        <Box>
+            <Dialog
+                open={showDialog}
+                onClose={closeDialog}
+                fullScreen={true}
+            >
+                <DialogTitle>
+                    <Typography variant="h6">
+                        Relays
+                    </Typography>
+                    <FormControl variant="standard" sx={{marginLeft: "20px"}}>
+                        <Select
+                            value={sortRelaysBy}
+                            label="Sort by"
+                            onChange={handeSelectSortByChange}
+                        >
+                            <MenuItem value={"relayType"}>Type</MenuItem>
+                            <MenuItem value={"nickname"}>Nickname</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <IconButton aria-label="close" sx={{
+                        position: "absolute",
+                        right: "10px",
+                        top: "10px",
+                    }} onClick={closeDialog}>
+                        <CloseIcon/>
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    <RelayList
+                        relayMatches={sortedRelayMatches}
+                        selectedRelay={relayDetailsId}
+                        setRelayDetailsId={handleSelectDetails}
+                    />
+                </DialogContent>
+            </Dialog>
+            <Dialog
+                open={showDetailsDialog}
+                onClose={handleDetailsDialogClose}
+                fullScreen={true}
+            >
+                <DialogTitle>
+                    <Typography variant="h6">
                         {rawRelayDetails ?
                             <Box display="flex" alignItems={"center"}>
                                 <Box sx={{
@@ -244,37 +267,19 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsProps> = ({
                                 </Typography>
                             </Box> : <CircularProgress color={"inherit"} size={24}/>
                         }
-                        <IconButton aria-label="close" sx={{
-                            position: "absolute",
-                            right: "10px",
-                            top: "10px",
-                        }} onClick={closeDialog}>
-                            <CloseIcon/>
-                        </IconButton>
-                    </Grid>
-                </Grid>
-
-            </DialogTitle>
-            <Divider/>
-            <Grid container>
-                {relayIdentifiers.length > 1 && <Grid item xs={12} sm={3}
-                                                      sx={{maxHeight: "65vh", overflow: 'auto'}}>
-                    <RelayList
-                        relayMatches={sortedRelayMatches}
-                        selectedRelay={relayDetailsId}
-                        setRelayDetailsId={setRelayDetailsId}
-                    />
-                </Grid>}
-                <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 9 : 12}
-                      sx={{maxHeight: "65vh", overflow: 'auto'}}>
+                    </Typography>
+                    <IconButton aria-label="close" sx={{
+                        position: "absolute",
+                        right: "10px",
+                        top: "10px",
+                    }} onClick={handleDetailsDialogClose}>
+                        <CloseIcon/>
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
                     <RelayDetails relayDetails={relayDetails}/>
-                </Grid>
-            </Grid>
-        </FullHeightDialog>
+                </DialogContent>
+            </Dialog>
+        </Box>
     )
-}
-
-export interface RelayMatch extends RelayIdentifierDto {
-    location: RelayLocationDto
-    relayType: RelayType
 }

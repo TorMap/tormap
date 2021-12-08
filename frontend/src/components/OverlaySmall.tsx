@@ -1,5 +1,5 @@
 import React, {FunctionComponent, useState} from "react";
-import {Transition, OverlayProps} from "../types/ui";
+import {OverlayProps, Transition} from "../types/ui";
 import {AppBar, Box, Button, Dialog, DialogActions, Fab, IconButton, Toolbar, Typography} from "@mui/material";
 import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from "@mui/icons-material/Close";
