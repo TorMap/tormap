@@ -287,7 +287,7 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<Props> = ({
                                                       sx={{maxHeight: "65vh", overflow: 'auto'}}>
                     <RelayList
                         relayMatches={sortedRelayMatches}
-                        relayDetailsId={relayDetailsId}
+                        selectedRelay={relayDetailsId}
                         setRelayDetailsId={setRelayDetailsId}
                     />
                 </Grid>}
