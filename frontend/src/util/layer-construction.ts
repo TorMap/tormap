@@ -7,8 +7,8 @@ import {Feature, GeoJsonObject, GeometryObject} from "geojson";
 import {
     buildRelayCoordinatesMap,
     createLatLonKey,
-    RelayFamilyLocation,
     getRelayType,
+    RelayFamilyLocation,
     sortFamilyCoordinatesMap
 } from "./aggregate-relays";
 import {getMapColor9} from "./geojson";
