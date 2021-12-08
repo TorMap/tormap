@@ -5,7 +5,6 @@ import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/acc
 interface SettingsInterface {
     settings: Settings
     changeSettings: (event: React.ChangeEvent<HTMLInputElement>) => void
-    //setSettings: React.Dispatch<React.SetStateAction<Settings>>
     setSettings: (s: Settings) => void
 }
 
