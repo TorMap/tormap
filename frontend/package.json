@@ -11,7 +11,7 @@
     "@mui/material": "5.2.2",
     "@mui/styles": "5.2.2",
     "@react-leaflet/core": "1.1.1",
-    "@testing-library/jest-dom": "5.16.0",
+    "@testing-library/jest-dom": "5.16.1",
     "@testing-library/react": "12.1.2",
     "@testing-library/user-event": "13.5.0",
     "@types/geojson": "7946.0.8",
