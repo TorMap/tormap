@@ -51,14 +51,14 @@ export const DateProvider: FunctionComponent<DateProviderProps> = ({children}) =
 
     const sliderValue = availableDays.findIndex((value) => value === selectedDate)
 
-    function setSliderValue(index: number | undefined){
+    function setSliderValue(index: number | undefined) {
         if (index) setSelectedDate(availableDays[index])
         else setSelectedDate(undefined)
     }
 
     useEffect(() => {
         if (availableDays) setSelectedDate(availableDays[availableDays.length - 1])
-    },[availableDays])
+    }, [availableDays])
 
     return (
         <DateContext.Provider
@@ -70,7 +70,7 @@ export const DateProvider: FunctionComponent<DateProviderProps> = ({children}) =
                 availableDays,
                 setAvailableDays
             }}>
-            { children }
+            {children}
         </DateContext.Provider>
     )
 }

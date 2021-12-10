@@ -47,7 +47,7 @@ export const DateSlider: FunctionComponent = () => {
 
     useEffect(() => {
         setLocalSliderValue(sliderValue)
-    },[sliderValue])
+    }, [sliderValue])
 
 
     return (

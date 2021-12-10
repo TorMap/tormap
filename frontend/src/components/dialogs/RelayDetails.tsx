@@ -16,7 +16,7 @@ interface Props {
 export const RelayDetails: FunctionComponent<Props> = ({relayDetails}) => {
     return (
         <div>
-            {relayDetails?
+            {relayDetails ?
                 <Table size={"small"}>
                     <TableBody>
                         {relayDetails.map((relayInfo) =>

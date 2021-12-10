@@ -21,10 +21,10 @@ interface Props {
 export const FamiliesTable: FunctionComponent<Props> = ({
                                                             familyIdentifiers,
                                                             familySelectionCallback,
-}) => {
+                                                        }) => {
     return (
         <div>
-            {familyIdentifiers? <Table size={"small"}>
+            {familyIdentifiers ? <Table size={"small"}>
                     <TableHead>
                         <TableRow>
                             <TableCell scope="row">
@@ -44,7 +44,8 @@ export const FamiliesTable: FunctionComponent<Props> = ({
                                 key={family.id}
                                 onClick={() => familySelectionCallback(family.id)}
                                 hover={true}
-                                sx={{"&:hover": {
+                                sx={{
+                                    "&:hover": {
                                         cursor: "pointer",
                                     }
                                 }}

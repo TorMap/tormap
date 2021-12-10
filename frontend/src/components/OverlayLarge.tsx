@@ -11,7 +11,7 @@ import {DatePickerLarge} from "./date/DatePickerLarge";
  *
  * @param statistics - a Statistics object for data to display
  */
-export const OverlayLarge: FunctionComponent<OverlayProps> = ({statistics}) =>{
+export const OverlayLarge: FunctionComponent<OverlayProps> = ({statistics}) => {
 
     return (
         <Box>
@@ -21,7 +21,7 @@ export const OverlayLarge: FunctionComponent<OverlayProps> = ({statistics}) =>{
                 width: "50%",
                 left: "25%",
             }}>
-                <DateSlider />
+                <DateSlider/>
             </Box>
             <DatePickerLarge/>
             <Box sx={{
@@ -34,14 +34,14 @@ export const OverlayLarge: FunctionComponent<OverlayProps> = ({statistics}) =>{
                 <AppSettings elevation={24}/>
             </Box>
             {statistics &&
-                <Box sx={{
-                    position: "fixed",
-                    left: "1%",
-                    bottom: "15px",
-                    maxWidth: "20%",
-                }} >
-                    <MapStats stats={statistics} elevation={24} defaultExpanded={true}/>
-                </Box>
+            <Box sx={{
+                position: "fixed",
+                left: "1%",
+                bottom: "15px",
+                maxWidth: "20%",
+            }}>
+                <MapStats stats={statistics} elevation={24} defaultExpanded={true}/>
+            </Box>
             }
         </Box>
     )
