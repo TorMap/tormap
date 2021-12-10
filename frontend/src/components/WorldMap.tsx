@@ -15,20 +15,20 @@ import {
 import {
     buildAggregatedCoordinatesLayer,
     buildCountryLayer,
-    buildRelayCountryLayer,
     buildFamilyCoordinatesLayer,
-    buildSelectedFamilyLayer,
+    buildRelayCountryLayer,
     buildRelayHeatmapLayer,
-    buildRelayLayer
+    buildRelayLayer,
+    buildSelectedFamilyLayer
 } from "../util/layer-construction";
 import {RelayLocationDto} from "../types/responses";
-import {RelayDetailsDialogLarge} from "./dialogs/RelayDetailsDialogLarge";
-import {FamilySelectionDialogLarge} from "./dialogs/FamilySelectionDialogLarge";
 import {SnackbarMessage} from "../types/ui";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
 import {useSettings} from "../util/settings-context";
 import {useDate} from "../util/date-context";
+import {RelayDetailsDialog} from "./dialogs/RelayDetailsDialogUtil";
+import {FamilySelectionDialog} from "./dialogs/FamilySelectionUtil";
 
 
 interface Props {
@@ -258,12 +258,12 @@ export const WorldMap: FunctionComponent<Props> = ({
                 setLeafletMap(newMap)
             }}
         >
-            <RelayDetailsDialogLarge
+            <RelayDetailsDialog
                 showDialog={showRelayDetailsDialog}
                 closeDialog={useCallback(() => setShowRelayDetailsDialog(false), [])}
                 relays={relaysForDetailsDialog}
             />
-            <FamilySelectionDialogLarge
+            <FamilySelectionDialog
                 showDialog={showFamilySelectionDialog}
                 closeDialog={useCallback(() => setShowFamilySelectionDialog(false), [])}
                 refreshDayData={useCallback(() => setRefreshDayCount(prevState => prevState + 1), [])}

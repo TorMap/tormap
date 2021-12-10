@@ -18,7 +18,7 @@ export const TorMapTheme: ThemeOptions = {
         },
         MuiLink: {
             styleOverrides: {
-                root:{
+                root: {
                     color: "rgba(255, 255, 255, 0.7)",
                     fontSize: ".9em",
                 }
@@ -31,7 +31,7 @@ export const TorMapTheme: ThemeOptions = {
                 }
             }
         },
-        MuiFormControlLabel:{
+        MuiFormControlLabel: {
             styleOverrides: {
                 root: {
                     marginLeft: "0px"

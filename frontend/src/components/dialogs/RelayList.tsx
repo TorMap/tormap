@@ -12,7 +12,7 @@ interface Props {
     /**
      * ID of currently selected Relay
      */
-    relayDetailsId?: number
+    selectedRelay?: number
 
     /**
      * Setter for the relayDetailsId
@@ -24,29 +24,29 @@ interface Props {
  * A List with Relays to select one
  * @param relays
  * @param relayMatches
- * @param relayDetailsId
+ * @param selectedRelay
  * @param setRelayDetailsId
  * @constructor
  */
 export const RelayList: FunctionComponent<Props> = ({
                                                         relayMatches,
-                                                        relayDetailsId,
+                                                        selectedRelay,
                                                         setRelayDetailsId,
                                                     }) => {
     return (
         <List>
             {relayMatches.map((relayMatch) =>
                 (relayMatch.id &&
-                        <ListItem
-                            button={true}
-                            selected={relayMatch.id === relayDetailsId}
-                            onClick={() => setRelayDetailsId(relayMatch.id)}
-                        >
-                            <ListItemIcon>
-                                {getIcon(relayMatch.relayType)}
-                            </ListItemIcon>
-                            <ListItemText primary={relayMatch.nickname}/>
-                        </ListItem>
+                    <ListItem
+                        button={true}
+                        selected={relayMatch.id === selectedRelay}
+                        onClick={() => setRelayDetailsId(relayMatch.id)}
+                    >
+                        <ListItemIcon>
+                            {getIcon(relayMatch.relayType)}
+                        </ListItemIcon>
+                        <ListItemText primary={relayMatch.nickname}/>
+                    </ListItem>
                 )
             )}
         </List>
