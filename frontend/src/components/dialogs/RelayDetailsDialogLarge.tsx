@@ -19,7 +19,7 @@ import {FullHeightDialog} from "../../types/ui";
 import {RelayType} from "../../types/relay";
 import {RelayList} from "./RelayList";
 import {RelayDetails} from "./RelayDetails";
-import {DetailsDialogProps} from "./DetailsDialogUtil";
+import {DetailsDialogProps} from "./RelayDetailsDialogUtil";
 
 
 /**
@@ -30,19 +30,19 @@ import {DetailsDialogProps} from "./DetailsDialogUtil";
  * @param enqueueSnackbar - The event handler for showing a snackbar message
  */
 export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps> = ({
-                                                                            showDialog,
-                                                                            closeDialog,
-                                                                            relays,
-                                                                        relayIdentifiers,
-                                                                        sortRelaysBy,
-                                                                        handleSelectSortByChange,
-                                                                        rawRelayDetails,
-                                                                        setRelayDetailsId,
-                                                                        sortedRelayMatches,
-                                                                        relayDetailsId,
-                                                                        relayDetails,
-                                                                        relay,
-                                                                        }) => {
+                                                                                         showDialog,
+                                                                                         closeDialog,
+                                                                                         relays,
+                                                                                         relayIdentifiers,
+                                                                                         sortRelaysBy,
+                                                                                         handleSelectSortByChange,
+                                                                                         rawRelayDetails,
+                                                                                         setRelayDetailsId,
+                                                                                         sortedRelayMatches,
+                                                                                         relayDetailsId,
+                                                                                         relayDetails,
+                                                                                         relay,
+                                                                                     }) => {
     return (
         <FullHeightDialog
             open={showDialog}

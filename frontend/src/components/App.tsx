@@ -23,7 +23,9 @@ export const App: FunctionComponent = () => {
     const selectedDate = date.selectedDate
     const setAvailableDays = date.setAvailableDays
 
-    useEffect(() => {console.log(selectedDate)},[selectedDate])
+    useEffect(() => {
+        console.log(selectedDate)
+    }, [selectedDate])
 
     // todo Move to Date context?
     // Loads available days from the backend
@@ -46,12 +48,12 @@ export const App: FunctionComponent = () => {
 
     return (
         <div>
-            {isLoading ? <LoadingAnimation /> : null}
+            {isLoading ? <LoadingAnimation/> : null}
             <WorldMap
                 setIsLoading={useCallback(setIsLoading, [setIsLoading])}
                 setStatistics={useCallback(setStatistics, [setStatistics])}
             />
-            <Overlay statistics={statistics} />
+            <Overlay statistics={statistics}/>
             <Box sx={{
                 color: "#b4b4b4",
                 background: "#262626",
