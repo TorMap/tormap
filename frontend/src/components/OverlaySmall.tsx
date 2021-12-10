@@ -1,5 +1,5 @@
 import React, {FunctionComponent, useState} from "react";
-import {Transition, OverlayProps} from "../types/ui";
+import {OverlayProps, Transition} from "../types/ui";
 import {AppBar, Box, Button, Dialog, DialogActions, Fab, IconButton, Toolbar, Typography} from "@mui/material";
 import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from "@mui/icons-material/Close";
@@ -25,7 +25,7 @@ export const OverlaySmall: FunctionComponent<OverlayProps> = ({statistics}) => {
                 sx={{position: "fixed", right: 20, bottom: 20}}
                 onClick={() => setOpen(true)}
             >
-                <SettingsIcon />
+                <SettingsIcon/>
             </Fab>
             <Dialog
                 open={open}
@@ -33,7 +33,7 @@ export const OverlaySmall: FunctionComponent<OverlayProps> = ({statistics}) => {
                 onClose={() => setOpen(false)}
                 TransitionComponent={Transition}
             >
-                <AppBar sx={{ position: 'relative' }}>
+                <AppBar sx={{position: 'relative'}}>
                     <Toolbar>
                         <IconButton
                             edge="start"
@@ -41,14 +41,14 @@ export const OverlaySmall: FunctionComponent<OverlayProps> = ({statistics}) => {
                             onClick={() => setOpen(false)}
                             aria-label="close"
                         >
-                            <CloseIcon />
+                            <CloseIcon/>
                         </IconButton>
-                        <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                        <Typography sx={{ml: 2, flex: 1}} variant="h6" component="div">
                             Settings
                         </Typography>
                     </Toolbar>
                 </AppBar>
-                <DatePickerSmall />
+                <DatePickerSmall/>
                 <Box sx={{padding: 1}}>
                     <AppSettings elevation={0}/>
                     <Box height={"10px"}/>
@@ -64,7 +64,7 @@ export const OverlaySmall: FunctionComponent<OverlayProps> = ({statistics}) => {
                         onClick={() => setOpen(false)}
                         variant={"contained"}
                         size={"large"}
-                        endIcon={<MapIcon />}
+                        endIcon={<MapIcon/>}
                     >
                         apply
                     </Button>

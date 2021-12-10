@@ -5,7 +5,6 @@ import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/acc
 interface SettingsInterface {
     settings: Settings
     changeSettings: (event: React.ChangeEvent<HTMLInputElement>) => void
-    //setSettings: React.Dispatch<React.SetStateAction<Settings>>
     setSettings: (s: Settings) => void
 }
 
@@ -28,7 +27,7 @@ interface SettingsProviderProps {
  * @param defaultSettings - a Settings object with the default settings
  * @param children - the child elements in the DOM
  */
-export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = ({defaultSettings, children }) => {
+export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = ({defaultSettings, children}) => {
     const [settings, setSettings] = useState<Settings>(defaultSettings)
 
     // Resets selection if grouping gets disabled
@@ -66,7 +65,7 @@ export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = 
 
     return (
         <SettingsContext.Provider value={{settings, changeSettings, setSettings}}>
-                { children }
+            {children}
         </SettingsContext.Provider>
     )
 }

@@ -5,7 +5,7 @@ import {
     Button,
     Card,
     CardHeader,
-    Dialog,
+    Dialog, DialogActions,
     DialogContent,
     DialogTitle,
     Grid,
@@ -15,7 +15,7 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
-    Typography
+    Typography, useMediaQuery, useTheme
 } from "@mui/material";
 import GitHubIcon from '@mui/icons-material/GitHub';
 import EmailIcon from '@mui/icons-material/Email';
@@ -30,6 +30,10 @@ import TorMapLogo from "../../resources/logo.png";
  * A component for displaying information about TorMap
  */
 export const AboutInformation: React.FunctionComponent = () => {
+    //Variables for deciding between small and large dialogs
+    const theme = useTheme()
+    const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
+    // AboutDialog specific variables
     const [showDialog, setShowDialog] = useState(false)
 
     return (
@@ -42,10 +46,16 @@ export const AboutInformation: React.FunctionComponent = () => {
                     color: "white",
                 }} fontSize={"large"}/>
             </Button>
-            <Dialog open={showDialog} fullWidth={true} maxWidth={"md"} onBackdropClick={() => setShowDialog(false)}>
+            <Dialog
+                open={showDialog}
+                fullWidth={true}
+                maxWidth={"md"}
+                onBackdropClick={() => setShowDialog(false)}
+                fullScreen={!isLargeScreen}
+            >
                 <DialogTitle>
                     <Box display="flex" alignItems={"center"}>
-                        <Avatar sx={{marginRight: "10px"}} src={TorMapLogo} alt={"TorMap logo"} />
+                        <Avatar sx={{marginRight: "10px"}} src={TorMapLogo} alt={"TorMap logo"}/>
                         <Typography variant="h6">TorMap</Typography>
                     </Box>
                     <IconButton aria-label="close" sx={{
@@ -80,8 +90,10 @@ export const AboutInformation: React.FunctionComponent = () => {
                                                          target={"_blank"}>TorProject</Link> already provides
                         a large <Link href={"https://metrics.torproject.org/collector.html"}
                                       target={"_blank"}>archive</Link> with raw historic data about the network.
-                        We regularly process these so called "descriptors" and lookup IPv4 addresses to get geo locations and
-                        autonomous systems. If you are interested in our implementation, check out the open source repository
+                        We regularly process these so called "descriptors" and lookup IPv4 addresses to get geo
+                        locations and
+                        autonomous systems. If you are interested in our implementation, check out the open source
+                        repository
                         on <Link href={"https://github.com/TorMap/tormap"}
                                  target={"_blank"}>GitHub</Link>.<br/>
                         The location and ownership of IP ranges can change over time. Since we
@@ -193,6 +205,22 @@ export const AboutInformation: React.FunctionComponent = () => {
                                                     target={"_blank"}>https://geojson-maps.ash.ms/</Link>.
                     </Typography>
                 </DialogContent>
+                {!isLargeScreen ? <DialogActions sx={{
+                    position: "fixed",
+                    bottom: 5,
+                    right: 5,
+                }}>
+                    <Button
+                        autoFocus
+                        onClick={() => setShowDialog(false)}
+                        variant={"contained"}
+                        size={"large"}
+                        endIcon={<CloseIcon/>}
+                    >
+                        close
+                    </Button>
+                </DialogActions> : null}
+
             </Dialog>
         </div>
     )
