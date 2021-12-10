@@ -14,7 +14,7 @@ import {
     Typography
 } from "@mui/material";
 import {getRelayType} from "../../util/aggregate-relays";
-import {DetailsDialogProps} from "./DetailsDialogUtil";
+import {DetailsDialogProps} from "./RelayDetailsDialogUtil";
 import {RelayDetails} from "./RelayDetails";
 import {getIcon} from "../../types/icons";
 import {RelayList} from "./RelayList";
@@ -24,19 +24,19 @@ import {Transition} from "../../types/ui";
 
 
 export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
-                                                                             showDialog,
-                                                                             closeDialog,
-                                                                             relays,
-                                                                             relayIdentifiers,
-                                                                             sortRelaysBy,
-                                                                             handleSelectSortByChange,
-                                                                             rawRelayDetails,
-                                                                             setRelayDetailsId,
-                                                                             sortedRelayMatches,
-                                                                             relayDetailsId,
-                                                                             relayDetails,
-                                                                             relay,
-                                                                 }) => {
+                                                                                   showDialog,
+                                                                                   closeDialog,
+                                                                                   relays,
+                                                                                   relayIdentifiers,
+                                                                                   sortRelaysBy,
+                                                                                   handleSelectSortByChange,
+                                                                                   rawRelayDetails,
+                                                                                   setRelayDetailsId,
+                                                                                   sortedRelayMatches,
+                                                                                   relayDetailsId,
+                                                                                   relayDetails,
+                                                                                   relay,
+                                                                               }) => {
     const [showDetailsDialog, setShowDetailsDialog] = useState(false)
 
     //if Dialog is closed, set details dialog closed, too
@@ -53,8 +53,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
         if (relays.length === 1) {
             closeDialog()
             setShowDetailsDialog(false)
-        }
-        else {
+        } else {
             setShowDetailsDialog(false)
         }
     }
@@ -72,7 +71,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                 fullScreen={true}
                 TransitionComponent={Transition}
             >
-                <AppBar sx={{ position: 'relative' }}>
+                <AppBar sx={{position: 'relative'}}>
                     <Toolbar>
                         <Typography variant="h6">
                             Relays
@@ -131,7 +130,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                 fullScreen={true}
                 TransitionComponent={Transition}
             >
-                <AppBar sx={{ position: 'relative' }}>
+                <AppBar sx={{position: 'relative'}}>
                     <Toolbar>
                         <Typography variant="h6">
                             {rawRelayDetails ?

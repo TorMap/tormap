@@ -1,40 +1,9 @@
-import {DialogContent, DialogTitle, IconButton, Typography, useMediaQuery, useTheme} from "@mui/material";
-import {RelayFamilyIdentifier} from "../../types/responses";
-import React, {useEffect, useState} from "react";
+import {DialogContent, DialogTitle, IconButton, Typography} from "@mui/material";
+import React from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import {FullHeightDialog, SnackbarMessage} from "../../types/ui";
-import {backend} from "../../util/util";
-import {useSnackbar} from "notistack";
+import {FullHeightDialog} from "../../types/ui";
 import {FamiliesTable} from "./FamiliesTable";
-
-
-interface Props {
-    /**
-     * Whether the modal should currently be visible
-     */
-    showDialog: boolean
-
-    /**
-     * Hide the modal
-     */
-    closeDialog: () => void
-
-    /**
-     * Trigger download of the current day
-     */
-    refreshDayData: () => void
-
-    /**
-     * Families which the user can view detailed information about
-     */
-    familyIds: number[]
-
-    /**
-     * Callback for setting a family as selected
-     * @param f the family ID
-     */
-    familySelectionCallback: (f: number) => void
-}
+import {FamilySelectionDialogProps} from "./FamilySelectionUtil";
 
 /**
  *
@@ -44,56 +13,20 @@ interface Props {
  * @param families - The familyIDs available to select
  * @param familySelectionCallback - the callback function for selecting a family
  */
-export const FamilySelectionDialogLarge: React.FunctionComponent<Props> = ({
-                                                                          showDialog,
-                                                                          closeDialog,
-                                                                          refreshDayData,
-                                                                          familyIds,
-                                                                          familySelectionCallback,
-                                                                      }) => {
-
-    const [isLoading, setIsLoading] = useState(true)
-    const [familyIdentifiers, setFamilyIdentifiers] = useState<RelayFamilyIdentifier[]>()
-
-    const { enqueueSnackbar } = useSnackbar();
-
-    /**
-     * Query more information about the Families specified in "families" parameter
-     */
-    useEffect(() => {
-        setFamilyIdentifiers([])
-        if (familyIds.length > 0) {
-            setIsLoading(true)
-            backend.post<RelayFamilyIdentifier[]>(
-                '/relay/details/family/identifiers',
-                familyIds
-            ).then(response => {
-                const identifiers = response.data
-                if (identifiers.length > 0) {
-                    setFamilyIdentifiers(response.data)
-                } else {
-                    closeDialog()
-                    enqueueSnackbar(SnackbarMessage.UpdatedData, {variant: "success"})
-                    refreshDayData()
-                }
-                setIsLoading(false)
-            }).catch(() => {
-                enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
-                setIsLoading(false)
-            })
-        }
-    }, [closeDialog, enqueueSnackbar, familyIds, refreshDayData])
-
-    const theme = useTheme()
-    const desktop = useMediaQuery(theme.breakpoints.up("lg"))
-
+export const FamilySelectionDialogLarge: React.FunctionComponent<FamilySelectionDialogProps> = ({
+                                                                                                    showDialog,
+                                                                                                    closeDialog,
+                                                                                                    familyIds,
+                                                                                                    familySelectionCallback,
+                                                                                                    isLoading,
+                                                                                                    familyIdentifiers,
+                                                                                                }) => {
     return (
         <FullHeightDialog
             open={showDialog}
             onClose={closeDialog}
             onBackdropClick={closeDialog}
             maxWidth={familyIds.length > 1 ? "lg" : "md"}
-            fullWidth={!desktop}
         >
             <div>
                 <DialogTitle>

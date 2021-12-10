@@ -62,10 +62,10 @@ export interface DetailsDialogProps extends DetailsProps {
 }
 
 export const RelayDetailsDialog: FunctionComponent<DetailsProps> = ({
-                                                                showDialog,
-                                                                closeDialog,
-                                                                relays,
-                                                            }) => {
+                                                                        showDialog,
+                                                                        closeDialog,
+                                                                        relays,
+                                                                    }) => {
     //Variables for deciding between small and large dialogs
     const theme = useTheme()
     const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
@@ -103,7 +103,7 @@ export const RelayDetailsDialog: FunctionComponent<DetailsProps> = ({
     )
 
     const sortedRelayMatches = useMemo(
-        () =>  relayMatches.sort((a, b) => a[sortRelaysBy] > b[sortRelaysBy] ? 1 : -1),
+        () => relayMatches.sort((a, b) => a[sortRelaysBy] > b[sortRelaysBy] ? 1 : -1),
         [relayMatches, sortRelaysBy]
     )
 
@@ -212,40 +212,42 @@ export const RelayDetailsDialog: FunctionComponent<DetailsProps> = ({
     const relay = relays.find((relay) => relayDetailsId && relay.detailsId === relayDetailsId)
     const handeSelectSortByChange = (event: SelectChangeEvent<keyof RelayMatch>) => {
         switch (event.target.value) {
-            case "nickname": setSortRelaysBy("nickname")
+            case "nickname":
+                setSortRelaysBy("nickname")
                 break
-            default: setSortRelaysBy("relayType")
+            default:
+                setSortRelaysBy("relayType")
                 break
         }
     }
 
     return (isLargeScreen ?
-        <RelayDetailsDialogLarge
-            showDialog={showDialog}
-            closeDialog={closeDialog}
-            relays={relays}
+            <RelayDetailsDialogLarge
+                showDialog={showDialog}
+                closeDialog={closeDialog}
+                relays={relays}
 
-            relayIdentifiers={relayIdentifiers}
-            sortRelaysBy={sortRelaysBy}
-            handleSelectSortByChange={handeSelectSortByChange}
-            rawRelayDetails={rawRelayDetails}
-            setRelayDetailsId={setRelayDetailsId}
-            sortedRelayMatches={sortedRelayMatches}
-            relayDetailsId={relayDetailsId}
-            relayDetails={relayDetails}
-            relay={relay}/>
-        : <RelayDetailsDialogSmall
-            showDialog={showDialog}
-            closeDialog={closeDialog}
-            relays={relays}
-            relayIdentifiers={relayIdentifiers}
-            sortRelaysBy={sortRelaysBy}
-            handleSelectSortByChange={handeSelectSortByChange}
-            rawRelayDetails={rawRelayDetails}
-            setRelayDetailsId={setRelayDetailsId}
-            sortedRelayMatches={sortedRelayMatches}
-            relayDetailsId={relayDetailsId}
-            relayDetails={relayDetails}
-            relay={relay}/>
+                relayIdentifiers={relayIdentifiers}
+                sortRelaysBy={sortRelaysBy}
+                handleSelectSortByChange={handeSelectSortByChange}
+                rawRelayDetails={rawRelayDetails}
+                setRelayDetailsId={setRelayDetailsId}
+                sortedRelayMatches={sortedRelayMatches}
+                relayDetailsId={relayDetailsId}
+                relayDetails={relayDetails}
+                relay={relay}/>
+            : <RelayDetailsDialogSmall
+                showDialog={showDialog}
+                closeDialog={closeDialog}
+                relays={relays}
+                relayIdentifiers={relayIdentifiers}
+                sortRelaysBy={sortRelaysBy}
+                handleSelectSortByChange={handeSelectSortByChange}
+                rawRelayDetails={rawRelayDetails}
+                setRelayDetailsId={setRelayDetailsId}
+                sortedRelayMatches={sortedRelayMatches}
+                relayDetailsId={relayDetailsId}
+                relayDetails={relayDetails}
+                relay={relay}/>
     )
 }

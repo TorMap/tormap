@@ -47,7 +47,7 @@ interface Props {
  * @param settings - the App Settings
  * @param stats - the Statistics Object to show
  */
-export const MapStats: FunctionComponent<Props> = ({ defaultExpanded, elevation, stats}) => {
+export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation, stats}) => {
 
     const settings = useSettings().settings
 

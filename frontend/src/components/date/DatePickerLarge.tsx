@@ -7,7 +7,7 @@ import moment from "moment";
 import {DatePicker, LocalizationProvider} from "@mui/lab";
 import {useDate} from "../../util/date-context";
 
-export const DatePickerLarge:FunctionComponent = () => {
+export const DatePickerLarge: FunctionComponent = () => {
 
     const date = useDate()
     const selectedDate = date.selectedDate
@@ -43,11 +43,11 @@ export const DatePickerLarge:FunctionComponent = () => {
                 }}
                 onAccept={() => setSelectedDate(localSelectedDate!)}
                 minDate={new Date(availableDays[0])}
-                maxDate={new Date(availableDays[availableDays.length-1])}
+                maxDate={new Date(availableDays[availableDays.length - 1])}
                 shouldDisableDate={date => {
                     return !(availableDays.includes(moment(date).format("YYYY-MM-DD")))
                 }}
-                views={["year","month","day"]}
+                views={["year", "month", "day"]}
                 showTodayButton
             />
         </LocalizationProvider>
