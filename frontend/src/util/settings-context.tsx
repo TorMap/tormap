@@ -27,7 +27,7 @@ interface SettingsProviderProps {
  * @param defaultSettings - a Settings object with the default settings
  * @param children - the child elements in the DOM
  */
-export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = ({defaultSettings, children }) => {
+export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = ({defaultSettings, children}) => {
     const [settings, setSettings] = useState<Settings>(defaultSettings)
 
     // Resets selection if grouping gets disabled
@@ -65,7 +65,7 @@ export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = 
 
     return (
         <SettingsContext.Provider value={{settings, changeSettings, setSettings}}>
-                { children }
+            {children}
         </SettingsContext.Provider>
     )
 }

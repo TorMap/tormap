@@ -37,16 +37,16 @@ export const RelayList: FunctionComponent<Props> = ({
         <List>
             {relayMatches.map((relayMatch) =>
                 (relayMatch.id &&
-                        <ListItem
-                            button={true}
-                            selected={relayMatch.id === selectedRelay}
-                            onClick={() => setRelayDetailsId(relayMatch.id)}
-                        >
-                            <ListItemIcon>
-                                {getIcon(relayMatch.relayType)}
-                            </ListItemIcon>
-                            <ListItemText primary={relayMatch.nickname}/>
-                        </ListItem>
+                    <ListItem
+                        button={true}
+                        selected={relayMatch.id === selectedRelay}
+                        onClick={() => setRelayDetailsId(relayMatch.id)}
+                    >
+                        <ListItemIcon>
+                            {getIcon(relayMatch.relayType)}
+                        </ListItemIcon>
+                        <ListItemText primary={relayMatch.nickname}/>
+                    </ListItem>
                 )
             )}
         </List>
