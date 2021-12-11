@@ -20,15 +20,8 @@ export const App: FunctionComponent = () => {
     const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
     const date = useDate()
-    const selectedDate = date.selectedDate
     const setAvailableDays = date.setAvailableDays
 
-    useEffect(() => {
-        console.log(selectedDate)
-    }, [selectedDate])
-
-    // todo Move to Date context?
-    // Loads available days from the backend
     useEffect(() => {
         closeSnackbar()
         setIsLoading(true)
