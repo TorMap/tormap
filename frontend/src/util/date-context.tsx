@@ -1,4 +1,7 @@
 import React, {FunctionComponent, useContext, useEffect, useState} from "react";
+import {differenceInDays} from "date-fns";
+import {SnackbarMessage} from "../types/ui";
+import {useSnackbar} from "notistack";
 
 interface DateInterface {
     /**
@@ -13,23 +16,12 @@ interface DateInterface {
     setSelectedDate: (newDate: string) => void
 
     /**
-     * the Index of the selected Day in availableDays
-     */
-    sliderValue: number | undefined
-
-    /**
-     * Day to be selected in form of index in availableDays
-     * @param index
-     */
-    setSliderValue: (index: number | undefined) => void
-
-    /**
      * An Array of all available Days
      */
     availableDays: string[]
 
     /**
-     * A funktion to set the available Days
+     * A function to set the available days
      * @param arr
      */
     setAvailableDays: (arr: string[]) => void
@@ -48,25 +40,23 @@ interface DateProviderProps {
 export const DateProvider: FunctionComponent<DateProviderProps> = ({children}) => {
     const [availableDays, setAvailableDays] = useState<string[]>([])
     const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined)
-
-    const sliderValue = availableDays.findIndex((value) => value === selectedDate)
-
-    function setSliderValue(index: number | undefined) {
-        if (index) setSelectedDate(availableDays[index])
-        else setSelectedDate(undefined)
-    }
+    const {enqueueSnackbar} = useSnackbar();
 
     useEffect(() => {
-        if (availableDays) setSelectedDate(availableDays[availableDays.length - 1])
-    }, [availableDays])
+        if (availableDays.length > 0) {
+            setSelectedDate(availableDays[availableDays.length - 1])
+        }
+        const expectedNumberOfDays = differenceInDays(new Date("2007-10-27"), new Date())
+        if (availableDays.length < expectedNumberOfDays) {
+            enqueueSnackbar(SnackbarMessage.HistoricDataProcessing, {variant: "info"})
+        }
+    }, [availableDays, enqueueSnackbar])
 
     return (
         <DateContext.Provider
             value={{
                 selectedDate,
                 setSelectedDate,
-                sliderValue,
-                setSliderValue,
                 availableDays,
                 setAvailableDays
             }}>

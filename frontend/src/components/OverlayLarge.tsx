@@ -4,7 +4,7 @@ import {DateSlider} from "./date/DateSlider";
 import {Box} from "@mui/material";
 import {AppSettings} from "./accordion/AppSettings";
 import {MapStats} from "./accordion/MapStats";
-import {DatePickerLarge} from "./date/DatePickerLarge";
+import {ResponsiveDatePicker} from "./date/ResponsiveDatePicker";
 
 /**
  * A component wrapping all UI elements for devices with large screen sizes
@@ -12,7 +12,6 @@ import {DatePickerLarge} from "./date/DatePickerLarge";
  * @param statistics - a Statistics object for data to display
  */
 export const OverlayLarge: FunctionComponent<OverlayProps> = ({statistics}) => {
-
     return (
         <Box>
             <Box sx={{
@@ -23,7 +22,7 @@ export const OverlayLarge: FunctionComponent<OverlayProps> = ({statistics}) => {
             }}>
                 <DateSlider/>
             </Box>
-            <DatePickerLarge/>
+            <ResponsiveDatePicker largeScreen={true}/>
             <Box sx={{
                 position: "absolute",
                 right: "1%",

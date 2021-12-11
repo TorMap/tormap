@@ -5,8 +5,8 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from "@mui/icons-material/Close";
 import {AppSettings} from "./accordion/AppSettings";
 import {MapStats} from "./accordion/MapStats";
-import {DatePickerSmall} from "./date/DatePickerSmall";
 import MapIcon from '@mui/icons-material/Map';
+import {ResponsiveDatePicker} from "./date/ResponsiveDatePicker";
 
 /**
  * A component wrapping all UI elements for devices with small screen sizes
@@ -48,7 +48,7 @@ export const OverlaySmall: FunctionComponent<OverlayProps> = ({statistics}) => {
                         </Typography>
                     </Toolbar>
                 </AppBar>
-                <DatePickerSmall/>
+                <ResponsiveDatePicker largeScreen={false} />
                 <Box sx={{padding: 1}}>
                     <AppSettings elevation={0}/>
                     <Box height={"10px"}/>
@@ -66,7 +66,7 @@ export const OverlaySmall: FunctionComponent<OverlayProps> = ({statistics}) => {
                         size={"large"}
                         endIcon={<MapIcon/>}
                     >
-                        apply
+                        Back
                     </Button>
                 </DialogActions>
             </Dialog>
