@@ -8,16 +8,18 @@ import {useDate} from "../../util/date-context";
  * A Slider for date selection
  */
 export const DateSlider: FunctionComponent = () => {
-    const date = useDate()
-    const sliderValue = date.sliderValue
-    const availableDays = date.availableDays
-    const setSliderValue = date.setSliderValue
+    const dateContext = useDate()
+    const availableDays = dateContext.availableDays
+    const setSelectedDate = dateContext.setSelectedDate
+    const selectedDate = dateContext.selectedDate
 
-    const [localSliderValue, setLocalSliderValue] = useState<number | undefined>(sliderValue)
-    const [localSliderValueComitted, setLocalSliderValueComitted] = useState<number | undefined>(sliderValue)
     const [sliderMarks, setSliderMarks] = useState<Mark[]>([])
+    const [sliderValue, setSliderValue] = useState<number>(availableDays.length - 1)
+    let debouncedSliderValue = useDebounce<number>(sliderValue, 500)
 
-    const debouncedSliderValue = useDebounce<number | undefined>(localSliderValueComitted, 500);
+    useEffect(() => {
+        setSliderValue(availableDays.findIndex((value) => value === selectedDate))
+    }, [availableDays, selectedDate])
 
     // calculate the marks for the slider
     useEffect(() => {
@@ -42,24 +44,21 @@ export const DateSlider: FunctionComponent = () => {
 
     // handle debouncing of the slider value when dragging
     useEffect(() => {
-        setSliderValue(debouncedSliderValue)
-    }, [debouncedSliderValue, setSliderValue])
-
-    useEffect(() => {
-        setLocalSliderValue(sliderValue)
-    }, [sliderValue])
-
+        if (debouncedSliderValue !== undefined) {
+            setSelectedDate(availableDays[debouncedSliderValue])
+        }
+    }, [availableDays, debouncedSliderValue, setSelectedDate])
 
     return (
         <Box>
             <Slider
                 disabled={(availableDays.length === 0)}
-                value={localSliderValue}
+                value={sliderValue}
                 onChange={(event: any, newValue: number | number[]) => {
-                    setLocalSliderValue(newValue as number)
+                    setSliderValue(newValue as number)
                 }}
                 onChangeCommitted={(event: any, newValue: number | number[]) => {
-                    setLocalSliderValueComitted(newValue as number)
+                    debouncedSliderValue = newValue as number
                 }}
                 valueLabelDisplay={(availableDays.length === 0) ? "off" : "on"}
                 name={"slider"}

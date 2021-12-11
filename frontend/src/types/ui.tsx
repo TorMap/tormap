@@ -10,6 +10,7 @@ export enum SnackbarMessage {
     NoFamilyData = "Currently we have no family information for this date!",
     UpdatedData = "New data needed to be displayed. Please try again now.",
     NoRelayDetails = "Currently we have no details about this relay for this month.",
+    HistoricDataProcessing = "Currently historic data is being processed.",
 }
 
 export const FullHeightDialog = styled(Dialog)(() => ({
