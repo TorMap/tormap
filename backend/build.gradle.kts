@@ -13,14 +13,14 @@ plugins {
     kotlin("plugin.jpa") version kotlinVersion
 
     // Generate code documentation https://kotlin.github.io/dokka/1.5.0/
-    id("org.jetbrains.dokka") version "1.5.0"
+    id("org.jetbrains.dokka") version "1.6.0"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "2.5.6"
+    id("org.springframework.boot") version "2.6.1"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 
     // Database migration tool https://flywaydb.org/documentation/usage/gradle/
-    id("org.flywaydb.flyway") version "8.0.3"
+    id("org.flywaydb.flyway") version "8.2.1"
 }
 
 repositories {
@@ -42,8 +42,8 @@ dependencies {
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-    implementation("org.springdoc:springdoc-openapi-ui:1.5.12")
-    implementation("org.springdoc:springdoc-openapi-kotlin:1.5.12")
+    implementation("org.springdoc:springdoc-openapi-ui:1.5.13")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.5.13")
 
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
@@ -66,7 +66,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.12.4")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.12.4")
     implementation("com.fasterxml.jackson.core:jackson-core:2.12.4")
-    implementation("org.slf4j:slf4j-api:1.7.22")
+    implementation("org.slf4j:slf4j-api:1.7.32")
     implementation("org.tukaani:xz:1.6")
 }
 
