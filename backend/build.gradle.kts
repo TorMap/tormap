@@ -5,7 +5,7 @@ version = "1.1.2"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
-    val kotlinVersion = "1.6.0"
+    val kotlinVersion = "1.6.10"
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
