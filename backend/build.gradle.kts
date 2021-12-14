@@ -5,12 +5,11 @@ version = "1.1.2"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
-    val kotlinVersion = "1.6.10"
-    kotlin("jvm") version kotlinVersion
-    kotlin("kapt") version kotlinVersion
-    kotlin("plugin.spring") version kotlinVersion
-    kotlin("plugin.allopen") version kotlinVersion
-    kotlin("plugin.jpa") version kotlinVersion
+    kotlin("jvm") version "1.6.10"
+    kotlin("kapt") version "1.6.10"
+    kotlin("plugin.spring") version "1.6.10"
+    kotlin("plugin.allopen") version "1.6.10"
+    kotlin("plugin.jpa") version "1.6.10"
 
     // Generate code documentation https://kotlin.github.io/dokka/1.5.0/
     id("org.jetbrains.dokka") version "1.6.0"
