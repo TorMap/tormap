@@ -1,5 +1,6 @@
 #!/bin/bash
-echo "This script checks if commands for Java, Node.js, yarn and serve are available. If they are not, we will try to install them for you."
+echo "This script checks if commands for Java, Node.js, n and yarn are available."
+echo "We will try to install missing commands for you."
 echo " "
 
 # Check if Java is installed
@@ -8,7 +9,7 @@ if [ "$(command -v java)" ]; then
     echo "Java JDK found on your system"
   else
     echo "It seems like you are using a Java JRE version. For development a Java Development Kit (JDK) is needed."
-    echo "Please install a Java JDK version >= 11 manually and set JAVA_HOME accordingly. The command 'java -version' should output a JDK version of Java. Finally rerun this install script!"
+    echo "Please install a Java JDK >= 11 manually, verify installation with 'java -version' and rerun the script!"
     exit 1
   fi
 else
@@ -17,8 +18,7 @@ else
     sudo apt-get update
     sudo apt-get install default-jdk
   else
-    echo "Java JDK not found"
-    echo "Please install a Java JDK >= 11 manually and rerun the script!"
+    echo "Please install a Java JDK >= 11 manually, verify installation with 'java -version' and rerun the script!"
     exit 1
   fi
 fi
@@ -78,26 +78,32 @@ else
   exit 1
 fi
 
-# Check if yarn is installed
-if [ "$(command -v yarn)" ]; then
-  echo 'yarn found on your system'
+# Check if n is installed
+if [ "$(command -v n)" ]; then
+  echo 'n found on your system (tool to switch node version)'
 elif [ "$(command -v npm)" ]; then
-  # Install yarn via npm
-  sudo npm install --global yarn
+  # Install m via npm
+  sudo npm install --global n
 else
   echo 'Could not find npm package manager.'
-  echo 'Please install yarn and serve manually!'
+  echo 'Please install yarn manually!'
   exit 1
 fi
 
-# Check if serve is installed
-if [ "$(command -v serve)" ]; then
-  echo 'serve found on your system'
-elif [ "$(command -v npm)" ]; then
-  # Install serve
-  sudo npm install --global serve
+echo 'Switching to node version 16'
+sudo n 16
+
+# Check if yarn is installed
+if [ "$(command -v yarn)" ]; then
+  echo 'yarn found on your system'
 else
-  echo 'Could not find npm package manager.'
-  echo 'Please install serve manually!'
-  exit 1
+  # Install yarn via npm
+  sudo npm install --global yarn
 fi
+
+echo 'Switching to yarn version berry'
+cd ./frontend
+yarn set version berry
+cd ..
+
+echo 'Everything installed successfully! Run the project with ./run'
