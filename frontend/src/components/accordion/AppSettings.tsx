@@ -8,54 +8,31 @@ import {
     FormControlLabel,
     FormGroup,
     Link,
-    makeStyles,
     Switch,
     Tooltip,
     Typography,
-} from "@material-ui/core";
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import {Settings} from "../types/app-state";
-import {RelayFlag, RelayFlagLabel, RelayType, RelayTypeLabel} from "../types/relay";
-import {tooltipTimeDelay} from "../util/config";
-import {getIcon} from "../types/icons";
-import {nameOfFactory} from "../util/util";
-
-/**
- * Styles according to Material UI doc for components used in AppSettings component
- */
-const useStyle = makeStyles(() => ({
-    accordion: {
-        position: "absolute",
-        right: "1%",
-        top: "15px",
-        paddingBottom: "10px",
-        maxWidth: "20%",
-    },
-}))
+} from "@mui/material";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import {Settings} from "../../types/app-state";
+import {RelayFlag, RelayFlagLabel, RelayType, RelayTypeLabel} from "../../types/relay";
+import {tooltipTimeDelay} from "../../util/config";
+import {getIcon} from "../../types/icons";
+import {nameOfFactory} from "../../util/util";
+import {useSettings} from "../../util/settings-context";
 
 interface Props {
-
-    /**
-     * The currently applied app settings
-     */
-    settings: Settings
-
-    /**
-     * A callback to handle the change of setting elements
-     * @param event the event of a controlling component (E.g. switches, checkboxes...)
-     */
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    elevation: number
 }
 
 /**
  * A component for changing the app settings
- * @param settings the settings
- * @param onChange the changeHandler for changing settings
  */
-export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
-    const classes = useStyle()
-
+export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     const nameOfSetting = nameOfFactory<Settings>()
+
+
+    const settings = useSettings().settings
+    const onChange = useSettings().changeSettings
 
     // Construct relay type options to display
     const showRelayTypes: RelayType[] = [RelayType.Exit, RelayType.Guard, RelayType.Other]
@@ -109,8 +86,8 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
     }]
 
     return (
-        <div className={classes.accordion}>
-            <Accordion>
+        <Box>
+            <Accordion elevation={elevation}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
                     aria-controls="panel2a-content"
@@ -118,7 +95,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                 >
                     <Typography className={"heading"}>Group relays by</Typography>
                 </AccordionSummary>
-                <AccordionDetails>
+                <AccordionDetails sx={{padding: "0px 8px 20px 8px"}}>
                     <FormGroup>
                         <FormControlLabel
                             key={"Family"}
@@ -147,7 +124,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>
-            <Accordion>
+            <Accordion elevation={elevation}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
                     aria-controls="panel2a-content"
@@ -155,7 +132,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                 >
                     <Typography className={"heading"}>Show relay types</Typography>
                 </AccordionSummary>
-                <AccordionDetails>
+                <AccordionDetails sx={{padding: "0px 8px 20px 8px"}}>
                     <FormGroup>
                         {showRelayTypes.map(relayType =>
                             <FormControlLabel
@@ -182,7 +159,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>
-            <Accordion>
+            <Accordion elevation={elevation}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
                     aria-controls="panel2a-content"
@@ -190,7 +167,7 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                 >
                     <Typography className={"heading"}>Relays must include flag</Typography>
                 </AccordionSummary>
-                <AccordionDetails>
+                <AccordionDetails sx={{padding: "0px 8px 20px 8px"}}>
                     <FormGroup>
                         {relayMustIncludeFlagOptions.map(option =>
                             <Tooltip
@@ -211,13 +188,15 @@ export const AppSettings: FunctionComponent<Props> = ({settings, onChange}) => {
                                 />
                             </Tooltip>
                         )}
+                    </FormGroup>
+                    <Box sx={{margin: "8px 8px"}}>
                         <Link href={"https://github.com/torproject/torspec/blob/main/dir-spec.txt"} target={"_blank"}>
                             More information about flags
                         </Link>
-                    </FormGroup>
+                    </Box>
                 </AccordionDetails>
             </Accordion>
-        </div>
+        </Box>
     )
 }
 

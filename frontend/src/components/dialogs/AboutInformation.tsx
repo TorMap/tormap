@@ -5,9 +5,9 @@ import {
     Button,
     Card,
     CardHeader,
-    Dialog,
+    Dialog, DialogActions,
     DialogContent,
-    DialogTitle, Divider,
+    DialogTitle,
     Grid,
     IconButton,
     Link,
@@ -15,74 +15,54 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
-    makeStyles,
-    Typography
-} from "@material-ui/core";
-import GitHubIcon from '@material-ui/icons/GitHub';
-import EmailIcon from '@material-ui/icons/Email';
-import TwitterIcon from '@material-ui/icons/Twitter';
-import CloseIcon from "@material-ui/icons/Close";
-import LanguageIcon from '@material-ui/icons/Language';
-import InfoIcon from '@material-ui/icons/Info';
+    Typography, useMediaQuery, useTheme
+} from "@mui/material";
+import GitHubIcon from '@mui/icons-material/GitHub';
+import EmailIcon from '@mui/icons-material/Email';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import CloseIcon from "@mui/icons-material/Close";
+import LanguageIcon from '@mui/icons-material/Language';
+import InfoIcon from '@mui/icons-material/Info';
 import {Icon} from "@iconify/react";
-import TorMapLogo from "../resources/logo.png";
-
-/**
- * Styles according to Material UI doc for components used in AppSettings component
- */
-const useStyle = makeStyles(() => ({
-    logo: {
-        marginRight: "10px",
-    },
-    about: {
-        position: "fixed",
-        top: "90px",
-        left: "10px",
-        color: "white",
-    },
-    closeButton: {
-        position: "absolute",
-        right: "10px",
-        top: "10px",
-    },
-    paper: {
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100%",
-    },
-    image: {
-        display: "block",
-        margin: "auto",
-        height: "25px",
-        textAlign: "center",
-    },
-    iconLink: {
-        marginTop: "5px",
-        marginLeft: "15px",
-    }
-}))
+import TorMapLogo from "../../resources/logo.png";
 
 /**
  * A component for displaying information about TorMap
- * @constructor
  */
 export const AboutInformation: React.FunctionComponent = () => {
+    //Variables for deciding between small and large dialogs
+    const theme = useTheme()
+    const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
+    // AboutDialog specific variables
     const [showDialog, setShowDialog] = useState(false)
-    const classes = useStyle()
 
     return (
         <div>
             <Button onClick={() => setShowDialog(true)}>
-                <InfoIcon className={classes.about} fontSize={"large"}/>
+                <InfoIcon sx={{
+                    position: "fixed",
+                    top: "90px",
+                    left: "10px",
+                    color: "white",
+                }} fontSize={"large"}/>
             </Button>
-            <Dialog open={showDialog} fullWidth={true} maxWidth={"md"} onBackdropClick={() => setShowDialog(false)}>
+            <Dialog
+                open={showDialog}
+                fullWidth={true}
+                maxWidth={"md"}
+                onBackdropClick={() => setShowDialog(false)}
+                fullScreen={!isLargeScreen}
+            >
                 <DialogTitle>
                     <Box display="flex" alignItems={"center"}>
-                        <Avatar className={classes.logo} src={TorMapLogo} alt={"TorMap logo"}/>
-                        <Typography variant="h5">TorMap</Typography>
+                        <Avatar sx={{marginRight: "10px"}} src={TorMapLogo} alt={"TorMap logo"}/>
+                        <Typography variant="h6">TorMap</Typography>
                     </Box>
-                    <IconButton aria-label="close" className={classes.closeButton} onClick={() => setShowDialog(false)}>
+                    <IconButton aria-label="close" sx={{
+                        position: "absolute",
+                        right: "10px",
+                        top: "10px",
+                    }} onClick={() => setShowDialog(false)}>
                         <CloseIcon/>
                     </IconButton>
                 </DialogTitle>
@@ -110,18 +90,20 @@ export const AboutInformation: React.FunctionComponent = () => {
                                                          target={"_blank"}>TorProject</Link> already provides
                         a large <Link href={"https://metrics.torproject.org/collector.html"}
                                       target={"_blank"}>archive</Link> with raw historic data about the network.
-                        We regularly process these so called "descriptors" and lookup IPv4 addresses to get geo locations and
-                        autonomous systems. If you are interested in our implementation, check out the open source repository
+                        We regularly process these so called "descriptors" and lookup IPv4 addresses to get geo
+                        locations and
+                        autonomous systems. If you are interested in our implementation, check out the open source
+                        repository
                         on <Link href={"https://github.com/TorMap/tormap"}
                                  target={"_blank"}>GitHub</Link>.<br/>
                         The location and ownership of IP ranges can change over time. Since we
                         only use current IP data, some relays might have been hosted somewhere else, than displayed on
                         our world map.
                     </Typography>
-                    <Divider/>
-                    <br/>
-                    <Grid container spacing={3}>
-                        <Grid item xs={3}>
+                    <Grid container spacing={3} sx={{
+                        paddingTop: "7px",
+                    }}>
+                        <Grid item xs={12} sm={4}>
                             <Card elevation={20}>
                                 <CardHeader
                                     title="TorMap"
@@ -157,7 +139,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                                 </List>
                             </Card>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item xs={12} sm={4}>
                             <Card elevation={20}>
                                 <CardHeader
                                     title="Julius Henke"
@@ -192,21 +174,12 @@ export const AboutInformation: React.FunctionComponent = () => {
                                 </List>
                             </Card>
                         </Grid>
-                        <Grid item xs={3}>
+                        <Grid item xs={12} sm={4}>
                             <Card elevation={20}>
                                 <CardHeader
                                     title="Tim Kilb"
                                 />
                                 <List dense={true}>
-                                    {/* TODO uncomment when ready*/}
-                                    {/*<ListItem button component="a" href="https://www.timkilb.com" target={"_blank"}>*/}
-                                    {/*    <ListItemIcon>*/}
-                                    {/*        <LanguageIcon/>*/}
-                                    {/*    </ListItemIcon>*/}
-                                    {/*    <ListItemText>*/}
-                                    {/*        Website*/}
-                                    {/*    </ListItemText>*/}
-                                    {/*</ListItem>*/}
                                     <ListItem button component="a" href="https://github.com/TimKilb" target={"_blank"}>
                                         <ListItemIcon>
                                             <GitHubIcon/>
@@ -232,6 +205,22 @@ export const AboutInformation: React.FunctionComponent = () => {
                                                     target={"_blank"}>https://geojson-maps.ash.ms/</Link>.
                     </Typography>
                 </DialogContent>
+                {!isLargeScreen ? <DialogActions sx={{
+                    position: "fixed",
+                    bottom: 5,
+                    right: 5,
+                }}>
+                    <Button
+                        autoFocus
+                        onClick={() => setShowDialog(false)}
+                        variant={"contained"}
+                        size={"large"}
+                        endIcon={<CloseIcon/>}
+                    >
+                        close
+                    </Button>
+                </DialogActions> : null}
+
             </Dialog>
         </div>
     )

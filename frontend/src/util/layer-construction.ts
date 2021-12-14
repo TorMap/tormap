@@ -7,12 +7,12 @@ import {Feature, GeoJsonObject, GeometryObject} from "geojson";
 import {
     buildRelayCoordinatesMap,
     createLatLonKey,
-    famCordArr,
     getRelayType,
+    RelayFamilyLocation,
     sortFamilyCoordinatesMap
 } from "./aggregate-relays";
 import {getMapColor9} from "./geojson";
-import {GeoRelayView} from "../types/responses";
+import {RelayLocationDto} from "../types/responses";
 
 /**
  * Returns a Layer with markers with size relative to number of relays on a coordinate.
@@ -20,7 +20,7 @@ import {GeoRelayView} from "../types/responses";
  * @param onMarkerClick - Event handler for clicking on a marker
  */
 export const buildAggregatedCoordinatesLayer = (
-    latLonMap: Map<string, GeoRelayView[]>,
+    latLonMap: Map<string, RelayLocationDto[]>,
     onMarkerClick: (e: LeafletMouseEvent) => void,
 ): LayerGroup => {
     const aggregatedCoordinatesLayer = new LayerGroup()
@@ -50,7 +50,7 @@ export const buildAggregatedCoordinatesLayer = (
  * @param onMarkerClick - Event handler for clicking on a marker
  */
 export const buildRelayLayer = (
-    latLonMap: Map<string, GeoRelayView[]>,
+    latLonMap: Map<string, RelayLocationDto[]>,
     singleColor: boolean,
     onMarkerClick: (e: LeafletMouseEvent) => void,
 ): LayerGroup => {
@@ -58,11 +58,11 @@ export const buildRelayLayer = (
     const exitLayer = new LayerGroup()
     const guardLayer = new LayerGroup()
     const defaultMarkerLayer = new LayerGroup([defaultLayer, guardLayer, exitLayer])
-    latLonMap.forEach((coordinate, key) =>{
+    latLonMap.forEach((coordinate, key) => {
         coordinate.forEach(relay => {
             let color = Colors.Default
             let layer = defaultLayer
-            switch (getRelayType(relay)){
+            switch (getRelayType(relay)) {
                 case RelayType.Exit: {
                     color = Colors.Exit
                     layer = exitLayer
@@ -93,42 +93,36 @@ export const buildRelayLayer = (
 }
 
 /**
- * Returns a Layer with markers for families with size relative to number of relays in given family on a coordinate.
+ * Returns a Layer with circles only for the selected family
  * @param familyMap - The FamilyMap
  * @param settings - The app settings
  * @param setSettingsCallback - The callback for changing settings
  */
-export const buildRelayFamilyLayer = (
-    familyMap: Map<number, GeoRelayView[]>,
+export const buildSelectedFamilyLayer = (
+    familyMap: Map<number, RelayLocationDto[]>,
     settings: Settings,
     setSettingsCallback: (s: Settings) => void,
 ): LayerGroup => {
     const familyLayer: LayerGroup = new LayerGroup()
-    familyMap.forEach((family, familyID) => {
-        if (familyID !== settings.selectedFamily) return
-        const latLonMap: Map<string, GeoRelayView[]> = buildRelayCoordinatesMap(family)
+    familyMap.forEach((family, familyId) => {
+        if (familyId !== settings.selectedFamily) return
+        const latLonMap: Map<string, RelayLocationDto[]> = buildRelayCoordinatesMap(family)
         latLonMap.forEach((relays, key) => {
-            let hue = (familyID % 8) * (360/8)
-            let sat = "90%"
-            let radius = calcRadiusForValue(relays.length)
-
             const coordinates = key.split(",")
-
-            const color = `hsl(${hue},${sat},60%)`
             circleMarker(
                 [+coordinates[0], +coordinates[1]],
                 {
-                    color: color,
-                    radius: radius,
+                    color: calculateFamilyColor(familyId),
+                    radius: calcRadiusForValue(relays.length),
                     fillOpacity: .2,
                     weight: 1,
                 },
             )
                 .on("click", () => {
-                    if (familyID === settings.selectedFamily) {
+                    if (familyId === settings.selectedFamily) {
                         setSettingsCallback({...settings, selectedFamily: undefined})
                     } else {
-                        setSettingsCallback({...settings, selectedFamily: familyID})
+                        setSettingsCallback({...settings, selectedFamily: familyId})
                     }
                 })
                 .addTo(familyLayer)
@@ -141,51 +135,74 @@ export const buildRelayFamilyLayer = (
  * Returns a Layer with markers for families with size relative to number of relays in given family on a coordinate. And scales families size so there are no markers with same size
  * @param famCordMap - The famCordMap
  * @param settings - The app settings
- * @param setSettingsCallback - The callback for changing settings
- * @param onMarkerClick - Event handler for clicking on a marker
+ * @param setSettings - The callback for changing settings
+ * @param setFamiliesForSelectionDialog
+ * @param setShowFamilySelectionDialog
  */
-export const buildRelayFamilyCoordinatesLayer = (
-    famCordMap: Map<string, Map<number, GeoRelayView[]>>,
+export const buildFamilyCoordinatesLayer = (
+    famCordMap: Map<string, Map<number, RelayLocationDto[]>>,
     settings: Settings,
-    setSettingsCallback: (s: Settings) => void,
-    onMarkerClick: (e: LeafletMouseEvent) => void,
+    setSettings: (s: Settings) => void,
+    setFamiliesForSelectionDialog: (f: number[]) => void,
+    setShowFamilySelectionDialog: (b: boolean) => void,
 ): LayerGroup => {
     const familyLayer: LayerGroup = new LayerGroup()
-    const sortedFamCordMap: Map<string, famCordArr[]> = sortFamilyCoordinatesMap(famCordMap)
-    sortedFamCordMap.forEach((famMapForLocation, location) => {
+    const sortedFamilyCoordinatesMap: Map<string, RelayFamilyLocation[]> = sortFamilyCoordinatesMap(famCordMap)
+    sortedFamilyCoordinatesMap.forEach((familiesAtLocation, location) => {
         const coordinates = location.split(",")
         const latLng: L.LatLngExpression = [+coordinates[0], +coordinates[1]]
-        famMapForLocation.forEach((famCordArr) => {
-            let hue = (famCordArr.familyID % 8) * (360/8)
-            let sat = "90%"
-            let radius = calcRadiusForValue(famCordArr.relays.length + famCordArr.padding)
+        familiesAtLocation.forEach((familyLocation) => {
+            let radius = calcRadiusForValue(familyLocation.relays.length + familyLocation.padding)
             let fillOpacity = .2
 
             // not selected
-            if (settings.selectedFamily !== undefined && settings.selectedFamily !== famCordArr.familyID) {
-                sat = "0%"
+            if (settings.selectedFamily !== undefined && settings.selectedFamily !== familyLocation.familyId) {
                 fillOpacity = 0
             }
 
-            const color = `hsl(${hue},${sat},60%)`
             circleMarker(
                 latLng,
                 {
-                    color: color,
+                    color: calculateFamilyColor(familyLocation.familyId),
                     radius: radius,
                     fillOpacity: fillOpacity,
                     weight: 1,
                     className: location,
                 }
             )
-                .on("click", onMarkerClick)
+                .on("click", () =>
+                    onMultiFamilyCircleClick(settings, setSettings, familiesAtLocation, setFamiliesForSelectionDialog, setShowFamilySelectionDialog)
+                )
                 .addTo(familyLayer)
         })
     })
     return familyLayer
 }
 
-export const buildRelayHeatmapLayer = (relays: GeoRelayView[]): LayerGroup => {
+const onMultiFamilyCircleClick = (
+    settings: Settings,
+    setSettings: (s: Settings) => void,
+    familiesAtLocation: RelayFamilyLocation[],
+    setFamiliesForSelectionDialog: (f: number[]) => void,
+    setShowFamilySelectionDialog: (b: boolean) => void,
+) => {
+    if (settings.selectedFamily) {
+        setSettings({...settings, selectedFamily: undefined})
+    } else if (familiesAtLocation.length === 1) {
+        setSettings({...settings, selectedFamily: familiesAtLocation[0].familyId})
+    } else {
+        setFamiliesForSelectionDialog(familiesAtLocation.map(family => family.familyId))
+        setShowFamilySelectionDialog(true)
+    }
+}
+
+const calculateFamilyColor = (familyId: number) => {
+    let hue = (familyId % 8) * (360 / 8)
+    let sat = "90%"
+    return `hsl(${hue},${sat},60%)`
+}
+
+export const buildRelayHeatmapLayer = (relays: RelayLocationDto[]): LayerGroup => {
     let coordinates = new Array<number[]>()
     relays.forEach(relay => coordinates.push([relay.lat, relay.long, 1]))
     // @ts-ignore TODO fix typescript error
@@ -205,7 +222,7 @@ export const buildRelayHeatmapLayer = (relays: GeoRelayView[]): LayerGroup => {
  * @param onMarkerClick - Event handler for clicking on a marker
  */
 export const buildRelayCountryLayer = (
-    countryMap: Map<string, GeoRelayView[]>,
+    countryMap: Map<string, RelayLocationDto[]>,
     settings: Settings,
     onMarkerClick: (e: LeafletMouseEvent) => void,
 ): LayerGroup => {
@@ -242,10 +259,10 @@ export const buildRelayCountryLayer = (
  * @param setSettingsCallback - The callback for changing settings
  */
 export const buildCountryLayer = (
-    countryMap: Map<string, GeoRelayView[]>,
+    countryMap: Map<string, RelayLocationDto[]>,
     settings: Settings,
     setSettingsCallback: (s: Settings) => void
-): LayerGroup =>{
+): LayerGroup => {
     // style for countries
     const style = (feature: Feature<GeometryObject>): PathOptions => {
         if (settings.selectedCountry === feature.properties!!.iso_a2) {
@@ -299,6 +316,7 @@ const onEachCountry = (
         }
     });
 }
+
 /**
  * Maps a number of range x1 to y1 to the range x2 to y2
  */
