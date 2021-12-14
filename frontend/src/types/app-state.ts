@@ -1,9 +1,6 @@
 import {RelayFlag, RelayType} from "./relay";
 
 export interface Settings {
-    showRelayTypes: Record<RelayType, boolean>
-    relaysMustIncludeFlag: Record<RelayFlag, boolean>
-
     // Grouping settings
     sortCountry: boolean
     selectedCountry: string | undefined
@@ -11,6 +8,9 @@ export interface Settings {
     selectedFamily: number | undefined
     aggregateCoordinates: boolean
     heatMap: boolean
+
+    showRelayTypes: Record<RelayType, boolean>
+    relaysMustIncludeFlag: Record<RelayFlag, boolean>
 }
 
 export interface Statistics {

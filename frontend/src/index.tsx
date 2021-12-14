@@ -2,28 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import "react-sliding-pane/dist/react-sliding-pane.css";
-import {App} from "./components/app";
-import {createMuiTheme, ThemeProvider} from "@material-ui/core";
+import {App} from "./components/App";
+import {createTheme, ThemeProvider} from "@mui/material";
 import {SnackbarProvider} from "notistack";
+import {TorMapTheme} from "./types/TorMapTheme";
+import {SettingsProvider} from "./util/settings-context";
+import {defaultSettings} from "./util/config";
+import {DateProvider} from "./util/date-context";
 
-const theme = createMuiTheme({
-    palette: {
-        type: "dark",
-    },
-    overrides: {
-        MuiTooltip: {
-            tooltip: {
-                fontSize: ".85em",
-            }
-        },
-        MuiLink: {
-            root: {
-                color: "rgba(255, 255, 255, 0.7)",
-                fontSize: ".9em",
-            }
-        },
-    }
-})
+const theme = createTheme(TorMapTheme)
 
 ReactDOM.render(
     <React.StrictMode>
@@ -35,7 +22,11 @@ ReactDOM.render(
                 anchorOrigin={{vertical: "top", horizontal: "center"}}
                 preventDuplicate={true}
             >
-                <App/>
+                <SettingsProvider defaultSettings={defaultSettings}>
+                    <DateProvider>
+                        <App/>
+                    </DateProvider>
+                </SettingsProvider>
             </SnackbarProvider>
         </ThemeProvider>
     </React.StrictMode>,

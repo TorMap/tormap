@@ -41,7 +41,7 @@ export const defaultSettings: Settings = {
 // The time it takes before the tooltip is shown
 export const tooltipTimeDelay = 750
 
-// Colors for node types
+// Colors for relay types
 export const Colors = {
     Exit: "#FF4848",
     Guard: "#FFD371",

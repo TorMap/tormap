@@ -3,15 +3,16 @@ import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
-    makeStyles,
+    Box,
     Table,
     TableBody,
     TableCell,
     TableRow,
     Typography
-} from "@material-ui/core";
-import {Settings, Statistics} from "../types/app-state";
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+} from "@mui/material";
+import {Statistics} from "../../types/app-state";
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
     CountryCountIcon,
     ExitRelayIcon,
@@ -19,43 +20,36 @@ import {
     GuardRelayIcon,
     OtherRelayIcon,
     TotalRelaysIcon
-} from "../types/icons";
-import {getFullName} from "../util/geojson";
-
-/**
- * Styles according to Material UI doc for components used in MapStats component
- */
-const useStyle = makeStyles(() => ({
-    root: {
-        position: "fixed",
-        left: "1%",
-        bottom: "15px",
-        maxWidth: "20%",
-    },
-    noPadding: {
-        padding: 0,
-    }
-}))
+} from "../../types/icons";
+import {getFullName} from "../../util/geojson";
+import {useSettings} from "../../util/settings-context";
 
 interface Props {
-    /**
-     * The currently applied app settings
-     */
-    settings: Settings
 
     /**
      * The currently map statistics of the currently rendered information
      */
     stats: Statistics
+
+    /**
+     * whether the statistics are expanded by default
+     */
+    defaultExpanded: boolean
+
+    /**
+     * elevation for material ui styling
+     */
+    elevation: number
 }
 
 /**
- * The Component showing statistics for rendered nodes
+ * The Component showing statistics for rendered relays
  * @param settings - the App Settings
  * @param stats - the Statistics Object to show
  */
-export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
-    const classes = useStyle()
+export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation, stats}) => {
+
+    const settings = useSettings().settings
 
     // Construct the stats rows to display
     let rows: StatsRow[] = []
@@ -71,10 +65,10 @@ export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
     if (stats.countryCount) rows.push({icon: CountryCountIcon, title: "Countries", value: stats.countryCount})
 
     return (
-        <div className={classes.root}>
-            <Accordion defaultExpanded={true}>
+        <Box>
+            <Accordion defaultExpanded={defaultExpanded} elevation={elevation}>
                 <AccordionSummary
-                    expandIcon={<ExpandLessIcon/>}
+                    expandIcon={defaultExpanded ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
                     aria-controls="panel2a-content"
                     id="panel2a-header"
                 >
@@ -83,8 +77,8 @@ export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
                         {settings.selectedCountry ? " in " + getFullName(settings.selectedCountry) : null}
                     </Typography>
                 </AccordionSummary>
-                <AccordionDetails classes={{root: classes.noPadding}}>
-                    <Table size="small">
+                <AccordionDetails>
+                    <Table size={"small"}>
                         <TableBody>
                             {rows.map(statsRow =>
                                 <TableRow key={statsRow.title}>
@@ -103,7 +97,7 @@ export const MapStats: FunctionComponent<Props> = ({settings, stats}) => {
                     </Table>
                 </AccordionDetails>
             </Accordion>
-        </div>
+        </Box>
     )
 }
 
