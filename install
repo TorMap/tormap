@@ -101,9 +101,4 @@ else
   sudo npm install --global yarn
 fi
 
-echo 'Switching to yarn version berry'
-cd ./frontend
-yarn set version berry
-cd ..
-
 echo 'Everything installed successfully! Run the project with ./run'
