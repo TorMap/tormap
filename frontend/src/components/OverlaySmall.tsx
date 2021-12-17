@@ -1,5 +1,5 @@
 import React, {FunctionComponent, useState} from "react";
-import {OverlayProps, Transition} from "../types/ui";
+import {OverlayProps, SlideUpTransition} from "../types/ui";
 import {AppBar, Box, Button, Dialog, DialogActions, Fab, IconButton, Toolbar, Typography} from "@mui/material";
 import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from "@mui/icons-material/Close";
@@ -31,7 +31,7 @@ export const OverlaySmall: FunctionComponent<OverlayProps> = ({statistics}) => {
                 open={open}
                 fullScreen
                 onClose={() => setOpen(false)}
-                TransitionComponent={Transition}
+                TransitionComponent={SlideUpTransition}
             >
                 <AppBar sx={{position: 'relative'}}>
                     <Toolbar>

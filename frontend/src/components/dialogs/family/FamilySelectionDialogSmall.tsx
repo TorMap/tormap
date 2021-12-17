@@ -1,7 +1,7 @@
 import React, {FunctionComponent} from "react";
 import {FamilySelectionDialogProps} from "./FamilySelectionUtil";
 import {AppBar, Box, Button, Dialog, DialogActions, DialogContent, Toolbar, Typography} from "@mui/material";
-import {Transition} from "../../types/ui";
+import {SlideUpTransition} from "../../../types/ui";
 import CloseIcon from "@mui/icons-material/Close";
 import {FamiliesTable} from "./FamiliesTable";
 
@@ -19,7 +19,7 @@ export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialog
                 open={showDialog}
                 onClose={closeDialog}
                 fullScreen={true}
-                TransitionComponent={Transition}
+                TransitionComponent={SlideUpTransition}
             >
                 <AppBar sx={{position: 'relative'}}>
                     <Toolbar>

@@ -1,4 +1,4 @@
-import {RelayFlag} from "./relay";
+import {RelayFlag} from "../types/relay";
 import {ReactJSXElement} from "@emotion/react/types/jsx-namespace";
 
 export interface RelayLocationDto {
@@ -34,11 +34,6 @@ export interface RelayDetailsDto {
     linkProtocolVersions: string
     circuitProtocolVersions: string
     tunnelledDirServer: boolean
-}
-
-export interface DetailsInfo {
-    name: string
-    value: string | number | ReactJSXElement | undefined
 }
 
 export interface RelayIdentifierDto {

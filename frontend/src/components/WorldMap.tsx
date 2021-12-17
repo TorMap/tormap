@@ -21,14 +21,14 @@ import {
     buildRelayLayer,
     buildSelectedFamilyLayer
 } from "../util/layer-construction";
-import {RelayLocationDto} from "../types/responses";
+import {RelayLocationDto} from "../dto/relay";
 import {SnackbarMessage} from "../types/ui";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
 import {useSettings} from "../util/settings-context";
 import {useDate} from "../util/date-context";
-import {RelayDetailsDialog} from "./dialogs/RelayDetailsDialogUtil";
-import {FamilySelectionDialog} from "./dialogs/FamilySelectionUtil";
+import {ResponsiveRelayDetailsDialog} from "./dialogs/relay/ResponsiveRelayDetailsDialog";
+import {FamilySelectionDialog} from "./dialogs/family/FamilySelectionUtil";
 
 
 interface Props {
@@ -258,10 +258,10 @@ export const WorldMap: FunctionComponent<Props> = ({
                 setLeafletMap(newMap)
             }}
         >
-            <RelayDetailsDialog
+            <ResponsiveRelayDetailsDialog
                 showDialog={showRelayDetailsDialog}
                 closeDialog={useCallback(() => setShowRelayDetailsDialog(false), [])}
-                relays={relaysForDetailsDialog}
+                relayLocations={relaysForDetailsDialog}
             />
             <FamilySelectionDialog
                 showDialog={showFamilySelectionDialog}
