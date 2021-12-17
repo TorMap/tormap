@@ -6,6 +6,7 @@ import moment from "moment";
 import {DatePicker, LocalizationProvider} from "@mui/lab";
 import {useDate} from "../../util/date-context";
 import {isValid} from "date-fns";
+import {enCA} from "date-fns/locale";
 
 interface Props {
     /**
@@ -32,7 +33,7 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
     }
 
     return (
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <LocalizationProvider dateAdapter={AdapterDateFns} locale={enCA}>
             <DatePicker
                 value={selectedDate}
                 renderInput={(params) =>

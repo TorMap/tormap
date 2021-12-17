@@ -30,7 +30,6 @@ interface Props {
 export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     const nameOfSetting = nameOfFactory<Settings>()
 
-
     const settings = useSettings().settings
     const onChange = useSettings().changeSettings
 
