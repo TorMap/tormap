@@ -264,6 +264,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/helper-plugin-utils@npm:^7.16.5":
+  version: 7.16.5
+  resolution: "@babel/helper-plugin-utils@npm:7.16.5"
+  checksum: 3ff605f879a9ed287952b538a8334bb16e6cf7cf441f205713b1cf8043b047a965773b66e50575018504f349e16368acfe4702a2f376e16263733e2c7c6c3e39
+  languageName: node
+  linkType: hard
+
 "@babel/helper-remap-async-to-generator@npm:^7.16.0, @babel/helper-remap-async-to-generator@npm:^7.16.4":
   version: 7.16.4
   resolution: "@babel/helper-remap-async-to-generator@npm:7.16.4"
@@ -518,7 +525,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/plugin-proposal-nullish-coalescing-operator@npm:7.16.0, @babel/plugin-proposal-nullish-coalescing-operator@npm:^7.12.1, @babel/plugin-proposal-nullish-coalescing-operator@npm:^7.16.0":
+"@babel/plugin-proposal-nullish-coalescing-operator@npm:7.16.5":
+  version: 7.16.5
+  resolution: "@babel/plugin-proposal-nullish-coalescing-operator@npm:7.16.5"
+  dependencies:
+    "@babel/helper-plugin-utils": ^7.16.5
+    "@babel/plugin-syntax-nullish-coalescing-operator": ^7.8.3
+  peerDependencies:
+    "@babel/core": ^7.0.0-0
+  checksum: 035a5a8f4d892ead797ce5c39b59c5fd91ef14f20cc9bfeafbbe7179ef05bd6ae311b73a5f36472cc278e3d282a1d025b0326ff7cf0bbfb63173cae469ff823b
+  languageName: node
+  linkType: hard
+
+"@babel/plugin-proposal-nullish-coalescing-operator@npm:^7.12.1, @babel/plugin-proposal-nullish-coalescing-operator@npm:^7.16.0":
   version: 7.16.0
   resolution: "@babel/plugin-proposal-nullish-coalescing-operator@npm:7.16.0"
   dependencies:
@@ -15410,7 +15429,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "tormap@workspace:."
   dependencies:
-    "@babel/plugin-proposal-nullish-coalescing-operator": 7.16.0
+    "@babel/plugin-proposal-nullish-coalescing-operator": 7.16.5
     "@date-io/date-fns": 2.11.0
     "@emotion/react": 11.7.1
     "@emotion/styled": 11.6.0
