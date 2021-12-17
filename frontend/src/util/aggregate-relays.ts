@@ -1,6 +1,6 @@
 import {Settings, Statistics} from "../types/app-state";
 import {RelayFlag, RelayFlags, RelayType} from "../types/relay";
-import {RelayLocationDto} from "../types/responses";
+import {RelayLocationDto} from "../dto/relay";
 
 /**
  * Returns a Array of GeoRelayViews that are filtered according to app settings.

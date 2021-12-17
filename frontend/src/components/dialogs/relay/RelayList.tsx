@@ -1,6 +1,6 @@
 import React, {FunctionComponent} from "react";
 import {List, ListItem, ListItemIcon, ListItemText} from "@mui/material";
-import {getIcon} from "../../types/icons";
+import {getIcon} from "../../../types/icons";
 import {RelayMatch} from "./RelayDetailsDialogLarge";
 
 interface Props {

@@ -1,6 +1,6 @@
 import React, {FunctionComponent} from "react";
 import {Table, TableBody, TableCell, TableHead, TableRow, Typography} from "@mui/material";
-import {RelayFamilyIdentifier} from "../../types/responses";
+import {RelayFamilyIdentifier} from "../../../dto/relay";
 
 interface Props {
     /**

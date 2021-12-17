@@ -12,43 +12,35 @@ import {
     Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import {getIcon} from "../../types/icons";
-import {getRelayType} from "../../util/aggregate-relays";
-import {RelayIdentifierDto, RelayLocationDto} from "../../types/responses";
-import {FullHeightDialog} from "../../types/ui";
-import {RelayType} from "../../types/relay";
+import {getIcon} from "../../../types/icons";
+import {getRelayType} from "../../../util/aggregate-relays";
+import {RelayIdentifierDto, RelayLocationDto} from "../../../dto/relay";
+import {FullHeightDialog} from "../../../types/ui";
+import {RelayType} from "../../../types/relay";
 import {RelayList} from "./RelayList";
-import {RelayDetails} from "./RelayDetails";
-import {DetailsDialogProps} from "./RelayDetailsDialogUtil";
+import {RelayDetailsTable} from "./RelayDetailsTable";
+import {DetailsDialogProps} from "./ResponsiveRelayDetailsDialog";
+import {SelectFamilyButton} from "../../buttons/SelectFamilyButton";
 
-
-/**
- * The Dialog for Relay Details
- * @param showDialog - Whether the details dialog should be displayed
- * @param closeDialog - Event handler for closing the dialog
- * @param relays - Selectable relays
- * @param enqueueSnackbar - The event handler for showing a snackbar message
- */
 export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps> = ({
                                                                                          showDialog,
                                                                                          closeDialog,
-                                                                                         relays,
+                                                                                         relayLocations,
                                                                                          relayIdentifiers,
                                                                                          sortRelaysBy,
                                                                                          handleSelectSortByChange,
-                                                                                         rawRelayDetails,
                                                                                          setRelayDetailsId,
                                                                                          sortedRelayMatches,
                                                                                          relayDetailsId,
                                                                                          relayDetails,
-                                                                                         relay,
+                                                                                         relayLocation,
                                                                                      }) => {
     return (
         <FullHeightDialog
             open={showDialog}
             onClose={closeDialog}
             onBackdropClick={closeDialog}
-            maxWidth={relays.length > 1 ? "lg" : "md"}
+            maxWidth={relayLocations.length > 1 ? "lg" : "md"}
             fullWidth={true}
             sx={{
                 paper: {
@@ -74,17 +66,16 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
                         </FormControl>
                     </Grid>}
                     <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 9 : 12}>
-                        {rawRelayDetails ?
+                        {relayDetails && relayLocation ?
                             <Box display="flex" alignItems={"center"}>
-                                <Box sx={{
-                                    display: "inline",
-                                    paddingRight: "16px",
-                                }}>
-                                    {relay ? getIcon(getRelayType(relay)) : null}
-                                </Box>
-                                <Typography sx={{display: "inline"}} variant="h6">
-                                    {rawRelayDetails.nickname}
+                                {relayLocation ? getIcon(getRelayType(relayLocation)) : null}
+                                <Typography sx={{display: "inline", padding: "0px 16px"}}
+                                            variant="h6">
+                                    {relayDetails.nickname}
                                 </Typography>
+
+                                {relayLocation?.familyId && <SelectFamilyButton newFamilyId={relayLocation.familyId}
+                                                                                furtherAction={closeDialog}/>}
                             </Box> : <CircularProgress color={"inherit"} size={24}/>
                         }
                         <IconButton aria-label="close" sx={{
@@ -110,7 +101,9 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
                 </Grid>}
                 <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 9 : 12}
                       sx={{maxHeight: "65vh", overflow: 'auto'}}>
-                    <RelayDetails relayDetails={relayDetails}/>
+                    {relayDetails && relayLocation &&
+                        <RelayDetailsTable relayDetails={relayDetails} relayLocation={relayLocation}/>
+                    }
                 </Grid>
             </Grid>
         </FullHeightDialog>
