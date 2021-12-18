@@ -3035,10 +3035,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:16.11.12":
-  version: 16.11.12
-  resolution: "@types/node@npm:16.11.12"
-  checksum: a3feb346d61a56f5a137c29bb8c63cfa3cc02e184b9dffdc18ef1528dcce55596e570575215a2e39e6ce69343eeb2a5ba71c271938f1dc8db4cc393902855412
+"@types/node@npm:16.11.14":
+  version: 16.11.14
+  resolution: "@types/node@npm:16.11.14"
+  checksum: 0bd4333fb4e56532db7f5174732268b18089913ddbb0e97957228e64f9fe3babf9923c77ce6f07d3d354445cfbb8d31b95c1f8be3c0f7426308bd8b93d3aaa02
   languageName: node
   linkType: hard
 
@@ -15446,7 +15446,7 @@ __metadata:
     "@types/geojson": 7946.0.8
     "@types/jest": 27.0.3
     "@types/leaflet": 1.7.6
-    "@types/node": 16.11.12
+    "@types/node": 16.11.14
     "@types/react": 17.0.37
     "@types/react-dom": 17.0.11
     axios: 0.24.0
