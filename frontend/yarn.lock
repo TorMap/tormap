@@ -3012,12 +3012,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/leaflet@npm:1.7.6":
-  version: 1.7.6
-  resolution: "@types/leaflet@npm:1.7.6"
+"@types/leaflet@npm:1.7.7":
+  version: 1.7.7
+  resolution: "@types/leaflet@npm:1.7.7"
   dependencies:
     "@types/geojson": "*"
-  checksum: 626c96342d2f9f86ffa573aa0d2c1b659b84f4330ff9ced2d351fd19a86c31c69f7e65100f8844d886d20cf1afdf20878512d4a55063e265920704f6e61c0fae
+  checksum: 3bde602447519187e7297e81ef6fca04f97c586cb6379b60978440b8133b44851f2b494333d58e9c7cc14b49222e412f64173919b057c0b12cb99f22377fa4cf
   languageName: node
   linkType: hard
 
@@ -15456,7 +15456,7 @@ __metadata:
     "@types/dateformat": 5.0.0
     "@types/geojson": 7946.0.8
     "@types/jest": 27.0.3
-    "@types/leaflet": 1.7.6
+    "@types/leaflet": 1.7.7
     "@types/node": 16.11.17
     "@types/react": 17.0.38
     "@types/react-dom": 17.0.11
