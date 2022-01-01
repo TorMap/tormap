@@ -2002,12 +2002,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@iconify/react@npm:3.1.0":
-  version: 3.1.0
-  resolution: "@iconify/react@npm:3.1.0"
+"@iconify/react@npm:3.1.1":
+  version: 3.1.1
+  resolution: "@iconify/react@npm:3.1.1"
   dependencies:
     cross-fetch: ^3.1.4
-  checksum: 0f1cc4ad4f3fc265c8af8687a8dff848780bac720f90e4cdb05e1abd69afa8e15269a035d4daa6c4e9a9407b1a503ec38744e6c20ffa27575072a58b00c8ae69
+  checksum: ed2c9b50bfe03b41a60a8ff8f934f78e3344a1fbc7a26ef0bc4a7db7e0b46adc5da7f9133d734c21234320b59bc11e9c0a13d8269e768b6d995ed6ecf98eed7a
   languageName: node
   linkType: hard
 
@@ -15431,7 +15431,7 @@ __metadata:
     "@date-io/date-fns": 2.11.0
     "@emotion/react": 11.7.1
     "@emotion/styled": 11.6.0
-    "@iconify/react": 3.1.0
+    "@iconify/react": 3.1.1
     "@mui/icons-material": 5.2.5
     "@mui/lab": 5.0.0-alpha.62
     "@mui/material": 5.2.6
