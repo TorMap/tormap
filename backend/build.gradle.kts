@@ -5,22 +5,21 @@ version = "1.1.2"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
-    val kotlinVersion = "1.6.0"
-    kotlin("jvm") version kotlinVersion
-    kotlin("kapt") version kotlinVersion
-    kotlin("plugin.spring") version kotlinVersion
-    kotlin("plugin.allopen") version kotlinVersion
-    kotlin("plugin.jpa") version kotlinVersion
+    kotlin("jvm") version "1.6.10"
+    kotlin("kapt") version "1.6.10"
+    kotlin("plugin.spring") version "1.6.10"
+    kotlin("plugin.allopen") version "1.6.10"
+    kotlin("plugin.jpa") version "1.6.10"
 
     // Generate code documentation https://kotlin.github.io/dokka/1.5.0/
-    id("org.jetbrains.dokka") version "1.6.0"
+    id("org.jetbrains.dokka") version "1.6.10"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "2.6.1"
+    id("org.springframework.boot") version "2.6.2"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 
     // Database migration tool https://flywaydb.org/documentation/usage/gradle/
-    id("org.flywaydb.flyway") version "8.2.1"
+    id("org.flywaydb.flyway") version "8.3.0"
 }
 
 repositories {
@@ -42,11 +41,11 @@ dependencies {
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-    implementation("org.springdoc:springdoc-openapi-ui:1.5.13")
-    implementation("org.springdoc:springdoc-openapi-kotlin:1.5.13")
+    implementation("org.springdoc:springdoc-openapi-ui:1.6.3")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.6.3")
 
     // Serialization
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
 
     // Latest stable H2 database driver https://www.h2database.com/
     runtimeOnly("com.h2database:h2:1.4.200")
@@ -58,7 +57,7 @@ dependencies {
     implementation("com.maxmind.geoip2:geoip2:2.16.1")
 
     // Anaylz user agent https://yauaa.basjes.nl/
-    implementation("nl.basjes.parse.useragent:yauaa:6.3")
+    implementation("nl.basjes.parse.useragent:yauaa:6.6")
 
     // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
     implementation("commons-codec:commons-codec:1.10")

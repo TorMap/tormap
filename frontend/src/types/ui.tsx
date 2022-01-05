@@ -26,12 +26,20 @@ export interface OverlayProps {
     statistics?: Statistics
 }
 
-//animation for Dialog sliding in
-export const Transition = React.forwardRef(function Transition(
+export const SlideUpTransition = React.forwardRef(function Transition(
     props: TransitionProps & {
         children: React.ReactElement;
     },
     ref: React.Ref<unknown>,
 ) {
-    return <Slide direction="up" ref={ref} {...props} />;
+    return <Slide direction="up" ref={ref} {...props}/>;
+});
+
+export const SlideLeftTransition = React.forwardRef(function Transition(
+    props: TransitionProps & {
+        children: React.ReactElement;
+    },
+    ref: React.Ref<unknown>,
+) {
+    return <Slide direction="left" ref={ref} {...props}/>;
 });
