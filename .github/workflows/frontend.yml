@@ -14,10 +14,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build
+      - name: Build and check yarn cache
+        if: github.event.pull_request
         run: |
           cd frontend
           yarn install --immutable --immutable-cache --check-cache
+          yarn build
+
+      - name: Build without checking yarn cache
+        if: ! github.event.pull_request
+        run: |
+          cd frontend
+          yarn install --immutable --immutable-cache
           yarn build
 
       - name: Deploy preview channel
