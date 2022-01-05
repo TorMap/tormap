@@ -1,4 +1,4 @@
-name: Build and deploy to Firebase hosting preview URL
+name: Deploy to Firebase hosting preview URL
 
 on:
   pull_request:
@@ -6,15 +6,18 @@ on:
       - 'frontend/**'
 
 jobs:
-  build-and-preview:
-    name: Build and deploy preview
+  deploy-preview:
+    name: Deploy preview
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
 
       - name: Build
-        run: cd frontend && yarn && yarn build
+        run: |
+          cd frontend
+          yarn install --immutable --immutable-cache --check-cache
+          yarn build
 
       - name: Deploy
         if: github.event.pull_request.head.repo.full_name == github.repository
