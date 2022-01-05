@@ -1,17 +1,14 @@
-name: Test backend
+name: backend
 
 on:
   push:
-    branches-ignore:
-    - master
-    - main
     paths:
       - 'backend/**'
-      - '.github/workflows/backend-test.yml'
+      - '.github/workflows/backend.yml'
 
 jobs:
-  test:
-    name: test
+  backend:
+    name: backend
     runs-on: ubuntu-latest
 
     steps:
@@ -25,10 +22,21 @@ jobs:
           distribution: 'adopt'
           cache: gradle
 
-      - name: Build and test with Gradle
+      - name: Build and test
         run: |
-          cd backend 
+          cd backend
           ./gradlew test
+
+      - name: Build image and push to DockerHub
+        if: github.ref_name == master || github.ref_name == main
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          ./gradlew bootBuildImage
+          docker push juliushenke/tormap:latest
+
 
       - name: Cleanup Gradle Cache
         # Remove some files from the Gradle cache, so they aren't cached by GitHub Actions.
