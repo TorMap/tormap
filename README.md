@@ -72,6 +72,7 @@ instead of `./gradlew` for all following commands.
 
 - `./gradlew`: installs required backend packages
 - `./gradlew build`: creates build and runs Flyway database migrations
+- `./gradlew test`: creates build, runs tests
 - `./gradlew bootRun`: creates build, runs it and listens on http://localhost:8080/
 - `./gradlew bootJar`: creates build with a fat JAR which contains all dependencies and resources in `build/libs/`
 - `./gradlew bootBuildImage`: creates build and a docker image (make sure local docker daemon is running)

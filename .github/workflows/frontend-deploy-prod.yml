@@ -1,4 +1,4 @@
-name: Build and deploy to Firebase hosting for tormap.org
+name: Deploy to Firebase hosting tormap.org
 
 on:
   push:
@@ -10,8 +10,8 @@ on:
       - '.github/workflows/frontend-deploy-prod.yml'
 
 jobs:
-  build-and-deploy:
-    name: Build and deploy production
+  deploy-production:
+    name: Deploy production
     runs-on: ubuntu-latest
 
     steps:
