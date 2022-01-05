@@ -28,14 +28,14 @@ jobs:
           ./gradlew test
 
       - name: Login to DockerHub
-        if: github.ref_name == master || github.ref_name == main
+        if: github.ref_name == 'master' || github.ref_name == 'main'
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build image and push to DockerHub
-        if: github.ref_name == master || github.ref_name == main
+        if: github.ref_name == 'master' || github.ref_name == 'main'
         run: |
           ./gradlew bootBuildImage
           docker push juliushenke/tormap:latest
