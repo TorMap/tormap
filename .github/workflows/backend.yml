@@ -37,6 +37,7 @@ jobs:
       - name: Build image and push to DockerHub
         if: github.ref_name == 'master' || github.ref_name == 'main'
         run: |
+          cd backend
           ./gradlew bootBuildImage
           docker push juliushenke/tormap:latest
 
