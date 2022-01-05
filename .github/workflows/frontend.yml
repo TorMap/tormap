@@ -20,7 +20,7 @@ jobs:
 
       - name: Build and check yarn cache
         if: github.event_name == 'pull_request'
-        run: |
+        run: | 
           cd frontend
           yarn install --immutable --immutable-cache --check-cache
           yarn build
