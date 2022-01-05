@@ -5,10 +5,6 @@ on:
     paths:
       - 'frontend/**'
       - '.github/workflows/frontend.yml'
-  pull_request:
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend.yml'
 
 jobs:
   frontend:
@@ -18,19 +14,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build and check yarn cache
-        if: github.event_name == 'pull_request'
-        run: | 
-          cd frontend
-          yarn install --immutable --immutable-cache --check-cache
-          yarn build
-
-      - name: Build without checking yarn cache
-        if: github.event_name != 'pull_request'
+      - name: Build
         run: |
           cd frontend
           yarn install --immutable --immutable-cache
           yarn build
+
+      - name: Check yarn cache
+        if: github.ref_name == 'master' || github.ref_name == 'main'
+        run: | 
+          cd frontend
+          yarn install --immutable --immutable-cache --check-cache
 
       - name: Deploy preview channel
         if: github.event.pull_request.head.repo.full_name == github.repository
