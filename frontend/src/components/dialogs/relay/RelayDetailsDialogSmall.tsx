@@ -7,35 +7,34 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    FormControl,
+    FormControl, IconButton,
     MenuItem,
     Select,
     Toolbar,
     Typography
 } from "@mui/material";
-import {getRelayType} from "../../util/aggregate-relays";
-import {DetailsDialogProps} from "./RelayDetailsDialogUtil";
-import {RelayDetails} from "./RelayDetails";
-import {getIcon} from "../../types/icons";
+import {getRelayType} from "../../../util/aggregate-relays";
+import {DetailsDialogProps} from "./ResponsiveRelayDetailsDialog";
+import {RelayDetailsTable} from "./RelayDetailsTable";
+import {getIcon} from "../../../types/icons";
 import {RelayList} from "./RelayList";
 import CloseIcon from "@mui/icons-material/Close";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import {Transition} from "../../types/ui";
+import {SlideLeftTransition, SlideUpTransition} from "../../../types/ui";
+import {SelectFamilyButton} from "../../buttons/SelectFamilyButton";
 
 
 export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                                                                                    showDialog,
                                                                                    closeDialog,
-                                                                                   relays,
-                                                                                   relayIdentifiers,
+                                                                                   relayLocations,
                                                                                    sortRelaysBy,
                                                                                    handleSelectSortByChange,
-                                                                                   rawRelayDetails,
                                                                                    setRelayDetailsId,
                                                                                    sortedRelayMatches,
                                                                                    relayDetailsId,
                                                                                    relayDetails,
-                                                                                   relay,
+                                                                                   relayLocation,
                                                                                }) => {
     const [showDetailsDialog, setShowDetailsDialog] = useState(false)
 
@@ -46,11 +45,11 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
 
     // show relay details directly if only one relay is selectable
     useEffect(() => {
-        if (relays.length === 1) setShowDetailsDialog(true);
-    }, [relays])
+        if (relayLocations.length === 1) setShowDetailsDialog(true);
+    }, [relayLocations])
 
     const handleDetailsDialogClose = () => {
-        if (relays.length === 1) {
+        if (relayLocations.length === 1) {
             closeDialog()
             setShowDetailsDialog(false)
         } else {
@@ -69,7 +68,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                 open={showDialog}
                 onClose={closeDialog}
                 fullScreen={true}
-                TransitionComponent={Transition}
+                TransitionComponent={SlideUpTransition}
             >
                 <AppBar sx={{position: 'relative'}}>
                     <Toolbar>
@@ -86,19 +85,13 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                                 <MenuItem value={"nickname"}>Nickname</MenuItem>
                             </Select>
                         </FormControl>
-                        <Button
-                            aria-label="close"
-                            sx={{
-                                position: "absolute",
-                                right: "15px",
-                                top: "15px",
-                            }}
-                            variant={"outlined"}
-                            onClick={closeDialog}
-                            endIcon={<CloseIcon/>}
-                        >
-                            Close
-                        </Button>
+                        <IconButton aria-label="close" sx={{
+                            position: "absolute",
+                            right: "15px",
+                            top: "15px",
+                        }} onClick={closeDialog}>
+                            <CloseIcon/>
+                        </IconButton>
                     </Toolbar>
                 </AppBar>
                 <DialogContent>
@@ -124,77 +117,58 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                     </Button>
                 </DialogActions>
             </Dialog>
-            <Dialog
-                open={showDetailsDialog && showDialog}
-                onClose={handleDetailsDialogClose}
-                fullScreen={true}
-                TransitionComponent={Transition}
-            >
-                <AppBar sx={{position: 'relative'}}>
-                    <Toolbar>
-                        <Typography variant="h6">
-                            {rawRelayDetails ?
-                                <Box display="flex" alignItems={"center"}>
-                                    <Box sx={{
-                                        display: "inline",
-                                        paddingRight: "16px",
-                                    }}>
-                                        {relay ? getIcon(getRelayType(relay)) : null}
-                                    </Box>
-                                    <Typography sx={{display: "inline"}} variant="h6">
-                                        {rawRelayDetails.nickname}
-                                    </Typography>
-                                </Box> : <CircularProgress color={"inherit"} size={24}/>
-                            }
-                        </Typography>
-                        {relays.length > 1 ? <Button
-                            autoFocus
-                            aria-label="go back"
-                            sx={{
-                                position: "absolute",
-                                right: "125px",
-                                top: "15px",
-                            }}
-                            variant={"outlined"}
-                            onClick={handleDetailsDialogClose}
-                            startIcon={<ArrowBackIcon/>}
-                        >
-                            Back
-                        </Button> : null}
-                        <Button
-                            aria-label="close"
-                            sx={{
+            <div>
+                <Dialog
+                    open={showDetailsDialog && showDialog}
+                    onClose={handleDetailsDialogClose}
+                    fullScreen={true}
+                    TransitionComponent={SlideLeftTransition}
+                >
+                    <AppBar sx={{position: 'relative'}}>
+                        <Toolbar>
+                            <Typography variant="h6">
+                                {relayDetails ?
+                                    <Box display="flex" alignItems={"center"}>
+                                        {relayLocation ? getIcon(getRelayType(relayLocation)) : null}
+                                        <Typography sx={{display: "inline", padding: "0px 16px"}} variant="h6">
+                                            {relayDetails.nickname}
+                                        </Typography>
+                                        {relayLocation?.familyId && <SelectFamilyButton newFamilyId={relayLocation.familyId}
+                                                                                        furtherAction={closeDialog}/>}
+                                    </Box> : <CircularProgress color={"inherit"} size={24}/>
+                                }
+                            </Typography>
+                            <IconButton aria-label="close" sx={{
                                 position: "absolute",
                                 right: "15px",
                                 top: "15px",
-                            }}
-                            variant={"outlined"}
-                            onClick={closeDialog}
-                            endIcon={<CloseIcon/>}
+                            }} onClick={handleDetailsDialogClose}>
+                                <ArrowBackIcon/>
+                            </IconButton>
+                        </Toolbar>
+                    </AppBar>
+                    <DialogContent>
+                        {relayDetails && relayLocation &&
+                            <RelayDetailsTable relayDetails={relayDetails} relayLocation={relayLocation}/>
+                        }
+                    </DialogContent>
+                    <DialogActions sx={{
+                        position: "fixed",
+                        bottom: 5,
+                        right: 5,
+                    }}>
+                        <Button
+                            autoFocus
+                            onClick={handleDetailsDialogClose}
+                            variant={"contained"}
+                            size={"large"}
+                            startIcon={<ArrowBackIcon/>}
                         >
-                            Close
+                            Back
                         </Button>
-                    </Toolbar>
-                </AppBar>
-                <DialogContent>
-                    <RelayDetails relayDetails={relayDetails}/>
-                </DialogContent>
-                <DialogActions sx={{
-                    position: "fixed",
-                    bottom: 5,
-                    right: 5,
-                }}>
-                    <Button
-                        autoFocus
-                        onClick={handleDetailsDialogClose}
-                        variant={"contained"}
-                        size={"large"}
-                        startIcon={<ArrowBackIcon/>}
-                    >
-                        Back
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                    </DialogActions>
+                </Dialog>
+            </div>
         </Box>
     )
 }

@@ -1,7 +1,7 @@
 import {DialogContent, DialogTitle, IconButton, Typography} from "@mui/material";
 import React from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import {FullHeightDialog} from "../../types/ui";
+import {FullHeightDialog} from "../../../types/ui";
 import {FamiliesTable} from "./FamiliesTable";
 import {FamilySelectionDialogProps} from "./FamilySelectionUtil";
 
