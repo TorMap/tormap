@@ -12,7 +12,7 @@ import {
     sortFamilyCoordinatesMap
 } from "./aggregate-relays";
 import {getMapColor9} from "./geojson";
-import {RelayLocationDto} from "../types/responses";
+import {RelayLocationDto} from "../dto/relay";
 
 /**
  * Returns a Layer with markers with size relative to number of relays on a coordinate.

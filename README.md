@@ -21,9 +21,9 @@ install missing requirements. Depending on your shell you run the script with `.
 If you use Windows or the `./install` script failed, please install these manually:
 
 - [Oracle JDK](https://www.oracle.com/java/technologies/javase-downloads.html)
-  / [OpenJDK](https://openjdk.java.net/install/index.html) >= Java version 11
-- [NodeJS](https://nodejs.org/en/)
-- [yarn](https://yarnpkg.com/en/docs/install)
+  / [OpenJDK](https://openjdk.java.net/install/index.html) (11 >= Java version)
+- [NodeJS](https://nodejs.org/en/)  (12.0.0 >= version < 17.0.0)
+- [yarn](https://yarnpkg.com/en/docs/install) (3.0.0 >= version)
 
 Troubleshooting:
 

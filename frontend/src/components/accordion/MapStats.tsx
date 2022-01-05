@@ -14,9 +14,9 @@ import {Statistics} from "../../types/app-state";
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
-    CountryCountIcon,
+    EarthIcon,
     ExitRelayIcon,
-    FamilyCountIcon,
+    RelayFamilyIcon,
     GuardRelayIcon,
     OtherRelayIcon,
     TotalRelaysIcon
@@ -61,8 +61,8 @@ export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation, 
         title: "Total relays",
         value: stats.relayExitCount + stats.relayGuardCount + stats.relayOtherCount
     })
-    if (stats.familyCount) rows.push({icon: FamilyCountIcon, title: "Families", value: stats.familyCount})
-    if (stats.countryCount) rows.push({icon: CountryCountIcon, title: "Countries", value: stats.countryCount})
+    if (stats.familyCount) rows.push({icon: RelayFamilyIcon, title: "Families", value: stats.familyCount})
+    if (stats.countryCount) rows.push({icon: EarthIcon, title: "Countries", value: stats.countryCount})
 
     return (
         <Box>

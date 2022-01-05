@@ -29,5 +29,5 @@ export const ExitRelayIcon = <DirectionsRunIcon style={{color: Colors.Exit}}/>
 export const GuardRelayIcon = <SecurityIcon style={{color: Colors.Guard}}/>
 export const OtherRelayIcon = <TimelineIcon style={{color: Colors.Default}}/>
 export const TotalRelaysIcon = <SubdirectoryArrowRightIcon/>
-export const FamilyCountIcon = <GroupIcon/>
-export const CountryCountIcon = <PublicIcon/>
+export const RelayFamilyIcon = <GroupIcon/>
+export const EarthIcon = <PublicIcon/>
