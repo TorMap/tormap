@@ -13604,7 +13604,7 @@ __metadata:
     reactjs-popup: 2.0.5
     style-loader: 3.3.1
     typescript: 4.5.4
-    web-vitals: 2.1.2
+    web-vitals: 2.1.3
   languageName: unknown
   linkType: soft
 
@@ -14002,10 +14002,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web-vitals@npm:2.1.2":
-  version: 2.1.2
-  resolution: "web-vitals@npm:2.1.2"
-  checksum: 488c93a514504ad0a056d3afc41ef143494e5562e08175c0122f704ea3d3c08a1f62de445042ed51a1937d49bf868a50842e20066fe3dc99677937e5625ffa3e
+"web-vitals@npm:2.1.3":
+  version: 2.1.3
+  resolution: "web-vitals@npm:2.1.3"
+  checksum: 6d5d961b5e7eb5a3b0c4b05c9692b8765f469be9bc2c077331dbc3f2f38bf9bd5cbb4d1cad9129dfd7ce454c00a442851ce42c235f27678fd07e962bce4ac12e
   languageName: node
   linkType: hard
 
