@@ -14,14 +14,14 @@
   "rebaseWhen": "behind-base-branch",
   "packageRules": [
     {
-      "description": "Automatically merge all but major updates",
+      "description": "Group all non-major updates",
       "matchUpdateTypes": [
         "minor",
         "patch",
         "pin",
         "digest"
       ],
-      "automerge": true
+      "groupName": "non-major"
     },
     {
       "description": "Ignore outdated dependencies required by TorProject descriptor library",
