@@ -56,7 +56,7 @@ dependencies {
     // Read .mmdb (MaxMind) DB files for IP lookups https://maxmind.github.io/MaxMind-DB/
     implementation("com.maxmind.geoip2:geoip2:2.16.1")
 
-    // Anaylz user agent https://yauaa.basjes.nl/
+    // Analyze user agent https://yauaa.basjes.nl/
     implementation("nl.basjes.parse.useragent:yauaa:6.5")
 
     // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
@@ -67,6 +67,10 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-core:2.12.4")
     implementation("org.slf4j:slf4j-api:1.7.32")
     implementation("org.tukaani:xz:1.6")
+
+    // Testing & Kotest https://kotest.io/
+    testImplementation("io.kotest:kotest-runner-junit5-jvm:5.0.3")
+    testImplementation("io.kotest:kotest-extensions-spring:4.4.3")
 }
 
 // Allow JPA annotations for Kotlin classes
