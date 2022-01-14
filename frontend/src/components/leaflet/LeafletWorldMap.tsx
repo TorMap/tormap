@@ -1,5 +1,5 @@
 import {MapContainer, TileLayer} from "react-leaflet";
-import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
+import React, {FunctionComponent, useEffect, useState} from "react";
 import 'leaflet/dist/leaflet.css';
 import "leaflet.heat"
 import {RelayLocationDto} from "../../dto/relay";
@@ -27,8 +27,6 @@ let latestRequestTimestamp: number | undefined = undefined
 
 export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
     const [relays, setRelays] = useState<RelayLocationDto[]>()
-    const [refreshDayCount, setRefreshDayCount] = useState(0)
-
     const {enqueueSnackbar} = useSnackbar();
     const dayToDisplay = useDate().selectedDate
 
@@ -48,7 +46,7 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
             })
             latestRequestTimestamp = currentTimeStamp
         }
-    }, [dayToDisplay, enqueueSnackbar, setIsLoading, refreshDayCount])
+    }, [dayToDisplay, enqueueSnackbar, setIsLoading])
 
     return (
         <MapContainer
