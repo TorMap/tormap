@@ -11,13 +11,11 @@ import {FamilySelectionDialogProps} from "./FamilySelectionUtil";
  * @param showDialog - Whether the family selection dialog should be displayed
  * @param closeDialog - Event handler for closing the dialog
  * @param families - The familyIDs available to select
- * @param familySelectionCallback - the callback function for selecting a family
  */
 export const FamilySelectionDialogLarge: React.FunctionComponent<FamilySelectionDialogProps> = ({
                                                                                                     showDialog,
                                                                                                     closeDialog,
                                                                                                     familyIds,
-                                                                                                    familySelectionCallback,
                                                                                                     isLoading,
                                                                                                     familyIdentifiers,
                                                                                                 }) => {
@@ -45,7 +43,7 @@ export const FamilySelectionDialogLarge: React.FunctionComponent<FamilySelection
                 >
                     <div>
                         {!isLoading ? <FamiliesTable familyIdentifiers={familyIdentifiers}
-                                                     familySelectionCallback={familySelectionCallback}/>
+                                                     closeFamilySelectionDialog={closeDialog}/>
                             : <p>loading...</p>}
                     </div>
                 </DialogContent>

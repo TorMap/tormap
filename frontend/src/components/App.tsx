@@ -1,26 +1,28 @@
 import React, {FunctionComponent, useCallback, useEffect, useState} from 'react';
-import {WorldMap} from "./WorldMap";
-import {Box, Button, Link} from "@mui/material";
+import {LeafletWorldMap} from "./leaflet/LeafletWorldMap";
+import {Box, Button, Link, useMediaQuery, useTheme} from "@mui/material";
 import "@mui/styles";
 import "../index.css";
-import {Statistics} from "../types/app-state";
 import {AboutInformation} from "./dialogs/AboutInformation";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
 import {SnackbarMessage} from "../types/ui";
-import {Overlay} from "./Overlay";
 import {LoadingAnimation} from "./loading/LoadingAnimation";
-import {useDate} from "../util/date-context";
+import {useDate} from "../context/date-context";
+import {OverlayLarge} from "./overlay/OverlayLarge";
+import {OverlaySmall} from "./overlay/OverlaySmall";
 
 export const App: FunctionComponent = () => {
     const [isLoading, setIsLoading] = useState(true)
-    const [statistics, setStatistics] = useState<Statistics>()
     const [connectionRetryCount, setConnectionRetryCount] = useState<number>(0)
 
     const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
     const date = useDate()
     const setAvailableDays = date.setAvailableDays
+
+    const theme = useTheme()
+    const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
 
     useEffect(() => {
         closeSnackbar()
@@ -42,11 +44,10 @@ export const App: FunctionComponent = () => {
     return (
         <div>
             {isLoading ? <LoadingAnimation/> : null}
-            <WorldMap
+            <LeafletWorldMap
                 setIsLoading={useCallback(setIsLoading, [setIsLoading])}
-                setStatistics={useCallback(setStatistics, [setStatistics])}
             />
-            <Overlay statistics={statistics}/>
+            {isLargeScreen ? <OverlayLarge /> : <OverlaySmall />}
             <Box sx={{
                 color: "#b4b4b4",
                 background: "#262626",

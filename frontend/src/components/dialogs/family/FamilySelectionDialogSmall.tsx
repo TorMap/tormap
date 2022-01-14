@@ -9,7 +9,6 @@ export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialog
                                                                                               showDialog,
                                                                                               closeDialog,
                                                                                               familyIds,
-                                                                                              familySelectionCallback,
                                                                                               isLoading,
                                                                                               familyIdentifiers,
                                                                                           }) => {
@@ -46,7 +45,7 @@ export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialog
                 >
                     <div>
                         {!isLoading ? <FamiliesTable familyIdentifiers={familyIdentifiers}
-                                                     familySelectionCallback={familySelectionCallback}/>
+                                                     closeFamilySelectionDialog={closeDialog}/>
                             : <p>loading...</p>}
                     </div>
                 </DialogContent>
