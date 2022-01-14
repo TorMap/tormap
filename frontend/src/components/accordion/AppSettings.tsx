@@ -15,10 +15,10 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {Settings} from "../../types/app-state";
 import {RelayFlag, RelayFlagLabel, RelayType, RelayTypeLabel} from "../../types/relay";
-import {tooltipTimeDelay} from "../../util/config";
+import {tooltipTimeDelay} from "../../config";
 import {getIcon} from "../../types/icons";
 import {nameOfFactory} from "../../util/util";
-import {useSettings} from "../../util/settings-context";
+import {useSettings} from "../../context/settings-context";
 
 interface Props {
     elevation: number
