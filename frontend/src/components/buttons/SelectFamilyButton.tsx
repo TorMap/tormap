@@ -1,7 +1,7 @@
 import React, {FunctionComponent} from "react";
 import {IconButton} from "@mui/material";
 import {RelayFamilyIcon} from "../../types/icons";
-import {useSettings} from "../../util/settings-context";
+import {useSettings} from "../../context/settings-context";
 
 interface Props {
     newFamilyId: number,

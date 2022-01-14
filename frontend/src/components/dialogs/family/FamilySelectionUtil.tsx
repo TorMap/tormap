@@ -7,7 +7,7 @@ import {backend} from "../../../util/util";
 import {RelayFamilyIdentifier} from "../../../dto/relay";
 import {SnackbarMessage} from "../../../types/ui";
 
-interface FamilySeletionProps {
+interface FamilySelectionProps {
     /**
      * Whether the modal should currently be visible
      */
@@ -27,25 +27,18 @@ interface FamilySeletionProps {
      * Families which the user can view detailed information about
      */
     familyIds: number[]
-
-    /**
-     * Callback for setting a family as selected
-     * @param f the family ID
-     */
-    familySelectionCallback: (f: number) => void
 }
 
-export interface FamilySelectionDialogProps extends Omit<FamilySeletionProps, "refreshDayData"> {
+export interface FamilySelectionDialogProps extends Omit<FamilySelectionProps, "refreshDayData"> {
     isLoading: boolean
     familyIdentifiers?: RelayFamilyIdentifier[]
 }
 
-export const FamilySelectionDialog: FunctionComponent<FamilySeletionProps> = ({
+export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
                                                                                   showDialog,
                                                                                   closeDialog,
                                                                                   refreshDayData,
                                                                                   familyIds,
-                                                                                  familySelectionCallback,
                                                                               }) => {
     //Variables for deciding between small and large dialogs
     const theme = useTheme()
@@ -87,7 +80,6 @@ export const FamilySelectionDialog: FunctionComponent<FamilySeletionProps> = ({
             <FamilySelectionDialogLarge
                 showDialog={showDialog}
                 closeDialog={closeDialog}
-                familySelectionCallback={familySelectionCallback}
                 familyIds={familyIds}
                 isLoading={isLoading}
                 familyIdentifiers={familyIdentifiers}
@@ -95,7 +87,6 @@ export const FamilySelectionDialog: FunctionComponent<FamilySeletionProps> = ({
             : <FamilySelectionDialogSmall
                 showDialog={showDialog}
                 closeDialog={closeDialog}
-                familySelectionCallback={familySelectionCallback}
                 familyIds={familyIds}
                 isLoading={isLoading}
                 familyIdentifiers={familyIdentifiers}

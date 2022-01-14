@@ -10,27 +10,21 @@ import {
     TableRow,
     Typography
 } from "@mui/material";
-import {Statistics} from "../../types/app-state";
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
     EarthIcon,
     ExitRelayIcon,
-    RelayFamilyIcon,
     GuardRelayIcon,
     OtherRelayIcon,
+    RelayFamilyIcon,
     TotalRelaysIcon
 } from "../../types/icons";
 import {getFullName} from "../../util/geojson";
-import {useSettings} from "../../util/settings-context";
+import {useSettings} from "../../context/settings-context";
+import {useStatistics} from "../../context/statistics-context";
 
 interface Props {
-
-    /**
-     * The currently map statistics of the currently rendered information
-     */
-    stats: Statistics
-
     /**
      * whether the statistics are expanded by default
      */
@@ -45,11 +39,11 @@ interface Props {
 /**
  * The Component showing statistics for rendered relays
  * @param settings - the App Settings
- * @param stats - the Statistics Object to show
  */
-export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation, stats}) => {
+export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation}) => {
 
     const settings = useSettings().settings
+    const stats = useStatistics().statistics
 
     // Construct the stats rows to display
     let rows: StatsRow[] = []
