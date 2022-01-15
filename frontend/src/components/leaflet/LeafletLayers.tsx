@@ -48,12 +48,12 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, setIsLoading}) 
     const [showRelayDetailsDialog, setShowRelayDetailsDialog] = useState(false)
     const [relaysForDetailsDialog, setRelaysForDetailsDialog] = useState<RelayLocationDto[]>([])
     const [leafletMarkerLayer] = useState<LayerGroup>(new LayerGroup())
-    const leafletMap = useMap()
 
-    const {enqueueSnackbar, closeSnackbar} = useSnackbar();
     const settings = useSettings().settings
     const setSettings = useSettings().setSettings
     const setStatistics = useStatistics().setStatistics
+    const leafletMap = useMap()
+    const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
     const filteredRelays = useMemo(
         () => relays ? applyRelayFilter(relays, settings) : [],
