@@ -1,6 +1,5 @@
 import {Dialog, Slide} from "@mui/material";
 import {styled} from '@mui/material/styles';
-import {Statistics} from "./app-state";
 import React from "react";
 import {TransitionProps} from "@mui/material/transitions";
 
@@ -18,13 +17,6 @@ export const FullHeightDialog = styled(Dialog)(() => ({
         height: '100%',
     },
 }));
-
-export interface OverlayProps {
-    /**
-     * The current map statistics of the currently rendered information
-     */
-    statistics?: Statistics
-}
 
 export const SlideUpTransition = React.forwardRef(function Transition(
     props: TransitionProps & {

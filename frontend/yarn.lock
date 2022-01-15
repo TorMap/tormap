@@ -2825,12 +2825,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@iconify/react@npm:3.1.1":
-  version: 3.1.1
-  resolution: "@iconify/react@npm:3.1.1"
+"@iconify/react@npm:3.1.2":
+  version: 3.1.2
+  resolution: "@iconify/react@npm:3.1.2"
   dependencies:
     cross-fetch: ^3.1.4
-  checksum: ed2c9b50bfe03b41a60a8ff8f934f78e3344a1fbc7a26ef0bc4a7db7e0b46adc5da7f9133d734c21234320b59bc11e9c0a13d8269e768b6d995ed6ecf98eed7a
+  checksum: 249314f2e2f57dc8ab8b6b49e809a1b78fe96ab2887a0ce6bb426db0a744ae98c9cc6f4d3e255be949a0e1085a68f196484166c9307546a89b66bc9b0e231de1
   languageName: node
   linkType: hard
 
@@ -3055,9 +3055,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/base@npm:5.0.0-alpha.63":
-  version: 5.0.0-alpha.63
-  resolution: "@mui/base@npm:5.0.0-alpha.63"
+"@mui/base@npm:5.0.0-alpha.64":
+  version: 5.0.0-alpha.64
+  resolution: "@mui/base@npm:5.0.0-alpha.64"
   dependencies:
     "@babel/runtime": ^7.16.3
     "@emotion/is-prop-valid": ^1.1.1
@@ -3073,7 +3073,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 641c6d3ddcfc1962d4ebe21587761f728c6eb3d5b0d4063c70321c8c99cc2392c4350cc03e310fb997c98e412616f63028a85f133e9f44e6b1b60917955c95ac
+  checksum: 337f30692694ddcadeee0ebc8db93e0d4c6af1d281d0407794be6512bd96fe8111619b111654bd5a749f6bd2db9fc8b4e4ace38e91336ad76a3458ad71203337
   languageName: node
   linkType: hard
 
@@ -3093,17 +3093,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/lab@npm:5.0.0-alpha.63":
-  version: 5.0.0-alpha.63
-  resolution: "@mui/lab@npm:5.0.0-alpha.63"
+"@mui/lab@npm:5.0.0-alpha.64":
+  version: 5.0.0-alpha.64
+  resolution: "@mui/lab@npm:5.0.0-alpha.64"
   dependencies:
     "@babel/runtime": ^7.16.3
     "@date-io/date-fns": ^2.11.0
     "@date-io/dayjs": ^2.11.0
     "@date-io/luxon": ^2.11.1
     "@date-io/moment": ^2.11.0
-    "@mui/base": 5.0.0-alpha.63
-    "@mui/system": ^5.2.6
+    "@mui/base": 5.0.0-alpha.64
+    "@mui/system": ^5.2.8
     "@mui/utils": ^5.2.3
     clsx: ^1.1.1
     prop-types: ^15.7.2
@@ -3130,17 +3130,17 @@ __metadata:
       optional: true
     moment:
       optional: true
-  checksum: 2c89cccc3bda13a8a43abbac09f8689f9f8a8fe701ad32bfb54bf6a961449d8a222fa42695ad322439c41c7214af707e95226604daa4faddbd722a910979d959
+  checksum: 42d92ccc413f71221a3d70b1f1890f8abc6ea6d00cda0c6087977b12e913f4354936fbae263e5c8176180e33cc0c9ea1bbe456fa4057eabe0c06c1f66bf60c94
   languageName: node
   linkType: hard
 
-"@mui/material@npm:5.2.7":
-  version: 5.2.7
-  resolution: "@mui/material@npm:5.2.7"
+"@mui/material@npm:5.2.8":
+  version: 5.2.8
+  resolution: "@mui/material@npm:5.2.8"
   dependencies:
     "@babel/runtime": ^7.16.3
-    "@mui/base": 5.0.0-alpha.63
-    "@mui/system": ^5.2.6
+    "@mui/base": 5.0.0-alpha.64
+    "@mui/system": ^5.2.8
     "@mui/types": ^7.1.0
     "@mui/utils": ^5.2.3
     "@types/react-transition-group": ^4.4.4
@@ -3163,7 +3163,7 @@ __metadata:
       optional: true
     "@types/react":
       optional: true
-  checksum: e92b82b251ded01537f68080958afdab4fea3858e9952d3c74913a3b7f4f8df713d9bc148ca39dec66a7a0869af447afd6299bc5ee1701b1ba78c18765e2d146
+  checksum: 4b6bf166597d5776d4f0b6b3376efdd574ca69bc7c7cb908e21a3fda7d4a56c7be3e10902f260b4824de2955185d92356f5251d6e84aecccf1226041bb7081f3
   languageName: node
   linkType: hard
 
@@ -3235,9 +3235,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/system@npm:^5.2.6":
-  version: 5.2.6
-  resolution: "@mui/system@npm:5.2.6"
+"@mui/system@npm:^5.2.8":
+  version: 5.2.8
+  resolution: "@mui/system@npm:5.2.8"
   dependencies:
     "@babel/runtime": ^7.16.3
     "@mui/private-theming": ^5.2.3
@@ -3259,7 +3259,7 @@ __metadata:
       optional: true
     "@types/react":
       optional: true
-  checksum: 24d99fedf9743b9665749ee8fcd927fa7a1a6b366d92345c1b006153844eb9d76cffc40ff341a8af9499af8335605e6a91d536f7f1f976fa0858b95537a6e013
+  checksum: eb86da6582b2f6013136162ffdbca0fd1fcdc7d8b1fda64f117f7d40fb6ff88aebb75a48df2673021d89242dace58fc35931755b7c8a19569630d2baee89fb63
   languageName: node
   linkType: hard
 
@@ -11985,16 +11985,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-leaflet@npm:3.2.2":
-  version: 3.2.2
-  resolution: "react-leaflet@npm:3.2.2"
+"react-leaflet@npm:3.2.4":
+  version: 3.2.4
+  resolution: "react-leaflet@npm:3.2.4"
   dependencies:
     "@react-leaflet/core": ^1.1.1
   peerDependencies:
     leaflet: ^1.7.1
     react: ^17.0.1
     react-dom: ^17.0.1
-  checksum: d5e5f34dea05e4d48d1d8c5c455b62ac1d2d417620b025f1098ca4014d83e81c97db3d5adef6abaa0c0c429aa6230564f50091aab4e7ebd9402d1fc541573967
+  checksum: d67a899f524fd4b39ad7b41877894d0bb0dffa86476db89609e428fa3820848ffc947eb99b520ce3456138b9be62f0ad57dc7b985b44ac70febb9621c5a28455
   languageName: node
   linkType: hard
 
@@ -13569,10 +13569,10 @@ __metadata:
     "@date-io/date-fns": 2.11.0
     "@emotion/react": 11.7.1
     "@emotion/styled": 11.6.0
-    "@iconify/react": 3.1.1
+    "@iconify/react": 3.1.2
     "@mui/icons-material": 5.2.5
-    "@mui/lab": 5.0.0-alpha.63
-    "@mui/material": 5.2.7
+    "@mui/lab": 5.0.0-alpha.64
+    "@mui/material": 5.2.8
     "@mui/styles": 5.2.3
     "@react-leaflet/core": 1.1.1
     "@testing-library/jest-dom": 5.16.1
@@ -13595,7 +13595,7 @@ __metadata:
     notistack: 2.0.3
     react: 17.0.2
     react-dom: 17.0.2
-    react-leaflet: 3.2.2
+    react-leaflet: 3.2.4
     react-leaflet-heatmap-layer: 2.0.0
     react-leaflet-shapefile: 2.0.0
     react-moment: 1.1.1

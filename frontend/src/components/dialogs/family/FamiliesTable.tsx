@@ -1,6 +1,7 @@
 import React, {FunctionComponent} from "react";
 import {Table, TableBody, TableCell, TableHead, TableRow, Typography} from "@mui/material";
 import {RelayFamilyIdentifier} from "../../../dto/relay";
+import {useSettings} from "../../../context/settings-context";
 
 interface Props {
     /**
@@ -9,10 +10,9 @@ interface Props {
     familyIdentifiers?: RelayFamilyIdentifier[]
 
     /**
-     * Callback for setting a family as selected
-     * @param f the family ID
+     * Callback for closing the dialog
      */
-    familySelectionCallback: (f: number) => void
+    closeFamilySelectionDialog: () => void
 }
 
 /**
@@ -20,10 +20,13 @@ interface Props {
  */
 export const FamiliesTable: FunctionComponent<Props> = ({
                                                             familyIdentifiers,
-                                                            familySelectionCallback,
+                                                            closeFamilySelectionDialog,
                                                         }) => {
+    const settings = useSettings().settings
+    const setSettings = useSettings().setSettings
+
     return (
-        <div>
+        <>
             {familyIdentifiers ? <Table size={"small"}>
                     <TableHead>
                         <TableRow>
@@ -42,7 +45,10 @@ export const FamiliesTable: FunctionComponent<Props> = ({
                         {familyIdentifiers.map((family) =>
                             <TableRow
                                 key={family.id}
-                                onClick={() => familySelectionCallback(family.id)}
+                                onClick={() => {
+                                    setSettings({...settings, selectedFamily: family.id})
+                                    closeFamilySelectionDialog()
+                                }}
                                 hover={true}
                                 sx={{
                                     "&:hover": {
@@ -68,7 +74,6 @@ export const FamiliesTable: FunctionComponent<Props> = ({
                     </TableBody>
                 </Table>
                 : <p>We do not have any information about these families for this date.</p>}
-        </div>
-
+        </>
     )
 }
