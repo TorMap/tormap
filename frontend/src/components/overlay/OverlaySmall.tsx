@@ -1,19 +1,17 @@
 import React, {FunctionComponent, useState} from "react";
-import {OverlayProps, SlideUpTransition} from "../types/ui";
+import {SlideUpTransition} from "../../types/ui";
 import {AppBar, Box, Button, Dialog, DialogActions, Fab, IconButton, Toolbar, Typography} from "@mui/material";
 import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from "@mui/icons-material/Close";
-import {AppSettings} from "./accordion/AppSettings";
-import {MapStats} from "./accordion/MapStats";
+import {AppSettings} from "../accordion/AppSettings";
+import {MapStats} from "../accordion/MapStats";
 import MapIcon from '@mui/icons-material/Map';
-import {ResponsiveDatePicker} from "./date/ResponsiveDatePicker";
+import {ResponsiveDatePicker} from "../date/ResponsiveDatePicker";
 
 /**
  * A component wrapping all UI elements for devices with small screen sizes
- *
- * @param statistics - a Statistics object for data to display
  */
-export const OverlaySmall: FunctionComponent<OverlayProps> = ({statistics}) => {
+export const OverlaySmall: FunctionComponent = () => {
     const [open, setOpen] = useState(false);
 
     return (
@@ -52,7 +50,7 @@ export const OverlaySmall: FunctionComponent<OverlayProps> = ({statistics}) => {
                 <Box sx={{padding: 1}}>
                     <AppSettings elevation={0}/>
                     <Box height={"10px"}/>
-                    {statistics && <MapStats stats={statistics} elevation={0} defaultExpanded={false}/>}
+                    <MapStats elevation={0} defaultExpanded={false}/>
                 </Box>
                 <DialogActions sx={{
                     position: "fixed",

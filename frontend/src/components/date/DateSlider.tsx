@@ -1,8 +1,8 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
 import {useDebounce} from "../../util/util";
 import Moment from "react-moment";
-import {Box, Slider} from "@mui/material";
-import {useDate} from "../../util/date-context";
+import {Slider} from "@mui/material";
+import {useDate} from "../../context/date-context";
 
 /**
  * A Slider for date selection
@@ -50,7 +50,7 @@ export const DateSlider: FunctionComponent = () => {
     }, [availableDays, debouncedSliderValue, setSelectedDate])
 
     return (
-        <Box>
+        <>
             <Slider
                 disabled={(availableDays.length === 0)}
                 value={sliderValue}
@@ -68,7 +68,7 @@ export const DateSlider: FunctionComponent = () => {
                 valueLabelFormat={(x) => x > 0 ? availableDays[x] : undefined}
                 track={false}
             />
-        </Box>
+        </>
     )
 
 }

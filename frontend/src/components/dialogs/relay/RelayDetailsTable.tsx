@@ -62,7 +62,7 @@ export const RelayDetailsTable: FunctionComponent<Props> = ({relayLocation, rela
     ]
 
     return (
-        <div>
+        <>
             {tableRows ?
                 <Table size={"small"}>
                     <TableBody>
@@ -80,7 +80,7 @@ export const RelayDetailsTable: FunctionComponent<Props> = ({relayLocation, rela
                     </TableBody>
                 </Table>
                 : <CircularProgress color={"inherit"} size={24}/>}
-        </div>
+        </>
     )
 }
 

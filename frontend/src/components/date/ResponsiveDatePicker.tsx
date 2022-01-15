@@ -4,7 +4,7 @@ import {TextField} from "@mui/material";
 import dateFormat from "dateformat";
 import moment from "moment";
 import {DatePicker, LocalizationProvider} from "@mui/lab";
-import {useDate} from "../../util/date-context";
+import {useDate} from "../../context/date-context";
 import {isValid} from "date-fns";
 import {enCA} from "date-fns/locale";
 
@@ -36,6 +36,7 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
         <LocalizationProvider dateAdapter={AdapterDateFns} locale={enCA}>
             <DatePicker
                 value={selectedDate}
+                mask={"____-__-__"}
                 renderInput={(params) =>
                     largeScreen ? <TextField variant={"standard"}
                                              {...params}
