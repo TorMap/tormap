@@ -50,7 +50,7 @@ export const DateSlider: FunctionComponent = () => {
     }, [availableDays, debouncedSliderValue, setSelectedDate])
 
     return (
-        <Box>
+        <>
             <Slider
                 disabled={(availableDays.length === 0)}
                 value={sliderValue}
@@ -68,7 +68,7 @@ export const DateSlider: FunctionComponent = () => {
                 valueLabelFormat={(x) => x > 0 ? availableDays[x] : undefined}
                 track={false}
             />
-        </Box>
+        </>
     )
 
 }

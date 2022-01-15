@@ -59,7 +59,7 @@ export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation})
     if (stats.countryCount) rows.push({icon: EarthIcon, title: "Countries", value: stats.countryCount})
 
     return (
-        <Box>
+        <>
             <Accordion defaultExpanded={defaultExpanded} elevation={elevation}>
                 <AccordionSummary
                     expandIcon={defaultExpanded ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
@@ -91,7 +91,7 @@ export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation})
                     </Table>
                 </AccordionDetails>
             </Accordion>
-        </Box>
+        </>
     )
 }
 

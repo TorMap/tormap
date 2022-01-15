@@ -64,7 +64,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
     }
 
     return (
-        <Box>
+        <>
             <Dialog
                 open={showDialog}
                 onClose={closeDialog}
@@ -118,58 +118,56 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                     </Button>
                 </DialogActions>
             </Dialog>
-            <div>
-                <Dialog
-                    open={showDetailsDialog && showDialog}
-                    onClose={handleDetailsDialogClose}
-                    fullScreen={true}
-                    TransitionComponent={SlideLeftTransition}
-                >
-                    <AppBar sx={{position: 'relative'}}>
-                        <Toolbar>
-                            <Typography variant="h6">
-                                {relayDetails ?
-                                    <Box display="flex" alignItems={"center"}>
-                                        {relayLocation ? getIcon(getRelayType(relayLocation)) : null}
-                                        <Typography sx={{display: "inline", padding: "0px 16px"}} variant="h6">
-                                            {relayDetails.nickname}
-                                        </Typography>
-                                        {relayLocation?.familyId && <SelectFamilyButton newFamilyId={relayLocation.familyId}
-                                                                                        furtherAction={closeDialog}/>}
-                                    </Box> : <CircularProgress color={"inherit"} size={24}/>
-                                }
-                            </Typography>
-                            <IconButton aria-label="close" sx={{
-                                position: "absolute",
-                                right: "15px",
-                                top: "15px",
-                            }} onClick={handleDetailsDialogClose}>
-                                <ArrowBackIcon/>
-                            </IconButton>
-                        </Toolbar>
-                    </AppBar>
-                    <DialogContent>
-                        {relayDetails && relayLocation &&
-                            <RelayDetailsTable relayDetails={relayDetails} relayLocation={relayLocation}/>
-                        }
-                    </DialogContent>
-                    <DialogActions sx={{
-                        position: "fixed",
-                        bottom: 5,
-                        right: 5,
-                    }}>
-                        <Button
-                            autoFocus
-                            onClick={handleDetailsDialogClose}
-                            variant={"contained"}
-                            size={"large"}
-                            startIcon={<ArrowBackIcon/>}
-                        >
-                            Back
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-            </div>
-        </Box>
+            <Dialog
+                open={showDetailsDialog && showDialog}
+                onClose={handleDetailsDialogClose}
+                fullScreen={true}
+                TransitionComponent={SlideLeftTransition}
+            >
+                <AppBar sx={{position: 'relative'}}>
+                    <Toolbar>
+                        <Typography variant="h6">
+                            {relayDetails ?
+                                <Box display="flex" alignItems={"center"}>
+                                    {relayLocation ? getIcon(getRelayType(relayLocation)) : null}
+                                    <Typography sx={{display: "inline", padding: "0px 16px"}} variant="h6">
+                                        {relayDetails.nickname}
+                                    </Typography>
+                                    {relayLocation?.familyId && <SelectFamilyButton newFamilyId={relayLocation.familyId}
+                                                                                    furtherAction={closeDialog}/>}
+                                </Box> : <CircularProgress color={"inherit"} size={24}/>
+                            }
+                        </Typography>
+                        <IconButton aria-label="close" sx={{
+                            position: "absolute",
+                            right: "15px",
+                            top: "15px",
+                        }} onClick={handleDetailsDialogClose}>
+                            <ArrowBackIcon/>
+                        </IconButton>
+                    </Toolbar>
+                </AppBar>
+                <DialogContent>
+                    {relayDetails && relayLocation &&
+                        <RelayDetailsTable relayDetails={relayDetails} relayLocation={relayLocation}/>
+                    }
+                </DialogContent>
+                <DialogActions sx={{
+                    position: "fixed",
+                    bottom: 5,
+                    right: 5,
+                }}>
+                    <Button
+                        autoFocus
+                        onClick={handleDetailsDialogClose}
+                        variant={"contained"}
+                        size={"large"}
+                        startIcon={<ArrowBackIcon/>}
+                    >
+                        Back
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </>
     )
 }

@@ -85,7 +85,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     }]
 
     return (
-        <Box>
+        <>
             <Accordion elevation={elevation}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
@@ -195,7 +195,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                     </Box>
                 </AccordionDetails>
             </Accordion>
-        </Box>
+        </>
     )
 }
 
