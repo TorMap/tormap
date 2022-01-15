@@ -65,6 +65,7 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
             wheelPxPerZoomLevel={200}
             preferCanvas={true}
             attributionControl={false}
+            maxBounds={[[-180, -360], [180, 360]]}
         >
             <LeafletLayers relays={relays} setIsLoading={setIsLoading} />
             <TileLayer
