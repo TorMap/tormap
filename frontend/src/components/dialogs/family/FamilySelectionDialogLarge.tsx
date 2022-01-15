@@ -26,28 +26,24 @@ export const FamilySelectionDialogLarge: React.FunctionComponent<FamilySelection
             onBackdropClick={closeDialog}
             maxWidth={familyIds.length > 1 ? "lg" : "md"}
         >
-            <div>
-                <DialogTitle>
-                    <Typography
-                        variant="h6">Select a family</Typography>
-                    <IconButton aria-label="close" sx={{
-                        position: "absolute",
-                        right: "10px",
-                        top: "10px",
-                    }} onClick={closeDialog}>
-                        <CloseIcon/>
-                    </IconButton>
-                </DialogTitle>
-                <DialogContent
-                    dividers
-                >
-                    <div>
-                        {!isLoading ? <FamiliesTable familyIdentifiers={familyIdentifiers}
-                                                     closeFamilySelectionDialog={closeDialog}/>
-                            : <p>loading...</p>}
-                    </div>
-                </DialogContent>
-            </div>
+            <DialogTitle>
+                <Typography
+                    variant="h6">Select a family</Typography>
+                <IconButton aria-label="close" sx={{
+                    position: "absolute",
+                    right: "10px",
+                    top: "10px",
+                }} onClick={closeDialog}>
+                    <CloseIcon/>
+                </IconButton>
+            </DialogTitle>
+            <DialogContent
+                dividers
+            >
+                {!isLoading ? <FamiliesTable familyIdentifiers={familyIdentifiers}
+                                             closeFamilySelectionDialog={closeDialog}/>
+                    : <p>loading...</p>}
+            </DialogContent>
         </FullHeightDialog>
     )
 }
