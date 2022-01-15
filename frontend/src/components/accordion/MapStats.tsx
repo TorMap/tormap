@@ -3,7 +3,6 @@ import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
-    Box,
     Table,
     TableBody,
     TableCell,
