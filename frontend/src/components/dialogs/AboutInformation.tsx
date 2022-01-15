@@ -40,7 +40,7 @@ export const AboutInformation: React.FunctionComponent = () => {
     const [showDialog, setShowDialog] = useState(false)
 
     return (
-        <div>
+        <>
             <Button onClick={() => setShowDialog(true)}>
                 <InfoIcon sx={{
                     position: "fixed",
@@ -225,7 +225,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                 </DialogActions> : null}
 
             </Dialog>
-        </div>
+        </>
     )
 
 }

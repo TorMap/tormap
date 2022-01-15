@@ -26,7 +26,7 @@ export const FamiliesTable: FunctionComponent<Props> = ({
     const setSettings = useSettings().setSettings
 
     return (
-        <div>
+        <>
             {familyIdentifiers ? <Table size={"small"}>
                     <TableHead>
                         <TableRow>
@@ -74,7 +74,6 @@ export const FamiliesTable: FunctionComponent<Props> = ({
                     </TableBody>
                 </Table>
                 : <p>We do not have any information about these families for this date.</p>}
-        </div>
-
+        </>
     )
 }

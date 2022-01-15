@@ -1,5 +1,5 @@
 import {useMap} from "react-leaflet";
-import React, {FunctionComponent, useCallback, useEffect, useMemo, useState} from "react";
+import React, {Fragment, FunctionComponent, useCallback, useEffect, useMemo, useState} from "react";
 import {LayerGroup, LeafletMouseEvent} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import "leaflet.heat"
@@ -53,6 +53,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, setIsLoading}) 
     const setSettings = useSettings().setSettings
     const setStatistics = useStatistics().setStatistics
     const leafletMap = useMap()
+    // TODO fix console error: Cannot update during an existing state transition
     const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
     const filteredRelays = useMemo(
@@ -192,7 +193,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, setIsLoading}) 
     }, [])
 
     return (
-        <div>
+        <>
             <ResponsiveRelayDetailsDialog
                 showDialog={showRelayDetailsDialog}
                 closeDialog={useCallback(() => setShowRelayDetailsDialog(false), [])}
@@ -204,6 +205,6 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, setIsLoading}) 
                 refreshDayData={useCallback(() => setIsLoading(true), [])}
                 familyIds={familiesForSelectionDialog}
             />
-        </div>
+        </>
     );
 };

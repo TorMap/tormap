@@ -42,7 +42,7 @@ export const App: FunctionComponent = () => {
     }, [connectionRetryCount, closeSnackbar, enqueueSnackbar, setAvailableDays])
 
     return (
-        <div>
+        <>
             {isLoading ? <LoadingAnimation/> : null}
             <LeafletWorldMap
                 setIsLoading={useCallback(setIsLoading, [setIsLoading])}
@@ -63,6 +63,6 @@ export const App: FunctionComponent = () => {
                 </span>
             </Box>
             <AboutInformation/>
-        </div>
+        </>
     )
 }
