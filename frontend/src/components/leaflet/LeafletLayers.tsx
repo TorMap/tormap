@@ -1,5 +1,5 @@
 import {useMap} from "react-leaflet";
-import React, {Fragment, FunctionComponent, useCallback, useEffect, useMemo, useState} from "react";
+import React, {FunctionComponent, useCallback, useEffect, useMemo, useState} from "react";
 import {LayerGroup, LeafletMouseEvent} from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import "leaflet.heat"
