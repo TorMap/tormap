@@ -1,6 +1,6 @@
 import React, {FunctionComponent} from "react";
 import {FamilySelectionDialogProps} from "./FamilySelectionUtil";
-import {AppBar, Box, Button, Dialog, DialogActions, DialogContent, Toolbar, Typography} from "@mui/material";
+import {AppBar, Button, Dialog, DialogActions, DialogContent, Toolbar, Typography} from "@mui/material";
 import {SlideUpTransition} from "../../../types/ui";
 import CloseIcon from "@mui/icons-material/Close";
 import {FamiliesTable} from "./FamiliesTable";
@@ -9,12 +9,11 @@ export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialog
                                                                                               showDialog,
                                                                                               closeDialog,
                                                                                               familyIds,
-                                                                                              familySelectionCallback,
                                                                                               isLoading,
                                                                                               familyIdentifiers,
                                                                                           }) => {
     return (
-        <Box>
+        <>
             <Dialog
                 open={showDialog}
                 onClose={closeDialog}
@@ -44,11 +43,9 @@ export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialog
                 <DialogContent
                     dividers
                 >
-                    <div>
-                        {!isLoading ? <FamiliesTable familyIdentifiers={familyIdentifiers}
-                                                     familySelectionCallback={familySelectionCallback}/>
-                            : <p>loading...</p>}
-                    </div>
+                    {!isLoading ? <FamiliesTable familyIdentifiers={familyIdentifiers}
+                                                 closeFamilySelectionDialog={closeDialog}/>
+                        : <p>loading...</p>}
                 </DialogContent>
                 <DialogActions sx={{
                     position: "fixed",
@@ -66,6 +63,6 @@ export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialog
                     </Button>
                 </DialogActions>
             </Dialog>
-        </Box>
+        </>
     )
 }

@@ -5,7 +5,8 @@ import {
     Button,
     Card,
     CardHeader,
-    Dialog, DialogActions,
+    Dialog,
+    DialogActions,
     DialogContent,
     DialogTitle,
     Grid,
@@ -15,7 +16,9 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
-    Typography, useMediaQuery, useTheme
+    Typography,
+    useMediaQuery,
+    useTheme
 } from "@mui/material";
 import GitHubIcon from '@mui/icons-material/GitHub';
 import EmailIcon from '@mui/icons-material/Email';
@@ -37,7 +40,7 @@ export const AboutInformation: React.FunctionComponent = () => {
     const [showDialog, setShowDialog] = useState(false)
 
     return (
-        <div>
+        <>
             <Button onClick={() => setShowDialog(true)}>
                 <InfoIcon sx={{
                     position: "fixed",
@@ -222,7 +225,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                 </DialogActions> : null}
 
             </Dialog>
-        </div>
+        </>
     )
 
 }

@@ -19,7 +19,7 @@ plugins {
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 
     // Database migration tool https://flywaydb.org/documentation/usage/gradle/
-    id("org.flywaydb.flyway") version "8.4.0"
+    id("org.flywaydb.flyway") version "8.4.1"
 }
 
 repositories {
