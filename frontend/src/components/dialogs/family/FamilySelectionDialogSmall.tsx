@@ -1,6 +1,6 @@
 import React, {FunctionComponent} from "react";
 import {FamilySelectionDialogProps} from "./FamilySelectionUtil";
-import {AppBar, Box, Button, Dialog, DialogActions, DialogContent, Toolbar, Typography} from "@mui/material";
+import {AppBar, Button, Dialog, DialogActions, DialogContent, Toolbar, Typography} from "@mui/material";
 import {SlideUpTransition} from "../../../types/ui";
 import CloseIcon from "@mui/icons-material/Close";
 import {FamiliesTable} from "./FamiliesTable";
