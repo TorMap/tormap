@@ -11985,16 +11985,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-leaflet@npm:3.2.4":
-  version: 3.2.4
-  resolution: "react-leaflet@npm:3.2.4"
+"react-leaflet@npm:3.2.5":
+  version: 3.2.5
+  resolution: "react-leaflet@npm:3.2.5"
   dependencies:
     "@react-leaflet/core": ^1.1.1
   peerDependencies:
     leaflet: ^1.7.1
     react: ^17.0.1
     react-dom: ^17.0.1
-  checksum: d67a899f524fd4b39ad7b41877894d0bb0dffa86476db89609e428fa3820848ffc947eb99b520ce3456138b9be62f0ad57dc7b985b44ac70febb9621c5a28455
+  checksum: 503b7cee8acc12e0e2c5e7675432e7ef5742463e3e5420282ce60a9efd306430caefae3cb282c976e3df7665f19aef5b49cdce44a034979b4ea3ee968c2621d2
   languageName: node
   linkType: hard
 
@@ -13595,7 +13595,7 @@ __metadata:
     notistack: 2.0.3
     react: 17.0.2
     react-dom: 17.0.2
-    react-leaflet: 3.2.4
+    react-leaflet: 3.2.5
     react-leaflet-heatmap-layer: 2.0.0
     react-leaflet-shapefile: 2.0.0
     react-moment: 1.1.1

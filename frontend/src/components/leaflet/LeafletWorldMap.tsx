@@ -26,18 +26,21 @@ Instead only the last selected date will be drawn.
 let latestRequestTimestamp: number | undefined = undefined
 
 export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
+    // Component state
     const [relays, setRelays] = useState<RelayLocationDto[]>()
+
+    // App context
     const {enqueueSnackbar} = useSnackbar();
-    const dayToDisplay = useDate().selectedDate
+    const {selectedDate} = useDate()
 
     /**
-     * Query all Relays from the selected date whenever a new date is selected
+     * Query all relays for the selected date whenever a new date is selected
      */
     useEffect(() => {
-        if (dayToDisplay) {
+        if (selectedDate) {
             let currentTimeStamp = Date.now()
             setIsLoading(true)
-            backend.get<RelayLocationDto[]>(`/relay/location/day/${dayToDisplay}`).then(response => {
+            backend.get<RelayLocationDto[]>(`/relay/location/day/${selectedDate}`).then(response => {
                 setIsLoading(false)
                 if (currentTimeStamp === latestRequestTimestamp) setRelays(response.data)
             }).catch(() => {
@@ -46,7 +49,7 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
             })
             latestRequestTimestamp = currentTimeStamp
         }
-    }, [dayToDisplay, enqueueSnackbar, setIsLoading])
+    }, [selectedDate, enqueueSnackbar, setIsLoading])
 
     return (
         <MapContainer
