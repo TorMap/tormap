@@ -1,6 +1,7 @@
 {
-    "name": "",
-    "short_name": "",
+    "name": "TorMap",
+    "short_name": "TorMap",
+    "start_url": ".",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
@@ -13,7 +14,7 @@
             "type": "image/png"
         }
     ],
-    "theme_color": "#ffffff",
-    "background_color": "#ffffff",
+    "theme_color": "#03a9f4",
+    "background_color": "#262626",
     "display": "standalone"
 }
