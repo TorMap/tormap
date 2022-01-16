@@ -1,8 +1,9 @@
 import React, {FunctionComponent} from "react";
-import {Link, Table, TableBody, TableCell, TableRow, Typography} from "@mui/material";
+import {Table, TableBody, TableCell, TableRow, Typography} from "@mui/material";
 import {RelayDetailsDto, RelayLocationDto} from "../../../dto/relay";
 import {RelayFlag, RelayFlagLabel} from "../../../types/relay";
 import {ReactJSXElement} from "@emotion/react/types/jsx-namespace";
+import {ExternalLink} from "../../link/ExternalLink";
 
 interface Props {
     relayLocation: RelayLocationDto
@@ -14,20 +15,18 @@ export const RelayDetailsTable: FunctionComponent<Props> = ({relayLocation, rela
         {
             name: "Fingerprint",
             value:
-                <Link
+                <ExternalLink
                     href={`https://metrics.torproject.org/rs.html#details/${relayDetails.fingerprint}`}
-                    target={"_blank"}>
-                    {relayDetails.fingerprint}
-                </Link>
+                    label={relayDetails.fingerprint}
+                />
         },
         {
             name: "IP address",
             value:
-                <Link
+                <ExternalLink
                     href={`https://metrics.torproject.org/rs.html#search/${relayDetails.address}`}
-                    target={"_blank"}>
-                    {relayDetails.address}
-                </Link>
+                    label={relayDetails.address}
+                />
         },
         {
             name: "Flags assigned by authorities",
@@ -37,11 +36,10 @@ export const RelayDetailsTable: FunctionComponent<Props> = ({relayLocation, rela
         {
             name: "Autonomous System Number",
             value:
-                <Link
+                <ExternalLink
                     href={`https://metrics.torproject.org/rs.html#search/as:${relayDetails.autonomousSystemNumber}`}
-                    target={"_blank"}>
-                    {relayDetails.autonomousSystemNumber}
-                </Link>
+                    label={relayDetails.autonomousSystemNumber}
+                />
         },
         {name: "Platform", value: relayDetails.platform},
         {name: "Uptime", value: formatSecondsToHours(relayDetails.uptime)},
