@@ -42,18 +42,20 @@ export interface DetailsDialogProps extends DetailsProps {
 }
 
 export const ResponsiveRelayDetailsDialog: FunctionComponent<DetailsProps> = ({
-                                                                        showDialog,
-                                                                        closeDialog,
-                                                                        relayLocations,
-                                                                    }) => {
+                                                                                  showDialog,
+                                                                                  closeDialog,
+                                                                                  relayLocations,
+                                                                              }) => {
+    // Component state
     const [relayIdentifiers, setRelayIdentifiers] = useState<RelayIdentifierDto[]>([])
     const [relayDetailsId, setRelayDetailsId] = useState<number>()
     const [relayDetails, setRelayDetails] = useState<RelayDetailsDto>()
     const [sortRelaysBy, setSortRelaysBy] = useState<keyof RelayMatch>("relayType")
-    
+
+    // App context
+    const {enqueueSnackbar} = useSnackbar();
     const theme = useTheme()
     const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
-    const {enqueueSnackbar} = useSnackbar();
 
     const relayDetailsIdToLocationMap = useMemo(() => {
         const relayDetailsIdToLocationMap = new Map<number, RelayLocationDto>()
@@ -151,7 +153,8 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<DetailsProps> = ({
                 setRelayDetailsId={setRelayDetailsId}
                 sortedRelayMatches={sortedRelayMatches}
                 relayDetailsId={relayDetailsId}
-                relayLocation={relayLocation}/>
+                relayLocation={relayLocation}
+            />
             : <RelayDetailsDialogSmall
                 showDialog={showDialog}
                 closeDialog={closeDialog}
@@ -163,6 +166,7 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<DetailsProps> = ({
                 setRelayDetailsId={setRelayDetailsId}
                 sortedRelayMatches={sortedRelayMatches}
                 relayDetailsId={relayDetailsId}
-                relayLocation={relayLocation}/>
+                relayLocation={relayLocation}
+            />
     )
 }

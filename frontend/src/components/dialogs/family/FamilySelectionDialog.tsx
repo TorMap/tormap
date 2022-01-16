@@ -40,14 +40,15 @@ export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
                                                                                   refreshDayData,
                                                                                   familyIds,
                                                                               }) => {
-    //Variables for deciding between small and large dialogs
-    const theme = useTheme()
-    const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
-    // Snackbar
-    const {enqueueSnackbar} = useSnackbar();
-    // FamilySelectionDialog specific variables
+    // Component state
     const [isLoading, setIsLoading] = useState(true)
     const [familyIdentifiers, setFamilyIdentifiers] = useState<RelayFamilyIdentifier[]>()
+
+    // App context
+    const {enqueueSnackbar} = useSnackbar();
+
+    const theme = useTheme()
+    const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
 
     /**
      * Query more information about the Families specified in "families" parameter

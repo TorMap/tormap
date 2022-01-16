@@ -1,5 +1,5 @@
 import React, {FunctionComponent} from "react";
-import {CircularProgress, Link, Table, TableBody, TableCell, TableRow, Typography} from "@mui/material";
+import {Link, Table, TableBody, TableCell, TableRow, Typography} from "@mui/material";
 import {RelayDetailsDto, RelayLocationDto} from "../../../dto/relay";
 import {RelayFlag, RelayFlagLabel} from "../../../types/relay";
 import {ReactJSXElement} from "@emotion/react/types/jsx-namespace";
@@ -62,25 +62,21 @@ export const RelayDetailsTable: FunctionComponent<Props> = ({relayLocation, rela
     ]
 
     return (
-        <>
-            {tableRows ?
-                <Table size={"small"}>
-                    <TableBody>
-                        {tableRows.map((row) =>
-                            row.value &&
-                            <TableRow key={row.name}>
-                                <TableCell scope="row" sx={{minWidth: "150px",}}>
-                                    <Typography>{row.name}</Typography>
-                                </TableCell>
-                                <TableCell scope="row">
-                                    <Typography>{row.value}</Typography>
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-                : <CircularProgress color={"inherit"} size={24}/>}
-        </>
+        <Table size={"small"}>
+            <TableBody>
+                {tableRows.map((row) =>
+                    row.value &&
+                    <TableRow key={row.name}>
+                        <TableCell scope="row" sx={{minWidth: "150px",}}>
+                            <Typography>{row.name}</Typography>
+                        </TableCell>
+                        <TableCell scope="row">
+                            <Typography>{row.value}</Typography>
+                        </TableCell>
+                    </TableRow>
+                )}
+            </TableBody>
+        </Table>
     )
 }
 

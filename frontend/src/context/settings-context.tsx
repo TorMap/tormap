@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {Settings} from "../types/app-state";
+import {Settings} from "../types/settings";
 import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/accordion/AppSettings";
 
 interface SettingsInterface {
@@ -28,6 +28,7 @@ interface SettingsProviderProps {
  * @param children - the child elements in the DOM
  */
 export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = ({defaultSettings, children}) => {
+    // Component state
     const [settings, setSettings] = useState<Settings>(defaultSettings)
 
     // Resets selection if grouping gets disabled

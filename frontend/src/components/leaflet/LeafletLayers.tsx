@@ -25,7 +25,7 @@ import {SnackbarMessage} from "../../types/ui";
 import {useSnackbar} from "notistack";
 import {useSettings} from "../../context/settings-context";
 import {ResponsiveRelayDetailsDialog} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
-import {FamilySelectionDialog} from "../dialogs/family/FamilySelectionUtil";
+import {FamilySelectionDialog} from "../dialogs/family/FamilySelectionDialog";
 import {useStatistics} from "../../context/statistics-context";
 
 
@@ -48,7 +48,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, setIsLoading}) 
     const [familiesForSelectionDialog, setFamiliesForSelectionDialog] = useState<number[]>([])
     const [showRelayDetailsDialog, setShowRelayDetailsDialog] = useState(false)
     const [relaysForDetailsDialog, setRelaysForDetailsDialog] = useState<RelayLocationDto[]>([])
-    const [leafletMarkerLayer] = useState<LayerGroup>(new LayerGroup())
+    const [leafletMarkerLayers] = useState<LayerGroup>(new LayerGroup())
 
     // App context
     const leafletMap = useMap()
@@ -126,71 +126,60 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, setIsLoading}) 
      * Redraw relays whenever settings get changed or new relays got downloaded.
      */
     useEffect(() => {
-        const buildLayerGroup = () => {
-            const layerGroup = new LayerGroup()
-
-            if (relays) {
-                if (filteredRelays.length) {
-                    closeSnackbar(SnackbarMessage.NoRelaysWithFlags)
-                } else {
-                    enqueueSnackbar(SnackbarMessage.NoRelaysWithFlags, {
-                        variant: "warning",
-                        key: SnackbarMessage.NoRelaysWithFlags
-                    })
-                    return layerGroup
-                }
-
-                if (settings.selectedFamily && !relayFamilyMap.has(settings.selectedFamily)) {
-                    setSettings({...settings, selectedFamily: undefined})
-                }
-
-                if (settings.heatMap) {
-                    layerGroup.addLayer(relayLocationHeatmapLayer)
-                }
-
-                if (leafletMap && relayCountryMap.size > 0 && settings.sortCountry) {
-                    layerGroup.addLayer(countryBordersLayer)
-                }
-
-                if (settings.aggregateCoordinates) {
-                    layerGroup.addLayer(aggregatedCoordinatesLayer)
-                }
-
-                if (settings.sortCountry) {
-                    if (settings.selectedCountry && !relayCountryMap.has(settings.selectedCountry)) {
-                        setSettings({...settings, selectedCountry: undefined})
-                    }
-                    layerGroup.addLayer(relayCountryLayer)
-                } else {
-                    layerGroup.addLayer(relayLayer)
-                }
-
-                if (settings.sortFamily) {
-                    if (settings.selectedFamily) layerGroup.addLayer(relaySelectedFamilyLayer)
-                    else layerGroup.addLayer(relayFamilyCoordinatesLayer)
-                }
-                if (settings.sortFamily && relayFamilyMap.size === 0) {
-                    enqueueSnackbar(SnackbarMessage.NoFamilyData, {variant: "warning", key: SnackbarMessage.NoFamilyData})
-                } else {
-                    closeSnackbar(SnackbarMessage.NoFamilyData)
-                }
-            }
-            return layerGroup
-        }
         if (relays) {
-            leafletMarkerLayer.clearLayers()
-            buildLayerGroup().getLayers().forEach(l => leafletMarkerLayer.addLayer(l))
             setStatistics(statistics)
-        }
-    }, [leafletMarkerLayer, relays, statistics, setStatistics, filteredRelays.length, settings, relayFamilyMap, leafletMap, relayCountryMap, closeSnackbar, enqueueSnackbar, setSettings, relayLocationHeatmapLayer, countryBordersLayer, aggregatedCoordinatesLayer, relayCountryLayer, relayLayer, relaySelectedFamilyLayer, relayFamilyCoordinatesLayer])
 
-    /**
-     * Add the marker layer to the leafletMap once the map changes
-     */
-    useEffect(() => {
-        leafletMap.addLayer(leafletMarkerLayer)
-        /* eslint-disable react-hooks/exhaustive-deps */
-    }, [leafletMap])
+            if (!leafletMap.hasLayer(leafletMarkerLayers)) {
+                leafletMap.addLayer(leafletMarkerLayers)
+            }
+            leafletMarkerLayers.clearLayers()
+
+            if (filteredRelays.length) {
+                closeSnackbar(SnackbarMessage.NoRelaysWithFlags)
+            } else {
+                enqueueSnackbar(SnackbarMessage.NoRelaysWithFlags, {
+                    variant: "warning",
+                    key: SnackbarMessage.NoRelaysWithFlags
+                })
+                return
+            }
+
+            if (settings.selectedFamily && !relayFamilyMap.has(settings.selectedFamily)) {
+                setSettings({...settings, selectedFamily: undefined})
+            }
+
+            if (settings.heatMap) {
+                leafletMarkerLayers.addLayer(relayLocationHeatmapLayer)
+            }
+
+            if (leafletMap && relayCountryMap.size > 0 && settings.sortCountry) {
+                leafletMarkerLayers.addLayer(countryBordersLayer)
+            }
+
+            if (settings.aggregateCoordinates) {
+                leafletMarkerLayers.addLayer(aggregatedCoordinatesLayer)
+            }
+
+            if (settings.sortCountry) {
+                if (settings.selectedCountry && !relayCountryMap.has(settings.selectedCountry)) {
+                    setSettings({...settings, selectedCountry: undefined})
+                }
+                leafletMarkerLayers.addLayer(relayCountryLayer)
+            } else {
+                leafletMarkerLayers.addLayer(relayLayer)
+            }
+
+            if (settings.sortFamily) {
+                if (settings.selectedFamily) leafletMarkerLayers.addLayer(relaySelectedFamilyLayer)
+                else leafletMarkerLayers.addLayer(relayFamilyCoordinatesLayer)
+            }
+            if (settings.sortFamily && relayFamilyMap.size === 0) {
+                enqueueSnackbar(SnackbarMessage.NoFamilyData, {variant: "warning", key: SnackbarMessage.NoFamilyData})
+            } else {
+                closeSnackbar(SnackbarMessage.NoFamilyData)
+            }
+        }
+    }, [leafletMarkerLayers, relays, statistics, setStatistics, filteredRelays.length, settings, relayFamilyMap, leafletMap, relayCountryMap, closeSnackbar, enqueueSnackbar, setSettings, relayLocationHeatmapLayer, countryBordersLayer, aggregatedCoordinatesLayer, relayCountryLayer, relayLayer, relaySelectedFamilyLayer, relayFamilyCoordinatesLayer])
 
     return (
         <>
@@ -202,7 +191,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, setIsLoading}) 
             <FamilySelectionDialog
                 showDialog={showFamilySelectionDialog}
                 closeDialog={useCallback(() => setShowFamilySelectionDialog(false), [])}
-                refreshDayData={useCallback(() => setIsLoading(true), [])}
+                refreshDayData={useCallback(() => setIsLoading(true), [setIsLoading])}
                 familyIds={familiesForSelectionDialog}
             />
         </>

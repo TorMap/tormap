@@ -9,8 +9,8 @@ interface Props {
 }
 
 export const SelectFamilyButton: FunctionComponent<Props> = ({newFamilyId, furtherAction}) => {
-    const settings = useSettings().settings
-    const setSettings = useSettings().setSettings
+    // App context
+    const {settings, setSettings} = useSettings()
 
     return (
         <IconButton aria-label="select family" onClick={() => {

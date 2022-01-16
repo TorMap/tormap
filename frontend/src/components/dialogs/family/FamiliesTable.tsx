@@ -22,8 +22,8 @@ export const FamiliesTable: FunctionComponent<Props> = ({
                                                             familyIdentifiers,
                                                             closeFamilySelectionDialog,
                                                         }) => {
-    const settings = useSettings().settings
-    const setSettings = useSettings().setSettings
+    // App context
+    const {settings, setSettings} = useSettings()
 
     return (
         <>
