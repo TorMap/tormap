@@ -42,7 +42,7 @@ export const AboutInformation: React.FunctionComponent = () => {
 
     return (
         <>
-            <Button onClick={() => setShowDialog(true)}>
+            <Button onClick={() => setShowDialog(true)} aria-label={"About TorMap"}>
                 <InfoIcon sx={{
                     position: "fixed",
                     top: "90px",
