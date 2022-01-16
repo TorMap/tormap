@@ -1,6 +1,6 @@
 import React, {FunctionComponent} from "react";
-import {FamilySelectionDialogProps} from "./FamilySelectionUtil";
-import {AppBar, Button, Dialog, DialogActions, DialogContent, Toolbar, Typography} from "@mui/material";
+import {FamilySelectionDialogProps} from "./FamilySelectionDialog";
+import {AppBar, Button, Dialog, DialogActions, DialogContent, IconButton, Toolbar, Typography} from "@mui/material";
 import {SlideUpTransition} from "../../../types/ui";
 import CloseIcon from "@mui/icons-material/Close";
 import {FamiliesTable} from "./FamiliesTable";
@@ -25,19 +25,13 @@ export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialog
                         <Typography variant="h6">
                             Families
                         </Typography>
-                        <Button
-                            aria-label="close"
-                            sx={{
-                                position: "absolute",
-                                right: "15px",
-                                top: "15px",
-                            }}
-                            variant={"outlined"}
-                            onClick={closeDialog}
-                            endIcon={<CloseIcon/>}
-                        >
-                            Close
-                        </Button>
+                        <IconButton aria-label="close" sx={{
+                            position: "absolute",
+                            right: "10px",
+                            top: "10px",
+                        }} onClick={closeDialog}>
+                            <CloseIcon/>
+                        </IconButton>
                     </Toolbar>
                 </AppBar>
                 <DialogContent
@@ -57,9 +51,8 @@ export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialog
                         onClick={closeDialog}
                         variant={"contained"}
                         size={"large"}
-                        endIcon={<CloseIcon/>}
                     >
-                        close
+                        Back
                     </Button>
                 </DialogActions>
             </Dialog>

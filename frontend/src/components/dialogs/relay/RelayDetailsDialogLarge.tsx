@@ -87,7 +87,6 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
                         </IconButton>
                     </Grid>
                 </Grid>
-
             </DialogTitle>
             <Divider/>
             <Grid container>

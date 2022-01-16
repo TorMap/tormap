@@ -13,14 +13,13 @@ import {OverlayLarge} from "./overlay/OverlayLarge";
 import {OverlaySmall} from "./overlay/OverlaySmall";
 
 export const App: FunctionComponent = () => {
+    // Component state
     const [isLoading, setIsLoading] = useState(true)
     const [connectionRetryCount, setConnectionRetryCount] = useState<number>(0)
 
+    // App context
     const {enqueueSnackbar, closeSnackbar} = useSnackbar();
-
-    const date = useDate()
-    const setAvailableDays = date.setAvailableDays
-
+    const {setAvailableDays} = useDate()
     const theme = useTheme()
     const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
 

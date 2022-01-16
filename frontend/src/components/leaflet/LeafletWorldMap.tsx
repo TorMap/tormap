@@ -21,7 +21,7 @@ interface Props {
 /*
 Variable needs to be outside component to keep track of the last selected date
 This prevents the case that multiple dates get loaded and the last received date is displayed.
-Instead only the last selected date will be drawn.
+Instead, only the last selected date will be drawn.
  */
 let latestRequestTimestamp: number | undefined = undefined
 
@@ -42,7 +42,9 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
             setIsLoading(true)
             backend.get<RelayLocationDto[]>(`/relay/location/day/${selectedDate}`).then(response => {
                 setIsLoading(false)
-                if (currentTimeStamp === latestRequestTimestamp) setRelays(response.data)
+                if (currentTimeStamp === latestRequestTimestamp) {
+                    setRelays(response.data)
+                }
             }).catch(() => {
                 setIsLoading(false)
                 enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
