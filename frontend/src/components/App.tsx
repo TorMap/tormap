@@ -32,7 +32,7 @@ export const App: FunctionComponent = () => {
         }).catch(() => {
             enqueueSnackbar(SnackbarMessage.ConnectionFailed, {
                 variant: "error",
-                action: <Button onClick={() => setConnectionRetryCount(previous => previous + 1)}>Retry</Button>,
+                action: <Button onClick={() => setConnectionRetryCount(connectionRetryCount + 1)}>Retry</Button>,
                 persist: true,
                 preventDuplicate: false,
             })

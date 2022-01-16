@@ -36,13 +36,12 @@ interface Props {
     relays?: RelayLocationDto[]
 
     /**
-     * A variable callback whether the map is currently fetching a new date
-     * @param b whether the map is currently fetching a new date
+     * Trigger download of the current day
      */
-    setIsLoading: (b: boolean) => void
+    reloadSelectedDay: () => void
 }
 
-export const LeafletLayers: FunctionComponent<Props> = ({relays, setIsLoading}) => {
+export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedDay}) => {
     // Component state
     const [showFamilySelectionDialog, setShowFamilySelectionDialog] = useState(false)
     const [familiesForSelectionDialog, setFamiliesForSelectionDialog] = useState<number[]>([])
@@ -191,7 +190,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, setIsLoading}) 
             <FamilySelectionDialog
                 showDialog={showFamilySelectionDialog}
                 closeDialog={useCallback(() => setShowFamilySelectionDialog(false), [])}
-                refreshDayData={useCallback(() => setIsLoading(true), [setIsLoading])}
+                reloadSelectedDay={reloadSelectedDay}
                 familyIds={familiesForSelectionDialog}
             />
         </>

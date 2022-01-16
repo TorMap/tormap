@@ -21,7 +21,7 @@ interface FamilySelectionProps {
     /**
      * Trigger download of the current day
      */
-    refreshDayData: () => void
+    reloadSelectedDay: () => void
 
     /**
      * Families which the user can view detailed information about
@@ -29,7 +29,7 @@ interface FamilySelectionProps {
     familyIds: number[]
 }
 
-export interface FamilySelectionDialogProps extends Omit<FamilySelectionProps, "refreshDayData"> {
+export interface FamilySelectionDialogProps extends Omit<FamilySelectionProps, "reloadSelectedDay"> {
     isLoading: boolean
     familyIdentifiers?: RelayFamilyIdentifier[]
 }
@@ -37,7 +37,7 @@ export interface FamilySelectionDialogProps extends Omit<FamilySelectionProps, "
 export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
                                                                                   showDialog,
                                                                                   closeDialog,
-                                                                                  refreshDayData,
+                                                                                  reloadSelectedDay,
                                                                                   familyIds,
                                                                               }) => {
     // Component state
@@ -67,7 +67,7 @@ export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
                 } else {
                     closeDialog()
                     enqueueSnackbar(SnackbarMessage.UpdatedData, {variant: "success"})
-                    refreshDayData()
+                    reloadSelectedDay()
                 }
                 setIsLoading(false)
             }).catch(() => {
@@ -75,7 +75,7 @@ export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
                 setIsLoading(false)
             })
         }
-    }, [closeDialog, enqueueSnackbar, familyIds, refreshDayData])
+    }, [closeDialog, enqueueSnackbar, familyIds, reloadSelectedDay])
 
     return (isLargeScreen ?
             <FamilySelectionDialogLarge
