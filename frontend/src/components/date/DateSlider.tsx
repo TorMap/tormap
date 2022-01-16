@@ -1,7 +1,7 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
 import {useDebounce} from "../../util/util";
 import Moment from "react-moment";
-import {Slider} from "@mui/material";
+import {Mark, Slider} from "@mui/material";
 import {useDate} from "../../context/date-context";
 
 /**
@@ -23,15 +23,20 @@ export const DateSlider: FunctionComponent = () => {
 
     // Calculate the marks for the slider
     useEffect(() => {
-        if (availableDays.length !== 0) {
+        if (availableDays.length > 0) {
             let markCount = 6
-            markCount--
+            if (availableDays.length < markCount) {
+                markCount = availableDays.length
+            }
             let marks = []
-            for (let i = 0; i <= markCount; i++) {
+            for (let i = 0; i < markCount; i++) {
+                const dateIndex = Math.round(i * (availableDays.length - 1) / (markCount - 1))
+                const date = availableDays[dateIndex]
                 const mark: Mark = {
-                    value: Math.round(i * (availableDays.length - 1) / markCount),
+                    value: dateIndex,
                     label: <Moment
-                        date={availableDays[Math.round(i * (availableDays.length - 1) / markCount)]}
+                        key={date}
+                        date={date}
                         format={"YYYY-MM"}
                     />
                 }
@@ -49,30 +54,22 @@ export const DateSlider: FunctionComponent = () => {
     }, [availableDays, debouncedSliderValue, setSelectedDate])
 
     return (
-        <>
-            <Slider
-                disabled={(availableDays.length === 0)}
-                value={sliderValue}
-                onChange={(event: any, newValue: number | number[]) => {
-                    setSliderValue(newValue as number)
-                }}
-                onChangeCommitted={(event: any, newValue: number | number[]) => {
-                    debouncedSliderValue = newValue as number
-                }}
-                valueLabelDisplay={(availableDays.length === 0) ? "off" : "on"}
-                name={"slider"}
-                min={0}
-                max={availableDays.length - 1}
-                marks={sliderMarks}
-                valueLabelFormat={(x) => x > 0 ? availableDays[x] : undefined}
-                track={false}
-            />
-        </>
+        <Slider
+            disabled={(availableDays.length === 0)}
+            value={sliderValue}
+            onChange={(event: any, newValue: number | number[]) => {
+                setSliderValue(newValue as number)
+            }}
+            onChangeCommitted={(event: any, newValue: number | number[]) => {
+                debouncedSliderValue = newValue as number
+            }}
+            valueLabelDisplay={(availableDays.length === 0) ? "off" : "on"}
+            name={"slider"}
+            min={0}
+            max={availableDays.length - 1}
+            marks={sliderMarks}
+            valueLabelFormat={(x) => x > 0 ? availableDays[x] : undefined}
+            track={false}
+        />
     )
-
-}
-
-interface Mark {
-    value: number
-    label: JSX.Element
 }
