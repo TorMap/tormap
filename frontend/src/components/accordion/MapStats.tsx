@@ -40,22 +40,22 @@ interface Props {
  * @param settings - the App Settings
  */
 export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation}) => {
-
-    const settings = useSettings().settings
-    const stats = useStatistics().statistics
+    // App context
+    const {settings} = useSettings()
+    const {statistics} = useStatistics()
 
     // Construct the stats rows to display
     let rows: StatsRow[] = []
-    rows.push({icon: ExitRelayIcon, title: "Exit relays", value: stats.relayExitCount})
-    rows.push({icon: GuardRelayIcon, title: "Guard relays", value: stats.relayGuardCount})
-    rows.push({icon: OtherRelayIcon, title: "Other relays", value: stats.relayOtherCount})
+    rows.push({icon: ExitRelayIcon, title: "Exit relays", value: statistics.relayExitCount})
+    rows.push({icon: GuardRelayIcon, title: "Guard relays", value: statistics.relayGuardCount})
+    rows.push({icon: OtherRelayIcon, title: "Other relays", value: statistics.relayOtherCount})
     rows.push({
         icon: TotalRelaysIcon,
         title: "Total relays",
-        value: stats.relayExitCount + stats.relayGuardCount + stats.relayOtherCount
+        value: statistics.relayExitCount + statistics.relayGuardCount + statistics.relayOtherCount
     })
-    if (stats.familyCount) rows.push({icon: RelayFamilyIcon, title: "Families", value: stats.familyCount})
-    if (stats.countryCount) rows.push({icon: EarthIcon, title: "Countries", value: stats.countryCount})
+    if (statistics.familyCount) rows.push({icon: RelayFamilyIcon, title: "Families", value: statistics.familyCount})
+    if (statistics.countryCount) rows.push({icon: EarthIcon, title: "Countries", value: statistics.countryCount})
 
     return (
         <>

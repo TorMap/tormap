@@ -1,5 +1,5 @@
 import React, {FunctionComponent, useContext, useState} from "react";
-import {Statistics} from "../types/app-state";
+import {Statistics} from "../types/statistics";
 
 interface StatisticsInterface {
     statistics: Statistics
@@ -17,6 +17,7 @@ interface StatisticsProviderProps {
 }
 
 export const StatisticsProvider: FunctionComponent<StatisticsProviderProps> = ({children}) => {
+    // Component state
     const [statistics, setStatistics] = useState<Statistics>({
         relayGuardCount: 0,
         relayExitCount: 0,

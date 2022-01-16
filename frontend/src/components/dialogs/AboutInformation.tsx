@@ -33,11 +33,12 @@ import TorMapLogo from "../../resources/logo.png";
  * A component for displaying information about TorMap
  */
 export const AboutInformation: React.FunctionComponent = () => {
-    //Variables for deciding between small and large dialogs
+    // Component state
+    const [showDialog, setShowDialog] = useState(false)
+
+    // App context
     const theme = useTheme()
     const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
-    // AboutDialog specific variables
-    const [showDialog, setShowDialog] = useState(false)
 
     return (
         <>
@@ -218,9 +219,8 @@ export const AboutInformation: React.FunctionComponent = () => {
                         onClick={() => setShowDialog(false)}
                         variant={"contained"}
                         size={"large"}
-                        endIcon={<CloseIcon/>}
                     >
-                        close
+                        Back
                     </Button>
                 </DialogActions> : null}
 

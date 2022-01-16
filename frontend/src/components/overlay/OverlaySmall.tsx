@@ -5,13 +5,13 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from "@mui/icons-material/Close";
 import {AppSettings} from "../accordion/AppSettings";
 import {MapStats} from "../accordion/MapStats";
-import MapIcon from '@mui/icons-material/Map';
 import {ResponsiveDatePicker} from "../date/ResponsiveDatePicker";
 
 /**
  * A component wrapping all UI elements for devices with small screen sizes
  */
 export const OverlaySmall: FunctionComponent = () => {
+    // Component state
     const [open, setOpen] = useState(false);
 
     return (
@@ -33,17 +33,16 @@ export const OverlaySmall: FunctionComponent = () => {
             >
                 <AppBar sx={{position: 'relative'}}>
                     <Toolbar>
-                        <IconButton
-                            edge="start"
-                            color="inherit"
-                            onClick={() => setOpen(false)}
-                            aria-label="close"
-                        >
-                            <CloseIcon/>
-                        </IconButton>
-                        <Typography sx={{ml: 2, flex: 1}} variant="h6" component="div">
+                        <Typography variant="h6">
                             Settings
                         </Typography>
+                        <IconButton aria-label="close" sx={{
+                            position: "absolute",
+                            right: "10px",
+                            top: "10px",
+                        }} onClick={() => setOpen(false)}>
+                            <CloseIcon/>
+                        </IconButton>
                     </Toolbar>
                 </AppBar>
                 <ResponsiveDatePicker largeScreen={false} />
@@ -62,7 +61,6 @@ export const OverlaySmall: FunctionComponent = () => {
                         onClick={() => setOpen(false)}
                         variant={"contained"}
                         size={"large"}
-                        endIcon={<MapIcon/>}
                     >
                         Back
                     </Button>

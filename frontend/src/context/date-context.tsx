@@ -38,6 +38,7 @@ interface DateProviderProps {
 }
 
 export const DateProvider: FunctionComponent<DateProviderProps> = ({children}) => {
+    // Component state
     const [availableDays, setAvailableDays] = useState<string[]>([])
     const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined)
     const {enqueueSnackbar} = useSnackbar();

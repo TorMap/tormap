@@ -8,23 +8,22 @@ import {useDate} from "../../context/date-context";
  * A Slider for date selection
  */
 export const DateSlider: FunctionComponent = () => {
-    const dateContext = useDate()
-    const availableDays = dateContext.availableDays
-    const setSelectedDate = dateContext.setSelectedDate
-    const selectedDate = dateContext.selectedDate
+    // App context
+    const {availableDays, setSelectedDate, selectedDate} = useDate()
 
+    // Component state
     const [sliderMarks, setSliderMarks] = useState<Mark[]>([])
     const [sliderValue, setSliderValue] = useState<number>(availableDays.length - 1)
+
     let debouncedSliderValue = useDebounce<number>(sliderValue, 500)
 
     useEffect(() => {
         setSliderValue(availableDays.findIndex((value) => value === selectedDate))
     }, [availableDays, selectedDate])
 
-    // calculate the marks for the slider
+    // Calculate the marks for the slider
     useEffect(() => {
         if (availableDays.length !== 0) {
-            // the count of marks
             let markCount = 6
             markCount--
             let marks = []
@@ -42,7 +41,7 @@ export const DateSlider: FunctionComponent = () => {
         }
     }, [availableDays])
 
-    // handle debouncing of the slider value when dragging
+    // Handle debouncing of the slider value when dragging
     useEffect(() => {
         if (debouncedSliderValue !== undefined) {
             setSelectedDate(availableDays[debouncedSliderValue])

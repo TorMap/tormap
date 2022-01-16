@@ -16,12 +16,11 @@ interface Props {
 }
 
 export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) => {
-    const dateContext = useDate()
-    const selectedDate = dateContext.selectedDate
-    const availableDays = dateContext.availableDays
+    // App context
+    const {selectedDate, availableDays, setSelectedDate} = useDate()
+
     const firstAvailableDate = selectedDate ? new Date(availableDays[0]) : undefined
     const lastAvailableDate = selectedDate ? new Date(availableDays[availableDays.length - 1]) : undefined
-    const setSelectedDate = dateContext.setSelectedDate
 
     const handleDateChange = (date: Date | null) => {
         if (date && isValid(date)) {
@@ -67,6 +66,5 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
                 showTodayButton
             />
         </LocalizationProvider>
-
     )
 }
