@@ -1,5 +1,5 @@
 import {MapContainer, TileLayer} from "react-leaflet";
-import React, {FunctionComponent, useEffect, useState} from "react";
+import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
 import 'leaflet/dist/leaflet.css';
 import "leaflet.heat"
 import {RelayLocationDto} from "../../dto/relay";
@@ -28,6 +28,7 @@ let latestRequestTimestamp: number | undefined = undefined
 export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
     // Component state
     const [relays, setRelays] = useState<RelayLocationDto[]>()
+    const [refreshDayCount, setRefreshDayCount] = useState<number>(0)
 
     // App context
     const {enqueueSnackbar} = useSnackbar();
@@ -51,7 +52,7 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
             })
             latestRequestTimestamp = currentTimeStamp
         }
-    }, [selectedDate, enqueueSnackbar, setIsLoading])
+    }, [selectedDate, enqueueSnackbar, setIsLoading, refreshDayCount])
 
     return (
         <MapContainer
@@ -72,7 +73,10 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
             attributionControl={false}
             maxBounds={[[-180, -360], [180, 360]]}
         >
-            <LeafletLayers relays={relays} setIsLoading={setIsLoading} />
+            <LeafletLayers
+                relays={relays}
+                reloadSelectedDay={useCallback(() => setRefreshDayCount(prev => prev + 1), [])}
+            />
             <TileLayer
                 maxZoom={19}
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
