@@ -1,8 +1,8 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
 import {useDebounce} from "../../util/util";
-import Moment from "react-moment";
 import {Mark, Slider} from "@mui/material";
 import {useDate} from "../../context/date-context";
+import {format} from "date-fns";
 
 /**
  * A Slider for date selection
@@ -34,11 +34,7 @@ export const DateSlider: FunctionComponent = () => {
                 const date = availableDays[dateIndex]
                 const mark: Mark = {
                     value: dateIndex,
-                    label: <Moment
-                        key={date}
-                        date={date}
-                        format={"YYYY-MM"}
-                    />
+                    label: format(new Date(date), "yyyy-MM")
                 }
                 marks.push(mark);
             }

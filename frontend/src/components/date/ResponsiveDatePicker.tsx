@@ -1,11 +1,9 @@
 import React, {FunctionComponent} from "react";
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import {TextField} from "@mui/material";
-import dateFormat from "dateformat";
-import moment from "moment";
 import {DatePicker, LocalizationProvider} from "@mui/lab";
 import {useDate} from "../../context/date-context";
-import {isValid} from "date-fns";
+import {format, isValid} from "date-fns";
 import {enCA} from "date-fns/locale";
 
 interface Props {
@@ -24,7 +22,7 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
 
     const handleDateChange = (date: Date | null) => {
         if (date && isValid(date)) {
-            const day: string = dateFormat(date, "yyyy-mm-dd")
+            const day: string = format(date, "yyyy-MM-dd")
             if (availableDays.includes(day)) {
                 setSelectedDate(day)
             }
@@ -60,7 +58,7 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
                 minDate={firstAvailableDate}
                 maxDate={lastAvailableDate}
                 shouldDisableDate={date => {
-                    return !(availableDays.includes(moment(date).format("YYYY-MM-DD")))
+                    return !(availableDays.includes(format(date, "yyyy-MM-dd")))
                 }}
                 views={["year", "month", "day"]}
                 showTodayButton

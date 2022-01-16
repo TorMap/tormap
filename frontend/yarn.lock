@@ -2583,7 +2583,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@date-io/date-fns@npm:2.11.0, @date-io/date-fns@npm:^2.11.0":
+"@date-io/date-fns@npm:^2.11.0":
   version: 2.11.0
   resolution: "@date-io/date-fns@npm:2.11.0"
   dependencies:
@@ -3787,13 +3787,6 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: fe81351470f2d3165e8b12ce33542eef89ea893e36dd62e8f7d72566dfb7e448376ae962f9f3ea888547ce8b55a40020ca0e01d637fab5d99567673084542641
-  languageName: node
-  linkType: hard
-
-"@types/dateformat@npm:5.0.0":
-  version: 5.0.0
-  resolution: "@types/dateformat@npm:5.0.0"
-  checksum: fee3fff637675fd55b59fff6a0507a120ae212a0c7ba823c00a45473da617a7d466e6d7d40d2b4b88af9df3f4be3ed80a51e222ea346c7738de688aa2c6747f1
   languageName: node
   linkType: hard
 
@@ -6213,13 +6206,6 @@ __metadata:
   version: 2.28.0
   resolution: "date-fns@npm:2.28.0"
   checksum: a0516b2e4f99b8bffc6cc5193349f185f195398385bdcaf07f17c2c4a24473c99d933eb0018be4142a86a6d46cb0b06be6440ad874f15e795acbedd6fd727a1f
-  languageName: node
-  linkType: hard
-
-"dateformat@npm:5.0.2":
-  version: 5.0.2
-  resolution: "dateformat@npm:5.0.2"
-  checksum: 12df548f6c4d3e89df1bee64302059ab67562cfcc9e97294795d7c530c19ad63eb8490d022b84b5bd86d0eece9d08b543010fd335ce97e7641fd2fb1115359d1
   languageName: node
   linkType: hard
 
@@ -10169,13 +10155,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment@npm:2.29.1":
-  version: 2.29.1
-  resolution: "moment@npm:2.29.1"
-  checksum: 1e14d5f422a2687996be11dd2d50c8de3bd577c4a4ca79ba5d02c397242a933e5b941655de6c8cb90ac18f01cc4127e55b4a12ae3c527a6c0a274e455979345e
-  languageName: node
-  linkType: hard
-
 "ms@npm:2.0.0":
   version: 2.0.0
   resolution: "ms@npm:2.0.0"
@@ -12020,17 +11999,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-moment@npm:1.1.1":
-  version: 1.1.1
-  resolution: "react-moment@npm:1.1.1"
-  peerDependencies:
-    moment: ^2.29.0
-    prop-types: ^15.7.0
-    react: ^16.0 || ^17.0.0
-  checksum: 7b80e2dd6a395e3ffd5cf3d0454c9413acfda1cfbf60f9aceb3f15316dcbdafb309390cd74403a0fb5debedb645147f63a24697c36d1a7cdb8c3fe51f9c68c87
-  languageName: node
-  linkType: hard
-
 "react-refresh@npm:^0.11.0":
   version: 0.11.0
   resolution: "react-refresh@npm:0.11.0"
@@ -12140,16 +12108,6 @@ __metadata:
     loose-envify: ^1.1.0
     object-assign: ^4.1.1
   checksum: b254cc17ce3011788330f7bbf383ab653c6848902d7936a87b09d835d091e3f295f7e9dd1597c6daac5dc80f90e778c8230218ba8ad599f74adcc11e33b9d61b
-  languageName: node
-  linkType: hard
-
-"reactjs-popup@npm:2.0.5":
-  version: 2.0.5
-  resolution: "reactjs-popup@npm:2.0.5"
-  peerDependencies:
-    react: ">=16"
-    react-dom: ">=16"
-  checksum: 7b9ebd49e66fb936e85cd4e7a3713cdf903e95f802e5783963f1f9c000d2f8bdb7e4b9967756677238b2fcd9c07637282f2a037403374931ba42865ffffe60e6
   languageName: node
   linkType: hard
 
@@ -13566,7 +13524,6 @@ __metadata:
   resolution: "tormap@workspace:."
   dependencies:
     "@babel/plugin-proposal-nullish-coalescing-operator": 7.16.7
-    "@date-io/date-fns": 2.11.0
     "@emotion/react": 11.7.1
     "@emotion/styled": 11.6.0
     "@iconify/react": 3.1.2
@@ -13578,7 +13535,6 @@ __metadata:
     "@testing-library/jest-dom": 5.16.1
     "@testing-library/react": 12.1.2
     "@testing-library/user-event": 13.5.0
-    "@types/dateformat": 5.0.0
     "@types/geojson": 7946.0.8
     "@types/jest": 27.4.0
     "@types/leaflet": 1.7.8
@@ -13588,23 +13544,18 @@ __metadata:
     axios: 0.24.0
     css-loader: 6.5.1
     date-fns: 2.28.0
-    dateformat: 5.0.2
     leaflet: 1.7.1
     leaflet.heat: 0.2.0
-    moment: 2.29.1
     notistack: 2.0.3
     react: 17.0.2
     react-dom: 17.0.2
     react-leaflet: 3.2.5
     react-leaflet-heatmap-layer: 2.0.0
     react-leaflet-shapefile: 2.0.0
-    react-moment: 1.1.1
     react-scripts: 5.0.0
     react-sliding-pane: 7.1.0
-    reactjs-popup: 2.0.5
     style-loader: 3.3.1
     typescript: 4.5.4
-    web-vitals: 2.1.3
   languageName: unknown
   linkType: soft
 
@@ -13999,13 +13950,6 @@ __metadata:
   dependencies:
     minimalistic-assert: ^1.0.0
   checksum: 2abc306c96930b757972a1c4650eb6b25b5d99f24088714957f88629e137db569368c5de0e57986c89ea70db2f1df9bba11a87cb6d0c8694b6f53a0159fab3bf
-  languageName: node
-  linkType: hard
-
-"web-vitals@npm:2.1.3":
-  version: 2.1.3
-  resolution: "web-vitals@npm:2.1.3"
-  checksum: 6d5d961b5e7eb5a3b0c4b05c9692b8765f469be9bc2c077331dbc3f2f38bf9bd5cbb4d1cad9129dfd7ce454c00a442851ce42c235f27678fd07e962bce4ac12e
   languageName: node
   linkType: hard
 
