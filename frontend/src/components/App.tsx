@@ -1,6 +1,6 @@
 import React, {FunctionComponent, useCallback, useEffect, useState} from 'react';
 import {LeafletWorldMap} from "./leaflet/LeafletWorldMap";
-import {Box, Button, Link, useMediaQuery, useTheme} from "@mui/material";
+import {Box, Button, useMediaQuery, useTheme} from "@mui/material";
 import "@mui/styles";
 import "../index.css";
 import {AboutInformation} from "./dialogs/AboutInformation";
@@ -11,6 +11,7 @@ import {LoadingAnimation} from "./loading/LoadingAnimation";
 import {useDate} from "../context/date-context";
 import {OverlayLarge} from "./overlay/OverlayLarge";
 import {OverlaySmall} from "./overlay/OverlaySmall";
+import {ExternalLink} from "./link/ExternalLink";
 
 export const App: FunctionComponent = () => {
     // Component state
@@ -56,9 +57,11 @@ export const App: FunctionComponent = () => {
                 fontSize: ".7rem",
             }}>
                 <span>
-                    <Link href="https://leafletjs.com" target={"_blank"}>Leaflet</Link> | &copy;&nbsp;
-                    <Link href="https://www.openstreetmap.org/copyright" target={"_blank"}>OpenStreetMap</Link>&nbsp;
-                    contributors &copy; <Link href="https://carto.com/attributions" target={"_blank"}>CARTO</Link>
+                    <ExternalLink href="https://leafletjs.com" label={"Leaflet"}/>
+                    {" | © "}
+                    <ExternalLink href="https://www.openstreetmap.org/copyright" label={"OpenStreetMap"}/>
+                    {" contributors © "}
+                    <ExternalLink href="https://carto.com/attributions" label={"CARTO"}/>
                 </span>
             </Box>
             <AboutInformation/>

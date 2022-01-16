@@ -7,7 +7,6 @@ import {
     Checkbox,
     FormControlLabel,
     FormGroup,
-    Link,
     Switch,
     Tooltip,
     Typography,
@@ -19,6 +18,7 @@ import {tooltipTimeDelay} from "../../config";
 import {getIcon} from "../../types/icons";
 import {nameOfFactory} from "../../util/util";
 import {useSettings} from "../../context/settings-context";
+import {ExternalLink} from "../link/ExternalLink";
 
 interface Props {
     elevation: number
@@ -139,9 +139,10 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                         )}
                     </FormGroup>
                     <Box sx={{margin: "8px 8px"}}>
-                        <Link href={"https://github.com/torproject/torspec/blob/main/dir-spec.txt"} target={"_blank"}>
-                            More information about flags
-                        </Link>
+                        <ExternalLink
+                            href={"https://github.com/torproject/torspec/blob/main/dir-spec.txt"}
+                            label={"More information about flags"}
+                        />
                     </Box>
                 </AccordionDetails>
             </Accordion>
