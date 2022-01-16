@@ -11,7 +11,6 @@ import {
     DialogTitle,
     Grid,
     IconButton,
-    Link,
     List,
     ListItem,
     ListItemIcon,
@@ -28,6 +27,7 @@ import LanguageIcon from '@mui/icons-material/Language';
 import InfoIcon from '@mui/icons-material/Info';
 import {Icon} from "@iconify/react";
 import TorMapLogo from "../../resources/logo.png";
+import {ExternalLink} from "../link/ExternalLink";
 
 /**
  * A component for displaying information about TorMap
@@ -79,27 +79,24 @@ export const AboutInformation: React.FunctionComponent = () => {
                         Tor network currently consists of thousands of relays which route anonymous internet traffic
                         daily. With our app you can group, filter and analyze Tor relays. The historic state of the
                         network can be viewed for any day between October 2007 and today.<br/>
-                        We developed TorMap for our practical P4-Project at the <Link
-                        href={"https://www.tu-darmstadt.de/"} target={"_blank"}>Technical University of
-                        Darmstadt</Link> as part of the <Link href={"https://panda-projekt.de/"}
-                                                              target={"_blank"}>PANDA project</Link>. It was supervised
-                        by <Link
-                        href={"mailto:florian.platzer@sit.fraunhofer.de"} target={"_blank"}>Florian
-                        Platzer</Link> from <Link href={"https://www.sit.fraunhofer.de/"} target={"_blank"}>Frauenhofer
-                        SIT</Link>.
+                        We developed TorMap for our practical P4-Project at the <ExternalLink
+                        href={"https://www.tu-darmstadt.de/"} label={"Technical University of Darmstadt"}/> as part of
+                        the <ExternalLink href={"https://panda-projekt.de/"} label={"PANDA project"}/>. It was
+                        supervised
+                        by <ExternalLink href={"mailto:florian.platzer@sit.fraunhofer.de"}
+                                         label={"Florian Platzer"}/> from <ExternalLink
+                        href={"https://www.sit.fraunhofer.de/"} label={"Frauenhofer SIT"}/>.
                     </Typography>
                     <Typography variant={"h6"}>How do we get our data?</Typography>
                     <Typography variant={"body1"} gutterBottom>
-                        The nonprofit organization <Link href={"https://www.torproject.org/"}
-                                                         target={"_blank"}>TorProject</Link> already provides
-                        a large <Link href={"https://metrics.torproject.org/collector.html"}
-                                      target={"_blank"}>archive</Link> with raw historic data about the network.
-                        We regularly process these so called "descriptors" and lookup IPv4 addresses to get geo
-                        locations and
-                        autonomous systems. If you are interested in our implementation, check out the open source
-                        repository
-                        on <Link href={"https://github.com/TorMap/tormap"}
-                                 target={"_blank"}>GitHub</Link>.<br/>
+                        The nonprofit organization <ExternalLink href={"https://www.torproject.org/"}
+                                                                 label={"TorProject"}/> already provides a
+                        large <ExternalLink href={"https://metrics.torproject.org/collector.html"}
+                                                               label={"archive"}/> with raw historic data about the
+                        network. We regularly process these so called "descriptors" and lookup IPv4 addresses to get geo
+                        locations and autonomous systems. If you are interested in our implementation, check out the
+                        open source repository on <ExternalLink href={"https://github.com/TorMap/tormap"}
+                                         label={"GitHub"}/>.<br/>
                         The location and ownership of IP ranges can change over time. Since we
                         only use current IP data, some relays might have been hosted somewhere else, than displayed on
                         our world map.
@@ -113,8 +110,13 @@ export const AboutInformation: React.FunctionComponent = () => {
                                     title="TorMap"
                                 />
                                 <List dense={true}>
-                                    <ListItem button component="a" href={"https://github.com/TorMap/tormap"}
-                                              target={"_blank"}>
+                                    <ListItem
+                                        button
+                                        component="a"
+                                        href={"https://github.com/TorMap/tormap"}
+                                        target={"_blank"}
+                                        rel={"noopener"}
+                                    >
                                         <ListItemIcon>
                                             <GitHubIcon/>
                                         </ListItemIcon>
@@ -131,8 +133,12 @@ export const AboutInformation: React.FunctionComponent = () => {
                                             Email
                                         </ListItemText>
                                     </ListItem>
-                                    <ListItem button component="a" href={"https://tippin.me/@Julius_Henke"}
-                                              target={"_blank"}>
+                                    <ListItem
+                                        button component="a"
+                                        href={"https://tippin.me/@Julius_Henke"}
+                                        target={"_blank"}
+                                        rel={"noopener"}
+                                    >
                                         <ListItemIcon>
                                             <Icon icon="mdi:bitcoin" width={26}/>
                                         </ListItemIcon>
@@ -149,8 +155,13 @@ export const AboutInformation: React.FunctionComponent = () => {
                                     title="Julius Henke"
                                 />
                                 <List dense={true}>
-                                    <ListItem button component="a" href="https://github.com/JuliusHenke"
-                                              target={"_blank"}>
+                                    <ListItem
+                                        button
+                                        component="a"
+                                        href="https://github.com/JuliusHenke"
+                                        target={"_blank"}
+                                        rel={"noopener"}
+                                    >
                                         <ListItemIcon>
                                             <GitHubIcon/>
                                         </ListItemIcon>
@@ -158,7 +169,13 @@ export const AboutInformation: React.FunctionComponent = () => {
                                             GitHub
                                         </ListItemText>
                                     </ListItem>
-                                    <ListItem button component="a" href="https://juliushenke.com/" target={"_blank"}>
+                                    <ListItem
+                                        button
+                                        component="a"
+                                        href="https://juliushenke.com/"
+                                        target={"_blank"}
+                                        rel={"noopener"}
+                                    >
                                         <ListItemIcon>
                                             <LanguageIcon/>
                                         </ListItemIcon>
@@ -166,8 +183,12 @@ export const AboutInformation: React.FunctionComponent = () => {
                                             Website
                                         </ListItemText>
                                     </ListItem>
-                                    <ListItem button component="a" href="https://twitter.com/Julius_Henke"
-                                              target={"_blank"}>
+                                    <ListItem
+                                        button component="a"
+                                        href="https://twitter.com/Julius_Henke"
+                                        target={"_blank"}
+                                        rel={"noopener"}
+                                    >
                                         <ListItemIcon>
                                             <TwitterIcon/>
                                         </ListItemIcon>
@@ -184,7 +205,13 @@ export const AboutInformation: React.FunctionComponent = () => {
                                     title="Tim Kilb"
                                 />
                                 <List dense={true}>
-                                    <ListItem button component="a" href="https://github.com/TimKilb" target={"_blank"}>
+                                    <ListItem
+                                        button
+                                        component="a"
+                                        href="https://github.com/TimKilb"
+                                        target={"_blank"}
+                                        rel={"noopener"}
+                                    >
                                         <ListItemIcon>
                                             <GitHubIcon/>
                                         </ListItemIcon>
@@ -201,12 +228,12 @@ export const AboutInformation: React.FunctionComponent = () => {
                     dividers
                 >
                     <Typography variant={"body2"}>
-                        We use IP geolocation data by <Link href={"https://db-ip.com"}
-                                                            target={"_blank"}>DB-IP</Link>{", "}
-                        Autonomous System data by <Link href={"https://www.maxmind.com/"}
-                                                        target={"_blank"}>MaxMind</Link>{" "}
-                        and GeoJSON data from <Link href={"https://geojson-maps.ash.ms/"}
-                                                    target={"_blank"}>https://geojson-maps.ash.ms/</Link>.
+                        We use IP geolocation data by <ExternalLink href={"https://db-ip.com"}
+                                                                    label={"DB-IP"}/>{", "}
+                        Autonomous System data by <ExternalLink href={"https://www.maxmind.com/"}
+                                                                label={"MaxMind"}/>{" "}
+                        and GeoJSON data from <ExternalLink href={"https://geojson-maps.ash.ms/"}
+                                                            label={"https://geojson-maps.ash.ms/"}/>.
                     </Typography>
                 </DialogContent>
                 {!isLargeScreen ? <DialogActions sx={{
