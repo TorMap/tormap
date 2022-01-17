@@ -25,9 +25,9 @@ import TwitterIcon from '@mui/icons-material/Twitter';
 import CloseIcon from "@mui/icons-material/Close";
 import LanguageIcon from '@mui/icons-material/Language';
 import InfoIcon from '@mui/icons-material/Info';
-import {Icon} from "@iconify/react";
 import TorMapLogo from "../../resources/logo.png";
 import {ExternalLink} from "../link/ExternalLink";
+import {BitcoinIcon} from "../icons/BitcoinIcon";
 
 /**
  * A component for displaying information about TorMap
@@ -140,7 +140,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                                         rel={"noopener"}
                                     >
                                         <ListItemIcon>
-                                            <Icon icon="mdi:bitcoin" width={26}/>
+                                            <BitcoinIcon/>
                                         </ListItemIcon>
                                         <ListItemText>
                                             Donate

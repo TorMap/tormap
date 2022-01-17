@@ -2825,15 +2825,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@iconify/react@npm:3.1.2":
-  version: 3.1.2
-  resolution: "@iconify/react@npm:3.1.2"
-  dependencies:
-    cross-fetch: ^3.1.4
-  checksum: 249314f2e2f57dc8ab8b6b49e809a1b78fe96ab2887a0ce6bb426db0a744ae98c9cc6f4d3e255be949a0e1085a68f196484166c9307546a89b66bc9b0e231de1
-  languageName: node
-  linkType: hard
-
 "@istanbuljs/load-nyc-config@npm:^1.0.0":
   version: 1.1.0
   resolution: "@istanbuljs/load-nyc-config@npm:1.1.0"
@@ -5855,15 +5846,6 @@ __metadata:
     path-type: ^4.0.0
     yaml: ^1.10.0
   checksum: 4be63e7117955fd88333d7460e4c466a90f556df6ef34efd59034d2463484e339666c41f02b523d574a797ec61f4a91918c5b89a316db2ea2f834e0d2d09465b
-  languageName: node
-  linkType: hard
-
-"cross-fetch@npm:^3.1.4":
-  version: 3.1.4
-  resolution: "cross-fetch@npm:3.1.4"
-  dependencies:
-    node-fetch: 2.6.1
-  checksum: 2107e5e633aa327bdacab036b1907c7ddd28651ede0c1d4fd14db04510944d56849a8255e2f5b8f9a1da0e061b6cee943f6819fe29ed9a130195e7fadd82a4ff
   languageName: node
   linkType: hard
 
@@ -10242,13 +10224,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:2.6.1":
-  version: 2.6.1
-  resolution: "node-fetch@npm:2.6.1"
-  checksum: 91075bedd57879117e310fbcc36983ad5d699e522edb1ebcdc4ee5294c982843982652925c3532729fdc86b2d64a8a827797a745f332040d91823c8752ee4d7c
-  languageName: node
-  linkType: hard
-
 "node-forge@npm:^0.10.0":
   version: 0.10.0
   resolution: "node-forge@npm:0.10.0"
@@ -13526,7 +13501,6 @@ __metadata:
     "@babel/plugin-proposal-nullish-coalescing-operator": 7.16.7
     "@emotion/react": 11.7.1
     "@emotion/styled": 11.6.0
-    "@iconify/react": 3.1.2
     "@mui/icons-material": 5.2.5
     "@mui/lab": 5.0.0-alpha.64
     "@mui/material": 5.2.8
