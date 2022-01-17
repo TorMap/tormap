@@ -43,14 +43,14 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
                                                  right: "2%",
                                                  maxWidth: "20%",
                                              }}
-                                             helperText={"A day in the life of the Tor Network"}
+                                             helperText={"Select a date"}
                         /> :
                         <TextField variant={"standard"}
                                    {...params}
                                    sx={{
                                        padding: 2
                                    }}
-                                   helperText={"A day in the life of the Tor Network"}
+                                   helperText={"Select a date"}
                         />
                 }
                 onChange={handleDateChange}
