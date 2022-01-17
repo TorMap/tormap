@@ -1,7 +1,7 @@
 import React, {FunctionComponent} from "react";
 import {IconButton} from "@mui/material";
 import {RelayFamilyIcon} from "../../types/icons";
-import {useSettings} from "../../util/settings-context";
+import {useSettings} from "../../context/settings-context";
 
 interface Props {
     newFamilyId: number,
@@ -9,8 +9,8 @@ interface Props {
 }
 
 export const SelectFamilyButton: FunctionComponent<Props> = ({newFamilyId, furtherAction}) => {
-    const settings = useSettings().settings
-    const setSettings = useSettings().setSettings
+    // App context
+    const {settings, setSettings} = useSettings()
 
     return (
         <IconButton aria-label="select family" onClick={() => {

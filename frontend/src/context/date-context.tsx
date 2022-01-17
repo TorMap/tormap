@@ -38,6 +38,7 @@ interface DateProviderProps {
 }
 
 export const DateProvider: FunctionComponent<DateProviderProps> = ({children}) => {
+    // Component state
     const [availableDays, setAvailableDays] = useState<string[]>([])
     const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined)
     const {enqueueSnackbar} = useSnackbar();
@@ -46,7 +47,7 @@ export const DateProvider: FunctionComponent<DateProviderProps> = ({children}) =
         if (availableDays.length > 0) {
             setSelectedDate(availableDays[availableDays.length - 1])
         }
-        const expectedNumberOfDays = differenceInDays(new Date("2007-10-27"), new Date())
+        const expectedNumberOfDays = Math.abs(differenceInDays(new Date("2007-10-27"), new Date()))
         if (availableDays.length < expectedNumberOfDays) {
             enqueueSnackbar(SnackbarMessage.HistoricDataProcessing, {variant: "info"})
         }

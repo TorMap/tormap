@@ -1,26 +1,28 @@
 import React, {FunctionComponent, useCallback, useEffect, useState} from 'react';
-import {WorldMap} from "./WorldMap";
-import {Box, Button, Link} from "@mui/material";
+import {LeafletWorldMap} from "./leaflet/LeafletWorldMap";
+import {Box, Button, useMediaQuery, useTheme} from "@mui/material";
 import "@mui/styles";
 import "../index.css";
-import {Statistics} from "../types/app-state";
 import {AboutInformation} from "./dialogs/AboutInformation";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
 import {SnackbarMessage} from "../types/ui";
-import {Overlay} from "./Overlay";
 import {LoadingAnimation} from "./loading/LoadingAnimation";
-import {useDate} from "../util/date-context";
+import {useDate} from "../context/date-context";
+import {OverlayLarge} from "./overlay/OverlayLarge";
+import {OverlaySmall} from "./overlay/OverlaySmall";
+import {ExternalLink} from "./link/ExternalLink";
 
 export const App: FunctionComponent = () => {
+    // Component state
     const [isLoading, setIsLoading] = useState(true)
-    const [statistics, setStatistics] = useState<Statistics>()
     const [connectionRetryCount, setConnectionRetryCount] = useState<number>(0)
 
+    // App context
     const {enqueueSnackbar, closeSnackbar} = useSnackbar();
-
-    const date = useDate()
-    const setAvailableDays = date.setAvailableDays
+    const {setAvailableDays} = useDate()
+    const theme = useTheme()
+    const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
 
     useEffect(() => {
         closeSnackbar()
@@ -31,7 +33,7 @@ export const App: FunctionComponent = () => {
         }).catch(() => {
             enqueueSnackbar(SnackbarMessage.ConnectionFailed, {
                 variant: "error",
-                action: <Button onClick={() => setConnectionRetryCount(previous => previous + 1)}>Retry</Button>,
+                action: <Button onClick={() => setConnectionRetryCount(connectionRetryCount + 1)}>Retry</Button>,
                 persist: true,
                 preventDuplicate: false,
             })
@@ -40,13 +42,12 @@ export const App: FunctionComponent = () => {
     }, [connectionRetryCount, closeSnackbar, enqueueSnackbar, setAvailableDays])
 
     return (
-        <div>
+        <>
             {isLoading ? <LoadingAnimation/> : null}
-            <WorldMap
+            <LeafletWorldMap
                 setIsLoading={useCallback(setIsLoading, [setIsLoading])}
-                setStatistics={useCallback(setStatistics, [setStatistics])}
             />
-            <Overlay statistics={statistics}/>
+            {isLargeScreen ? <OverlayLarge /> : <OverlaySmall />}
             <Box sx={{
                 color: "#b4b4b4",
                 background: "#262626",
@@ -56,12 +57,14 @@ export const App: FunctionComponent = () => {
                 fontSize: ".7rem",
             }}>
                 <span>
-                    <Link href="https://leafletjs.com" target={"_blank"}>Leaflet</Link> | &copy;&nbsp;
-                    <Link href="https://www.openstreetmap.org/copyright" target={"_blank"}>OpenStreetMap</Link>&nbsp;
-                    contributors &copy; <Link href="https://carto.com/attributions" target={"_blank"}>CARTO</Link>
+                    <ExternalLink href="https://leafletjs.com" label={"Leaflet"}/>
+                    {" | © "}
+                    <ExternalLink href="https://www.openstreetmap.org/copyright" label={"OpenStreetMap"}/>
+                    {" contributors © "}
+                    <ExternalLink href="https://carto.com/attributions" label={"CARTO"}/>
                 </span>
             </Box>
             <AboutInformation/>
-        </div>
+        </>
     )
 }
