@@ -49,5 +49,9 @@ class AppConfig(
      * Include an unique ETag hash for each response to enable client side caching.
      */
     @Bean
-    fun etag() = ShallowEtagHeaderFilter()
+    fun shallowEtagHeaderFilter(): ShallowEtagHeaderFilter {
+        val filter = ShallowEtagHeaderFilter();
+        filter.isWriteWeakETag = true;
+        return filter
+    }
 }

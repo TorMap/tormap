@@ -1,4 +1,4 @@
-name: backend
+name: backend-push
 
 on:
   push:
@@ -7,10 +7,8 @@ on:
       - '.github/workflows/backend.yml'
 
 jobs:
-  backend:
-    name: backend
+  backend-push:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - uses: gradle/wrapper-validation-action@v1
@@ -42,8 +40,6 @@ jobs:
           docker push juliushenke/tormap:latest
 
       - name: Cleanup Gradle Cache
-        # Remove some files from the Gradle cache, so they aren't cached by GitHub Actions.
-        # Restoring these files from a GitHub Actions cache might cause problems for future builds.
         run: |
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
           rm -f ~/.gradle/caches/modules-2/gc.properties
