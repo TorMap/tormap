@@ -64,7 +64,7 @@ export const DateSlider: FunctionComponent = () => {
             min={0}
             max={availableDays.length - 1}
             marks={sliderMarks}
-            valueLabelFormat={(x) => x > 0 ? availableDays[x] : undefined}
+            valueLabelFormat={x => availableDays[x]}
             track={false}
         />
     )
