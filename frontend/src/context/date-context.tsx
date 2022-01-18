@@ -46,10 +46,11 @@ export const DateProvider: FunctionComponent<DateProviderProps> = ({children}) =
     useEffect(() => {
         if (availableDays.length > 0) {
             setSelectedDate(availableDays[availableDays.length - 1])
-        }
-        const expectedNumberOfDays = Math.abs(differenceInDays(new Date("2007-10-27"), new Date()))
-        if (availableDays.length < expectedNumberOfDays) {
-            enqueueSnackbar(SnackbarMessage.HistoricDataProcessing, {variant: "info"})
+            const oldestConsensusDateAvailable = new Date("2007-10-27")
+            const minExpectedNumberOfDays = Math.abs(differenceInDays(oldestConsensusDateAvailable, new Date())) - 5
+            if (availableDays.length < minExpectedNumberOfDays) {
+                enqueueSnackbar(SnackbarMessage.HistoricDataProcessing, {variant: "info"})
+            }
         }
     }, [availableDays, enqueueSnackbar])
 
