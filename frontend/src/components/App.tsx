@@ -52,8 +52,8 @@ export const App: FunctionComponent = () => {
                 color: "#b4b4b4",
                 background: "#262626",
                 position: "fixed",
-                right: "0px",
-                bottom: "0px",
+                right: "2px",
+                bottom: "2px",
                 fontSize: ".7rem",
             }}>
                 <span>

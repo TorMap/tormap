@@ -39,11 +39,10 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
                                              {...params}
                                              sx={{
                                                  position: "fixed",
-                                                 bottom: "4%",
-                                                 right: "2%",
+                                                 bottom: "37px",
+                                                 right: "1%",
                                                  maxWidth: "20%",
                                              }}
-                                             helperText={"Select a date"}
                         /> :
                         <TextField variant={"standard"}
                                    {...params}
