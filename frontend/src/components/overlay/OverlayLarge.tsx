@@ -13,7 +13,7 @@ export const OverlayLarge: FunctionComponent = () => {
         <Box>
             <Box sx={{
                 position: "fixed",
-                bottom: "2%",
+                bottom: "15px",
                 width: "50%",
                 left: "25%",
             }}>
