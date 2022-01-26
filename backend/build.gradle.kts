@@ -15,11 +15,11 @@ plugins {
     id("org.jetbrains.dokka") version "1.6.10"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "2.6.2"
+    id("org.springframework.boot") version "2.6.3"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 
     // Database migration tool https://flywaydb.org/documentation/usage/gradle/
-    id("org.flywaydb.flyway") version "8.4.1"
+    id("org.flywaydb.flyway") version "8.4.2"
 }
 
 repositories {
@@ -41,8 +41,8 @@ dependencies {
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-    implementation("org.springdoc:springdoc-openapi-ui:1.6.4")
-    implementation("org.springdoc:springdoc-openapi-kotlin:1.6.4")
+    implementation("org.springdoc:springdoc-openapi-ui:1.6.5")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.6.5")
 
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
@@ -57,7 +57,7 @@ dependencies {
     implementation("com.maxmind.geoip2:geoip2:2.16.1")
 
     // Anaylz user agent https://yauaa.basjes.nl/
-    implementation("nl.basjes.parse.useragent:yauaa:6.7")
+    implementation("nl.basjes.parse.useragent:yauaa:6.8")
 
     // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
     implementation("commons-codec:commons-codec:1.10")
