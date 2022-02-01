@@ -71,7 +71,7 @@ Make sure you are in the `backend` directory. On `Windows` use `gradlew.bat`
 instead of `./gradlew` for all following commands.
 
 - `./gradlew bootRun`: creates build, runs it and listens on http://localhost:8080/
-- `./gradlew build`: creates build, runs tests
+- `./gradlew test`: creates build, runs tests
 - `./gradlew bootJar`: creates build with a fat JAR which contains all dependencies and resources in `build/libs/`
 - `./gradlew bootBuildImage`: creates build and a docker image (make sure local docker daemon is running)
 - `./gradlew dokkaHtml`: generate code documentation in HTML format in `build/dokka/`
@@ -161,7 +161,7 @@ First make sure you have installed all requirements for development.
 Build fat JAR:
 
 1. Go to `backend` directory where file `gradlew` is located
-2. Run command: `./gradlew && ./gradlew bootJar`
+2. Run command: `./gradlew bootJar`
 3. A fat jar containing all packages should now be located in `backend/build/libs/`.
 4. Create a folder containing a copy of the generated jar and the `backend/resources` folder.
 5. Go into the directory where the `.jar` file is located
@@ -172,7 +172,7 @@ Build docker image:
 
 1. Go to `backend` directory where file `gradlew` is located
 2. Make sure [docker](https://docs.docker.com/get-docker/) is installed and the docker daemon is running
-3. Run command: `./gradlew && ./gradlew bootBuildImage`
+3. Run command: `./gradlew bootBuildImage`
 4. A new image named juliushenke/tormap should be available in your local docker registry
 5. Run image in new container with command: `docker run -p 8080:8080 juliushenke/tormap` (optionally add the
    flag `-v ~/resources:/workspace/resources/` to mount a preprocessed resources like the DB from your host file system
@@ -187,3 +187,10 @@ Build docker image:
 4. Go into the directory where `index.html` is located
 5. Install [serve](https://www.npmjs.com/package/serve) and run command: `serve -l 3000`
 6. Frontend should be available at http://localhost:3000
+
+## Releases
+
+TorMap releases can be found at https://github.com/TorMap/tormap/releases. We use
+[Semantic Versioning](https://semver.org/) and try to keep the frontend,
+backend, [GitHub](https://github.com/TorMap/tormap) and [Docker tags](https://hub.docker.com/r/juliushenke/tormap/tags)
+consistent.
