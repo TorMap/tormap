@@ -11,15 +11,12 @@ plugins {
     kotlin("plugin.allopen") version "1.6.10"
     kotlin("plugin.jpa") version "1.6.10"
 
-    // Generate code documentation https://kotlin.github.io/dokka/1.5.0/
+    // Generate code documentation https://kotlin.github.io/dokka
     id("org.jetbrains.dokka") version "1.6.10"
 
     // Spring https://spring.io/projects/spring-boot
     id("org.springframework.boot") version "2.6.3"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-
-    // Database migration tool https://flywaydb.org/documentation/usage/gradle/
-    id("org.flywaydb.flyway") version "8.4.3"
 }
 
 repositories {
@@ -51,7 +48,7 @@ dependencies {
     runtimeOnly("com.h2database:h2:1.4.200")
 
     // Run Flyway DB migration tool on startup https://flywaydb.org/
-    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-core:8.4.3")
 
     // Read .mmdb (MaxMind) DB files for IP lookups https://maxmind.github.io/MaxMind-DB/
     implementation("com.maxmind.geoip2:geoip2:2.16.1")
@@ -76,15 +73,10 @@ allOpen {
     annotation("javax.persistence.MappedSuperclass")
 }
 
-// Connect migration tool to DB
-flyway {
-    url = "jdbc:h2:./resources/database/tormap;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=5;LOCK_TIMEOUT=30000"
-    user = "sa"
-}
-
 // Build image for docker https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#build-image
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage> {
     imageName = "juliushenke/tormap"
+    tag(version.toString())
 
     val relativePathIpLookup = "/ip-lookup/"
     bindings = listOf("${rootProject.projectDir.absolutePath}$relativePathIpLookup:/workspace$relativePathIpLookup")

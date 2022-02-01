@@ -70,19 +70,10 @@ in [Kotlin](https://kotlinlang.org/).
 Make sure you are in the `backend` directory. On `Windows` use `gradlew.bat`
 instead of `./gradlew` for all following commands.
 
-- `./gradlew`: installs required backend packages
-- `./gradlew build`: creates build and runs Flyway database migrations
-- `./gradlew test`: creates build, runs tests
 - `./gradlew bootRun`: creates build, runs it and listens on http://localhost:8080/
+- `./gradlew build`: creates build, runs tests
 - `./gradlew bootJar`: creates build with a fat JAR which contains all dependencies and resources in `build/libs/`
 - `./gradlew bootBuildImage`: creates build and a docker image (make sure local docker daemon is running)
-- `./gradlew flywayMigrate`: Migrates the database
-- `./gradlew flywayClean`: Drops all objects in the configured schemas
-- `./gradlew flywayInfo`: Prints the details and status information about all the migrations
-- `./gradlew flywayValidate`: Validates the applied migrations against the ones available on the classpath
-- `./gradlew flywayBaseline`: Baselines an existing database, excluding all migrations up to and including
-  baselineVersion
-- `./gradlew flywayRepair`: Repairs the schema history table
 - `./gradlew dokkaHtml`: generate code documentation in HTML format in `build/dokka/`
 
 #### Config
