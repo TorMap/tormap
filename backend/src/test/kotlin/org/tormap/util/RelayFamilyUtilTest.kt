@@ -60,9 +60,9 @@ class RelayFamilyUtilTest : StringSpec({
 
     listOf(
         "\$${relay2.fingerprint}",
-        "C, \$${relay2.fingerprint}",
+        "${relay3.nickname}, \$${relay2.fingerprint}",
         relay2.nickname,
-        "C, ${relay2.nickname}",
+        "${relay3.nickname}, ${relay2.nickname}",
     ).forEach {
         "relay confirms family member (familyEntries=$it)" {
             relay1.familyEntries = it
