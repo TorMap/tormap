@@ -34,7 +34,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-security")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
@@ -64,7 +63,18 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-core:2.12.4")
     implementation("org.slf4j:slf4j-api:1.7.32")
     implementation("org.tukaani:xz:1.6")
+
+    // Testing & Kotest https://kotest.io/
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+    }
+    testImplementation("io.kotest:kotest-runner-junit5:5.1.0")
+    testImplementation("io.kotest:kotest-assertions-core:5.1.0")
+    testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.0")
 }
+
+// Fix version requirement from Kotest
+extra["kotlin-coroutines.version"] = "1.6.0"
 
 // Allow JPA annotations for Kotlin classes
 allOpen {
