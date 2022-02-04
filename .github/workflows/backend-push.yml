@@ -37,7 +37,7 @@ jobs:
         run: |
           cd backend
           ./gradlew bootBuildImage
-          docker push juliushenke/tormap:latest
+          docker push juliushenke/tormap
 
       - name: Cleanup Gradle Cache
         run: |

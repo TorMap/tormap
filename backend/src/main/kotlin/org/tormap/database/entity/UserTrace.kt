@@ -13,10 +13,7 @@ import javax.persistence.*
         Index(columnList = "responseStatus"),
     ]
 )
-class UserTrace(trace: HttpTrace) {
-    @Id
-    @GeneratedValue
-    val id: Long? = null
+class UserTrace(trace: HttpTrace): AbstractBaseEntity<Long>() {
     var timestamp: Instant = trace.timestamp
     var uri: String = trace.request.uri.toString()
 
