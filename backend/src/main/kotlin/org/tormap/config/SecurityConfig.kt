@@ -6,9 +6,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.tormap.logger
+import org.tormap.util.logger
 import java.io.File
-import java.nio.file.Path
 import java.util.*
 
 
@@ -56,19 +55,25 @@ class SecurityConfig(
         http.authorizeRequests()
             .antMatchers("$actuatorPath/**")
             .authenticated()
+            .and()
+            .formLogin()
 
         // Require authenticated users for H2 database web console
         http.authorizeRequests()
             .antMatchers("$h2ConsolePath/**")
             .authenticated()
             .and()
+            .formLogin()
+            .and()
             .csrf().disable()
             .headers().frameOptions().disable()
 
-        // Enable unauthenticated access to all other endpoints and add a form login for authenticated ones
+        // Disable spring security features for public facing endpoints
         http.authorizeRequests()
-            .anyRequest().permitAll()
+            .antMatchers("relay/**")
+            .permitAll()
             .and()
-            .formLogin()
+            .headers().disable()
+            .csrf().disable()
     }
 }

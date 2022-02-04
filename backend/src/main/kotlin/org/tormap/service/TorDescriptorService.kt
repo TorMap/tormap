@@ -9,8 +9,8 @@ import org.tormap.database.entity.*
 import org.tormap.database.repository.ProcessedFileRepository
 import org.tormap.database.repository.RelayDetailsRepository
 import org.tormap.database.repository.RelayLocationRepositoryImpl
-import org.tormap.logger
-import org.tormap.millisSinceEpochToLocalDate
+import org.tormap.util.logger
+import org.tormap.util.millisSinceEpochToLocalDate
 import org.torproject.descriptor.*
 import org.torproject.descriptor.impl.DescriptorReaderImpl
 import org.torproject.descriptor.index.DescriptorIndexCollector
@@ -33,7 +33,7 @@ class TorDescriptorService(
     private val relayDetailsRepository: RelayDetailsRepository,
     private val processedFileRepository: ProcessedFileRepository,
     private val ipLookupService: IpLookupService,
-    private val relayDetailsService: RelayDetailsService,
+    private val relayDetailsUpdateService: RelayDetailsUpdateService,
     private val relayLocationController: RelayLocationController,
 ) {
     private val logger = logger()
@@ -95,7 +95,7 @@ class TorDescriptorService(
             descriptorsBeingProcessed.add(processDescriptor(it))
         }
         if (descriptorType === DescriptorType.RECENT_RELAY_SERVER) {
-            relayDetailsService.updateFamilies(processedMonths)
+            relayDetailsUpdateService.updateFamilies(processedMonths)
         }
     }
 
@@ -125,7 +125,7 @@ class TorDescriptorService(
             } ?: lastError
         }
         if (descriptorType == DescriptorType.ARCHIVE_RELAY_SERVER) {
-            relayDetailsService.updateFamilies(processedMonths)
+            relayDetailsUpdateService.updateFamilies(processedMonths)
         }
         saveFinishedDescriptorFile(descriptorFile, descriptorType, lastError)
         return processedMonths
@@ -241,7 +241,7 @@ class TorDescriptorService(
                     descriptorMonth,
                     descriptorDay,
                     autonomousSystem?.autonomousSystemOrganization,
-                    autonomousSystem?.autonomousSystemNumber,
+                    autonomousSystem?.autonomousSystemNumber?.toInt(),
                     existingRelay?.id,
                 )
             )
