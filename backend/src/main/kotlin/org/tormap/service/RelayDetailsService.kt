@@ -94,7 +94,7 @@ class RelayDetailsService(
             val autonomousSystem = ipLookupService.lookupAutonomousSystem(this.address!!)
             if (autonomousSystem != null) {
                 this.autonomousSystemName = autonomousSystem.autonomousSystemOrganization
-                this.autonomousSystemNumber = autonomousSystem.autonomousSystemNumber
+                this.autonomousSystemNumber = autonomousSystem.autonomousSystemNumber.toInt()
                 relayDetailsRepositoryImpl.save(this)
                 return true
             }
