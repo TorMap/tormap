@@ -1,5 +1,4 @@
 import {RelayFlag} from "../types/relay";
-import {ReactJSXElement} from "@emotion/react/types/jsx-namespace";
 
 export interface RelayLocationDto {
     lat: number

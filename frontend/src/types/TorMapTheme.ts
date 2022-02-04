@@ -3,10 +3,6 @@ import {ThemeOptions} from "@mui/material";
 export const TorMapTheme: ThemeOptions = {
     palette: {
         mode: "dark",
-        background: {
-            //paper: "#424242",
-            //default: "#424242",
-        },
     },
     components: {
         MuiTooltip: {

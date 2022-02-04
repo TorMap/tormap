@@ -1,23 +1,24 @@
-name: Build and deploy to Firebase hosting preview URL
+name: frontend-pull-request
 
 on:
   pull_request:
     paths:
       - 'frontend/**'
+      - '.github/workflows/frontend-pull-request.yml'
 
 jobs:
-  build-and-preview:
-    name: Build and deploy preview
+  frontend-pull-request:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build
-        run: cd frontend && yarn && yarn build
+      - name: Check yarn cache and build
+        run: | 
+          cd frontend
+          yarn install --immutable --immutable-cache --check-cache
+          yarn build
 
-      - name: Deploy
-        if: github.event.pull_request.head.repo.full_name == github.repository
+      - name: Deploy preview channel
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
@@ -27,3 +28,4 @@ jobs:
           expires: 30d
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
+

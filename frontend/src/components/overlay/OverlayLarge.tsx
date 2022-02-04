@@ -1,22 +1,19 @@
 import React, {FunctionComponent} from "react";
-import {OverlayProps} from "../types/ui";
-import {DateSlider} from "./date/DateSlider";
+import {DateSlider} from "../date/DateSlider";
 import {Box} from "@mui/material";
-import {AppSettings} from "./accordion/AppSettings";
-import {MapStats} from "./accordion/MapStats";
-import {ResponsiveDatePicker} from "./date/ResponsiveDatePicker";
+import {AppSettings} from "../accordion/AppSettings";
+import {MapStats} from "../accordion/MapStats";
+import {ResponsiveDatePicker} from "../date/ResponsiveDatePicker";
 
 /**
  * A component wrapping all UI elements for devices with large screen sizes
- *
- * @param statistics - a Statistics object for data to display
  */
-export const OverlayLarge: FunctionComponent<OverlayProps> = ({statistics}) => {
+export const OverlayLarge: FunctionComponent = () => {
     return (
         <Box>
             <Box sx={{
                 position: "fixed",
-                bottom: "2%",
+                bottom: "15px",
                 width: "50%",
                 left: "25%",
             }}>
@@ -32,16 +29,14 @@ export const OverlayLarge: FunctionComponent<OverlayProps> = ({statistics}) => {
             }}>
                 <AppSettings elevation={24}/>
             </Box>
-            {statistics &&
             <Box sx={{
                 position: "fixed",
                 left: "1%",
                 bottom: "15px",
                 maxWidth: "20%",
             }}>
-                <MapStats stats={statistics} elevation={24} defaultExpanded={true}/>
+                <MapStats elevation={24} defaultExpanded={true}/>
             </Box>
-            }
         </Box>
     )
 }

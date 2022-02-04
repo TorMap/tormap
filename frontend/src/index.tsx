@@ -6,9 +6,10 @@ import {App} from "./components/App";
 import {createTheme, ThemeProvider} from "@mui/material";
 import {SnackbarProvider} from "notistack";
 import {TorMapTheme} from "./types/TorMapTheme";
-import {SettingsProvider} from "./util/settings-context";
-import {defaultSettings} from "./util/config";
-import {DateProvider} from "./util/date-context";
+import {SettingsProvider} from "./context/settings-context";
+import {defaultSettings} from "./config";
+import {DateProvider} from "./context/date-context";
+import {StatisticsProvider} from "./context/statistics-context";
 
 const theme = createTheme(TorMapTheme)
 
@@ -24,7 +25,9 @@ ReactDOM.render(
             >
                 <SettingsProvider defaultSettings={defaultSettings}>
                     <DateProvider>
-                        <App/>
+                        <StatisticsProvider>
+                            <App/>
+                        </StatisticsProvider>
                     </DateProvider>
                 </SettingsProvider>
             </SnackbarProvider>

@@ -4,3 +4,15 @@
 /.jpb/*
 *.log
 *.cache
+
+# Please use yarn package manager instead
+package-lock.json
+
+# yarn
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
