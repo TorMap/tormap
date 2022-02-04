@@ -1,6 +1,6 @@
 package org.tormap.database.entity
 
-import org.springframework.data.util.ProxyUtils
+import org.hibernate.Hibernate
 import java.io.Serializable
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
@@ -14,12 +14,8 @@ abstract class AbstractBaseEntity<T: Serializable>  {
     var id: T? = null
 
     override fun equals(other: Any?): Boolean {
-        other ?: return false
-
         if (this === other) return true
-
-        if (javaClass != ProxyUtils.getUserClass(other)) return false
-
+        if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
         other as AbstractBaseEntity<*>
 
         return  this.id != null && this.id == other.id
