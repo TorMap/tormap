@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import axios from "axios";
-import {backendApiUrl} from "./config";
+import {backendApiUrl} from "../config";
 
 /**
  * new React-Hook for handling
