@@ -2,8 +2,8 @@
 
 package org.tormap.adapter.dto
 
-import org.tormap.commaSeparatedToList
-import org.tormap.jointToCommaSeparated
+import org.tormap.util.commaSeparatedToList
+import org.tormap.util.jointToCommaSeparated
 
 /**
  * Identifier of a family

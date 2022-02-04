@@ -18,7 +18,7 @@ class TorMapBackendTest(
 ) : StringSpec({
     "context loads" {}
 
-    "admin password file exists" {
+    "admin password file gets created" {
         File(adminPasswordFile).exists() shouldBe true
     }
 

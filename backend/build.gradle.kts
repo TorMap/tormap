@@ -27,6 +27,7 @@ dependencies {
     // Kotlin
     kotlin("reflect")
     kotlin("stdlib-jdk8")
+    kotlin("noarg")
 
     // Spring Boot https://spring.io/projects/spring-boot
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -73,6 +74,7 @@ dependencies {
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.0")
 }
 
+// Fix version requirement from Kotest
 extra["kotlin-coroutines.version"] = "1.6.0"
 
 // Allow JPA annotations for Kotlin classes
