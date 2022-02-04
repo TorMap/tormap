@@ -6,7 +6,7 @@ import com.maxmind.geoip2.model.AsnResponse
 import com.maxmind.geoip2.model.CityResponse
 import org.springframework.stereotype.Service
 import org.tormap.config.value.IpLookupConfig
-import org.tormap.logger
+import org.tormap.util.logger
 import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode

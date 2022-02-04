@@ -3,7 +3,10 @@ package org.tormap.database.entity
 import org.torproject.descriptor.NetworkStatusEntry
 import java.math.BigDecimal
 import java.time.LocalDate
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.Index
+import javax.persistence.Table
 
 /**
  * This entity is used to store relevant information about a [NetworkStatusEntry]
@@ -24,11 +27,7 @@ class RelayLocation(
 
     @Column(length = 2, columnDefinition = "char(2)")
     var countryCode: String,
-) {
-    @Id
-    @GeneratedValue
-    val id: Long? = null
-
+): AbstractBaseEntity<Long>() {
     @Column(length = 40, columnDefinition = "char(40)")
     var fingerprint: String = networkStatusEntry.fingerprint
 
