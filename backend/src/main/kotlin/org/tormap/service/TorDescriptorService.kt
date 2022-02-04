@@ -241,7 +241,7 @@ class TorDescriptorService(
                     descriptorMonth,
                     descriptorDay,
                     autonomousSystem?.autonomousSystemOrganization,
-                    autonomousSystem?.autonomousSystemNumber,
+                    autonomousSystem?.autonomousSystemNumber?.toInt(),
                     existingRelay?.id,
                 )
             )
