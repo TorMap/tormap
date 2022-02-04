@@ -1,11 +1,9 @@
 import React, {FunctionComponent} from "react";
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import {TextField} from "@mui/material";
-import dateFormat from "dateformat";
-import moment from "moment";
 import {DatePicker, LocalizationProvider} from "@mui/lab";
-import {useDate} from "../../util/date-context";
-import {isValid} from "date-fns";
+import {useDate} from "../../context/date-context";
+import {format, isValid} from "date-fns";
 import {enCA} from "date-fns/locale";
 
 interface Props {
@@ -16,16 +14,15 @@ interface Props {
 }
 
 export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) => {
-    const dateContext = useDate()
-    const selectedDate = dateContext.selectedDate
-    const availableDays = dateContext.availableDays
+    // App context
+    const {selectedDate, availableDays, setSelectedDate} = useDate()
+
     const firstAvailableDate = selectedDate ? new Date(availableDays[0]) : undefined
     const lastAvailableDate = selectedDate ? new Date(availableDays[availableDays.length - 1]) : undefined
-    const setSelectedDate = dateContext.setSelectedDate
 
     const handleDateChange = (date: Date | null) => {
         if (date && isValid(date)) {
-            const day: string = dateFormat(date, "yyyy-mm-dd")
+            const day: string = format(date, "yyyy-MM-dd")
             if (availableDays.includes(day)) {
                 setSelectedDate(day)
             }
@@ -36,23 +33,23 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
         <LocalizationProvider dateAdapter={AdapterDateFns} locale={enCA}>
             <DatePicker
                 value={selectedDate}
+                mask={"____-__-__"}
                 renderInput={(params) =>
                     largeScreen ? <TextField variant={"standard"}
                                              {...params}
                                              sx={{
                                                  position: "fixed",
-                                                 bottom: "4%",
-                                                 right: "2%",
+                                                 bottom: "37px",
+                                                 right: "1%",
                                                  maxWidth: "20%",
                                              }}
-                                             helperText={"A day in the life of the Tor Network"}
                         /> :
                         <TextField variant={"standard"}
                                    {...params}
                                    sx={{
                                        padding: 2
                                    }}
-                                   helperText={"A day in the life of the Tor Network"}
+                                   helperText={"Select a date"}
                         />
                 }
                 onChange={handleDateChange}
@@ -60,12 +57,11 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
                 minDate={firstAvailableDate}
                 maxDate={lastAvailableDate}
                 shouldDisableDate={date => {
-                    return !(availableDays.includes(moment(date).format("YYYY-MM-DD")))
+                    return !(availableDays.includes(format(date, "yyyy-MM-dd")))
                 }}
                 views={["year", "month", "day"]}
                 showTodayButton
             />
         </LocalizationProvider>
-
     )
 }

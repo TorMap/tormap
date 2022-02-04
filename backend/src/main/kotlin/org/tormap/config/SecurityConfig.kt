@@ -8,8 +8,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.tormap.logger
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
 import java.util.*
 
 
@@ -32,13 +30,14 @@ class SecurityConfig(
 
     @Throws(java.lang.Exception::class)
     override fun configure(auth: AuthenticationManagerBuilder) {
-        val passwordFilePath = Path.of(adminPasswordFile)
+        val passwordFile = File(adminPasswordFile)
         var password = UUID.randomUUID().toString()
-        if (Files.exists(passwordFilePath)) {
-            password = passwordFilePath.toFile().readText()
+        if (passwordFile.exists()) {
+            password = passwordFile.readText()
         } else {
-            Files.createFile(passwordFilePath)
-            passwordFilePath.toFile().writeText(password)
+            File(passwordFile.parent).mkdirs()
+            passwordFile.createNewFile()
+            passwordFile.writeText(password)
         }
         logger.info("------------------------------------------------------")
         logger.info("Admin password: $password")
@@ -56,19 +55,25 @@ class SecurityConfig(
         http.authorizeRequests()
             .antMatchers("$actuatorPath/**")
             .authenticated()
+            .and()
+            .formLogin()
 
         // Require authenticated users for H2 database web console
         http.authorizeRequests()
             .antMatchers("$h2ConsolePath/**")
             .authenticated()
             .and()
+            .formLogin()
+            .and()
             .csrf().disable()
             .headers().frameOptions().disable()
 
-        // Enable unauthenticated access to all other endpoints and add a form login for authenticated ones
+        // Disable spring security features for public facing endpoints
         http.authorizeRequests()
-            .anyRequest().permitAll()
+            .antMatchers("relay/**")
+            .permitAll()
             .and()
-            .formLogin()
+            .headers().disable()
+            .csrf().disable()
     }
 }

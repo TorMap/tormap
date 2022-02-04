@@ -1,19 +1,17 @@
 import React, {FunctionComponent, useState} from "react";
-import {OverlayProps, SlideUpTransition} from "../types/ui";
+import {SlideUpTransition} from "../../types/ui";
 import {AppBar, Box, Button, Dialog, DialogActions, Fab, IconButton, Toolbar, Typography} from "@mui/material";
 import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from "@mui/icons-material/Close";
-import {AppSettings} from "./accordion/AppSettings";
-import {MapStats} from "./accordion/MapStats";
-import MapIcon from '@mui/icons-material/Map';
-import {ResponsiveDatePicker} from "./date/ResponsiveDatePicker";
+import {AppSettings} from "../accordion/AppSettings";
+import {MapStats} from "../accordion/MapStats";
+import {ResponsiveDatePicker} from "../date/ResponsiveDatePicker";
 
 /**
  * A component wrapping all UI elements for devices with small screen sizes
- *
- * @param statistics - a Statistics object for data to display
  */
-export const OverlaySmall: FunctionComponent<OverlayProps> = ({statistics}) => {
+export const OverlaySmall: FunctionComponent = () => {
+    // Component state
     const [open, setOpen] = useState(false);
 
     return (
@@ -35,24 +33,23 @@ export const OverlaySmall: FunctionComponent<OverlayProps> = ({statistics}) => {
             >
                 <AppBar sx={{position: 'relative'}}>
                     <Toolbar>
-                        <IconButton
-                            edge="start"
-                            color="inherit"
-                            onClick={() => setOpen(false)}
-                            aria-label="close"
-                        >
-                            <CloseIcon/>
-                        </IconButton>
-                        <Typography sx={{ml: 2, flex: 1}} variant="h6" component="div">
+                        <Typography variant="h6">
                             Settings
                         </Typography>
+                        <IconButton aria-label="close" sx={{
+                            position: "absolute",
+                            right: "10px",
+                            top: "10px",
+                        }} onClick={() => setOpen(false)}>
+                            <CloseIcon/>
+                        </IconButton>
                     </Toolbar>
                 </AppBar>
                 <ResponsiveDatePicker largeScreen={false} />
                 <Box sx={{padding: 1}}>
                     <AppSettings elevation={0}/>
                     <Box height={"10px"}/>
-                    {statistics && <MapStats stats={statistics} elevation={0} defaultExpanded={false}/>}
+                    <MapStats elevation={0} defaultExpanded={false}/>
                 </Box>
                 <DialogActions sx={{
                     position: "fixed",
@@ -64,7 +61,6 @@ export const OverlaySmall: FunctionComponent<OverlayProps> = ({statistics}) => {
                         onClick={() => setOpen(false)}
                         variant={"contained"}
                         size={"large"}
-                        endIcon={<MapIcon/>}
                     >
                         Back
                     </Button>

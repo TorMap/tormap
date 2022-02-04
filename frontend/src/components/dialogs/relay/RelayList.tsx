@@ -38,6 +38,7 @@ export const RelayList: FunctionComponent<Props> = ({
             {relayMatches.map((relayMatch) =>
                 (relayMatch.id &&
                     <ListItem
+                        key={relayMatch.id}
                         button={true}
                         selected={relayMatch.id === selectedRelay}
                         onClick={() => setRelayDetailsId(relayMatch.id)}

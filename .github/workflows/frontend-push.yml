@@ -1,26 +1,25 @@
-name: Build and deploy to Firebase hosting for tormap.org
+name: frontend-push
 
 on:
   push:
-    branches:
-      - master
-      - main
     paths:
       - 'frontend/**'
-      - '.github/workflows/frontend-deploy-prod.yml'
+      - '.github/workflows/frontend-push.yml'
 
 jobs:
-  build-and-deploy:
-    name: Build and deploy production
+  frontend-push:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
 
       - name: Build
-        run: cd frontend && yarn && yarn build
+        run: |
+          cd frontend
+          yarn install --immutable --immutable-cache
+          yarn build
 
-      - name: Deploy
+      - name: Deploy live channel
+        if: github.ref_name == 'master' || github.ref_name == 'main'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
@@ -30,3 +29,4 @@ jobs:
           channelId: live
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
+

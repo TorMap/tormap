@@ -1,40 +1,40 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
 import {useDebounce} from "../../util/util";
-import Moment from "react-moment";
-import {Box, Slider} from "@mui/material";
-import {useDate} from "../../util/date-context";
+import {Mark, Slider} from "@mui/material";
+import {useDate} from "../../context/date-context";
+import {format} from "date-fns";
 
 /**
  * A Slider for date selection
  */
 export const DateSlider: FunctionComponent = () => {
-    const dateContext = useDate()
-    const availableDays = dateContext.availableDays
-    const setSelectedDate = dateContext.setSelectedDate
-    const selectedDate = dateContext.selectedDate
+    // App context
+    const {availableDays, setSelectedDate, selectedDate} = useDate()
 
+    // Component state
     const [sliderMarks, setSliderMarks] = useState<Mark[]>([])
     const [sliderValue, setSliderValue] = useState<number>(availableDays.length - 1)
+
     let debouncedSliderValue = useDebounce<number>(sliderValue, 500)
 
     useEffect(() => {
         setSliderValue(availableDays.findIndex((value) => value === selectedDate))
     }, [availableDays, selectedDate])
 
-    // calculate the marks for the slider
+    // Calculate the marks for the slider
     useEffect(() => {
-        if (availableDays.length !== 0) {
-            // the count of marks
+        if (availableDays.length > 0) {
             let markCount = 6
-            markCount--
+            if (availableDays.length < markCount) {
+                markCount = availableDays.length
+            }
             let marks = []
-            for (let i = 0; i <= markCount; i++) {
+            for (let i = 0; i < markCount; i++) {
+                const dateIndex = Math.round(i * (availableDays.length - 1) / (markCount - 1))
+                const date = availableDays[dateIndex]
                 const mark: Mark = {
-                    value: Math.round(i * (availableDays.length - 1) / markCount),
-                    label: <Moment
-                        date={availableDays[Math.round(i * (availableDays.length - 1) / markCount)]}
-                        format={"YYYY-MM"}
-                    />
+                    value: dateIndex,
+                    label: format(new Date(date), "yyyy-MM")
                 }
                 marks.push(mark);
             }
@@ -42,7 +42,7 @@ export const DateSlider: FunctionComponent = () => {
         }
     }, [availableDays])
 
-    // handle debouncing of the slider value when dragging
+    // Handle debouncing of the slider value when dragging
     useEffect(() => {
         if (debouncedSliderValue !== undefined) {
             setSelectedDate(availableDays[debouncedSliderValue])
@@ -50,30 +50,22 @@ export const DateSlider: FunctionComponent = () => {
     }, [availableDays, debouncedSliderValue, setSelectedDate])
 
     return (
-        <Box>
-            <Slider
-                disabled={(availableDays.length === 0)}
-                value={sliderValue}
-                onChange={(event: any, newValue: number | number[]) => {
-                    setSliderValue(newValue as number)
-                }}
-                onChangeCommitted={(event: any, newValue: number | number[]) => {
-                    debouncedSliderValue = newValue as number
-                }}
-                valueLabelDisplay={(availableDays.length === 0) ? "off" : "on"}
-                name={"slider"}
-                min={0}
-                max={availableDays.length - 1}
-                marks={sliderMarks}
-                valueLabelFormat={(x) => x > 0 ? availableDays[x] : undefined}
-                track={false}
-            />
-        </Box>
+        <Slider
+            disabled={(availableDays.length === 0)}
+            value={sliderValue}
+            onChange={(event: any, newValue: number | number[]) => {
+                setSliderValue(newValue as number)
+            }}
+            onChangeCommitted={(event: any, newValue: number | number[]) => {
+                debouncedSliderValue = newValue as number
+            }}
+            valueLabelDisplay={(availableDays.length === 0) ? "off" : "on"}
+            name={"slider"}
+            min={0}
+            max={availableDays.length - 1}
+            marks={sliderMarks}
+            valueLabelFormat={x => availableDays[x]}
+            track={false}
+        />
     )
-
-}
-
-interface Mark {
-    value: number
-    label: JSX.Element
 }
