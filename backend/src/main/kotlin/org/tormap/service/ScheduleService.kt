@@ -18,7 +18,7 @@ class ScheduleService(
     private val descriptorConfig: DescriptorConfig,
     private val scheduleConfig: ScheduleConfig,
     private val torDescriptorService: TorDescriptorService,
-    private val relayDetailsService: RelayDetailsService,
+    private val relayDetailsUpdateService: RelayDetailsUpdateService,
 ) {
     /**
      * Fetches and processes relay consensus descriptors of the last 3 days.
@@ -74,7 +74,7 @@ class ScheduleService(
      */
     @Scheduled(fixedRateString = "\${schedule.rate.updateRelayFamilies}")
     fun updateRelayFamilies() =
-        relayDetailsService.updateAllFamilies(scheduleConfig.shouldOverwriteFamilies)
+        relayDetailsUpdateService.updateAllFamilies(scheduleConfig.shouldOverwriteFamilies)
 
     /**
      * Updates all relays which do not have any Autonomous System set.
@@ -82,6 +82,6 @@ class ScheduleService(
      */
     @Scheduled(fixedRateString = "\${schedule.rate.updateRelayAutonomousSystems}")
     fun updateRelayAutonomousSystems() =
-        relayDetailsService.updateAutonomousSystems()
+        relayDetailsUpdateService.updateAutonomousSystems()
 }
 

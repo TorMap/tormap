@@ -1,7 +1,7 @@
 package org.tormap.database.entity
 
-import org.tormap.jointToCommaSeparated
-import org.tormap.stripLengthForDB
+import org.tormap.util.jointToCommaSeparated
+import org.tormap.util.stripLengthForDB
 import org.torproject.descriptor.ServerDescriptor
 import java.time.LocalDate
 import javax.persistence.*
@@ -19,65 +19,94 @@ import javax.persistence.*
     ]
 )
 class RelayDetails(
-    descriptor: ServerDescriptor,
-
     @Column(length = 7, columnDefinition = "char(7)")
     var month: String,
 
     var day: LocalDate,
 
     @Column(length = 255)
-    var autonomousSystemName: String? = null,
+    var autonomousSystemName: String?,
 
-    var autonomousSystemNumber: Int? = null,
+    var autonomousSystemNumber: Int?,
 
-    @Id
-    @GeneratedValue
-    val id: Long? = null,
-) {
     @Column(length = 15)
-    var address: String? = descriptor.address
+    var address: String,
 
-    var allowSingleHopExits: Boolean = descriptor.allowSingleHopExits
+    var allowSingleHopExits: Boolean,
 
     @Column(length = 19)
-    var nickname: String? = descriptor.nickname
+    var nickname: String,
 
-    var bandwidthRate: Int = descriptor.bandwidthRate
+    var bandwidthRate: Int,
 
-    var bandwidthBurst: Int = descriptor.bandwidthBurst
+    var bandwidthBurst: Int,
 
-    var bandwidthObserved: Int = descriptor.bandwidthObserved
+    var bandwidthObserved: Int,
 
-    var platform: String? = descriptor.platform.stripLengthForDB()
+    var platform: String?,
 
-    var protocols: String? = descriptor.protocols?.map {
-        "${it.key} (${it.value.jointToCommaSeparated()})"
-    }?.jointToCommaSeparated().stripLengthForDB()
+    var protocols: String?,
 
     @Column(length = 40, columnDefinition = "char(40)")
-    var fingerprint: String = descriptor.fingerprint
+    var fingerprint: String,
 
-    var isHibernating: Boolean = descriptor.isHibernating
+    var isHibernating: Boolean,
 
-    var uptime: Long? = descriptor.uptime
+    var uptime: Long?,
 
-    var contact: String? = descriptor.contact.stripLengthForDB()
+    var contact: String?,
 
     @Lob
-    var familyEntries: String? = descriptor.familyEntries?.jointToCommaSeparated()
+    var familyEntries: String?,
 
-    var familyId: Long? = null
+    var familyId: Long?,
 
-    var cachesExtraInfo: Boolean = descriptor.cachesExtraInfo
+    var cachesExtraInfo: Boolean,
 
-    var isHiddenServiceDir: Boolean = descriptor.isHiddenServiceDir
+    var isHiddenServiceDir: Boolean,
 
-    var linkProtocolVersions: String? = descriptor.linkProtocolVersions?.jointToCommaSeparated().stripLengthForDB()
+    var linkProtocolVersions: String?,
 
-    var circuitProtocolVersions: String? =
-        descriptor.circuitProtocolVersions?.jointToCommaSeparated().stripLengthForDB()
+    var circuitProtocolVersions: String?,
 
-    var tunnelledDirServer: Boolean = descriptor.tunnelledDirServer
+    var tunnelledDirServer: Boolean,
+) : AbstractBaseEntity<Long>() {
 
+    @Suppress("LeakingThis")
+    constructor(
+        descriptor: ServerDescriptor,
+        month: String,
+        day: LocalDate,
+        autonomousSystemName: String?,
+        autonomousSystemNumber: Int?,
+        id: Long?,
+    ) : this(
+        month = month,
+        day = day,
+        autonomousSystemName = autonomousSystemName,
+        autonomousSystemNumber = autonomousSystemNumber,
+        address = descriptor.address,
+        allowSingleHopExits = descriptor.allowSingleHopExits,
+        nickname = descriptor.nickname,
+        bandwidthRate = descriptor.bandwidthRate,
+        bandwidthBurst = descriptor.bandwidthBurst,
+        bandwidthObserved = descriptor.bandwidthObserved,
+        platform = descriptor.platform.stripLengthForDB(),
+        protocols = descriptor.protocols?.map {
+            "${it.key} (${it.value.jointToCommaSeparated()})"
+        }?.jointToCommaSeparated().stripLengthForDB(),
+        fingerprint = descriptor.fingerprint,
+        isHibernating = descriptor.isHibernating,
+        uptime = descriptor.uptime,
+        contact = descriptor.contact.stripLengthForDB(),
+        familyEntries = descriptor.familyEntries?.jointToCommaSeparated(),
+        familyId = null,
+        cachesExtraInfo = descriptor.cachesExtraInfo,
+        isHiddenServiceDir = descriptor.isHiddenServiceDir,
+        linkProtocolVersions = descriptor.linkProtocolVersions?.jointToCommaSeparated().stripLengthForDB(),
+        circuitProtocolVersions = descriptor.circuitProtocolVersions?.jointToCommaSeparated().stripLengthForDB(),
+        tunnelledDirServer = descriptor.tunnelledDirServer
+    ) {
+        this.id = id
+    }
 }
