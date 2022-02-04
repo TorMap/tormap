@@ -1,6 +1,6 @@
 package org.tormap.database.entity
 
-import org.tormap.stripLengthForDB
+import org.tormap.util.stripLengthForDB
 import java.io.Serializable
 import java.time.LocalDateTime
 import javax.persistence.Embeddable
