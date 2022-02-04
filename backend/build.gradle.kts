@@ -27,7 +27,6 @@ dependencies {
     // Kotlin
     kotlin("reflect")
     kotlin("stdlib-jdk8")
-    kotlin("noarg")
 
     // Spring Boot https://spring.io/projects/spring-boot
     implementation("org.springframework.boot:spring-boot-starter-web")

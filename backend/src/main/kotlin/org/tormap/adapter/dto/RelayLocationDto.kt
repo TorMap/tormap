@@ -2,8 +2,8 @@
 
 package org.tormap.adapter.dto
 
-import org.tormap.util.commaSeparatedToList
 import org.tormap.database.entity.RelayLocation
+import org.tormap.util.commaSeparatedToList
 import java.math.BigDecimal
 
 /**
