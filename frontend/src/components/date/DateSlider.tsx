@@ -1,6 +1,7 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
 import {useDebounce} from "../../util/util";
-import {Mark, Slider} from "@mui/material";
+import {Slider} from "@mui/material";
+import {Mark} from "@mui/base";
 import {useDate} from "../../context/date-context";
 import {format} from "date-fns";
 
