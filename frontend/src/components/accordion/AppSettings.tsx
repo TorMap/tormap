@@ -36,7 +36,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
 
     return (
         <>
-            <Accordion elevation={elevation}>
+            <Accordion elevation={elevation} defaultExpanded>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
                     aria-controls="panel2a-content"
@@ -73,7 +73,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>
-            <Accordion elevation={elevation}>
+            <Accordion elevation={elevation} defaultExpanded>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
                     aria-controls="panel2a-content"
