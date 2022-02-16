@@ -1,7 +1,19 @@
 import React, {FunctionComponent} from "react";
-import {List, ListItem, ListItemIcon, ListItemText} from "@mui/material";
-import {getIcon} from "../../../types/icons";
+import {
+    Box,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableRow,
+    Typography
+} from "@mui/material";
+import {getIcon, RelayFamilyIcon} from "../../../types/icons";
 import {RelayMatch} from "./RelayDetailsDialogLarge";
+import {calculateFamilyColor} from "../../../util/layer-construction";
 
 interface Props {
     /**
@@ -43,10 +55,15 @@ export const RelayList: FunctionComponent<Props> = ({
                         selected={relayMatch.id === selectedRelay}
                         onClick={() => setRelayDetailsId(relayMatch.id)}
                     >
-                        <ListItemIcon>
-                            {getIcon(relayMatch.relayType)}
-                        </ListItemIcon>
                         <ListItemText primary={relayMatch.nickname}/>
+                        <ListItemIcon sx={{minWidth: "70px"}}>
+                            {getIcon(relayMatch.relayType)}
+                            {relayMatch.location.familyId &&
+                                <Box sx={{color: calculateFamilyColor(relayMatch.location.familyId), paddingLeft: "15px"}}>
+                                    {RelayFamilyIcon}
+                                </Box>
+                            }
+                        </ListItemIcon>
                     </ListItem>
                 )
             )}

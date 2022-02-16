@@ -196,7 +196,7 @@ const onMultiFamilyCircleClick = (
     }
 }
 
-const calculateFamilyColor = (familyId: number) => {
+export const calculateFamilyColor = (familyId: number) => {
     let hue = (familyId % 8) * (360 / 8)
     let sat = "90%"
     return `hsl(${hue},${sat},60%)`
