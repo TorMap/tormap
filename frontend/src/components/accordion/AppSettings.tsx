@@ -114,7 +114,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                     aria-controls="panel2a-content"
                     id="panel2a-header"
                 >
-                    <Typography className={"heading"}>Relays must include flag</Typography>
+                    <Typography className={"heading"}>Relays must have flag</Typography>
                 </AccordionSummary>
                 <AccordionDetails sx={{padding: "0px 8px 20px 8px"}}>
                     <FormGroup>
@@ -128,7 +128,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                                     control={
                                         <Checkbox
                                             id={option.relayFlag.toString()}
-                                            checked={settings.relaysMustIncludeFlag[option.relayFlag]}
+                                            checked={settings.relaysMustHaveFlag[option.relayFlag]}
                                             onChange={changeSettings}
                                         />
                                     }
