@@ -13,7 +13,7 @@ export const applyRelayFilter = (relays: RelayLocationDto[], settings: Settings)
     relays.forEach(relay => {
         let relayMissesRequiredFlag = false
         RelayFlags.forEach(flag => {
-                if (settings.relaysMustIncludeFlag[flag] && !relay.flags?.includes(flag)) {
+                if (settings.relaysMustHaveFlag[flag] && !relay.flags?.includes(flag)) {
                     relayMissesRequiredFlag = true
                     return
                 }

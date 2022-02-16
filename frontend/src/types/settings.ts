@@ -11,7 +11,7 @@ export interface Settings {
 
     // Relay flags
     showRelayTypes: Record<RelayType, boolean>
-    relaysMustIncludeFlag: Record<RelayFlag, boolean>
+    relaysMustHaveFlag: Record<RelayFlag, boolean>
 }
 
 // Relay flag options to display. Tooltips according to https://github.com/torproject/torspec/blob/main/dir-spec.txt
