@@ -67,14 +67,13 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
                     </Grid>}
                     <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 9 : 12}>
                         {relayDetails && relayLocation ?
-                            <Box display="flex" alignItems={"center"}>
-                                {relayLocation ? getIcon(getRelayType(relayLocation)) : null}
-                                <Typography sx={{display: "inline", padding: "0px 16px"}}
+                            <Box display="flex" alignItems={"center"} >
+                                <Typography sx={{display: "inline", paddingRight: "15px"}}
                                             variant="h6">
                                     {relayDetails.nickname}
                                 </Typography>
-
-                                {relayLocation?.familyId && <SelectFamilyButton newFamilyId={relayLocation.familyId}
+                                {relayLocation ? getIcon(getRelayType(relayLocation)) : null}
+                                {relayLocation?.familyId && <SelectFamilyButton familyId={relayLocation.familyId}
                                                                                 furtherAction={closeDialog}/>}
                             </Box> : <CircularProgress color={"inherit"} size={24}/>
                         }

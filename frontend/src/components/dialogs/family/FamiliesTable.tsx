@@ -33,8 +33,8 @@ export const FamiliesTable: FunctionComponent<Props> = ({
                             <TableCell scope="row">
                                 <Typography sx={{fontWeight: "bold",}}>Relay nicknames</Typography>
                             </TableCell>
-                            <TableCell scope="" sx={{minWidth: "150px",}}>
-                                <Typography sx={{fontWeight: "bold",}}>Member count</Typography>
+                            <TableCell scope="" sx={{minWidth: "75px",}}>
+                                <Typography sx={{fontWeight: "bold",}}>Count</Typography>
                             </TableCell>
                             <TableCell scope="row">
                                 <Typography sx={{fontWeight: "bold",}}>Autonomous Systems</Typography>
@@ -59,7 +59,7 @@ export const FamiliesTable: FunctionComponent<Props> = ({
                                 <TableCell scope="row">
                                     <Typography>{family.nicknames}</Typography>
                                 </TableCell>
-                                <TableCell scope="row" sx={{minWidth: "150px",}}>
+                                <TableCell scope="row" sx={{minWidth: "75px",}}>
                                     <Typography>{family.memberCount}</Typography>
                                 </TableCell>
                                 <TableCell scope="row">

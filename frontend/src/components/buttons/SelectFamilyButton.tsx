@@ -2,27 +2,34 @@ import React, {FunctionComponent} from "react";
 import {IconButton} from "@mui/material";
 import {RelayFamilyIcon} from "../../types/icons";
 import {useSettings} from "../../context/settings-context";
+import {calculateFamilyColor} from "../../util/layer-construction";
 
 interface Props {
-    newFamilyId: number,
+    familyId: number,
     furtherAction?: () => void,
 }
 
-export const SelectFamilyButton: FunctionComponent<Props> = ({newFamilyId, furtherAction}) => {
+export const SelectFamilyButton: FunctionComponent<Props> = ({familyId, furtherAction}) => {
     // App context
     const {settings, setSettings} = useSettings()
 
     return (
-        <IconButton aria-label="select family" onClick={() => {
-            setSettings({
-                ...settings,
-                selectedFamily: newFamilyId,
-                sortFamily: true
-            })
-            if (furtherAction) {
-                furtherAction()
-            }
-        }}>
+        <IconButton
+            aria-label="select family"
+            onClick={() => {
+                setSettings({
+                    ...settings,
+                    selectedFamily: familyId,
+                    sortFamily: true
+                })
+                if (furtherAction) {
+                    furtherAction()
+                }
+            }}
+            sx={{
+                color: calculateFamilyColor(familyId)
+            }}
+        >
             {RelayFamilyIcon}
         </IconButton>
     )

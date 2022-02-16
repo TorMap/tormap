@@ -132,7 +132,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                                         {relayDetails.nickname}
                                     </Typography>
                                     {relayLocation ? getIcon(getRelayType(relayLocation)) : null}
-                                    {relayLocation?.familyId && <SelectFamilyButton newFamilyId={relayLocation.familyId}
+                                    {relayLocation?.familyId && <SelectFamilyButton familyId={relayLocation.familyId}
                                                                                     furtherAction={closeDialog}/>}
                                 </Box> : <CircularProgress color={"inherit"} size={24}/>
                             }
