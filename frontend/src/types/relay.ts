@@ -64,3 +64,9 @@ export const RelayTypeLabel: Record<RelayType, string> = {
     [RelayType.Guard]: "Guard",
     [RelayType.Other]: "Other",
 }
+
+export const RelayTypeTooltip: Record<RelayType, string> = {
+    [RelayType.Exit]: "Shows relays who have an 'Exit' flag",
+    [RelayType.Guard]: "Shows relays who have a 'Guard' but no 'Exit' flag",
+    [RelayType.Other]: "Shows relays who have neither a 'Guard' nor 'Exit' flag",
+}
