@@ -21,6 +21,7 @@ import {RelayList} from "./RelayList";
 import {RelayDetailsTable} from "./RelayDetailsTable";
 import {DetailsDialogProps} from "./ResponsiveRelayDetailsDialog";
 import {SelectFamilyButton} from "../../buttons/SelectFamilyButton";
+import {useSettings} from "../../../context/settings-context";
 
 export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps> = ({
                                                                                          showDialog,
@@ -35,6 +36,9 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
                                                                                          relayDetails,
                                                                                          relayLocation,
                                                                                      }) => {
+    // App context
+    const {settings, setSettings} = useSettings()
+
     return (
         <FullHeightDialog
             open={showDialog}
@@ -67,14 +71,37 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
                     </Grid>}
                     <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 9 : 12}>
                         {relayDetails && relayLocation ?
-                            <Box display="flex" alignItems={"center"} >
-                                <Typography sx={{display: "inline", paddingRight: "15px"}}
+                            <Box display="flex" alignItems={"center"}>
+                                <Typography sx={{display: "inline"}}
                                             variant="h6">
                                     {relayDetails.nickname}
                                 </Typography>
-                                {relayLocation ? getIcon(getRelayType(relayLocation)) : null}
-                                {relayLocation?.familyId && <SelectFamilyButton familyId={relayLocation.familyId}
-                                                                                furtherAction={closeDialog}/>}
+                                {relayLocation &&
+                                    <IconButton
+                                        aria-label="select relay type"
+                                        sx={{ml: 1}}
+                                        onClick={() => {
+                                            const relayType = getRelayType(relayLocation)
+                                            setSettings({
+                                                ...settings,
+                                                showRelayTypes: {
+                                                    [RelayType.Exit]: RelayType.Exit === relayType,
+                                                    [RelayType.Guard]: RelayType.Guard === relayType,
+                                                    [RelayType.Other]: RelayType.Other === relayType,
+                                                },
+                                            })
+                                            closeDialog()
+                                        }}
+                                    >
+                                        {getIcon(getRelayType(relayLocation))}
+                                    </IconButton>
+                                }
+                                {relayLocation?.familyId &&
+                                    <SelectFamilyButton
+                                        familyId={relayLocation.familyId}
+                                        furtherAction={closeDialog}
+                                    />
+                                }
                             </Box> : <CircularProgress color={"inherit"} size={24}/>
                         }
                         <IconButton aria-label="close" sx={{

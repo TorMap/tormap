@@ -56,7 +56,7 @@ export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = 
             case relaysMustIncludeFlagInput:
                 setSettings({
                     ...settings,
-                    relaysMustIncludeFlag: {...settings.relaysMustIncludeFlag, [event.target.id]: event.target.checked}
+                    relaysMustHaveFlag: {...settings.relaysMustHaveFlag, [event.target.id]: event.target.checked}
                 })
                 break;
             default:
