@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import {SlideUpTransition} from "../../../types/ui";
 import CloseIcon from "@mui/icons-material/Close";
-import {FamiliesTable} from "./FamiliesTable";
+import {FamilySelectionTable} from "./FamilySelectionTable";
 
 export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialogProps> = ({
                                                                                               shouldShowDialog,
@@ -46,8 +46,8 @@ export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialog
                 <DialogContent
                     dividers
                 >
-                    {!isLoading ? <FamiliesTable familyIdentifiers={familyIdentifiers}
-                                                 closeFamilySelectionDialog={closeDialog}/>
+                    {!isLoading ? <FamilySelectionTable familyIdentifiers={familyIdentifiers}
+                                                        closeFamilySelectionDialog={closeDialog}/>
                         : <CircularProgress color={"inherit"} size={22.5} sx={{mt: 1}}/>}
                 </DialogContent>
                 <DialogActions sx={{
