@@ -45,7 +45,7 @@ export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = 
      * input event handler for setting changes
      * @param event
      */
-    const changeSettings = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const changeSetting = (event: React.ChangeEvent<HTMLInputElement>) => {
         switch (event.target.name) {
             case showRelayTypesInput:
                 setSettings({
@@ -56,7 +56,7 @@ export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = 
             case relaysMustIncludeFlagInput:
                 setSettings({
                     ...settings,
-                    relaysMustIncludeFlag: {...settings.relaysMustIncludeFlag, [event.target.id]: event.target.checked}
+                    relaysMustHaveFlag: {...settings.relaysMustHaveFlag, [event.target.id]: event.target.checked}
                 })
                 break;
             default:
@@ -65,7 +65,7 @@ export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = 
     };
 
     return (
-        <SettingsContext.Provider value={{settings, changeSettings, setSettings}}>
+        <SettingsContext.Provider value={{settings, changeSettings: changeSetting, setSettings}}>
             {children}
         </SettingsContext.Provider>
     )

@@ -1,30 +1,31 @@
-import {DialogContent, DialogTitle, IconButton} from "@mui/material";
+import {CircularProgress, Dialog, DialogContent, DialogTitle, IconButton} from "@mui/material";
 import React, {FunctionComponent} from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import {FullHeightDialog} from "../../../types/ui";
 import {FamiliesTable} from "./FamiliesTable";
 import {FamilySelectionDialogProps} from "./FamilySelectionDialog";
 
 /**
- *
  * A Dialog to select a Family from multiple Families
- * @param showDialog - Whether the family selection dialog should be displayed
- * @param closeDialog - Event handler for closing the dialog
- * @param families - The familyIDs available to select
  */
 export const FamilySelectionDialogLarge: FunctionComponent<FamilySelectionDialogProps> = ({
-                                                                                                    showDialog,
+                                                                                                    shouldShowDialog,
                                                                                                     closeDialog,
-                                                                                                    familyIds,
                                                                                                     isLoading,
                                                                                                     familyIdentifiers,
                                                                                                 }) => {
     return (
-        <FullHeightDialog
-            open={showDialog}
+        <Dialog
+            open={shouldShowDialog}
             onClose={closeDialog}
             onBackdropClick={closeDialog}
-            maxWidth={familyIds.length > 1 ? "lg" : "md"}
+            maxWidth={"lg"}
+            fullWidth={true}
+            PaperProps={{
+                sx: {
+                    minHeight: "80vh",
+                    maxHeight: "80vh",
+                }
+            }}
         >
             <DialogTitle>
                 Select a family
@@ -41,8 +42,8 @@ export const FamilySelectionDialogLarge: FunctionComponent<FamilySelectionDialog
             >
                 {!isLoading ? <FamiliesTable familyIdentifiers={familyIdentifiers}
                                              closeFamilySelectionDialog={closeDialog}/>
-                    : <p>loading...</p>}
+                    : <CircularProgress color={"inherit"} size={22.5} sx={{mt: 1}}/>}
             </DialogContent>
-        </FullHeightDialog>
+        </Dialog>
     )
 }

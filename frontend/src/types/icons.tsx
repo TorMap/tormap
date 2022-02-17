@@ -25,9 +25,9 @@ export function getIcon(relayType: RelayType): JSX.Element | null {
     }
 }
 
-export const ExitRelayIcon = <DirectionsRunIcon style={{color: Colors.Exit}}/>
-export const GuardRelayIcon = <SecurityIcon style={{color: Colors.Guard}}/>
-export const OtherRelayIcon = <TimelineIcon style={{color: Colors.Default}}/>
+export const ExitRelayIcon = <DirectionsRunIcon sx={{color: Colors.Exit}}/>
+export const GuardRelayIcon = <SecurityIcon sx={{color: Colors.Guard}}/>
+export const OtherRelayIcon = <TimelineIcon sx={{color: Colors.Default}}/>
 export const TotalRelaysIcon = <SubdirectoryArrowRightIcon/>
 export const RelayFamilyIcon = <GroupIcon/>
 export const EarthIcon = <PublicIcon/>

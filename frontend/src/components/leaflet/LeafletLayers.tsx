@@ -181,12 +181,12 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
     return (
         <>
             <ResponsiveRelayDetailsDialog
-                showDialog={showRelayDetailsDialog}
+                shouldShowDialog={showRelayDetailsDialog}
                 closeDialog={useCallback(() => setShowRelayDetailsDialog(false), [])}
                 relayLocations={relaysForDetailsDialog}
             />
             <FamilySelectionDialog
-                showDialog={showFamilySelectionDialog}
+                shouldShowDialog={showFamilySelectionDialog}
                 closeDialog={useCallback(() => setShowFamilySelectionDialog(false), [])}
                 reloadSelectedDay={reloadSelectedDay}
                 familyIds={familiesForSelectionDialog}
