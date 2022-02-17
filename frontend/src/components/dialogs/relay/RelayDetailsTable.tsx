@@ -30,14 +30,12 @@ export const RelayDetailsTable: FunctionComponent<Props> = ({relayDetailsMatch})
             name: "Flags assigned by authorities",
             value: constructFlagString(relayDetailsMatch.flags)
         },
-        {name: "Autonomous System", value: relayDetailsMatch.autonomousSystemName},
         {
-            name: "Autonomous System Number",
-            value:
-                <ExternalLink
-                    href={`https://metrics.torproject.org/rs.html#search/as:${relayDetailsMatch.autonomousSystemNumber}`}
-                    label={relayDetailsMatch.autonomousSystemNumber}
-                />
+            name: "Autonomous System",
+            value: <ExternalLink
+                href={`https://metrics.torproject.org/rs.html#search/as:${relayDetailsMatch.autonomousSystemNumber}`}
+                label={`${relayDetailsMatch.autonomousSystemName} (${relayDetailsMatch.autonomousSystemNumber})`}
+            />
         },
         {name: "Platform", value: relayDetailsMatch.platform},
         {name: "Uptime", value: formatSecondsToHours(relayDetailsMatch.uptime)},
