@@ -1,4 +1,6 @@
 // Order of flags must be kept in sync with backend
+import {RelayDetailsDto, RelayIdentifierDto, RelayLocationDto} from "../dto/relay";
+
 export enum RelayFlag {
     Valid,
     Named,
@@ -63,4 +65,18 @@ export const RelayTypeLabel: Record<RelayType, string> = {
     [RelayType.Exit]: "Exit",
     [RelayType.Guard]: "Guard",
     [RelayType.Other]: "Other",
+}
+
+export const RelayTypeTooltip: Record<RelayType, string> = {
+    [RelayType.Exit]: "Shows relays who have an 'Exit' flag",
+    [RelayType.Guard]: "Shows relays who have a 'Guard' but no 'Exit' flag",
+    [RelayType.Other]: "Shows relays who have neither a 'Guard' nor 'Exit' flag",
+}
+
+export interface RelayMatch extends RelayIdentifierDto, RelayLocationDto {
+    relayType: RelayType
+}
+
+export interface RelayDetailsMatch extends RelayDetailsDto, RelayLocationDto {
+    relayType: RelayType
 }

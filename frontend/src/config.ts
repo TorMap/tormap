@@ -5,13 +5,21 @@ export const backendApiUrl = process.env.REACT_APP_BACKEND_API_URL
 
 // Default settings, that are selected on page load
 export const defaultSettings: Settings = {
+    // Group relays by settings
+    sortCountry: false,
+    selectedCountry: undefined,
+    sortFamily: false,
+    selectedFamily: undefined,
+    aggregateCoordinates: false,
+    heatMap: false,
+
     showRelayTypes: {
         [RelayType.Exit]: true,
         [RelayType.Guard]: true,
         [RelayType.Other]: true,
     },
 
-    relaysMustIncludeFlag: {
+    relaysMustHaveFlag: {
         [RelayFlag.Authority]: false,
         [RelayFlag.BadExit]: false,
         [RelayFlag.Exit]: false,
@@ -28,14 +36,6 @@ export const defaultSettings: Settings = {
         [RelayFlag.Valid]: false,
         [RelayFlag.V2Dir]: false,
     },
-
-    // Group relays by settings
-    sortCountry: false,
-    selectedCountry: undefined,
-    sortFamily: false,
-    selectedFamily: undefined,
-    aggregateCoordinates: false,
-    heatMap: false,
 }
 
 // The time it takes before the tooltip is shown
