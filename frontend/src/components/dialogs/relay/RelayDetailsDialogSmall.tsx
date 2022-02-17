@@ -1,56 +1,39 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
-import {
-    AppBar,
-    Box,
-    Button,
-    CircularProgress,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    FormControl,
-    IconButton,
-    MenuItem,
-    Select,
-    Toolbar,
-    Typography
-} from "@mui/material";
-import {getRelayType} from "../../../util/aggregate-relays";
+import {AppBar, Button, Dialog, DialogActions, DialogContent, IconButton, Toolbar} from "@mui/material";
 import {DetailsDialogProps} from "./ResponsiveRelayDetailsDialog";
 import {RelayDetailsTable} from "./RelayDetailsTable";
-import {getIcon} from "../../../types/icons";
 import {RelayList} from "./RelayList";
 import CloseIcon from "@mui/icons-material/Close";
 import {SlideLeftTransition, SlideUpTransition} from "../../../types/ui";
-import {SelectFamilyButton} from "../../buttons/SelectFamilyButton";
+import {RelayDetailsHeader} from "./RelayDetailsHeader";
+import {RelayDetailsSelectionHeader} from "./RelayDetailsSelectionHeader";
 
 
 export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
-                                                                                   showDialog,
+                                                                                   shouldShowDialog,
                                                                                    closeDialog,
-                                                                                   relayLocations,
+                                                                                   relayDetailsMatch,
+                                                                                   sortedRelayMatches,
                                                                                    sortRelaysBy,
                                                                                    handleSelectSortByChange,
-                                                                                   setRelayDetailsId,
-                                                                                   sortedRelayMatches,
                                                                                    relayDetailsId,
-                                                                                   relayDetails,
-                                                                                   relayLocation,
+                                                                                   setRelayDetailsId,
                                                                                }) => {
     // Component state
     const [showDetailsDialog, setShowDetailsDialog] = useState(false)
 
     // If relay selection is closed, set details dialog closed too
     useEffect(() => {
-        if (!showDialog) setShowDetailsDialog(false)
-    }, [showDialog])
+        if (!shouldShowDialog) setShowDetailsDialog(false)
+    }, [shouldShowDialog])
 
     // Show relay details directly if only one relay is selectable
     useEffect(() => {
-        if (relayLocations.length === 1) setShowDetailsDialog(true);
-    }, [relayLocations])
+        if (sortedRelayMatches.length === 1) setShowDetailsDialog(true);
+    }, [sortedRelayMatches])
 
     const handleDetailsDialogClose = () => {
-        if (relayLocations.length === 1) {
+        if (sortedRelayMatches.length === 1) {
             closeDialog()
             setShowDetailsDialog(false)
         } else {
@@ -66,26 +49,17 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
     return (
         <>
             <Dialog
-                open={showDialog}
+                open={shouldShowDialog}
                 onClose={closeDialog}
                 fullScreen={true}
                 TransitionComponent={SlideUpTransition}
             >
                 <AppBar sx={{position: 'relative'}}>
                     <Toolbar>
-                        <Typography variant="h6">
-                            Relays
-                        </Typography>
-                        <FormControl variant="standard" sx={{marginLeft: "20px"}}>
-                            <Select
-                                value={sortRelaysBy}
-                                label="Sort by"
-                                onChange={handleSelectSortByChange}
-                            >
-                                <MenuItem value={"relayType"}>Type</MenuItem>
-                                <MenuItem value={"nickname"}>Nickname</MenuItem>
-                            </Select>
-                        </FormControl>
+                        <RelayDetailsSelectionHeader
+                            sortRelaysBy={sortRelaysBy}
+                            handleSelectSortByChange={handleSelectSortByChange}
+                        />
                         <IconButton aria-label="close" sx={{
                             position: "absolute",
                             right: "15px",
@@ -98,8 +72,8 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                 <DialogContent>
                     <RelayList
                         relayMatches={sortedRelayMatches}
-                        selectedRelay={relayDetailsId}
-                        setRelayDetailsId={handleSelectDetails}
+                        selectedRelayId={relayDetailsId}
+                        setSelectedRelayId={handleSelectDetails}
                     />
                 </DialogContent>
                 <DialogActions sx={{
@@ -118,37 +92,22 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                 </DialogActions>
             </Dialog>
             <Dialog
-                open={showDetailsDialog && showDialog}
+                open={showDetailsDialog && shouldShowDialog}
                 onClose={handleDetailsDialogClose}
                 fullScreen={true}
                 TransitionComponent={SlideLeftTransition}
             >
                 <AppBar sx={{position: 'relative'}}>
                     <Toolbar>
-                        <Typography variant="h6">
-                            {relayDetails ?
-                                <Box display="flex" alignItems={"center"}>
-                                    <Typography sx={{display: "inline", padding: "0px 16px"}} variant="h6">
-                                        {relayDetails.nickname}
-                                    </Typography>
-                                    {relayLocation ? getIcon(getRelayType(relayLocation)) : null}
-                                    {relayLocation?.familyId && <SelectFamilyButton newFamilyId={relayLocation.familyId}
-                                                                                    furtherAction={closeDialog}/>}
-                                </Box> : <CircularProgress color={"inherit"} size={24}/>
-                            }
-                        </Typography>
-                        <IconButton aria-label="close" sx={{
-                            position: "absolute",
-                            right: "15px",
-                            top: "15px",
-                        }} onClick={handleDetailsDialogClose}>
-                            <CloseIcon/>
-                        </IconButton>
+                        <RelayDetailsHeader
+                            closeDialog={closeDialog}
+                            relayDetailsMatch={relayDetailsMatch}
+                        />
                     </Toolbar>
                 </AppBar>
                 <DialogContent>
-                    {relayDetails && relayLocation &&
-                        <RelayDetailsTable relayDetails={relayDetails} relayLocation={relayLocation}/>
+                    {relayDetailsMatch &&
+                        <RelayDetailsTable relayDetailsMatch={relayDetailsMatch}/>
                     }
                 </DialogContent>
                 <DialogActions sx={{

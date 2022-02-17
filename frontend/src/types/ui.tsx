@@ -14,7 +14,7 @@ export enum SnackbarMessage {
 
 export const FullHeightDialog = styled(Dialog)(() => ({
     paper: {
-        height: '100%',
+        height: '70vh',
     },
 }));
 
