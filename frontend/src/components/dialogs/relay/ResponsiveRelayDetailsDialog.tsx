@@ -32,14 +32,14 @@ export interface DetailsDialogProps {
 }
 
 export const ResponsiveRelayDetailsDialog: FunctionComponent<Props> = ({
-                                                                                  shouldShowDialog,
-                                                                                  closeDialog,
-                                                                                  relayLocations,
-                                                                              }) => {
+                                                                           shouldShowDialog,
+                                                                           closeDialog,
+                                                                           relayLocations,
+                                                                       }) => {
     // Component state
     const [relayIdentifiers, setRelayIdentifiers] = useState<RelayIdentifierDto[]>([])
-    const [selectedRelayDetailsId, setRelayDetailsId] = useState<number>()
-    const [selectedRelayDetails, setRelayDetails] = useState<RelayDetailsDto>()
+    const [relayDetailsId, setRelayDetailsId] = useState<number>()
+    const [relayDetails, setRelayDetails] = useState<RelayDetailsDto>()
     const [sortRelaysBy, setSortRelaysBy] = useState<keyof RelayMatch>("nickname")
 
     // App context
@@ -47,7 +47,7 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<Props> = ({
     const theme = useTheme()
     const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
 
-    const nameOfRelayMatch = nameOfFactory<RelayMatch>()
+    const nameOfRelayMatch = useMemo(() => nameOfFactory<RelayMatch>(), [])
 
     const relayDetailsIdToLocationMap = useMemo(() => {
         const relayDetailsIdToLocationMap = new Map<number, RelayLocationDto>()
@@ -84,23 +84,23 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<Props> = ({
         [nameOfRelayMatch, relayMatches, sortRelaysBy]
     )
 
-    const selectedRelayLocation = useMemo<RelayLocationDto | undefined>(
-        () => relayLocations.find((relay) => selectedRelayDetailsId && relay.detailsId === selectedRelayDetailsId),
-        [selectedRelayDetailsId, relayLocations]
-    )
-
     const relayDetailsMatch = useMemo<RelayDetailsMatch | undefined>(
         () => {
-            if (selectedRelayDetails && selectedRelayLocation && selectedRelayDetails.id === selectedRelayDetailsId) {
-                return {
-                    ...selectedRelayDetails,
-                    ...selectedRelayLocation,
-                    relayType: getRelayType(selectedRelayLocation)
+            if (relayDetailsId) {
+                const relayLocation = relayLocations.find((relay) =>
+                    relayDetailsId && relay.detailsId === relayDetailsId
+                )
+                if (relayDetails && relayLocation && relayDetails.id === relayDetailsId) {
+                    return {
+                        ...relayDetails,
+                        ...relayLocation,
+                        relayType: getRelayType(relayLocation)
+                    }
                 }
             }
             return undefined
         },
-        [selectedRelayDetails, selectedRelayDetailsId, selectedRelayLocation]
+        [relayDetails, relayDetailsId, relayLocations]
     )
 
     /**
@@ -134,17 +134,17 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<Props> = ({
      * Query more information for the selected relay
      */
     useEffect(() => {
-        if (!selectedRelayDetailsId && sortedRelayMatches.length > 0) {
+        if (!relayDetailsId && sortedRelayMatches.length > 0) {
             setRelayDetailsId(sortedRelayMatches[0].id)
-        } else if (selectedRelayDetailsId) {
-            backend.get<RelayDetailsDto>(`/relay/details/relay/${selectedRelayDetailsId}`).then(response => {
+        } else if (relayDetailsId) {
+            backend.get<RelayDetailsDto>(`/relay/details/relay/${relayDetailsId}`).then(response => {
                 setRelayDetails(response.data)
             })
                 .catch(() => {
                     enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
                 })
         }
-    }, [sortedRelayMatches, selectedRelayDetailsId, relayDetailsIdToLocationMap, enqueueSnackbar])
+    }, [sortedRelayMatches, relayDetailsId, relayDetailsIdToLocationMap, enqueueSnackbar])
 
     const handeSelectSortByChange = (event: SelectChangeEvent<keyof RelayMatch>) => {
         switch (event.target.value) {
@@ -169,7 +169,7 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<Props> = ({
                 handleSelectSortByChange={handeSelectSortByChange}
                 setRelayDetailsId={setRelayDetailsId}
                 sortedRelayMatches={sortedRelayMatches}
-                relayDetailsId={selectedRelayDetailsId}
+                relayDetailsId={relayDetailsId}
             />
             : <RelayDetailsDialogSmall
                 relayDetailsMatch={relayDetailsMatch}
@@ -179,7 +179,7 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<Props> = ({
                 handleSelectSortByChange={handeSelectSortByChange}
                 setRelayDetailsId={setRelayDetailsId}
                 sortedRelayMatches={sortedRelayMatches}
-                relayDetailsId={selectedRelayDetailsId}
+                relayDetailsId={relayDetailsId}
             />
     )
 }
