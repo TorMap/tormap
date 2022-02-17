@@ -2,6 +2,7 @@ import React, {FunctionComponent} from "react";
 import {FormControl, MenuItem, Select, Typography} from "@mui/material";
 import {SelectChangeEvent} from "@mui/material/Select/SelectInput";
 import {RelayMatch} from "../../../types/relay";
+import {nameOfFactory} from "../../../util/util";
 
 interface Props {
     sortRelaysBy: keyof RelayMatch
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export const RelayDetailsSelectionHeader: FunctionComponent<Props> = ({sortRelaysBy, handleSelectSortByChange}) => {
+    const nameOfRelayMatch = nameOfFactory<RelayMatch>()
     return (
         <>
             <Typography sx={{display: "inline"}} variant="h6">
@@ -20,9 +22,9 @@ export const RelayDetailsSelectionHeader: FunctionComponent<Props> = ({sortRelay
                     label="Sort by"
                     onChange={handleSelectSortByChange}
                 >
-                    <MenuItem value={"nickname"}>Nickname</MenuItem>
-                    <MenuItem value={"relayType"}>Type</MenuItem>
-                    <MenuItem value={"familyId"}>Family</MenuItem>
+                    <MenuItem value={nameOfRelayMatch("nickname")}>Nickname</MenuItem>
+                    <MenuItem value={nameOfRelayMatch("relayType")}>Type</MenuItem>
+                    <MenuItem value={nameOfRelayMatch("familyId")}>Family</MenuItem>
                 </Select>
             </FormControl>
         </>
