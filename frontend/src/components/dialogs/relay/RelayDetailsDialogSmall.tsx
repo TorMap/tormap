@@ -1,27 +1,12 @@
 import React, {FunctionComponent, useEffect, useState} from "react";
-import {
-    AppBar,
-    Box,
-    Button,
-    CircularProgress,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    FormControl,
-    IconButton,
-    MenuItem,
-    Select,
-    Toolbar,
-    Typography
-} from "@mui/material";
-import {getRelayType} from "../../../util/aggregate-relays";
+import {AppBar, Button, Dialog, DialogActions, DialogContent, IconButton, Toolbar} from "@mui/material";
 import {DetailsDialogProps} from "./ResponsiveRelayDetailsDialog";
 import {RelayDetailsTable} from "./RelayDetailsTable";
-import {getIcon} from "../../../types/icons";
 import {RelayList} from "./RelayList";
 import CloseIcon from "@mui/icons-material/Close";
 import {SlideLeftTransition, SlideUpTransition} from "../../../types/ui";
-import {SelectFamilyButton} from "../../buttons/SelectFamilyButton";
+import {RelayDetailsHeader} from "./RelayDetailsHeader";
+import {RelayDetailsSelectionHeader} from "./RelayDetailsSelectionHeader";
 
 
 export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
@@ -73,19 +58,10 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
             >
                 <AppBar sx={{position: 'relative'}}>
                     <Toolbar>
-                        <Typography variant="h6">
-                            Relays
-                        </Typography>
-                        <FormControl variant="standard" sx={{marginLeft: "20px"}}>
-                            <Select
-                                value={sortRelaysBy}
-                                label="Sort by"
-                                onChange={handleSelectSortByChange}
-                            >
-                                <MenuItem value={"relayType"}>Type</MenuItem>
-                                <MenuItem value={"nickname"}>Nickname</MenuItem>
-                            </Select>
-                        </FormControl>
+                        <RelayDetailsSelectionHeader
+                            sortRelaysBy={sortRelaysBy}
+                            handleSelectSortByChange={handleSelectSortByChange}
+                        />
                         <IconButton aria-label="close" sx={{
                             position: "absolute",
                             right: "15px",
@@ -125,25 +101,11 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
             >
                 <AppBar sx={{position: 'relative'}}>
                     <Toolbar>
-                        <Typography variant="h6">
-                            {relayDetails ?
-                                <Box display="flex" alignItems={"center"}>
-                                    <Typography sx={{display: "inline", padding: "0px 16px"}} variant="h6">
-                                        {relayDetails.nickname}
-                                    </Typography>
-                                    {relayLocation ? getIcon(getRelayType(relayLocation)) : null}
-                                    {relayLocation?.familyId && <SelectFamilyButton familyId={relayLocation.familyId}
-                                                                                    furtherAction={closeDialog}/>}
-                                </Box> : <CircularProgress color={"inherit"} size={24}/>
-                            }
-                        </Typography>
-                        <IconButton aria-label="close" sx={{
-                            position: "absolute",
-                            right: "15px",
-                            top: "15px",
-                        }} onClick={handleDetailsDialogClose}>
-                            <CloseIcon/>
-                        </IconButton>
+                        <RelayDetailsHeader
+                            closeDialog={closeDialog}
+                            relayLocation={relayLocation}
+                            relayDetails={relayDetails}
+                        />
                     </Toolbar>
                 </AppBar>
                 <DialogContent>
