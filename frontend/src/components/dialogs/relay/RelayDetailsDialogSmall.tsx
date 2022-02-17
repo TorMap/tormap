@@ -10,32 +10,30 @@ import {RelayDetailsSelectionHeader} from "./RelayDetailsSelectionHeader";
 
 
 export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
-                                                                                   showDialog,
+                                                                                   shouldShowDialog,
                                                                                    closeDialog,
-                                                                                   relayLocations,
+                                                                                   relayDetailsMatch,
+                                                                                   sortedRelayMatches,
                                                                                    sortRelaysBy,
                                                                                    handleSelectSortByChange,
-                                                                                   setRelayDetailsId,
-                                                                                   sortedRelayMatches,
                                                                                    relayDetailsId,
-                                                                                   relayDetails,
-                                                                                   relayLocation,
+                                                                                   setRelayDetailsId,
                                                                                }) => {
     // Component state
     const [showDetailsDialog, setShowDetailsDialog] = useState(false)
 
     // If relay selection is closed, set details dialog closed too
     useEffect(() => {
-        if (!showDialog) setShowDetailsDialog(false)
-    }, [showDialog])
+        if (!shouldShowDialog) setShowDetailsDialog(false)
+    }, [shouldShowDialog])
 
     // Show relay details directly if only one relay is selectable
     useEffect(() => {
-        if (relayLocations.length === 1) setShowDetailsDialog(true);
-    }, [relayLocations])
+        if (sortedRelayMatches.length === 1) setShowDetailsDialog(true);
+    }, [sortedRelayMatches])
 
     const handleDetailsDialogClose = () => {
-        if (relayLocations.length === 1) {
+        if (sortedRelayMatches.length === 1) {
             closeDialog()
             setShowDetailsDialog(false)
         } else {
@@ -51,7 +49,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
     return (
         <>
             <Dialog
-                open={showDialog}
+                open={shouldShowDialog}
                 onClose={closeDialog}
                 fullScreen={true}
                 TransitionComponent={SlideUpTransition}
@@ -74,8 +72,8 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                 <DialogContent>
                     <RelayList
                         relayMatches={sortedRelayMatches}
-                        selectedRelay={relayDetailsId}
-                        setRelayDetailsId={handleSelectDetails}
+                        selectedRelayId={relayDetailsId}
+                        setSelectedRelayId={handleSelectDetails}
                     />
                 </DialogContent>
                 <DialogActions sx={{
@@ -94,7 +92,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                 </DialogActions>
             </Dialog>
             <Dialog
-                open={showDetailsDialog && showDialog}
+                open={showDetailsDialog && shouldShowDialog}
                 onClose={handleDetailsDialogClose}
                 fullScreen={true}
                 TransitionComponent={SlideLeftTransition}
@@ -103,14 +101,13 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                     <Toolbar>
                         <RelayDetailsHeader
                             closeDialog={closeDialog}
-                            relayLocation={relayLocation}
-                            relayDetails={relayDetails}
+                            relayDetailsMatch={relayDetailsMatch}
                         />
                     </Toolbar>
                 </AppBar>
                 <DialogContent>
-                    {relayDetails && relayLocation &&
-                        <RelayDetailsTable relayDetails={relayDetails} relayLocation={relayLocation}/>
+                    {relayDetailsMatch &&
+                        <RelayDetailsTable relayDetailsMatch={relayDetailsMatch}/>
                     }
                 </DialogContent>
                 <DialogActions sx={{

@@ -1,62 +1,60 @@
 import React, {FunctionComponent} from "react";
 import {Table, TableBody, TableCell, TableRow, Typography} from "@mui/material";
-import {RelayDetailsDto, RelayLocationDto} from "../../../dto/relay";
-import {RelayFlag, RelayFlagLabel} from "../../../types/relay";
+import {RelayDetailsMatch, RelayFlag, RelayFlagLabel} from "../../../types/relay";
 import {ReactJSXElement} from "@emotion/react/types/jsx-namespace";
 import {ExternalLink} from "../../link/ExternalLink";
 
 interface Props {
-    relayLocation: RelayLocationDto
-    relayDetails: RelayDetailsDto
+    relayDetailsMatch: RelayDetailsMatch
 }
 
-export const RelayDetailsTable: FunctionComponent<Props> = ({relayLocation, relayDetails}) => {
+export const RelayDetailsTable: FunctionComponent<Props> = ({relayDetailsMatch}) => {
     const tableRows: RelayDetailsTableRow[] = [
         {
             name: "Fingerprint",
             value:
                 <ExternalLink
-                    href={`https://metrics.torproject.org/rs.html#details/${relayDetails.fingerprint}`}
-                    label={relayDetails.fingerprint}
+                    href={`https://metrics.torproject.org/rs.html#details/${relayDetailsMatch.fingerprint}`}
+                    label={relayDetailsMatch.fingerprint}
                 />
         },
         {
             name: "IP address",
             value:
                 <ExternalLink
-                    href={`https://metrics.torproject.org/rs.html#search/${relayDetails.address}`}
-                    label={relayDetails.address}
+                    href={`https://metrics.torproject.org/rs.html#search/${relayDetailsMatch.address}`}
+                    label={relayDetailsMatch.address}
                 />
         },
         {
             name: "Flags assigned by authorities",
-            value: constructFlagString(relayLocation.flags)
+            value: constructFlagString(relayDetailsMatch.flags)
         },
-        {name: "Autonomous System", value: relayDetails.autonomousSystemName},
+        {name: "Autonomous System", value: relayDetailsMatch.autonomousSystemName},
         {
             name: "Autonomous System Number",
             value:
                 <ExternalLink
-                    href={`https://metrics.torproject.org/rs.html#search/as:${relayDetails.autonomousSystemNumber}`}
-                    label={relayDetails.autonomousSystemNumber}
+                    href={`https://metrics.torproject.org/rs.html#search/as:${relayDetailsMatch.autonomousSystemNumber}`}
+                    label={relayDetailsMatch.autonomousSystemNumber}
                 />
         },
-        {name: "Platform", value: relayDetails.platform},
-        {name: "Uptime", value: formatSecondsToHours(relayDetails.uptime)},
-        {name: "Contact", value: relayDetails.contact},
-        {name: "Bandwidth for short intervals", value: formatBytesToMBPerSecond(relayDetails.bandwidthBurst)},
-        {name: "Bandwidth for long periods", value: formatBytesToMBPerSecond(relayDetails.bandwidthRate)},
-        {name: "Bandwidth observed", value: formatBytesToMBPerSecond(relayDetails.bandwidthObserved)},
-        {name: "Supported protocols", value: relayDetails.protocols},
-        {name: "Allows single hop exit", value: formatBoolean(relayDetails.allowSingleHopExits)},
-        {name: "Is hibernating", value: formatBoolean(relayDetails.isHibernating)},
-        {name: "Caches extra info", value: formatBoolean(relayDetails.cachesExtraInfo)},
-        {name: "Is a hidden service directory", value: formatBoolean(relayDetails.isHiddenServiceDir)},
-        {name: "Accepts tunneled directory requests", value: formatBoolean(relayDetails.tunnelledDirServer)},
-        {name: "Link protocol versions", value: relayDetails.linkProtocolVersions},
-        {name: "Circuit protocol versions", value: relayDetails.circuitProtocolVersions},
-        {name: "Self reported family members", value: relayDetails.familyEntries},
-        {name: "Infos published by relay on", value: relayDetails.day},
+        {name: "Platform", value: relayDetailsMatch.platform},
+        {name: "Uptime", value: formatSecondsToHours(relayDetailsMatch.uptime)},
+        {name: "Contact", value: relayDetailsMatch.contact},
+        {name: "Bandwidth for short intervals", value: formatBytesToMBPerSecond(relayDetailsMatch.bandwidthBurst)},
+        {name: "Bandwidth for long periods", value: formatBytesToMBPerSecond(relayDetailsMatch.bandwidthRate)},
+        {name: "Bandwidth observed", value: formatBytesToMBPerSecond(relayDetailsMatch.bandwidthObserved)},
+        {name: "Supported protocols", value: relayDetailsMatch.protocols},
+        {name: "Allows single hop exit", value: formatBoolean(relayDetailsMatch.allowSingleHopExits)},
+        {name: "Is hibernating", value: formatBoolean(relayDetailsMatch.isHibernating)},
+        {name: "Caches extra info", value: formatBoolean(relayDetailsMatch.cachesExtraInfo)},
+        {name: "Is a hidden service directory", value: formatBoolean(relayDetailsMatch.isHiddenServiceDir)},
+        {name: "Accepts tunneled directory requests", value: formatBoolean(relayDetailsMatch.tunnelledDirServer)},
+        {name: "Link protocol versions", value: relayDetailsMatch.linkProtocolVersions},
+        {name: "Circuit protocol versions", value: relayDetailsMatch.circuitProtocolVersions},
+        {name: "Self reported family members", value: relayDetailsMatch.familyEntries},
+        {name: "Infos published by relay on", value: relayDetailsMatch.day},
     ]
 
     return (

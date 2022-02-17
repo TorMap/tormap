@@ -11,7 +11,7 @@ interface FamilySelectionProps {
     /**
      * Whether the modal should currently be visible
      */
-    showDialog: boolean
+    shouldShowDialog: boolean
 
     /**
      * Hide the modal
@@ -35,7 +35,7 @@ export interface FamilySelectionDialogProps extends Omit<FamilySelectionProps, "
 }
 
 export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
-                                                                                  showDialog,
+                                                                                  shouldShowDialog,
                                                                                   closeDialog,
                                                                                   reloadSelectedDay,
                                                                                   familyIds,
@@ -79,14 +79,14 @@ export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
 
     return (isLargeScreen ?
             <FamilySelectionDialogLarge
-                showDialog={showDialog}
+                shouldShowDialog={shouldShowDialog}
                 closeDialog={closeDialog}
                 familyIds={familyIds}
                 isLoading={isLoading}
                 familyIdentifiers={familyIdentifiers}
             />
             : <FamilySelectionDialogSmall
-                showDialog={showDialog}
+                shouldShowDialog={shouldShowDialog}
                 closeDialog={closeDialog}
                 familyIds={familyIds}
                 isLoading={isLoading}
