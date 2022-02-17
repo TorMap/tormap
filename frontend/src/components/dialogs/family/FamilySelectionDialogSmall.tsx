@@ -1,6 +1,16 @@
 import React, {FunctionComponent} from "react";
 import {FamilySelectionDialogProps} from "./FamilySelectionDialog";
-import {AppBar, Button, Dialog, DialogActions, DialogContent, IconButton, Toolbar, Typography} from "@mui/material";
+import {
+    AppBar,
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    IconButton,
+    Toolbar,
+    Typography
+} from "@mui/material";
 import {SlideUpTransition} from "../../../types/ui";
 import CloseIcon from "@mui/icons-material/Close";
 import {FamiliesTable} from "./FamiliesTable";
@@ -8,7 +18,6 @@ import {FamiliesTable} from "./FamiliesTable";
 export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialogProps> = ({
                                                                                               shouldShowDialog,
                                                                                               closeDialog,
-                                                                                              familyIds,
                                                                                               isLoading,
                                                                                               familyIdentifiers,
                                                                                           }) => {
@@ -39,7 +48,7 @@ export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialog
                 >
                     {!isLoading ? <FamiliesTable familyIdentifiers={familyIdentifiers}
                                                  closeFamilySelectionDialog={closeDialog}/>
-                        : <p>loading...</p>}
+                        : <CircularProgress color={"inherit"} size={22.5} sx={{mt: 1}}/>}
                 </DialogContent>
                 <DialogActions sx={{
                     position: "fixed",
