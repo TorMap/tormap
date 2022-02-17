@@ -7,24 +7,21 @@ import {RelayDetailsSelectionHeader} from "./RelayDetailsSelectionHeader";
 import {RelayDetailsHeader} from "./RelayDetailsHeader";
 
 export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps> = ({
-                                                                                         showDialog,
+                                                                                         shouldShowDialog,
                                                                                          closeDialog,
-                                                                                         relayLocations,
-                                                                                         relayIdentifiers,
+                                                                                         relayDetailsMatch,
+                                                                                         sortedRelayMatches,
                                                                                          sortRelaysBy,
                                                                                          handleSelectSortByChange,
-                                                                                         setRelayDetailsId,
-                                                                                         sortedRelayMatches,
                                                                                          relayDetailsId,
-                                                                                         relayDetails,
-                                                                                         relayLocation,
+                                                                                         setRelayDetailsId,
                                                                                      }) => {
     return (
         <Dialog
-            open={showDialog}
+            open={shouldShowDialog}
             onClose={closeDialog}
             onBackdropClick={closeDialog}
-            maxWidth={relayLocations.length > 1 ? "lg" : "md"}
+            maxWidth={sortedRelayMatches.length > 1 ? "lg" : "md"}
             fullWidth={true}
             sx={{
                 paper: {
@@ -34,35 +31,32 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
         >
             <DialogTitle>
                 <Grid container>
-                    {relayIdentifiers.length > 1 && <Grid item xs={12} sm={3}>
+                    {sortedRelayMatches.length > 1 && <Grid item xs={12} sm={3}>
                         <RelayDetailsSelectionHeader
                             sortRelaysBy={sortRelaysBy}
                             handleSelectSortByChange={handleSelectSortByChange}
                         />
                     </Grid>}
-                    <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 9 : 12}>
+                    <Grid item xs={12} sm={sortedRelayMatches.length > 1 ? 9 : 12}>
                         <RelayDetailsHeader
                             closeDialog={closeDialog}
-                            relayLocation={relayLocation}
-                            relayDetails={relayDetails}
+                            relayDetailsMatch={relayDetailsMatch}
                         />
                     </Grid>
                 </Grid>
             </DialogTitle>
             <Divider/>
             <Grid container>
-                {relayIdentifiers.length > 1 && <Grid item xs={12} sm={3} sx={{maxHeight: "65vh", overflow: 'auto'}}>
+                {sortedRelayMatches.length > 1 && <Grid item xs={12} sm={3} sx={{maxHeight: "65vh", overflow: 'auto'}}>
                     <RelayList
                         relayMatches={sortedRelayMatches}
-                        selectedRelay={relayDetailsId}
-                        setRelayDetailsId={setRelayDetailsId}
+                        selectedRelayId={relayDetailsId}
+                        setSelectedRelayId={setRelayDetailsId}
                     />
                 </Grid>}
-                <Grid item xs={12} sm={relayIdentifiers.length > 1 ? 9 : 12}
+                <Grid item xs={12} sm={sortedRelayMatches.length > 1 ? 9 : 12}
                       sx={{maxHeight: "65vh", overflow: 'auto'}}>
-                    {relayDetails && relayLocation &&
-                        <RelayDetailsTable relayDetails={relayDetails} relayLocation={relayLocation}/>
-                    }
+                    {relayDetailsMatch && <RelayDetailsTable relayDetailsMatch={relayDetailsMatch}/>}
                 </Grid>
             </Grid>
         </Dialog>

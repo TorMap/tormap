@@ -6,7 +6,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import {FamiliesTable} from "./FamiliesTable";
 
 export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialogProps> = ({
-                                                                                              showDialog,
+                                                                                              shouldShowDialog,
                                                                                               closeDialog,
                                                                                               familyIds,
                                                                                               isLoading,
@@ -15,7 +15,7 @@ export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialog
     return (
         <>
             <Dialog
-                open={showDialog}
+                open={shouldShowDialog}
                 onClose={closeDialog}
                 fullScreen={true}
                 TransitionComponent={SlideUpTransition}

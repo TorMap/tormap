@@ -1,5 +1,5 @@
 import React, {FunctionComponent} from "react";
-import {FormControl, MenuItem, Select, Typography} from "@mui/material";
+import {Box, FormControl, MenuItem, Select, Typography} from "@mui/material";
 import {SelectChangeEvent} from "@mui/material/Select/SelectInput";
 import {RelayMatch} from "../../../types/relay";
 import {nameOfFactory} from "../../../util/util";
@@ -12,11 +12,11 @@ interface Props {
 export const RelayDetailsSelectionHeader: FunctionComponent<Props> = ({sortRelaysBy, handleSelectSortByChange}) => {
     const nameOfRelayMatch = nameOfFactory<RelayMatch>()
     return (
-        <>
+        <Box display="flex" alignItems={"center"} sx={{mt: 0.5}}>
             <Typography sx={{display: "inline"}} variant="h6">
                 Relays
             </Typography>
-            <FormControl variant="standard" sx={{marginLeft: "20px"}}>
+            <FormControl variant="standard" sx={{ml: 3}}>
                 <Select
                     value={sortRelaysBy}
                     label="Sort by"
@@ -27,6 +27,6 @@ export const RelayDetailsSelectionHeader: FunctionComponent<Props> = ({sortRelay
                     <MenuItem value={nameOfRelayMatch("familyId")}>Family</MenuItem>
                 </Select>
             </FormControl>
-        </>
+        </Box>
     )
 }
