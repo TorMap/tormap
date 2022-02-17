@@ -10,7 +10,7 @@ import {RelayDetailsDialogSmall} from "./RelayDetailsDialogSmall";
 import {useSnackbar} from "notistack";
 import {getRelayType} from "../../../util/aggregate-relays";
 import {SnackbarMessage} from "../../../types/ui";
-import {backend} from "../../../util/util";
+import {backend, nameOfFactory} from "../../../util/util";
 import {SelectChangeEvent} from "@mui/material/Select/SelectInput";
 import {RelayMatch} from "../../../types/relay";
 
@@ -58,6 +58,8 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<DetailsProps> = ({
     const theme = useTheme()
     const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
 
+    const nameOfRelayMatch = nameOfFactory<RelayMatch>()
+
     const relayDetailsIdToLocationMap = useMemo(() => {
         const relayDetailsIdToLocationMap = new Map<number, RelayLocationDto>()
         relayLocations.filter(relay => relay.detailsId).forEach(relay => relayDetailsIdToLocationMap.set(relay.detailsId!!, relay))
@@ -84,13 +86,13 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<DetailsProps> = ({
 
     const sortedRelayMatches = useMemo(
         () => relayMatches.sort((a, b) => {
-                if (sortRelaysBy === "familyId") {
+                if (sortRelaysBy === nameOfRelayMatch("familyId")) {
                     return a[sortRelaysBy]!! < b[sortRelaysBy]!! ? 1 : -1
                 }
                 return a[sortRelaysBy]!! > b[sortRelaysBy]!! ? 1 : -1
             }
         ),
-        [relayMatches, sortRelaysBy]
+        [nameOfRelayMatch, relayMatches, sortRelaysBy]
     )
 
     /**
@@ -139,14 +141,14 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<DetailsProps> = ({
     const relayLocation = relayLocations.find((relay) => relayDetailsId && relay.detailsId === relayDetailsId)
     const handeSelectSortByChange = (event: SelectChangeEvent<keyof RelayMatch>) => {
         switch (event.target.value) {
-            case "relayType":
-                setSortRelaysBy("relayType")
+            case nameOfRelayMatch("relayType"):
+                setSortRelaysBy(nameOfRelayMatch("relayType"))
                 break
-            case "familyId":
-                setSortRelaysBy("familyId")
+            case nameOfRelayMatch("familyId"):
+                setSortRelaysBy(nameOfRelayMatch("familyId"))
                 break
             default:
-                setSortRelaysBy("nickname")
+                setSortRelaysBy(nameOfRelayMatch("nickname"))
                 break
         }
     }

@@ -1,6 +1,5 @@
 // Order of flags must be kept in sync with backend
 import {RelayIdentifierDto, RelayLocationDto} from "../dto/relay";
-import {nameOfFactory} from "../util/util";
 
 export enum RelayFlag {
     Valid,
