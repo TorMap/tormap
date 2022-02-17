@@ -1,7 +1,5 @@
 import React from "react";
 import {Dialog, DialogTitle, Divider, Grid} from "@mui/material";
-import {RelayIdentifierDto, RelayLocationDto} from "../../../dto/relay";
-import {RelayType} from "../../../types/relay";
 import {RelayList} from "./RelayList";
 import {RelayDetailsTable} from "./RelayDetailsTable";
 import {DetailsDialogProps} from "./ResponsiveRelayDetailsDialog";
@@ -71,7 +69,3 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
     )
 }
 
-export interface RelayMatch extends RelayIdentifierDto {
-    location: RelayLocationDto
-    relayType: RelayType
-}
