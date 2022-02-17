@@ -12,45 +12,34 @@ import {getRelayType} from "../../../util/aggregate-relays";
 import {SnackbarMessage} from "../../../types/ui";
 import {backend, nameOfFactory} from "../../../util/util";
 import {SelectChangeEvent} from "@mui/material/Select/SelectInput";
-import {RelayMatch} from "../../../types/relay";
+import {RelayDetailsMatch, RelayMatch} from "../../../types/relay";
 
-export interface DetailsProps {
-    /**
-     * Whether the modal should currently be visible
-     */
-    showDialog: boolean
-
-    /**
-     * Hide the modal
-     */
+export interface Props {
+    shouldShowDialog: boolean
     closeDialog: () => void
-
-    /**
-     * Relays which the user can view detailed information about
-     */
     relayLocations: RelayLocationDto[]
 }
 
-export interface DetailsDialogProps extends DetailsProps {
-    relayIdentifiers: RelayIdentifierDto[]
+export interface DetailsDialogProps {
+    shouldShowDialog: boolean
+    closeDialog: () => void
+    relayDetailsMatch?: RelayDetailsMatch,
+    sortedRelayMatches: RelayMatch[]
     sortRelaysBy: keyof RelayMatch
     handleSelectSortByChange: (event: SelectChangeEvent<keyof RelayMatch>) => void
-    setRelayDetailsId: (id: number) => void
-    sortedRelayMatches: RelayMatch[]
     relayDetailsId?: number
-    relayDetails?: RelayDetailsDto
-    relayLocation?: RelayLocationDto
+    setRelayDetailsId: (id: number) => void
 }
 
-export const ResponsiveRelayDetailsDialog: FunctionComponent<DetailsProps> = ({
-                                                                                  showDialog,
+export const ResponsiveRelayDetailsDialog: FunctionComponent<Props> = ({
+                                                                                  shouldShowDialog,
                                                                                   closeDialog,
                                                                                   relayLocations,
                                                                               }) => {
     // Component state
     const [relayIdentifiers, setRelayIdentifiers] = useState<RelayIdentifierDto[]>([])
-    const [relayDetailsId, setRelayDetailsId] = useState<number>()
-    const [relayDetails, setRelayDetails] = useState<RelayDetailsDto>()
+    const [selectedRelayDetailsId, setRelayDetailsId] = useState<number>()
+    const [selectedRelayDetails, setRelayDetails] = useState<RelayDetailsDto>()
     const [sortRelaysBy, setSortRelaysBy] = useState<keyof RelayMatch>("nickname")
 
     // App context
@@ -95,6 +84,25 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<DetailsProps> = ({
         [nameOfRelayMatch, relayMatches, sortRelaysBy]
     )
 
+    const selectedRelayLocation = useMemo<RelayLocationDto | undefined>(
+        () => relayLocations.find((relay) => selectedRelayDetailsId && relay.detailsId === selectedRelayDetailsId),
+        [selectedRelayDetailsId, relayLocations]
+    )
+
+    const relayDetailsMatch = useMemo<RelayDetailsMatch | undefined>(
+        () => {
+            if (selectedRelayDetails && selectedRelayLocation && selectedRelayDetails.id === selectedRelayDetailsId) {
+                return {
+                    ...selectedRelayDetails,
+                    ...selectedRelayLocation,
+                    relayType: getRelayType(selectedRelayLocation)
+                }
+            }
+            return undefined
+        },
+        [selectedRelayDetails, selectedRelayDetailsId, selectedRelayLocation]
+    )
+
     /**
      * Query relayIdentifiers for relays from backend
      */
@@ -126,19 +134,18 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<DetailsProps> = ({
      * Query more information for the selected relay
      */
     useEffect(() => {
-        if (!relayDetailsId && sortedRelayMatches.length > 0) {
+        if (!selectedRelayDetailsId && sortedRelayMatches.length > 0) {
             setRelayDetailsId(sortedRelayMatches[0].id)
-        } else if (relayDetailsId) {
-            backend.get<RelayDetailsDto>(`/relay/details/relay/${relayDetailsId}`).then(response => {
+        } else if (selectedRelayDetailsId) {
+            backend.get<RelayDetailsDto>(`/relay/details/relay/${selectedRelayDetailsId}`).then(response => {
                 setRelayDetails(response.data)
             })
                 .catch(() => {
                     enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
                 })
         }
-    }, [sortedRelayMatches, relayDetailsId, relayDetailsIdToLocationMap, enqueueSnackbar])
+    }, [sortedRelayMatches, selectedRelayDetailsId, relayDetailsIdToLocationMap, enqueueSnackbar])
 
-    const relayLocation = relayLocations.find((relay) => relayDetailsId && relay.detailsId === relayDetailsId)
     const handeSelectSortByChange = (event: SelectChangeEvent<keyof RelayMatch>) => {
         switch (event.target.value) {
             case nameOfRelayMatch("relayType"):
@@ -155,30 +162,24 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<DetailsProps> = ({
 
     return (isLargeScreen ?
             <RelayDetailsDialogLarge
-                showDialog={showDialog}
+                relayDetailsMatch={relayDetailsMatch}
+                shouldShowDialog={shouldShowDialog}
                 closeDialog={closeDialog}
-                relayLocations={relayLocations}
-                relayIdentifiers={relayIdentifiers}
                 sortRelaysBy={sortRelaysBy}
                 handleSelectSortByChange={handeSelectSortByChange}
-                relayDetails={relayDetails}
                 setRelayDetailsId={setRelayDetailsId}
                 sortedRelayMatches={sortedRelayMatches}
-                relayDetailsId={relayDetailsId}
-                relayLocation={relayLocation}
+                relayDetailsId={selectedRelayDetailsId}
             />
             : <RelayDetailsDialogSmall
-                showDialog={showDialog}
+                relayDetailsMatch={relayDetailsMatch}
+                shouldShowDialog={shouldShowDialog}
                 closeDialog={closeDialog}
-                relayLocations={relayLocations}
-                relayIdentifiers={relayIdentifiers}
                 sortRelaysBy={sortRelaysBy}
                 handleSelectSortByChange={handeSelectSortByChange}
-                relayDetails={relayDetails}
                 setRelayDetailsId={setRelayDetailsId}
                 sortedRelayMatches={sortedRelayMatches}
-                relayDetailsId={relayDetailsId}
-                relayLocation={relayLocation}
+                relayDetailsId={selectedRelayDetailsId}
             />
     )
 }

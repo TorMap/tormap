@@ -1,5 +1,5 @@
 // Order of flags must be kept in sync with backend
-import {RelayIdentifierDto, RelayLocationDto} from "../dto/relay";
+import {RelayDetailsDto, RelayIdentifierDto, RelayLocationDto} from "../dto/relay";
 
 export enum RelayFlag {
     Valid,
@@ -74,5 +74,9 @@ export const RelayTypeTooltip: Record<RelayType, string> = {
 }
 
 export interface RelayMatch extends RelayIdentifierDto, RelayLocationDto {
+    relayType: RelayType
+}
+
+export interface RelayDetailsMatch extends RelayDetailsDto, RelayLocationDto {
     relayType: RelayType
 }

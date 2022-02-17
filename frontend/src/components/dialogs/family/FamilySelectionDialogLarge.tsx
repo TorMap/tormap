@@ -6,14 +6,10 @@ import {FamiliesTable} from "./FamiliesTable";
 import {FamilySelectionDialogProps} from "./FamilySelectionDialog";
 
 /**
- *
  * A Dialog to select a Family from multiple Families
- * @param showDialog - Whether the family selection dialog should be displayed
- * @param closeDialog - Event handler for closing the dialog
- * @param families - The familyIDs available to select
  */
 export const FamilySelectionDialogLarge: FunctionComponent<FamilySelectionDialogProps> = ({
-                                                                                                    showDialog,
+                                                                                                    shouldShowDialog,
                                                                                                     closeDialog,
                                                                                                     familyIds,
                                                                                                     isLoading,
@@ -21,7 +17,7 @@ export const FamilySelectionDialogLarge: FunctionComponent<FamilySelectionDialog
                                                                                                 }) => {
     return (
         <FullHeightDialog
-            open={showDialog}
+            open={shouldShowDialog}
             onClose={closeDialog}
             onBackdropClick={closeDialog}
             maxWidth={familyIds.length > 1 ? "lg" : "md"}
