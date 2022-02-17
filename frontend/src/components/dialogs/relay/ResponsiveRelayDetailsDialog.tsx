@@ -3,7 +3,7 @@
  * @param bandwidthInBytes - number to be formatted
  */
 import React, {FunctionComponent, useEffect, useMemo, useState} from "react";
-import {RelayDetailsDialogLarge, RelayMatch} from "./RelayDetailsDialogLarge";
+import {RelayDetailsDialogLarge} from "./RelayDetailsDialogLarge";
 import {RelayDetailsDto, RelayIdentifierDto, RelayLocationDto} from "../../../dto/relay";
 import {useMediaQuery, useTheme} from "@mui/material";
 import {RelayDetailsDialogSmall} from "./RelayDetailsDialogSmall";
@@ -12,6 +12,7 @@ import {getRelayType} from "../../../util/aggregate-relays";
 import {SnackbarMessage} from "../../../types/ui";
 import {backend} from "../../../util/util";
 import {SelectChangeEvent} from "@mui/material/Select/SelectInput";
+import {RelayMatch} from "../../../types/relay";
 
 export interface DetailsProps {
     /**
@@ -50,7 +51,7 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<DetailsProps> = ({
     const [relayIdentifiers, setRelayIdentifiers] = useState<RelayIdentifierDto[]>([])
     const [relayDetailsId, setRelayDetailsId] = useState<number>()
     const [relayDetails, setRelayDetails] = useState<RelayDetailsDto>()
-    const [sortRelaysBy, setSortRelaysBy] = useState<keyof RelayMatch>("relayType")
+    const [sortRelaysBy, setSortRelaysBy] = useState<keyof RelayMatch>("nickname")
 
     // App context
     const {enqueueSnackbar} = useSnackbar();
@@ -71,18 +72,24 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<DetailsProps> = ({
                 if (relayLocation) {
                     relayMatches.push({
                         ...identifier,
-                        location: relayLocation,
+                        ...relayLocation,
                         relayType: getRelayType(relayLocation)
                     })
                 }
             })
-            return relayMatches.sort((a, b) => a.relayType > b.relayType ? 1 : -1)
+            return relayMatches
         },
         [relayIdentifiers, relayDetailsIdToLocationMap]
     )
 
     const sortedRelayMatches = useMemo(
-        () => relayMatches.sort((a, b) => a[sortRelaysBy] > b[sortRelaysBy] ? 1 : -1),
+        () => relayMatches.sort((a, b) => {
+                if (sortRelaysBy === "familyId") {
+                    return a[sortRelaysBy]!! < b[sortRelaysBy]!! ? 1 : -1
+                }
+                return a[sortRelaysBy]!! > b[sortRelaysBy]!! ? 1 : -1
+            }
+        ),
         [relayMatches, sortRelaysBy]
     )
 
@@ -132,11 +139,14 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<DetailsProps> = ({
     const relayLocation = relayLocations.find((relay) => relayDetailsId && relay.detailsId === relayDetailsId)
     const handeSelectSortByChange = (event: SelectChangeEvent<keyof RelayMatch>) => {
         switch (event.target.value) {
-            case "nickname":
-                setSortRelaysBy("nickname")
+            case "relayType":
+                setSortRelaysBy("relayType")
+                break
+            case "familyId":
+                setSortRelaysBy("familyId")
                 break
             default:
-                setSortRelaysBy("relayType")
+                setSortRelaysBy("nickname")
                 break
         }
     }

@@ -1,8 +1,8 @@
 import React, {FunctionComponent} from "react";
 import {Box, List, ListItem, ListItemIcon, ListItemText} from "@mui/material";
 import {getIcon, RelayFamilyIcon} from "../../../types/icons";
-import {RelayMatch} from "./RelayDetailsDialogLarge";
 import {calculateFamilyColor} from "../../../util/layer-construction";
+import {RelayMatch} from "../../../types/relay";
 
 interface Props {
     /**
@@ -47,8 +47,8 @@ export const RelayList: FunctionComponent<Props> = ({
                         <ListItemText primary={relayMatch.nickname}/>
                         <ListItemIcon sx={{minWidth: "70px"}}>
                             {getIcon(relayMatch.relayType)}
-                            {relayMatch.location.familyId &&
-                                <Box sx={{color: calculateFamilyColor(relayMatch.location.familyId), ml: 2}}>
+                            {relayMatch.familyId &&
+                                <Box sx={{color: calculateFamilyColor(relayMatch.familyId), ml: 2}}>
                                     {RelayFamilyIcon}
                                 </Box>
                             }
