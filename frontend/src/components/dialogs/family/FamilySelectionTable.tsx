@@ -18,10 +18,10 @@ interface Props {
 /**
  * A Component to show a Table with Families to select one
  */
-export const FamiliesTable: FunctionComponent<Props> = ({
-                                                            familyIdentifiers,
-                                                            closeFamilySelectionDialog,
-                                                        }) => {
+export const FamilySelectionTable: FunctionComponent<Props> = ({
+                                                                   familyIdentifiers,
+                                                                   closeFamilySelectionDialog,
+                                                               }) => {
     // App context
     const {settings, setSettings} = useSettings()
 
