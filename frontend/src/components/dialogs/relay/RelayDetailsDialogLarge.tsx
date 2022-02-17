@@ -23,10 +23,11 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
             onBackdropClick={closeDialog}
             maxWidth={sortedRelayMatches.length > 1 ? "lg" : "md"}
             fullWidth={true}
-            sx={{
-                paper: {
-                    height: '70vh',
-                },
+            PaperProps={{
+                sx: {
+                    minHeight: "80vh",
+                    maxHeight: "80vh",
+                }
             }}
         >
             <DialogTitle>
@@ -47,7 +48,7 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
             </DialogTitle>
             <Divider/>
             <Grid container>
-                {sortedRelayMatches.length > 1 && <Grid item xs={12} sm={3} sx={{maxHeight: "65vh", overflow: 'auto'}}>
+                {sortedRelayMatches.length > 1 && <Grid item xs={12} sm={3} sx={{maxHeight: "70vh", overflow: 'auto'}}>
                     <RelayList
                         relayMatches={sortedRelayMatches}
                         selectedRelayId={relayDetailsId}
@@ -55,7 +56,7 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
                     />
                 </Grid>}
                 <Grid item xs={12} sm={sortedRelayMatches.length > 1 ? 9 : 12}
-                      sx={{maxHeight: "65vh", overflow: 'auto'}}>
+                      sx={{maxHeight: "70vh", overflow: 'auto'}}>
                     {relayDetailsMatch && <RelayDetailsTable relayDetailsMatch={relayDetailsMatch}/>}
                 </Grid>
             </Grid>

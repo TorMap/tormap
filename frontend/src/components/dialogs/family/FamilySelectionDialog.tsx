@@ -29,7 +29,9 @@ interface FamilySelectionProps {
     familyIds: number[]
 }
 
-export interface FamilySelectionDialogProps extends Omit<FamilySelectionProps, "reloadSelectedDay"> {
+export interface FamilySelectionDialogProps {
+    shouldShowDialog: boolean
+    closeDialog: () => void
     isLoading: boolean
     familyIdentifiers?: RelayFamilyIdentifier[]
 }
@@ -81,14 +83,12 @@ export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
             <FamilySelectionDialogLarge
                 shouldShowDialog={shouldShowDialog}
                 closeDialog={closeDialog}
-                familyIds={familyIds}
                 isLoading={isLoading}
                 familyIdentifiers={familyIdentifiers}
             />
             : <FamilySelectionDialogSmall
                 shouldShowDialog={shouldShowDialog}
                 closeDialog={closeDialog}
-                familyIds={familyIds}
                 isLoading={isLoading}
                 familyIdentifiers={familyIdentifiers}
             />
