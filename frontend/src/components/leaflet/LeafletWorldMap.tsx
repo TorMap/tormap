@@ -62,13 +62,14 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
                 backgroundColor: "#262626",
                 position: "fixed",
             }}
-            center={[15, 0]}
-            minZoom={2}
+            center={[30, 0]}
             zoom={3}
+            minZoom={2}
+            maxZoom={18}
             scrollWheelZoom={true}
-            zoomSnap={0.5}
-            zoomDelta={0.5}
-            wheelPxPerZoomLevel={200}
+            zoomSnap={1}
+            zoomDelta={1}
+            wheelPxPerZoomLevel={128}
             preferCanvas={true}
             attributionControl={false}
             maxBounds={[[-180, -360], [180, 360]]}
