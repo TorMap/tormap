@@ -1,7 +1,7 @@
 import {CircularProgress, Dialog, DialogContent, DialogTitle, IconButton} from "@mui/material";
 import React, {FunctionComponent} from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import {FamiliesTable} from "./FamiliesTable";
+import {FamilySelectionTable} from "./FamilySelectionTable";
 import {FamilySelectionDialogProps} from "./FamilySelectionDialog";
 
 /**
@@ -40,8 +40,8 @@ export const FamilySelectionDialogLarge: FunctionComponent<FamilySelectionDialog
             <DialogContent
                 dividers
             >
-                {!isLoading ? <FamiliesTable familyIdentifiers={familyIdentifiers}
-                                             closeFamilySelectionDialog={closeDialog}/>
+                {!isLoading ? <FamilySelectionTable familyIdentifiers={familyIdentifiers}
+                                                    closeFamilySelectionDialog={closeDialog}/>
                     : <CircularProgress color={"inherit"} size={22.5} sx={{mt: 1}}/>}
             </DialogContent>
         </Dialog>
