@@ -1,8 +1,6 @@
 import React, {FunctionComponent, useCallback, useEffect, useState} from 'react';
 import {LeafletWorldMap} from "./leaflet/LeafletWorldMap";
 import {Box, Button, useMediaQuery, useTheme} from "@mui/material";
-import "@mui/styles";
-import "../index.css";
 import {AboutInformation} from "./dialogs/AboutInformation";
 import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
