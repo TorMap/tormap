@@ -2,13 +2,13 @@ import React, {FunctionComponent} from "react";
 import {Box, List, ListItem, ListItemIcon, ListItemText} from "@mui/material";
 import {getIcon, RelayFamilyIcon} from "../../../types/icons";
 import {calculateFamilyColor} from "../../../util/layer-construction";
-import {RelayMatch} from "../../../types/relay";
+import {RelayIdentifierMatch} from "../../../types/relay";
 
 interface Props {
     /**
      * Relay matches
      */
-    relayMatches: RelayMatch[]
+    relayMatches: RelayIdentifierMatch[]
 
     /**
      * ID of currently selected relay
