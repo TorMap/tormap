@@ -16,19 +16,24 @@
   },
   "headers": [
     {
-      "source": "static/**",
-      "headers": [
-        {
-          "key": "cache-control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
+      "source" : "**/*.@(jpg|jpeg|gif|png|svg|ico)",
+      "headers" : [ {
+        "key" : "Cache-Control",
+        "value" : "max-age=604800"
+      } ]
+    },
+    {
+      "source" : "**/*.@(css|js)",
+      "headers" : [ {
+        "key" : "Cache-Control",
+        "value" : "max-age=31536000, immutable"
+      } ]
     },
     {
       "source": "service-worker.js",
       "headers": [
         {
-          "key": "cache-control",
+          "key": "Cache-Control",
           "value": "no-cache"
         }
       ]
