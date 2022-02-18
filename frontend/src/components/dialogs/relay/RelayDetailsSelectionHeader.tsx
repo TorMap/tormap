@@ -1,16 +1,16 @@
 import React, {FunctionComponent} from "react";
 import {Box, FormControl, MenuItem, Select, Typography} from "@mui/material";
 import {SelectChangeEvent} from "@mui/material/Select/SelectInput";
-import {RelayMatch} from "../../../types/relay";
+import {RelayIdentifierMatch} from "../../../types/relay";
 import {nameOfFactory} from "../../../util/util";
 
 interface Props {
-    sortRelaysBy: keyof RelayMatch
-    handleSelectSortByChange: (event: SelectChangeEvent<keyof RelayMatch>) => void
+    sortRelaysBy: keyof RelayIdentifierMatch
+    handleSelectSortByChange: (event: SelectChangeEvent<keyof RelayIdentifierMatch>) => void
 }
 
 export const RelayDetailsSelectionHeader: FunctionComponent<Props> = ({sortRelaysBy, handleSelectSortByChange}) => {
-    const nameOfRelayMatch = nameOfFactory<RelayMatch>()
+    const nameOfRelayMatch = nameOfFactory<RelayIdentifierMatch>()
     return (
         <Box display="flex" alignItems={"center"} sx={{mt: 0.5}}>
             <Typography sx={{display: "inline"}} variant="h6">

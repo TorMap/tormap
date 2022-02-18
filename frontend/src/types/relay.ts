@@ -73,7 +73,7 @@ export const RelayTypeTooltip: Record<RelayType, string> = {
     [RelayType.Other]: "Shows relays who have neither a 'Guard' nor 'Exit' flag",
 }
 
-export interface RelayMatch extends RelayIdentifierDto, RelayLocationDto {
+export interface RelayIdentifierMatch extends RelayIdentifierDto, RelayLocationDto {
     relayType: RelayType
 }
 
