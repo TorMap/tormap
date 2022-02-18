@@ -8,7 +8,7 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle,
+    DialogTitle, Divider,
     Grid,
     IconButton,
     List,
@@ -61,6 +61,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                     <Box display="flex" alignItems={"center"}>
                         <Avatar sx={{marginRight: "10px"}} src={TorMapLogo} alt={"TorMap logo"}/>
                         <Typography variant="h6">TorMap</Typography>
+
                     </Box>
                     <IconButton aria-label="close" sx={{
                         position: "absolute",
@@ -99,7 +100,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                                          label={"GitHub"}/>.<br/>
                         The location and ownership of IP ranges can change over time. Since we
                         only use current IP data, some relays might have been hosted somewhere else, than displayed on
-                        our world map.
+                        our world map. The location is also not accurate to the street level but rather an approximate of the city.
                     </Typography>
                     <Grid container spacing={3} sx={{
                         paddingTop: "7px",
@@ -223,10 +224,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                             </Card>
                         </Grid>
                     </Grid>
-                </DialogContent>
-                <DialogContent
-                    dividers
-                >
+                    <Divider sx={{my: 2}}/>
                     <Typography variant={"body2"}>
                         We use IP geolocation data by <ExternalLink href={"https://db-ip.com"}
                                                                     label={"DB-IP"}/>{", "}
@@ -235,6 +233,9 @@ export const AboutInformation: React.FunctionComponent = () => {
                         and GeoJSON data from <ExternalLink href={"https://geojson-maps.ash.ms/"}
                                                             label={"https://geojson-maps.ash.ms/"}/>.
                     </Typography>
+                    {process.env.REACT_APP_VERSION && <Typography variant={"body2"}>
+                        This is TorMap version <ExternalLink href={"https://github.com/TorMap/tormap/releases"} label={process.env.REACT_APP_VERSION}/>.
+                    </Typography>}
                 </DialogContent>
                 {!isLargeScreen ? <DialogActions sx={{
                     position: "fixed",
@@ -250,7 +251,6 @@ export const AboutInformation: React.FunctionComponent = () => {
                         Back
                     </Button>
                 </DialogActions> : null}
-
             </Dialog>
         </>
     )
