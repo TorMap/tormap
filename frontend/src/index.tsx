@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import "@mui/styles";
 import "react-sliding-pane/dist/react-sliding-pane.css";
 import {App} from "./components/App";
 import {createTheme, ThemeProvider} from "@mui/material";
