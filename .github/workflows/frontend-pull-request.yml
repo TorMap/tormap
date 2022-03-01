@@ -10,7 +10,7 @@ jobs:
   frontend-pull-request:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Check yarn cache and build
         run: | 
