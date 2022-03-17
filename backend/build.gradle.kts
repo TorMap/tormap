@@ -47,7 +47,7 @@ dependencies {
     runtimeOnly("com.h2database:h2:1.4.200")
 
     // Run Flyway DB migration tool on startup https://flywaydb.org/
-    implementation("org.flywaydb:flyway-core:8.5.2")
+    implementation("org.flywaydb:flyway-core:8.5.4")
 
     // Read .mmdb (MaxMind) DB files for IP lookups https://maxmind.github.io/MaxMind-DB/
     implementation("com.maxmind.geoip2:geoip2:3.0.0")
@@ -68,8 +68,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("io.kotest:kotest-runner-junit5:5.2.0")
-    testImplementation("io.kotest:kotest-assertions-core:5.2.0")
+    testImplementation("io.kotest:kotest-runner-junit5:5.2.1")
+    testImplementation("io.kotest:kotest-assertions-core:5.2.1")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.0")
 }
 
