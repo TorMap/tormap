@@ -12,6 +12,9 @@
     "JuliusHenke"
   ],
   "rebaseWhen": "behind-base-branch",
+  "automergeType": "branch",
+  "stabilityDays": 3,
+  "prCreation": "immediate",
   "packageRules": [
     {
       "description": "Group all non-major updates",
@@ -22,6 +25,16 @@
         "digest"
       ],
       "groupName": "non-major"
+    },
+    {
+      "description": "Group major dev updates",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "groupName": "major-dev"
     },
     {
       "description": "Ignore outdated dependencies required by TorProject descriptor library",
@@ -37,8 +50,5 @@
       ],
       "enabled": false
     }
-  ],
-  "automergeType": "branch",
-  "stabilityDays": 3,
-  "prCreation": "not-pending"
+  ]
 }
