@@ -15,6 +15,9 @@
   "automergeType": "branch",
   "stabilityDays": 3,
   "prCreation": "immediate",
+  "schedule": [
+    "every weekend"
+  ],
   "packageRules": [
     {
       "description": "Group all non-major updates",
