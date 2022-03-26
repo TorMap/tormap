@@ -3643,9 +3643,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/jest-dom@npm:5.16.2":
-  version: 5.16.2
-  resolution: "@testing-library/jest-dom@npm:5.16.2"
+"@testing-library/jest-dom@npm:5.16.3":
+  version: 5.16.3
+  resolution: "@testing-library/jest-dom@npm:5.16.3"
   dependencies:
     "@babel/runtime": ^7.9.2
     "@types/testing-library__jest-dom": ^5.9.1
@@ -3656,7 +3656,7 @@ __metadata:
     dom-accessibility-api: ^0.5.6
     lodash: ^4.17.15
     redent: ^3.0.0
-  checksum: e4569df67c4c4998d2c60c6cf00ce2f1ac10c9397e0970320728c8be8f4e2c17a0e801705ce8a7384f7f5629b598a6f58db91d4401dde02044f5625405ca0988
+  checksum: 2d7b767bc1337eea9698ec6d57beea37b4993d848b30d7498b72eb975fbf58dea14039515fb4b393f95ea52f55ca5f91db5d7b2f746f8457e345021ed7482ecb
   languageName: node
   linkType: hard
 
@@ -4075,14 +4075,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:17.0.41":
-  version: 17.0.41
-  resolution: "@types/react@npm:17.0.41"
+"@types/react@npm:17.0.43":
+  version: 17.0.43
+  resolution: "@types/react@npm:17.0.43"
   dependencies:
     "@types/prop-types": "*"
     "@types/scheduler": "*"
     csstype: ^3.0.2
-  checksum: 1b086ec0ea5d666f05e19e0724e41278d27a2ca29a2cd71b9d9ab3fe27dba233806eb728d744e092c9fe9637ac738d8c5a05983cde84d215342949b47ecba2ef
+  checksum: 981b0993f5b3ea9d3488b8cc883201e8ae47ba7732929f788f450a79fd72829e658080d5084e67caa008e58d989b0abc1d5f36ff0a1cda09315ea3a3c0c9dc11
   languageName: node
   linkType: hard
 
@@ -13636,14 +13636,14 @@ __metadata:
     "@mui/material": 5.5.2
     "@mui/styles": 5.5.1
     "@react-leaflet/core": 1.1.1
-    "@testing-library/jest-dom": 5.16.2
+    "@testing-library/jest-dom": 5.16.3
     "@testing-library/react": 12.1.4
     "@testing-library/user-event": 13.5.0
     "@types/geojson": 7946.0.8
     "@types/jest": 27.4.1
     "@types/leaflet": 1.7.9
     "@types/node": 16.11.26
-    "@types/react": 17.0.41
+    "@types/react": 17.0.43
     "@types/react-dom": 17.0.14
     axios: 0.26.1
     css-loader: 6.7.1
@@ -13659,7 +13659,7 @@ __metadata:
     react-scripts: 5.0.0
     react-sliding-pane: 7.1.0
     style-loader: 3.3.1
-    typescript: 4.6.2
+    typescript: 4.6.3
   languageName: unknown
   linkType: soft
 
@@ -13801,23 +13801,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:4.6.2":
-  version: 4.6.2
-  resolution: "typescript@npm:4.6.2"
+"typescript@npm:4.6.3":
+  version: 4.6.3
+  resolution: "typescript@npm:4.6.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 8a44ed7e6f6c4cb1ebe8cf236ecda2fb119d84dcf0fbd77e707b2dfea1bbcfc4e366493a143513ce7f57203c75da9d4e20af6fe46de89749366351046be7577c
+  checksum: 255bb26c8cb846ca689dd1c3a56587af4f69055907aa2c154796ea28ee0dea871535b1c78f85a6212c77f2657843a269c3a742d09d81495b97b914bf7920415b
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@4.6.2#~builtin<compat/typescript>":
-  version: 4.6.2
-  resolution: "typescript@patch:typescript@npm%3A4.6.2#~builtin<compat/typescript>::version=4.6.2&hash=bda367"
+"typescript@patch:typescript@4.6.3#~builtin<compat/typescript>":
+  version: 4.6.3
+  resolution: "typescript@patch:typescript@npm%3A4.6.3#~builtin<compat/typescript>::version=4.6.3&hash=bda367"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 40b493a71747fb89fa70df104e2c4a5e284b43750af5bea024090a5261cefa387f7a9372411b13030f7bf5555cee4275443d08805642ae5c74ef76740854a4c7
+  checksum: 6bf45caf847062420592e711bc9c28bf5f9a9a7fa8245343b81493e4ededae33f1774009d1234d911422d1646a2c839f44e1a23ecb111b40a60ac2ea4c1482a8
   languageName: node
   linkType: hard
 
