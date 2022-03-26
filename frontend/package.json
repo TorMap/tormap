@@ -10,13 +10,13 @@
     "@mui/material": "5.5.2",
     "@mui/styles": "5.5.1",
     "@react-leaflet/core": "1.1.1",
-    "@testing-library/jest-dom": "5.16.2",
+    "@testing-library/jest-dom": "5.16.3",
     "@testing-library/react": "12.1.4",
     "@testing-library/user-event": "13.5.0",
     "@types/geojson": "7946.0.8",
     "@types/jest": "27.4.1",
     "@types/node": "16.11.26",
-    "@types/react": "17.0.41",
+    "@types/react": "17.0.43",
     "@types/react-dom": "17.0.14",
     "axios": "0.26.1",
     "date-fns": "2.28.0",
@@ -30,7 +30,7 @@
     "react-leaflet-shapefile": "2.0.0",
     "react-scripts": "5.0.0",
     "react-sliding-pane": "7.1.0",
-    "typescript": "4.6.2"
+    "typescript": "4.6.3"
   },
   "scripts": {
     "start": "react-scripts start",
