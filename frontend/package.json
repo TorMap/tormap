@@ -8,12 +8,12 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
-    "@emotion/react": "11.8.2",
+    "@emotion/react": "11.9.0",
     "@emotion/styled": "11.8.1",
-    "@mui/icons-material": "5.5.1",
-    "@mui/lab": "5.0.0-alpha.75",
-    "@mui/material": "5.5.3",
-    "@mui/styles": "5.5.3",
+    "@mui/icons-material": "5.6.0",
+    "@mui/lab": "5.0.0-alpha.76",
+    "@mui/material": "5.6.0",
+    "@mui/styles": "5.6.0",
     "@react-leaflet/core": "1.1.1",
     "axios": "0.26.1",
     "date-fns": "2.28.0",
