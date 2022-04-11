@@ -1,7 +1,7 @@
 import {Settings} from "./types/settings";
 import {RelayFlag, RelayType} from "./types/relay";
 
-export const backendApiUrl = process.env.REACT_APP_BACKEND_API_URL
+export const backendApiUrl = import.meta.env.VITE_BACKEND_API_URL?.toString()
 
 // Default settings, that are selected on page load
 export const defaultSettings: Settings = {
