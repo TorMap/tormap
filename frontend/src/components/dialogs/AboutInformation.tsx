@@ -233,8 +233,8 @@ export const AboutInformation: React.FunctionComponent = () => {
                         and GeoJSON data from <ExternalLink href={"https://geojson-maps.ash.ms/"}
                                                             label={"https://geojson-maps.ash.ms/"}/>.
                     </Typography>
-                    {process.env.REACT_APP_VERSION && <Typography variant={"body2"}>
-                        This frontend version is based on TorMap <ExternalLink href={"https://github.com/TorMap/tormap/releases"} label={process.env.REACT_APP_VERSION}/>.
+                    {APP_VERSION && <Typography variant={"body2"}>
+                        This is TorMap version <ExternalLink href={"https://github.com/TorMap/tormap/releases"} label={APP_VERSION}/>.
                     </Typography>}
                 </DialogContent>
                 {!isLargeScreen ? <DialogActions sx={{
