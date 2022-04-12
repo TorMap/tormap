@@ -1,5 +1,4 @@
-import React, {FunctionComponent, useCallback, useEffect, useState} from 'react';
-import {LeafletWorldMap} from "./leaflet/LeafletWorldMap";
+import React, {FunctionComponent, Suspense, useCallback, useEffect, useState} from 'react';
 import {Box, Button, useMediaQuery, useTheme} from "@mui/material";
 import {AboutInformation} from "./dialogs/AboutInformation";
 import {backend} from "../util/util";
@@ -7,9 +6,12 @@ import {useSnackbar} from "notistack";
 import {SnackbarMessage} from "../types/ui";
 import {LoadingAnimation} from "./loading/LoadingAnimation";
 import {useDate} from "../context/date-context";
-import {OverlayLarge} from "./overlay/OverlayLarge";
-import {OverlaySmall} from "./overlay/OverlaySmall";
-import {ExternalLink} from "./link/ExternalLink";
+
+// Lazy loaded components
+const ExternalLink = React.lazy(() => import('./link/ExternalLink'));
+const OverlayLarge = React.lazy(() => import('./overlay/OverlayLarge'));
+const OverlaySmall = React.lazy(() => import('./overlay/OverlaySmall'));
+const LeafletWorldMap = React.lazy(() => import('./leaflet/LeafletWorldMap'));
 
 export const App: FunctionComponent = () => {
     // Component state
@@ -41,22 +43,23 @@ export const App: FunctionComponent = () => {
 
     return (
         <>
-            <React.StrictMode>
-                {isLoading ? <LoadingAnimation/> : null}
-            </React.StrictMode>
-            <LeafletWorldMap
-                setIsLoading={useCallback(setIsLoading, [setIsLoading])}
-            />
-            <React.StrictMode>
-                {isLargeScreen ? <OverlayLarge/> : <OverlaySmall/>}
-                <Box sx={{
-                    color: "#b4b4b4",
-                    background: "#262626",
-                    position: "fixed",
-                    right: "2px",
-                    bottom: "2px",
-                    fontSize: ".7rem",
-                }}>
+            <Suspense fallback={<LoadingAnimation/>}>
+                <React.StrictMode>
+                    {isLoading ? <LoadingAnimation/> : null}
+                </React.StrictMode>
+                <LeafletWorldMap
+                    setIsLoading={useCallback(setIsLoading, [setIsLoading])}
+                />
+                <React.StrictMode>
+                    {isLargeScreen ? <OverlayLarge/> : <OverlaySmall/>}
+                    <Box sx={{
+                        color: "#b4b4b4",
+                        background: "#262626",
+                        position: "fixed",
+                        right: "2px",
+                        bottom: "2px",
+                        fontSize: ".7rem",
+                    }}>
                     <span>
                         <ExternalLink href="https://leafletjs.com" label={"Leaflet"}/>
                         {" | © "}
@@ -64,9 +67,10 @@ export const App: FunctionComponent = () => {
                         {" contributors © "}
                         <ExternalLink href="https://carto.com/attributions" label={"CARTO"}/>
                     </span>
-                </Box>
-                <AboutInformation/>
-            </React.StrictMode>
+                    </Box>
+                    <AboutInformation/>
+                </React.StrictMode>
+            </Suspense>
         </>
     )
 }

@@ -11,3 +11,5 @@ export const ExternalLink: FunctionComponent<Props> = ({href,label}) => {
         <Link href={href} target={"_blank"} rel={"noopener"}>{label}</Link>
     )
 }
+
+export default ExternalLink
