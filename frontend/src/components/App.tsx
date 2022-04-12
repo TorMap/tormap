@@ -41,28 +41,32 @@ export const App: FunctionComponent = () => {
 
     return (
         <>
-            {isLoading ? <LoadingAnimation/> : null}
+            <React.StrictMode>
+                {isLoading ? <LoadingAnimation/> : null}
+            </React.StrictMode>
             <LeafletWorldMap
                 setIsLoading={useCallback(setIsLoading, [setIsLoading])}
             />
-            {isLargeScreen ? <OverlayLarge /> : <OverlaySmall />}
-            <Box sx={{
-                color: "#b4b4b4",
-                background: "#262626",
-                position: "fixed",
-                right: "2px",
-                bottom: "2px",
-                fontSize: ".7rem",
-            }}>
-                <span>
-                    <ExternalLink href="https://leafletjs.com" label={"Leaflet"}/>
-                    {" | © "}
-                    <ExternalLink href="https://www.openstreetmap.org/copyright" label={"OpenStreetMap"}/>
-                    {" contributors © "}
-                    <ExternalLink href="https://carto.com/attributions" label={"CARTO"}/>
-                </span>
-            </Box>
-            <AboutInformation/>
+            <React.StrictMode>
+                {isLargeScreen ? <OverlayLarge/> : <OverlaySmall/>}
+                <Box sx={{
+                    color: "#b4b4b4",
+                    background: "#262626",
+                    position: "fixed",
+                    right: "2px",
+                    bottom: "2px",
+                    fontSize: ".7rem",
+                }}>
+                    <span>
+                        <ExternalLink href="https://leafletjs.com" label={"Leaflet"}/>
+                        {" | © "}
+                        <ExternalLink href="https://www.openstreetmap.org/copyright" label={"OpenStreetMap"}/>
+                        {" contributors © "}
+                        <ExternalLink href="https://carto.com/attributions" label={"CARTO"}/>
+                    </span>
+                </Box>
+                <AboutInformation/>
+            </React.StrictMode>
         </>
     )
 }

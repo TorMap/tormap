@@ -11,28 +11,26 @@ import {SettingsProvider} from "./context/settings-context";
 import {defaultSettings} from "./config";
 import {DateProvider} from "./context/date-context";
 import {StatisticsProvider} from "./context/statistics-context";
+import {createRoot} from "react-dom/client";
 
 const theme = createTheme(TorMapTheme)
 
-ReactDOM.render(
-    <React.StrictMode>
-        <ThemeProvider theme={theme}>
-            <SnackbarProvider
-                maxSnack={3}
-                autoHideDuration={4000}
-                variant={"info"}
-                anchorOrigin={{vertical: "top", horizontal: "center"}}
-                preventDuplicate={true}
-            >
-                <SettingsProvider defaultSettings={defaultSettings}>
-                    <DateProvider>
-                        <StatisticsProvider>
-                            <App/>
-                        </StatisticsProvider>
-                    </DateProvider>
-                </SettingsProvider>
-            </SnackbarProvider>
-        </ThemeProvider>
-    </React.StrictMode>,
-    document.getElementById('root')
-);
+createRoot(document.getElementById('root')!).render(
+    <ThemeProvider theme={theme}>
+        <SnackbarProvider
+            maxSnack={3}
+            autoHideDuration={4000}
+            variant={"info"}
+            anchorOrigin={{vertical: "top", horizontal: "center"}}
+            preventDuplicate={true}
+        >
+            <SettingsProvider defaultSettings={defaultSettings}>
+                <DateProvider>
+                    <StatisticsProvider>
+                        <App/>
+                    </StatisticsProvider>
+                </DateProvider>
+            </SettingsProvider>
+        </SnackbarProvider>
+    </ThemeProvider>
+)
