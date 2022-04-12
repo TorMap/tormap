@@ -78,15 +78,17 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
             maxBounds={[[-180, -360], [180, 360]]}
             tap={isAtLeastMediumScreen ? false : undefined} // fixes macOS/Safari bug for Leaflet v1.7.1
         >
-            <LeafletLayers
-                relays={relays}
-                reloadSelectedDay={useCallback(() => setRefreshDayCount(prev => prev + 1), [])}
-            />
-            <TileLayer
-                maxZoom={19}
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                noWrap={true}
-            />
+            <React.StrictMode>
+                <LeafletLayers
+                    relays={relays}
+                    reloadSelectedDay={useCallback(() => setRefreshDayCount(prev => prev + 1), [])}
+                />
+                <TileLayer
+                    maxZoom={19}
+                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    noWrap={true}
+                />
+            </React.StrictMode>
         </MapContainer>
     );
 };
