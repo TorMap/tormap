@@ -1,6 +1,6 @@
 import {defineConfig} from 'vite'
-import reactRefresh from '@vitejs/plugin-react-refresh'
-import checker from 'vite-plugin-checker'
+import viteChecker from 'vite-plugin-checker'
+import viteReact from "@vitejs/plugin-react";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -8,8 +8,8 @@ export default defineConfig({
         outDir: 'build',
     },
     plugins: [
-        reactRefresh(),
-        checker({ typescript: true }),
+        viteReact(),
+        viteChecker({ typescript: true }),
     ],
     define: {
         APP_VERSION: JSON.stringify(process.env.npm_package_version),
