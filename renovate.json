@@ -16,7 +16,7 @@
   "stabilityDays": 3,
   "prCreation": "immediate",
   "schedule": [
-    "every weekend"
+    "before 9am on Saturday"
   ],
   "packageRules": [
     {
