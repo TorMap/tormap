@@ -69,3 +69,5 @@ export const OverlaySmall: FunctionComponent = () => {
         </Box>
     )
 }
+
+export default OverlaySmall

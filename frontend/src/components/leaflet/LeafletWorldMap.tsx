@@ -92,3 +92,5 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
         </MapContainer>
     );
 };
+
+export default LeafletWorldMap

@@ -171,3 +171,5 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<Props> = ({
             />
     )
 }
+
+export default ResponsiveRelayDetailsDialog

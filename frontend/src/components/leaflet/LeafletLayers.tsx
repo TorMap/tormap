@@ -1,5 +1,5 @@
 import {useMap} from "react-leaflet";
-import React, {FunctionComponent, useCallback, useEffect, useMemo, useState} from "react";
+import React, {FunctionComponent, Suspense, useCallback, useEffect, useMemo, useState} from "react";
 import {LayerGroup, LeafletMouseEvent} from "leaflet";
 import {
     applyRelayFilter,
@@ -22,10 +22,12 @@ import {RelayLocationDto} from "../../dto/relay";
 import {SnackbarMessage} from "../../types/ui";
 import {useSnackbar} from "notistack";
 import {useSettings} from "../../context/settings-context";
-import {ResponsiveRelayDetailsDialog} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
-import {FamilySelectionDialog} from "../dialogs/family/FamilySelectionDialog";
 import {useStatistics} from "../../context/statistics-context";
+import {LoadingAnimation} from "../loading/LoadingAnimation";
 
+// Lazy loaded components
+const ResponsiveRelayDetailsDialog = React.lazy(() => import('../dialogs/relay/ResponsiveRelayDetailsDialog'));
+const FamilySelectionDialog = React.lazy(() => import('../dialogs/family/FamilySelectionDialog'));
 
 interface Props {
     /**
@@ -179,7 +181,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
     }, [leafletMarkerLayers, relays, statistics, setStatistics, filteredRelays.length, settings, relayFamilyMap, leafletMap, relayCountryMap, closeSnackbar, enqueueSnackbar, setSettings, relayLocationHeatmapLayer, countryBordersLayer, aggregatedCoordinatesLayer, relayCountryLayer, relayLayer, relaySelectedFamilyLayer, relayFamilyCoordinatesLayer])
 
     return (
-        <>
+        <Suspense fallback={<LoadingAnimation/>}>
             <ResponsiveRelayDetailsDialog
                 shouldShowDialog={showRelayDetailsDialog}
                 closeDialog={useCallback(() => setShowRelayDetailsDialog(false), [])}
@@ -191,6 +193,6 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
                 reloadSelectedDay={reloadSelectedDay}
                 familyIds={familiesForSelectionDialog}
             />
-        </>
+        </Suspense>
     );
 };
