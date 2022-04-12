@@ -1,6 +1,6 @@
 {
   "name": "tormap",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "scripts": {
     "start": "vite",
@@ -38,16 +38,5 @@
     "vite": "2.9.1",
     "vite-plugin-checker": "0.4.5"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ]
-  },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ],
   "packageManager": "yarn@3.2.0"
 }
