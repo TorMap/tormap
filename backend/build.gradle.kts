@@ -12,7 +12,7 @@ plugins {
     kotlin("plugin.jpa") version "1.6.20"
 
     // Generate code documentation https://kotlin.github.io/dokka
-    id("org.jetbrains.dokka") version "1.6.10"
+    id("org.jetbrains.dokka") version "1.6.20"
 
     // Spring https://spring.io/projects/spring-boot
     id("org.springframework.boot") version "2.6.6"
@@ -47,7 +47,7 @@ dependencies {
     runtimeOnly("com.h2database:h2:1.4.200")
 
     // Run Flyway DB migration tool on startup https://flywaydb.org/
-    implementation("org.flywaydb:flyway-core:8.5.7")
+    implementation("org.flywaydb:flyway-core:8.5.8")
 
     // Read .mmdb (MaxMind) DB files for IP lookups https://maxmind.github.io/MaxMind-DB/
     implementation("com.maxmind.geoip2:geoip2:3.0.1")
