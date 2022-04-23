@@ -984,7 +984,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-leaflet/core@npm:2.0.0":
+"@react-leaflet/core@npm:2.0.0, @react-leaflet/core@npm:^2.0.0":
   version: 2.0.0
   resolution: "@react-leaflet/core@npm:2.0.0"
   peerDependencies:
@@ -992,17 +992,6 @@ __metadata:
     react: ^18.0.0
     react-dom: ^18.0.0
   checksum: 8528b05bb3f2218dc783d508fad571ed34986bb9a15e8296f3ca6e090934ee4b9858172cab25bc2ae3255c880660d648477bb609c496bee70d1c0e3fb99f0533
-  languageName: node
-  linkType: hard
-
-"@react-leaflet/core@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "@react-leaflet/core@npm:1.1.1"
-  peerDependencies:
-    leaflet: ^1.7.1
-    react: ^17.0.1
-    react-dom: ^17.0.1
-  checksum: 2fc4a80e5524f9437ac6cef0f95e63388f2df6ecc5107fef85fd097eb2455436e796d41a4c43cdcbb983a4132403646823ba1dc0d953e866eb80808cbfaf0232
   languageName: node
   linkType: hard
 
@@ -3028,16 +3017,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-leaflet@npm:3.2.5":
-  version: 3.2.5
-  resolution: "react-leaflet@npm:3.2.5"
+"react-leaflet@npm:4.0.0":
+  version: 4.0.0
+  resolution: "react-leaflet@npm:4.0.0"
   dependencies:
-    "@react-leaflet/core": ^1.1.1
+    "@react-leaflet/core": ^2.0.0
   peerDependencies:
-    leaflet: ^1.7.1
-    react: ^17.0.1
-    react-dom: ^17.0.1
-  checksum: 503b7cee8acc12e0e2c5e7675432e7ef5742463e3e5420282ce60a9efd306430caefae3cb282c976e3df7665f19aef5b49cdce44a034979b4ea3ee968c2621d2
+    leaflet: ^1.8.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
+  checksum: 0da0445c1a5f7c47483b1e629c83f477181e987235022235d97808f3b16eebee5d479963e20c64033f17a4f4cbd7bcf310dd5db5af2b8576be1a09b44f8a3ffd
   languageName: node
   linkType: hard
 
@@ -3506,7 +3495,7 @@ __metadata:
     notistack: 2.0.4
     react: 18.0.0
     react-dom: 18.0.0
-    react-leaflet: 3.2.5
+    react-leaflet: 4.0.0
     react-leaflet-heatmap-layer: 2.0.0
     react-leaflet-shapefile: 2.0.0
     react-sliding-pane: 7.1.0
