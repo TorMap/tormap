@@ -5,17 +5,17 @@ version = "0.0.2"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
-    kotlin("jvm") version "1.6.20"
-    kotlin("kapt") version "1.6.20"
-    kotlin("plugin.spring") version "1.6.20"
-    kotlin("plugin.allopen") version "1.6.20"
-    kotlin("plugin.jpa") version "1.6.20"
+    kotlin("jvm") version "1.6.21"
+    kotlin("kapt") version "1.6.21"
+    kotlin("plugin.spring") version "1.6.21"
+    kotlin("plugin.allopen") version "1.6.21"
+    kotlin("plugin.jpa") version "1.6.21"
 
     // Generate code documentation https://kotlin.github.io/dokka
     id("org.jetbrains.dokka") version "1.6.20"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "2.6.6"
+    id("org.springframework.boot") version "2.6.7"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 }
 
@@ -37,8 +37,8 @@ dependencies {
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-    implementation("org.springdoc:springdoc-openapi-ui:1.6.7")
-    implementation("org.springdoc:springdoc-openapi-kotlin:1.6.7")
+    implementation("org.springdoc:springdoc-openapi-ui:1.6.8")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.6.8")
 
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.2")
@@ -47,7 +47,7 @@ dependencies {
     runtimeOnly("com.h2database:h2:1.4.200")
 
     // Run Flyway DB migration tool on startup https://flywaydb.org/
-    implementation("org.flywaydb:flyway-core:8.5.8")
+    implementation("org.flywaydb:flyway-core:8.5.9")
 
     // Read .mmdb (MaxMind) DB files for IP lookups https://maxmind.github.io/MaxMind-DB/
     implementation("com.maxmind.geoip2:geoip2:3.0.1")
@@ -70,7 +70,7 @@ dependencies {
     }
     testImplementation("io.kotest:kotest-runner-junit5:5.2.3")
     testImplementation("io.kotest:kotest-assertions-core:5.2.3")
-    testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.0")
+    testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.1")
 }
 
 // Fix version requirement from Kotest
