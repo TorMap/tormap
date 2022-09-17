@@ -38,7 +38,7 @@ dependencies {
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
     implementation("org.springdoc:springdoc-openapi-ui:1.6.8")
-    implementation("org.springdoc:springdoc-openapi-kotlin:1.6.8")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.6.11")
 
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.2")
