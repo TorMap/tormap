@@ -950,12 +950,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/leaflet@npm:1.7.11":
-  version: 1.7.11
-  resolution: "@types/leaflet@npm:1.7.11"
+"@types/leaflet@npm:1.8.0":
+  version: 1.8.0
+  resolution: "@types/leaflet@npm:1.8.0"
   dependencies:
     "@types/geojson": "*"
-  checksum: 6613dbc91f174545ed39183a8564a344152f1884f02ab4dbc002b6bd4816d8525b5247e62217694763daf727ca5e589f40144dc809edb7194064e6bdc2f4369a
+  checksum: a0190d48dfd49c7526a38c94490d9acdcb09de8b0338ebae8b33374b24f474330be82733007ab1c39008a61c4712b743ccf230909f203f0f35c9986b3a583ab6
   languageName: node
   linkType: hard
 
@@ -3487,7 +3487,7 @@ __metadata:
     "@mui/styles": 5.10.3
     "@react-leaflet/core": 2.0.1
     "@types/geojson": 7946.0.10
-    "@types/leaflet": 1.7.11
+    "@types/leaflet": 1.8.0
     "@types/node": 16.11.59
     "@types/react": 18.0.20
     "@types/react-dom": 18.0.6
