@@ -34,7 +34,7 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
             <DatePicker
                 value={selectedDate}
                 mask={"____-__-__"}
-                renderInput={(params) =>
+                renderInput={(params: any) =>
                     largeScreen ? <TextField variant={"standard"}
                                              {...params}
                                              sx={{
@@ -56,7 +56,7 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
                 onAccept={handleDateChange}
                 minDate={firstAvailableDate}
                 maxDate={lastAvailableDate}
-                shouldDisableDate={date => {
+                shouldDisableDate={(date: any) => {
                     return !(availableDays.includes(format(date, "yyyy-MM-dd")))
                 }}
                 views={["year", "month", "day"]}
