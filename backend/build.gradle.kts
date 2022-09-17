@@ -9,7 +9,7 @@ plugins {
     kotlin("kapt") version "1.6.21"
     kotlin("plugin.spring") version "1.6.21"
     kotlin("plugin.allopen") version "1.6.21"
-    kotlin("plugin.jpa") version "1.6.21"
+    kotlin("plugin.jpa") version "1.7.10"
 
     // Generate code documentation https://kotlin.github.io/dokka
     id("org.jetbrains.dokka") version "1.6.21"
