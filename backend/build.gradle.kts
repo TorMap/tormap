@@ -60,7 +60,7 @@ dependencies {
     implementation("org.apache.commons:commons-compress:1.13")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.12.4")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.12.4")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.12.4")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.13.4")
     implementation("org.slf4j:slf4j-api:1.7.32")
     implementation("org.tukaani:xz:1.6")
 
