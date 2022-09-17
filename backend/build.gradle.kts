@@ -5,18 +5,18 @@ version = "0.0.2"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
-    kotlin("jvm") version "1.6.21"
-    kotlin("kapt") version "1.6.21"
-    kotlin("plugin.spring") version "1.6.21"
-    kotlin("plugin.allopen") version "1.6.21"
-    kotlin("plugin.jpa") version "1.6.21"
+    kotlin("jvm") version "1.7.10"
+    kotlin("kapt") version "1.7.10"
+    kotlin("plugin.spring") version "1.7.10"
+    kotlin("plugin.allopen") version "1.7.10"
+    kotlin("plugin.jpa") version "1.7.10"
 
     // Generate code documentation https://kotlin.github.io/dokka
-    id("org.jetbrains.dokka") version "1.6.21"
+    id("org.jetbrains.dokka") version "1.7.10"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "2.6.7"
-    id("io.spring.dependency-management") version "1.0.11.RELEASE"
+    id("org.springframework.boot") version "2.7.3"
+    id("io.spring.dependency-management") version "1.0.13.RELEASE"
 }
 
 repositories {
@@ -37,23 +37,23 @@ dependencies {
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-    implementation("org.springdoc:springdoc-openapi-ui:1.6.8")
-    implementation("org.springdoc:springdoc-openapi-kotlin:1.6.8")
+    implementation("org.springdoc:springdoc-openapi-ui:1.6.11")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.6.11")
 
     // Serialization
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.2")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4")
 
     // Latest stable H2 database driver https://www.h2database.com/
     runtimeOnly("com.h2database:h2:1.4.200")
 
     // Run Flyway DB migration tool on startup https://flywaydb.org/
-    implementation("org.flywaydb:flyway-core:8.5.10")
+    implementation("org.flywaydb:flyway-core:8.5.13")
 
     // Read .mmdb (MaxMind) DB files for IP lookups https://maxmind.github.io/MaxMind-DB/
     implementation("com.maxmind.geoip2:geoip2:3.0.1")
 
     // Anaylz user agent https://yauaa.basjes.nl/
-    implementation("nl.basjes.parse.useragent:yauaa:7.0.0")
+    implementation("nl.basjes.parse.useragent:yauaa:7.5.0")
 
     // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
     implementation("commons-codec:commons-codec:1.10")
@@ -68,9 +68,9 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("io.kotest:kotest-runner-junit5:5.3.0")
-    testImplementation("io.kotest:kotest-assertions-core:5.3.0")
-    testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.1")
+    testImplementation("io.kotest:kotest-runner-junit5:5.4.2")
+    testImplementation("io.kotest:kotest-assertions-core:5.4.2")
+    testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.2")
 }
 
 // Fix version requirement from Kotest
