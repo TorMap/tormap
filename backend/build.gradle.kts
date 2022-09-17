@@ -12,7 +12,7 @@ plugins {
     kotlin("plugin.jpa") version "1.6.21"
 
     // Generate code documentation https://kotlin.github.io/dokka
-    id("org.jetbrains.dokka") version "1.6.21"
+    id("org.jetbrains.dokka") version "1.7.10"
 
     // Spring https://spring.io/projects/spring-boot
     id("org.springframework.boot") version "2.6.7"
