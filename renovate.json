@@ -3,6 +3,9 @@
   "extends": [
     "github>juliushenke/renovate-preset"
   ],
+  "assignees": [
+    "JuliusHenke"
+  ],
   "packageRules": [
     {
       "description": "Ignore outdated dependencies required by TorProject descriptor library",
