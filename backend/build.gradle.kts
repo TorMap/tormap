@@ -41,7 +41,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-kotlin:1.6.8")
 
     // Serialization
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.2")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4")
 
     // Latest stable H2 database driver https://www.h2database.com/
     runtimeOnly("com.h2database:h2:1.4.200")
