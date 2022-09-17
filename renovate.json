@@ -2,21 +2,5 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "github>juliushenke/renovate-preset"
-  ],
-  "packageRules": [
-    {
-      "description": "Ignore outdated dependencies required by TorProject descriptor library",
-      "managers": [
-        "gradle"
-      ],
-      "packagePatterns": [
-        "^commons-codec",
-        "^org.apache.commons",
-        "^com.fasterxml.jackson.core",
-        "^org.slf4j",
-        "^org.tukaani"
-      ],
-      "enabled": false
-    }
   ]
 }
