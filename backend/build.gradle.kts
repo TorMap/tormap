@@ -16,7 +16,7 @@ plugins {
 
     // Spring https://spring.io/projects/spring-boot
     id("org.springframework.boot") version "2.7.3"
-    id("io.spring.dependency-management") version "1.0.13.RELEASE"
+    id("io.spring.dependency-management") version "1.0.14.RELEASE"
 }
 
 repositories {
@@ -53,7 +53,7 @@ dependencies {
     implementation("com.maxmind.geoip2:geoip2:3.0.1")
 
     // Anaylz user agent https://yauaa.basjes.nl/
-    implementation("nl.basjes.parse.useragent:yauaa:7.5.0")
+    implementation("nl.basjes.parse.useragent:yauaa:7.6.0")
 
     // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
     implementation("commons-codec:commons-codec:1.10")
