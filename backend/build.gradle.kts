@@ -15,7 +15,7 @@ plugins {
     id("org.jetbrains.dokka") version "1.7.10"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "2.7.3"
+    id("org.springframework.boot") version "2.7.4"
     id("io.spring.dependency-management") version "1.0.14.RELEASE"
 }
 
