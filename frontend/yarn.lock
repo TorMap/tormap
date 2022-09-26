@@ -1025,14 +1025,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:18.0.20":
-  version: 18.0.20
-  resolution: "@types/react@npm:18.0.20"
+"@types/react@npm:18.0.21":
+  version: 18.0.21
+  resolution: "@types/react@npm:18.0.21"
   dependencies:
     "@types/prop-types": "*"
     "@types/scheduler": "*"
     csstype: ^3.0.2
-  checksum: f67f5b16efd89e237bf0e40d133218c398cf2a2f81166ce1e9fa32d0df6b869106740983396c51df9708a1b79b2a9d725eda1230cc3064c92d86d9ea6a4b714c
+  checksum: 36c1a7c9d507e81e2e629c1ad3db51d7b84d8b010c2d5008da411874286c6a5ccc711ae1d4c470efc0bdc77153cc8804a40e927e929e5164c669ca41b84b846d
   languageName: node
   linkType: hard
 
@@ -2318,10 +2318,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet@npm:1.9.0":
-  version: 1.9.0
-  resolution: "leaflet@npm:1.9.0"
-  checksum: 2f55313f681f149ff8f011b0cbc66e3a8710cec40f033243d24a26c57a46c56e7b8ceed53a61f0b258d4adf99592cc9c14d5f1de8eb70a6037f496ead2d228cf
+"leaflet@npm:1.9.1":
+  version: 1.9.1
+  resolution: "leaflet@npm:1.9.1"
+  checksum: e91f71c9979c8988e11c49ca456f827f1fbe92bdda8ad266defd32a2272b5108678ba13d7564e4edbca9b2c1b40d310c01174222fd148445733ba1166c520350
   languageName: node
   linkType: hard
 
@@ -3489,12 +3489,12 @@ __metadata:
     "@types/geojson": 7946.0.10
     "@types/leaflet": 1.8.0
     "@types/node": 16.11.59
-    "@types/react": 18.0.20
+    "@types/react": 18.0.21
     "@types/react-dom": 18.0.6
     "@vitejs/plugin-react": 1.3.2
     axios: 0.27.2
     date-fns: 2.29.3
-    leaflet: 1.9.0
+    leaflet: 1.9.1
     leaflet.heat: 0.2.0
     notistack: 2.0.5
     react: 18.2.0
