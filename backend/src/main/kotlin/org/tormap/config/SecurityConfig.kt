@@ -20,9 +20,6 @@ class SecurityConfig(
     @Value("\${spring.security.user.passwordFile}")
     private val adminPasswordFile: String,
 
-    @Value("\${spring.h2.console.path}")
-    private val h2ConsolePath: String,
-
     @Value("\${management.endpoints.web.base-path}")
     private val actuatorPath: String,
 ) : WebSecurityConfigurerAdapter() {
@@ -57,16 +54,6 @@ class SecurityConfig(
             .authenticated()
             .and()
             .formLogin()
-
-        // Require authenticated users for H2 database web console
-        http.authorizeRequests()
-            .antMatchers("$h2ConsolePath/**")
-            .authenticated()
-            .and()
-            .formLogin()
-            .and()
-            .csrf().disable()
-            .headers().frameOptions().disable()
 
         // Disable spring security features for public facing endpoints
         http.authorizeRequests()

@@ -1,6 +1,6 @@
 package org.tormap.service
 
-import org.springframework.jdbc.support.incrementer.H2SequenceMaxValueIncrementer
+import org.springframework.jdbc.support.incrementer.PostgresSequenceMaxValueIncrementer
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.tormap.adapter.controller.RelayLocationController
@@ -19,7 +19,7 @@ import javax.transaction.Transactional
 @Service
 class RelayDetailsUpdateService(
     private val relayDetailsRepositoryImpl: RelayDetailsRepositoryImpl,
-    private val dbSequenceIncrementer: H2SequenceMaxValueIncrementer,
+    private val dbSequenceIncrementer: PostgresSequenceMaxValueIncrementer,
     private val ipLookupService: IpLookupService,
     private val relayLocationController: RelayLocationController,
 ) {
