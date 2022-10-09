@@ -7,8 +7,9 @@ import org.tormap.adapter.dto.RelayIdentifiersDto
 import javax.transaction.Transactional
 
 interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
-    @Query("SELECT DISTINCT new org.tormap.database.repository.MonthFamilyMembersCount(month, count(familyId)) " +
-            "FROM RelayDetails GROUP BY month ORDER BY month"
+    @Query(
+        "SELECT DISTINCT new org.tormap.database.repository.MonthFamilyMembersCount(month, count(familyId)) " +
+                "FROM RelayDetails GROUP BY month ORDER BY month"
     )
     fun findDistinctMonthFamilyMemberCount(): List<MonthFamilyMembersCount>
 
@@ -18,17 +19,17 @@ interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
     @Query(
         "SELECT new org.tormap.adapter.dto.RelayIdentifiersDto(id, fingerprint, nickname) " +
                 "FROM RelayDetails " +
-            "WHERE id in :ids"
+                "WHERE id in :ids"
     )
     fun findRelayIdentifiers(ids: List<Long>): List<RelayIdentifiersDto>
 
     @Query(
-        "SELECT new org.tormap.adapter.dto.RelayFamilyIdentifiersDto(familyId, count(id), function('LISTAGG', nickname, ', '), function('LISTAGG', autonomousSystemName, ', ')) " +
+        "SELECT new org.tormap.adapter.dto.RelayFamilyIdentifiersDto(familyId, count(id), '', '') " +
                 "FROM RelayDetails " +
-            "WHERE familyId in :ids " +
-            "GROUP BY familyId"
+                "WHERE familyId in :familyIds " +
+                "GROUP BY familyId"
     )
-    fun findFamilyIdentifiers(ids: List<Long>): List<RelayFamilyIdentifiersDto>
+    fun findFamilyIdentifiers(familyIds: List<Long>): List<RelayFamilyIdentifiersDto>
 
     @Transactional
     @Modifying

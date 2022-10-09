@@ -90,6 +90,7 @@ under http://localhost:8080/openapi.
 
 #### Database
 
+[//]: # (TODO: document new Postgres database)
 TorMap uses an embedded H2 database which saves the whole state in a single DB file located
 at `backend/resources/database/tormap.mv.db`.
 

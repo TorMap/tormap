@@ -1,86 +1,86 @@
-create sequence if not exists HIBERNATE_SEQUENCE;
+CREATE SEQUENCE public.hibernate_sequence INCREMENT 1 START 1 MINVALUE 1;
 
-create table if not exists PROCESSED_FILE
+create table if not exists processed_file
 (
-    FILENAME      VARCHAR(255) not null,
-    TYPE          INTEGER      not null,
-    ERROR         VARCHAR(255),
-    LAST_MODIFIED BIGINT       not null,
-    PROCESSED_AT  TIMESTAMP,
-    primary key (FILENAME, TYPE)
+    filename      varchar(255) not null,
+    type          integer      not null,
+    error         varchar(255),
+    last_modified bigint       not null,
+    processed_at  timestamp,
+    primary key (filename, type)
 );
 
-create table if not exists RELAY_DETAILS
+create table if not exists relay_details
 (
-    ID                        BIGINT  not null
+    id                        bigint  not null
         primary key,
-    ADDRESS                   VARCHAR(15),
-    ALLOW_SINGLE_HOP_EXITS    BOOLEAN not null,
-    AUTONOMOUS_SYSTEM_NAME    VARCHAR(255),
-    AUTONOMOUS_SYSTEM_NUMBER  INTEGER,
-    BANDWIDTH_BURST           INTEGER not null,
-    BANDWIDTH_OBSERVED        INTEGER not null,
-    BANDWIDTH_RATE            INTEGER not null,
-    CACHES_EXTRA_INFO         BOOLEAN not null,
-    CIRCUIT_PROTOCOL_VERSIONS VARCHAR(255),
-    CONTACT                   VARCHAR(255),
-    DAY                       DATE,
-    FAMILY_ENTRIES            CLOB,
-    FAMILY_ID                 BIGINT,
-    FINGERPRINT               CHAR(40),
-    IS_HIBERNATING            BOOLEAN not null,
-    IS_HIDDEN_SERVICE_DIR     BOOLEAN not null,
-    LINK_PROTOCOL_VERSIONS    VARCHAR(255),
-    MONTH                     CHAR(7),
-    NICKNAME                  VARCHAR(19),
-    PLATFORM                  VARCHAR(255),
-    PROTOCOLS                 VARCHAR(255),
-    TUNNELLED_DIR_SERVER      BOOLEAN not null,
-    UPTIME                    BIGINT,
-    constraint UKDJ8S83CN1FWMFUOJB7GMDQJPB
-        unique (MONTH, FINGERPRINT)
+    address                   varchar(15),
+    allow_single_hop_exits    boolean not null,
+    autonomous_system_name    varchar(255),
+    autonomous_system_number  integer,
+    bandwidth_burst           integer not null,
+    bandwidth_observed        integer not null,
+    bandwidth_rate            integer not null,
+    caches_extra_info         boolean not null,
+    circuit_protocol_versions varchar(255),
+    contact                   varchar(255),
+    day                       date,
+    family_entries            text,
+    family_id                 bigint,
+    fingerprint               char(40),
+    is_hibernating            boolean not null,
+    is_hidden_service_dir     boolean not null,
+    link_protocol_versions    varchar(255),
+    month                     char(7),
+    nickname                  varchar(19),
+    platform                  varchar(255),
+    protocols                 varchar(255),
+    tunnelled_dir_server      boolean not null,
+    uptime                    bigint,
+    constraint ukdj8s83cn1fwmfuojb7gmdqjpb
+        unique (month, fingerprint)
 );
 
-create index if not exists IDXCQ3LHP78MBMUB50NO34JX9YUD
-    on RELAY_DETAILS (FAMILY_ID);
+create index if not exists idxcq3lhp78mbmub50no34jx9yud
+    on relay_details (family_id);
 
-create table if not exists RELAY_LOCATION
+create table if not exists relay_location
 (
-    ID           BIGINT not null
+    id           bigint not null
         primary key,
-    COUNTRY_CODE CHAR(2),
-    DAY          DATE,
-    FINGERPRINT  CHAR(40),
-    FLAGS        VARCHAR(255),
-    LATITUDE     DECIMAL(19, 2),
-    LONGITUDE    DECIMAL(19, 2),
-    constraint UKS31O09JOXQGOQOOLNUJ89FKTA
-        unique (DAY, FINGERPRINT)
+    country_code char(2),
+    day          date,
+    fingerprint  char(40),
+    flags        varchar(255),
+    latitude     decimal(19, 2),
+    longitude    decimal(19, 2),
+    constraint uks31o09joxqgoqoolnuj89fkta
+        unique (day, fingerprint)
 );
 
-create index if not exists IDX7AFGO3A18QK33VQ1E11CFNV81
-    on RELAY_LOCATION (DAY);
+create index if not exists idx7afgo3a18qk33vq1e11cfnv81
+    on relay_location (day);
 
-create table if not exists USER_TRACE
+create table if not exists user_trace
 (
-    ID                  BIGINT  not null
+    id                  bigint  not null
         primary key,
-    AGENT_MAJOR_VERSION VARCHAR(255),
-    COUNTRY_CODE        CHAR(2),
-    DEVICE_CLASS        VARCHAR(255),
-    METHOD              INTEGER,
-    OPERATING_SYSTEM    VARCHAR(255),
-    RESPONSE_STATUS     INTEGER not null,
-    TIME_TAKEN          BIGINT  not null,
-    TIMESTAMP           TIMESTAMP,
-    URI                 VARCHAR(255)
+    agent_major_version varchar(255),
+    country_code        char(2),
+    device_class        varchar(255),
+    method              integer,
+    operating_system    varchar(255),
+    response_status     integer not null,
+    time_taken          bigint  not null,
+    timestamp           timestamp,
+    uri                 varchar(255)
 );
 
-create index if not exists IDX24NOI93PUMMSW06GWGFJAA8HA
-    on USER_TRACE (TIMESTAMP);
+create index if not exists idx24noi93pummsw06gwgfjaa8ha
+    on user_trace (timestamp);
 
-create index if not exists IDXPAS47VYVU0O6HKFNT39W1OFDS
-    on USER_TRACE (METHOD);
+create index if not exists idxpas47vyvu0o6hkfnt39w1ofds
+    on user_trace (method);
 
-create index if not exists IDX7KD9LCF6BEYWA50YYYKKXVLFH
-    on USER_TRACE (RESPONSE_STATUS);
+create index if not exists idx7kd9lcf6beywa50yyykkxvlfh
+    on user_trace (response_status);
