@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  backend:
+    image: eclipse-temurin:17-jdk
+    working_dir: /usr/src/app
+    command: ./gradlew bootRun
+    volumes:
+      # mounts backend directory
+      - ./backend/:/usr/src/app
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    ports:
+      - "8080:8080"
+
+  db:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+
+  frontend:
+    image: node:16
+    working_dir: /usr/src/app
+    command: bash -c "yarn && yarn start"
+    volumes:
+      # mounts frontend directory
+      - ./frontend/:/usr/src/app
+    ports:
+      - "3000:3000"

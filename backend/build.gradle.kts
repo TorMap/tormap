@@ -43,8 +43,8 @@ dependencies {
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4")
 
-    // Latest stable H2 database driver https://www.h2database.com/
-    runtimeOnly("com.h2database:h2:1.4.200")
+    // Postgres Database
+    implementation("org.postgresql:postgresql:42.5.0")
 
     // Run Flyway DB migration tool on startup https://flywaydb.org/
     implementation("org.flywaydb:flyway-core:8.5.13")
