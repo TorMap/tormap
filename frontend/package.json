@@ -15,7 +15,7 @@
     "@mui/material": "5.10.8",
     "@mui/styles": "5.10.8",
     "@react-leaflet/core": "2.1.0",
-    "axios": "0.27.2",
+    "axios": "1.1.2",
     "date-fns": "2.29.3",
     "leaflet": "1.9.2",
     "leaflet.heat": "0.2.0",
