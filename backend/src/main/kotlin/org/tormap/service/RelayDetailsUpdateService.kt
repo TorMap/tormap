@@ -10,6 +10,7 @@ import org.tormap.util.addFamilyMember
 import org.tormap.util.commaSeparatedToList
 import org.tormap.util.getFamilyMember
 import org.tormap.util.logger
+import javax.sql.DataSource
 import javax.transaction.Transactional
 
 
@@ -19,11 +20,12 @@ import javax.transaction.Transactional
 @Service
 class RelayDetailsUpdateService(
     private val relayDetailsRepositoryImpl: RelayDetailsRepositoryImpl,
-    private val dbSequenceIncrementer: PostgresSequenceMaxValueIncrementer,
     private val ipLookupService: IpLookupService,
     private val relayLocationController: RelayLocationController,
+    dataSource: DataSource,
 ) {
     private val logger = logger()
+    private val dbSequenceIncrementer = PostgresSequenceMaxValueIncrementer(dataSource, "hibernate_sequence")
 
     /**
      * Updates [RelayDetails.autonomousSystemName] and [RelayDetails.autonomousSystemNumber] for all [RelayDetails] missing this info.
