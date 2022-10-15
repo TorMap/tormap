@@ -12,7 +12,7 @@ plugins {
     kotlin("plugin.jpa") version "1.7.20"
 
     // Generate code documentation https://kotlin.github.io/dokka
-    id("org.jetbrains.dokka") version "1.7.10"
+    id("org.jetbrains.dokka") version "1.7.20"
 
     // Spring https://spring.io/projects/spring-boot
     id("org.springframework.boot") version "2.7.4"
@@ -68,8 +68,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("io.kotest:kotest-runner-junit5:5.5.0")
-    testImplementation("io.kotest:kotest-assertions-core:5.5.0")
+    testImplementation("io.kotest:kotest-runner-junit5:5.5.1")
+    testImplementation("io.kotest:kotest-assertions-core:5.5.1")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.2")
 }
 
