@@ -16,7 +16,7 @@ plugins {
 
     // Spring https://spring.io/projects/spring-boot
     id("org.springframework.boot") version "2.7.4"
-    id("io.spring.dependency-management") version "1.0.14.RELEASE"
+    id("io.spring.dependency-management") version "1.1.0"
 }
 
 repositories {
@@ -37,8 +37,8 @@ dependencies {
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-    implementation("org.springdoc:springdoc-openapi-ui:1.6.11")
-    implementation("org.springdoc:springdoc-openapi-kotlin:1.6.11")
+    implementation("org.springdoc:springdoc-openapi-ui:1.6.12")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.6.12")
 
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4")
@@ -53,7 +53,7 @@ dependencies {
     implementation("com.maxmind.geoip2:geoip2:3.0.1")
 
     // Anaylz user agent https://yauaa.basjes.nl/
-    implementation("nl.basjes.parse.useragent:yauaa:7.6.0")
+    implementation("nl.basjes.parse.useragent:yauaa:7.7.0")
 
     // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
     implementation("commons-codec:commons-codec:1.10")
