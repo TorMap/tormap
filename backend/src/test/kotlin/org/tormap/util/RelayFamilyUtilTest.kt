@@ -6,7 +6,6 @@ import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.tormap.relayDetailsMock
-import java.lang.Exception
 
 @SpringBootTest
 @ActiveProfiles("test")
