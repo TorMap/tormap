@@ -10,12 +10,17 @@ disk. Processed data can instantly be fetched by the frontend to be displayed on
 
 ## Development
 
+The easiest way to get started quickly is by running the `docker compose up` command in the
+root project directory. This requires [Docker Compose](https://docs.docker.com/compose/) to be installed on your system.
+
 ### Requirements
 
 Make sure you have at least 100 GB of free disk space, since the downloaded archive and local DB will take up a lot of
 space.
 
-On most `Unix` systems you can use the installation script `./install`. It will try to use your package manager to
+If you are not using [Docker Compose](https://docs.docker.com/compose/) for development, you will need to install system
+requirements. On most `Unix` systems you can use the installation script `./install`. It will try to use your package
+manager to
 install missing requirements. Depending on your shell you run the script with `./install` or `bash ./install`.
 
 If you use Windows or the `./install` script failed, please install these manually:
@@ -63,7 +68,8 @@ be available, if the corresponding relay server descriptors have been processed.
 ### Backend
 
 The backend uses a [Spring Boot](https://spring.io/projects/spring-boot) standalone webserver and is written
-in [Kotlin](https://kotlinlang.org/).
+in [Kotlin](https://kotlinlang.org/). A PostgresSQL database is used to store backend data and needs to be available
+when starting the backend.
 
 #### CLI commands
 
@@ -88,22 +94,6 @@ at `backend/build.gradle.kts`.
 An interactive Swagger UI is available under http://localhost:8080 and the specification can also be viewed in raw JSON
 under http://localhost:8080/openapi.
 
-#### Database
-
-[//]: # (TODO: document new Postgres database)
-TorMap uses an embedded H2 database which saves the whole state in a single DB file located
-at `backend/resources/database/tormap.mv.db`.
-
-To manually connect to the DB you either can add the datasource in your IDE or open http://localhost:8080/h2 while the
-backend is running. Make sure to configure the connection the same way your `application.yml` is set. In an IDE it might
-be necessary to configure the datasource URL with an absolute path to ensure the correct working directory is used.
-
-Preprocessed DBs can be downloaded to speed up project deployment. Please make sure the major version (2.x.x) of the
-provided download matches the TorMap backend version you want to deploy (check version in `backend/build.gradle.kts`).:
-
-DB download folder:
-https://mega.nz/folder/905XAC4Z#wwpWQm7w_R7tdAJHjMHkNg
-
 #### IP lookups
 
 TorMap uses DB files in [MaxMind DB file format](https://maxmind.github.io/MaxMind-DB/) (
@@ -127,10 +117,7 @@ When the backend is started, an admin password is displayed in the console. Afte
 in `backend/resources/admin-password.txt` for future runs. While the backend is running you can login
 with `username=admin` and the password at `http://localhost:8080/login`.
 
-This grants you access to:
-
-- Spring actuator endpoints http://localhost:8080/actuator
-- H2 DB web console http://localhost:8080/h2
+This grants you access to the Spring actuator endpoints: http://localhost:8080/actuator
 
 ### Frontend
 
@@ -174,8 +161,8 @@ Build docker image:
 1. Go to `backend` directory where file `gradlew` is located
 2. Make sure [docker](https://docs.docker.com/get-docker/) is installed and the docker daemon is running
 3. Run command: `./gradlew bootBuildImage`
-4. A new image named juliushenke/tormap should be available in your local docker registry
-5. Run image in new container with command: `docker run -p 8080:8080 juliushenke/tormap` (optionally add the
+4. A new image named tormap/backend should be available in your local docker registry
+5. Run image in new container with command: `docker run -p 8080:8080 tormap/backend` (optionally add the
    flag `-v ~/resources:/workspace/resources/` to mount a preprocessed resources like the DB from your host file system
    into the container)
 6. Backend should be available at http://localhost:8080
@@ -193,5 +180,5 @@ Build docker image:
 
 TorMap releases can be found at https://github.com/TorMap/tormap/releases. We use
 [Semantic Versioning](https://semver.org/) and try to keep the frontend,
-backend, [GitHub](https://github.com/TorMap/tormap) and [Docker tags](https://hub.docker.com/r/juliushenke/tormap/tags)
+backend, [GitHub](https://github.com/TorMap/tormap) and [Docker tags](https://hub.docker.com/r/tormap/)
 consistent.
