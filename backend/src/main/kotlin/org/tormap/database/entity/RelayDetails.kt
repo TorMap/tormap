@@ -19,7 +19,7 @@ import javax.persistence.*
     ]
 )
 class RelayDetails(
-    @Column(length = 7, columnDefinition = "char(7)")
+    @Column(length = 7, columnDefinition = "bpchar(7)")
     var month: String,
 
     var day: LocalDate,
@@ -47,7 +47,7 @@ class RelayDetails(
 
     var protocols: String?,
 
-    @Column(length = 40, columnDefinition = "char(40)")
+    @Column(length = 40,  columnDefinition = "bpchar(40)")
     var fingerprint: String,
 
     var isHibernating: Boolean,
@@ -56,7 +56,7 @@ class RelayDetails(
 
     var contact: String?,
 
-    @Lob
+    @Column(columnDefinition = "text")
     var familyEntries: String?,
 
     var familyId: Long?,

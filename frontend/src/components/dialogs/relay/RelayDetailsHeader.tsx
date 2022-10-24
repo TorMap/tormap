@@ -1,7 +1,7 @@
 import React, {FunctionComponent} from "react";
-import {Box, CircularProgress, IconButton, Typography} from "@mui/material";
+import {Box, CircularProgress, IconButton, Tooltip, Typography} from "@mui/material";
 import {getRelayType} from "../../../util/aggregate-relays";
-import {RelayDetailsMatch, RelayType} from "../../../types/relay";
+import {RelayDetailsMatch, RelayType, RelayTypeLabel} from "../../../types/relay";
 import {getIcon} from "../../../types/icons";
 import {SelectFamilyButton} from "../../buttons/SelectFamilyButton";
 import CloseIcon from "@mui/icons-material/Close";
@@ -12,29 +12,33 @@ interface Props {
      * Hide the modal
      */
     closeDialog: () => void
+    finishQuickAction?: () => void
     relayDetailsMatch?: RelayDetailsMatch,
 }
 
 export const RelayDetailsHeader: FunctionComponent<Props> = ({
                                                                  closeDialog,
+                                                                 finishQuickAction = closeDialog,
                                                                  relayDetailsMatch,
                                                              }) => {
     // App context
     const {settings, setSettings} = useSettings()
+    const relayType = relayDetailsMatch ? getRelayType(relayDetailsMatch) : undefined
 
     return (
-        <>
-            {relayDetailsMatch ?
-                <Box display="flex" alignItems={"center"}>
+        <Box display="flex" alignItems={"center"}>
+            {relayDetailsMatch ? <>
+                <Tooltip title={`Relay's nickname`}>
                     <Typography sx={{display: "inline"}}
                                 variant="h6">
                         {relayDetailsMatch.nickname}
                     </Typography>
+                </Tooltip>
+                <Tooltip title={`${RelayTypeLabel[relayType!]} relay`}>
                     <IconButton
                         aria-label="select relay type"
                         sx={{ml: 1}}
                         onClick={() => {
-                            const relayType = getRelayType(relayDetailsMatch)
                             setSettings({
                                 ...settings,
                                 showRelayTypes: {
@@ -43,26 +47,29 @@ export const RelayDetailsHeader: FunctionComponent<Props> = ({
                                     [RelayType.Other]: RelayType.Other === relayType,
                                 },
                             })
-                            closeDialog()
+                            finishQuickAction()
                         }}
                     >
                         {getIcon(getRelayType(relayDetailsMatch))}
                     </IconButton>
-                    {relayDetailsMatch?.familyId &&
-                        <SelectFamilyButton
-                            familyId={relayDetailsMatch.familyId}
-                            furtherAction={closeDialog}
-                        />
-                    }
-                </Box> : <CircularProgress color={"inherit"} size={22.5} sx={{mt: 1}}/>
-            }
+                </Tooltip>
+                {relayDetailsMatch?.familyId &&
+                    <Tooltip title={`Show family on map`}>
+                        <Box>
+                            <SelectFamilyButton
+                                familyId={relayDetailsMatch.familyId}
+                                furtherAction={finishQuickAction}
+                            />
+                        </Box>
+                    </Tooltip>
+                }
+            </> : <CircularProgress color={"inherit"} size={22.5} sx={{mt: 1}}/>}
             <IconButton aria-label="close" sx={{
                 position: "absolute",
-                right: "10px",
-                top: "16px",
+                right: "16px",
             }} onClick={closeDialog}>
                 <CloseIcon/>
             </IconButton>
-        </>
+        </Box>
     )
 }

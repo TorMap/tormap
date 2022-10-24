@@ -12,10 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Check yarn cache and build
+      - name: yarn build
         run: | 
           cd frontend
-          yarn install --immutable --immutable-cache --check-cache
+          yarn install --immutable
           yarn build
 
       - name: Deploy preview channel

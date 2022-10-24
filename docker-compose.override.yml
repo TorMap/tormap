@@ -1,0 +1,22 @@
+# overrides production config (docker-compos.yml) with dev config
+version: '3.8'
+services:
+  backend:
+    image: eclipse-temurin:17-jdk
+    working_dir: /usr/src/app
+    command: ./gradlew bootRun
+    volumes:
+      # mounts backend directory
+      - ./backend/:/usr/src/app
+    ports:
+      - "8080:8080"
+
+  frontend:
+    image: node:16
+    working_dir: /usr/src/app
+    command: bash -c "yarn && yarn start"
+    volumes:
+      # mounts frontend directory
+      - ./frontend/:/usr/src/app
+    ports:
+      - "3000:3000"

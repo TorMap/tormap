@@ -40,3 +40,5 @@ export const OverlayLarge: FunctionComponent = () => {
         </Box>
     )
 }
+
+export default OverlayLarge

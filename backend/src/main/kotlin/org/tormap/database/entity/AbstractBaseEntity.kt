@@ -3,6 +3,7 @@ package org.tormap.database.entity
 import org.hibernate.Hibernate
 import java.io.Serializable
 import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.MappedSuperclass
 
@@ -10,7 +11,7 @@ import javax.persistence.MappedSuperclass
 abstract class AbstractBaseEntity<T: Serializable>  {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     var id: T? = null
 
     override fun equals(other: Any?): Boolean {

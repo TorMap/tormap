@@ -4,9 +4,10 @@ import {DetailsDialogProps} from "./ResponsiveRelayDetailsDialog";
 import {RelayDetailsTable} from "./RelayDetailsTable";
 import {RelayList} from "./RelayList";
 import CloseIcon from "@mui/icons-material/Close";
-import {SlideLeftTransition, SlideUpTransition} from "../../../types/ui";
+import {SlideUpTransition} from "../../../types/ui";
 import {RelayDetailsHeader} from "./RelayDetailsHeader";
 import {RelayDetailsSelectionHeader} from "./RelayDetailsSelectionHeader";
+import {LoadingAnimation} from "../../loading/LoadingAnimation";
 
 
 export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
@@ -20,30 +21,16 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                                                                                    setRelayDetailsId,
                                                                                }) => {
     // Component state
-    const [showDetailsDialog, setShowDetailsDialog] = useState(false)
-
-    // If relay selection is closed, set details dialog closed too
-    useEffect(() => {
-        if (!shouldShowDialog) setShowDetailsDialog(false)
-    }, [shouldShowDialog])
+    const [showRelayDetails, setShowRelayDetails] = useState(false)
 
     // Show relay details directly if only one relay is selectable
     useEffect(() => {
-        if (sortedRelayMatches.length === 1) setShowDetailsDialog(true);
+        setShowRelayDetails(sortedRelayMatches.length <= 1)
     }, [sortedRelayMatches])
-
-    const handleDetailsDialogClose = () => {
-        if (sortedRelayMatches.length === 1) {
-            closeDialog()
-            setShowDetailsDialog(false)
-        } else {
-            setShowDetailsDialog(false)
-        }
-    }
 
     const handleSelectDetails = (id: number) => {
         setRelayDetailsId(id)
-        setShowDetailsDialog(true)
+        setShowRelayDetails(true)
     }
 
     return (
@@ -56,58 +43,41 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
             >
                 <AppBar sx={{position: 'relative'}}>
                     <Toolbar>
-                        <RelayDetailsSelectionHeader
-                            sortRelaysBy={sortRelaysBy}
-                            handleSelectSortByChange={handleSelectSortByChange}
-                        />
-                        <IconButton aria-label="close" sx={{
-                            position: "absolute",
-                            right: "15px",
-                            top: "15px",
-                        }} onClick={closeDialog}>
-                            <CloseIcon/>
-                        </IconButton>
+                        {showRelayDetails ?
+                            <RelayDetailsHeader
+                                closeDialog={() => {
+                                    if (sortedRelayMatches.length > 1) {
+                                        setShowRelayDetails(false)
+                                    } else {
+                                        closeDialog()
+                                    }
+                                }}
+                                finishQuickAction={closeDialog}
+                                relayDetailsMatch={relayDetailsMatch}
+                            /> : <>
+                                <RelayDetailsSelectionHeader
+                                    sortRelaysBy={sortRelaysBy}
+                                    handleSelectSortByChange={handleSelectSortByChange}
+                                />
+                                <IconButton aria-label="close" sx={{
+                                    position: "absolute",
+                                    right: "16px",
+                                }} onClick={closeDialog}>
+                                    <CloseIcon/>
+                                </IconButton>
+                            </>
+                        }
                     </Toolbar>
                 </AppBar>
                 <DialogContent>
-                    <RelayList
-                        relayMatches={sortedRelayMatches}
-                        selectedRelayId={relayDetailsId}
-                        setSelectedRelayId={handleSelectDetails}
-                    />
-                </DialogContent>
-                <DialogActions sx={{
-                    position: "fixed",
-                    bottom: 5,
-                    right: 5,
-                }}>
-                    <Button
-                        autoFocus
-                        onClick={closeDialog}
-                        variant={"contained"}
-                        size={"large"}
-                    >
-                        Back
-                    </Button>
-                </DialogActions>
-            </Dialog>
-            <Dialog
-                open={showDetailsDialog && shouldShowDialog}
-                onClose={handleDetailsDialogClose}
-                fullScreen={true}
-                TransitionComponent={SlideLeftTransition}
-            >
-                <AppBar sx={{position: 'relative'}}>
-                    <Toolbar>
-                        <RelayDetailsHeader
-                            closeDialog={closeDialog}
-                            relayDetailsMatch={relayDetailsMatch}
+                    {showRelayDetails ?
+                        relayDetailsMatch ? <RelayDetailsTable relayDetailsMatch={relayDetailsMatch}/> :
+                            <LoadingAnimation/> :
+                        <RelayList
+                            relayMatches={sortedRelayMatches}
+                            selectedRelayId={relayDetailsId}
+                            setSelectedRelayId={handleSelectDetails}
                         />
-                    </Toolbar>
-                </AppBar>
-                <DialogContent>
-                    {relayDetailsMatch &&
-                        <RelayDetailsTable relayDetailsMatch={relayDetailsMatch}/>
                     }
                 </DialogContent>
                 <DialogActions sx={{
@@ -117,7 +87,13 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                 }}>
                     <Button
                         autoFocus
-                        onClick={handleDetailsDialogClose}
+                        onClick={() => {
+                            if (showRelayDetails) {
+                                setShowRelayDetails(false)
+                            } else {
+                                closeDialog()
+                            }
+                        }}
                         variant={"contained"}
                         size={"large"}
                     >
