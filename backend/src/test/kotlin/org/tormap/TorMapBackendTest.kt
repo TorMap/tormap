@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import org.testcontainers.junit.jupiter.Testcontainers
 import org.tormap.config.value.IpLookupConfig
 import java.io.File
 
