@@ -7,7 +7,7 @@ services:
       # mounts backend directory
       - ./:/usr/src/app
     depends_on:
-      - db
+      - database
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/postgres
       - SPRING_DATASOURCE_USERNAME=postgres
