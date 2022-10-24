@@ -1,0 +1,30 @@
+# production config
+version: '3.8'
+services:
+  backend:
+    image: tormap/backend:${TORMAP_VERSION:-latest}
+    volumes:
+      # mounts backend directory
+      - ./:/usr/src/app
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    ports:
+      - "8080:8080"
+
+  db:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+
+  # TODO release frontend image and configure ports
+  frontend:
+    image: tormap/frontend:${TORMAP_VERSION:-latest}
+    ports:
+      - "3000:3000"

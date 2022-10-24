@@ -5,6 +5,8 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/backend.yml'
+    tags:
+      - 'v*'
 
 jobs:
   backend-push:
@@ -25,9 +27,19 @@ jobs:
           cd backend
           ./gradlew test
 
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: tormap/backend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}
+
       - name: Login to DockerHub
         if: github.ref_name == 'master' || github.ref_name == 'main'
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -37,7 +49,7 @@ jobs:
         run: |
           cd backend
           ./gradlew bootBuildImage
-          docker push juliushenke/tormap
+          docker push tormap/backend
 
       - name: Cleanup Gradle Cache
         run: |

@@ -25,7 +25,7 @@ class UserTrace(trace: HttpTrace): AbstractBaseEntity<Long>() {
     var operatingSystem: String? = null
     var agentMajorVersion: String? = null
 
-    @Column(length = 2, columnDefinition = "char(2)")
+    @Column(length = 2, columnDefinition = "bpchar(2)")
     var countryCode: String? = null
 }
 
