@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "org.tormap"
-version = "0.0.2"
+version = "1.0.0"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
@@ -85,7 +85,7 @@ allOpen {
 
 // Build image for docker https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#build-image
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage> {
-    imageName = "juliushenke/tormap"
+    imageName = "tormap/backend"
     tag(version.toString())
 
     val relativePathIpLookup = "/ip-lookup/"
