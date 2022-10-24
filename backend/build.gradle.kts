@@ -64,13 +64,17 @@ dependencies {
     implementation("org.slf4j:slf4j-api:1.7.32")
     implementation("org.tukaani:xz:1.6")
 
-    // Testing & Kotest https://kotest.io/
+    // Testing with Kotest (https://kotest.io/) and Testcontainers (https://testcontainers.org/)
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation("io.kotest:kotest-runner-junit5:5.5.1")
     testImplementation("io.kotest:kotest-assertions-core:5.5.1")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.2")
+    testImplementation("org.testcontainers:testcontainers:1.17.5")
+    testImplementation("org.testcontainers:junit-jupiter:1.17.5")
+    testImplementation("org.testcontainers:postgresql:1.17.5")
+
 }
 
 // Fix version requirement from Kotest

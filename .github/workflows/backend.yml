@@ -4,9 +4,13 @@ on:
   push:
     paths:
       - 'backend/**'
-      - '.github/workflows/backend.yml'
+      - '.github/workflows/backend*'
     tags:
       - 'v*'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend*'
 
 jobs:
   backend-push:
