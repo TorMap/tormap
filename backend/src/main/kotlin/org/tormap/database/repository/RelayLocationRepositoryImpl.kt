@@ -16,7 +16,7 @@ interface RelayLocationRepositoryImpl : RelayLocationRepository {
         "SELECT new org.tormap.adapter.dto.RelayLocationDto(g.latitude, g.longitude, g.countryCode, g.flags, n.id, n.familyId) FROM RelayLocation g " +
                 "LEFT JOIN FETCH RelayDetails n " +
                 "ON g.fingerprint = n.fingerprint " +
-                "AND function('FORMATDATETIME', g.day, 'yyyy-MM') = n.month " +
+                "AND function('TO_CHAR', g.day, 'YYYY-MM') = n.month " +
                 "WHERE g.day = :day"
     )
     fun findAllUsingDay(day: LocalDate): List<RelayLocationDto>

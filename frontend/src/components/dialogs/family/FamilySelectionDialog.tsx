@@ -94,3 +94,5 @@ export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
             />
     )
 }
+
+export default FamilySelectionDialog

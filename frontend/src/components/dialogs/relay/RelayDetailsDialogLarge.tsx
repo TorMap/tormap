@@ -1,5 +1,5 @@
 import React from "react";
-import {Dialog, DialogTitle, Divider, Grid} from "@mui/material";
+import {Box, Dialog, DialogTitle, Divider, Grid} from "@mui/material";
 import {RelayList} from "./RelayList";
 import {RelayDetailsTable} from "./RelayDetailsTable";
 import {DetailsDialogProps} from "./ResponsiveRelayDetailsDialog";
@@ -33,10 +33,12 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
             <DialogTitle>
                 <Grid container>
                     {sortedRelayMatches.length > 1 && <Grid item xs={12} sm={3}>
-                        <RelayDetailsSelectionHeader
-                            sortRelaysBy={sortRelaysBy}
-                            handleSelectSortByChange={handleSelectSortByChange}
-                        />
+                        <Box sx={{mt: 0.5}}>
+                            <RelayDetailsSelectionHeader
+                                sortRelaysBy={sortRelaysBy}
+                                handleSelectSortByChange={handleSelectSortByChange}
+                            />
+                        </Box>
                     </Grid>}
                     <Grid item xs={12} sm={sortedRelayMatches.length > 1 ? 9 : 12}>
                         <RelayDetailsHeader

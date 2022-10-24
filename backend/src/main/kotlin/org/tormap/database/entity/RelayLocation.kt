@@ -25,10 +25,10 @@ class RelayLocation(
     var latitude: BigDecimal,
     var longitude: BigDecimal,
 
-    @Column(length = 2, columnDefinition = "char(2)")
+    @Column(length = 2, columnDefinition = "bpchar(2)")
     var countryCode: String,
 ): AbstractBaseEntity<Long>() {
-    @Column(length = 40, columnDefinition = "char(40)")
+    @Column(length = 40, columnDefinition = "bpchar(40)")
     var fingerprint: String = networkStatusEntry.fingerprint
 
     var flags: String? = try {
