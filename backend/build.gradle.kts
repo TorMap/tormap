@@ -90,8 +90,6 @@ allOpen {
 // Build image for docker https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#build-image
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage> {
     imageName = "tormap/backend"
-    tag(version.toString())
-
     val relativePathIpLookup = "/ip-lookup/"
     bindings = listOf("${rootProject.projectDir.absolutePath}$relativePathIpLookup:/workspace$relativePathIpLookup")
 }
