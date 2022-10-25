@@ -22,9 +22,9 @@ class IpLookupService(
 ) {
     private val logger = logger()
     private var dbipLocationDB =
-        maxmindTypeDatabaseReader(ipLookupConfig.locationLookup.dbipDatabaseFile, ipLookupConfig.shouldCache)
+        maxmindTypeDatabaseReader(javaClass.getResource(ipLookupConfig.locationLookup.dbipDatabaseFile)!!.path, ipLookupConfig.shouldCache)
     private var maxmindAutonomousSystemDB =
-        maxmindTypeDatabaseReader(ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile, ipLookupConfig.shouldCache)
+        maxmindTypeDatabaseReader(javaClass.getResource(ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile)!!.path, ipLookupConfig.shouldCache)
 
     /**
      * Get the approximate geo location of an [ipAddress]

@@ -117,5 +117,4 @@ jib {
             }
         }
     }
-    extraDirectories.setPaths("ip-lookup")
 }

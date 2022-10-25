@@ -4,8 +4,7 @@ services:
   backend:
     image: tormap/backend:${TORMAP_VERSION:-latest}
     volumes:
-      # mounts backend directory
-      - ./:/usr/src/app
+      - ./tormap-data:/tormap-data
     depends_on:
       - database
     environment:
