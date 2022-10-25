@@ -13,7 +13,7 @@ on:
       - '.github/workflows/backend*'
 
 jobs:
-  test:
+  gradle_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -36,7 +36,8 @@ jobs:
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
           rm -f ~/.gradle/caches/modules-2/gc.properties
 
-  docker-image:
+  docker_image:
+    needs: gradle_test
     if: github.event_name != 'pull_request' && github.ref_name == 'master'
     runs-on: ubuntu-latest
     steps:
