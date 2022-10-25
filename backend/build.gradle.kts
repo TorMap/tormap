@@ -11,12 +11,12 @@ plugins {
     kotlin("plugin.allopen") version "1.7.20"
     kotlin("plugin.jpa") version "1.7.20"
 
-    // Generate code documentation https://kotlin.github.io/dokka
-    id("org.jetbrains.dokka") version "1.7.20"
-
     // Spring https://spring.io/projects/spring-boot
     id("org.springframework.boot") version "2.7.4"
     id("io.spring.dependency-management") version "1.1.0"
+
+    // Build and push docker images
+    id("com.google.cloud.tools.jib") version "3.3.0"
 }
 
 repositories {
@@ -74,7 +74,6 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:1.17.5")
     testImplementation("org.testcontainers:junit-jupiter:1.17.5")
     testImplementation("org.testcontainers:postgresql:1.17.5")
-
 }
 
 // Fix version requirement from Kotest
@@ -85,20 +84,6 @@ allOpen {
     annotation("javax.persistence.Entity")
     annotation("javax.persistence.Embeddable")
     annotation("javax.persistence.MappedSuperclass")
-}
-
-// Build image for docker https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#build-image
-tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootBuildImage> {
-    imageName = "tormap/backend"
-    tag(version.toString())
-
-    val relativePathIpLookup = "/ip-lookup/"
-    bindings = listOf("${rootProject.projectDir.absolutePath}$relativePathIpLookup:/workspace$relativePathIpLookup")
-}
-
-// Configure KotlinDoc generation
-tasks.dokkaHtml.configure {
-    outputDirectory.set(buildDir.resolve("dokka"))
 }
 
 // Compile options for JVM build
@@ -112,4 +97,24 @@ tasks.withType<KotlinCompile> {
 // Configure tests
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+// Configure docker build and push
+jib {
+    to {
+        image = "tormap/backend"
+        tags = setOf(version.toString(), version.toString().substringBefore('.'))
+    }
+    from {
+        platforms {
+            platform {
+                architecture = "amd64"
+                os = "linux"
+            }
+            platform {
+                architecture = "arm64"
+                os = "linux"
+            }
+        }
+    }
 }
