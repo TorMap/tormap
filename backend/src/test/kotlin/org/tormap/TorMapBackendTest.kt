@@ -2,6 +2,7 @@ package org.tormap
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -23,8 +24,8 @@ class TorMapBackendTest(
     }
 
     "ip-lookup files exist" {
-       File(ipLookupConfig.locationLookup.dbipDatabaseFile).exists() shouldBe true
-       File(ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile).exists() shouldBe true
+        javaClass.getResource(ipLookupConfig.locationLookup.dbipDatabaseFile) shouldNotBe null
+        javaClass.getResource(ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile) shouldNotBe null
     }
 })
 

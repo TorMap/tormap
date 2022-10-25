@@ -1,4 +1,4 @@
-# overrides production config (docker-compos.yml) with dev config
+# dev config overrides production config (docker-compose.yml)
 version: '3.8'
 services:
   backend:
@@ -6,7 +6,6 @@ services:
     working_dir: /usr/src/app
     command: ./gradlew bootRun
     volumes:
-      # mounts backend directory
       - ./backend/:/usr/src/app
     ports:
       - "8080:8080"
@@ -16,7 +15,6 @@ services:
     working_dir: /usr/src/app
     command: bash -c "yarn && yarn start"
     volumes:
-      # mounts frontend directory
       - ./frontend/:/usr/src/app
     ports:
       - "3000:3000"
