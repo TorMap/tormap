@@ -1,4 +1,4 @@
-FROM eclipse-temurin:11-jdk as builder
+FROM gradle:7.5-jdk11 as builder
 WORKDIR application
 
 COPY . .
@@ -12,5 +12,8 @@ COPY --from=builder application/dependencies/ ./
 COPY --from=builder application/spring-boot-loader/ ./
 COPY --from=builder application/snapshot-dependencies/ ./
 COPY --from=builder application/application/ ./
+
+# Makes JVM aware of memory limit available to the container (cgroups)
+ENV JAVA_OPTS='-XX:+UseContainerSupport -XX:MaxRAMPercentage=80'
 
 ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
