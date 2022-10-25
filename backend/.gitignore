@@ -11,6 +11,7 @@ descriptors/
 tormap.*.db
 **/*password.txt
 resources/**
+tormap-data/**
 
 ### STS ###
 .apt_generated
