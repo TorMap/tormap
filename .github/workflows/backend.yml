@@ -37,7 +37,7 @@ jobs:
           rm -f ~/.gradle/caches/modules-2/gc.properties
 
   docker-image:
-    if: github.event_name != 'pull_request' && github.ref_name == master
+    if: github.event_name != 'pull_request' && github.ref_name == 'master'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
