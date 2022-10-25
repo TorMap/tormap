@@ -1,44 +1,12 @@
 {
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
-  ],
-  "baseBranches": [
-    "dev"
-  ],
-  "labels": [
-    "renovate"
+    "github>juliushenke/renovate-preset"
   ],
   "assignees": [
     "JuliusHenke"
   ],
-  "rebaseWhen": "behind-base-branch",
-  "automergeType": "branch",
-  "stabilityDays": 3,
-  "prCreation": "immediate",
-  "schedule": [
-    "before 9am on Saturday"
-  ],
   "packageRules": [
-    {
-      "description": "Group all non-major updates",
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "pin",
-        "digest"
-      ],
-      "groupName": "non-major"
-    },
-    {
-      "description": "Group major dev updates",
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "matchDepTypes": [
-        "devDependencies"
-      ],
-      "groupName": "major-dev"
-    },
     {
       "description": "Ignore outdated dependencies required by TorProject descriptor library",
       "managers": [
