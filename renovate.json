@@ -23,9 +23,6 @@
     },
     {
       "description": "Ignore specific docker images",
-      "managers": [
-        "docker"
-      ],
       "packagePatterns": [
         "^eclipse-temurin",
       ],
