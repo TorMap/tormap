@@ -12,7 +12,7 @@ plugins {
     kotlin("plugin.jpa") version "1.7.20"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "2.7.4"
+    id("org.springframework.boot") version "2.7.5"
     id("io.spring.dependency-management") version "1.1.0"
 
     // Build and push docker images
@@ -68,8 +68,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("io.kotest:kotest-runner-junit5:5.5.1")
-    testImplementation("io.kotest:kotest-assertions-core:5.5.1")
+    testImplementation("io.kotest:kotest-runner-junit5:5.5.2")
+    testImplementation("io.kotest:kotest-assertions-core:5.5.2")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.2")
     testImplementation("org.testcontainers:testcontainers:1.17.5")
     testImplementation("org.testcontainers:junit-jupiter:1.17.5")
