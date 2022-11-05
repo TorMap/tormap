@@ -50,7 +50,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core:8.5.13")
 
     // Read .mmdb (MaxMind) DB files for IP lookups https://maxmind.github.io/MaxMind-DB/
-    implementation("com.maxmind.geoip2:geoip2:3.0.1")
+    implementation("com.maxmind.geoip2:geoip2:3.0.2")
 
     // Anaylz user agent https://yauaa.basjes.nl/
     implementation("nl.basjes.parse.useragent:yauaa:7.8.0")
