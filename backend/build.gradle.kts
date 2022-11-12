@@ -5,11 +5,11 @@ version = "1.0.0"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
-    kotlin("jvm") version "1.7.20"
-    kotlin("kapt") version "1.7.20"
-    kotlin("plugin.spring") version "1.7.20"
-    kotlin("plugin.allopen") version "1.7.20"
-    kotlin("plugin.jpa") version "1.7.20"
+    kotlin("jvm") version "1.7.21"
+    kotlin("kapt") version "1.7.21"
+    kotlin("plugin.spring") version "1.7.21"
+    kotlin("plugin.allopen") version "1.7.21"
+    kotlin("plugin.jpa") version "1.7.21"
 
     // Spring https://spring.io/projects/spring-boot
     id("org.springframework.boot") version "2.7.5"
@@ -41,7 +41,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-kotlin:1.6.12")
 
     // Serialization
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.4")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.0")
 
     // Postgres Database
     implementation("org.postgresql:postgresql:42.5.0")
@@ -68,8 +68,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("io.kotest:kotest-runner-junit5:5.5.3")
-    testImplementation("io.kotest:kotest-assertions-core:5.5.3")
+    testImplementation("io.kotest:kotest-runner-junit5:5.5.4")
+    testImplementation("io.kotest:kotest-assertions-core:5.5.4")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.2")
     testImplementation("org.testcontainers:testcontainers:1.17.5")
     testImplementation("org.testcontainers:junit-jupiter:1.17.5")
