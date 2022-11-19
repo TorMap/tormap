@@ -2329,10 +2329,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"leaflet@npm:1.9.2":
-  version: 1.9.2
-  resolution: "leaflet@npm:1.9.2"
-  checksum: ab6edb278c6bbd05db9a9395694fc517557433bedbcb233941ea42327ee90650f2d61dd3f9caf861040c8b25abfd8e1f79018f6ae899181e280287c7481ba4bf
+"leaflet@npm:1.9.3":
+  version: 1.9.3
+  resolution: "leaflet@npm:1.9.3"
+  checksum: f8bc33215e6aed8488cb3d32511b943ff093c1747bcda8a39116e24fe714e12525f1a6843b6a79940ece4cf8d2a86e2cb1d7b80fc550344b3182659b19231a04
   languageName: node
   linkType: hard
 
@@ -3519,7 +3519,7 @@ __metadata:
     "@vitejs/plugin-react": 1.3.2
     axios: 1.1.3
     date-fns: 2.29.3
-    leaflet: 1.9.2
+    leaflet: 1.9.3
     leaflet.heat: 0.2.0
     notistack: 2.0.8
     react: 18.2.0
