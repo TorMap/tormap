@@ -71,9 +71,9 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5:5.5.4")
     testImplementation("io.kotest:kotest-assertions-core:5.5.4")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.2")
-    testImplementation("org.testcontainers:testcontainers:1.17.5")
-    testImplementation("org.testcontainers:junit-jupiter:1.17.5")
-    testImplementation("org.testcontainers:postgresql:1.17.5")
+    testImplementation("org.testcontainers:testcontainers:1.17.6")
+    testImplementation("org.testcontainers:junit-jupiter:1.17.6")
+    testImplementation("org.testcontainers:postgresql:1.17.6")
 }
 
 // Fix version requirement from Kotest
