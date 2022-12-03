@@ -12,7 +12,7 @@ plugins {
     kotlin("plugin.jpa") version "1.7.21"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "2.7.5"
+    id("org.springframework.boot") version "3.0.0"
     id("io.spring.dependency-management") version "1.1.0"
 
     // Build and push docker images
