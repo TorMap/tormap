@@ -5,14 +5,14 @@ version = "1.0.0"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
-    kotlin("jvm") version "1.7.21"
-    kotlin("kapt") version "1.7.21"
-    kotlin("plugin.spring") version "1.7.21"
-    kotlin("plugin.allopen") version "1.7.21"
-    kotlin("plugin.jpa") version "1.7.21"
+    kotlin("jvm") version "1.7.22"
+    kotlin("kapt") version "1.7.22"
+    kotlin("plugin.spring") version "1.7.22"
+    kotlin("plugin.allopen") version "1.7.22"
+    kotlin("plugin.jpa") version "1.7.22"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "2.7.5"
+    id("org.springframework.boot") version "2.7.6"
     id("io.spring.dependency-management") version "1.1.0"
 
     // Build and push docker images
@@ -44,7 +44,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.1")
 
     // Postgres Database
-    implementation("org.postgresql:postgresql:42.5.0")
+    implementation("org.postgresql:postgresql:42.5.1")
 
     // Run Flyway DB migration tool on startup https://flywaydb.org/
     implementation("org.flywaydb:flyway-core:8.5.13")
