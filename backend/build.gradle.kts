@@ -53,7 +53,7 @@ dependencies {
     implementation("com.maxmind.geoip2:geoip2:3.0.2")
 
     // Anaylz user agent https://yauaa.basjes.nl/
-    implementation("nl.basjes.parse.useragent:yauaa:7.8.0")
+    implementation("nl.basjes.parse.useragent:yauaa:7.9.0")
 
     // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
     implementation("commons-codec:commons-codec:1.10")
