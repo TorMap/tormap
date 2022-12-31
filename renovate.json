@@ -20,6 +20,13 @@
         "^org.tukaani"
       ],
       "enabled": false
+    },
+    {
+      "description": "Ignore specific docker images",
+      "packagePatterns": [
+        "^eclipse-temurin",
+      ],
+      "enabled": false
     }
   ]
 }
