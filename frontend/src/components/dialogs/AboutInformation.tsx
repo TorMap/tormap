@@ -1,4 +1,8 @@
-import React, {useState} from "react";
+import CloseIcon from "@mui/icons-material/Close";
+import EmailIcon from '@mui/icons-material/Email';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import InfoIcon from '@mui/icons-material/Info';
+import TwitterIcon from '@mui/icons-material/Twitter';
 import {
     Avatar,
     Box,
@@ -15,14 +19,11 @@ import {
     useMediaQuery,
     useTheme
 } from "@mui/material";
-import GitHubIcon from '@mui/icons-material/GitHub';
-import EmailIcon from '@mui/icons-material/Email';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import CloseIcon from "@mui/icons-material/Close";
-import InfoIcon from '@mui/icons-material/Info';
-import {ExternalLink} from "../link/ExternalLink";
-import {BitcoinIcon} from "../icons/BitcoinIcon";
+import React, {useState} from "react";
+
 import {ContributorCard} from "../card/ContributorCard";
+import {BitcoinIcon} from "../icons/BitcoinIcon";
+import {ExternalLink} from "../link/ExternalLink";
 
 /**
  * A component for displaying information about TorMap
@@ -160,7 +161,6 @@ export const AboutInformation: React.FunctionComponent = () => {
                     right: 5,
                 }}>
                     <Button
-                        autoFocus
                         onClick={() => setShowDialog(false)}
                         variant={"contained"}
                         size={"large"}

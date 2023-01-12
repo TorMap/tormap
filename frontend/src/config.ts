@@ -1,5 +1,5 @@
-import {Settings} from "./types/settings";
 import {RelayFlag, RelayType} from "./types/relay";
+import {Settings} from "./types/settings";
 
 export const backendApiUrl = import.meta.env.VITE_BACKEND_API_URL?.toString()
 

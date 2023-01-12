@@ -1,9 +1,11 @@
+import {Feature, GeoJsonObject, GeometryObject} from "geojson";
 import L, {circleMarker, GeoJSON, Layer, LayerGroup, LeafletMouseEvent, PathOptions} from "leaflet";
+
 import {Colors} from "../config";
+import {RelayLocationDto} from "../dto/relay";
+import worldGeoData from "../resources/world.geo.json";
 import {RelayType} from "../types/relay";
 import {Settings} from "../types/settings";
-import worldGeoData from "../resources/world.geo.json";
-import {Feature, GeoJsonObject, GeometryObject} from "geojson";
 import {
     buildRelayCoordinatesMap,
     createLatLonKey,
@@ -12,7 +14,6 @@ import {
     sortFamilyCoordinatesMap
 } from "./aggregate-relays";
 import {getMapColor9} from "./geojson";
-import {RelayLocationDto} from "../dto/relay";
 
 /**
  * Returns a Layer with markers with size relative to number of relays on a coordinate.
@@ -152,7 +153,7 @@ export const buildFamilyCoordinatesLayer = (
         const coordinates = location.split(",")
         const latLng: L.LatLngExpression = [+coordinates[0], +coordinates[1]]
         familiesAtLocation.forEach((familyLocation) => {
-            let radius = calcRadiusForValue(familyLocation.relays.length + familyLocation.padding)
+            const radius = calcRadiusForValue(familyLocation.relays.length + familyLocation.padding)
             let fillOpacity = .2
 
             // not selected
@@ -197,16 +198,15 @@ const onMultiFamilyCircleClick = (
 }
 
 export const calculateFamilyColor = (familyId: number) => {
-    let hue = (familyId % 8) * (360 / 8)
-    let sat = "90%"
+    const hue = (familyId % 8) * (360 / 8)
+    const sat = "90%"
     return `hsl(${hue},${sat},60%)`
 }
 
 export const buildRelayHeatmapLayer = (relays: RelayLocationDto[]): LayerGroup => {
-    let coordinates = new Array<number[]>()
+    const coordinates = new Array<number[]>()
     relays.forEach(relay => coordinates.push([relay.lat, relay.long, 1]))
-    // @ts-ignore TODO fix typescript error
-    return L.heatLayer(coordinates, {
+    return (L as any).heatLayer(coordinates, {
         radius: 25,
         max: 1,
         blur: 35,
@@ -228,10 +228,10 @@ export const buildRelayCountryLayer = (
 ): LayerGroup => {
     const countryLayer: LayerGroup = new LayerGroup()
     countryMap.forEach((country, key) => {
-        let hue = getMapColor9(key) * 360 / 9
+        const hue = getMapColor9(key) * 360 / 9
         country.forEach((relay) => {
             let sat = "90%"
-            let radius = 1
+            const radius = 1
 
             // not selected
             if (settings.selectedCountry !== undefined && settings.selectedCountry !== relay.country) sat = "0%"
@@ -265,7 +265,7 @@ export const buildCountryLayer = (
 ): LayerGroup => {
     // style for countries
     const style = (feature: Feature<GeometryObject>): PathOptions => {
-        if (settings.selectedCountry === feature.properties!!.iso_a2) {
+        if (settings.selectedCountry === feature.properties?.iso_a2) {
             return {
                 fillColor: "rgba(255,255,255,0.7)",
                 weight: .5,
@@ -280,7 +280,7 @@ export const buildCountryLayer = (
 
     // draw countries according above style
     const geoData = worldGeoData
-    let filteredGeoData = new GeoJSON(undefined, {
+    const filteredGeoData = new GeoJSON(undefined, {
         style: style as PathOptions,
         onEachFeature(feature: Feature<GeometryObject>, layer: Layer) {
             onEachCountry(feature, layer, settings, setSettingsCallback)
@@ -310,7 +310,7 @@ const onEachCountry = (
 ) => {
     layer.on({
         click: () => {
-            if (feature.properties!!.iso_a2 !== settings.selectedCountry)
+            if (feature.properties?.iso_a2 !== settings.selectedCountry)
                 setSettingsCallback({...settings, selectedCountry: feature.properties?.iso_a2})
             else setSettingsCallback({...settings, selectedCountry: undefined})
         }

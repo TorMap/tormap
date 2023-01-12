@@ -1,5 +1,4 @@
-import React, {FunctionComponent} from "react";
-import {FamilySelectionDialogProps} from "./FamilySelectionDialog";
+import CloseIcon from "@mui/icons-material/Close";
 import {
     AppBar,
     Button,
@@ -11,8 +10,10 @@ import {
     Toolbar,
     Typography
 } from "@mui/material";
+import React, {FunctionComponent} from "react";
+
 import {SlideUpTransition} from "../../../types/ui";
-import CloseIcon from "@mui/icons-material/Close";
+import {FamilySelectionDialogProps} from "./FamilySelectionDialog";
 import {FamilySelectionTable} from "./FamilySelectionTable";
 
 export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialogProps> = ({
@@ -56,7 +57,6 @@ export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialog
                     right: 5,
                 }}>
                     <Button
-                        autoFocus
                         onClick={closeDialog}
                         variant={"contained"}
                         size={"large"}

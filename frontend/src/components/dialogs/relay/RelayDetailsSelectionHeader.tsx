@@ -1,6 +1,7 @@
-import React, {FunctionComponent} from "react";
 import {Box, FormControl, MenuItem, Select, Typography} from "@mui/material";
 import {SelectChangeEvent} from "@mui/material/Select/SelectInput";
+import React, {FunctionComponent} from "react";
+
 import {RelayIdentifierMatch} from "../../../types/relay";
 import {nameOfFactory} from "../../../util/util";
 

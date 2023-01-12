@@ -1,11 +1,12 @@
-import React, {FunctionComponent, Suspense, useCallback, useEffect, useState} from 'react';
 import {Box, Button, useMediaQuery, useTheme} from "@mui/material";
-import {AboutInformation} from "./dialogs/AboutInformation";
-import {backend} from "../util/util";
 import {useSnackbar} from "notistack";
-import {SnackbarMessage} from "../types/ui";
-import {LoadingAnimation} from "./loading/LoadingAnimation";
+import React, {FunctionComponent, Suspense, useCallback, useEffect, useState} from 'react';
+
 import {useDate} from "../context/date-context";
+import {SnackbarMessage} from "../types/ui";
+import {backend} from "../util/util";
+import {AboutInformation} from "./dialogs/AboutInformation";
+import {LoadingAnimation} from "./loading/LoadingAnimation";
 
 // Lazy loaded components
 const ExternalLink = React.lazy(() => import('./link/ExternalLink'));
