@@ -10,6 +10,7 @@ interface StatisticsInterface {
 const StatisticsContext = React.createContext<StatisticsInterface | null>(null)
 
 export function useStatistics() {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return useContext(StatisticsContext)!
 }
 
