@@ -31,7 +31,7 @@ interface DateInterface {
 const DateContext = React.createContext<DateInterface | null>(null)
 
 export function useDate() {
-    return useContext(DateContext)
+    return useContext(DateContext)!
 }
 
 interface DateProviderProps {
