@@ -37,11 +37,11 @@ export interface FamilySelectionDialogProps {
 }
 
 export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
-                                                                                  shouldShowDialog,
-                                                                                  closeDialog,
-                                                                                  reloadSelectedDay,
-                                                                                  familyIds,
-                                                                              }) => {
+                                                                                   shouldShowDialog,
+                                                                                   closeDialog,
+                                                                                   reloadSelectedDay,
+                                                                                   familyIds,
+                                                                               }) => {
     // Component state
     const [isLoading, setIsLoading] = useState(true)
     const [familyIdentifiers, setFamilyIdentifiers] = useState<RelayFamilyIdentifier[]>()

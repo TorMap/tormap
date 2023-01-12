@@ -1,10 +1,10 @@
 import React, {FunctionComponent} from "react";
-import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import {TextField} from "@mui/material";
-import {DatePicker, LocalizationProvider} from "@mui/lab";
 import {useDate} from "../../context/date-context";
 import {format, isValid} from "date-fns";
 import {enCA} from "date-fns/locale";
+import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
+import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
 
 interface Props {
     /**
@@ -30,7 +30,7 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
     }
 
     return (
-        <LocalizationProvider dateAdapter={AdapterDateFns} locale={enCA}>
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enCA}>
             <DatePicker
                 value={selectedDate}
                 mask={"____-__-__"}
@@ -60,7 +60,6 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
                     return !(availableDays.includes(format(date, "yyyy-MM-dd")))
                 }}
                 views={["year", "month", "day"]}
-                showTodayButton
             />
         </LocalizationProvider>
     )
