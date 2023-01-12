@@ -1,5 +1,5 @@
 import React, {FunctionComponent} from "react";
-import {Box, FormControl, MenuItem, Select, Tooltip, Typography, useMediaQuery} from "@mui/material";
+import {Box, FormControl, MenuItem, Select, Typography} from "@mui/material";
 import {SelectChangeEvent} from "@mui/material/Select/SelectInput";
 import {RelayIdentifierMatch} from "../../../types/relay";
 import {nameOfFactory} from "../../../util/util";
