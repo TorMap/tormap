@@ -1,11 +1,12 @@
-import React, {FunctionComponent} from "react";
-import {Box, CircularProgress, IconButton, Tooltip, Typography} from "@mui/material";
-import {getRelayType} from "../../../util/aggregate-relays";
-import {RelayDetailsMatch, RelayType, RelayTypeLabel} from "../../../types/relay";
-import {getIcon} from "../../../types/icons";
-import {SelectFamilyButton} from "../../buttons/SelectFamilyButton";
 import CloseIcon from "@mui/icons-material/Close";
+import {Box, CircularProgress, IconButton, Tooltip, Typography} from "@mui/material";
+import React, {FunctionComponent} from "react";
+
 import {useSettings} from "../../../context/settings-context";
+import {getIcon} from "../../../types/icons";
+import {RelayDetailsMatch, RelayType, RelayTypeLabel} from "../../../types/relay";
+import {getRelayType} from "../../../util/aggregate-relays";
+import {SelectFamilyButton} from "../../buttons/SelectFamilyButton";
 
 interface Props {
     /**
@@ -27,14 +28,14 @@ export const RelayDetailsHeader: FunctionComponent<Props> = ({
 
     return (
         <Box display="flex" alignItems={"center"}>
-            {relayDetailsMatch ? <>
+            {relayDetailsMatch && relayType != undefined ? <>
                 <Tooltip title={`Relay's nickname`}>
                     <Typography sx={{display: "inline"}}
                                 variant="h6">
                         {relayDetailsMatch.nickname}
                     </Typography>
                 </Tooltip>
-                <Tooltip title={`${RelayTypeLabel[relayType!]} relay`}>
+                <Tooltip title={`${RelayTypeLabel[relayType]} relay`}>
                     <IconButton
                         aria-label="select relay type"
                         sx={{ml: 1}}

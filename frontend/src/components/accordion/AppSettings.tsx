@@ -1,4 +1,4 @@
-import React, {FunctionComponent} from "react";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
     Accordion,
     AccordionDetails,
@@ -11,13 +11,14 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {relayMustIncludeFlagOptions, Settings} from "../../types/settings";
-import {RelayFlagLabel, RelayType, RelayTypeLabel, RelayTypeTooltip} from "../../types/relay";
+import React, {FunctionComponent} from "react";
+
 import {tooltipTimeDelay} from "../../config";
-import {getIcon} from "../../types/icons";
-import {nameOfFactory} from "../../util/util";
 import {useSettings} from "../../context/settings-context";
+import {getIcon} from "../../types/icons";
+import {RelayFlagLabel, RelayType, RelayTypeLabel, RelayTypeTooltip} from "../../types/relay";
+import {relayMustIncludeFlagOptions, Settings} from "../../types/settings";
+import {nameOfFactory} from "../../util/util";
 import {ExternalLink} from "../link/ExternalLink";
 
 interface Props {

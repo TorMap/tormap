@@ -1,21 +1,26 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
 import './index.css';
 import "@mui/styles";
 import "react-sliding-pane/dist/react-sliding-pane.css";
-import {App} from "./components/App";
+
 import {createTheme, ThemeProvider} from "@mui/material";
 import {SnackbarProvider} from "notistack";
-import {TorMapTheme} from "./types/TorMapTheme";
-import {SettingsProvider} from "./context/settings-context";
-import {defaultSettings} from "./config";
-import {DateProvider} from "./context/date-context";
-import {StatisticsProvider} from "./context/statistics-context";
+import React from 'react';
 import {createRoot} from "react-dom/client";
 
-const theme = createTheme(TorMapTheme)
+import {App} from "./components/App";
+import {defaultSettings} from "./config";
+import {DateProvider} from "./context/date-context";
+import {SettingsProvider} from "./context/settings-context";
+import {StatisticsProvider} from "./context/statistics-context";
+import {TorMapTheme} from "./types/TorMapTheme";
 
-createRoot(document.getElementById('root')!).render(
+const theme = createTheme(TorMapTheme)
+const root = document.getElementById('root');
+if (!root) {
+    throw new Error('Root element not found');
+}
+
+createRoot(root).render(
     <ThemeProvider theme={theme}>
         <SnackbarProvider
             maxSnack={3}

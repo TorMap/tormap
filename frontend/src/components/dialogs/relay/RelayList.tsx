@@ -1,8 +1,9 @@
-import React, {FunctionComponent} from "react";
 import {Box, List, ListItem, ListItemIcon, ListItemText} from "@mui/material";
+import React, {FunctionComponent} from "react";
+
 import {getIcon, RelayFamilyIcon} from "../../../types/icons";
-import {calculateFamilyColor} from "../../../util/layer-construction";
 import {RelayIdentifierMatch} from "../../../types/relay";
+import {calculateFamilyColor} from "../../../util/layer-construction";
 
 interface Props {
     /**

@@ -1,7 +1,8 @@
-import React, {FunctionComponent} from "react";
 import {IconButton} from "@mui/material";
-import {RelayFamilyIcon} from "../../types/icons";
+import React, {FunctionComponent} from "react";
+
 import {useSettings} from "../../context/settings-context";
+import {RelayFamilyIcon} from "../../types/icons";
 import {calculateFamilyColor} from "../../util/layer-construction";
 
 interface Props {

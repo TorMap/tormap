@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {Settings} from "../types/settings";
+
 import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/accordion/AppSettings";
+import {Settings} from "../types/settings";
 
 interface SettingsInterface {
     settings: Settings
@@ -14,7 +15,7 @@ const SettingsContext = React.createContext<SettingsInterface | null>(null)
  * The Context Hook for Settings provided in the SettingsProvider
  */
 export function useSettings() {
-    return useContext(SettingsContext)!
+    return useContext(SettingsContext)
 }
 
 interface SettingsProviderProps {

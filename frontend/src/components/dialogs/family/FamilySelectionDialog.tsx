@@ -1,11 +1,12 @@
-import React, {FunctionComponent, useEffect, useState} from "react";
 import {useMediaQuery, useTheme} from "@mui/material";
 import {useSnackbar} from "notistack";
-import {FamilySelectionDialogLarge} from "./FamilySelectionDialogLarge";
-import {FamilySelectionDialogSmall} from "./FamilySelectionDialogSmall";
-import {backend} from "../../../util/util";
+import React, {FunctionComponent, useEffect, useState} from "react";
+
 import {RelayFamilyIdentifier} from "../../../dto/relay";
 import {SnackbarMessage} from "../../../types/ui";
+import {backend} from "../../../util/util";
+import {FamilySelectionDialogLarge} from "./FamilySelectionDialogLarge";
+import {FamilySelectionDialogSmall} from "./FamilySelectionDialogSmall";
 
 interface FamilySelectionProps {
     /**

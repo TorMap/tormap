@@ -1,6 +1,6 @@
-import {Settings} from "../types/settings";
-import {RelayFlag, RelayFlags, RelayType} from "../types/relay";
 import {RelayLocationDto} from "../dto/relay";
+import {RelayFlag, RelayFlags, RelayType} from "../types/relay";
+import {Settings} from "../types/settings";
 import {Statistics} from "../types/statistics";
 
 /**
@@ -9,7 +9,7 @@ import {Statistics} from "../types/statistics";
  * @param settings - The app settings for filtering
  */
 export const applyRelayFilter = (relays: RelayLocationDto[], settings: Settings): RelayLocationDto[] => {
-    let filtered: RelayLocationDto[] = []
+    const filtered: RelayLocationDto[] = []
     relays.forEach(relay => {
         let relayMissesRequiredFlag = false
         RelayFlags.forEach(flag => {
@@ -32,11 +32,11 @@ export const applyRelayFilter = (relays: RelayLocationDto[], settings: Settings)
  * @param relays - The relays
  */
 export const buildRelayCoordinatesMap = (relays: RelayLocationDto[]): Map<string, RelayLocationDto[]> => {
-    let latLonMap: Map<string, RelayLocationDto[]> = new Map<string, RelayLocationDto[]>()
+    const latLonMap: Map<string, RelayLocationDto[]> = new Map<string, RelayLocationDto[]>()
     relays.forEach(relay => {
         const key: string = createLatLonKey(relay)
-        if (latLonMap.has(key)) {
-            let old = latLonMap.get(key)!!
+        const old = latLonMap.get(key)
+        if (old) {
             old.push(relay)
             latLonMap.set(key, old)
         } else {
@@ -53,13 +53,13 @@ export const createLatLonKey = (relay: RelayLocationDto) => `${relay.lat},${rela
  * @param relays - The relays
  */
 export const buildRelayFamilyMap = (relays: RelayLocationDto[]): Map<number, RelayLocationDto[]> => {
-    let familyMap: Map<number, RelayLocationDto[]> = new Map<number, RelayLocationDto[]>()
+    const familyMap: Map<number, RelayLocationDto[]> = new Map<number, RelayLocationDto[]>()
     relays.forEach(relay => {
         if (relay.familyId !== null) {
             const key = relay.familyId
             if (key) {
-                if (familyMap.has(key)) {
-                    let old = familyMap.get(key)!!
+                const old = familyMap.get(key)
+                if (old) {
                     old.push(relay)
                     familyMap.set(key, old)
                 } else {
@@ -76,7 +76,7 @@ export const buildRelayFamilyMap = (relays: RelayLocationDto[]): Map<number, Rel
  * @param latLonMap - A LatLonMap to build the famCordMap on
  */
 export const buildFamilyCoordinatesMap = (latLonMap: Map<string, RelayLocationDto[]>): Map<string, Map<number, RelayLocationDto[]>> => {
-    let famCordMap: Map<string, Map<number, RelayLocationDto[]>> = new Map<string, Map<number, RelayLocationDto[]>>()
+    const famCordMap: Map<string, Map<number, RelayLocationDto[]>> = new Map<string, Map<number, RelayLocationDto[]>>()
     latLonMap.forEach((relaysOnLocation, location) => {
         famCordMap.set(location, buildRelayFamilyMap(relaysOnLocation))
     })
@@ -89,10 +89,10 @@ export const buildFamilyCoordinatesMap = (latLonMap: Map<string, RelayLocationDt
  * @param famCordMap - The famCordMap-Object to sort
  */
 export const sortFamilyCoordinatesMap = (famCordMap: Map<string, Map<number, RelayLocationDto[]>>): Map<string, RelayFamilyLocation[]> => {
-    let output: Map<string, RelayFamilyLocation[]> = new Map<string, RelayFamilyLocation[]>()
+    const output: Map<string, RelayFamilyLocation[]> = new Map<string, RelayFamilyLocation[]>()
     // For each coordinate
     famCordMap.forEach((famMapForLocation, coordinateKey) => {
-        let sorted: RelayFamilyLocation[] = []
+        const sorted: RelayFamilyLocation[] = []
         // For each family at coordinate
         while (famMapForLocation.size > 0) {
             let largest: RelayFamilyLocation = {relays: [], familyId: 0, padding: 0}
@@ -125,12 +125,12 @@ export type RelayFamilyLocation = {
  * @param relays - The relays
  */
 export const buildRelayCountryMap = (relays: RelayLocationDto[]): Map<string, RelayLocationDto[]> => {
-    let countryMap: Map<string, RelayLocationDto[]> = new Map<string, RelayLocationDto[]>()
+    const countryMap: Map<string, RelayLocationDto[]> = new Map<string, RelayLocationDto[]>()
     relays.forEach(relay => {
         if (relay.country !== undefined) {
             const key: string = relay.country
-            if (countryMap.has(key)) {
-                let old = countryMap.get(key)!!
+            const old = countryMap.get(key)
+            if (old) {
                 old.push(relay)
                 countryMap.set(key, old)
             } else {
@@ -157,17 +157,19 @@ export const buildStatistics = (
     if (settings.selectedCountry && settings.selectedFamily) {
         filteredRelays = []
         relayFamilyMap.get(settings.selectedFamily)?.forEach(familyRelay => {
-            relayCountryMap.get(settings.selectedCountry!!)?.forEach(countryRelay => {
-                if (familyRelay.detailsId === countryRelay.detailsId) filteredRelays.push(familyRelay)
-            })
+            if (settings.selectedCountry) {
+                relayCountryMap.get(settings.selectedCountry)?.forEach(countryRelay => {
+                    if (familyRelay.detailsId === countryRelay.detailsId) filteredRelays.push(familyRelay)
+                })
+            }
         })
     } else if (settings.selectedCountry && relayCountryMap.has(settings.selectedCountry)) {
-        filteredRelays = relayCountryMap.get(settings.selectedCountry)!!
+        filteredRelays = relayCountryMap.get(settings.selectedCountry) ?? []
     } else if (settings.selectedFamily && relayFamilyMap.has(settings.selectedFamily)) {
-        filteredRelays = relayFamilyMap.get(settings.selectedFamily)!!
+        filteredRelays = relayFamilyMap.get(settings.selectedFamily) ?? []
     }
 
-    let stats: Statistics = {
+    const stats: Statistics = {
         relayGuardCount: 0,
         relayExitCount: 0,
         relayOtherCount: 0,
