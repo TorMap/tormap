@@ -1,9 +1,10 @@
-import React, {FunctionComponent, useEffect, useState} from "react";
-import {useDebounce} from "../../util/util";
-import {Slider} from "@mui/material";
 import {Mark} from "@mui/base";
-import {useDate} from "../../context/date-context";
+import {Slider} from "@mui/material";
 import {format} from "date-fns";
+import React, {FunctionComponent, useEffect, useState} from "react";
+
+import {useDate} from "../../context/date-context";
+import {useDebounce} from "../../util/util";
 
 /**
  * A Slider for date selection
@@ -29,7 +30,7 @@ export const DateSlider: FunctionComponent = () => {
             if (availableDays.length < markCount) {
                 markCount = availableDays.length
             }
-            let marks = []
+            const marks = []
             for (let i = 0; i < markCount; i++) {
                 const dateIndex = Math.round(i * (availableDays.length - 1) / (markCount - 1))
                 const date = availableDays[dateIndex]
@@ -54,10 +55,10 @@ export const DateSlider: FunctionComponent = () => {
         <Slider
             disabled={(availableDays.length === 0)}
             value={sliderValue}
-            onChange={(event: any, newValue: number | number[]) => {
+            onChange={(_, newValue: number | number[]) => {
                 setSliderValue(newValue as number)
             }}
-            onChangeCommitted={(event: any, newValue: number | number[]) => {
+            onChangeCommitted={(_, newValue: number | number[]) => {
                 debouncedSliderValue = newValue as number
             }}
             valueLabelDisplay={(availableDays.length === 0) ? "off" : "on"}

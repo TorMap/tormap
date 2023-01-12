@@ -1,6 +1,12 @@
-import {useMap} from "react-leaflet";
-import React, {FunctionComponent, Suspense, useCallback, useEffect, useMemo, useState} from "react";
 import {LayerGroup, LeafletMouseEvent} from "leaflet";
+import {useSnackbar} from "notistack";
+import React, {FunctionComponent, Suspense, useCallback, useEffect, useMemo, useState} from "react";
+import {useMap} from "react-leaflet";
+
+import {useSettings} from "../../context/settings-context";
+import {useStatistics} from "../../context/statistics-context";
+import {RelayLocationDto} from "../../dto/relay";
+import {SnackbarMessage} from "../../types/ui";
 import {
     applyRelayFilter,
     buildFamilyCoordinatesMap,
@@ -18,11 +24,6 @@ import {
     buildRelayLayer,
     buildSelectedFamilyLayer
 } from "../../util/layer-construction";
-import {RelayLocationDto} from "../../dto/relay";
-import {SnackbarMessage} from "../../types/ui";
-import {useSnackbar} from "notistack";
-import {useSettings} from "../../context/settings-context";
-import {useStatistics} from "../../context/statistics-context";
 import {LoadingAnimation} from "../loading/LoadingAnimation";
 
 // Lazy loaded components
@@ -82,7 +83,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
      */
     const openRelayDetailsDialog = useCallback((event: LeafletMouseEvent) => {
         if (relays) {
-            const relaysAtCoordinate = relayCoordinatesMap.get(event.target.options.className)!!
+            const relaysAtCoordinate = relayCoordinatesMap?.get(event.target.options.className) ?? []
             setRelaysForDetailsDialog(relaysAtCoordinate)
             setShowRelayDetailsDialog(true)
         }

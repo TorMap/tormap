@@ -1,4 +1,5 @@
-import React, {FunctionComponent, ReactElement} from "react";
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
     Accordion,
     AccordionDetails,
@@ -9,8 +10,10 @@ import {
     TableRow,
     Typography
 } from "@mui/material";
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import React, {FunctionComponent, ReactElement} from "react";
+
+import {useSettings} from "../../context/settings-context";
+import {useStatistics} from "../../context/statistics-context";
 import {
     EarthIcon,
     ExitRelayIcon,
@@ -20,8 +23,6 @@ import {
     TotalRelaysIcon
 } from "../../types/icons";
 import {getFullName} from "../../util/geojson";
-import {useSettings} from "../../context/settings-context";
-import {useStatistics} from "../../context/statistics-context";
 
 interface Props {
     /**
@@ -45,7 +46,7 @@ export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation})
     const {statistics} = useStatistics()
 
     // Construct the stats rows to display
-    let rows: StatsRow[] = []
+    const rows: StatsRow[] = []
     rows.push({icon: ExitRelayIcon, title: "Exit relays", value: statistics.relayExitCount})
     rows.push({icon: GuardRelayIcon, title: "Guard relays", value: statistics.relayGuardCount})
     rows.push({icon: OtherRelayIcon, title: "Other relays", value: statistics.relayOtherCount})

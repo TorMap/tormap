@@ -1,4 +1,5 @@
 import React, {FunctionComponent, useContext, useState} from "react";
+
 import {Statistics} from "../types/statistics";
 
 interface StatisticsInterface {
@@ -9,7 +10,7 @@ interface StatisticsInterface {
 const StatisticsContext = React.createContext<StatisticsInterface | null>(null)
 
 export function useStatistics() {
-    return useContext(StatisticsContext)!
+    return useContext(StatisticsContext)
 }
 
 interface StatisticsProviderProps {

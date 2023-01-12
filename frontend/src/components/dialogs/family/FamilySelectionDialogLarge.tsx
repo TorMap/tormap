@@ -1,8 +1,9 @@
+import CloseIcon from "@mui/icons-material/Close";
 import {CircularProgress, Dialog, DialogContent, DialogTitle, IconButton} from "@mui/material";
 import React, {FunctionComponent} from "react";
-import CloseIcon from "@mui/icons-material/Close";
-import {FamilySelectionTable} from "./FamilySelectionTable";
+
 import {FamilySelectionDialogProps} from "./FamilySelectionDialog";
+import {FamilySelectionTable} from "./FamilySelectionTable";
 
 /**
  * A Dialog to select a Family from multiple Families

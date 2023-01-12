@@ -1,7 +1,7 @@
 import {Dialog, Slide} from "@mui/material";
 import {styled} from '@mui/material/styles';
-import React from "react";
 import {TransitionProps} from "@mui/material/transitions";
+import React from "react";
 
 export enum SnackbarMessage {
     ConnectionFailed = "Connection failed! Maybe the server is being upgraded.",

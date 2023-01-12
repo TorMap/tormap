@@ -2,17 +2,18 @@
  * Format number represented as bytes to rounded mega byte string representation
  * @param bandwidthInBytes - number to be formatted
  */
-import React, {FunctionComponent, useCallback, useEffect, useMemo, useState} from "react";
-import {RelayDetailsDialogLarge} from "./RelayDetailsDialogLarge";
-import {RelayDetailsDto, RelayIdentifierDto, RelayLocationDto} from "../../../dto/relay";
 import {useMediaQuery, useTheme} from "@mui/material";
-import {RelayDetailsDialogSmall} from "./RelayDetailsDialogSmall";
-import {useSnackbar} from "notistack";
-import {getRelayType} from "../../../util/aggregate-relays";
-import {SnackbarMessage} from "../../../types/ui";
-import {backend, nameOfFactory} from "../../../util/util";
 import {SelectChangeEvent} from "@mui/material/Select/SelectInput";
+import {useSnackbar} from "notistack";
+import React, {FunctionComponent, useCallback, useEffect, useMemo, useState} from "react";
+
+import {RelayDetailsDto, RelayIdentifierDto, RelayLocationDto} from "../../../dto/relay";
 import {RelayDetailsMatch, RelayIdentifierMatch} from "../../../types/relay";
+import {SnackbarMessage} from "../../../types/ui";
+import {getRelayType} from "../../../util/aggregate-relays";
+import {backend, nameOfFactory} from "../../../util/util";
+import {RelayDetailsDialogLarge} from "./RelayDetailsDialogLarge";
+import {RelayDetailsDialogSmall} from "./RelayDetailsDialogSmall";
 
 export interface Props {
     shouldShowDialog: boolean
@@ -51,7 +52,11 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<Props> = ({
 
     const relayDetailsIdToLocationMap = useMemo(() => {
         const relayDetailsIdToLocationMap = new Map<number, RelayLocationDto>()
-        relayLocations.filter(relay => relay.detailsId).forEach(relay => relayDetailsIdToLocationMap.set(relay.detailsId!!, relay))
+        relayLocations.forEach(relay => {
+            if (relay.detailsId) {
+                relayDetailsIdToLocationMap.set(relay.detailsId, relay)
+            }
+        })
         return relayDetailsIdToLocationMap
     }, [relayLocations])
 
@@ -78,9 +83,9 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent<Props> = ({
     const sortedRelayIdentifierMatches = useMemo(
         () => relayIdentifierMatches.sort((a, b) => {
                 if (sortRelaysBy === nameOfRelayMatch("familyId")) {
-                    return a[sortRelaysBy]!! < b[sortRelaysBy]!! ? 1 : -1
+                    return a[sortRelaysBy]! < b[sortRelaysBy]! ? 1 : -1
                 }
-                return a[sortRelaysBy]!! > b[sortRelaysBy]!! ? 1 : -1
+                return a[sortRelaysBy]! > b[sortRelaysBy]! ? 1 : -1
             }
         ),
         [nameOfRelayMatch, relayIdentifierMatches, sortRelaysBy]
