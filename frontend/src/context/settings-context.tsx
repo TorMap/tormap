@@ -15,7 +15,7 @@ const SettingsContext = React.createContext<SettingsInterface | null>(null)
  * The Context Hook for Settings provided in the SettingsProvider
  */
 export function useSettings() {
-    return useContext(SettingsContext)
+    return useContext(SettingsContext)!
 }
 
 interface SettingsProviderProps {
