@@ -3608,7 +3608,7 @@ __metadata:
     react-sliding-pane: 7.3.0
     typescript: 4.9.4
     vite: 4.0.4
-    vite-plugin-checker: 0.5.1
+    vite-plugin-checker: 0.5.3
   languageName: unknown
   linkType: soft
 
@@ -3678,9 +3678,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-plugin-checker@npm:0.5.1":
-  version: 0.5.1
-  resolution: "vite-plugin-checker@npm:0.5.1"
+"vite-plugin-checker@npm:0.5.3":
+  version: 0.5.3
+  resolution: "vite-plugin-checker@npm:0.5.3"
   dependencies:
     "@babel/code-frame": ^7.12.13
     ansi-escapes: ^4.3.0
@@ -3699,12 +3699,21 @@ __metadata:
     vscode-uri: ^3.0.2
   peerDependencies:
     eslint: ">=7"
+    meow: ^9.0.0
+    optionator: ^0.9.1
+    stylelint: ">=13"
     typescript: "*"
-    vite: ^2.0.0 || ^3.0.0-0
+    vite: ">=2.0.0"
     vls: "*"
     vti: "*"
   peerDependenciesMeta:
     eslint:
+      optional: true
+    meow:
+      optional: true
+    optionator:
+      optional: true
+    stylelint:
       optional: true
     typescript:
       optional: true
@@ -3712,7 +3721,7 @@ __metadata:
       optional: true
     vti:
       optional: true
-  checksum: eed0b1a07563ca5b0567bbb39348a46208282f2c10c47d86d5c4d334c04bde30a1ce80566359588bdbae61339a8ee4ca609b9d4d779d50c6233d3efa8eb36220
+  checksum: cf474d41ee7071da8a23da587b8aaf82dc3d9e66280837c6596f108d069242e0ca8da02e124fa61121508e56548e50ad0a68683a8ce4d7741ce347de1198c897
   languageName: node
   linkType: hard
 
