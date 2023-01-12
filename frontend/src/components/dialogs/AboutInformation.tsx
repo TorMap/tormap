@@ -3,18 +3,14 @@ import {
     Avatar,
     Box,
     Button,
-    Card,
-    CardHeader,
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle, Divider,
+    DialogTitle,
+    Divider,
     Grid,
     IconButton,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
+    Stack,
     Typography,
     useMediaQuery,
     useTheme
@@ -23,11 +19,10 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import EmailIcon from '@mui/icons-material/Email';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import CloseIcon from "@mui/icons-material/Close";
-import LanguageIcon from '@mui/icons-material/Language';
 import InfoIcon from '@mui/icons-material/Info';
-import TorMapLogo from "../../resources/logo.png";
 import {ExternalLink} from "../link/ExternalLink";
 import {BitcoinIcon} from "../icons/BitcoinIcon";
+import {ContributorCard} from "../card/ContributorCard";
 
 /**
  * A component for displaying information about TorMap
@@ -59,9 +54,25 @@ export const AboutInformation: React.FunctionComponent = () => {
             >
                 <DialogTitle>
                     <Box display="flex" alignItems={"center"}>
-                        <Avatar sx={{marginRight: "10px"}} src={TorMapLogo} alt={"TorMap logo"}/>
-                        <Typography variant="h6">TorMap</Typography>
-
+                        <Avatar sx={{marginRight: "24px"}} src={"android-chrome-192x192.png"} alt={"TorMap logo"}/>
+                        <Typography variant="h5">TorMap</Typography>
+                        <Grid sx={{flexGrow: 1, marginLeft: "0px", paddingTop: "8px"}} container spacing={4}>
+                            <Grid item>
+                                <ExternalLink sx={{color: "white"}} href={"https://github.com/TorMap/tormap"}
+                                              label={<GitHubIcon/>}/>
+                            </Grid>
+                            <Grid item>
+                                <ExternalLink sx={{color: "white"}} href={"https://twitter.com/TorMapOrg"}
+                                              label={<TwitterIcon/>}/>
+                            </Grid>
+                            <Grid item>
+                                <ExternalLink sx={{color: "white"}} href={"mailto:hi@tormap.org"} label={<EmailIcon/>}/>
+                            </Grid>
+                            <Grid item>
+                                <ExternalLink sx={{color: "white"}} href={"https://tippin.me/@Julius_Henke"}
+                                              label={<BitcoinIcon/>}/>
+                            </Grid>
+                        </Grid>
                     </Box>
                     <IconButton aria-label="close" sx={{
                         position: "absolute",
@@ -74,7 +85,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                 <DialogContent
                     dividers
                 >
-                    <Typography variant={"h6"}>What can I do here?</Typography>
+                    <h2>What is TorMap?</h2>
                     <Typography variant={"body1"} gutterBottom>
                         TorMap is a world map displaying approximate locations where Tor relays are being hosted. The
                         Tor network currently consists of thousands of relays which route anonymous internet traffic
@@ -88,142 +99,48 @@ export const AboutInformation: React.FunctionComponent = () => {
                                          label={"Florian Platzer"}/> from <ExternalLink
                         href={"https://www.sit.fraunhofer.de/"} label={"Frauenhofer SIT"}/>.
                     </Typography>
-                    <Typography variant={"h6"}>How do we get our data?</Typography>
+                    <h2>How do we get our data?</h2>
                     <Typography variant={"body1"} gutterBottom>
                         The nonprofit organization <ExternalLink href={"https://www.torproject.org/"}
                                                                  label={"TorProject"}/> already provides a
                         large <ExternalLink href={"https://metrics.torproject.org/collector.html"}
-                                                               label={"archive"}/> with raw historic data about the
-                        network. We regularly process these so called "descriptors" and lookup IPv4 addresses to get geo
+                                            label={"archive"}/> with raw historic data about the
+                        network. We regularly process these so called &quot;descriptors&quot; and lookup IPv4 addresses
+                        to get geo
                         locations and autonomous systems. If you are interested in our implementation, check out the
                         open source repository on <ExternalLink href={"https://github.com/TorMap/tormap"}
-                                         label={"GitHub"}/>.<br/>
+                                                                label={"GitHub"}/>.<br/>
                         The location and ownership of IP ranges can change over time. Since we
                         only use current IP data, some relays might have been hosted somewhere else, than displayed on
-                        our world map. The location is also not accurate to the street level but rather an approximate of the city.
+                        our world map. The location is also not accurate to the street level but rather an approximate
+                        of the city.
                     </Typography>
-                    <Grid container spacing={3} sx={{
-                        paddingTop: "7px",
-                    }}>
-                        <Grid item xs={12} sm={4}>
-                            <Card elevation={20}>
-                                <CardHeader
-                                    title="TorMap"
-                                />
-                                <List dense={true}>
-                                    <ListItem
-                                        button
-                                        component="a"
-                                        href={"https://github.com/TorMap/tormap"}
-                                        target={"_blank"}
-                                        rel={"noopener"}
-                                    >
-                                        <ListItemIcon>
-                                            <GitHubIcon/>
-                                        </ListItemIcon>
-                                        <ListItemText>
-                                            Github
-                                        </ListItemText>
-                                    </ListItem>
-                                    <ListItem button component="a" href={"mailto:hi@tormap.org"}
-                                              target={"_blank"}>
-                                        <ListItemIcon>
-                                            <EmailIcon/>
-                                        </ListItemIcon>
-                                        <ListItemText>
-                                            Email
-                                        </ListItemText>
-                                    </ListItem>
-                                    <ListItem
-                                        button component="a"
-                                        href={"https://tippin.me/@Julius_Henke"}
-                                        target={"_blank"}
-                                        rel={"noopener"}
-                                    >
-                                        <ListItemIcon>
-                                            <BitcoinIcon/>
-                                        </ListItemIcon>
-                                        <ListItemText>
-                                            Donate
-                                        </ListItemText>
-                                    </ListItem>
-                                </List>
-                            </Card>
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                            <Card elevation={20}>
-                                <CardHeader
-                                    title="Julius Henke"
-                                />
-                                <List dense={true}>
-                                    <ListItem
-                                        button
-                                        component="a"
-                                        href="https://github.com/JuliusHenke"
-                                        target={"_blank"}
-                                        rel={"noopener"}
-                                    >
-                                        <ListItemIcon>
-                                            <GitHubIcon/>
-                                        </ListItemIcon>
-                                        <ListItemText>
-                                            GitHub
-                                        </ListItemText>
-                                    </ListItem>
-                                    <ListItem
-                                        button
-                                        component="a"
-                                        href="https://juliushenke.com/"
-                                        target={"_blank"}
-                                        rel={"noopener"}
-                                    >
-                                        <ListItemIcon>
-                                            <LanguageIcon/>
-                                        </ListItemIcon>
-                                        <ListItemText>
-                                            Website
-                                        </ListItemText>
-                                    </ListItem>
-                                    <ListItem
-                                        button component="a"
-                                        href="https://twitter.com/Julius_Henke"
-                                        target={"_blank"}
-                                        rel={"noopener"}
-                                    >
-                                        <ListItemIcon>
-                                            <TwitterIcon/>
-                                        </ListItemIcon>
-                                        <ListItemText>
-                                            Twitter
-                                        </ListItemText>
-                                    </ListItem>
-                                </List>
-                            </Card>
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                            <Card elevation={20}>
-                                <CardHeader
-                                    title="Tim Kilb"
-                                />
-                                <List dense={true}>
-                                    <ListItem
-                                        button
-                                        component="a"
-                                        href="https://github.com/TimKilb"
-                                        target={"_blank"}
-                                        rel={"noopener"}
-                                    >
-                                        <ListItemIcon>
-                                            <GitHubIcon/>
-                                        </ListItemIcon>
-                                        <ListItemText>
-                                            GitHub
-                                        </ListItemText>
-                                    </ListItem>
-                                </List>
-                            </Card>
-                        </Grid>
-                    </Grid>
+                    <h2>Contributors</h2>
+                    <Stack
+                        direction="row"
+                        justifyContent="flex-start"
+                        alignItems="flex-start"
+                        spacing={3}
+                    >
+                        <ContributorCard
+                            avatar={<Avatar src={"https://avatars.githubusercontent.com/u/23460202?s=96&v=4"}/>}
+                            name={"Julius Henke"}
+                            website={"https://juliushenke.com"}
+                            roles={["Maintainer"]}
+                        />
+                        <ContributorCard
+                            avatar={<Avatar src={"https://avatars.githubusercontent.com/u/32802490?s=96&v=4"}/>}
+                            name={"Tim Kilb"}
+                            website={"https://github.com/TimKilb"}
+                            roles={["Developer"]}
+                        />
+                        <ContributorCard
+                            avatar={<Avatar src={"/felix-krauspe.jpeg"}/>}
+                            name={"Felix Krauspe"}
+                            website={"https://www.linkedin.com/in/felix-krauspe-202bb9218/"}
+                            roles={["Server Admin"]}
+                        />
+                    </Stack>
                     <Divider sx={{my: 2}}/>
                     <Typography variant={"body2"}>
                         We use IP geolocation data by <ExternalLink href={"https://db-ip.com"}
