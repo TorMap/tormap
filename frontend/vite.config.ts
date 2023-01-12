@@ -1,6 +1,6 @@
 import {defineConfig} from 'vite'
 import viteChecker from 'vite-plugin-checker'
-import viteReact from "@vitejs/plugin-react";
+import viteReact from "@vitejs/plugin-react-swc";
 
 // https://vitejs.dev/config/
 export default defineConfig({
