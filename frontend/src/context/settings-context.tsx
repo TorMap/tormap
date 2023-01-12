@@ -15,6 +15,7 @@ const SettingsContext = React.createContext<SettingsInterface | null>(null)
  * The Context Hook for Settings provided in the SettingsProvider
  */
 export function useSettings() {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return useContext(SettingsContext)!
 }
 
