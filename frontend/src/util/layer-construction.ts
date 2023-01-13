@@ -1,5 +1,5 @@
 import {Feature, GeoJsonObject, GeometryObject} from "geojson";
-import L, {circleMarker, GeoJSON, Layer, LayerGroup, LeafletMouseEvent, PathOptions} from "leaflet";
+import L, {circleMarker, GeoJSON, HeatLatLngTuple, Layer, LayerGroup, LeafletMouseEvent, PathOptions} from "leaflet";
 
 import {Colors} from "../config";
 import {RelayLocationDto} from "../dto/relay";
@@ -204,15 +204,15 @@ export const calculateFamilyColor = (familyId: number) => {
 }
 
 export const buildRelayHeatmapLayer = (relays: RelayLocationDto[]): LayerGroup => {
-    const coordinates = new Array<number[]>()
+    const coordinates = new Array<HeatLatLngTuple>()
     relays.forEach(relay => coordinates.push([relay.lat, relay.long, 1]))
-    return (L as any).heatLayer(coordinates, {
+    return L.heatLayer(coordinates, {
         radius: 25,
         max: 1,
         blur: 35,
         minOpacity: .55,
         gradient: {0.4: '#2e53dc', 0.65: '#c924ae', .75: '#ff4646', .83: "#ff0000"},
-    })
+    }) as unknown as LayerGroup
 }
 
 /**
@@ -253,7 +253,7 @@ export const buildRelayCountryLayer = (
 }
 
 /**
- * Returns an Layer with all Countries that contain relays
+ * Returns a Layer with all countries that contain relays
  * @param countryMap - The CountryMap
  * @param settings - The app settings
  * @param setSettingsCallback - The callback for changing settings

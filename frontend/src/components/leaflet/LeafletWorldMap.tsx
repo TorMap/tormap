@@ -1,6 +1,3 @@
-import 'leaflet/dist/leaflet.css';
-import "leaflet.heat"
-
 import {useMediaQuery, useTheme} from "@mui/material";
 import {useSnackbar} from "notistack";
 import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
@@ -12,6 +9,8 @@ import {SnackbarMessage} from "../../types/ui";
 import {backend} from "../../util/util";
 import {LeafletLayers} from "./LeafletLayers";
 
+import "leaflet.heat"
+import 'leaflet/dist/leaflet.css';
 
 interface Props {
     /**
