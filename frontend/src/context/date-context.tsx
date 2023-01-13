@@ -1,7 +1,8 @@
-import React, {FunctionComponent, useContext, useEffect, useState} from "react";
 import {differenceInDays} from "date-fns";
-import {SnackbarMessage} from "../types/ui";
 import {useSnackbar} from "notistack";
+import React, {FunctionComponent, useContext, useEffect, useState} from "react";
+
+import {SnackbarMessage} from "../types/ui";
 
 interface DateInterface {
     /**
@@ -30,6 +31,7 @@ interface DateInterface {
 const DateContext = React.createContext<DateInterface | null>(null)
 
 export function useDate() {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return useContext(DateContext)!
 }
 

@@ -1,7 +1,8 @@
-import React, {FunctionComponent} from "react";
-import {Table, TableBody, TableCell, TableRow, Typography} from "@mui/material";
-import {RelayDetailsMatch, RelayFlag, RelayFlagLabel} from "../../../types/relay";
 import {ReactJSXElement} from "@emotion/react/types/jsx-namespace";
+import {Table, TableBody, TableCell, TableRow, Typography} from "@mui/material";
+import React, {FunctionComponent} from "react";
+
+import {RelayDetailsMatch, RelayFlag, RelayFlagLabel} from "../../../types/relay";
 import {ExternalLink} from "../../link/ExternalLink";
 
 interface Props {

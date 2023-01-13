@@ -1,15 +1,16 @@
-import {MapContainer, TileLayer} from "react-leaflet";
+import {useMediaQuery, useTheme} from "@mui/material";
+import {useSnackbar} from "notistack";
 import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
-import 'leaflet/dist/leaflet.css';
-import "leaflet.heat"
+import {MapContainer, TileLayer} from "react-leaflet";
+
+import {useDate} from "../../context/date-context";
 import {RelayLocationDto} from "../../dto/relay";
 import {SnackbarMessage} from "../../types/ui";
 import {backend} from "../../util/util";
-import {useSnackbar} from "notistack";
-import {useDate} from "../../context/date-context";
 import {LeafletLayers} from "./LeafletLayers";
-import {useMediaQuery, useTheme} from "@mui/material";
 
+import "leaflet.heat"
+import 'leaflet/dist/leaflet.css';
 
 interface Props {
     /**
@@ -42,7 +43,7 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
      */
     useEffect(() => {
         if (selectedDate) {
-            let currentTimeStamp = Date.now()
+            const currentTimeStamp = Date.now()
             setIsLoading(true)
             backend.get<RelayLocationDto[]>(`/relay/location/day/${selectedDate}`).then(response => {
                 setIsLoading(false)

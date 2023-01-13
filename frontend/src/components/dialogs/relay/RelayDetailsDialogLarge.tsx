@@ -1,10 +1,11 @@
-import React from "react";
 import {Box, Dialog, DialogTitle, Divider, Grid} from "@mui/material";
-import {RelayList} from "./RelayList";
-import {RelayDetailsTable} from "./RelayDetailsTable";
-import {DetailsDialogProps} from "./ResponsiveRelayDetailsDialog";
-import {RelayDetailsSelectionHeader} from "./RelayDetailsSelectionHeader";
+import React from "react";
+
 import {RelayDetailsHeader} from "./RelayDetailsHeader";
+import {RelayDetailsSelectionHeader} from "./RelayDetailsSelectionHeader";
+import {RelayDetailsTable} from "./RelayDetailsTable";
+import {RelayList} from "./RelayList";
+import {DetailsDialogProps} from "./ResponsiveRelayDetailsDialog";
 
 export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps> = ({
                                                                                          shouldShowDialog,
