@@ -30,13 +30,4 @@ module.exports = {
         'plugin:react/recommended',
         'plugin:jsx-a11y/recommended',
     ],
-    plugins: ['simple-import-sort'],
-    rules: {
-        'react/react-in-jsx-scope': 'off',
-        'jsx-a11y/accessible-emoji': 'off',
-        'react/prop-types': 'off',
-        '@typescript-eslint/explicit-function-return-type': 'off',
-        'simple-import-sort/imports': 'error',
-        'simple-import-sort/exports': 'error',
-    },
 };
