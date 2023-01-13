@@ -15,7 +15,6 @@
     "@mui/material": "5.10.17",
     "@mui/styles": "5.10.16",
     "@mui/x-date-pickers": "5.0.12",
-    "@react-leaflet/core": "2.1.0",
     "axios": "1.2.1",
     "date-fns": "2.29.3",
     "leaflet": "1.9.3",
@@ -23,9 +22,7 @@
     "notistack": "2.0.8",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-leaflet": "4.2.0",
-    "react-leaflet-heatmap-layer": "2.0.0",
-    "react-leaflet-shapefile": "2.0.0",
+    "react-leaflet": "3.2.5",
     "react-sliding-pane": "7.3.0"
   },
   "devDependencies": {
