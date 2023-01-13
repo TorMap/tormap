@@ -22,7 +22,7 @@ import {
     RelayFamilyIcon,
     TotalRelaysIcon
 } from "../../types/icons";
-import {getFullName} from "../../util/geojson";
+import {getFullCountryName} from "../../util/geojson";
 
 interface Props {
     /**
@@ -68,7 +68,7 @@ export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation})
                 >
                     <Typography className={"heading"}>
                         Stats{settings.selectedFamily ? " for family" : null}
-                        {settings.selectedCountry ? " in " + getFullName(settings.selectedCountry) : null}
+                        {settings.selectedCountry ? " in " + getFullCountryName(settings.selectedCountry) : null}
                     </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
