@@ -1,13 +1,14 @@
-import React, {FunctionComponent, useEffect, useState} from "react";
-import {AppBar, Button, Dialog, DialogActions, DialogContent, IconButton, Toolbar} from "@mui/material";
-import {DetailsDialogProps} from "./ResponsiveRelayDetailsDialog";
-import {RelayDetailsTable} from "./RelayDetailsTable";
-import {RelayList} from "./RelayList";
 import CloseIcon from "@mui/icons-material/Close";
+import {AppBar, Button, Dialog, DialogActions, DialogContent, IconButton, Toolbar} from "@mui/material";
+import React, {FunctionComponent, useEffect, useState} from "react";
+
 import {SlideUpTransition} from "../../../types/ui";
+import {LoadingAnimation} from "../../loading/LoadingAnimation";
 import {RelayDetailsHeader} from "./RelayDetailsHeader";
 import {RelayDetailsSelectionHeader} from "./RelayDetailsSelectionHeader";
-import {LoadingAnimation} from "../../loading/LoadingAnimation";
+import {RelayDetailsTable} from "./RelayDetailsTable";
+import {RelayList} from "./RelayList";
+import {DetailsDialogProps} from "./ResponsiveRelayDetailsDialog";
 
 
 export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
@@ -86,7 +87,6 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                     right: 5,
                 }}>
                     <Button
-                        autoFocus
                         onClick={() => {
                             if (showRelayDetails) {
                                 setShowRelayDetails(false)

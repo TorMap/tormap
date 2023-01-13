@@ -1,10 +1,11 @@
-import React, {FunctionComponent} from "react";
-import AdapterDateFns from "@mui/lab/AdapterDateFns";
-import {TextField} from "@mui/material";
-import {DatePicker, LocalizationProvider} from "@mui/lab";
-import {useDate} from "../../context/date-context";
+import {TextField, TextFieldProps} from "@mui/material";
+import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
+import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
 import {format, isValid} from "date-fns";
 import {enCA} from "date-fns/locale";
+import React, {FunctionComponent} from "react";
+
+import {useDate} from "../../context/date-context";
 
 interface Props {
     /**
@@ -30,11 +31,11 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
     }
 
     return (
-        <LocalizationProvider dateAdapter={AdapterDateFns} locale={enCA}>
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enCA}>
             <DatePicker
                 value={selectedDate}
                 mask={"____-__-__"}
-                renderInput={(params: any) =>
+                renderInput={(params: TextFieldProps) =>
                     largeScreen ? <TextField variant={"standard"}
                                              {...params}
                                              sx={{
@@ -56,11 +57,10 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
                 onAccept={handleDateChange}
                 minDate={firstAvailableDate}
                 maxDate={lastAvailableDate}
-                shouldDisableDate={(date: any) => {
+                shouldDisableDate={(date) => {
                     return !(availableDays.includes(format(date, "yyyy-MM-dd")))
                 }}
                 views={["year", "month", "day"]}
-                showTodayButton
             />
         </LocalizationProvider>
     )

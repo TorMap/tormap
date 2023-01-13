@@ -1,8 +1,9 @@
-import React, {FunctionComponent, useState} from "react";
-import {SlideUpTransition} from "../../types/ui";
-import {AppBar, Box, Button, Dialog, DialogActions, Fab, IconButton, Toolbar, Typography} from "@mui/material";
-import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from "@mui/icons-material/Close";
+import SettingsIcon from '@mui/icons-material/Settings';
+import {AppBar, Box, Button, Dialog, DialogActions, Fab, IconButton, Toolbar, Typography} from "@mui/material";
+import React, {FunctionComponent, useState} from "react";
+
+import {SlideUpTransition} from "../../types/ui";
 import {AppSettings} from "../accordion/AppSettings";
 import {MapStats} from "../accordion/MapStats";
 import {ResponsiveDatePicker} from "../date/ResponsiveDatePicker";
@@ -57,7 +58,6 @@ export const OverlaySmall: FunctionComponent = () => {
                     right: 5,
                 }}>
                     <Button
-                        autoFocus
                         onClick={() => setOpen(false)}
                         variant={"contained"}
                         size={"large"}
