@@ -869,14 +869,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-leaflet/core@npm:2.1.0, @react-leaflet/core@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "@react-leaflet/core@npm:2.1.0"
+"@react-leaflet/core@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "@react-leaflet/core@npm:1.1.1"
   peerDependencies:
-    leaflet: ^1.9.0
-    react: ^18.0.0
-    react-dom: ^18.0.0
-  checksum: c11a15fb71a9929b809f346d8f784d0f32afa373bc096aa1f0d0fa6a2ef0ce632a563c31876abf8b255a12a19d6e80ece31e2ef505f79a678bbf073e7a6c5c60
+    leaflet: ^1.7.1
+    react: ^17.0.1
+    react-dom: ^17.0.1
+  checksum: 2fc4a80e5524f9437ac6cef0f95e63388f2df6ecc5107fef85fd097eb2455436e796d41a4c43cdcbb983a4132403646823ba1dc0d953e866eb80808cbfaf0232
   languageName: node
   linkType: hard
 
@@ -3300,159 +3300,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash._arraymap@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "lodash._arraymap@npm:3.0.0"
-  checksum: 939d02f55dbbb75adf3db2ee7e9526bca32b34e3e69f911fdf1943558115e5927b140f52f97e4ab8f5b913a69565707cdc201bafe8cebba994425ca1d7f50243
-  languageName: node
-  linkType: hard
-
-"lodash._basecallback@npm:^3.0.0":
-  version: 3.3.1
-  resolution: "lodash._basecallback@npm:3.3.1"
-  dependencies:
-    lodash._baseisequal: ^3.0.0
-    lodash._bindcallback: ^3.0.0
-    lodash.isarray: ^3.0.0
-    lodash.pairs: ^3.0.0
-  checksum: 5fa86cbc194d7a9bebbddaf17de1d321222ecef65617f488d88eacff8c2ecea26cdf93ce14684f1661f442d951d9f6820ab3c469a2723f4e8c797ec4f9097db8
-  languageName: node
-  linkType: hard
-
-"lodash._baseeach@npm:^3.0.0":
-  version: 3.0.4
-  resolution: "lodash._baseeach@npm:3.0.4"
-  dependencies:
-    lodash.keys: ^3.0.0
-  checksum: b2204df7b5c4a75e54fe6b7df7bccaf57fdd2ec687017be586bbf9d661d2589d5cb12b5b79cae52ac5358a335e5362883474727baccef010e51f6e3d18c2ca54
-  languageName: node
-  linkType: hard
-
-"lodash._baseget@npm:^3.0.0":
-  version: 3.7.2
-  resolution: "lodash._baseget@npm:3.7.2"
-  checksum: bcb9c5a76ac4a0c69a2648c813ca7702c4dc4bd3a07d5eb5cc04344feef8e7c25be9ebdf1a0ce1b88cad5912e0e956b836b9bc52f542666cd0a9f5c798a677e1
-  languageName: node
-  linkType: hard
-
-"lodash._baseisequal@npm:^3.0.0":
-  version: 3.0.7
-  resolution: "lodash._baseisequal@npm:3.0.7"
-  dependencies:
-    lodash.isarray: ^3.0.0
-    lodash.istypedarray: ^3.0.0
-    lodash.keys: ^3.0.0
-  checksum: aa9b072c96204b42a597bf5840d51d884c38702299c519327d56214fc3108c51d71f8a305dc1c780c90008a51d6d523001486350946c38d082a1e1c9aa57ffd4
-  languageName: node
-  linkType: hard
-
-"lodash._bindcallback@npm:^3.0.0":
-  version: 3.0.1
-  resolution: "lodash._bindcallback@npm:3.0.1"
-  checksum: 3916fd72bc02de3643a52d46cf5aaeab4c0b21cd7cb2fb801a8bf9dacdc8532e89b30a4ebafdf65da5fe09d8b0bf898a7416402704fd7262a976703e1c59e549
-  languageName: node
-  linkType: hard
-
-"lodash._getnative@npm:^3.0.0":
-  version: 3.9.1
-  resolution: "lodash._getnative@npm:3.9.1"
-  checksum: ba2152bb10bf44beb54fcd273598197972c989c2181b54e533cec1ff1ebebdf8bb02d4ffc3d5a648480a48beb3026db191f5de99adecd7eac36bbd6025c9b048
-  languageName: node
-  linkType: hard
-
-"lodash._topath@npm:^3.0.0":
-  version: 3.8.1
-  resolution: "lodash._topath@npm:3.8.1"
-  dependencies:
-    lodash.isarray: ^3.0.0
-  checksum: 1e59055c5440c075fe3a44783f5c7c7c041e07897897e436adfd7ece1775b7ce88cec50914d60997d2cabe331b7dbd2e57f61dacaa144878a8464cd091701ca8
-  languageName: node
-  linkType: hard
-
 "lodash.debounce@npm:^4.0.8":
   version: 4.0.8
   resolution: "lodash.debounce@npm:4.0.8"
   checksum: a3f527d22c548f43ae31c861ada88b2637eb48ac6aa3eb56e82d44917971b8aa96fbb37aa60efea674dc4ee8c42074f90f7b1f772e9db375435f6c83a19b3bc6
-  languageName: node
-  linkType: hard
-
-"lodash.filter@npm:^4.3.0":
-  version: 4.6.0
-  resolution: "lodash.filter@npm:4.6.0"
-  checksum: f21d245d24818e15b560cb6cadc8404a1bf98bd87d037e5e51858aad57ca2b9db64d87e450a23c8f72dd2c66968efd09b034055ce86d93eef4a4eb6f1bbaf100
-  languageName: node
-  linkType: hard
-
-"lodash.foreach@npm:^4.2.0":
-  version: 4.5.0
-  resolution: "lodash.foreach@npm:4.5.0"
-  checksum: a940386b158ca0d62994db41fc16529eb8ae67138f29ced38e91f912cb5435d1b0ed34b18e6f7b9ddfc32ab676afc6dfec60d1e22633d8e3e4b33413402ab4ad
-  languageName: node
-  linkType: hard
-
-"lodash.isarguments@npm:^3.0.0":
-  version: 3.1.0
-  resolution: "lodash.isarguments@npm:3.1.0"
-  checksum: ae1526f3eb5c61c77944b101b1f655f846ecbedcb9e6b073526eba6890dc0f13f09f72e11ffbf6540b602caee319af9ac363d6cdd6be41f4ee453436f04f13b5
-  languageName: node
-  linkType: hard
-
-"lodash.isarray@npm:^3.0.0":
-  version: 3.0.4
-  resolution: "lodash.isarray@npm:3.0.4"
-  checksum: 3b298fb76ff16981353f7d0695d8680be9451b74d2e76714ddbd903a90fbaa8e1d84979d0ae99325f5a9033776771154b19e05027ab23de83202251c8abe81b5
-  languageName: node
-  linkType: hard
-
-"lodash.isnumber@npm:^3.0.3":
-  version: 3.0.3
-  resolution: "lodash.isnumber@npm:3.0.3"
-  checksum: 913784275b565346255e6ae6a6e30b760a0da70abc29f3e1f409081585875105138cda4a429ff02577e1bc0a7ae2a90e0a3079a37f3a04c3d6c5aaa532f4cab2
-  languageName: node
-  linkType: hard
-
-"lodash.istypedarray@npm:^3.0.0":
-  version: 3.0.6
-  resolution: "lodash.istypedarray@npm:3.0.6"
-  checksum: 76cc7b897b4b7829ec1f2722c5f05fe511af1096fa6194b4359996cd21d0bf18f58e4fe2f8d146b1f801a66b3a2ce8ddcc07b810ae9b79920256d6e0ff19207b
-  languageName: node
-  linkType: hard
-
-"lodash.keys@npm:^3.0.0":
-  version: 3.1.2
-  resolution: "lodash.keys@npm:3.1.2"
-  dependencies:
-    lodash._getnative: ^3.0.0
-    lodash.isarguments: ^3.0.0
-    lodash.isarray: ^3.0.0
-  checksum: ac7c02c793334c48161a8e8a1f12576c73ee50d1371e75680afc6c2d3740d5e9bdc899517e6c0034014eaa2512c5f433a2e6985c9e16cf28b5c9013ec81bd35e
-  languageName: node
-  linkType: hard
-
-"lodash.map@npm:^3.0.0":
-  version: 3.1.4
-  resolution: "lodash.map@npm:3.1.4"
-  dependencies:
-    lodash._arraymap: ^3.0.0
-    lodash._basecallback: ^3.0.0
-    lodash._baseeach: ^3.0.0
-    lodash.isarray: ^3.0.0
-    lodash.keys: ^3.0.0
-  checksum: 0657a12efcb2ca51622b72c3dd9c9f5a6cee97a48ac80b9176aadf83ae3cb6f518eca34d4b09e06e50571020ee4359a0e52b2f784922b20e7c9def6026a6b41a
-  languageName: node
-  linkType: hard
-
-"lodash.map@npm:^4.3.0":
-  version: 4.6.0
-  resolution: "lodash.map@npm:4.6.0"
-  checksum: 7369a41d7d24d15ce3bbd02a7faa3a90f6266c38184e64932571b9b21b758bd10c04ffd117d1859be1a44156f29b94df5045eff172bf8a97fddf68bf1002d12f
-  languageName: node
-  linkType: hard
-
-"lodash.max@npm:^4.0.0":
-  version: 4.0.1
-  resolution: "lodash.max@npm:4.0.1"
-  checksum: f887b68db054edabe3a4f4877a7b7d0bef6e4a29e9371ea4d711a6ed0ca2393659a879158c609649aabd0337528ec58ed5b1e9581fed536ec0b8ae45a6e5f278
   languageName: node
   linkType: hard
 
@@ -3463,45 +3314,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.min@npm:^4.0.0":
-  version: 4.0.1
-  resolution: "lodash.min@npm:4.0.1"
-  checksum: 61e93e1b9d348ecc4c0fc7d1cec0ad8240c8229c73a8de0f69d6299b418b66422312611fb72264563eb8ce68b3c2ed69e95e2392c09766a6da9a8d449b7fb2e8
-  languageName: node
-  linkType: hard
-
-"lodash.pairs@npm:^3.0.0":
-  version: 3.0.1
-  resolution: "lodash.pairs@npm:3.0.1"
-  dependencies:
-    lodash.keys: ^3.0.0
-  checksum: 32cc738e1276245a0c08cf9936d07332464713488703dc17eb78b480c694bced23b2c2d5bd6042db890b87aacdd5dc7d031a9223bbf622e940fb39a6fdfa9112
-  languageName: node
-  linkType: hard
-
 "lodash.pick@npm:^4.4.0":
   version: 4.4.0
   resolution: "lodash.pick@npm:4.4.0"
   checksum: 2c36cab7da6b999a20bd3373b40e31a3ef81fa264f34a6979c852c5bc8ac039379686b27380f0cb8e3781610844fafec6949c6fbbebc059c98f8fa8570e3675f
-  languageName: node
-  linkType: hard
-
-"lodash.pluck@npm:^3.1.2":
-  version: 3.1.2
-  resolution: "lodash.pluck@npm:3.1.2"
-  dependencies:
-    lodash._baseget: ^3.0.0
-    lodash._topath: ^3.0.0
-    lodash.isarray: ^3.0.0
-    lodash.map: ^3.0.0
-  checksum: cec1950e9aa065ae7d46d8f739877554161cfea097fede81197f45351646d135bd5ad67a4d03912a103cec635b29e7085bb90c075633eb2d182d23542a2bad61
-  languageName: node
-  linkType: hard
-
-"lodash.reduce@npm:^4.3.0":
-  version: 4.6.0
-  resolution: "lodash.reduce@npm:4.6.0"
-  checksum: 81f2a1045440554f8427f895ef479f1de5c141edd7852dde85a894879312801efae0295116e5cf830c531c1a51cdab8f3628c3ad39fa21a9874bb9158d9ea075
   languageName: node
   linkType: hard
 
@@ -4111,50 +3927,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-leaflet-heatmap-layer@npm:2.0.0":
-  version: 2.0.0
-  resolution: "react-leaflet-heatmap-layer@npm:2.0.0"
+"react-leaflet@npm:3.2.5":
+  version: 3.2.5
+  resolution: "react-leaflet@npm:3.2.5"
   dependencies:
-    lodash.filter: ^4.3.0
-    lodash.foreach: ^4.2.0
-    lodash.isnumber: ^3.0.3
-    lodash.map: ^4.3.0
-    lodash.max: ^4.0.0
-    lodash.min: ^4.0.0
-    lodash.pluck: ^3.1.2
-    lodash.reduce: ^4.3.0
-    simpleheat: ^0.4.0
+    "@react-leaflet/core": ^1.1.1
   peerDependencies:
-    leaflet: ^1.0.0
-    react: ^15.4.1 || ^16.0.0
-    react-leaflet: ^2.0.0
-  checksum: a63fb3646b42b250ef10da58b7db5559e149f0c220e8aa466a275b20f198000a8137a5b8b01ad0b6e0f9549288fd6885952e37c37f826a2afa941e546115ab77
-  languageName: node
-  linkType: hard
-
-"react-leaflet-shapefile@npm:2.0.0":
-  version: 2.0.0
-  resolution: "react-leaflet-shapefile@npm:2.0.0"
-  peerDependencies:
-    catiline: 2.9.3
-    leaflet: ^1.0.2
-    react: ^15.4.1
-    react-leaflet: ^1.0.1
-    shpjs: ^3.3.2
-  checksum: fb5b77a0ecba6517c952c4156def3b60ff72eff56bf212bc0a7e677dadc05880551765dd1a0d11f8742ea8ae74f3ecc3054fa0e14bd398f10a1c6f3eba70046c
-  languageName: node
-  linkType: hard
-
-"react-leaflet@npm:4.2.0":
-  version: 4.2.0
-  resolution: "react-leaflet@npm:4.2.0"
-  dependencies:
-    "@react-leaflet/core": ^2.1.0
-  peerDependencies:
-    leaflet: ^1.9.0
-    react: ^18.0.0
-    react-dom: ^18.0.0
-  checksum: da6351ac89c110039d1e9e72888e7c8c04982a87c0e48c1a2eafc689b52e88e95cc74f7e621eddab7d2de1f4979ad34c3bc74483d60ef44b0ef89f67ee237d1a
+    leaflet: ^1.7.1
+    react: ^17.0.1
+    react-dom: ^17.0.1
+  checksum: 503b7cee8acc12e0e2c5e7675432e7ef5742463e3e5420282ce60a9efd306430caefae3cb282c976e3df7665f19aef5b49cdce44a034979b4ea3ee968c2621d2
   languageName: node
   linkType: hard
 
@@ -4509,13 +4291,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simpleheat@npm:^0.4.0":
-  version: 0.4.0
-  resolution: "simpleheat@npm:0.4.0"
-  checksum: 1b35fd5e97f9d92a7a3131db29710b171f8a54677ad9fe1fa970492431c5c20a1f1d57a76efba8a8b105a2c28f64811c9515817850ea7b79f57e9d66068a3c9c
-  languageName: node
-  linkType: hard
-
 "slash@npm:^3.0.0":
   version: 3.0.0
   resolution: "slash@npm:3.0.0"
@@ -4741,7 +4516,6 @@ __metadata:
     "@mui/material": 5.10.17
     "@mui/styles": 5.10.16
     "@mui/x-date-pickers": 5.0.12
-    "@react-leaflet/core": 2.1.0
     "@types/geojson": 7946.0.10
     "@types/leaflet": 1.9.0
     "@types/leaflet.heat": 0.2.1
@@ -4761,9 +4535,7 @@ __metadata:
     notistack: 2.0.8
     react: 18.2.0
     react-dom: 18.2.0
-    react-leaflet: 4.2.0
-    react-leaflet-heatmap-layer: 2.0.0
-    react-leaflet-shapefile: 2.0.0
+    react-leaflet: 3.2.5
     react-sliding-pane: 7.3.0
     typescript: 4.9.4
     vite: 4.0.4
