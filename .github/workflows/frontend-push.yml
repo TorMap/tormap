@@ -5,8 +5,8 @@ on:
     paths:
       - 'frontend/**'
       - '.github/workflows/frontend-push.yml'
-    tags:
-      - 'v*'
+#    tags:
+#      - 'v*'
 
 jobs:
   build_and_deploy:
