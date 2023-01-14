@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.tormap.database.entity.RelayLocation
 import java.time.LocalDate
 
-
 /**
  * Repository to interact with DB
  */

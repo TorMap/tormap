@@ -1,6 +1,7 @@
 package org.tormap.config
 
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -9,15 +10,18 @@ import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.filter.ShallowEtagHeaderFilter
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.tormap.config.value.DescriptorConfig
+import org.tormap.config.value.IpLookupConfig
+import org.tormap.config.value.ScheduleConfig
 
 /**
  * Add all application configuration here and not in @SpringBootApplication class
  */
 @Configuration
-@EnableScheduling
-@ConfigurationPropertiesScan
 @EnableAsync
 @EnableCaching
+@EnableScheduling
+@EnableConfigurationProperties(ScheduleConfig::class, DescriptorConfig::class, IpLookupConfig::class)
 class AppConfig : WebMvcConfigurer {
 
     /**

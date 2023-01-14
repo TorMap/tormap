@@ -4,27 +4,32 @@ import com.maxmind.db.CHMCache
 import com.maxmind.geoip2.DatabaseReader
 import com.maxmind.geoip2.model.AsnResponse
 import com.maxmind.geoip2.model.CityResponse
+import mu.KotlinLogging
+import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 import org.tormap.config.value.IpLookupConfig
-import org.tormap.util.logger
-import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.net.InetAddress
-
 
 /**
  * This service handles location tasks requiring a geo location database
  */
 @Service
 class IpLookupService(
-    ipLookupConfig: IpLookupConfig,
+    ipLookupConfig: IpLookupConfig
 ) {
-    private val logger = logger()
+    private val logger = KotlinLogging.logger { }
     private var dbipLocationDB =
-        maxmindTypeDatabaseReader(javaClass.getResource(ipLookupConfig.locationLookup.dbipDatabaseFile)!!.path, ipLookupConfig.shouldCache)
+        maxmindTypeDatabaseReader(
+            ipLookupConfig.locationLookup.dbipDatabaseFile,
+            ipLookupConfig.shouldCache
+        )
     private var maxmindAutonomousSystemDB =
-        maxmindTypeDatabaseReader(javaClass.getResource(ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile)!!.path, ipLookupConfig.shouldCache)
+        maxmindTypeDatabaseReader(
+            ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile,
+            ipLookupConfig.shouldCache
+        )
 
     /**
      * Get the approximate geo location of an [ipAddress]
@@ -51,11 +56,10 @@ class IpLookupService(
     /**
      * Create a database reader for the [.mmdb file format](https://maxmind.github.io/MaxMind-DB/)
      */
-    private fun maxmindTypeDatabaseReader(databaseFilePath: String, shouldCache: Boolean) =
-        if (shouldCache)
-            DatabaseReader.Builder(File(databaseFilePath)).withCache(CHMCache()).build()
-        else
-            DatabaseReader.Builder(File(databaseFilePath)).build()
+    private fun maxmindTypeDatabaseReader(databaseFile: Resource, shouldCache: Boolean): DatabaseReader {
+        val reader = DatabaseReader.Builder(databaseFile.file)
+        return if (shouldCache) reader.withCache(CHMCache()).build() else reader.build()
+    }
 }
 
 class Location(maxMindCityResponse: CityResponse) {
@@ -77,7 +81,7 @@ class Location(maxMindCityResponse: CityResponse) {
         val locationIncomplete =
             this.countryCode == "-" || (this.latitude == BigDecimal.ZERO && this.longitude == BigDecimal.ZERO)
         if (locationIncomplete) {
-            throw LocationIncompleteException("latitude=${latitude} longitude=${longitude} countryCode=${countryCode}")
+            throw LocationIncompleteException("latitude=$latitude longitude=$longitude countryCode=$countryCode")
         }
     }
 

@@ -13,9 +13,9 @@ fun MutableList<Set<RelayDetails>>.addFamilyMember(
     val newMemberIndex = this.indexOfFirst { it.contains(newMember) }
 
     if (
-        requestingRelayIndex >= 0
-        && newMemberIndex >= 0
-        && requestingRelayIndex != newMemberIndex
+        requestingRelayIndex >= 0 &&
+        newMemberIndex >= 0 &&
+        requestingRelayIndex != newMemberIndex
     ) {
         this[requestingRelayIndex] = this[requestingRelayIndex].plus(this[newMemberIndex])
         this.removeAt(newMemberIndex)
@@ -33,7 +33,7 @@ fun MutableList<Set<RelayDetails>>.addFamilyMember(
  */
 fun RelayDetails.getFamilyMember(
     familyEntry: String,
-    relaysWithFamilyEntries: List<RelayDetails>,
+    relaysWithFamilyEntries: List<RelayDetails>
 ): RelayDetails? {
     when {
         familyEntry.matches(familyEntryFingerprintRegex) -> {

@@ -2,13 +2,12 @@
 
 package org.tormap.database.repository
 
+import jakarta.transaction.Transactional
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.tormap.database.entity.DescriptorFileId
 import org.tormap.database.entity.DescriptorType
 import org.tormap.database.entity.ProcessedFile
-import javax.transaction.Transactional
-
 
 /**
  * Repository to interact with DB

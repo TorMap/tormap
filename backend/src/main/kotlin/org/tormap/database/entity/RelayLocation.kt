@@ -1,12 +1,12 @@
 package org.tormap.database.entity
 
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.Index
+import jakarta.persistence.Table
 import org.torproject.descriptor.NetworkStatusEntry
 import java.math.BigDecimal
 import java.time.LocalDate
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Index
-import javax.persistence.Table
 
 /**
  * This entity is used to store relevant information about a [NetworkStatusEntry]
@@ -16,7 +16,7 @@ import javax.persistence.Table
 @Table(
     indexes = [
         Index(columnList = "day, fingerprint", unique = true),
-        Index(columnList = "day"),
+        Index(columnList = "day")
     ]
 )
 class RelayLocation(
@@ -26,8 +26,8 @@ class RelayLocation(
     var longitude: BigDecimal,
 
     @Column(length = 2, columnDefinition = "bpchar(2)")
-    var countryCode: String,
-): AbstractBaseEntity<Long>() {
+    var countryCode: String
+) : AbstractBaseEntity<Long>() {
     @Column(length = 40, columnDefinition = "bpchar(40)")
     var fingerprint: String = networkStatusEntry.fingerprint
 

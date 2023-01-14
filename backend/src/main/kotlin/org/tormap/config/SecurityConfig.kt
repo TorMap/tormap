@@ -1,15 +1,19 @@
 package org.tormap.config
 
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.tormap.util.logger
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.DelegatingPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.provisioning.InMemoryUserDetailsManager
+import org.springframework.security.web.SecurityFilterChain
 import java.io.File
 import java.util.*
-
 
 @Configuration
 @EnableWebSecurity
@@ -21,46 +25,58 @@ class SecurityConfig(
     private val adminPasswordFile: String,
 
     @Value("\${management.endpoints.web.base-path}")
-    private val actuatorPath: String,
-) : WebSecurityConfigurerAdapter() {
-    private val logger = logger()
+    private val actuatorPath: String
+) {
 
-    @Throws(java.lang.Exception::class)
-    override fun configure(auth: AuthenticationManagerBuilder) {
+    private val logger = KotlinLogging.logger { }
+
+    @Bean
+    fun passwordEncoderBean(): PasswordEncoder? {
+        val encodingId = "bcrypt"
+        val encoders = mapOf(encodingId to BCryptPasswordEncoder(12))
+        return DelegatingPasswordEncoder(encodingId, encoders)
+    }
+
+    @Bean
+    fun authenticationManagerBean(passwordEncoder: PasswordEncoder): InMemoryUserDetailsManager {
         val passwordFile = File(adminPasswordFile)
-        var password = UUID.randomUUID().toString()
+        var adminPassword = UUID.randomUUID().toString()
         if (passwordFile.exists()) {
-            password = passwordFile.readText()
+            adminPassword = passwordFile.readText()
         } else {
             File(passwordFile.parent).mkdirs()
             passwordFile.createNewFile()
-            passwordFile.writeText(password)
+            passwordFile.writeText(adminPassword)
         }
         logger.info("------------------------------------------------------")
-        logger.info("Admin password: $password")
+        logger.info("Admin password: $adminPassword")
         logger.info("------------------------------------------------------")
 
-        auth.inMemoryAuthentication()
-            .withUser(adminUserName)
-            .password("{noop}$password")
+        val user = User.withUsername(adminUserName)
+            .passwordEncoder(passwordEncoder::encode)
+            .password(adminPassword)
             .roles("ADMIN")
+            .build()
+        return InMemoryUserDetailsManager(user)
     }
 
-    @Throws(Exception::class)
-    override fun configure(http: HttpSecurity) {
+    @Bean
+    fun securityFilterChainBean(http: HttpSecurity): SecurityFilterChain {
         // Require authenticated users for actuator endpoints
-        http.authorizeRequests()
-            .antMatchers("$actuatorPath/**")
+        http.authorizeHttpRequests()
+            .requestMatchers("$actuatorPath/**")
             .authenticated()
             .and()
             .formLogin()
 
         // Disable spring security features for public facing endpoints
-        http.authorizeRequests()
-            .antMatchers("relay/**")
+        http.authorizeHttpRequests()
+            .requestMatchers("relay/**")
             .permitAll()
             .and()
             .headers().disable()
             .csrf().disable()
+
+        return http.build()
     }
 }

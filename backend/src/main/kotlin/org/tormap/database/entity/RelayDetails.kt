@@ -1,10 +1,10 @@
 package org.tormap.database.entity
 
+import jakarta.persistence.*
 import org.tormap.util.jointToCommaSeparated
 import org.tormap.util.stripLengthForDB
 import org.torproject.descriptor.ServerDescriptor
 import java.time.LocalDate
-import javax.persistence.*
 
 /**
  * This entity is used to store details from a relay or bridge [ServerDescriptor].
@@ -15,7 +15,7 @@ import javax.persistence.*
 @Table(
     indexes = [
         Index(columnList = "month, fingerprint", unique = true),
-        Index(columnList = "familyId"),
+        Index(columnList = "familyId")
     ]
 )
 class RelayDetails(
@@ -47,7 +47,7 @@ class RelayDetails(
 
     var protocols: String?,
 
-    @Column(length = 40,  columnDefinition = "bpchar(40)")
+    @Column(length = 40, columnDefinition = "bpchar(40)")
     var fingerprint: String,
 
     var isHibernating: Boolean,
@@ -69,7 +69,7 @@ class RelayDetails(
 
     var circuitProtocolVersions: String?,
 
-    var tunnelledDirServer: Boolean,
+    var tunnelledDirServer: Boolean
 ) : AbstractBaseEntity<Long>() {
 
     @Suppress("LeakingThis")
@@ -79,7 +79,7 @@ class RelayDetails(
         day: LocalDate,
         autonomousSystemName: String?,
         autonomousSystemNumber: Int?,
-        id: Long?,
+        id: Long?
     ) : this(
         month = month,
         day = day,

@@ -1,10 +1,7 @@
 package org.tormap.config.value
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 
-
-@ConstructorBinding
 @ConfigurationProperties("schedule")
 data class ScheduleConfig(
 
@@ -16,7 +13,7 @@ data class ScheduleConfig(
     /**
      * In what interval tasks are run
      */
-    val rate: RateConfig,
+    val rate: RateConfig
 )
 
 /**
@@ -51,5 +48,5 @@ data class RateConfig(
     /**
      * The rate at which missing families of relays are updated.
      */
-    val updateRelayFamilies: String,
+    val updateRelayFamilies: String
 )

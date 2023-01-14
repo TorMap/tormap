@@ -1,5 +1,6 @@
 package org.tormap.service
 
+import mu.KotlinLogging
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.AsyncResult
 import org.springframework.stereotype.Service
@@ -9,7 +10,6 @@ import org.tormap.database.entity.*
 import org.tormap.database.repository.ProcessedFileRepository
 import org.tormap.database.repository.RelayDetailsRepository
 import org.tormap.database.repository.RelayLocationRepositoryImpl
-import org.tormap.util.logger
 import org.tormap.util.millisSinceEpochToLocalDate
 import org.torproject.descriptor.*
 import org.torproject.descriptor.impl.DescriptorReaderImpl
@@ -36,7 +36,7 @@ class TorDescriptorService(
     private val relayDetailsUpdateService: RelayDetailsUpdateService,
     private val relayLocationController: RelayLocationController,
 ) {
-    private val logger = logger()
+    private val logger = KotlinLogging.logger { }
     private val descriptorCollector: DescriptorCollector = DescriptorIndexCollector()
 
     /**

@@ -1,8 +1,8 @@
 package org.tormap.database.entity
 
-import org.springframework.boot.actuate.trace.http.HttpTrace
+import jakarta.persistence.*
+import org.springframework.boot.actuate.web.exchanges.HttpExchange
 import java.time.Instant
-import javax.persistence.*
 
 @Suppress("unused")
 @Entity
@@ -10,17 +10,17 @@ import javax.persistence.*
     indexes = [
         Index(columnList = "timestamp"),
         Index(columnList = "method"),
-        Index(columnList = "responseStatus"),
+        Index(columnList = "responseStatus")
     ]
 )
-class UserTrace(trace: HttpTrace): AbstractBaseEntity<Long>() {
+class UserTrace(trace: HttpExchange) : AbstractBaseEntity<Long>() {
     var timestamp: Instant = trace.timestamp
     var uri: String = trace.request.uri.toString()
 
     @Enumerated
     var method: RequestMethod = RequestMethod.valueOf(trace.request.method.uppercase())
     var responseStatus: Int = trace.response.status
-    var timeTaken: Long = trace.timeTaken
+    var timeTaken: Long = trace.timeTaken.toSeconds()
     var deviceClass: String? = null
     var operatingSystem: String? = null
     var agentMajorVersion: String? = null

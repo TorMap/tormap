@@ -1,12 +1,12 @@
 package org.tormap.database.entity
 
+import jakarta.persistence.Embeddable
+import jakarta.persistence.EmbeddedId
+import jakarta.persistence.Entity
+import jakarta.persistence.Enumerated
 import org.tormap.util.stripLengthForDB
 import java.io.Serializable
 import java.time.LocalDateTime
-import javax.persistence.Embeddable
-import javax.persistence.EmbeddedId
-import javax.persistence.Entity
-import javax.persistence.Enumerated
 
 /**
  * This entity is used to record which descriptors files have been processed
@@ -18,7 +18,7 @@ class ProcessedFile(
     var id: DescriptorFileId,
     var lastModified: Long,
     var processedAt: LocalDateTime = LocalDateTime.now(),
-    error: String? = null,
+    error: String? = null
 ) {
     var error: String? = error.stripLengthForDB()
         set(value) {
@@ -34,7 +34,7 @@ class DescriptorFileId(
     @Enumerated
     var type: DescriptorType,
 
-    var filename: String,
+    var filename: String
 ) : Serializable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

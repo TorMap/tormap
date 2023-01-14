@@ -1,16 +1,8 @@
 package org.tormap.util
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-
-/**
- * Get logger for any class
- */
-@Suppress("unused")
-inline fun <reified T> T.logger(): Logger = LoggerFactory.getLogger(T::class.java)
 
 fun <T> Iterable<T>.jointToCommaSeparated() = this.joinToString(", ")
 

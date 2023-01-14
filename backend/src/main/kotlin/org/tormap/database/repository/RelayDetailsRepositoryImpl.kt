@@ -1,15 +1,17 @@
 package org.tormap.database.repository
 
+import jakarta.transaction.Transactional
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.tormap.adapter.dto.RelayFamilyIdentifiersDto
 import org.tormap.adapter.dto.RelayIdentifiersDto
-import javax.transaction.Transactional
 
 interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
     @Query(
-        "SELECT DISTINCT new org.tormap.database.repository.MonthFamilyMembersCount(month, count(familyId)) " +
-                "FROM RelayDetails GROUP BY month ORDER BY month"
+        """SELECT DISTINCT new org.tormap.database.repository.MonthFamilyMembersCount(month, count(familyId))
+           FROM RelayDetails
+           GROUP BY month
+           ORDER BY month"""
     )
     fun findDistinctMonthFamilyMemberCount(): List<MonthFamilyMembersCount>
 
@@ -17,17 +19,17 @@ interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
     fun findDistinctMonthsAndAutonomousSystemNumberNull(): Set<String>
 
     @Query(
-        "SELECT new org.tormap.adapter.dto.RelayIdentifiersDto(id, fingerprint, nickname) " +
-                "FROM RelayDetails " +
-                "WHERE id in :ids"
+        """SELECT new org.tormap.adapter.dto.RelayIdentifiersDto(id, fingerprint, nickname)
+           FROM RelayDetails
+           WHERE id in :ids"""
     )
     fun findRelayIdentifiers(ids: List<Long>): List<RelayIdentifiersDto>
 
     @Query(
-        "SELECT new org.tormap.adapter.dto.RelayFamilyIdentifiersDto(familyId, count(id), '', '') " +
-                "FROM RelayDetails " +
-                "WHERE familyId in :familyIds " +
-                "GROUP BY familyId"
+        """SELECT new org.tormap.adapter.dto.RelayFamilyIdentifiersDto(familyId, count(id), '', '')
+           FROM RelayDetails
+           WHERE familyId in :familyIds
+           GROUP BY familyId"""
     )
     fun findFamilyIdentifiers(familyIds: List<Long>): List<RelayFamilyIdentifiersDto>
 
@@ -37,7 +39,7 @@ interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
     fun clearFamiliesFromMonth(month: String): Int
 }
 
-class MonthFamilyMembersCount(
+data class MonthFamilyMembersCount(
     val month: String,
-    val count: Long,
+    val count: Long
 )

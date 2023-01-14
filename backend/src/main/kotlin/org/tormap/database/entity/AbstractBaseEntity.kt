@@ -1,14 +1,14 @@
 package org.tormap.database.entity
 
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.MappedSuperclass
 import org.hibernate.Hibernate
 import java.io.Serializable
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.MappedSuperclass
 
 @MappedSuperclass
-abstract class AbstractBaseEntity<T: Serializable>  {
+abstract class AbstractBaseEntity<T : Serializable> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -19,7 +19,7 @@ abstract class AbstractBaseEntity<T: Serializable>  {
         if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
         other as AbstractBaseEntity<*>
 
-        return  this.id != null && this.id == other.id
+        return this.id != null && this.id == other.id
     }
 
     override fun hashCode() = 31

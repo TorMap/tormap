@@ -9,9 +9,9 @@ import org.tormap.database.repository.RelayDetailsRepositoryImpl
 import org.tormap.util.addFamilyMember
 import org.tormap.util.commaSeparatedToList
 import org.tormap.util.getFamilyMember
-import org.tormap.util.logger
 import javax.sql.DataSource
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
+import mu.KotlinLogging
 
 
 /**
@@ -24,7 +24,7 @@ class RelayDetailsUpdateService(
     private val relayLocationController: RelayLocationController,
     dataSource: DataSource,
 ) {
-    private val logger = logger()
+    private val logger = KotlinLogging.logger { }
     private val dbSequenceIncrementer = PostgresSequenceMaxValueIncrementer(dataSource, "hibernate_sequence")
 
     /**

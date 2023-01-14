@@ -2,8 +2,8 @@ package org.tormap.adapter
 
 import nl.basjes.parse.useragent.UserAgentAnalyzer
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.actuate.trace.http.HttpTrace
-import org.springframework.boot.actuate.trace.http.InMemoryHttpTraceRepository
+import org.springframework.boot.actuate.web.exchanges.HttpExchange
+import org.springframework.boot.actuate.web.exchanges.InMemoryHttpExchangeRepository
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Repository
 import org.tormap.database.entity.UserTrace
@@ -19,9 +19,9 @@ class HttpTraceRepository(
     private val userTraceRepository: UserTraceRepository,
     private val ipLookupService: IpLookupService,
 
-    @Value("\${management.trace.http.maxInMemory}")
-    private val maxHttpTracesInMemory: Int,
-) : InMemoryHttpTraceRepository() {
+    @Value("\${management.httpexchanges.recording.maxInMemory}")
+    private val maxHttpTracesInMemory: Int
+) : InMemoryHttpExchangeRepository() {
     private var unsavedTraces = 0
     private val userAgentAnalyzer =
         UserAgentAnalyzer
@@ -29,13 +29,13 @@ class HttpTraceRepository(
             .hideMatcherLoadStats()
             .withCache(1000)
             .withFields(DEVICE_CLASS, OPERATING_SYSTEM_NAME, AGENT_NAME_VERSION_MAJOR)
-            .build();
+            .build()
 
     init {
         super.setCapacity(maxHttpTracesInMemory)
     }
 
-    override fun add(trace: HttpTrace) {
+    override fun add(trace: HttpExchange) {
         if (unsavedTraces == maxHttpTracesInMemory) {
             saveTraces(super.findAll())
             unsavedTraces = 0
@@ -45,7 +45,7 @@ class HttpTraceRepository(
     }
 
     @Async
-    fun saveTraces(httpTraces: List<HttpTrace>){
+    fun saveTraces(httpTraces: List<HttpExchange>) {
         httpTraces.forEach {
             val userTrace = UserTrace(it)
             val ipAddress = it.request.remoteAddress ?: it.request.headers["X-FORWARDED-FOR"]?.firstOrNull()
