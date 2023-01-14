@@ -2,11 +2,11 @@ name: frontend-push
 
 on:
   push:
-    tags:
-      - 'v*'
     paths:
       - 'frontend/**'
       - '.github/workflows/frontend-push.yml'
+    tags:
+      - 'v*'
 
 jobs:
   build_and_deploy:
