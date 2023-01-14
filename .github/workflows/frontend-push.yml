@@ -7,7 +7,7 @@ on:
       - '.github/workflows/frontend-push.yml'
 
 jobs:
-  build:
+  build_and_deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -18,10 +18,6 @@ jobs:
           yarn install --immutable
           yarn build
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
       - name: Deploy to tormap.org
         if: github.ref_name == 'master' || github.ref_name == 'main'
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -49,7 +45,6 @@ jobs:
   docker_image:
     if: (github.event_name != 'pull_request' && github.ref_name == 'master') || github.ref_name == 'dev'
     runs-on: ubuntu-latest
-    needs: build
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-qemu-action@v1
