@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "org.tormap"
-version = "1.0.0"
+version = "1.0.1"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
@@ -113,6 +113,10 @@ jib {
             }
             platform {
                 architecture = "arm64"
+                os = "linux"
+            }
+            platform {
+                architecture = "arm/v7"
                 os = "linux"
             }
         }
