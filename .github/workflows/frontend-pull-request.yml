@@ -1,4 +1,4 @@
-name: frontend-pull-request
+name: frontend_pull_request
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
       - '.github/workflows/frontend-pull-request.yml'
 
 jobs:
-  frontend-pull-request:
+  frontend_pull_request:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
