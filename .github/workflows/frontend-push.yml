@@ -62,7 +62,7 @@ jobs:
       - name: Collect frontend version
         run: |
           cd frontend
-          apt-get install jq -y
+          sudo apt-get install jq -y
           PACKAGE_VERSION=$(jq -r '.version' package.json)
           PACKAGE_VERSION_MAJOR=$(jq -r '.version' package.json | cut -d '.' -f1)
 
