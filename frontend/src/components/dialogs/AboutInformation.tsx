@@ -112,7 +112,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                                                                 label={"GitHub"}/>.<br/>
                         The location and ownership of IP ranges can change over time. Since we
                         only use current IP data, some relays might have been hosted somewhere else, than displayed on
-                        our world map. The location is also not accurate to the street level but rather an approximate
+                        our world map. The location is also not accurate to the street level but rather an approximation
                         of the city.
                     </Typography>
                     <h2>Contributors</h2>
