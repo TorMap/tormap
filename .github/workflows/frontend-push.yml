@@ -1,15 +1,13 @@
-name: frontend-push
+name: frontend_push
 
 on:
   push:
     paths:
       - 'frontend/**'
       - '.github/workflows/frontend-push.yml'
-#    tags:
-#      - 'v*'
 
 jobs:
-  build_and_deploy:
+  frontend_push:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -43,35 +41,3 @@ jobs:
           channelId: live
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
-
-  docker_image:
-    if: (github.event_name != 'pull_request' && github.ref_name == 'master') || github.ref_name == 'dev'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: docker/setup-qemu-action@v1
-      - uses: docker/setup-buildx-action@v1
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Docker meta for frontend image
-        id: docker_meta
-        uses: docker/metadata-action@v4
-        with:
-          images: tormap/frontend
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}
-
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: frontend
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
-          push: true
-          tags: ${{ steps.docker_meta.outputs.tags }}
-          labels: ${{ steps.docker_meta.outputs.labels }}
