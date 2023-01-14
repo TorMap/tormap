@@ -57,7 +57,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                     <Box display="flex" alignItems={"center"}>
                         <Avatar sx={{marginRight: "24px"}} src={"android-chrome-192x192.png"} alt={"TorMap logo"}/>
                         <Typography variant="h5">TorMap</Typography>
-                        <Grid sx={{flexGrow: 1, marginLeft: "0px", paddingTop: "8px"}} container spacing={4}>
+                        <Grid sx={{flexGrow: 1, paddingLeft: "24px", paddingRight: "30px", paddingTop: "8px"}} container spacing={{ xs: 2, sm: 4 }}>
                             <Grid item>
                                 <ExternalLink sx={{color: "white"}} href={"https://github.com/TorMap/tormap"}
                                               label={<GitHubIcon/>}/>
@@ -74,14 +74,13 @@ export const AboutInformation: React.FunctionComponent = () => {
                                               label={<BitcoinIcon/>}/>
                             </Grid>
                         </Grid>
+                        <IconButton aria-label="close" sx={{
+                            position: "absolute",
+                            right: "10px",
+                        }} onClick={() => setShowDialog(false)}>
+                            <CloseIcon/>
+                        </IconButton>
                     </Box>
-                    <IconButton aria-label="close" sx={{
-                        position: "absolute",
-                        right: "10px",
-                        top: "10px",
-                    }} onClick={() => setShowDialog(false)}>
-                        <CloseIcon/>
-                    </IconButton>
                 </DialogTitle>
                 <DialogContent
                     dividers
@@ -118,10 +117,10 @@ export const AboutInformation: React.FunctionComponent = () => {
                     </Typography>
                     <h2>Contributors</h2>
                     <Stack
-                        direction="row"
+                        direction={{ sm: 'column', md: 'row' }}
                         justifyContent="flex-start"
                         alignItems="flex-start"
-                        spacing={3}
+                        spacing={{ xs: 3, sm: 3 }}
                     >
                         <ContributorCard
                             avatar={<Avatar src={"https://avatars.githubusercontent.com/u/23460202?s=96&v=4"}/>}

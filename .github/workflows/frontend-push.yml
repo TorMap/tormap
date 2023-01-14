@@ -1,4 +1,4 @@
-name: frontend-push
+name: frontend_push
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
       - '.github/workflows/frontend-push.yml'
 
 jobs:
-  frontend-push:
+  frontend_push:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -41,4 +41,3 @@ jobs:
           channelId: live
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
-

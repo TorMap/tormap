@@ -13,7 +13,7 @@ import {
     RelayFamilyLocation,
     sortFamilyCoordinatesMap
 } from "./aggregate-relays";
-import {getMapColor9} from "./geojson";
+import {getUniqueCountryColor} from "./geojson";
 
 /**
  * Returns a Layer with markers with size relative to number of relays on a coordinate.
@@ -228,7 +228,7 @@ export const buildRelayCountryLayer = (
 ): LayerGroup => {
     const countryLayer: LayerGroup = new LayerGroup()
     countryMap.forEach((country, key) => {
-        const hue = getMapColor9(key) * 360 / 9
+        const hue = getUniqueCountryColor(key) * 360 / 9
         country.forEach((relay) => {
             let sat = "90%"
             const radius = 1
@@ -279,19 +279,17 @@ export const buildCountryLayer = (
     }
 
     // draw countries according above style
-    const geoData = worldGeoData
     const filteredGeoData = new GeoJSON(undefined, {
         style: style as PathOptions,
         onEachFeature(feature: Feature<GeometryObject>, layer: Layer) {
             onEachCountry(feature, layer, settings, setSettingsCallback)
         }
     })
-    geoData.features.forEach(feature => {
+    worldGeoData.features.forEach(feature => {
         if (countryMap.has(feature.properties.iso_a2)) {
             filteredGeoData.addData(feature as GeoJsonObject)
         }
     })
-
     return filteredGeoData
 }
 
