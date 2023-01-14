@@ -2,6 +2,8 @@ name: frontend-push
 
 on:
   push:
+    tags:
+      - 'v*'
     paths:
       - 'frontend/**'
       - '.github/workflows/frontend-push.yml'
@@ -48,10 +50,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: docker/setup-qemu-action@v1
-
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v1
+      - uses: docker/setup-buildx-action@v1
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
@@ -59,17 +58,20 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Collect frontend version
-        run: |
-          cd frontend
-          sudo apt-get install jq -y
-          PACKAGE_VERSION=$(jq -r '.version' package.json)
-          PACKAGE_VERSION_MAJOR=$(jq -r '.version' package.json | cut -d '.' -f1)
+      - name: Docker meta for frontend image
+        id: docker_meta
+        uses: docker/metadata-action@v4
+        with:
+          images: tormap/frontend
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}
 
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
           context: frontend
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
-          tags: tormap/frontend:latest,tormap/frontend:${{ env.PACKAGE_VERSION }},tormap/frontend:${{ env.PACKAGE_VERSION_MAJOR }}
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
