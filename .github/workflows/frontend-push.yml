@@ -77,8 +77,4 @@ jobs:
           context: frontend
           platforms: linux/amd64,linux/arm64
           push: true
-          tags:
-            - tormap/frontend:latest
-            - tormap/frontend:${PACKAGE_VERSION}
-            - tormap/frontend:${PACKAGE_VERSION_MAJOR}
-
+          tags: tormap/frontend:latest,tormap/frontend:${PACKAGE_VERSION},tormap/frontend:${PACKAGE_VERSION_MAJOR}
