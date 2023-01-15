@@ -43,3 +43,4 @@ out/
 
 ### VS Code ###
 .vscode/
+/native-image/

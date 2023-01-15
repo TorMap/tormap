@@ -8,9 +8,9 @@ descriptor:
 ip-lookup:
   shouldCache: true
   locationLookup:
-    dbipDatabaseFile: classpath:/ip-lookup/location/dbip/dbip-city-lite.mmdb
+    dbipDatabaseFile: /ip-lookup/location/dbip/dbip-city-lite.mmdb
   autonomousSystemLookup:
-    maxmindDatabaseFile: classpath:/ip-lookup/autonomous-system/maxmind/GeoLite2-ASN.mmdb
+    maxmindDatabaseFile: /ip-lookup/autonomous-system/maxmind/GeoLite2-ASN.mmdb
 management:
   endpoint:
     health:

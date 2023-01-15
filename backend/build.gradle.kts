@@ -106,6 +106,17 @@ tasks {
     }
 }
 
+tasks.register("bootRunWithNativeImageAgent") {
+    group = "application"
+    description = "Runs bootRun with GraalVM tracing agent enabled"
+    doFirst {
+        tasks.bootRun {
+            jvmArgs = listOf("-agentlib:native-image-agent=config-output-dir=native-image")
+        }
+    }
+    finalizedBy("bootRun")
+}
+
 graalvmNative {
     agent {
         defaultMode.set("standard")

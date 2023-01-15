@@ -1,7 +1,6 @@
 package org.tormap.config.value
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.core.io.Resource
 
 @ConfigurationProperties("ip-lookup")
 data class IpLookupConfig(
@@ -26,7 +25,7 @@ data class LocationLookupConfig(
     /**
      * Relative backend path to the dbip DB file
      */
-    val dbipDatabaseFile: Resource
+    val dbipDatabaseFile: String
 )
 
 data class AutonomousSystemLookupConfig(
@@ -34,5 +33,5 @@ data class AutonomousSystemLookupConfig(
     /**
      * Relative backend path to the MaxMind DB file
      */
-    val maxmindDatabaseFile: Resource
+    val maxmindDatabaseFile: String
 )

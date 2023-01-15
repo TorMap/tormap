@@ -1,0 +1,318 @@
+[
+  {
+    "name": "com.github.benmanes.caffeine.cache.BLCHeader$DrainStatusRef",
+    "fields": [
+      {
+        "name": "drainStatus"
+      }
+    ]
+  },
+  {
+    "name": "com.github.benmanes.caffeine.cache.BaseMpscLinkedArrayQueueColdProducerFields",
+    "fields": [
+      {
+        "name": "producerLimit"
+      }
+    ]
+  },
+  {
+    "name": "com.github.benmanes.caffeine.cache.BaseMpscLinkedArrayQueueConsumerFields",
+    "fields": [
+      {
+        "name": "consumerIndex"
+      }
+    ]
+  },
+  {
+    "name": "com.github.benmanes.caffeine.cache.BaseMpscLinkedArrayQueueProducerFields",
+    "fields": [
+      {
+        "name": "producerIndex"
+      }
+    ]
+  },
+  {
+    "name": "com.github.benmanes.caffeine.cache.BoundedLocalCache",
+    "fields": [
+      {
+        "name": "refreshes"
+      }
+    ]
+  },
+  {
+    "name": "com.github.benmanes.caffeine.cache.Cache"
+  },
+  {
+    "name": "com.github.benmanes.caffeine.cache.Caffeine"
+  },
+  {
+    "name": "com.github.benmanes.caffeine.cache.PS",
+    "fields": [
+      {
+        "name": "key"
+      },
+      {
+        "name": "value"
+      }
+    ]
+  },
+  {
+    "name": "com.github.benmanes.caffeine.cache.PSMS",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "com.github.benmanes.caffeine.cache.SSMS",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "com.github.benmanes.caffeine.cache.Caffeine",
+          "com.github.benmanes.caffeine.cache.AsyncCacheLoader",
+          "boolean"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.github.benmanes.caffeine.cache.StripedBuffer",
+    "fields": [
+      {
+        "name": "tableBusy"
+      }
+    ]
+  },
+  {
+    "name": "com.maxmind.db.Metadata",
+    "queryAllPublicConstructors": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "int",
+          "int",
+          "java.math.BigInteger",
+          "java.lang.String",
+          "java.util.List",
+          "java.util.Map",
+          "int",
+          "long",
+          "int"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.maxmind.geoip2.model.CityResponse",
+    "queryAllPublicConstructors": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "com.maxmind.geoip2.record.City",
+          "com.maxmind.geoip2.record.Continent",
+          "com.maxmind.geoip2.record.Country",
+          "com.maxmind.geoip2.record.Location",
+          "com.maxmind.geoip2.record.MaxMind",
+          "com.maxmind.geoip2.record.Postal",
+          "com.maxmind.geoip2.record.Country",
+          "com.maxmind.geoip2.record.RepresentedCountry",
+          "java.util.ArrayList",
+          "com.maxmind.geoip2.record.Traits"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.maxmind.geoip2.record.City",
+    "queryAllPublicConstructors": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.util.List",
+          "java.lang.Integer",
+          "java.lang.Long",
+          "java.util.Map"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.maxmind.geoip2.record.Continent",
+    "queryAllPublicConstructors": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.util.List",
+          "java.lang.String",
+          "java.lang.Long",
+          "java.util.Map"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.maxmind.geoip2.record.Country",
+    "queryAllPublicConstructors": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.util.List",
+          "java.lang.Integer",
+          "java.lang.Long",
+          "java.lang.Boolean",
+          "java.lang.String",
+          "java.util.Map"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.maxmind.geoip2.record.Location",
+    "queryAllPublicConstructors": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.Integer",
+          "java.lang.Integer",
+          "java.lang.Double",
+          "java.lang.Double",
+          "java.lang.Integer",
+          "java.lang.Integer",
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "com.maxmind.geoip2.record.Subdivision",
+    "queryAllPublicConstructors": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.util.List",
+          "java.lang.Integer",
+          "java.lang.Long",
+          "java.lang.String",
+          "java.util.Map"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.apache.logging.log4j.core.LoggerContext"
+  },
+  {
+    "name": "org.apache.logging.log4j.core.impl$Log4jContextFactory"
+  },
+  {
+    "name": "org.apache.logging.log4j.core.impl.Log4jContextFactory"
+  },
+  {
+    "name": "org.apache.logging.log4j.message.DefaultFlowMessageFactory",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.logging.log4j.message.ParameterizedMessageFactory",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.logging.log4j.spi.ExtendedLogger"
+  },
+  {
+    "name": "org.apache.logging.slf4j.SLF4JLoggerContextFactory",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.apache.logging.slf4j.SLF4JProvider"
+  },
+  {
+    "name": "org.postgresql.util.PGobject",
+    "queryAllDeclaredMethods": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.torproject.descriptor.NetworkStatusEntry"
+  },
+  {
+    "name": "org.torproject.descriptor.ServerDescriptor"
+  },
+  {
+    "name": "org.torproject.descriptor.impl.RelayNetworkStatusConsensusImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "byte[]",
+          "int[]",
+          "java.io.File"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.torproject.descriptor.index.DirectoryNode",
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true,
+    "queryAllDeclaredConstructors": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.torproject.descriptor.index.FileNode",
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true,
+    "queryAllDeclaredConstructors": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "org.torproject.descriptor.index.IndexNode",
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true,
+    "queryAllDeclaredConstructors": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

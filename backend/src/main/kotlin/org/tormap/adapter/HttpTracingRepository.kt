@@ -27,6 +27,8 @@ class HttpTraceRepository(
         UserAgentAnalyzer
             .newBuilder()
             .hideMatcherLoadStats()
+            // TODO
+            .dropDefaultResources()
             .withCache(1000)
             .withFields(DEVICE_CLASS, OPERATING_SYSTEM_NAME, AGENT_NAME_VERSION_MAJOR)
             .build()
