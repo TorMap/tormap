@@ -209,6 +209,905 @@
     ]
   },
   {
+    "name": "java.io.BufferedInputStream",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.io.InputStream"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.io.Closeable",
+    "queryAllDeclaredMethods": true,
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.io.FilePermission"
+  },
+  {
+    "name": "java.io.Serializable",
+    "allDeclaredFields": true,
+    "allDeclaredClasses": true,
+    "queryAllDeclaredMethods": true,
+    "queryAllPublicMethods": true,
+    "queryAllDeclaredConstructors": true
+  },
+  {
+    "name": "java.lang.AutoCloseable",
+    "queryAllDeclaredMethods": true,
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.Boolean",
+    "fields": [
+      {
+        "name": "TYPE"
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Byte",
+    "fields": [
+      {
+        "name": "TYPE"
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Character",
+    "fields": [
+      {
+        "name": "TYPE"
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Class",
+    "queryAllDeclaredMethods": true,
+    "methods": [
+      {
+        "name": "getAnnotatedInterfaces",
+        "parameterTypes": []
+      },
+      {
+        "name": "getAnnotatedSuperclass",
+        "parameterTypes": []
+      },
+      {
+        "name": "getDeclaredMethod",
+        "parameterTypes": [
+          "java.lang.String",
+          "java.lang.Class[]"
+        ]
+      },
+      {
+        "name": "getMethod",
+        "parameterTypes": [
+          "java.lang.String",
+          "java.lang.Class[]"
+        ]
+      },
+      {
+        "name": "getModule",
+        "parameterTypes": []
+      },
+      {
+        "name": "getNestHost",
+        "parameterTypes": []
+      },
+      {
+        "name": "getNestMembers",
+        "parameterTypes": []
+      },
+      {
+        "name": "getPermittedSubclasses",
+        "parameterTypes": []
+      },
+      {
+        "name": "getRecordComponents",
+        "parameterTypes": []
+      },
+      {
+        "name": "isNestmateOf",
+        "parameterTypes": [
+          "java.lang.Class"
+        ]
+      },
+      {
+        "name": "isRecord",
+        "parameterTypes": []
+      },
+      {
+        "name": "isSealed",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.ClassLoader",
+    "queryAllDeclaredMethods": true,
+    "methods": [
+      {
+        "name": "defineClass",
+        "parameterTypes": [
+          "java.lang.String",
+          "byte[]",
+          "int",
+          "int",
+          "java.security.ProtectionDomain"
+        ]
+      },
+      {
+        "name": "getUnnamedModule",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.ClassValue"
+  },
+  {
+    "name": "java.lang.Comparable",
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "java.lang.Deprecated",
+    "queryAllDeclaredMethods": true,
+    "queryAllPublicMethods": true,
+    "methods": [
+      {
+        "name": "forRemoval",
+        "parameterTypes": []
+      },
+      {
+        "name": "since",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Double",
+    "fields": [
+      {
+        "name": "TYPE"
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Float",
+    "fields": [
+      {
+        "name": "TYPE"
+      }
+    ]
+  },
+  {
+    "name": "java.lang.FunctionalInterface",
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "java.lang.Integer",
+    "queryAllDeclaredMethods": true,
+    "fields": [
+      {
+        "name": "TYPE"
+      }
+    ],
+    "methods": [
+      {
+        "name": "valueOf",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Iterable",
+    "queryAllDeclaredMethods": true,
+    "queryAllPublicMethods": true,
+    "methods": [
+      {
+        "name": "forEach",
+        "parameterTypes": [
+          "java.util.function.Consumer"
+        ]
+      },
+      {
+        "name": "spliterator",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Long",
+    "fields": [
+      {
+        "name": "TYPE"
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Module",
+    "queryAllDeclaredMethods": true,
+    "methods": [
+      {
+        "name": "addExports",
+        "parameterTypes": [
+          "java.lang.String",
+          "java.lang.Module"
+        ]
+      },
+      {
+        "name": "isExported",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "isNamed",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Object",
+    "allDeclaredFields": true,
+    "allDeclaredClasses": true,
+    "queryAllDeclaredMethods": true,
+    "queryAllDeclaredConstructors": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      },
+      {
+        "name": "equals",
+        "parameterTypes": [
+          "java.lang.Object"
+        ]
+      },
+      {
+        "name": "getClass",
+        "parameterTypes": []
+      },
+      {
+        "name": "hashCode",
+        "parameterTypes": []
+      },
+      {
+        "name": "notify",
+        "parameterTypes": []
+      },
+      {
+        "name": "notifyAll",
+        "parameterTypes": []
+      },
+      {
+        "name": "toString",
+        "parameterTypes": []
+      },
+      {
+        "name": "wait",
+        "parameterTypes": []
+      },
+      {
+        "name": "wait",
+        "parameterTypes": [
+          "long"
+        ]
+      },
+      {
+        "name": "wait",
+        "parameterTypes": [
+          "long",
+          "int"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Runtime",
+    "methods": [
+      {
+        "name": "version",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Runtime$Version",
+    "methods": [
+      {
+        "name": "feature",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.RuntimePermission"
+  },
+  {
+    "name": "java.lang.SecurityManager",
+    "methods": [
+      {
+        "name": "checkPermission",
+        "parameterTypes": [
+          "java.security.Permission"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Short",
+    "fields": [
+      {
+        "name": "TYPE"
+      }
+    ]
+  },
+  {
+    "name": "java.lang.StackTraceElement",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.String",
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "java.lang.System",
+    "methods": [
+      {
+        "name": "getSecurityManager",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.Throwable",
+    "allDeclaredFields": true
+  },
+  {
+    "name": "java.lang.Void",
+    "fields": [
+      {
+        "name": "TYPE"
+      }
+    ]
+  },
+  {
+    "name": "java.lang.WrongThreadException"
+  },
+  {
+    "name": "java.lang.annotation.Documented",
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "java.lang.annotation.Inherited",
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "java.lang.annotation.Repeatable",
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "java.lang.annotation.Retention",
+    "queryAllDeclaredMethods": true,
+    "queryAllDeclaredConstructors": true,
+    "methods": [
+      {
+        "name": "value",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.annotation.Target",
+    "queryAllDeclaredMethods": true,
+    "queryAllDeclaredConstructors": true,
+    "methods": [
+      {
+        "name": "value",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.constant.Constable",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.invoke.MethodHandles",
+    "queryAllDeclaredMethods": true,
+    "methods": [
+      {
+        "name": "privateLookupIn",
+        "parameterTypes": [
+          "java.lang.Class",
+          "java.lang.invoke.MethodHandles$Lookup"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.lang.invoke.MethodHandles$Lookup",
+    "methods": [
+      {
+        "name": "defineClass",
+        "parameterTypes": [
+          "byte[]"
+        ]
+      },
+      {
+        "name": "lookupClass",
+        "parameterTypes": []
+      },
+      {
+        "name": "lookupModes",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.invoke.TypeDescriptor$OfField",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.management.BufferPoolMXBean",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.management.ClassLoadingMXBean",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.management.CompilationMXBean",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.management.LockInfo",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.management.ManagementPermission",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.lang.management.MemoryMXBean",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.management.MemoryManagerMXBean",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.management.MemoryPoolMXBean",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.management.MemoryUsage",
+    "queryAllPublicMethods": true,
+    "methods": [
+      {
+        "name": "from",
+        "parameterTypes": [
+          "javax.management.openmbean.CompositeData"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.lang.management.MonitorInfo",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.management.PlatformLoggingMXBean",
+    "queryAllPublicMethods": true,
+    "methods": [
+      {
+        "name": "getLoggerLevel",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "getLoggerNames",
+        "parameterTypes": []
+      },
+      {
+        "name": "getParentLoggerName",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "setLoggerLevel",
+        "parameterTypes": [
+          "java.lang.String",
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.lang.management.RuntimeMXBean",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.management.ThreadInfo",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.reflect.AnnotatedArrayType",
+    "methods": [
+      {
+        "name": "getAnnotatedGenericComponentType",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.reflect.AnnotatedElement",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.reflect.AnnotatedParameterizedType",
+    "methods": [
+      {
+        "name": "getAnnotatedActualTypeArguments",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.reflect.AnnotatedType",
+    "methods": [
+      {
+        "name": "getType",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.reflect.Executable",
+    "methods": [
+      {
+        "name": "getAnnotatedExceptionTypes",
+        "parameterTypes": []
+      },
+      {
+        "name": "getAnnotatedParameterTypes",
+        "parameterTypes": []
+      },
+      {
+        "name": "getAnnotatedReceiverType",
+        "parameterTypes": []
+      },
+      {
+        "name": "getParameterCount",
+        "parameterTypes": []
+      },
+      {
+        "name": "getParameters",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.reflect.GenericDeclaration",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.reflect.Method",
+    "methods": [
+      {
+        "name": "getAnnotatedReturnType",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.reflect.Parameter",
+    "methods": [
+      {
+        "name": "getModifiers",
+        "parameterTypes": []
+      },
+      {
+        "name": "getName",
+        "parameterTypes": []
+      },
+      {
+        "name": "isNamePresent",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.reflect.ParameterizedType",
+    "methods": [
+      {
+        "name": "getActualTypeArguments",
+        "parameterTypes": []
+      },
+      {
+        "name": "getRawType",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.reflect.Proxy",
+    "allDeclaredFields": true,
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "java.lang.reflect.Type",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.lang.reflect.TypeVariable",
+    "methods": [
+      {
+        "name": "getBounds",
+        "parameterTypes": []
+      },
+      {
+        "name": "getName",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.lang.reflect.WildcardType",
+    "methods": [
+      {
+        "name": "getLowerBounds",
+        "parameterTypes": []
+      },
+      {
+        "name": "getUpperBounds",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.math.BigDecimal"
+  },
+  {
+    "name": "java.math.BigInteger"
+  },
+  {
+    "name": "java.net.NetPermission"
+  },
+  {
+    "name": "java.net.SocketPermission"
+  },
+  {
+    "name": "java.net.URLPermission",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String",
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.net.UnixDomainSocketAddress",
+    "methods": [
+      {
+        "name": "of",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.nio.channels.ServerSocketChannel",
+    "methods": [
+      {
+        "name": "open",
+        "parameterTypes": [
+          "java.net.ProtocolFamily"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.nio.channels.SocketChannel",
+    "methods": [
+      {
+        "name": "open",
+        "parameterTypes": [
+          "java.net.ProtocolFamily"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.security.AccessController",
+    "methods": [
+      {
+        "name": "doPrivileged",
+        "parameterTypes": [
+          "java.security.PrivilegedExceptionAction"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.security.AlgorithmParametersSpi"
+  },
+  {
+    "name": "java.security.AllPermission"
+  },
+  {
+    "name": "java.security.KeyStoreSpi"
+  },
+  {
+    "name": "java.security.SecureClassLoader",
+    "queryAllDeclaredMethods": true
+  },
+  {
+    "name": "java.security.SecureRandomParameters"
+  },
+  {
+    "name": "java.security.SecurityPermission"
+  },
+  {
+    "name": "java.security.interfaces.RSAPrivateKey"
+  },
+  {
+    "name": "java.security.interfaces.RSAPublicKey"
+  },
+  {
+    "name": "java.sql.Date"
+  },
+  {
+    "name": "java.sql.Driver"
+  },
+  {
+    "name": "java.sql.DriverManager"
+  },
+  {
+    "name": "java.sql.Timestamp"
+  },
+  {
+    "name": "java.sql.Types",
+    "allPublicFields": true
+  },
+  {
+    "name": "java.sql.Wrapper",
+    "queryAllDeclaredMethods": true,
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.time.Instant"
+  },
+  {
+    "name": "java.time.LocalDate"
+  },
+  {
+    "name": "java.time.LocalDateTime"
+  },
+  {
+    "name": "java.util.ArrayList",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "int"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.util.Collection"
+  },
+  {
+    "name": "java.util.Date"
+  },
+  {
+    "name": "java.util.Enumeration"
+  },
+  {
+    "name": "java.util.EventListener",
+    "queryAllDeclaredMethods": true,
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.util.HashSet"
+  },
+  {
+    "name": "java.util.List"
+  },
+  {
+    "name": "java.util.Optional"
+  },
+  {
+    "name": "java.util.PropertyPermission",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String",
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "java.util.Set"
+  },
+  {
+    "name": "java.util.TreeSet",
+    "queryAllDeclaredMethods": true,
+    "queryAllDeclaredConstructors": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.util.concurrent.Executor",
+    "queryAllDeclaredMethods": true,
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.util.concurrent.ScheduledExecutorService"
+  },
+  {
+    "name": "java.util.concurrent.ThreadFactory",
+    "queryAllDeclaredMethods": true,
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.util.function.Function"
+  },
+  {
+    "name": "java.util.function.Supplier",
+    "queryAllDeclaredMethods": true,
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.util.logging.LogManager",
+    "methods": [
+      {
+        "name": "getLoggingMXBean",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "java.util.logging.LoggingMXBean",
+    "queryAllPublicMethods": true
+  },
+  {
+    "name": "java.util.logging.SimpleFormatter",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
     "name": "org.apache.logging.log4j.core.LoggerContext"
   },
   {
@@ -268,6 +1167,19 @@
   },
   {
     "name": "org.torproject.descriptor.impl.RelayNetworkStatusConsensusImpl",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "byte[]",
+          "int[]",
+          "java.io.File"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.torproject.descriptor.impl.RelayServerDescriptorImpl",
     "methods": [
       {
         "name": "<init>",

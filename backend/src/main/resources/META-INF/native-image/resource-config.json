@@ -2,8 +2,25 @@
   "resources": {
     "includes": [
       {
-        "pattern": "\\QUserAgents/\\E"
+        "pattern": "\\Qdb/migration/V1__Create_tables.sql\\E"
+      },
+      {
+        "pattern": "\\Qdb/migration/V2__missing_sequences.sql\\E"
+      },
+      {
+        "pattern": "\\Qdb/migration\\E"
+      },
+      {
+        "pattern": "\\Qip-lookup/autonomous-system/maxmind/GeoLite2-ASN.mmdb\\E"
+      },
+      {
+        "pattern": "\\Qip-lookup/location/dbip/dbip-city-lite.mmdb\\E"
+      },
+      {
+        "pattern": "\\Qua_parser/regexes.yaml\\E"
       }
     ]
-  }
+  },
+  "bundles": [
+  ]
 }

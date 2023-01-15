@@ -1,6 +1,5 @@
 package org.tormap.adapter
 
-import nl.basjes.parse.useragent.UserAgentAnalyzer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.actuate.web.exchanges.HttpExchange
 import org.springframework.boot.actuate.web.exchanges.InMemoryHttpExchangeRepository
@@ -9,10 +8,9 @@ import org.springframework.stereotype.Repository
 import org.tormap.database.entity.UserTrace
 import org.tormap.database.repository.UserTraceRepository
 import org.tormap.service.IpLookupService
+import ua_parser.Parser
 
-const val DEVICE_CLASS = "DeviceClass"
-const val OPERATING_SYSTEM_NAME = "OperatingSystemName"
-const val AGENT_NAME_VERSION_MAJOR = "AgentNameVersionMajor"
+object UserAgentParser : Parser()
 
 @Repository
 class HttpTraceRepository(
@@ -23,15 +21,6 @@ class HttpTraceRepository(
     private val maxHttpTracesInMemory: Int
 ) : InMemoryHttpExchangeRepository() {
     private var unsavedTraces = 0
-    private val userAgentAnalyzer =
-        UserAgentAnalyzer
-            .newBuilder()
-            .hideMatcherLoadStats()
-            // TODO
-            .dropDefaultResources()
-            .withCache(1000)
-            .withFields(DEVICE_CLASS, OPERATING_SYSTEM_NAME, AGENT_NAME_VERSION_MAJOR)
-            .build()
 
     init {
         super.setCapacity(maxHttpTracesInMemory)
@@ -57,10 +46,10 @@ class HttpTraceRepository(
             }
             val userAgent = it.request.headers["user-agent"]?.firstOrNull()
             if (userAgent != null) {
-                val userDeviceInfo = userAgentAnalyzer.parse(userAgent)
-                userTrace.deviceClass = userDeviceInfo.getValue(DEVICE_CLASS)
-                userTrace.operatingSystem = userDeviceInfo.getValue(OPERATING_SYSTEM_NAME)
-                userTrace.agentMajorVersion = userDeviceInfo.getValue(AGENT_NAME_VERSION_MAJOR)
+                val userDeviceInfo = UserAgentParser.parse(userAgent)
+                userTrace.deviceClass = userDeviceInfo.device.family
+                userTrace.operatingSystem = "${userDeviceInfo.os.family} ${userDeviceInfo.os.major}"
+                userTrace.agentMajorVersion = userDeviceInfo.userAgent.major
             }
             userTraceRepository.save(userTrace)
         }

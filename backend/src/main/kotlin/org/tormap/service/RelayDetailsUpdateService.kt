@@ -1,5 +1,7 @@
 package org.tormap.service
 
+import jakarta.transaction.Transactional
+import mu.KotlinLogging
 import org.springframework.jdbc.support.incrementer.PostgresSequenceMaxValueIncrementer
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
@@ -10,9 +12,6 @@ import org.tormap.util.addFamilyMember
 import org.tormap.util.commaSeparatedToList
 import org.tormap.util.getFamilyMember
 import javax.sql.DataSource
-import jakarta.transaction.Transactional
-import mu.KotlinLogging
-
 
 /**
  * This service deals with [RelayDetails] entities
@@ -81,7 +80,6 @@ class RelayDetailsUpdateService(
         }
         updateFamilies(monthFamilyMemberCount.map { it.month }.toSet())
     }
-
 
     /**
      * Updates [RelayDetails.familyId] for all entities of the requested [months].

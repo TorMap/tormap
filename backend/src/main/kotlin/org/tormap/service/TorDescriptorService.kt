@@ -2,16 +2,24 @@ package org.tormap.service
 
 import mu.KotlinLogging
 import org.springframework.scheduling.annotation.Async
-import org.springframework.scheduling.annotation.AsyncResult
 import org.springframework.stereotype.Service
 import org.tormap.adapter.controller.RelayLocationController
 import org.tormap.config.value.DescriptorConfig
-import org.tormap.database.entity.*
+import org.tormap.database.entity.DescriptorFileId
+import org.tormap.database.entity.DescriptorType
+import org.tormap.database.entity.ProcessedFile
+import org.tormap.database.entity.RelayDetails
+import org.tormap.database.entity.RelayLocation
+import org.tormap.database.entity.isRecent
 import org.tormap.database.repository.ProcessedFileRepository
 import org.tormap.database.repository.RelayDetailsRepository
 import org.tormap.database.repository.RelayLocationRepositoryImpl
 import org.tormap.util.millisSinceEpochToLocalDate
-import org.torproject.descriptor.*
+import org.torproject.descriptor.Descriptor
+import org.torproject.descriptor.DescriptorCollector
+import org.torproject.descriptor.RelayNetworkStatusConsensus
+import org.torproject.descriptor.ServerDescriptor
+import org.torproject.descriptor.UnparseableDescriptor
 import org.torproject.descriptor.impl.DescriptorReaderImpl
 import org.torproject.descriptor.index.DescriptorIndexCollector
 import java.io.File
@@ -19,8 +27,8 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
-
 
 /**
  * This service can collect and process Tor descriptors.
@@ -103,7 +111,6 @@ class TorDescriptorService(
      * Waits until all descriptors of the [descriptorFile] are processed and finally saves finished [ProcessedFile].
      * Updates the [RelayDetails.familyId] of processed months when [descriptorType] is [DescriptorType.ARCHIVE_RELAY_SERVER].
      */
-    @Async
     fun finishDescriptorFile(
         descriptorFile: File,
         descriptorType: DescriptorType,
@@ -180,17 +187,21 @@ class TorDescriptorService(
     fun processDescriptor(descriptor: Descriptor): Future<ProcessedDescriptorInfo> {
         return try {
             return when (descriptor) {
-                is RelayNetworkStatusConsensus -> AsyncResult(processRelayConsensusDescriptor(descriptor))
-                is ServerDescriptor -> AsyncResult(processServerDescriptor(descriptor))
+                is RelayNetworkStatusConsensus -> CompletableFuture.supplyAsync {
+                    processRelayConsensusDescriptor(descriptor)
+                }
+
+                is ServerDescriptor -> CompletableFuture.supplyAsync { processServerDescriptor(descriptor) }
                 is UnparseableDescriptor -> {
                     logger.debug("Unparsable descriptor in file ${descriptor.descriptorFile.name}: ${descriptor.descriptorParseException.message}")
-                    AsyncResult(ProcessedDescriptorInfo())
+                    CompletableFuture.completedFuture(ProcessedDescriptorInfo())
                 }
+
                 else -> throw Exception("Descriptor type ${descriptor.javaClass.name} is not yet supported!")
             }
         } catch (exception: Exception) {
             logger.error("Could not process descriptor part of ${descriptor.descriptorFile.name}! ${exception.message}")
-            AsyncResult(ProcessedDescriptorInfo(error = exception.message))
+            CompletableFuture.completedFuture(ProcessedDescriptorInfo(error = exception.message))
         }
     }
 
@@ -209,13 +220,15 @@ class TorDescriptorService(
             ) {
                 val location = ipLookupService.lookupLocation(networkStatusEntry.address)
                 if (location != null) {
-                    relayLocationRepositoryImpl.save(RelayLocation(
-                        networkStatusEntry,
-                        descriptorDay,
-                        location.latitude,
-                        location.longitude,
-                        location.countryCode,
-                    ))
+                    relayLocationRepositoryImpl.save(
+                        RelayLocation(
+                            networkStatusEntry,
+                            descriptorDay,
+                            location.latitude,
+                            location.longitude,
+                            location.countryCode,
+                        )
+                    )
                 }
             }
         }

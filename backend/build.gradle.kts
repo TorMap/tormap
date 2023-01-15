@@ -42,9 +42,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-    val openapi = "1.6.14"
-    implementation("org.springdoc:springdoc-openapi-ui:$openapi")
-    implementation("org.springdoc:springdoc-openapi-kotlin:$openapi")
+//    val openapi = "1.6.14"
+//    implementation("org.springdoc:springdoc-openapi-ui:$openapi")
+//    implementation("org.springdoc:springdoc-openapi-kotlin:$openapi")
 
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -62,7 +62,7 @@ dependencies {
     implementation("com.maxmind.geoip2:geoip2:4.0.0")
 
     // Analyze user agent https://yauaa.basjes.nl/
-    implementation("nl.basjes.parse.useragent:yauaa:7.10.0")
+    implementation("com.github.ua-parser:uap-java:1.5.3")
 
     // Packages required by metrics-lib (org.torproject.descriptor in java module)
     // (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
@@ -71,7 +71,6 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.12.4")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.12.4")
     implementation("com.fasterxml.jackson.core:jackson-core:2.12.4")
-    //runtimeOnly("org.slf4j:slf4j-api:1.7.32")
     implementation("org.tukaani:xz:1.6")
 
     // Testing with Kotest (https://kotest.io/) and Testcontainers (https://testcontainers.org/)

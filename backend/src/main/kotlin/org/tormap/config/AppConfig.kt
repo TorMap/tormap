@@ -1,8 +1,8 @@
 package org.tormap.config
 
+import org.springframework.aot.hint.MemberCategory
 import org.springframework.aot.hint.RuntimeHints
 import org.springframework.aot.hint.RuntimeHintsRegistrar
-import org.springframework.aot.hint.annotation.RegisterReflectionForBinding
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
@@ -13,9 +13,13 @@ import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.filter.ShallowEtagHeaderFilter
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.tormap.config.value.AutonomousSystemLookupConfig
 import org.tormap.config.value.DescriptorConfig
 import org.tormap.config.value.IpLookupConfig
+import org.tormap.config.value.LocationLookupConfig
+import org.tormap.config.value.RateConfig
 import org.tormap.config.value.ScheduleConfig
+import org.tormap.database.repository.MonthFamilyMembersCount
 
 /**
  * Add all application configuration here and not in @SpringBootApplication class
@@ -25,7 +29,6 @@ import org.tormap.config.value.ScheduleConfig
 @EnableCaching
 @EnableScheduling
 @ImportRuntimeHints(IpLookupResourceRegistrar::class)
-@RegisterReflectionForBinding(ScheduleConfig::class, DescriptorConfig::class, IpLookupConfig::class)
 @EnableConfigurationProperties(ScheduleConfig::class, DescriptorConfig::class, IpLookupConfig::class)
 class AppConfig : WebMvcConfigurer {
 
@@ -51,7 +54,12 @@ class AppConfig : WebMvcConfigurer {
 internal class IpLookupResourceRegistrar : RuntimeHintsRegistrar {
     override fun registerHints(hints: RuntimeHints, classLoader: ClassLoader?) {
         // Temporary hint, should be included into the official spring boot project
-        hints.resources().registerPattern("ip-lookup/location/dbip/dbip-city-lite.mmdb")
-        hints.resources().registerPattern("ip-lookup/autonomous-system/maxmind/GeoLite2-ASN.mmdb")
+        hints.reflection().registerType(MonthFamilyMembersCount::class.java, *MemberCategory.values())
+        hints.reflection().registerType(ScheduleConfig::class.java, *MemberCategory.values())
+        hints.reflection().registerType(RateConfig::class.java, *MemberCategory.values())
+        hints.reflection().registerType(DescriptorConfig::class.java, *MemberCategory.values())
+        hints.reflection().registerType(IpLookupConfig::class.java, *MemberCategory.values())
+        hints.reflection().registerType(LocationLookupConfig::class.java, *MemberCategory.values())
+        hints.reflection().registerType(AutonomousSystemLookupConfig::class.java, *MemberCategory.values())
     }
 }
