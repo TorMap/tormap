@@ -5,6 +5,7 @@ import com.maxmind.geoip2.DatabaseReader
 import com.maxmind.geoip2.model.AsnResponse
 import com.maxmind.geoip2.model.CityResponse
 import mu.KotlinLogging
+import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 import org.tormap.config.value.IpLookupConfig
 import java.math.BigDecimal
@@ -55,8 +56,8 @@ class IpLookupService(
     /**
      * Create a database reader for the [.mmdb file format](https://maxmind.github.io/MaxMind-DB/)
      */
-    private fun maxmindTypeDatabaseReader(databaseFile: String, shouldCache: Boolean): DatabaseReader {
-        val reader = DatabaseReader.Builder(javaClass.getResourceAsStream(databaseFile)!!)
+    private fun maxmindTypeDatabaseReader(databaseFile: Resource, shouldCache: Boolean): DatabaseReader {
+        val reader = DatabaseReader.Builder(databaseFile.inputStream)
         return if (shouldCache) reader.withCache(CHMCache()).build() else reader.build()
     }
 }

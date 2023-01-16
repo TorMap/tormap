@@ -4,9 +4,12 @@ import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.annotation.web.invoke
 import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -38,7 +41,7 @@ class SecurityConfig(
     }
 
     @Bean
-    fun authenticationManagerBean(passwordEncoder: PasswordEncoder): InMemoryUserDetailsManager {
+    fun userDetailsServiceBean(passwordEncoder: PasswordEncoder): UserDetailsService {
         val passwordFile = File(adminPasswordFile)
         var adminPassword = UUID.randomUUID().toString()
         if (passwordFile.exists()) {
@@ -61,21 +64,33 @@ class SecurityConfig(
     }
 
     @Bean
-    fun securityFilterChainBean(http: HttpSecurity): SecurityFilterChain {
-        // Require authenticated users for actuator endpoints
-        http.authorizeHttpRequests()
-            .requestMatchers("$actuatorPath/**")
-            .authenticated()
-            .and()
-            .formLogin()
+    @Order(1)
+    fun filterChainAdmin(http: HttpSecurity): SecurityFilterChain {
+        http {
+            securityMatcher("$actuatorPath/**")
+            authorizeRequests {
+                authorize("$actuatorPath/**", hasRole("ADMIN"))
+            }
+            formLogin {}
+        }
 
-        // Disable spring security features for public facing endpoints
-        http.authorizeHttpRequests()
-            .requestMatchers("relay/**")
-            .permitAll()
-            .and()
-            .headers().disable()
-            .csrf().disable()
+        return http.build()
+    }
+
+    @Bean
+    @Order(2)
+    fun filterChainBasic(http: HttpSecurity): SecurityFilterChain {
+        http {
+            authorizeHttpRequests {
+                authorize("/**", permitAll)
+            }
+            headers {
+                disable()
+            }
+            csrf {
+                disable()
+            }
+        }
 
         return http.build()
     }

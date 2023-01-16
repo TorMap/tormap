@@ -8,9 +8,9 @@ descriptor:
 ip-lookup:
   shouldCache: true
   locationLookup:
-    dbipDatabaseFile: /ip-lookup/location/dbip/dbip-city-lite.mmdb
+    dbipDatabaseFile: classpath:/ip-lookup/location/dbip/dbip-city-lite.mmdb
   autonomousSystemLookup:
-    maxmindDatabaseFile: /ip-lookup/autonomous-system/maxmind/GeoLite2-ASN.mmdb
+    maxmindDatabaseFile: classpath:/ip-lookup/autonomous-system/maxmind/GeoLite2-ASN.mmdb
 management:
   endpoint:
     health:
@@ -52,7 +52,6 @@ spring:
     username: postgres
     password: postgres
   flyway:
-    baselineOnMigrate: true
     locations: classpath:/db/migration
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -66,8 +65,8 @@ spring:
     user:
       name: admin
       passwordFile: tormap-data/admin-password.txt
-springdoc:
-  api-docs:
-    path: /openapi
-  swagger-ui:
-    path: /
+#springdoc:
+#  api-docs:
+#    path: /openapi
+#  swagger-ui:
+#    path: /
