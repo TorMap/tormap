@@ -38,7 +38,7 @@ jobs:
 
   docker_image:
     needs: gradle_test
-    if: github.event_name != 'pull_request' && github.ref_name == 'master'
+    if: startsWith(github.event.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
