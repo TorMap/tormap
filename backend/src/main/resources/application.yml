@@ -60,11 +60,14 @@ spring:
     open-in-view: false
   output:
     ansi:
-      enabled: ALWAYS
+      enabled: always
   security:
     user:
       name: admin
       passwordFile: tormap-data/admin-password.txt
+  web:
+    resources:
+      static-locations: classpath:/static
 #springdoc:
 #  api-docs:
 #    path: /openapi
