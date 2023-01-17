@@ -10,17 +10,9 @@ import org.tormap.relayDetailsMock
 @SpringBootTest
 @ActiveProfiles("test")
 class RelayFamilyUtilTest : StringSpec({
-    val relay1 = relayDetailsMock()
-    relay1.fingerprint = "A".repeat(40)
-    relay1.nickname = "A"
-
-    val relay2 = relayDetailsMock()
-    relay2.fingerprint = "B".repeat(40)
-    relay2.nickname = "B"
-
-    val relay3 = relayDetailsMock()
-    relay3.fingerprint = "C".repeat(40)
-    relay3.nickname = "C"
+    val relay1 = relayDetailsMock('A')
+    val relay2 = relayDetailsMock('B')
+    val relay3 = relayDetailsMock('C')
 
     listOf(
         relay2.nickname,

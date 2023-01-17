@@ -1,10 +1,13 @@
 package org.tormap.database.entity
 
+import org.tormap.adapter.dto.RelayFamilyIdentifiersDto
 import org.tormap.util.jointToCommaSeparated
 import org.tormap.util.stripLengthForDB
 import org.torproject.descriptor.ServerDescriptor
 import java.time.LocalDate
 import javax.persistence.*
+
+const val FIND_FAMILY_IDENTIFIERS_QUERY = "findFamilyIdentifiers"
 
 /**
  * This entity is used to store details from a relay or bridge [ServerDescriptor].
@@ -17,6 +20,33 @@ import javax.persistence.*
         Index(columnList = "month, fingerprint", unique = true),
         Index(columnList = "familyId"),
     ]
+)
+@SqlResultSetMapping(
+    name = FIND_FAMILY_IDENTIFIERS_QUERY,
+    classes = [
+        ConstructorResult(
+            targetClass = RelayFamilyIdentifiersDto::class,
+            columns = [
+                ColumnResult(name = "id", type = Long::class),
+                ColumnResult(name = "memberCount", type = Long::class),
+                ColumnResult(name = "nicknames", type = String::class),
+                ColumnResult(name = "autonomousSystems", type = String::class),
+            ]
+        )
+    ]
+)
+@NamedNativeQuery(
+    name = FIND_FAMILY_IDENTIFIERS_QUERY,
+    query = "SELECT " +
+        "family_id as id, " +
+        "count(id) as memberCount, " +
+        "string_agg(nickname, ', ') as nicknames, " +
+        "string_agg(DISTINCT autonomous_system_name, ', ') as autonomousSystems " +
+        "FROM relay_details " +
+        "WHERE family_id in :familyIds " +
+        "GROUP BY family_id",
+    resultClass = RelayFamilyIdentifiersDto::class,
+    resultSetMapping = FIND_FAMILY_IDENTIFIERS_QUERY
 )
 class RelayDetails(
     @Column(length = 7, columnDefinition = "bpchar(7)")
@@ -47,7 +77,7 @@ class RelayDetails(
 
     var protocols: String?,
 
-    @Column(length = 40,  columnDefinition = "bpchar(40)")
+    @Column(length = 40, columnDefinition = "bpchar(40)")
     var fingerprint: String,
 
     var isHibernating: Boolean,
