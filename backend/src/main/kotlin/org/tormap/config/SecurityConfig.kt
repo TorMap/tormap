@@ -69,7 +69,7 @@ class SecurityConfig(
         http {
             securityMatcher("$actuatorPath/**")
             authorizeRequests {
-                authorize("$actuatorPath/**", hasRole("ADMIN"))
+                authorize(pattern = "$actuatorPath/**", access = hasRole("ADMIN"))
             }
             formLogin {}
         }
@@ -82,7 +82,7 @@ class SecurityConfig(
     fun filterChainBasic(http: HttpSecurity): SecurityFilterChain {
         http {
             authorizeHttpRequests {
-                authorize("/**", permitAll)
+                authorize(access = permitAll)
             }
             headers {
                 disable()
