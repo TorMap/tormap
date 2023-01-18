@@ -24,7 +24,7 @@
     {
       "description": "Ignore specific docker images",
       "packagePatterns": [
-        "^eclipse-temurin",
+        "^eclipse-temurin"
       ],
       "enabled": false
     }
