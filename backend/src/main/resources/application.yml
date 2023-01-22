@@ -1,73 +1,74 @@
 descriptor:
-  apiBaseURL: https://collector.torproject.org
-  localDownloadDirectory: tormap-data/descriptors
-  archiveRelayConsensuses: /archive/relay-descriptors/consensuses/
-  archiveRelayServers: /archive/relay-descriptors/server-descriptors/
-  recentRelayConsensuses: /recent/relay-descriptors/consensuses/
-  recentRelayServers: /recent/relay-descriptors/server-descriptors/
+    apiBaseURL: https://collector.torproject.org
+    localDownloadDirectory: tormap-data/descriptors
+    archiveRelayConsensuses: /archive/relay-descriptors/consensuses/
+    archiveRelayServers: /archive/relay-descriptors/server-descriptors/
+    recentRelayConsensuses: /recent/relay-descriptors/consensuses/
+    recentRelayServers: /recent/relay-descriptors/server-descriptors/
 ip-lookup:
-  shouldCache: true
-  locationLookup:
-    dbipDatabaseFile: classpath:/ip-lookup/location/dbip/dbip-city-lite.mmdb
-  autonomousSystemLookup:
-    maxmindDatabaseFile: classpath:/ip-lookup/autonomous-system/maxmind/GeoLite2-ASN.mmdb
+    shouldCache: true
+    locationLookup:
+        dbipDatabaseFile: classpath:/ip-lookup/location/dbip/dbip-city-lite.mmdb
+    autonomousSystemLookup:
+        maxmindDatabaseFile: classpath:/ip-lookup/autonomous-system/maxmind/GeoLite2-ASN.mmdb
 management:
-  endpoint:
-    health:
-      show-details: when_authorized
-    logfile:
-      external-file: logs/spring-boot-logger.log
-  endpoints:
-    jmx:
-      exposure:
-        include:
-    web:
-      exposure:
-        include: health,info,metrics,caches,httptrace,flyway,logfile,mappings,scheduledtasks,threaddump,heapdump
-      base-path: /actuator
-  httpexchanges:
-    recording:
-      include: PRINCIPAL,REMOTE_ADDRESS,REQUEST_HEADERS,RESPONSE_HEADERS,SESSION_ID,TIME_TAKEN
-      maxInMemory: 100
+    endpoint:
+        health:
+            show-details: when_authorized
+        logfile:
+            external-file: logs/spring-boot-logger.log
+    endpoints:
+        jmx:
+            exposure:
+                include:
+        web:
+            exposure:
+                include: health,info,metrics,caches,httptrace,flyway,logfile,mappings,scheduledtasks,threaddump,heapdump
+            base-path: /actuator
+    httpexchanges:
+        recording:
+            include: PRINCIPAL,REMOTE_ADDRESS,REQUEST_HEADERS,RESPONSE_HEADERS,SESSION_ID,TIME_TAKEN
+            maxInMemory: 100
 logging:
-  file:
-    path: logs/spring-boot-logger.log
+    level:
+        nl.basjes: warn
+        org.tormap: info
 schedule:
-  shouldOverwriteFamilies: false
-  rate:
-    recentRelayConsensuses: PT1H
-    recentRelayServers: PT1H
-    archiveRelayConsensuses: PT12H
-    archiveRelayServers: PT12H
-    updateRelayAutonomousSystems: PT12H
-    updateRelayFamilies: PT12H
+    shouldOverwriteFamilies: false
+    rate:
+        recentRelayConsensuses: PT1H
+        recentRelayServers: PT1H
+        archiveRelayConsensuses: PT12H
+        archiveRelayServers: PT12H
+        updateRelayAutonomousSystems: PT12H
+        updateRelayFamilies: PT12H
 server:
-  port: 8080
-  compression:
-    enabled: true
-    min-response-size: 1024
+    port: 8080
+    compression:
+        enabled: true
+        min-response-size: 1024
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
-    password: postgres
-  flyway:
-    locations: classpath:/db/migration
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: validate
-    open-in-view: false
-  output:
-    ansi:
-      enabled: always
-  security:
-    user:
-      name: admin
-      passwordFile: tormap-data/admin-password.txt
-  web:
-    resources:
-      static-locations: classpath:/static
+    datasource:
+        url: jdbc:postgresql://localhost:5432/postgres
+        username: postgres
+        password: postgres
+    flyway:
+        locations: classpath:/db/migration
+    jpa:
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        hibernate:
+            ddl-auto: validate
+        open-in-view: false
+    output:
+        ansi:
+            enabled: always
+    security:
+        user:
+            name: admin
+            passwordFile: tormap-data/admin-password.txt
+    web:
+        resources:
+            static-locations: classpath:/static
 #springdoc:
 #  api-docs:
 #    path: /openapi
