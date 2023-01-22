@@ -3,8 +3,10 @@ package org.tormap.database.repository
 import jakarta.transaction.Transactional
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.tormap.adapter.dto.RelayFamilyIdentifiersDto
 import org.tormap.adapter.dto.RelayIdentifiersDto
+import org.tormap.database.entity.FIND_FAMILY_IDENTIFIERS_QUERY
 
 interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
     @Query(
@@ -25,13 +27,8 @@ interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
     )
     fun findRelayIdentifiers(ids: List<Long>): List<RelayIdentifiersDto>
 
-    @Query(
-        """SELECT new org.tormap.adapter.dto.RelayFamilyIdentifiersDto(familyId, count(id), '', '')
-           FROM RelayDetails
-           WHERE familyId in :familyIds
-           GROUP BY familyId"""
-    )
-    fun findFamilyIdentifiers(familyIds: List<Long>): List<RelayFamilyIdentifiersDto>
+    @Query(name = FIND_FAMILY_IDENTIFIERS_QUERY, nativeQuery = true)
+    fun findFamilyIdentifiers(@Param("familyIds") familyIds: List<Long>): List<RelayFamilyIdentifiersDto>
 
     @Transactional
     @Modifying
@@ -39,7 +36,4 @@ interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
     fun clearFamiliesFromMonth(month: String): Int
 }
 
-data class MonthFamilyMembersCount(
-    val month: String,
-    val count: Long
-)
+data class MonthFamilyMembersCount(val month: String, val count: Long)
