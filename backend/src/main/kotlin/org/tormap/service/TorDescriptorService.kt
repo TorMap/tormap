@@ -1,6 +1,7 @@
 package org.tormap.service
 
 import mu.KotlinLogging
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.tormap.adapter.controller.RelayLocationController
 import org.tormap.config.value.DescriptorConfig
