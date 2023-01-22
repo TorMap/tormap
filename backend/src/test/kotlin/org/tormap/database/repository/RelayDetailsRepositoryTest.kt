@@ -3,12 +3,12 @@ package org.tormap.database.repository
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotContain
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import org.tormap.adapter.dto.RelayIdentifiersDto
 import org.tormap.relayDetailsMock
 
 @SpringBootTest
@@ -75,16 +75,18 @@ class RelayDetailsRepositoryTest(
             relayDetailsRepository.findRelayIdentifiers(listOf(relay1.id!!, relay2.id!!))
         }
 
-        relayIdentifiersList shouldContain RelayIdentifiersDto(
-            id = relay1.id!!,
-            fingerprint = relay1.fingerprint,
-            nickname = relay1.nickname,
-        )
-        relayIdentifiersList shouldContain RelayIdentifiersDto(
-            id = relay2.id!!,
-            fingerprint = relay2.fingerprint,
-            nickname = relay2.nickname,
-        )
+        relayIdentifiersList.find { relayIdentifiers ->
+            relayIdentifiers.id == relay1.id!!
+                && relayIdentifiers.fingerprint == relay1.fingerprint
+                && relayIdentifiers.nickname == relay1.nickname
+        }.shouldNotBeNull()
+
+        relayIdentifiersList.find { relayIdentifiers ->
+            relayIdentifiers.id == relay2.id!!
+                && relayIdentifiers.fingerprint == relay2.fingerprint
+                && relayIdentifiers.nickname == relay2.nickname
+        }.shouldNotBeNull()
+
         relayIdentifiersList.size shouldBe 2
     }
 
