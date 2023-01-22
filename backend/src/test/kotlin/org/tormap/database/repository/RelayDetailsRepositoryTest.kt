@@ -23,10 +23,7 @@ class RelayDetailsRepositoryTest(
     val relay3 = relayDetailsMock('C')
     relay3.familyId = commonFamilyId + 1
 
-    relayDetailsRepository.save(relay1)
-    relayDetailsRepository.save(relay2)
-    relayDetailsRepository.save(relay3)
-
+    relayDetailsRepository.saveAll(listOf(relay1, relay2, relay3))
 
     "find family identifiers by family id" {
         val familyIdentifiers = withContext(Dispatchers.IO) {

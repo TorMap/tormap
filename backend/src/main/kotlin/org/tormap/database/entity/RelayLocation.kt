@@ -1,9 +1,6 @@
 package org.tormap.database.entity
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Index
-import jakarta.persistence.Table
+import org.springframework.data.relational.core.mapping.Table
 import org.torproject.descriptor.NetworkStatusEntry
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -12,28 +9,18 @@ import java.time.LocalDate
  * This entity is used to store relevant information about a [NetworkStatusEntry]
  */
 @Suppress("unused")
-@Entity
-@Table(
-    indexes = [
-        Index(columnList = "day, fingerprint", unique = true),
-        Index(columnList = "day")
-    ]
-)
+@Table("relay_location")
 class RelayLocation(
     networkStatusEntry: NetworkStatusEntry,
     var day: LocalDate,
     var latitude: BigDecimal,
     var longitude: BigDecimal,
-
-    @Column(length = 2, columnDefinition = "bpchar(2)")
     var countryCode: String
 ) : AbstractBaseEntity<Long>() {
-    @Column(length = 40, columnDefinition = "bpchar(40)")
     var fingerprint: String = networkStatusEntry.fingerprint
-
     var flags: String? = try {
         networkStatusEntry.flags.map { TorRelayFlag.valueOf(it.toString()).ordinal }.joinToString(", ")
-    } catch (exception: Exception) {
+    } catch (exception: IllegalArgumentException) {
         null
     }
 }

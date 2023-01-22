@@ -1,6 +1,6 @@
 package org.tormap.database.repository
 
-import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.repository.ListCrudRepository
 import org.tormap.database.entity.UserTrace
 
-interface UserTraceRepository : JpaRepository<UserTrace, Long>
+interface UserTraceRepository : ListCrudRepository<UserTrace, Long>

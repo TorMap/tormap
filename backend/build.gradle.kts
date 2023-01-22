@@ -6,7 +6,6 @@ version = "1.0.1"
 plugins {
     val kotlin = "1.8.0"
     kotlin("jvm") version kotlin
-    kotlin("plugin.jpa") version kotlin
     kotlin("plugin.spring") version kotlin
 
     // Spring https://spring.io/projects/spring-boot
@@ -31,12 +30,12 @@ repositories {
 dependencies {
     // Kotlin
     kotlin("reflect")
-    kotlin("stdlib-jdk8")
+    kotlin("stdlib")
 
     // Spring Boot https://spring.io/projects/spring-boot
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-cache")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -89,14 +88,6 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.testcontainers:testcontainers")
-}
-
-// Allow JPA annotations for Kotlin classes
-allOpen {
-    annotation("jakarta.persistence.Embeddable")
-    annotation("jakarta.persistence.MappedSuperclass")
-    annotation("jakarta.persistence.Inheritance")
-    annotation("org.springframework.beans.factory.annotation.Configurable")
 }
 
 tasks {
