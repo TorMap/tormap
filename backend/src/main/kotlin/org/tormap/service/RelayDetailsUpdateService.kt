@@ -1,10 +1,10 @@
 package org.tormap.service
 
-import jakarta.transaction.Transactional
 import mu.KotlinLogging
 import org.springframework.jdbc.support.incrementer.PostgresSequenceMaxValueIncrementer
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.tormap.adapter.controller.RelayLocationController
 import org.tormap.database.entity.RelayDetails
 import org.tormap.database.repository.RelayDetailsRepositoryImpl
@@ -32,19 +32,17 @@ class RelayDetailsUpdateService(
     @Async
     fun updateAutonomousSystems() {
         try {
-            relayDetailsRepositoryImpl.flush()
             val monthsToProcess = relayDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
             logger.info("... Updating Autonomous Systems for months: ${monthsToProcess.joinToString(", ")}")
             monthsToProcess.forEach {
                 var changedRelaysCount = 0
                 val relaysWithoutAutonomousSystem =
-                    relayDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(it)
+                    relayDetailsRepositoryImpl.findAllByMonthAndAutonomousSystemNumberNull(it)
                 relaysWithoutAutonomousSystem.forEach { relay ->
                     if (relay.updateAutonomousSystem()) {
                         changedRelaysCount++
                     }
                 }
-                relayDetailsRepositoryImpl.flush()
                 if (changedRelaysCount > 0) {
                     logger.info("Finished Autonomous Systems for month $it. Updated $changedRelaysCount relays.")
                 }
@@ -87,7 +85,6 @@ class RelayDetailsUpdateService(
     fun updateFamilies(months: Set<String>) {
         try {
             logger.info("... Updating relay families for months: ${months.joinToString(", ")}")
-            relayDetailsRepositoryImpl.flush()
             months.forEach { month ->
                 try {
                     updateFamiliesForMonth(month)
@@ -110,7 +107,7 @@ class RelayDetailsUpdateService(
         var rejectedFamilyConnectionCount = 0
         val families = mutableListOf<Set<RelayDetails>>()
         val requestingRelays =
-            relayDetailsRepositoryImpl.findAllByMonthEqualsAndFamilyEntriesNotNull(month)
+            relayDetailsRepositoryImpl.findAllByMonthAndFamilyEntriesNotNull(month)
         requestingRelays.forEach { requestingRelay ->
             requestingRelay.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
                 try {
@@ -142,7 +139,7 @@ class RelayDetailsUpdateService(
         this.forEach { family ->
             val familyId = dbSequenceIncrementer.nextLongValue()
             family.forEach { it.familyId = familyId }
-            relayDetailsRepositoryImpl.saveAllAndFlush(family)
+            relayDetailsRepositoryImpl.saveAll(family)
         }
     }
 }

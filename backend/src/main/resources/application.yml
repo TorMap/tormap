@@ -15,8 +15,6 @@ management:
     endpoint:
         health:
             show-details: when_authorized
-        logfile:
-            external-file: logs/spring-boot-logger.log
     endpoints:
         jmx:
             exposure:
@@ -32,7 +30,6 @@ management:
 logging:
     level:
         nl.basjes: warn
-        org.tormap: info
 schedule:
     shouldOverwriteFamilies: false
     rate:

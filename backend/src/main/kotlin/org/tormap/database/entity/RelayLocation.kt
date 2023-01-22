@@ -1,5 +1,8 @@
 package org.tormap.database.entity
 
+import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.PersistenceCreator
+import org.springframework.data.domain.Persistable
 import org.springframework.data.relational.core.mapping.Table
 import org.torproject.descriptor.NetworkStatusEntry
 import java.math.BigDecimal
@@ -8,21 +11,35 @@ import java.time.LocalDate
 /**
  * This entity is used to store relevant information about a [NetworkStatusEntry]
  */
-@Suppress("unused")
 @Table("relay_location")
-class RelayLocation(
-    networkStatusEntry: NetworkStatusEntry,
+@Suppress("unused", "MemberVisibilityCanBePrivate")
+class RelayLocation @PersistenceCreator internal constructor(
+    @Id private var id: Long? = null,
+    var fingerprint: String,
     var day: LocalDate,
+    var flags: Set<TorRelayFlag>?,
     var latitude: BigDecimal,
     var longitude: BigDecimal,
     var countryCode: String
-) : AbstractBaseEntity<Long>() {
-    var fingerprint: String = networkStatusEntry.fingerprint
-    var flags: String? = try {
-        networkStatusEntry.flags.map { TorRelayFlag.valueOf(it.toString()).ordinal }.joinToString(", ")
-    } catch (exception: IllegalArgumentException) {
-        null
-    }
+) : Persistable<Long?> {
+    constructor(
+        networkStatusEntry: NetworkStatusEntry,
+        day: LocalDate,
+        latitude: BigDecimal,
+        longitude: BigDecimal,
+        countryCode: String
+    ) : this(
+        fingerprint = networkStatusEntry.fingerprint,
+        day = day,
+        flags = kotlin.runCatching { networkStatusEntry.flags.map(TorRelayFlag::valueOf).toSet() }.getOrNull(),
+        latitude = latitude,
+        longitude = longitude,
+        countryCode = countryCode
+    )
+
+    override fun getId(): Long? = id
+
+    override fun isNew(): Boolean = id == null
 }
 
 /**

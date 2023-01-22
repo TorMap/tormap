@@ -1,7 +1,6 @@
 package org.tormap.service
 
 import mu.KotlinLogging
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.tormap.adapter.controller.RelayLocationController
 import org.tormap.config.value.DescriptorConfig
@@ -10,7 +9,6 @@ import org.tormap.database.entity.DescriptorType
 import org.tormap.database.entity.ProcessedFile
 import org.tormap.database.entity.RelayDetails
 import org.tormap.database.entity.RelayLocation
-import org.tormap.database.entity.isRecent
 import org.tormap.database.repository.ProcessedFileRepository
 import org.tormap.database.repository.RelayDetailsRepository
 import org.tormap.database.repository.RelayLocationRepositoryImpl
@@ -152,7 +150,7 @@ class TorDescriptorService(
         }
         descriptorsFile.processedAt = LocalDateTime.now()
         descriptorsFile.error = error
-        processedFileRepository.saveAndFlush(descriptorsFile)
+        processedFileRepository.save(descriptorsFile)
         logger.info("Finished processing descriptors file ${descriptorFile.name}")
     }
 
@@ -164,12 +162,12 @@ class TorDescriptorService(
         val descriptorReader = DescriptorReaderImpl()
         val parentDirectory = File(descriptorConfig.localDownloadDirectory + apiPath)
         if (descriptorType.isRecent()) {
-            processedFileRepository.deleteAllById_TypeEqualsAndLastModifiedBefore(
+            processedFileRepository.deleteAllByTypeAndLastModifiedBefore(
                 descriptorType,
                 Instant.now().minus(4, ChronoUnit.DAYS).toEpochMilli()
             )
         }
-        val excludedFiles = processedFileRepository.findAllById_TypeEqualsAndErrorNull(descriptorType)
+        val excludedFiles = processedFileRepository.findAllByTypeAndErrorNull(descriptorType)
         descriptorReader.excludedFiles = excludedFiles.associate {
             Pair(
                 parentDirectory.absolutePath + File.separator + it.id.filename,
@@ -232,7 +230,6 @@ class TorDescriptorService(
                 }
             }
         }
-        relayLocationRepositoryImpl.flush()
         relayLocationController.cacheNewDay(descriptorDay.toString())
         return ProcessedDescriptorInfo(YearMonth.from(descriptorDay).toString())
     }
@@ -244,8 +241,7 @@ class TorDescriptorService(
     private fun processServerDescriptor(descriptor: ServerDescriptor): ProcessedDescriptorInfo {
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.publishedMillis)
         val descriptorMonth = YearMonth.from(descriptorDay).toString()
-        val existingRelay =
-            relayDetailsRepository.findByMonthAndFingerprint(descriptorMonth, descriptor.fingerprint)
+        val existingRelay = relayDetailsRepository.findByMonthAndFingerprint(descriptorMonth, descriptor.fingerprint)
         if (existingRelay == null || existingRelay.day < descriptorDay) {
             val autonomousSystem = ipLookupService.lookupAutonomousSystem(descriptor.address)
             relayDetailsRepository.save(
@@ -255,7 +251,6 @@ class TorDescriptorService(
                     descriptorDay,
                     autonomousSystem?.autonomousSystemOrganization,
                     autonomousSystem?.autonomousSystemNumber?.toInt(),
-                    existingRelay?.id,
                 )
             )
         }

@@ -53,6 +53,5 @@ class HttpTraceRepository(
             }
             userTraceRepository.save(userTrace)
         }
-        userTraceRepository.flush()
     }
 }
