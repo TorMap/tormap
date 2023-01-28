@@ -57,7 +57,8 @@ export const AboutInformation: React.FunctionComponent = () => {
                     <Box display="flex" alignItems={"center"}>
                         <Avatar sx={{marginRight: "24px"}} src={"android-chrome-192x192.png"} alt={"TorMap logo"}/>
                         <Typography variant="h5">TorMap</Typography>
-                        <Grid sx={{flexGrow: 1, paddingLeft: "24px", paddingRight: "30px", paddingTop: "8px"}} container spacing={{ xs: 2, sm: 4 }}>
+                        <Grid sx={{flexGrow: 1, paddingLeft: "24px", paddingRight: "30px", paddingTop: "8px"}} container
+                              spacing={{xs: 2, sm: 4}}>
                             <Grid item>
                                 <ExternalLink sx={{color: "white"}} href={"https://github.com/TorMap/tormap"}
                                               label={<GitHubIcon/>}/>
@@ -70,7 +71,7 @@ export const AboutInformation: React.FunctionComponent = () => {
                                 <ExternalLink sx={{color: "white"}} href={"mailto:hi@tormap.org"} label={<EmailIcon/>}/>
                             </Grid>
                             <Grid item>
-                                <ExternalLink sx={{color: "white"}} href={"https://tippin.me/@Julius_Henke"}
+                                <ExternalLink sx={{color: "white"}} href={"https://tippin.me/@TorMapOrg"}
                                               label={<BitcoinIcon/>}/>
                             </Grid>
                         </Grid>
@@ -87,11 +88,10 @@ export const AboutInformation: React.FunctionComponent = () => {
                 >
                     <h2>What is TorMap?</h2>
                     <Typography variant={"body1"} gutterBottom>
-                        TorMap is a world map displaying approximate locations where Tor relays are being hosted. The
-                        Tor network currently consists of thousands of relays which route anonymous internet traffic
-                        daily. With our app you can group, filter and analyze Tor relays. The historic state of the
-                        network can be viewed for any day between October 2007 and today.<br/>
-                        We developed TorMap for our practical P4-Project at the <ExternalLink
+                        TorMap is a world map displaying approximate locations where Tor relays are being hosted.
+                        You can group, filter and analyze thousands of Tor relays, which route anonymous internet
+                        traffic daily. The historic state of the network can be viewed for any day between October 2007
+                        and today.<br/> We developed TorMap for our practical P4-Project at the <ExternalLink
                         href={"https://www.tu-darmstadt.de/"} label={"Technical University of Darmstadt"}/> as part of
                         the <ExternalLink href={"https://panda-projekt.de/"} label={"PANDA project"}/>. It was
                         supervised
@@ -117,10 +117,10 @@ export const AboutInformation: React.FunctionComponent = () => {
                     </Typography>
                     <h2>Contributors</h2>
                     <Stack
-                        direction={{ sm: 'column', md: 'row' }}
+                        direction={{sm: 'column', md: 'row'}}
                         justifyContent="flex-start"
                         alignItems="flex-start"
-                        spacing={{ xs: 3, sm: 3 }}
+                        spacing={{xs: 3, sm: 3}}
                     >
                         <ContributorCard
                             avatar={<Avatar src={"https://avatars.githubusercontent.com/u/23460202?s=96&v=4"}/>}
@@ -151,7 +151,8 @@ export const AboutInformation: React.FunctionComponent = () => {
                                                             label={"https://geojson-maps.ash.ms/"}/>.
                     </Typography>
                     {APP_VERSION && <Typography variant={"body2"}>
-                        This is TorMap version <ExternalLink href={"https://github.com/TorMap/tormap/releases"} label={APP_VERSION}/>.
+                        This is TorMap version <ExternalLink href={"https://github.com/TorMap/tormap/releases"}
+                                                             label={APP_VERSION}/>.
                     </Typography>}
                 </DialogContent>
                 {!isLargeScreen ? <DialogActions sx={{
