@@ -154,6 +154,9 @@ export const buildStatistics = (
     relayFamilyMap: Map<number, RelayLocationDto[]>,
     settings: Settings
 ): Statistics => {
+    let countryCount = relayCountryMap.size
+    let familyCount = relayFamilyMap.size
+
     if (settings.selectedCountry && settings.selectedFamily) {
         filteredRelays = []
         relayFamilyMap.get(settings.selectedFamily)?.forEach(familyRelay => {
@@ -163,21 +166,26 @@ export const buildStatistics = (
                 })
             }
         })
+        countryCount = 1
+        familyCount = 1
     } else if (settings.selectedCountry && relayCountryMap.has(settings.selectedCountry)) {
         filteredRelays = relayCountryMap.get(settings.selectedCountry) ?? []
+        countryCount = 1
+        familyCount = new Set(filteredRelays.map(relay => relay.familyId)).size
     } else if (settings.selectedFamily && relayFamilyMap.has(settings.selectedFamily)) {
         filteredRelays = relayFamilyMap.get(settings.selectedFamily) ?? []
+        familyCount = 1
+        countryCount = new Set(filteredRelays.map(relay => relay.country)).size
     }
 
     const stats: Statistics = {
         relayGuardCount: 0,
         relayExitCount: 0,
         relayOtherCount: 0,
+        countryCount,
+        familyCount,
     }
-    if (!settings.selectedCountry && !settings.selectedFamily) {
-        stats.countryCount = relayCountryMap.size
-        stats.familyCount = relayFamilyMap.size
-    }
+
     filteredRelays.forEach(relay => {
         const type = getRelayType(relay)
         switch (type) {

@@ -46,17 +46,18 @@ export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation})
     const {statistics} = useStatistics()
 
     // Construct the stats rows to display
-    const rows: StatsRow[] = []
-    rows.push({icon: ExitRelayIcon, title: "Exit relays", value: statistics.relayExitCount})
-    rows.push({icon: GuardRelayIcon, title: "Guard relays", value: statistics.relayGuardCount})
-    rows.push({icon: OtherRelayIcon, title: "Other relays", value: statistics.relayOtherCount})
-    rows.push({
-        icon: TotalRelaysIcon,
-        title: "Total relays",
-        value: statistics.relayExitCount + statistics.relayGuardCount + statistics.relayOtherCount
-    })
-    if (statistics.familyCount) rows.push({icon: RelayFamilyIcon, title: "Families", value: statistics.familyCount})
-    if (statistics.countryCount) rows.push({icon: EarthIcon, title: "Countries", value: statistics.countryCount})
+    const rows: StatsRow[] = [
+        {icon: ExitRelayIcon, title: "Exit relays", value: statistics.relayExitCount},
+        {icon: GuardRelayIcon, title: "Guard relays", value: statistics.relayGuardCount},
+        {icon: OtherRelayIcon, title: "Other relays", value: statistics.relayOtherCount},
+        {
+            icon: TotalRelaysIcon,
+            title: "Total relays",
+            value: statistics.relayExitCount + statistics.relayGuardCount + statistics.relayOtherCount
+        },
+        {icon: RelayFamilyIcon, title: "Families", value: statistics.familyCount},
+        {icon: EarthIcon, title: "Countries", value: statistics.countryCount},
+    ]
 
     return (
         <>
