@@ -3,7 +3,6 @@ package org.tormap.service
 import mu.KotlinLogging
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
-import org.tormap.adapter.controller.RelayLocationController
 import org.tormap.config.value.DescriptorConfig
 import org.tormap.database.entity.DescriptorFileId
 import org.tormap.database.entity.DescriptorType
@@ -12,7 +11,7 @@ import org.tormap.database.entity.RelayDetails
 import org.tormap.database.entity.RelayLocation
 import org.tormap.database.repository.ProcessedFileRepository
 import org.tormap.database.repository.RelayDetailsRepository
-import org.tormap.database.repository.RelayLocationRepositoryImpl
+import org.tormap.database.repository.RelayLocationRepository
 import org.tormap.util.millisSinceEpochToLocalDate
 import org.torproject.descriptor.Descriptor
 import org.torproject.descriptor.DescriptorCollector
@@ -36,14 +35,15 @@ import java.util.concurrent.Future
 @Service
 class TorDescriptorService(
     private val descriptorConfig: DescriptorConfig,
-    private val relayLocationRepositoryImpl: RelayLocationRepositoryImpl,
+    private val relayLocationRepository: RelayLocationRepository,
     private val relayDetailsRepository: RelayDetailsRepository,
     private val processedFileRepository: ProcessedFileRepository,
     private val ipLookupService: IpLookupService,
     private val relayDetailsUpdateService: RelayDetailsUpdateService,
-    private val relayLocationController: RelayLocationController,
 ) {
+
     private val logger = KotlinLogging.logger { }
+
     private val descriptorCollector: DescriptorCollector = DescriptorIndexCollector()
 
     /**
@@ -51,31 +51,28 @@ class TorDescriptorService(
      */
     fun collectAndProcessDescriptors(apiPath: String, descriptorType: DescriptorType) {
         try {
-            logger.info("... Collecting descriptors from API path: $apiPath")
+            logger.info { "... Collecting descriptors from API path: $apiPath" }
             collectDescriptors(apiPath, descriptorType.isRecent())
-            logger.info("Finished collecting descriptors from API path: $apiPath")
+            logger.info { "Finished collecting descriptors from API path: $apiPath" }
 
-            logger.info("... Processing descriptors from API path $apiPath")
+            logger.info { "... Processing descriptors from API path $apiPath" }
             processDescriptors(apiPath, descriptorType)
-            logger.info("Finished processing descriptors from API path: $apiPath")
+            logger.info { "Finished processing descriptors from API path: $apiPath" }
         } catch (exception: Exception) {
-            logger.error("Could not collect or process descriptors from API path: $apiPath! ${exception.message}")
+            logger.error(exception) { "Could not collect or process descriptors from API path: $apiPath!" }
         }
     }
 
     /**
      * This is a wrapper function to collect descriptors from the configured collector API.
      */
-    private fun collectDescriptors(
-        apiPath: String,
-        shouldDeleteLocalFilesNotFoundOnRemote: Boolean
-    ) =
+    private fun collectDescriptors(apiPath: String, shouldDeleteLocalFilesNotFoundOnRemote: Boolean) =
         descriptorCollector.collectDescriptors(
             descriptorConfig.apiBaseURL,
             arrayOf(apiPath),
             0L,
             File(descriptorConfig.localDownloadDirectory),
-            shouldDeleteLocalFilesNotFoundOnRemote,
+            shouldDeleteLocalFilesNotFoundOnRemote
         )
 
     /**
@@ -146,13 +143,13 @@ class TorDescriptorService(
         val descriptorsFile = processedFileRepository.findById(descriptorsDescriptorFileId).orElseGet {
             ProcessedFile(
                 descriptorsDescriptorFileId,
-                descriptorFile.lastModified(),
+                descriptorFile.lastModified()
             )
         }
         descriptorsFile.processedAt = LocalDateTime.now()
         descriptorsFile.error = error
         processedFileRepository.save(descriptorsFile)
-        logger.info("Finished processing descriptors file ${descriptorFile.name}")
+        logger.info { "Finished processing descriptors file ${descriptorFile.name}" }
     }
 
     /**
@@ -172,7 +169,7 @@ class TorDescriptorService(
         descriptorReader.excludedFiles = excludedFiles.associate {
             Pair(
                 parentDirectory.absolutePath + File.separator + it.id.filename,
-                it.lastModified,
+                it.lastModified
             )
         }.toSortedMap()
 
@@ -192,14 +189,14 @@ class TorDescriptorService(
 
                 is ServerDescriptor -> CompletableFuture.supplyAsync { processServerDescriptor(descriptor) }
                 is UnparseableDescriptor -> {
-                    logger.debug("Unparsable descriptor in file ${descriptor.descriptorFile.name}: ${descriptor.descriptorParseException.message}")
+                    logger.debug { "Unparsable descriptor in file ${descriptor.descriptorFile.name}: ${descriptor.descriptorParseException.message}" }
                     CompletableFuture.completedFuture(ProcessedDescriptorInfo())
                 }
 
                 else -> throw Exception("Descriptor type ${descriptor.javaClass.name} is not yet supported!")
             }
         } catch (exception: Exception) {
-            logger.error("Could not process descriptor part of ${descriptor.descriptorFile.name}! ${exception.message}")
+            logger.error { "Could not process descriptor part of ${descriptor.descriptorFile.name}! ${exception.message}" }
             CompletableFuture.completedFuture(ProcessedDescriptorInfo(error = exception.message))
         }
     }
@@ -212,26 +209,25 @@ class TorDescriptorService(
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.validAfterMillis)
         descriptor.statusEntries.forEach {
             val networkStatusEntry = it.value
-            if (!relayLocationRepositoryImpl.existsByDayAndFingerprint(
+            if (!relayLocationRepository.existsByDayAndFingerprint(
                     descriptorDay,
                     networkStatusEntry.fingerprint
                 )
             ) {
                 val location = ipLookupService.lookupLocation(networkStatusEntry.address)
                 if (location != null) {
-                    relayLocationRepositoryImpl.save(
+                    relayLocationRepository.save(
                         RelayLocation(
                             networkStatusEntry,
                             descriptorDay,
                             location.latitude,
                             location.longitude,
-                            location.countryCode,
+                            location.countryCode
                         )
                     )
                 }
             }
         }
-        relayLocationController.cacheNewDay(descriptorDay.toString())
         return ProcessedDescriptorInfo(YearMonth.from(descriptorDay).toString())
     }
 
@@ -251,7 +247,7 @@ class TorDescriptorService(
                     descriptorMonth,
                     descriptorDay,
                     autonomousSystem?.autonomousSystemOrganization,
-                    autonomousSystem?.autonomousSystemNumber?.toInt(),
+                    autonomousSystem?.autonomousSystemNumber?.toInt()
                 )
             )
         }
@@ -259,7 +255,7 @@ class TorDescriptorService(
     }
 }
 
-class ProcessedDescriptorInfo(
+data class ProcessedDescriptorInfo(
     var yearMonth: String? = null,
-    var error: String? = null,
+    var error: String? = null
 )

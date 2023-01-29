@@ -11,8 +11,8 @@ import org.tormap.database.entity.DescriptorType
  * This scheduler sets reoccurring events to collect and process data about Tor relays
  * With the @Async class annotation all methods run in parallel on separate threads if available.
  */
-@Service
 @Async
+@Service
 class ScheduleService(
     private val descriptorConfig: DescriptorConfig,
     private val scheduleConfig: ScheduleConfig,

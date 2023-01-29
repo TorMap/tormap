@@ -13,5 +13,5 @@ class RelayLocationDto(
     val country: String,
     val flags: List<Int>?,
     val detailsId: Long?,
-    val familyId: Long?
+    val familyId: Long?,
 )

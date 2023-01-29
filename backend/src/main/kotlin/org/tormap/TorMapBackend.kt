@@ -11,7 +11,7 @@ import java.time.ZoneId
 class TorMapBackend : ApplicationRunner {
     private val logger = KotlinLogging.logger { }
     override fun run(args: ApplicationArguments) {
-        logger.info("TorMap backend started successfully, running in timezone: ${ZoneId.systemDefault()}")
+        logger.info { "TorMap backend started successfully, running in timezone: ${ZoneId.systemDefault()}" }
     }
 }
 

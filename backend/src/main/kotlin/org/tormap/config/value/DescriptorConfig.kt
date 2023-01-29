@@ -32,5 +32,5 @@ data class DescriptorConfig(
     /**
      * The sub path to download recent relay server descriptors from
      */
-    val recentRelayServers: String
+    val recentRelayServers: String,
 )

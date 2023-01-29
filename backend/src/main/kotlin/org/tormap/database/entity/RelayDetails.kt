@@ -14,7 +14,7 @@ import java.time.LocalDate
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 @Table("relay_details")
-class RelayDetails @PersistenceCreator internal constructor(
+class RelayDetails @PersistenceCreator private constructor(
     @Id private val id: Long? = null,
     var fingerprint: String,
     var month: String,
@@ -38,7 +38,7 @@ class RelayDetails @PersistenceCreator internal constructor(
     var isHiddenServiceDir: Boolean,
     var linkProtocolVersions: String?,
     var circuitProtocolVersions: String?,
-    var tunnelledDirServer: Boolean
+    var tunnelledDirServer: Boolean,
 ) {
     constructor(
         descriptor: ServerDescriptor,

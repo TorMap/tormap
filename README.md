@@ -97,7 +97,7 @@ under http://localhost:8080/openapi.
 #### IP lookups
 
 TorMap uses DB files in [MaxMind DB file format](https://maxmind.github.io/MaxMind-DB/) (
-.mmdb) to map IPv4 addresses of Tor relays to geo locations and autonomous systems. The mapping is applied when
+.mmdb) to map IPv4 addresses of Tor relays to geolocations and autonomous systems. The mapping is applied when
 descriptors are being processed and missing autonomous systems info is also updated regularly.
 
 IP ranges and their geographic location changes over time. We only use the current IP to location data although the

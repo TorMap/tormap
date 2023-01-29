@@ -9,7 +9,7 @@ import java.time.Instant
 
 @Table("user_trace")
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class UserTrace @PersistenceCreator internal constructor(
+class UserTrace @PersistenceCreator private constructor(
     @Id private var id: Long? = null,
     var timestamp: Instant,
     var uri: String,
@@ -19,7 +19,7 @@ class UserTrace @PersistenceCreator internal constructor(
     var deviceClass: String? = null,
     var operatingSystem: String? = null,
     var agentMajorVersion: String? = null,
-    var countryCode: String? = null
+    var countryCode: String? = null,
 ) : Persistable<Long> {
     constructor(trace: HttpExchange) : this(
         timestamp = trace.timestamp,

@@ -21,14 +21,9 @@ import java.util.*
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
-    @Value("\${spring.security.user.name}")
-    private val adminUserName: String,
-
-    @Value("\${spring.security.user.passwordFile}")
-    private val adminPasswordFile: String,
-
-    @Value("\${management.endpoints.web.base-path}")
-    private val actuatorPath: String
+    @Value("\${spring.security.user.name}") private val adminUserName: String,
+    @Value("\${spring.security.user.passwordFile}") private val adminPasswordFile: String,
+    @Value("\${management.endpoints.web.base-path}") private val actuatorPath: String,
 ) {
 
     private val logger = KotlinLogging.logger { }
@@ -51,9 +46,9 @@ class SecurityConfig(
             passwordFile.createNewFile()
             passwordFile.writeText(adminPassword)
         }
-        logger.info("------------------------------------------------------")
-        logger.info("Admin password: $adminPassword")
-        logger.info("------------------------------------------------------")
+        logger.info { "------------------------------------------------------" }
+        logger.info { "Admin password: $adminPassword" }
+        logger.info { "------------------------------------------------------" }
 
         val user = User.withUsername(adminUserName)
             .passwordEncoder(passwordEncoder::encode)

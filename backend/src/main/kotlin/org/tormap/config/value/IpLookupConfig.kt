@@ -18,19 +18,19 @@ data class IpLookupConfig(
     /**
      * Config for looking up autonomous system
      */
-    val autonomousSystemLookup: AutonomousSystemLookupConfig
+    val autonomousSystemLookup: AutonomousSystemLookupConfig,
 )
 
 data class LocationLookupConfig(
     /**
      * Relative backend path to the dbip DB file
      */
-    val dbipDatabaseFile: Resource
+    val dbipDatabaseFile: Resource,
 )
 
 data class AutonomousSystemLookupConfig(
     /**
      * Relative backend path to the MaxMind DB file
      */
-    val maxmindDatabaseFile: Resource
+    val maxmindDatabaseFile: Resource,
 )

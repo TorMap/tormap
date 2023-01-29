@@ -18,7 +18,6 @@ RUN strip --strip-all /gradle/build/native/nativeCompile/tormap
 # final image
 FROM spritsail/busybox:1.36.0
 
-ENV SPRING_PROFILES_ACTIVE=prod IPLOOKUP_LOCATIONLOOKUP_DBIPDATABASEFILE="/home/nonroot/ip-lookup/location/dbip"
 RUN adduser --disabled-password -g '' -h '/home/nonroot' -s '/sbin/nologin' -u '10001' nonroot \
     && rm /etc/group- /etc/passwd- /etc/shadow-
 USER 10001:10001

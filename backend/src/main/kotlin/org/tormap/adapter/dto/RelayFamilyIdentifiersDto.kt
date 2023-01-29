@@ -6,5 +6,5 @@ class RelayFamilyIdentifiersDto(
     val id: Long,
     val memberCount: Long,
     val nicknames: String?,
-    val autonomousSystems: String?
+    val autonomousSystems: String?,
 )

@@ -13,7 +13,7 @@ fun millisSinceEpochToLocalDate(millisSinceEpoch: Long): LocalDate = LocalDate.o
     ZoneId.of("UTC")
 )
 
-fun String?.stripLengthForDB(maximumCharacters: Int = 255) = when {
-    this == null || this.length <= maximumCharacters -> this
+fun String?.stripLengthForDB(maximumCharacters: Int = 255) = when (this?.length) {
+    null, in 0..maximumCharacters -> this
     else -> this.substring(0, maximumCharacters - 3) + "..."
 }

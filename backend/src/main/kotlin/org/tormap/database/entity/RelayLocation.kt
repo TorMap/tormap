@@ -13,14 +13,14 @@ import java.time.LocalDate
  */
 @Table("relay_location")
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class RelayLocation @PersistenceCreator internal constructor(
+class RelayLocation @PersistenceCreator private constructor(
     @Id private var id: Long? = null,
     var fingerprint: String,
     var day: LocalDate,
     var flags: Set<TorRelayFlag>?,
     var latitude: BigDecimal,
     var longitude: BigDecimal,
-    var countryCode: String
+    var countryCode: String,
 ) : Persistable<Long?> {
     constructor(
         networkStatusEntry: NetworkStatusEntry,

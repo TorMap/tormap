@@ -10,25 +10,19 @@ import java.time.LocalDateTime
  */
 @Table("processed_file")
 @Suppress("unused")
-class ProcessedFile @PersistenceCreator internal constructor(
+class ProcessedFile @PersistenceCreator private constructor(
     private var type: DescriptorType,
     private var filename: String,
     var lastModified: Long,
     var processedAt: LocalDateTime = LocalDateTime.now(),
-    error: String? = null
+    error: String? = null,
 ) {
     constructor(
         id: DescriptorFileId,
         lastModified: Long,
         processedAt: LocalDateTime = LocalDateTime.now(),
         error: String? = null
-    ) : this(
-        type = id.type,
-        filename = id.filename,
-        lastModified = lastModified,
-        processedAt = processedAt,
-        error = error
-    )
+    ) : this(id.type, id.filename, lastModified, processedAt, error)
 
     var id: DescriptorFileId
         get() = DescriptorFileId(type, filename)

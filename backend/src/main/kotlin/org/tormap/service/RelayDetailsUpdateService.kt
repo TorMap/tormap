@@ -7,24 +7,26 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.tormap.adapter.controller.RelayLocationController
 import org.tormap.database.entity.RelayDetails
-import org.tormap.database.repository.RelayDetailsRepositoryImpl
+import org.tormap.database.repository.RelayDetailsRepository
 import org.tormap.util.addFamilyMember
 import org.tormap.util.commaSeparatedToList
 import org.tormap.util.getFamilyMember
 import javax.sql.DataSource
 
+// TODO: check why data source is used directly here
 /**
  * This service deals with [RelayDetails] entities
  */
 @Service
 class RelayDetailsUpdateService(
-    private val relayDetailsRepositoryImpl: RelayDetailsRepositoryImpl,
+    private val relayDetailsRepository: RelayDetailsRepository,
     private val ipLookupService: IpLookupService,
     private val relayLocationController: RelayLocationController,
     dataSource: DataSource,
 ) {
     private val logger = KotlinLogging.logger { }
-    private val dbSequenceIncrementer = PostgresSequenceMaxValueIncrementer(dataSource, "hibernate_sequence")
+
+    private val dbSequenceIncrementer = PostgresSequenceMaxValueIncrementer(dataSource, "relay_sequence")
 
     /**
      * Updates [RelayDetails.autonomousSystemName] and [RelayDetails.autonomousSystemNumber] for all [RelayDetails] missing this info.
@@ -32,24 +34,24 @@ class RelayDetailsUpdateService(
     @Async
     fun updateAutonomousSystems() {
         try {
-            val monthsToProcess = relayDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
-            logger.info("... Updating Autonomous Systems for months: ${monthsToProcess.joinToString(", ")}")
-            monthsToProcess.forEach {
+            val monthsToProcess = relayDetailsRepository.findDistinctMonthsAndAutonomousSystemNumberNull()
+            logger.info { "... Updating Autonomous Systems for months: ${monthsToProcess.joinToString(", ")}" }
+            for (month in monthsToProcess) {
                 var changedRelaysCount = 0
                 val relaysWithoutAutonomousSystem =
-                    relayDetailsRepositoryImpl.findAllByMonthAndAutonomousSystemNumberNull(it)
+                    relayDetailsRepository.findAllByMonthAndAutonomousSystemNumberNull(month)
                 relaysWithoutAutonomousSystem.forEach { relay ->
                     if (relay.updateAutonomousSystem()) {
                         changedRelaysCount++
                     }
                 }
                 if (changedRelaysCount > 0) {
-                    logger.info("Finished Autonomous Systems for month $it. Updated $changedRelaysCount relays.")
+                    logger.info { "Finished Autonomous Systems for month $month. Updated $changedRelaysCount relays" }
                 }
             }
-            logger.info("Finished updating Autonomous System")
+            logger.info { "Finished updating Autonomous System" }
         } catch (exception: Exception) {
-            logger.error("Could not update Autonomous System! ${exception.message}")
+            logger.error(exception) { "Could not update Autonomous System!" }
         }
     }
 
@@ -62,7 +64,7 @@ class RelayDetailsUpdateService(
         if (autonomousSystem != null) {
             this.autonomousSystemName = autonomousSystem.autonomousSystemOrganization
             this.autonomousSystemNumber = autonomousSystem.autonomousSystemNumber.toInt()
-            relayDetailsRepositoryImpl.save(this)
+            relayDetailsRepository.save(this)
             return true
         }
         return false
@@ -72,7 +74,7 @@ class RelayDetailsUpdateService(
      * Updates [RelayDetails.familyId] for all entities and if desired can also [overwriteExistingFamilies].
      */
     fun updateAllFamilies(overwriteExistingFamilies: Boolean) {
-        var monthFamilyMemberCount = relayDetailsRepositoryImpl.findDistinctMonthFamilyMemberCount()
+        var monthFamilyMemberCount = relayDetailsRepository.findDistinctMonthFamilyMemberCount()
         if (!overwriteExistingFamilies) {
             monthFamilyMemberCount = monthFamilyMemberCount.filter { it.count == 0L }
         }
@@ -84,18 +86,17 @@ class RelayDetailsUpdateService(
      */
     fun updateFamilies(months: Set<String>) {
         try {
-            logger.info("... Updating relay families for months: ${months.joinToString(", ")}")
-            months.forEach { month ->
+            logger.info { "... Updating relay families for months: ${months.joinToString(", ")}" }
+            for (month in months) {
                 try {
                     updateFamiliesForMonth(month)
-                    relayLocationController.cacheDaysOfMonth(month)
                 } catch (exception: Exception) {
                     logger.error("Could not update relay families for month $month! ${exception.message}")
                 }
             }
-            logger.info("Finished updating relay families")
+            logger.info { "Finished updating relay families" }
         } catch (exception: Exception) {
-            logger.error("Could not update relay families! ${exception.message}")
+            logger.error(exception) { "Could not update relay families!" }
         }
     }
 
@@ -107,7 +108,7 @@ class RelayDetailsUpdateService(
         var rejectedFamilyConnectionCount = 0
         val families = mutableListOf<Set<RelayDetails>>()
         val requestingRelays =
-            relayDetailsRepositoryImpl.findAllByMonthAndFamilyEntriesNotNull(month)
+            relayDetailsRepository.findAllByMonthAndFamilyEntriesNotNull(month)
         requestingRelays.forEach { requestingRelay ->
             requestingRelay.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
                 try {
@@ -125,10 +126,13 @@ class RelayDetailsUpdateService(
                 }
             }
         }
-        relayDetailsRepositoryImpl.clearFamiliesFromMonth(month)
+        relayDetailsRepository.clearFamiliesFromMonth(month)
         families.saveToDatabase()
         val totalFamilyConnectionCount = confirmedFamilyConnectionCount + rejectedFamilyConnectionCount
-        logger.info("Finished families for month $month. Rejected $rejectedFamilyConnectionCount / $totalFamilyConnectionCount connections. Found ${families.size} different families.")
+        logger.info {
+            "Finished families for month $month. Rejected $rejectedFamilyConnectionCount / " +
+                "$totalFamilyConnectionCount connections. Found ${families.size} different families."
+        }
     }
 
     /**
@@ -139,7 +143,7 @@ class RelayDetailsUpdateService(
         this.forEach { family ->
             val familyId = dbSequenceIncrementer.nextLongValue()
             family.forEach { it.familyId = familyId }
-            relayDetailsRepositoryImpl.saveAll(family)
+            relayDetailsRepository.saveAll(family)
         }
     }
 }

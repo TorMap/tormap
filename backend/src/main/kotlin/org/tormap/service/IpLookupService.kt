@@ -3,7 +3,7 @@ package org.tormap.service
 import com.maxmind.db.CHMCache
 import com.maxmind.geoip2.DatabaseReader
 import com.maxmind.geoip2.model.AsnResponse
-import com.maxmind.geoip2.model.CityResponse
+import com.maxmind.geoip2.record.Country
 import mu.KotlinLogging
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
@@ -11,45 +11,46 @@ import org.tormap.config.value.IpLookupConfig
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.net.InetAddress
+import java.util.zip.GZIPInputStream
+import com.maxmind.geoip2.record.Location as GeoIp2Location
 
 /**
- * This service handles location tasks requiring a geo location database
+ * This service handles location tasks requiring a geolocation database
  */
 @Service
-class IpLookupService(
-    ipLookupConfig: IpLookupConfig
-) {
+class IpLookupService(ipLookupConfig: IpLookupConfig) {
+
     private val logger = KotlinLogging.logger { }
-    private var dbipLocationDB =
-        maxmindTypeDatabaseReader(
-            ipLookupConfig.locationLookup.dbipDatabaseFile,
-            ipLookupConfig.shouldCache
-        )
-    private var maxmindAutonomousSystemDB =
-        maxmindTypeDatabaseReader(
-            ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile,
-            ipLookupConfig.shouldCache
-        )
+
+    private var dbipLocationDB = maxmindTypeDatabaseReader(
+        ipLookupConfig.locationLookup.dbipDatabaseFile,
+        ipLookupConfig.shouldCache
+    )
+    private var maxmindAutonomousSystemDB = maxmindTypeDatabaseReader(
+        ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile,
+        ipLookupConfig.shouldCache
+    )
 
     /**
-     * Get the approximate geo location of an [ipAddress]
+     * Get the approximate geolocation of an [ipAddress]
      * by looking it up with two different file based DB providers (IP2Location & Maxmind)
      */
     fun lookupLocation(ipAddress: String): Location? = try {
-        Location(dbipLocationDB.city(InetAddress.getByName(ipAddress)))
+        val city = dbipLocationDB.city(InetAddress.getByName(ipAddress))
+        Location(city.location, city.country)
     } catch (exception: Exception) {
-        logger.warn("Location lookup for IP $ipAddress with provider dbip failed! ${exception.javaClass}: ${exception.message}")
+        logger.warn(exception) { "Location lookup for IP $ipAddress with provider dbip failed!" }
         null
     }
 
     /**
-     * Get the approximate geo location of an [ipAddress]
+     * Get the approximate geolocation of an [ipAddress]
      * by looking it up with two different file based DB providers (IP2Location & Maxmind)
      */
     fun lookupAutonomousSystem(ipAddress: String): AsnResponse? = try {
         maxmindAutonomousSystemDB.asn(InetAddress.getByName(ipAddress))
     } catch (exception: Exception) {
-        logger.debug("Autonomous System lookup for IP $ipAddress with provider MaxMind failed! ${exception.javaClass}: ${exception.message}")
+        logger.debug(exception) { "Autonomous System lookup for IP $ipAddress with provider MaxMind failed!" }
         null
     }
 
@@ -57,33 +58,32 @@ class IpLookupService(
      * Create a database reader for the [.mmdb file format](https://maxmind.github.io/MaxMind-DB/)
      */
     private fun maxmindTypeDatabaseReader(databaseFile: Resource, shouldCache: Boolean): DatabaseReader {
-        val reader = DatabaseReader.Builder(databaseFile.inputStream)
+        val inputStream = when {
+            databaseFile.filename?.endsWith(".gz") == true -> GZIPInputStream(databaseFile.inputStream)
+            else -> databaseFile.inputStream
+        }
+
+        val reader = DatabaseReader.Builder(inputStream)
         return if (shouldCache) reader.withCache(CHMCache()).build() else reader.build()
     }
 }
 
-class Location(maxMindCityResponse: CityResponse) {
-    private val geoDecimalPlaces = 4
-    var latitude: BigDecimal
-    var longitude: BigDecimal
-    var countryCode: String
+class Location(location: GeoIp2Location, country: Country) {
 
-    init {
-        this.latitude =
-            maxMindCityResponse.location.latitude.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN)
-        this.longitude =
-            maxMindCityResponse.location.longitude.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN)
-        this.countryCode = maxMindCityResponse.country.isoCode
-        this.ensureCompleteLocation()
+    companion object {
+        private const val geoDecimalPlaces = 4
     }
 
-    private fun ensureCompleteLocation() {
-        val locationIncomplete =
-            this.countryCode == "-" || (this.latitude == BigDecimal.ZERO && this.longitude == BigDecimal.ZERO)
+    val latitude: BigDecimal = location.latitude.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN)
+    val longitude: BigDecimal = location.longitude.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN)
+    val countryCode: String = country.isoCode
+
+    init {
+        val locationIncomplete = countryCode == "-" || (latitude == BigDecimal.ZERO && longitude == BigDecimal.ZERO)
         if (locationIncomplete) {
             throw LocationIncompleteException("latitude=$latitude longitude=$longitude countryCode=$countryCode")
         }
     }
 
-    class LocationIncompleteException(message: String) : Exception(message)
+    class LocationIncompleteException(message: String) : RuntimeException(message)
 }

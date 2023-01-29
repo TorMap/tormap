@@ -13,7 +13,7 @@ data class ScheduleConfig(
     /**
      * In what interval tasks are run
      */
-    val rate: RateConfig
+    val rate: RateConfig,
 )
 
 /**
@@ -48,5 +48,5 @@ data class RateConfig(
     /**
      * The rate at which missing families of relays are updated.
      */
-    val updateRelayFamilies: String
+    val updateRelayFamilies: String,
 )

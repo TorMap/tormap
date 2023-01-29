@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "org.tormap"
-version = "1.0.1"
+version = "1.1.0"
 
 plugins {
     val kotlin = "1.8.0"
@@ -9,12 +9,15 @@ plugins {
     kotlin("plugin.spring") version kotlin
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "3.0.1"
+    id("org.springframework.boot") version "3.0.2"
     id("io.spring.dependency-management") version "1.1.0"
     id("org.graalvm.buildtools.native") version "0.9.19"
 
     // flyway
     id("org.flywaydb.flyway") version "9.11.0"
+
+    // Build and push docker images
+    id("com.google.cloud.tools.jib") version "3.3.1"
 }
 
 kotlin {
@@ -34,7 +37,6 @@ dependencies {
 
     // Spring Boot https://spring.io/projects/spring-boot
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")

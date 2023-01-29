@@ -1,20 +1,26 @@
 package org.tormap.adapter.controller
 
-import org.springframework.web.bind.annotation.*
-import org.tormap.adapter.controller.exception.RelayNotFoundException
+import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.RestController
 import org.tormap.database.entity.RelayDetails
-import org.tormap.database.repository.RelayDetailsRepositoryImpl
+import org.tormap.database.repository.RelayDetailsRepository
+
+@ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "The requested relay was not found.")
+class RelayNotFoundException : RuntimeException()
 
 @RestController
 @RequestMapping("relay/details/")
-class RelayDetailsController(
-    val relayDetailsRepositoryImpl: RelayDetailsRepositoryImpl,
-) {
+class RelayDetailsController(val relayDetailsRepositoryImpl: RelayDetailsRepository) {
     @GetMapping("relay/{id}")
-    fun getRelay(@PathVariable id: Long): RelayDetails {
-        val details = relayDetailsRepositoryImpl.findById(id)
-        return if (details.isPresent) details.get() else throw RelayNotFoundException()
-    }
+    fun getRelay(@PathVariable id: Long): RelayDetails =
+        relayDetailsRepositoryImpl.findByIdOrNull(id) ?: throw RelayNotFoundException()
 
     @GetMapping("family/{id}")
     fun getFamily(@PathVariable id: Long) = relayDetailsRepositoryImpl.findAllByFamilyId(id)
