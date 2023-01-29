@@ -12,7 +12,7 @@ import java.time.LocalDate
  */
 @Repository
 interface RelayLocationRepository : ListCrudRepository<RelayLocation, Long> {
-    @Query("SELECT exists(SELECT 1 FROM relay_location WHERE day = :day AND fingerprint = :fingerprint)")
+    @Query("SELECT EXISTS(SELECT 1 FROM relay_location WHERE day = :day AND fingerprint = :fingerprint)")
     fun existsByDayAndFingerprint(day: LocalDate, fingerprint: String): Boolean
 
     @Query("SELECT DISTINCT day FROM relay_location")

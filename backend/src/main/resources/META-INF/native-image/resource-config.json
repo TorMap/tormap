@@ -1,29 +1,26 @@
 {
-  "resources": {
-    "includes": [
-      {
-        "pattern": "\\Qdb/migration/V1__Create_tables.sql\\E"
-      },
-      {
-        "pattern": "\\Qdb/migration/V2__missing_sequences.sql\\E"
-      },
-      {
-        "pattern": "\\Qdb/migration/V3__make_entity_ids_auto_increment.sql\\E"
-      },
-      {
-        "pattern": "\\Qdb/migration\\E"
-      },
-      {
-        "pattern": "\\Qip-lookup/GeoLite2-ASN.mmdb\\E"
-      },
-      {
-        "pattern": "\\Qip-lookup/dbip-city-lite.mmdb\\E"
-      },
-      {
-        "pattern": "\\Qua_parser/regexes.yaml\\E"
-      }
+    "resources": {
+        "includes": [
+            {
+                "pattern": "\\Qdb/migration/V1__Create_tables.sql\\E"
+            },
+            {
+                "pattern": "\\Qdb/migration/V2__missing_sequences.sql\\E"
+            },
+            {
+                "pattern": "\\Qdb/migration/V3__make_entity_ids_auto_increment.sql\\E"
+            },
+            {
+                "pattern": "\\Qdb/migration/V4__rename_hibernate_sequence.sql\\E"
+            },
+            {
+                "pattern": "\\Qdb/migration\\E"
+            },
+            {
+                "pattern": "\\Qua_parser/regexes.yaml\\E"
+            }
+        ]
+    },
+    "bundles": [
     ]
-  },
-  "bundles": [
-  ]
 }

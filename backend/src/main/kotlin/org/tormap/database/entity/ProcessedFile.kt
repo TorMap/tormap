@@ -1,6 +1,9 @@
 package org.tormap.database.entity
 
+import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.PersistenceCreator
+import org.springframework.data.annotation.Transient
+import org.springframework.data.domain.Persistable
 import org.springframework.data.relational.core.mapping.Table
 import org.tormap.util.stripLengthForDB
 import java.time.LocalDateTime
@@ -10,37 +13,29 @@ import java.time.LocalDateTime
  */
 @Table("processed_file")
 @Suppress("unused")
-class ProcessedFile @PersistenceCreator private constructor(
+class ProcessedFile @PersistenceCreator constructor(
+    @Id val filename: String,
     private var type: DescriptorType,
-    private var filename: String,
     var lastModified: Long,
     var processedAt: LocalDateTime = LocalDateTime.now(),
-    error: String? = null,
-) {
-    constructor(
-        id: DescriptorFileId,
-        lastModified: Long,
-        processedAt: LocalDateTime = LocalDateTime.now(),
-        error: String? = null
-    ) : this(id.type, id.filename, lastModified, processedAt, error)
+    error: String? = null
+) : Persistable<String> {
 
-    var id: DescriptorFileId
-        get() = DescriptorFileId(type, filename)
-        set(id) {
-            type = id.type
-            filename = id.filename
-        }
+    @Transient
+    private var isNew = false
 
     var error: String? = error
         set(value) {
             field = value.stripLengthForDB()
         }
-}
 
-/**
- * This represents a composite id
- */
-class DescriptorFileId(val type: DescriptorType, val filename: String)
+    override fun getId(): String = filename
+
+    override fun isNew(): Boolean = isNew
+    fun setNew() {
+        isNew = true
+    }
+}
 
 enum class DescriptorType {
     ARCHIVE_RELAY_CONSENSUS,

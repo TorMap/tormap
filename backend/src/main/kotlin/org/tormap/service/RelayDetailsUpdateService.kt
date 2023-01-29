@@ -5,7 +5,6 @@ import org.springframework.jdbc.support.incrementer.PostgresSequenceMaxValueIncr
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.tormap.adapter.controller.RelayLocationController
 import org.tormap.database.entity.RelayDetails
 import org.tormap.database.repository.RelayDetailsRepository
 import org.tormap.util.addFamilyMember
@@ -13,7 +12,6 @@ import org.tormap.util.commaSeparatedToList
 import org.tormap.util.getFamilyMember
 import javax.sql.DataSource
 
-// TODO: check why data source is used directly here
 /**
  * This service deals with [RelayDetails] entities
  */
@@ -21,12 +19,12 @@ import javax.sql.DataSource
 class RelayDetailsUpdateService(
     private val relayDetailsRepository: RelayDetailsRepository,
     private val ipLookupService: IpLookupService,
-    private val relayLocationController: RelayLocationController,
-    dataSource: DataSource,
+    dataSource: DataSource
 ) {
+
     private val logger = KotlinLogging.logger { }
 
-    private val dbSequenceIncrementer = PostgresSequenceMaxValueIncrementer(dataSource, "relay_sequence")
+    private val dbSequenceIncrementer = PostgresSequenceMaxValueIncrementer(dataSource, "relay_family_sequence")
 
     /**
      * Updates [RelayDetails.autonomousSystemName] and [RelayDetails.autonomousSystemNumber] for all [RelayDetails] missing this info.
@@ -107,8 +105,7 @@ class RelayDetailsUpdateService(
         var confirmedFamilyConnectionCount = 0
         var rejectedFamilyConnectionCount = 0
         val families = mutableListOf<Set<RelayDetails>>()
-        val requestingRelays =
-            relayDetailsRepository.findAllByMonthAndFamilyEntriesNotNull(month)
+        val requestingRelays = relayDetailsRepository.findAllByMonthAndFamilyEntriesNotNull(month)
         requestingRelays.forEach { requestingRelay ->
             requestingRelay.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
                 try {

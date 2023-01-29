@@ -1,10 +1,10 @@
 package org.tormap.service
 
 import mu.KotlinLogging
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.tormap.config.value.DescriptorConfig
-import org.tormap.database.entity.DescriptorFileId
 import org.tormap.database.entity.DescriptorType
 import org.tormap.database.entity.ProcessedFile
 import org.tormap.database.entity.RelayDetails
@@ -39,7 +39,7 @@ class TorDescriptorService(
     private val relayDetailsRepository: RelayDetailsRepository,
     private val processedFileRepository: ProcessedFileRepository,
     private val ipLookupService: IpLookupService,
-    private val relayDetailsUpdateService: RelayDetailsUpdateService,
+    private val relayDetailsUpdateService: RelayDetailsUpdateService
 ) {
 
     private val logger = KotlinLogging.logger { }
@@ -139,13 +139,9 @@ class TorDescriptorService(
      * Next time this [descriptorFile] will be excluded from processing if no [error] was found or a newer version exists.
      */
     private fun saveFinishedDescriptorFile(descriptorFile: File, descriptorType: DescriptorType, error: String?) {
-        val descriptorsDescriptorFileId = DescriptorFileId(descriptorType, descriptorFile.name)
-        val descriptorsFile = processedFileRepository.findById(descriptorsDescriptorFileId).orElseGet {
-            ProcessedFile(
-                descriptorsDescriptorFileId,
-                descriptorFile.lastModified()
-            )
-        }
+        val descriptorsFile = processedFileRepository.findByIdOrNull(descriptorFile.name)
+            ?: ProcessedFile(descriptorFile.name, descriptorType, descriptorFile.lastModified()).apply { setNew() }
+
         descriptorsFile.processedAt = LocalDateTime.now()
         descriptorsFile.error = error
         processedFileRepository.save(descriptorsFile)
@@ -168,7 +164,7 @@ class TorDescriptorService(
         val excludedFiles = processedFileRepository.findAllByTypeAndErrorNull(descriptorType)
         descriptorReader.excludedFiles = excludedFiles.associate {
             Pair(
-                parentDirectory.absolutePath + File.separator + it.id.filename,
+                parentDirectory.absolutePath + File.separator + it.filename,
                 it.lastModified
             )
         }.toSortedMap()
@@ -209,11 +205,7 @@ class TorDescriptorService(
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.validAfterMillis)
         descriptor.statusEntries.forEach {
             val networkStatusEntry = it.value
-            if (!relayLocationRepository.existsByDayAndFingerprint(
-                    descriptorDay,
-                    networkStatusEntry.fingerprint
-                )
-            ) {
+            if (!relayLocationRepository.existsByDayAndFingerprint(descriptorDay, networkStatusEntry.fingerprint)) {
                 val location = ipLookupService.lookupLocation(networkStatusEntry.address)
                 if (location != null) {
                     relayLocationRepository.save(
@@ -241,15 +233,14 @@ class TorDescriptorService(
         val existingRelay = relayDetailsRepository.findByMonthAndFingerprint(descriptorMonth, descriptor.fingerprint)
         if (existingRelay == null || existingRelay.day < descriptorDay) {
             val autonomousSystem = ipLookupService.lookupAutonomousSystem(descriptor.address)
-            relayDetailsRepository.save(
-                RelayDetails(
-                    descriptor,
-                    descriptorMonth,
-                    descriptorDay,
-                    autonomousSystem?.autonomousSystemOrganization,
-                    autonomousSystem?.autonomousSystemNumber?.toInt()
-                )
+            val relayDetails = RelayDetails(
+                descriptor,
+                descriptorMonth,
+                descriptorDay,
+                autonomousSystem?.autonomousSystemOrganization,
+                autonomousSystem?.autonomousSystemNumber?.toInt()
             )
+            relayDetailsRepository.save(existingRelay.map(relayDetails))
         }
         return ProcessedDescriptorInfo(descriptorMonth)
     }

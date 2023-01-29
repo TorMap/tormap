@@ -106,7 +106,7 @@ months, to keep the IP ranges up to date.
 
 Replacing existing DB files:
 
-1. Download latest MMDB file from https://db-ip.com/db/download/ip-to-country-lite
+1. Download latest MMDB file from https://db-ip.com/db/download/ip-to-city-lite
 2. Replace `backend/ip-lookup/location/dbip/dbip-city-lite.mmdb`
 3. Create account and download latest GeoLite2 ASN MMDB file from https://www.maxmind.com/
 4. Replace `backend/ip-lookup/autonomous-system/maxmind/GeoLite2-ASN.mmdb`

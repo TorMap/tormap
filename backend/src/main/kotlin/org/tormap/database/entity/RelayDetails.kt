@@ -15,7 +15,7 @@ import java.time.LocalDate
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 @Table("relay_details")
 class RelayDetails @PersistenceCreator private constructor(
-    @Id private val id: Long? = null,
+    @Id private var id: Long? = null,
     var fingerprint: String,
     var month: String,
     var day: LocalDate,

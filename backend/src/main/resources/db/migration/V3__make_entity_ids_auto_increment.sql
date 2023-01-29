@@ -15,4 +15,3 @@ CREATE SEQUENCE user_trace_id_seq;
 ALTER SEQUENCE user_trace_id_seq OWNED BY user_trace.id;
 ALTER TABLE user_trace
     ALTER COLUMN id SET DEFAULT nextval('user_trace_id_seq'::regclass);
-

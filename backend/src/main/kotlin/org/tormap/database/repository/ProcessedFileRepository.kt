@@ -4,7 +4,6 @@ import org.springframework.data.jdbc.repository.query.Modifying
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.repository.ListCrudRepository
 import org.springframework.stereotype.Repository
-import org.tormap.database.entity.DescriptorFileId
 import org.tormap.database.entity.DescriptorType
 import org.tormap.database.entity.ProcessedFile
 
@@ -12,7 +11,7 @@ import org.tormap.database.entity.ProcessedFile
  * Repository to interact with DB
  */
 @Repository
-interface ProcessedFileRepository : ListCrudRepository<ProcessedFile, DescriptorFileId> {
+interface ProcessedFileRepository : ListCrudRepository<ProcessedFile, String> {
     @Query(
         """SELECT type, filename, last_modified, processed_at, error
            FROM processed_file
