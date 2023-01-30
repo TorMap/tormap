@@ -12,22 +12,21 @@ import {DetailsDialogProps} from "./ResponsiveRelayDetailsDialog";
 
 
 export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
-                                                                                   shouldShowDialog,
+                                                                                   showDialog,
                                                                                    closeDialog,
                                                                                    relayDetailsMatch,
-                                                                                   sortedRelayMatches,
-                                                                                   sortRelaysBy,
-                                                                                   handleSelectSortByChange,
+                                                                                   filteredRelayMatches,
                                                                                    relayDetailsId,
                                                                                    setRelayDetailsId,
+                                                                                   showRelayList
                                                                                }) => {
     // Component state
     const [showRelayDetails, setShowRelayDetails] = useState(false)
 
     // Show relay details directly if only one relay is selectable
     useEffect(() => {
-        setShowRelayDetails(sortedRelayMatches.length <= 1)
-    }, [sortedRelayMatches])
+        setShowRelayDetails(filteredRelayMatches.length <= 1)
+    }, [filteredRelayMatches])
 
     const handleSelectDetails = (id: number) => {
         setRelayDetailsId(id)
@@ -37,7 +36,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
     return (
         <>
             <Dialog
-                open={shouldShowDialog}
+                open={showDialog}
                 onClose={closeDialog}
                 fullScreen={true}
                 TransitionComponent={SlideUpTransition}
@@ -47,7 +46,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                         {showRelayDetails ?
                             <RelayDetailsHeader
                                 closeDialog={() => {
-                                    if (sortedRelayMatches.length > 1) {
+                                    if (filteredRelayMatches.length > 1) {
                                         setShowRelayDetails(false)
                                     } else {
                                         closeDialog()
@@ -56,10 +55,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                                 finishQuickAction={closeDialog}
                                 relayDetailsMatch={relayDetailsMatch}
                             /> : <>
-                                <RelayDetailsSelectionHeader
-                                    sortRelaysBy={sortRelaysBy}
-                                    handleSelectSortByChange={handleSelectSortByChange}
-                                />
+                                <RelayDetailsSelectionHeader/>
                                 <IconButton aria-label="close" sx={{
                                     position: "absolute",
                                     right: "16px",
@@ -75,7 +71,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                         relayDetailsMatch ? <RelayDetailsTable relayDetailsMatch={relayDetailsMatch}/> :
                             <LoadingAnimation/> :
                         <RelayList
-                            relayMatches={sortedRelayMatches}
+                            relayMatches={filteredRelayMatches}
                             selectedRelayId={relayDetailsId}
                             setSelectedRelayId={handleSelectDetails}
                         />
