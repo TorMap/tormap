@@ -2,13 +2,15 @@ import {RelayLocationDto} from "../dto/relay";
 import {RelayFlag, RelayFlags, RelayType} from "../types/relay";
 import {Settings} from "../types/settings";
 import {Statistics} from "../types/statistics";
+import {useAtom} from "jotai";
+import {filteredRelaysAtom} from "../components/leaflet/LeafletLayers";
 
 /**
  * Returns a Array of GeoRelayViews that are filtered according to app settings.
  * @param relays - The relays to filter
  * @param settings - The app settings for filtering
  */
-export const applyRelayFilter = (relays: RelayLocationDto[], settings: Settings): RelayLocationDto[] => {
+export const filterRelaysByFlags = (relays: RelayLocationDto[], settings: Settings): RelayLocationDto[] => {
     const filtered: RelayLocationDto[] = []
     relays.forEach(relay => {
         let relayMissesRequiredFlag = false
@@ -147,12 +149,14 @@ export const buildRelayCountryMap = (relays: RelayLocationDto[]): Map<string, Re
  * @param relayCountryMap - A map of relays with the same country
  * @param relayFamilyMap - A map of relays with the same family
  * @param settings - Tha app settings
+ * @param setColoredRelays
  */
 export const buildStatistics = (
     filteredRelays: RelayLocationDto[],
     relayCountryMap: Map<string, RelayLocationDto[]>,
     relayFamilyMap: Map<number, RelayLocationDto[]>,
-    settings: Settings
+    settings: Settings,
+    setColoredRelays: (relays: RelayLocationDto[]) => void
 ): Statistics => {
     let countryCount = relayCountryMap.size
     let familyCount = relayFamilyMap.size
@@ -177,6 +181,7 @@ export const buildStatistics = (
         familyCount = 1
         countryCount = new Set(filteredRelays.map(relay => relay.country)).size
     }
+    setColoredRelays(filteredRelays)
 
     const stats: Statistics = {
         relayGuardCount: 0,
