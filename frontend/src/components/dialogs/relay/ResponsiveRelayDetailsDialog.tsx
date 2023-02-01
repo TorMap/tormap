@@ -3,9 +3,8 @@
  * @param bandwidthInBytes - number to be formatted
  */
 import {useMediaQuery, useTheme} from "@mui/material";
-import {SelectChangeEvent} from "@mui/material/Select/SelectInput";
 import {useSnackbar} from "notistack";
-import React, {FunctionComponent, useCallback, useEffect, useMemo, useState} from "react";
+import React, {FunctionComponent, useEffect, useMemo, useState} from "react";
 
 import {RelayDetailsDto, RelayIdentifierDto, RelayLocationDto} from "../../../dto/relay";
 import {RelayDetailsMatch, RelayIdentifierMatch} from "../../../types/relay";
@@ -80,15 +79,14 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
     )
 
     const orderedRelayIdentifierMatches = useMemo(
-        () => Array.from(relayIdentifierMatches).sort((a, b) => {
-                console.log("test")
+        () => [...relayIdentifierMatches].sort((a, b) => {
                 if (orderRelaysBy === nameOfRelayMatch("familyId")) {
                     return a[orderRelaysBy]! < b[orderRelaysBy]! ? 1 : -1
                 }
                 return a[orderRelaysBy]! > b[orderRelaysBy]! ? 1 : -1
             }
         ),
-        [nameOfRelayMatch, relayIdentifierMatches]
+        [nameOfRelayMatch, relayIdentifierMatches, orderRelaysBy]
     )
 
     const searchedRelayIdentifierMatches = useMemo(
