@@ -2,8 +2,6 @@ import {RelayLocationDto} from "../dto/relay";
 import {RelayFlag, RelayFlags, RelayType} from "../types/relay";
 import {Settings} from "../types/settings";
 import {Statistics} from "../types/statistics";
-import {useAtom} from "jotai";
-import {filteredRelaysAtom} from "../components/leaflet/LeafletLayers";
 
 /**
  * Returns a Array of GeoRelayViews that are filtered according to app settings.

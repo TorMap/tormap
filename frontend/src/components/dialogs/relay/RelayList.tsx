@@ -1,11 +1,10 @@
-import {Box, CircularProgress, List, ListItem, ListItemIcon, ListItemText} from "@mui/material";
-import React, {FunctionComponent, useState} from "react";
+import {Box, CircularProgress, List, ListItemButton, ListItemIcon, ListItemText} from "@mui/material";
+import React, {FunctionComponent, useMemo, useState} from "react";
 import InfiniteScroll from "react-infinite-scroller";
 
 import {getIcon, RelayFamilyIcon} from "../../../types/icons";
 import {RelayIdentifierMatch} from "../../../types/relay";
 import {calculateFamilyColor} from "../../../util/layer-construction";
-import {LoadingAnimation} from "../../loading/LoadingAnimation";
 
 interface Props {
     /**
@@ -39,7 +38,7 @@ export const RelayList: FunctionComponent<Props> = ({
             pageStart={0}
             loadMore={() => setNumberOfMatchesToDisplay(numberOfMatchesToDisplay + MATCHES_PER_SCROLL)}
             hasMore={numberOfMatchesToDisplay < relayMatches.length}
-            loader={<Box sx={{textAlign: "center"}}><CircularProgress
+            loader={<Box key={0} sx={{textAlign: "center"}}><CircularProgress
                 color={"inherit"}
                 sx={{
                     backgroundColor: "transparent",
@@ -52,9 +51,8 @@ export const RelayList: FunctionComponent<Props> = ({
                 <List>
                     {relayMatches.slice(0, numberOfMatchesToDisplay + 1).map(relayMatch =>
                         (relayMatch.id &&
-                            <ListItem
+                            <ListItemButton
                                 key={relayMatch.id}
-                                button={true}
                                 selected={relayMatch.id === selectedRelayId}
                                 onClick={() => setSelectedRelayId(relayMatch.id)}
                             >
@@ -67,11 +65,11 @@ export const RelayList: FunctionComponent<Props> = ({
                                         </Box>
                                     }
                                 </ListItemIcon>
-                            </ListItem>
+                            </ListItemButton>
                         )
                     )}
                 </List>
-                : <Box sx={{textAlign: "center"}}>No results found</Box>}
+                : <Box sx={{textAlign: "center", p: "16px"}}>No results found</Box>}
         </InfiniteScroll>
     )
 }
