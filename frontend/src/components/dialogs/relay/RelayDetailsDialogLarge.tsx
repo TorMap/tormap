@@ -33,9 +33,7 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
             <DialogTitle>
                 <Grid container>
                     {showRelayList && <Grid item xs={12} sm={4}>
-                        <Box sx={{mt: 0.5}}>
-                            <RelayDetailsSelectionHeader/>
-                        </Box>
+                        <RelayDetailsSelectionHeader/>
                     </Grid>}
                     <Grid item xs={12} sm={showRelayList ? 8 : 12}>
                         <RelayDetailsHeader
