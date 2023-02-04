@@ -2,7 +2,7 @@
 
 package org.tormap.adapter.dto
 
-class RelayFamilyIdentifiersDto(
+data class RelayFamilyIdentifiersDto(
     val id: Long,
     val memberCount: Long,
     val nicknames: String?,

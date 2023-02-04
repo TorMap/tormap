@@ -5,7 +5,7 @@ package org.tormap.adapter.dto
 /**
  * Identifiers of a relay
  */
-class RelayIdentifiersDto(
+data class RelayIdentifiersDto(
     val id: Long,
     val fingerprint: String,
     val nickname: String,

@@ -26,7 +26,7 @@ class ProcessedFile @PersistenceCreator constructor(
 
     var error: String? = error
         set(value) {
-            field = value.stripLengthForDB()
+            field = value?.stripLengthForDB()
         }
 
     override fun getId(): String = filename

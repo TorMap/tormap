@@ -2,6 +2,9 @@ package org.tormap.util
 
 import org.tormap.database.entity.RelayDetails
 
+private val familyEntryFingerprintRegex = Regex("^\\$[A-F0-9]{40}$")
+private val familyEntryNicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
+
 /**
  * Check to which family the [requestingRelay] and the [newMember] belong
  */
@@ -49,7 +52,7 @@ fun RelayDetails.getFamilyMember(familyEntry: String, relaysWithFamilyEntries: L
  * Determines if this [RelayDetails] shares a family with the [allegedFamilyMember].
  */
 fun RelayDetails.confirmsFamilyMember(allegedFamilyMember: RelayDetails): Boolean =
-    this.familyEntries?.commaSeparatedToList()?.any {
+    this.familyEntries?.split(", ")?.any {
         when {
             familyEntryFingerprintRegex.matches(it) ->
                 allegedFamilyMember.fingerprint == extractFingerprintFromFamilyEntry(it)
@@ -61,6 +64,3 @@ fun RelayDetails.confirmsFamilyMember(allegedFamilyMember: RelayDetails): Boolea
     } ?: false
 
 private fun extractFingerprintFromFamilyEntry(familyEntry: String) = familyEntry.substring(1, 41)
-
-private val familyEntryFingerprintRegex = Regex("^\\$[A-F0-9]{40}$")
-private val familyEntryNicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")

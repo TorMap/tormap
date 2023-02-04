@@ -4,7 +4,6 @@ import org.springframework.aot.hint.MemberCategory
 import org.springframework.aot.hint.RuntimeHints
 import org.springframework.aot.hint.RuntimeHintsRegistrar
 import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.ImportRuntimeHints
@@ -26,7 +25,6 @@ import org.tormap.database.repository.MonthFamilyMembersCount
  */
 @Configuration
 @EnableAsync
-@EnableCaching
 @EnableScheduling
 @ImportRuntimeHints(IpLookupResourceRegistrar::class)
 @EnableConfigurationProperties(ScheduleConfig::class, DescriptorConfig::class, IpLookupConfig::class)

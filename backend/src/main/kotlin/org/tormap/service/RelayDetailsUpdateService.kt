@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional
 import org.tormap.database.entity.RelayDetails
 import org.tormap.database.repository.RelayDetailsRepository
 import org.tormap.util.addFamilyMember
-import org.tormap.util.commaSeparatedToList
 import org.tormap.util.getFamilyMember
 import javax.sql.DataSource
 
@@ -107,7 +106,7 @@ class RelayDetailsUpdateService(
         val families = mutableListOf<Set<RelayDetails>>()
         val requestingRelays = relayDetailsRepository.findAllByMonthAndFamilyEntriesNotNull(month)
         requestingRelays.forEach { requestingRelay ->
-            requestingRelay.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
+            requestingRelay.familyEntries!!.split(", ").forEach { familyEntry ->
                 try {
                     val newConfirmedMember =
                         requestingRelay.getFamilyMember(familyEntry, requestingRelays)

@@ -3,7 +3,6 @@ package org.tormap.database.entity
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.PersistenceCreator
 import org.springframework.data.relational.core.mapping.Table
-import org.tormap.util.jointToCommaSeparated
 import org.tormap.util.stripLengthForDB
 import org.torproject.descriptor.ServerDescriptor
 import java.time.LocalDate
@@ -58,18 +57,20 @@ class RelayDetails @PersistenceCreator private constructor(
         bandwidthBurst = descriptor.bandwidthBurst,
         bandwidthObserved = descriptor.bandwidthObserved,
         platform = descriptor.platform.stripLengthForDB(),
-        protocols = descriptor.protocols?.map { "${it.key} (${it.value.jointToCommaSeparated()})" }
-            ?.jointToCommaSeparated().stripLengthForDB(),
+        protocols = descriptor.protocols
+            ?.map { "${it.key} (${it.value.joinToString()})" }
+            ?.joinToString()
+            ?.stripLengthForDB(),
         fingerprint = descriptor.fingerprint,
         isHibernating = descriptor.isHibernating,
         uptime = descriptor.uptime,
         contact = descriptor.contact.stripLengthForDB(),
-        familyEntries = descriptor.familyEntries?.jointToCommaSeparated(),
+        familyEntries = descriptor.familyEntries?.joinToString(),
         familyId = null,
         cachesExtraInfo = descriptor.cachesExtraInfo,
         isHiddenServiceDir = descriptor.isHiddenServiceDir,
-        linkProtocolVersions = descriptor.linkProtocolVersions?.jointToCommaSeparated().stripLengthForDB(),
-        circuitProtocolVersions = descriptor.circuitProtocolVersions?.jointToCommaSeparated().stripLengthForDB(),
+        linkProtocolVersions = descriptor.linkProtocolVersions?.joinToString()?.stripLengthForDB(),
+        circuitProtocolVersions = descriptor.circuitProtocolVersions?.joinToString()?.stripLengthForDB(),
         tunnelledDirServer = descriptor.tunnelledDirServer
     )
 }

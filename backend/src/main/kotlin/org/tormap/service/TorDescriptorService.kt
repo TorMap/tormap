@@ -12,7 +12,7 @@ import org.tormap.database.entity.RelayLocation
 import org.tormap.database.repository.ProcessedFileRepository
 import org.tormap.database.repository.RelayDetailsRepository
 import org.tormap.database.repository.RelayLocationRepository
-import org.tormap.util.millisSinceEpochToLocalDate
+import org.tormap.util.toLocalDate
 import org.torproject.descriptor.Descriptor
 import org.torproject.descriptor.DescriptorCollector
 import org.torproject.descriptor.RelayNetworkStatusConsensus
@@ -202,7 +202,7 @@ class TorDescriptorService(
      * The location is retrieved based on the relay's IP addresses.
      */
     private fun processRelayConsensusDescriptor(descriptor: RelayNetworkStatusConsensus): ProcessedDescriptorInfo {
-        val descriptorDay = millisSinceEpochToLocalDate(descriptor.validAfterMillis)
+        val descriptorDay = Instant.ofEpochMilli(descriptor.validAfterMillis).toLocalDate()
         descriptor.statusEntries.forEach {
             val networkStatusEntry = it.value
             if (!relayLocationRepository.existsByDayAndFingerprint(descriptorDay, networkStatusEntry.fingerprint)) {
@@ -228,7 +228,7 @@ class TorDescriptorService(
      * Only saves a relay if no more recent matching fingerprint is found.
      */
     private fun processServerDescriptor(descriptor: ServerDescriptor): ProcessedDescriptorInfo {
-        val descriptorDay = millisSinceEpochToLocalDate(descriptor.publishedMillis)
+        val descriptorDay = Instant.ofEpochMilli(descriptor.publishedMillis).toLocalDate()
         val descriptorMonth = YearMonth.from(descriptorDay).toString()
         val existingRelay = relayDetailsRepository.findByMonthAndFingerprint(descriptorMonth, descriptor.fingerprint)
         if (existingRelay == null || existingRelay.day < descriptorDay) {

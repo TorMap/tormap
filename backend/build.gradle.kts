@@ -80,9 +80,9 @@ dependencies {
     testImplementation("com.ninja-squad:springmockk:4.0.0")
     // kotest
     val kotest = "5.5.4"
-    testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.2")
     testImplementation("io.kotest:kotest-assertions-core-jvm:$kotest")
     testImplementation("io.kotest:kotest-runner-junit5:$kotest")
+    testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.2")
     // Test Containers
     testImplementation(platform("org.testcontainers:testcontainers-bom:1.17.6"))
     testImplementation("org.testcontainers:junit-jupiter")
