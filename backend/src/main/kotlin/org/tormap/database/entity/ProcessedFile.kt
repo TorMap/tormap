@@ -32,6 +32,7 @@ class ProcessedFile @PersistenceCreator constructor(
     override fun getId(): String = filename
 
     override fun isNew(): Boolean = isNew
+
     fun setNew() {
         isNew = true
     }

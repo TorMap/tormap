@@ -45,7 +45,7 @@ class IpLookupService(ipLookupConfig: IpLookupConfig) {
         val city = dbipLocationDB.city(InetAddress.getByName(ipAddress))
         Location(city.location, city.country)
     } catch (exception: Exception) {
-        logger.warn(exception) { "Location lookup for IP $ipAddress with provider dbip failed!" }
+        logger.debug(exception) { "Location lookup for IP $ipAddress with provider dbip failed!" }
         null
     }
 

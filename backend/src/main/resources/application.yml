@@ -51,11 +51,6 @@ spring:
         password: postgres
     flyway:
         locations: classpath:/db/migration
-    jpa:
-        database-platform: org.hibernate.dialect.PostgreSQLDialect
-        hibernate:
-            ddl-auto: validate
-        open-in-view: false
     output:
         ansi:
             enabled: always
@@ -66,8 +61,10 @@ spring:
     web:
         resources:
             static-locations: classpath:/static
-#springdoc:
-#  api-docs:
-#    path: /openapi
-#  swagger-ui:
-#    path: /
+springdoc:
+    api-docs:
+        enabled: true
+        path: /v3/api-docs
+    swagger-ui:
+        enabled: true
+        path: /swagger-ui

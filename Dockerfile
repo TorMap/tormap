@@ -1,9 +1,8 @@
 # syntax = docker/dockerfile:1.4.3
 
-FROM ghcr.io/graalvm/native-image:22.3.0 AS builder
+FROM ghcr.io/graalvm/native-image:22.3.1 AS builder
 
-RUN microdnf update -y \
- && microdnf install --nodocs -y tar gzip findutils \
+RUN microdnf install --nodocs -y tar gzip findutils \
  && microdnf clean all \
  && rm -rf /var/cache/yum
 WORKDIR /build

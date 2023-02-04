@@ -4,7 +4,7 @@ group = "org.tormap"
 version = "1.1.0"
 
 plugins {
-    val kotlin = "1.8.0"
+    val kotlin = "1.8.10"
     kotlin("jvm") version kotlin
     kotlin("plugin.spring") version kotlin
 
@@ -18,6 +18,9 @@ plugins {
 
     // Build and push docker images
     id("com.google.cloud.tools.jib") version "3.3.1"
+
+    // openapi docu
+    id("org.springdoc.openapi-gradle-plugin") version "1.6.0"
 }
 
 kotlin {
@@ -43,9 +46,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-//    val openapi = "1.6.14"
-//    implementation("org.springdoc:springdoc-openapi-ui:$openapi")
-//    implementation("org.springdoc:springdoc-openapi-kotlin:$openapi")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
 
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -69,9 +70,6 @@ dependencies {
     // (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
     implementation("commons-codec:commons-codec:1.10")
     implementation("org.apache.commons:commons-compress:1.13")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.12.4")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.4")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.12.4")
     implementation("org.tukaani:xz:1.6")
 
     // Testing with Kotest (https://kotest.io/) and Testcontainers (https://testcontainers.org/)

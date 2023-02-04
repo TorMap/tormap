@@ -31,7 +31,7 @@ class UserTrace @PersistenceCreator private constructor(
 
     override fun getId(): Long? = id
 
-    override fun isNew(): Boolean = id != null
+    override fun isNew(): Boolean = id == null
 }
 
 enum class RequestMethod {
