@@ -23,7 +23,7 @@ export interface DetailsDialogProps {
     filteredRelayMatches: RelayIdentifierMatch[]
     relayDetailsId?: number
     setRelayDetailsId: (id: number) => void
-    showRelayList: boolean
+    canShowRelayList: boolean
 }
 
 export const showRelayDetailsDialogAtom = atom(false);
@@ -162,7 +162,7 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
                 setRelayDetailsId={setRelayDetailsId}
                 filteredRelayMatches={searchedRelayIdentifierMatches}
                 relayDetailsId={relayDetailsId}
-                showRelayList={relayIdentifierMatches.length > 1}
+                canShowRelayList={relayIdentifierMatches.length > 1}
             />
             : <RelayDetailsDialogSmall
                 relayDetailsMatch={relayDetailsMatch}
@@ -171,7 +171,7 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
                 setRelayDetailsId={setRelayDetailsId}
                 filteredRelayMatches={searchedRelayIdentifierMatches}
                 relayDetailsId={relayDetailsId}
-                showRelayList={relayIdentifierMatches.length > 1}
+                canShowRelayList={relayIdentifierMatches.length > 1}
             />
     )
 }
