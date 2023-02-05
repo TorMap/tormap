@@ -18,19 +18,26 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                                                                                    filteredRelayMatches,
                                                                                    relayDetailsId,
                                                                                    setRelayDetailsId,
-                                                                                   showRelayList
+                                                                                   canShowRelayList
                                                                                }) => {
     // Component state
     const [showRelayDetails, setShowRelayDetails] = useState(false)
 
-    // Show relay details directly if only one relay is selectable
     useEffect(() => {
-        setShowRelayDetails(filteredRelayMatches.length <= 1)
-    }, [filteredRelayMatches])
+        setShowRelayDetails(!canShowRelayList)
+    }, [canShowRelayList, showDialog])
 
     const handleSelectDetails = (id: number) => {
         setRelayDetailsId(id)
         setShowRelayDetails(true)
+    }
+
+    function closeDialogOrOnlyRelayDetails() {
+        if (canShowRelayList && showRelayDetails) {
+            setShowRelayDetails(false)
+        } else {
+            closeDialog()
+        }
     }
 
     return (
@@ -45,16 +52,11 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                     <Toolbar>
                         {showRelayDetails ?
                             <RelayDetailsHeader
-                                closeDialog={() => {
-                                    if (showRelayList) {
-                                        setShowRelayDetails(false)
-                                    } else {
-                                        closeDialog()
-                                    }
-                                }}
+                                closeDialog={closeDialogOrOnlyRelayDetails}
                                 finishQuickAction={closeDialog}
                                 relayDetailsMatch={relayDetailsMatch}
-                            /> : <>
+                            /> :
+                            <>
                                 <RelayDetailsSelectionHeader/>
                                 <IconButton aria-label="close" sx={{
                                     position: "absolute",
@@ -83,12 +85,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                     right: 5,
                 }}>
                     <Button
-                        onClick={() => {
-                            if (!showRelayDetails || !showRelayList) {
-                                closeDialog()
-                            }
-                            setShowRelayDetails(false)
-                        }}
+                        onClick={closeDialogOrOnlyRelayDetails}
                         variant={"contained"}
                         size={"large"}
                     >
