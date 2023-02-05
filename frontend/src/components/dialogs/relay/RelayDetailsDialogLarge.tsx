@@ -14,14 +14,14 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
                                                                                          filteredRelayMatches,
                                                                                          relayDetailsId,
                                                                                          setRelayDetailsId,
-                                                                                         showRelayList
+                                                                                         canShowRelayList
                                                                                      }) => {
     return (
         <Dialog
             open={showDialog}
             onClose={closeDialog}
             onBackdropClick={closeDialog}
-            maxWidth={showRelayList ? "lg" : "md"}
+            maxWidth={canShowRelayList ? "lg" : "md"}
             fullWidth={true}
             PaperProps={{
                 sx: {
@@ -32,10 +32,10 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
         >
             <DialogTitle>
                 <Grid container>
-                    {showRelayList && <Grid item xs={12} sm={4}>
+                    {canShowRelayList && <Grid item xs={12} sm={4}>
                         <RelayDetailsSelectionHeader/>
                     </Grid>}
-                    <Grid item xs={12} sm={showRelayList ? 8 : 12}>
+                    <Grid item xs={12} sm={canShowRelayList ? 8 : 12}>
                         <RelayDetailsHeader
                             closeDialog={closeDialog}
                             relayDetailsMatch={relayDetailsMatch}
@@ -45,14 +45,14 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
             </DialogTitle>
             <Divider/>
             <Grid container>
-                {showRelayList && <Grid item xs={12} sm={4} sx={{maxHeight: "70vh", overflow: 'auto'}}>
+                {canShowRelayList && <Grid item xs={12} sm={4} sx={{maxHeight: "70vh", overflow: 'auto'}}>
                     <RelayList
                         relayMatches={filteredRelayMatches}
                         selectedRelayId={relayDetailsId}
                         setSelectedRelayId={setRelayDetailsId}
                     />
                 </Grid>}
-                <Grid item xs={12} sm={showRelayList ? 8 : 12}
+                <Grid item xs={12} sm={canShowRelayList ? 8 : 12}
                       sx={{maxHeight: "70vh", overflow: 'auto'}}>
                     {relayDetailsMatch && <RelayDetailsTable relayDetailsMatch={relayDetailsMatch}/>}
                 </Grid>

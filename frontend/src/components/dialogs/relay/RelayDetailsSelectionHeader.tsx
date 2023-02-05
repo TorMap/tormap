@@ -10,8 +10,8 @@ export const relayDetailsDialogOrderAtom = atom<keyof RelayIdentifierMatch>("nic
 
 export const RelayDetailsSelectionHeader: FunctionComponent = () => {
     const nameOfRelayMatch = nameOfFactory<RelayIdentifierMatch>()
-    const [, setSearchRelaysBy] = useAtom(relayDetailsDialogSearchAtom)
-    const [, setOrderRelaysBy] = useAtom(relayDetailsDialogOrderAtom)
+    const [searchRelaysBy, setSearchRelaysBy] = useAtom(relayDetailsDialogSearchAtom)
+    const [orderRelaysBy, setOrderRelaysBy] = useAtom(relayDetailsDialogOrderAtom)
 
     return (
         <Stack direction={"row"}>
@@ -26,13 +26,14 @@ export const RelayDetailsSelectionHeader: FunctionComponent = () => {
                 }}
                 variant="standard"
                 onChange={(event) => setSearchRelaysBy(event.target.value)}
+                value={searchRelaysBy}
             />
             <FormControl variant="standard" sx={{ml: 3}}>
                 <InputLabel id="select-order-by-label">Order by</InputLabel>
                 <Select
                     labelId="select-order-by-label"
                     onChange={(event) => setOrderRelaysBy(event.target.value as keyof RelayIdentifierMatch)}
-                    defaultValue={nameOfRelayMatch("nickname")}
+                    value={orderRelaysBy}
                 >
                     <MenuItem value={nameOfRelayMatch("nickname")}>Nickname</MenuItem>
                     <MenuItem value={nameOfRelayMatch("relayType")}>Type</MenuItem>
