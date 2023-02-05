@@ -1,9 +1,10 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SearchIcon from '@mui/icons-material/Search';
 import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
-    Box,
+    Box, Button,
     Checkbox,
     FormControlLabel,
     FormGroup,
@@ -20,6 +21,10 @@ import {RelayFlagLabel, RelayType, RelayTypeLabel, RelayTypeTooltip} from "../..
 import {relayMustIncludeFlagOptions, Settings} from "../../types/settings";
 import {nameOfFactory} from "../../util/util";
 import {ExternalLink} from "../link/ExternalLink";
+import {useAtom} from "jotai";
+import {relaysForDetailsDialogAtom, showRelayDetailsDialogAtom} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
+import {filteredRelaysAtom} from "../leaflet/LeafletLayers";
+import {relayDetailsDialogSearchAtom} from "../dialogs/relay/RelayDetailsSelectionHeader";
 
 interface Props {
     elevation: number
@@ -32,11 +37,24 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     // App context
     const {settings, changeSettings} = useSettings()
 
+    // Atom state
+    const [, setShowRelayDetailsDialog] = useAtom(showRelayDetailsDialogAtom)
+    const [, setRelaysForDetailsDialog] = useAtom(relaysForDetailsDialogAtom)
+    const [, setRelayDetailsDialogSearch] = useAtom(relayDetailsDialogSearchAtom)
+    const [filteredRelays] = useAtom(filteredRelaysAtom)
+
     // Util
     const nameOfSetting = nameOfFactory<Settings>()
 
     return (
         <>
+            <Button variant="contained" startIcon={<SearchIcon />} fullWidth={true} sx={{mb: "16px"}} onClick={() => {
+                setRelaysForDetailsDialog(filteredRelays)
+                setShowRelayDetailsDialog(true)
+                setRelayDetailsDialogSearch("")
+            }}>
+                Search {filteredRelays.length} relays
+            </Button>
             <Accordion elevation={elevation} defaultExpanded>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
