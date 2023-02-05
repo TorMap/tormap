@@ -8,7 +8,7 @@ import {Statistics} from "../types/statistics";
  * @param relays - The relays to filter
  * @param settings - The app settings for filtering
  */
-export const applyRelayFilter = (relays: RelayLocationDto[], settings: Settings): RelayLocationDto[] => {
+export const filterRelaysByFlags = (relays: RelayLocationDto[], settings: Settings): RelayLocationDto[] => {
     const filtered: RelayLocationDto[] = []
     relays.forEach(relay => {
         let relayMissesRequiredFlag = false
@@ -141,39 +141,40 @@ export const buildRelayCountryMap = (relays: RelayLocationDto[]): Map<string, Re
     return countryMap
 }
 
-/**
- * Returns a Statistics-Object for given parameters
- * @param filteredRelays - The already filtered relays
- * @param relayCountryMap - A map of relays with the same country
- * @param relayFamilyMap - A map of relays with the same family
- * @param settings - Tha app settings
- */
+export const buildFilteredRelays = (
+    filteredRelaysByFlags: RelayLocationDto[],
+    relayCountryMap: Map<string, RelayLocationDto[]>,
+    relayFamilyMap: Map<number, RelayLocationDto[]>,
+    settings: Settings,
+): RelayLocationDto[] => {
+    if (settings.selectedCountry && settings.selectedFamily) {
+        return relayCountryMap.get(settings.selectedCountry)?.filter(
+            countryRelay => countryRelay.familyId === settings.selectedFamily
+        ) ?? []
+    } else if (settings.selectedCountry && relayCountryMap.has(settings.selectedCountry)) {
+        return relayCountryMap.get(settings.selectedCountry) ?? []
+    } else if (settings.selectedFamily && relayFamilyMap.has(settings.selectedFamily)) {
+        return relayFamilyMap.get(settings.selectedFamily) ?? []
+    }
+    return filteredRelaysByFlags
+}
+
 export const buildStatistics = (
     filteredRelays: RelayLocationDto[],
     relayCountryMap: Map<string, RelayLocationDto[]>,
     relayFamilyMap: Map<number, RelayLocationDto[]>,
-    settings: Settings
+    settings: Settings,
 ): Statistics => {
     let countryCount = relayCountryMap.size
     let familyCount = relayFamilyMap.size
 
     if (settings.selectedCountry && settings.selectedFamily) {
-        filteredRelays = []
-        relayFamilyMap.get(settings.selectedFamily)?.forEach(familyRelay => {
-            if (settings.selectedCountry) {
-                relayCountryMap.get(settings.selectedCountry)?.forEach(countryRelay => {
-                    if (familyRelay.detailsId === countryRelay.detailsId) filteredRelays.push(familyRelay)
-                })
-            }
-        })
         countryCount = 1
         familyCount = 1
     } else if (settings.selectedCountry && relayCountryMap.has(settings.selectedCountry)) {
-        filteredRelays = relayCountryMap.get(settings.selectedCountry) ?? []
         countryCount = 1
         familyCount = new Set(filteredRelays.map(relay => relay.familyId)).size
     } else if (settings.selectedFamily && relayFamilyMap.has(settings.selectedFamily)) {
-        filteredRelays = relayFamilyMap.get(settings.selectedFamily) ?? []
         familyCount = 1
         countryCount = new Set(filteredRelays.map(relay => relay.country)).size
     }

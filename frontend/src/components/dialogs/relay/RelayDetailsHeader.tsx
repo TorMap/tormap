@@ -25,9 +25,8 @@ export const RelayDetailsHeader: FunctionComponent<Props> = ({
     // App context
     const {settings, setSettings} = useSettings()
     const relayType = relayDetailsMatch ? getRelayType(relayDetailsMatch) : undefined
-
     return (
-        <Box display="flex" alignItems={"center"}>
+        <Box display="flex" alignItems={"center"} sx={{mt: 0.5}}>
             {relayDetailsMatch && relayType != undefined ? <>
                 <Tooltip title={`Relay's nickname`}>
                     <Typography sx={{display: "inline"}}
