@@ -25,8 +25,7 @@ class RelayDetailsController(val relayDetailsRepositoryImpl: RelayDetailsReposit
         relayDetailsRepositoryImpl.findByIdOrNull(id) ?: throw RelayNotFoundException()
 
     @GetMapping("family/{id}")
-    fun getFamily(@PathVariable id: Long): List<RelayDetails> =
-        relayDetailsRepositoryImpl.findAllByFamilyId(id)
+    fun getFamily(@PathVariable id: Long): List<RelayDetails> = relayDetailsRepositoryImpl.findAllByFamilyId(id)
 
     @PostMapping("relay/identifiers")
     fun getRelayIdentifiers(@RequestBody ids: List<Long>): List<RelayIdentifiersDto> =

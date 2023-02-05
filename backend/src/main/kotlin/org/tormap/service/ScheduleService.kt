@@ -1,17 +1,15 @@
 package org.tormap.service
 
-import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import org.tormap.config.value.DescriptorConfig
-import org.tormap.config.value.ScheduleConfig
+import org.tormap.config.DescriptorConfig
+import org.tormap.config.ScheduleConfig
 import org.tormap.database.entity.DescriptorType
 
 /**
  * This scheduler sets reoccurring events to collect and process data about Tor relays
  * With the @Async class annotation all methods run in parallel on separate threads if available.
  */
-@Async
 @Service
 class ScheduleService(
     private val descriptorConfig: DescriptorConfig,
@@ -25,11 +23,10 @@ class ScheduleService(
      * Can take 20 minutes depending on your machine.
      */
     @Scheduled(fixedRateString = "\${schedule.rate.recentRelayConsensuses}")
-    fun recentRelayConsensuses() =
-        torDescriptorService.collectAndProcessDescriptors(
-            descriptorConfig.recentRelayConsensuses,
-            DescriptorType.RECENT_RELAY_CONSENSUS
-        )
+    fun recentRelayConsensuses() = torDescriptorService.collectAndProcessDescriptors(
+        descriptorConfig.recentRelayConsensuses,
+        DescriptorType.RECENT_RELAY_CONSENSUS
+    )
 
     /**
      * Fetches and processes relay server descriptors of the last 3 days.
@@ -37,11 +34,10 @@ class ScheduleService(
      * Can take 20 minutes depending on your machine.
      */
     @Scheduled(fixedRateString = "\${schedule.rate.recentRelayServers}")
-    fun recentRelayServers() =
-        torDescriptorService.collectAndProcessDescriptors(
-            descriptorConfig.recentRelayServers,
-            DescriptorType.RECENT_RELAY_SERVER
-        )
+    fun recentRelayServers() = torDescriptorService.collectAndProcessDescriptors(
+        descriptorConfig.recentRelayServers,
+        DescriptorType.RECENT_RELAY_SERVER
+    )
 
     /**
      * Fetches and processes archive relay consensus descriptors.
@@ -49,11 +45,10 @@ class ScheduleService(
      * After the download finished, and you start with an empty DB this takes about 20 hours depending on your machine.
      */
     @Scheduled(fixedRateString = "\${schedule.rate.archiveRelayConsensuses}")
-    fun archiveRelayConsensuses() =
-        torDescriptorService.collectAndProcessDescriptors(
-            descriptorConfig.archiveRelayConsensuses,
-            DescriptorType.ARCHIVE_RELAY_CONSENSUS
-        )
+    fun archiveRelayConsensuses() = torDescriptorService.collectAndProcessDescriptors(
+        descriptorConfig.archiveRelayConsensuses,
+        DescriptorType.ARCHIVE_RELAY_CONSENSUS
+    )
 
     /**
      * Fetches and processes archive relay server descriptors.
@@ -61,25 +56,22 @@ class ScheduleService(
      * After the download finished, and you start with an empty DB this takes about 10 hours depending on your machine.
      */
     @Scheduled(fixedRateString = "\${schedule.rate.archiveRelayServers}")
-    fun archiveRelayServers() =
-        torDescriptorService.collectAndProcessDescriptors(
-            descriptorConfig.archiveRelayServers,
-            DescriptorType.ARCHIVE_RELAY_SERVER
-        )
+    fun archiveRelayServers() = torDescriptorService.collectAndProcessDescriptors(
+        descriptorConfig.archiveRelayServers,
+        DescriptorType.ARCHIVE_RELAY_SERVER
+    )
 
     /**
      * Updates all relays which do not have a family set and optionally can overwrite existing family structures.
      * Can take a few minutes depending on how many months are updated.
      */
     @Scheduled(fixedRateString = "\${schedule.rate.updateRelayFamilies}")
-    fun updateRelayFamilies() =
-        relayDetailsUpdateService.updateAllFamilies(scheduleConfig.shouldOverwriteFamilies)
+    fun updateRelayFamilies() = relayDetailsUpdateService.updateAllFamilies(scheduleConfig.shouldOverwriteFamilies)
 
     /**
      * Updates all relays which do not have any Autonomous System set.
      * Can take a few minutes depending on how many months are updated.
      */
     @Scheduled(fixedRateString = "\${schedule.rate.updateRelayAutonomousSystems}")
-    fun updateRelayAutonomousSystems() =
-        relayDetailsUpdateService.updateAutonomousSystems()
+    fun updateRelayAutonomousSystems() = relayDetailsUpdateService.updateAutonomousSystems()
 }

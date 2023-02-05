@@ -2,6 +2,7 @@ package org.tormap.database.entity
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.PersistenceCreator
+import org.springframework.data.domain.Persistable
 import org.springframework.data.relational.core.mapping.Table
 import org.tormap.util.stripLengthForDB
 import org.torproject.descriptor.ServerDescriptor
@@ -38,7 +39,7 @@ class RelayDetails @PersistenceCreator private constructor(
     var linkProtocolVersions: String?,
     var circuitProtocolVersions: String?,
     var tunnelledDirServer: Boolean,
-) {
+) : Persistable<Long> {
     constructor(
         descriptor: ServerDescriptor,
         month: String,
@@ -56,7 +57,7 @@ class RelayDetails @PersistenceCreator private constructor(
         bandwidthRate = descriptor.bandwidthRate,
         bandwidthBurst = descriptor.bandwidthBurst,
         bandwidthObserved = descriptor.bandwidthObserved,
-        platform = descriptor.platform.stripLengthForDB(),
+        platform = descriptor.platform?.stripLengthForDB(),
         protocols = descriptor.protocols
             ?.map { "${it.key} (${it.value.joinToString()})" }
             ?.joinToString()
@@ -64,7 +65,7 @@ class RelayDetails @PersistenceCreator private constructor(
         fingerprint = descriptor.fingerprint,
         isHibernating = descriptor.isHibernating,
         uptime = descriptor.uptime,
-        contact = descriptor.contact.stripLengthForDB(),
+        contact = descriptor.contact?.stripLengthForDB(),
         familyEntries = descriptor.familyEntries?.joinToString(),
         familyId = null,
         cachesExtraInfo = descriptor.cachesExtraInfo,
@@ -73,4 +74,8 @@ class RelayDetails @PersistenceCreator private constructor(
         circuitProtocolVersions = descriptor.circuitProtocolVersions?.joinToString()?.stripLengthForDB(),
         tunnelledDirServer = descriptor.tunnelledDirServer
     )
+
+    override fun getId(): Long? = id
+
+    override fun isNew(): Boolean = id == null
 }

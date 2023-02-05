@@ -8,7 +8,7 @@ private val familyEntryNicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
 /**
  * Check to which family the [requestingRelay] and the [newMember] belong
  */
-fun MutableList<Set<RelayDetails>>.addFamilyMember(requestingRelay: RelayDetails, newMember: RelayDetails) {
+fun MutableList<List<RelayDetails>>.addFamilyMember(requestingRelay: RelayDetails, newMember: RelayDetails) {
     val requestingRelayIndex = this.indexOfFirst { it.contains(requestingRelay) }
     val newMemberIndex = this.indexOfFirst { it.contains(newMember) }
 
@@ -22,7 +22,7 @@ fun MutableList<Set<RelayDetails>>.addFamilyMember(requestingRelay: RelayDetails
 
         newMemberIndex >= 0 -> this[newMemberIndex] = this[newMemberIndex] + requestingRelay
 
-        else -> this.add(setOf(requestingRelay, newMember))
+        else -> this.add(listOf(requestingRelay, newMember))
     }
 }
 

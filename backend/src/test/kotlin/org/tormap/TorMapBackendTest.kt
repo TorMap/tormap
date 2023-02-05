@@ -2,11 +2,10 @@ package org.tormap
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import org.tormap.config.value.IpLookupConfig
+import org.tormap.config.IpLookupConfig
 import java.io.File
 
 @SpringBootTest

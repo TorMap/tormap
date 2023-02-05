@@ -22,24 +22,24 @@ interface RelayDetailsRepository : ListCrudRepository<RelayDetails, Long> {
     fun findAllByFamilyId(familyId: Long): List<RelayDetails>
 
     @Query(
-        """SELECT month, count(DISTINCT family_id)
+        """SELECT DISTINCT month
            FROM relay_details
            GROUP BY month
-           ORDER BY month"""
+           HAVING count(DISTINCT family_id) <= :count"""
     )
-    fun findDistinctMonthFamilyMemberCount(): List<MonthFamilyMembersCount>
+    fun findDistinctMonthFamilyMemberCount(count: Int = Int.MAX_VALUE): List<String>
 
     @Query("SELECT DISTINCT month FROM relay_details WHERE autonomous_system_number IS NULL ORDER BY month")
-    fun findDistinctMonthsAndAutonomousSystemNumberNull(): Set<String>
+    fun findDistinctMonthsWithAutonomousSystemNumberNull(): List<String>
 
     @Query("SELECT id, fingerprint, nickname FROM relay_details WHERE id IN (:ids)")
     fun findRelayIdentifiers(ids: List<Long>): List<RelayIdentifiersDto>
 
     @Query(
-        """SELECT family_id AS id,
-                  count(id) AS memberCount,
+        """SELECT family_id,
+                  count(id) AS member_count,
                   string_agg(nickname, ', ') AS nicknames,
-                  string_agg(DISTINCT autonomous_system_name, ', ') AS autonomousSystems
+                  string_agg(DISTINCT autonomous_system_name, ', ') AS autonomous_systems
            FROM relay_details
            WHERE family_id IN (:familyIds)
            GROUP BY family_id"""

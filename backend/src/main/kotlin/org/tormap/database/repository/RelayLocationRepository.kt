@@ -12,22 +12,22 @@ import java.time.LocalDate
  */
 @Repository
 interface RelayLocationRepository : ListCrudRepository<RelayLocation, Long> {
-    @Query("SELECT EXISTS(SELECT 1 FROM relay_location WHERE day = :day AND fingerprint = :fingerprint)")
+    @Query("SELECT exists(SELECT 1 FROM relay_location WHERE day = :day AND fingerprint = :fingerprint)")
     fun existsByDayAndFingerprint(day: LocalDate, fingerprint: String): Boolean
 
     @Query("SELECT DISTINCT day FROM relay_location")
-    fun findDistinctDays(): Set<LocalDate>
+    fun findDistinctDays(): List<LocalDate>
 
     @Query(
-        """SELECT g.latitude AS lat,
-                  g.longitude AS long,
-                  g.country_code AS country,
-                  trim('{' FROM trim('}' FROM g.flags_numeric)) AS flags,
-                  n.id AS detailsId,
-                  n.family_id AS familyId
-           FROM relay_location g
-           LEFT JOIN relay_details n ON g.fingerprint = n.fingerprint AND to_char(g.day, 'YYYY-MM') = n.month
-           WHERE g.day = :day"""
+        """SELECT location.latitude AS lat,
+                  location.longitude AS long,
+                  location.country_code AS country,
+                  trim('{' FROM trim('}' FROM location.flags_numeric)) AS flags,
+                  details.id AS details_id,
+                  details.family_id AS family_id
+           FROM relay_location location
+           LEFT JOIN relay_details details ON location.fingerprint = details.fingerprint AND to_char(location.day, 'YYYY-MM') = details.month
+           WHERE location.day = :day"""
     )
     fun findAllUsingDay(day: LocalDate): List<RelayLocationDto>
 }

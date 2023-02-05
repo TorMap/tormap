@@ -2,12 +2,13 @@ package org.tormap.service
 
 import com.maxmind.db.CHMCache
 import com.maxmind.geoip2.DatabaseReader
+import com.maxmind.geoip2.exception.AddressNotFoundException
 import com.maxmind.geoip2.model.AsnResponse
 import com.maxmind.geoip2.record.Country
 import mu.KotlinLogging
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
-import org.tormap.config.value.IpLookupConfig
+import org.tormap.config.IpLookupConfig
 import java.io.File
 import java.io.InputStream
 import java.math.BigDecimal
@@ -44,7 +45,7 @@ class IpLookupService(ipLookupConfig: IpLookupConfig) {
     fun lookupLocation(ipAddress: String): Location? = try {
         val city = dbipLocationDB.city(InetAddress.getByName(ipAddress))
         Location(city.location, city.country)
-    } catch (exception: Exception) {
+    } catch (exception: AddressNotFoundException) {
         logger.debug(exception) { "Location lookup for IP $ipAddress with provider dbip failed!" }
         null
     }
@@ -55,8 +56,8 @@ class IpLookupService(ipLookupConfig: IpLookupConfig) {
      */
     fun lookupAutonomousSystem(ipAddress: String): AsnResponse? = try {
         maxmindAutonomousSystemDB.asn(InetAddress.getByName(ipAddress))
-    } catch (exception: Exception) {
-        logger.debug(exception) { "Autonomous System lookup for IP $ipAddress with provider MaxMind failed!" }
+    } catch (e: AddressNotFoundException) {
+        logger.debug(e) { "Autonomous System lookup for IP $ipAddress with provider MaxMind failed!" }
         null
     }
 
@@ -65,6 +66,7 @@ class IpLookupService(ipLookupConfig: IpLookupConfig) {
      * resource changes, but not it's name, this change is not picked up and the old version is used.
      * Either the backing file has to be removed, a new name has to be used or the OS has to trigger a tmp file clean
      * up.
+     * If the file is a tar.gz file, it's extracted.
      */
     private fun storeOrLoad(resource: Resource): File {
         // input stream is expensive, so make it lazy and only evaluate if we need it
@@ -108,11 +110,8 @@ class Location(location: GeoIp2Location, country: Country) {
     val countryCode: String = country.isoCode
 
     init {
-        val locationIncomplete = countryCode == "-" || (latitude == BigDecimal.ZERO && longitude == BigDecimal.ZERO)
-        if (locationIncomplete) {
-            throw LocationIncompleteException("latitude=$latitude longitude=$longitude countryCode=$countryCode")
+        require(countryCode != "-" && (latitude != BigDecimal.ZERO && longitude != BigDecimal.ZERO)) {
+            "latitude=$latitude longitude=$longitude countryCode=$countryCode"
         }
     }
-
-    class LocationIncompleteException(message: String) : RuntimeException(message)
 }

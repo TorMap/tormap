@@ -12,10 +12,8 @@ import java.time.LocalDate
 @RequestMapping("relay/location/")
 class RelayLocationController(val relayLocationRepository: RelayLocationRepository) {
     @GetMapping("days")
-    fun getDays(): Set<LocalDate> =
-        relayLocationRepository.findDistinctDays()
+    fun getDays(): List<LocalDate> = relayLocationRepository.findDistinctDays()
 
     @GetMapping("day/{day}")
-    fun getDay(@PathVariable day: LocalDate): List<RelayLocationDto> =
-        relayLocationRepository.findAllUsingDay(day)
+    fun getDay(@PathVariable day: LocalDate): List<RelayLocationDto> = relayLocationRepository.findAllUsingDay(day)
 }

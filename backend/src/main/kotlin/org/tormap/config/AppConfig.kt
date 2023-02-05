@@ -7,24 +7,16 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.ImportRuntimeHints
-import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.filter.ShallowEtagHeaderFilter
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-import org.tormap.config.value.AutonomousSystemLookupConfig
-import org.tormap.config.value.DescriptorConfig
-import org.tormap.config.value.IpLookupConfig
-import org.tormap.config.value.LocationLookupConfig
-import org.tormap.config.value.RateConfig
-import org.tormap.config.value.ScheduleConfig
 import org.tormap.database.repository.MonthFamilyMembersCount
 
 /**
  * Add all application configuration here and not in @SpringBootApplication class
  */
 @Configuration
-@EnableAsync
 @EnableScheduling
 @ImportRuntimeHints(IpLookupResourceRegistrar::class)
 @EnableConfigurationProperties(ScheduleConfig::class, DescriptorConfig::class, IpLookupConfig::class)
@@ -49,7 +41,7 @@ class AppConfig : WebMvcConfigurer {
 }
 
 // see https://github.com/spring-projects/spring-boot/issues/33400
-internal class IpLookupResourceRegistrar : RuntimeHintsRegistrar {
+private class IpLookupResourceRegistrar : RuntimeHintsRegistrar {
     override fun registerHints(hints: RuntimeHints, classLoader: ClassLoader?) {
         // Temporary hint, should be included into the official spring boot project
         hints.reflection().registerType(MonthFamilyMembersCount::class.java, *MemberCategory.values())

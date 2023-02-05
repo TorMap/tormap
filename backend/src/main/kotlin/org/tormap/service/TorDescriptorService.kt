@@ -2,9 +2,8 @@ package org.tormap.service
 
 import mu.KotlinLogging
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
-import org.tormap.config.value.DescriptorConfig
+import org.tormap.config.DescriptorConfig
 import org.tormap.database.entity.DescriptorType
 import org.tormap.database.entity.ProcessedFile
 import org.tormap.database.entity.RelayDetails
@@ -25,8 +24,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Future
 
 /**
  * This service can collect and process Tor descriptors.
@@ -79,26 +76,25 @@ class TorDescriptorService(
      * Process descriptors which were previously saved to disk at [apiPath]
      */
     private fun processDescriptors(apiPath: String, descriptorType: DescriptorType) {
-        var descriptorsBeingProcessed = mutableSetOf<Future<ProcessedDescriptorInfo>>()
-        val processedMonths = mutableSetOf<String>()
+        val processedDescriptors = mutableListOf<ProcessedDescriptorInfo>()
+        val processedMonths = mutableListOf<String>()
         var lastProcessedFile: File? = null
-        readDescriptors(apiPath, descriptorType).forEach {
-            if (lastProcessedFile == null) {
-                lastProcessedFile = it.descriptorFile
-            } else if (it.descriptorFile != lastProcessedFile) {
-                processedMonths.addAll(
-                    finishDescriptorFile(
-                        lastProcessedFile!!,
-                        descriptorType,
-                        descriptorsBeingProcessed
-                    )
-                )
-                lastProcessedFile = it.descriptorFile
-                descriptorsBeingProcessed = mutableSetOf()
+
+        for (descriptor in readDescriptors(apiPath, descriptorType)) {
+            when {
+                lastProcessedFile == null -> lastProcessedFile = descriptor.descriptorFile
+                descriptor.descriptorFile != lastProcessedFile -> {
+                    val finishedFile = finishDescriptorFile(lastProcessedFile, descriptorType, processedDescriptors)
+                    processedMonths.addAll(finishedFile)
+                    lastProcessedFile = descriptor.descriptorFile
+                    processedDescriptors.clear()
+                }
             }
-            descriptorsBeingProcessed.add(processDescriptor(it))
+
+            processedDescriptors.add(processDescriptor(descriptor))
         }
-        if (descriptorType === DescriptorType.RECENT_RELAY_SERVER) {
+
+        if (descriptorType == DescriptorType.RECENT_RELAY_SERVER) {
             relayDetailsUpdateService.updateFamilies(processedMonths)
         }
     }
@@ -110,13 +106,13 @@ class TorDescriptorService(
     fun finishDescriptorFile(
         descriptorFile: File,
         descriptorType: DescriptorType,
-        descriptorDaysBeingProcessed: MutableSet<Future<ProcessedDescriptorInfo>>
-    ): MutableSet<String> {
-        val processedMonths = mutableSetOf<String>()
+        descriptorDaysBeingProcessed: List<ProcessedDescriptorInfo>
+    ): List<String> {
+        val processedMonths = mutableListOf<String>()
         var lastError: String? = null
-        descriptorDaysBeingProcessed.forEach {
+
+        for (processedDescriptor in descriptorDaysBeingProcessed) {
             lastError = try {
-                val processedDescriptor = it.get()
                 if (processedDescriptor.yearMonth != null) {
                     processedMonths.add(processedDescriptor.yearMonth!!)
                 }
@@ -127,6 +123,7 @@ class TorDescriptorService(
                 message
             } ?: lastError
         }
+
         if (descriptorType == DescriptorType.ARCHIVE_RELAY_SERVER) {
             relayDetailsUpdateService.updateFamilies(processedMonths)
         }
@@ -163,10 +160,7 @@ class TorDescriptorService(
         }
         val excludedFiles = processedFileRepository.findAllByTypeAndErrorNull(descriptorType)
         descriptorReader.excludedFiles = excludedFiles.associate {
-            Pair(
-                parentDirectory.absolutePath + File.separator + it.filename,
-                it.lastModified
-            )
+            (parentDirectory.absolutePath + File.separator + it.filename) to it.lastModified
         }.toSortedMap()
 
         return descriptorReader.readDescriptors(parentDirectory)
@@ -175,25 +169,24 @@ class TorDescriptorService(
     /**
      * Process a [descriptor] depending on it's type
      */
-    @Async
-    fun processDescriptor(descriptor: Descriptor): Future<ProcessedDescriptorInfo> {
+    fun processDescriptor(descriptor: Descriptor): ProcessedDescriptorInfo {
         return try {
-            return when (descriptor) {
-                is RelayNetworkStatusConsensus -> CompletableFuture.supplyAsync {
-                    processRelayConsensusDescriptor(descriptor)
-                }
-
-                is ServerDescriptor -> CompletableFuture.supplyAsync { processServerDescriptor(descriptor) }
+            when (descriptor) {
+                is RelayNetworkStatusConsensus -> processRelayConsensusDescriptor(descriptor)
+                is ServerDescriptor -> processServerDescriptor(descriptor)
                 is UnparseableDescriptor -> {
-                    logger.debug { "Unparsable descriptor in file ${descriptor.descriptorFile.name}: ${descriptor.descriptorParseException.message}" }
-                    CompletableFuture.completedFuture(ProcessedDescriptorInfo())
+                    logger.debug {
+                        "Unparsable descriptor in file ${descriptor.descriptorFile.name}: " +
+                            descriptor.descriptorParseException.message
+                    }
+                    ProcessedDescriptorInfo()
                 }
 
                 else -> throw Exception("Descriptor type ${descriptor.javaClass.name} is not yet supported!")
             }
         } catch (exception: Exception) {
             logger.error { "Could not process descriptor part of ${descriptor.descriptorFile.name}! ${exception.message}" }
-            CompletableFuture.completedFuture(ProcessedDescriptorInfo(error = exception.message))
+            ProcessedDescriptorInfo(error = exception.message)
         }
     }
 
@@ -203,8 +196,8 @@ class TorDescriptorService(
      */
     private fun processRelayConsensusDescriptor(descriptor: RelayNetworkStatusConsensus): ProcessedDescriptorInfo {
         val descriptorDay = Instant.ofEpochMilli(descriptor.validAfterMillis).toLocalDate()
-        descriptor.statusEntries.forEach {
-            val networkStatusEntry = it.value
+        for (statusEntry in descriptor.statusEntries) {
+            val networkStatusEntry = statusEntry.value
             if (!relayLocationRepository.existsByDayAndFingerprint(descriptorDay, networkStatusEntry.fingerprint)) {
                 val location = ipLookupService.lookupLocation(networkStatusEntry.address)
                 if (location != null) {
@@ -220,6 +213,7 @@ class TorDescriptorService(
                 }
             }
         }
+
         return ProcessedDescriptorInfo(YearMonth.from(descriptorDay).toString())
     }
 
@@ -240,7 +234,7 @@ class TorDescriptorService(
                 autonomousSystem?.autonomousSystemOrganization,
                 autonomousSystem?.autonomousSystemNumber?.toInt()
             )
-            relayDetailsRepository.save(existingRelay.map(relayDetails))
+            relayDetailsRepository.save(existingRelay.update(relayDetails))
         }
         return ProcessedDescriptorInfo(descriptorMonth)
     }
