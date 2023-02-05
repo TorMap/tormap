@@ -13,7 +13,7 @@ import {
     buildRelayCoordinatesMap,
     buildRelayCountryMap,
     buildRelayFamilyMap,
-    buildStatistics
+    buildStatistics, buildFilteredRelays
 } from "../../util/aggregate-relays";
 import {
     buildAggregatedCoordinatesLayer,
@@ -30,6 +30,7 @@ import {
     relaysForDetailsDialogAtom,
     showRelayDetailsDialogAtom
 } from "../dialogs/relay/ResponsiveRelayDetailsDialog";
+import {relayDetailsDialogSearchAtom} from "../dialogs/relay/RelayDetailsSelectionHeader";
 
 // Lazy loaded components
 const ResponsiveRelayDetailsDialog = React.lazy(() => import('../dialogs/relay/ResponsiveRelayDetailsDialog'));
@@ -58,6 +59,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
     // Atom state
     const [, setShowRelayDetailsDialog] = useAtom(showRelayDetailsDialogAtom)
     const [, setRelaysForDetailsDialog] = useAtom(relaysForDetailsDialogAtom)
+    const [, setRelayDetailsDialogSearch] = useAtom(relayDetailsDialogSearchAtom)
     const [, setFilteredRelays] = useAtom(filteredRelaysAtom)
 
     // App context
@@ -86,6 +88,10 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
         () => buildFamilyCoordinatesMap(relayCoordinatesMap),
         [relayCoordinatesMap]
     )
+    const filteredRelays = useMemo(
+        () => buildFilteredRelays(filteredRelaysByFlags, relayCountryMap, relayFamilyMap, settings),
+        [filteredRelaysByFlags, relayCountryMap, relayFamilyMap, settings, setFilteredRelays]
+    )
 
     /**
      * After a marker was clicked on the map the corresponding relays are passed to the details dialog
@@ -96,6 +102,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
             const relaysAtCoordinate = relayCoordinatesMap?.get(event.target.options.className) ?? []
             setRelaysForDetailsDialog(relaysAtCoordinate)
             setShowRelayDetailsDialog(true)
+            setRelayDetailsDialogSearch("")
         }
     }, [relayCoordinatesMap, relays])
 
@@ -128,8 +135,8 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
         [relayFamilyCoordinatesMap, settings, setSettings, setFamiliesForSelectionDialog, setShowFamilySelectionDialog]
     )
     const statistics = useMemo(
-        () => buildStatistics(filteredRelaysByFlags, relayCountryMap, relayFamilyMap, settings, setFilteredRelays),
-        [filteredRelaysByFlags, relayCountryMap, relayFamilyMap, settings, setFilteredRelays]
+        () => buildStatistics(filteredRelays, relayCountryMap, relayFamilyMap, settings),
+        [filteredRelays, relayCountryMap, relayFamilyMap, settings]
     )
 
     /**
@@ -138,6 +145,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
     useEffect(() => {
         if (relays) {
             setStatistics(statistics)
+            setFilteredRelays(filteredRelays)
 
             if (!leafletMap.hasLayer(leafletMarkerLayers)) {
                 leafletMap.addLayer(leafletMarkerLayers)
@@ -189,7 +197,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
                 closeSnackbar(SnackbarMessage.NoFamilyData)
             }
         }
-    }, [leafletMarkerLayers, relays, statistics, setStatistics, filteredRelaysByFlags.length, settings, relayFamilyMap, leafletMap, relayCountryMap, closeSnackbar, enqueueSnackbar, setSettings, relayLocationHeatmapLayer, countryBordersLayer, aggregatedCoordinatesLayer, relayCountryLayer, relayLayer, relaySelectedFamilyLayer, relayFamilyCoordinatesLayer])
+    }, [filteredRelays, leafletMarkerLayers, relays, statistics, setStatistics, filteredRelaysByFlags.length, settings, relayFamilyMap, leafletMap, relayCountryMap, closeSnackbar, enqueueSnackbar, setSettings, relayLocationHeatmapLayer, countryBordersLayer, aggregatedCoordinatesLayer, relayCountryLayer, relayLayer, relaySelectedFamilyLayer, relayFamilyCoordinatesLayer])
 
     return (
         <Suspense fallback={<LoadingAnimation/>}>

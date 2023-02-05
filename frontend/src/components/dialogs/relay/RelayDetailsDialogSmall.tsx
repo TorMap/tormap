@@ -46,7 +46,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                         {showRelayDetails ?
                             <RelayDetailsHeader
                                 closeDialog={() => {
-                                    if (filteredRelayMatches.length > 1) {
+                                    if (showRelayList) {
                                         setShowRelayDetails(false)
                                     } else {
                                         closeDialog()
@@ -84,11 +84,10 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                 }}>
                     <Button
                         onClick={() => {
-                            if (showRelayDetails) {
-                                setShowRelayDetails(false)
-                            } else {
+                            if (!showRelayDetails || !showRelayList) {
                                 closeDialog()
                             }
+                            setShowRelayDetails(false)
                         }}
                         variant={"contained"}
                         size={"large"}
