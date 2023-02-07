@@ -22,5 +22,5 @@ RUN adduser --disabled-password -g '' -h '/home/nonroot' -s '/sbin/nologin' -u '
 USER 10001:10001
 EXPOSE 8080
 WORKDIR /home/nonroot
-ENTRYPOINT ["/sbin/tini", "--", "/home/nonroot/tormap"]
+ENTRYPOINT ["/sbin/tini", "--", "/home/nonroot/tormap", "-XX:+ExitOnOutOfMemoryError"]
 COPY --link --from=builder --chown=10001:10001 --chmod=500 /gradle/build/native/nativeCompile/tormap /home/nonroot/tormap
