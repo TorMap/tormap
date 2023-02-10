@@ -61,13 +61,13 @@ export const App: FunctionComponent = () => {
                         bottom: "2px",
                         fontSize: ".7rem",
                     }}>
-                    <span>
-                        <ExternalLink href="https://leafletjs.com" label={"Leaflet"}/>
-                        {" | © "}
-                        <ExternalLink href="https://www.openstreetmap.org/copyright" label={"OpenStreetMap"}/>
-                        {" contributors © "}
-                        <ExternalLink href="https://carto.com/attributions" label={"CARTO"}/>
-                    </span>
+                        <span>
+                            <ExternalLink href="https://leafletjs.com" label={"Leaflet"}/>
+                            {" | © "}
+                            <ExternalLink href="https://www.openstreetmap.org/copyright" label={"OpenStreetMap"}/>
+                            {" contributors © "}
+                            <ExternalLink href="https://carto.com/attributions" label={"CARTO"}/>
+                        </span>
                     </Box>
                     <AboutInformation/>
                 </React.StrictMode>
