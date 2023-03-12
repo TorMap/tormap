@@ -17,7 +17,7 @@
     "@mui/x-date-pickers": "5.0.12",
     "axios": "1.2.1",
     "date-fns": "2.29.3",
-    "jotai": "1.13.1",
+    "jotai": "2.0.3",
     "leaflet": "1.9.3",
     "leaflet.heat": "0.2.0",
     "notistack": "2.0.8",
