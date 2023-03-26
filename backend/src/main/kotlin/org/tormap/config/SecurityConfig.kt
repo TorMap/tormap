@@ -38,13 +38,10 @@ class SecurityConfig(
     @Bean
     fun userDetailsServiceBean(passwordEncoder: PasswordEncoder): UserDetailsService {
         val passwordFile = File(adminPasswordFile)
-        var adminPassword = UUID.randomUUID().toString()
-        if (passwordFile.exists()) {
-            adminPassword = passwordFile.readText()
-        } else {
+        val adminPassword = if (passwordFile.exists()) passwordFile.readText() else {
             File(passwordFile.parent).mkdirs()
             passwordFile.createNewFile()
-            passwordFile.writeText(adminPassword)
+            UUID.randomUUID().toString().also(passwordFile::writeText)
         }
         logger.info { "------------------------------------------------------" }
         logger.info { "Admin password: $adminPassword" }

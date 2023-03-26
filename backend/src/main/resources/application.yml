@@ -8,9 +8,9 @@ descriptor:
 ip-lookup:
     shouldCache: true
     locationLookup:
-        dbipDatabaseFile: https://download.db-ip.com/free/dbip-city-lite-2023-01.mmdb.gz
+        dbipDatabaseFile: https://download.db-ip.com/free/dbip-city-lite-2023-03.mmdb.gz
     autonomousSystemLookup:
-        maxmindDatabaseFile: https://download.db-ip.com/free/dbip-asn-lite-2023-01.mmdb.gz
+        maxmindDatabaseFile: https://download.db-ip.com/free/dbip-asn-lite-2023-03.mmdb.gz
 management:
     endpoint:
         health:

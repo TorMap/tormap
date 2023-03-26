@@ -18,6 +18,18 @@
             },
             {
                 "pattern": "\\Qua_parser/regexes.yaml\\E"
+            },
+            {
+                "pattern": "\\Qstatic/favicon.ico\\E"
+            },
+            {
+                "pattern": "\\Qstatic/favicon-16x16.png\\E"
+            },
+            {
+                "pattern": "\\Qstatic/favicon-32x32.png\\E"
+            },
+            {
+                "pattern": "\\Qstatic/robots.txt\\E"
             }
         ]
     },

@@ -1,6 +1,7 @@
 package org.tormap.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
+import java.nio.file.Path
 
 @ConfigurationProperties("descriptor")
 data class DescriptorConfig(
@@ -12,7 +13,7 @@ data class DescriptorConfig(
     /**
      * The local directory in which downloaded descriptors will be saved
      */
-    val localDownloadDirectory: String,
+    val localDownloadDirectory: Path,
 
     /**
      * The sub path to download historic (starting 2007-10) relay consensus descriptors from

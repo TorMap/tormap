@@ -32,7 +32,7 @@ class RelayDetailsUpdateService(
 
         for (month in monthsToProcess) {
             val relaysWithoutAS = relayDetailsRepository.findAllByMonthAndAutonomousSystemNumberNull(month)
-            val updatedRelayDetails = relaysWithoutAS.filter { it.updateAutonomousSystem() }
+            val updatedRelayDetails = relaysWithoutAS.filter(::updatedAutonomousSystem)
 
             if (updatedRelayDetails.isNotEmpty()) {
                 relayDetailsRepository.saveAll(updatedRelayDetails)
@@ -47,13 +47,13 @@ class RelayDetailsUpdateService(
      * Trys to add an Autonomous System to [this].
      * @return true if details were updated
      */
-    private fun RelayDetails.updateAutonomousSystem(): Boolean {
-        val autonomousSystem = ipLookupService.lookupAutonomousSystem(this.address)
+    private fun updatedAutonomousSystem(relayDetails: RelayDetails): Boolean {
+        val autonomousSystem = ipLookupService.lookupAutonomousSystem(relayDetails.address)
 
         return if (autonomousSystem == null) false
         else {
-            this.autonomousSystemName = autonomousSystem.autonomousSystemOrganization
-            this.autonomousSystemNumber = autonomousSystem.autonomousSystemNumber.toInt()
+            relayDetails.autonomousSystemName = autonomousSystem.autonomousSystemOrganization
+            relayDetails.autonomousSystemNumber = autonomousSystem.autonomousSystemNumber.toInt()
             true
         }
     }

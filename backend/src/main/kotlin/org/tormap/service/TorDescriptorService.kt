@@ -20,10 +20,12 @@ import org.torproject.descriptor.UnparseableDescriptor
 import org.torproject.descriptor.impl.DescriptorReaderImpl
 import org.torproject.descriptor.index.DescriptorIndexCollector
 import java.io.File
+import java.nio.file.Paths
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
+import kotlin.io.path.absolute
 
 /**
  * This service can collect and process Tor descriptors.
@@ -65,10 +67,10 @@ class TorDescriptorService(
      */
     private fun collectDescriptors(apiPath: String, shouldDeleteLocalFilesNotFoundOnRemote: Boolean) =
         descriptorCollector.collectDescriptors(
-            descriptorConfig.apiBaseURL,
+            descriptorConfig.apiBaseURL.toString(),
             arrayOf(apiPath),
             0L,
-            File(descriptorConfig.localDownloadDirectory),
+            descriptorConfig.localDownloadDirectory.toFile(),
             shouldDeleteLocalFilesNotFoundOnRemote
         )
 
@@ -151,7 +153,7 @@ class TorDescriptorService(
      */
     private fun readDescriptors(apiPath: String, descriptorType: DescriptorType): MutableIterable<Descriptor> {
         val descriptorReader = DescriptorReaderImpl()
-        val parentDirectory = File(descriptorConfig.localDownloadDirectory + apiPath)
+        val parentDirectory = Paths.get(descriptorConfig.localDownloadDirectory.toString(), apiPath)
         if (descriptorType.isRecent()) {
             processedFileRepository.deleteAllByTypeAndLastModifiedBefore(
                 descriptorType,
@@ -160,10 +162,10 @@ class TorDescriptorService(
         }
         val excludedFiles = processedFileRepository.findAllByTypeAndErrorNull(descriptorType)
         descriptorReader.excludedFiles = excludedFiles.associate {
-            (parentDirectory.absolutePath + File.separator + it.filename) to it.lastModified
+            parentDirectory.resolve(it.filename).absolute().toString() to it.lastModified
         }.toSortedMap()
 
-        return descriptorReader.readDescriptors(parentDirectory)
+        return descriptorReader.readDescriptors(parentDirectory.toFile())
     }
 
     /**
@@ -175,14 +177,15 @@ class TorDescriptorService(
                 is RelayNetworkStatusConsensus -> processRelayConsensusDescriptor(descriptor)
                 is ServerDescriptor -> processServerDescriptor(descriptor)
                 is UnparseableDescriptor -> {
-                    logger.debug {
-                        "Unparsable descriptor in file ${descriptor.descriptorFile.name}: " +
-                            descriptor.descriptorParseException.message
+                    logger.debug(descriptor.descriptorParseException) {
+                        "Unparsable descriptor in file ${descriptor.descriptorFile.name}"
                     }
                     ProcessedDescriptorInfo()
                 }
 
-                else -> throw Exception("Descriptor type ${descriptor.javaClass.name} is not yet supported!")
+                else -> throw UnsupportedOperationException(
+                    "Descriptor type ${descriptor.javaClass.name} is not yet supported!"
+                )
             }
         } catch (exception: Exception) {
             logger.error { "Could not process descriptor part of ${descriptor.descriptorFile.name}! ${exception.message}" }
@@ -199,16 +202,9 @@ class TorDescriptorService(
         for (statusEntry in descriptor.statusEntries) {
             val networkStatusEntry = statusEntry.value
             if (!relayLocationRepository.existsByDayAndFingerprint(descriptorDay, networkStatusEntry.fingerprint)) {
-                val location = ipLookupService.lookupLocation(networkStatusEntry.address)
-                if (location != null) {
+                ipLookupService.lookupLocation(networkStatusEntry.address)?.let {
                     relayLocationRepository.save(
-                        RelayLocation(
-                            networkStatusEntry,
-                            descriptorDay,
-                            location.latitude,
-                            location.longitude,
-                            location.countryCode
-                        )
+                        RelayLocation(networkStatusEntry, descriptorDay, it.latitude, it.longitude, it.countryCode)
                     )
                 }
             }
