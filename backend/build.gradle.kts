@@ -9,7 +9,7 @@ plugins {
     kotlin("plugin.spring") version kotlin
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "3.0.2"
+    id("org.springframework.boot") version "3.0.5"
     id("io.spring.dependency-management") version "1.1.0"
     id("org.graalvm.buildtools.native") version "0.9.19"
 
@@ -142,4 +142,24 @@ tasks.withType<KotlinCompile>().configureEach {
 // Configure tests
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+// Configure docker build and push
+jib {
+    to {
+        image = "tormap/backend"
+        tags = setOf(version.toString(), version.toString().substringBefore('.'))
+    }
+    from {
+        platforms {
+            platform {
+                architecture = "amd64"
+                os = "linux"
+            }
+            platform {
+                architecture = "arm64"
+                os = "linux"
+            }
+        }
+    }
 }
