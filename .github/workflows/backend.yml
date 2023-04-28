@@ -1,7 +1,11 @@
 name: backend
 
 on:
-  [push, pull_request]:
+  push:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend*'
+  pull_request:
     paths:
       - 'backend/**'
       - '.github/workflows/backend*'
