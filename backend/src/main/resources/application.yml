@@ -25,10 +25,6 @@ management:
             exposure:
                 include: health,info,metrics,caches,httptrace,flyway,logfile,mappings,scheduledtasks,threaddump,heapdump
             base-path: /actuator
-    trace:
-        http:
-            include: PRINCIPAL,REMOTE_ADDRESS,REQUEST_HEADERS,RESPONSE_HEADERS,SESSION_ID,TIME_TAKEN
-            maxInMemory: 100
 logging:
     file:
         path: logs/spring-boot-logger.log
