@@ -18,7 +18,7 @@ jobs:
           yarn install --immutable
           yarn build
 
-      - name: Deploy preview channel
+      - name: Deploy to preview channel
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
