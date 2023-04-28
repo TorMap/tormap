@@ -88,6 +88,7 @@ The main `backend` config is located at `backend/srv/main/resorces/application.y
 with
 `backend/srv/main/resorces/logback-spring.xml`. Dependencies are managed with `Gradle` and located
 at `backend/build.gradle.kts`.
+When deploying, the environment variable `NEW_RELIC_INGEST_KEY` can be set to collect metrics to https://newrelic.com.
 
 #### OpenAPI specification
 
