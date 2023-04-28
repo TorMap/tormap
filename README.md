@@ -183,3 +183,4 @@ TorMap releases can be found at https://github.com/TorMap/tormap/releases. We us
 [Semantic Versioning](https://semver.org/) and try to keep the frontend,
 backend, [GitHub](https://github.com/TorMap/tormap) and [Docker tags](https://hub.docker.com/r/tormap/)
 consistent.
+
