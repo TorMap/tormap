@@ -1,4 +1,4 @@
-name: backend
+name: backend_test
 
 on:
   push:
@@ -10,8 +10,12 @@ on:
       - 'backend/**'
       - '.github/workflows/backend*'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  gradle_test:
+  backend_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
