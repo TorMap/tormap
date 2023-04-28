@@ -11,6 +11,7 @@ import org.springframework.boot.actuate.autoconfigure.metrics.export.simple.Simp
 import org.springframework.boot.autoconfigure.AutoConfigureAfter
 import org.springframework.boot.autoconfigure.AutoConfigureBefore
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.net.InetAddress
@@ -27,6 +28,7 @@ import java.time.Duration
 @ConditionalOnClass(
     NewRelicRegistry::class
 )
+@ConditionalOnProperty(name = ["NEW_RELIC_INGEST_KEY"])
 class NewRelicMetricsExportAutoConfiguration {
     @Bean
     fun newRelicConfig(): NewRelicRegistryConfig {
