@@ -4608,7 +4608,7 @@ __metadata:
     react-leaflet: 3.2.5
     react-sliding-pane: 7.3.0
     typescript: 5.0.4
-    vite: 4.0.4
+    vite: 4.0.5
     vite-plugin-checker: 0.6.0
   languageName: unknown
   linkType: soft
@@ -4790,9 +4790,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:4.0.4":
-  version: 4.0.4
-  resolution: "vite@npm:4.0.4"
+"vite@npm:4.0.5":
+  version: 4.0.5
+  resolution: "vite@npm:4.0.5"
   dependencies:
     esbuild: ^0.16.3
     fsevents: ~2.3.2
@@ -4824,7 +4824,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: eb86c8cdfe8dcb6644005486b31cb60bc596f2aa683cb194abb5c0afca7c2a5dfdb02bbc7f83f419ad170227ac9c3b898f4406a6d1433105fb61d79d78e47d52
+  checksum: efaa4cf8a1065ea34ef001e385a9bb89e068ec2d1c633cb3a8e4eb3149343f95827615fd5cc28cada8090b6c8cee9b1f00d3d553050377a67aa202e740f43717
   languageName: node
   linkType: hard
 
