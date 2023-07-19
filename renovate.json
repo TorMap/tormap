@@ -24,9 +24,15 @@
     {
       "description": "Ignore specific docker images",
       "packagePatterns": [
-        "^eclipse-temurin",
+        "^eclipse-temurin"
       ],
       "enabled": false
+    },
+    {
+      "packagePatterns": [
+        "^@types/leaflet$"
+      ],
+      "allowedVersions": ">1.9.3"
     }
   ]
 }
