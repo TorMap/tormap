@@ -14,7 +14,7 @@
     "@mui/icons-material": "5.14.0",
     "@mui/material": "5.14.0",
     "@mui/styles": "5.14.0",
-    "@mui/x-date-pickers": "5.0.20",
+    "@mui/x-date-pickers": "6.9.2",
     "axios": "1.4.0",
     "date-fns": "2.30.0",
     "jotai": "2.2.2",
