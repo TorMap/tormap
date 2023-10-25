@@ -1027,12 +1027,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/leaflet.heat@npm:0.2.1":
-  version: 0.2.1
-  resolution: "@types/leaflet.heat@npm:0.2.1"
+"@types/leaflet.heat@npm:0.2.3":
+  version: 0.2.3
+  resolution: "@types/leaflet.heat@npm:0.2.3"
   dependencies:
     "@types/leaflet": "*"
-  checksum: d15ad7fd1dbcc863114c431ab480e70a6f835791c749102190be378f15a1e351fad9c9fa41768528ab884f0d5ab31d080fc4e3b66f2bd6abb147de2366af9147
+  checksum: 71d9a982d7899f481c4b796d7874ddcffa96f641d0e41a4baa1b375ef047d622b0317afb81fb24c36296d65fc918555ef1987256a03d42853a3e06f757787ad4
   languageName: node
   linkType: hard
 
@@ -4574,7 +4574,7 @@ __metadata:
     "@mui/x-date-pickers": 5.0.20
     "@types/geojson": 7946.0.10
     "@types/leaflet": 1.9.0
-    "@types/leaflet.heat": 0.2.1
+    "@types/leaflet.heat": 0.2.3
     "@types/node": 16.18.38
     "@types/react": 18.2.15
     "@types/react-dom": 18.2.7
