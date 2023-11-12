@@ -102,15 +102,15 @@ TorMap uses DB files in [MaxMind DB file format](https://maxmind.github.io/MaxMi
 descriptors are being processed and missing autonomous systems info is also updated regularly.
 
 IP ranges and their geographic location changes over time. We only use the current IP to location data although the
-location of some relays in the past might have been different. It is advised to replace the `.mmdb` DB files every few
+location of some relays in the past might have been different. If desired, the `.mmdb` DB files can be updated every few
 months, to keep the IP ranges up to date.
 
 Replacing existing DB files:
 
 1. Download latest MMDB file from https://db-ip.com/db/download/ip-to-country-lite
-2. Replace `backend/ip-lookup/location/dbip/dbip-city-lite.mmdb`
+2. Replace `backend/ip-lookup/location/dbip-city-lite-<YEAR>-<MONTH>.mmdb`
 3. Create account and download latest GeoLite2 ASN MMDB file from https://www.maxmind.com/
-4. Replace `backend/ip-lookup/autonomous-system/maxmind/GeoLite2-ASN.mmdb`
+4. Replace `backend/ip-lookup/autonomous-system/GeoLite2-ASN-<YEAR>-<MONTH>.mmdb`
 
 #### Admin access
 
