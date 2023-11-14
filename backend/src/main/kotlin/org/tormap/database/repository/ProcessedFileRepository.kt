@@ -14,9 +14,9 @@ import javax.transaction.Transactional
  * Repository to interact with DB
  */
 interface ProcessedFileRepository : JpaRepository<ProcessedFile, DescriptorFileId> {
-    fun findAllById_TypeEqualsAndErrorNull(descriptorType: DescriptorType): List<ProcessedFile>
+    fun findAllById_TypeEquals(descriptorType: DescriptorType): List<ProcessedFile>
 
     @Transactional
     @Modifying
-    fun deleteAllById_TypeEqualsAndLastModifiedBefore(descriptorType: DescriptorType, lastModifiedBefore: Long)
+    fun deleteById_TypeInAndLastModifiedBefore(descriptorTypes: List<DescriptorType>, lastModifiedBefore: Long)
 }

@@ -12,10 +12,6 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.net.InetAddress
 
-
-/**
- * This service handles location tasks requiring a geo location database
- */
 @Service
 class IpLookupService(
     ipLookupConfig: IpLookupConfig,
@@ -26,10 +22,6 @@ class IpLookupService(
     private var maxmindAutonomousSystemDB =
         maxmindTypeDatabaseReader(javaClass.getResource(ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile)!!.path, ipLookupConfig.shouldCache)
 
-    /**
-     * Get the approximate geo location of an [ipAddress]
-     * by looking it up with two different file based DB providers (IP2Location & Maxmind)
-     */
     fun lookupLocation(ipAddress: String): Location? = try {
         Location(dbipLocationDB.city(InetAddress.getByName(ipAddress)))
     } catch (exception: Exception) {
@@ -37,10 +29,6 @@ class IpLookupService(
         null
     }
 
-    /**
-     * Get the approximate geo location of an [ipAddress]
-     * by looking it up with two different file based DB providers (IP2Location & Maxmind)
-     */
     fun lookupAutonomousSystem(ipAddress: String): AsnResponse? = try {
         maxmindAutonomousSystemDB.asn(InetAddress.getByName(ipAddress))
     } catch (exception: Exception) {
@@ -48,9 +36,6 @@ class IpLookupService(
         null
     }
 
-    /**
-     * Create a database reader for the [.mmdb file format](https://maxmind.github.io/MaxMind-DB/)
-     */
     private fun maxmindTypeDatabaseReader(databaseFilePath: String, shouldCache: Boolean) =
         if (shouldCache)
             DatabaseReader.Builder(File(databaseFilePath)).withCache(CHMCache()).build()
