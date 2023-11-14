@@ -2,9 +2,11 @@ package org.tormap.service
 
 import org.springframework.stereotype.Service
 import org.tormap.config.value.DescriptorConfig
-import org.tormap.database.entity.*
+import org.tormap.database.entity.DescriptorType
+import org.tormap.database.entity.isRecent
+import org.tormap.database.entity.isRelayServerType
 import org.tormap.util.logger
-import org.torproject.descriptor.*
+import org.torproject.descriptor.DescriptorCollector
 import org.torproject.descriptor.index.DescriptorIndexCollector
 import java.io.File
 
