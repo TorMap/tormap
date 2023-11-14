@@ -18,13 +18,7 @@ class ProcessedFile(
     var id: DescriptorFileId,
     var lastModified: Long,
     var processedAt: LocalDateTime = LocalDateTime.now(),
-    error: String? = null,
-) {
-    var error: String? = error.stripLengthForDB()
-        set(value) {
-            field = value.stripLengthForDB()
-        }
-}
+)
 
 /**
  * This represents a composite id
