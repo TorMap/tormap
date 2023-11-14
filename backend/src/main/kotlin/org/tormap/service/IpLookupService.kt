@@ -18,11 +18,18 @@ class IpLookupService(
 ) {
     private val logger = logger()
     private var dbipLocationDB =
-        maxmindTypeDatabaseReader(javaClass.getResource(ipLookupConfig.locationLookup.dbipDatabaseFile)!!.path, ipLookupConfig.shouldCache)
+        maxmindTypeDatabaseReader(
+            javaClass.getResource(ipLookupConfig.locationLookup.dbipDatabaseFile)!!.path,
+            ipLookupConfig.shouldCache
+        )
     private var maxmindAutonomousSystemDB =
-        maxmindTypeDatabaseReader(javaClass.getResource(ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile)!!.path, ipLookupConfig.shouldCache)
+        maxmindTypeDatabaseReader(
+            javaClass.getResource(ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile)!!.path,
+            ipLookupConfig.shouldCache
+        )
 
     fun lookupLocation(ipAddress: String): Location? = try {
+        ensureValidPublicIPAddress(ipAddress)
         Location(dbipLocationDB.city(InetAddress.getByName(ipAddress)))
     } catch (exception: Exception) {
         logger.warn("Location lookup for IP $ipAddress with provider dbip failed! ${exception.javaClass}: ${exception.message}")
@@ -30,10 +37,48 @@ class IpLookupService(
     }
 
     fun lookupAutonomousSystem(ipAddress: String): AsnResponse? = try {
+        ensureValidPublicIPAddress(ipAddress)
         maxmindAutonomousSystemDB.asn(InetAddress.getByName(ipAddress))
     } catch (exception: Exception) {
         logger.debug("Autonomous System lookup for IP $ipAddress with provider MaxMind failed! ${exception.javaClass}: ${exception.message}")
         null
+    }
+
+    private fun ensureValidPublicIPAddress(ipAddress: String): String {
+        if (!isValidIPAddress(ipAddress)) {
+            throw Exception("IP address $ipAddress is not valid!")
+        }
+
+        if (isPrivateIPAddress(ipAddress)) {
+            throw Exception("IP address $ipAddress is private!")
+        }
+        return ipAddress
+    }
+
+    private fun isValidIPAddress(ipAddress: String): Boolean {
+        return Regex("^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}\$").matches(ipAddress)
+    }
+
+    private fun isPrivateIPAddress(ipAddress: String): Boolean {
+        val ipParts = ipAddress.split(".")
+        val firstOctet = ipParts[0].toInt()
+
+        when (firstOctet) {
+            in 10..10 -> return true // 10.0.0.0 to 10.255.255.255
+            in 172..172 -> {
+                val secondOctet = ipParts[1].toInt()
+                if (secondOctet in 16..31) {
+                    return true // 172.16.0.0 to 172.31.255.255
+                }
+            }
+            in 192..192 -> {
+                val secondOctet = ipParts[1].toInt()
+                if (secondOctet == 168) {
+                    return true // 192.168.0.0 to 192.168.255.255
+                }
+            }
+        }
+        return false
     }
 
     private fun maxmindTypeDatabaseReader(databaseFilePath: String, shouldCache: Boolean) =
