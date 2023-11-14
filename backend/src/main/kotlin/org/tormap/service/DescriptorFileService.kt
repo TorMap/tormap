@@ -6,7 +6,6 @@ import org.tormap.database.entity.DescriptorFileId
 import org.tormap.database.entity.DescriptorType
 import org.tormap.database.entity.ProcessedFile
 import org.tormap.database.repository.ProcessedFileRepository
-import org.tormap.util.logger
 import org.torproject.descriptor.Descriptor
 import org.torproject.descriptor.impl.DescriptorReaderImpl
 import java.io.File
@@ -21,8 +20,6 @@ class DescriptorFileService(
     private val descriptorConfig: DescriptorConfig,
     private val processedFileRepository: ProcessedFileRepository,
 ) {
-    private val logger = logger()
-
     /**
      * Read descriptors which were previously saved to disk at [apiPath].
      * A reader can consume quite some memory. Try not to create multiple readers in a short time.
