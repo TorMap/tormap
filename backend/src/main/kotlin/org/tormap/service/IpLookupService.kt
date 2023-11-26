@@ -31,8 +31,7 @@ class IpLookupService(
     fun lookupLocation(ipAddress: String): Location? = try {
         if (isValidPublicIPAddress(ipAddress)) {
             Location(dbipLocationDB.city(InetAddress.getByName(ipAddress)))
-        }
-        null
+        } else null
     } catch (exception: Exception) {
         logger.debug("Location lookup for IP $ipAddress failed! ${exception.javaClass}: ${exception.message}")
         null
@@ -41,8 +40,7 @@ class IpLookupService(
     fun lookupAutonomousSystem(ipAddress: String): AsnResponse? = try {
         if (isValidPublicIPAddress(ipAddress)) {
             maxmindAutonomousSystemDB.asn(InetAddress.getByName(ipAddress))
-        }
-        null
+        } else null
     } catch (exception: Exception) {
         logger.debug("Autonomous System lookup for IP $ipAddress failed! ${exception.javaClass}: ${exception.message}")
         null
