@@ -31,7 +31,6 @@ class RelayDetailsUpdateService(
      */
     fun updateAutonomousSystems() {
         try {
-            relayDetailsRepositoryImpl.flush()
             val monthsToProcess = relayDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
             logger.info("... Updating Autonomous Systems for months: ${monthsToProcess.joinToString(", ")}")
             monthsToProcess.forEach {
@@ -87,7 +86,6 @@ class RelayDetailsUpdateService(
     fun updateFamilies(months: Set<String>) {
         try {
             logger.info("... Updating relay families for months: ${months.joinToString(", ")}")
-            relayDetailsRepositoryImpl.flush()
             months.forEach { month ->
                 try {
                     updateFamiliesForMonth(month)

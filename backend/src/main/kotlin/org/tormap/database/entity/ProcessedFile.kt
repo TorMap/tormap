@@ -58,3 +58,6 @@ fun DescriptorType.isRecent() =
 
 fun DescriptorType.isRelayServerType() =
     this === DescriptorType.ARCHIVE_RELAY_SERVER || this === DescriptorType.RECENT_RELAY_SERVER
+
+fun DescriptorType.isRelayConsensusType() =
+    this === DescriptorType.ARCHIVE_RELAY_CONSENSUS || this === DescriptorType.RECENT_RELAY_CONSENSUS

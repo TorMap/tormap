@@ -4,7 +4,10 @@ import org.springframework.stereotype.Service
 import org.tormap.config.value.DescriptorConfig
 import org.tormap.database.entity.DescriptorType
 import org.tormap.database.entity.isRecent
+import org.tormap.database.entity.isRelayConsensusType
 import org.tormap.database.entity.isRelayServerType
+import org.tormap.database.repository.RelayDetailsRepository
+import org.tormap.database.repository.RelayLocationRepository
 import org.tormap.util.logger
 import org.torproject.descriptor.DescriptorCollector
 import org.torproject.descriptor.index.DescriptorIndexCollector
@@ -20,7 +23,9 @@ class DescriptorCoordinationService(
     private val descriptorConfig: DescriptorConfig,
     private val relayDetailsUpdateService: RelayDetailsUpdateService,
     private val descriptorFileService: DescriptorFileService,
-    private val descriptorProcessingService: DescriptorProcessingService
+    private val descriptorProcessingService: DescriptorProcessingService,
+    private val relayDetailsRepository: RelayDetailsRepository,
+    private val relayLocationRepository: RelayLocationRepository,
 ) {
     private val logger = logger()
     private val descriptorCollector: DescriptorCollector = DescriptorIndexCollector()
@@ -56,23 +61,47 @@ class DescriptorCoordinationService(
         var errorCount = 0
         val processedMonths = mutableSetOf<String>()
         descriptorFileService.getDescriptorDiskReader(apiPath, descriptorType).forEach { descriptor ->
-            if (lastProcessedFile != null && lastProcessedFile != descriptor.descriptorFile) {
-                logger.info("Finished processing descriptors file ${lastProcessedFile?.name} with $errorCount errors.")
-                if (errorCount == 0) {
-                    lastProcessedFile?.let {
-                        descriptorFileService.saveProcessedFileReference(it, descriptorType)
+            lastProcessedFile?.let {
+                if (it != descriptor.descriptorFile) {
+                    flushRelayRepositoryAndSaveProcessedFile(it, descriptorType, errorCount)
+                    if (descriptorType.isRelayServerType()) {
+                        relayDetailsUpdateService.updateFamilies(processedMonths)
                     }
+                    processedMonths.clear()
+                    errorCount = 0
                 }
-                if (descriptorType.isRelayServerType()) {
-                    relayDetailsUpdateService.updateFamilies(processedMonths)
-                }
-                processedMonths.clear()
-                errorCount = 0
             }
             val descriptorInfo = descriptorProcessingService.processDescriptor(descriptor)
             descriptorInfo.yearMonth?.let { processedMonths.add(it) }
             descriptorInfo.error?.let { errorCount++ }
             lastProcessedFile = descriptor.descriptorFile
+        }
+    }
+
+    private fun flushRelayRepositoryAndSaveProcessedFile(file: File, descriptorType: DescriptorType, errorCount: Int) {
+        try {
+            when {
+                descriptorType.isRelayServerType() -> relayDetailsRepository.flush()
+                descriptorType.isRelayConsensusType() -> relayLocationRepository.flush()
+                else -> throw Exception("Descriptor type ${descriptorType.name} is not yet supported!")
+            }
+            if (errorCount == 0) {
+                descriptorFileService.saveProcessedFileReference(file, descriptorType)
+            }
+            logFinishedProcessingDescriptorFile(file.name, errorCount)
+        } catch (exception: Exception) {
+            logger.error("Could not flush relay repository for ${descriptorType.name}! ${exception.message}")
+        }
+    }
+
+    private fun logFinishedProcessingDescriptorFile(
+        filename: String,
+        errorCount: Int,
+    ) {
+        if (errorCount == 0) {
+            logger.info("Finished $filename with 0 errors")
+        } else {
+            logger.error("Finished $filename with $errorCount errors")
         }
     }
 }

@@ -36,7 +36,7 @@ class RelayLocationController(
      * Update the cache for available relay location days and the given [day]
      */
     @Async
-    fun cacheNewDay(day: String) {
+    fun updateCache(day: String) {
         cacheManager.getCache(CacheName.RELAY_LOCATION_DAYS)?.invalidate()
         getDays()
         cacheManager.getCache(CacheName.RELAY_LOCATION_DAY)?.put(

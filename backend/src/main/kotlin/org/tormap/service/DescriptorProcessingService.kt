@@ -64,7 +64,7 @@ class DescriptorProcessingService(
             }
         }
         relayLocationRepositoryImpl.flush()
-        relayLocationController.cacheNewDay(descriptorDay.toString())
+        relayLocationController.updateCache(descriptorDay.toString())
         return ProcessedDescriptorInfo(YearMonth.from(descriptorDay).toString())
     }
 
