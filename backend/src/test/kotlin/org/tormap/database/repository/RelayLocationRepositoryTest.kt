@@ -2,8 +2,6 @@ package org.tormap.database.repository
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.tormap.mockRelayLocation
@@ -15,9 +13,7 @@ class RelayLocationRepositoryTest(
     private val relayLocationRepository: RelayLocationRepositoryImpl,
 ) : StringSpec({
     beforeEach {
-        withContext(Dispatchers.IO) {
-            relayLocationRepository.deleteAll()
-        }
+        relayLocationRepository.deleteAll()
     }
 
     val firstDayOfYear = LocalDate.ofYearDay(2023, 1)

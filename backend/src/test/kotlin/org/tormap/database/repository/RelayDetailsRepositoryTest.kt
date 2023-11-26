@@ -2,8 +2,6 @@ package org.tormap.database.repository
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.tormap.mockRelayDetails
@@ -28,18 +26,14 @@ class RelayDetailsRepositoryTest(
     }
 
     beforeEach {
-        withContext(Dispatchers.IO) {
-            relayDetailsRepository.deleteAll()
-        }
+        relayDetailsRepository.deleteAll()
     }
 
     "findDistinctMonthFamilyMemberCount" {
         setCommonMonthAndFamilyForRelay1And2()
 
-        val monthFamilyCounts = withContext(Dispatchers.IO) {
-            relayDetailsRepository.saveAll(listOf(relay1, relay2, relay3))
-            relayDetailsRepository.findDistinctMonthFamilyMemberCount()
-        }
+        relayDetailsRepository.saveAll(listOf(relay1, relay2, relay3))
+        val monthFamilyCounts = relayDetailsRepository.findDistinctMonthFamilyMemberCount()
 
         monthFamilyCounts.find { it.month == relay1.month }?.count shouldBe 2
         monthFamilyCounts.find { it.month == relay3.month }?.count shouldBe 1
@@ -53,10 +47,8 @@ class RelayDetailsRepositoryTest(
         relay3.month = "2023-03"
         relay3.autonomousSystemNumber = 0
 
-        val months = withContext(Dispatchers.IO) {
-            relayDetailsRepository.saveAll(listOf(relay1, relay2, relay3))
-            relayDetailsRepository.findDistinctMonthsAndAutonomousSystemNumberNull()
-        }
+        relayDetailsRepository.saveAll(listOf(relay1, relay2, relay3))
+        val months = relayDetailsRepository.findDistinctMonthsAndAutonomousSystemNumberNull()
 
         months shouldBe setOf(relay1.month, relay2.month)
     }
@@ -66,10 +58,8 @@ class RelayDetailsRepositoryTest(
         relay2.id = 1
         relay3.id = 2
 
-        val relayIdentifiersList = withContext(Dispatchers.IO) {
-            relayDetailsRepository.saveAll(listOf(relay1, relay2, relay3))
-            relayDetailsRepository.findRelayIdentifiers(listOf(relay1.id!!, relay2.id!!))
-        }
+        relayDetailsRepository.saveAll(listOf(relay1, relay2, relay3))
+        val relayIdentifiersList = relayDetailsRepository.findRelayIdentifiers(listOf(relay1.id!!, relay2.id!!))
 
         // TODO
 //        relayIdentifiersList.find { relayIdentifiers ->
@@ -90,10 +80,9 @@ class RelayDetailsRepositoryTest(
     "findFamilyIdentifiers" {
         setCommonMonthAndFamilyForRelay1And2()
 
-        val familyIdentifiers = withContext(Dispatchers.IO) {
-            relayDetailsRepository.saveAll(listOf(relay1, relay2, relay3))
-            relayDetailsRepository.findFamilyIdentifiers(listOf(relay1.familyId!!))
-        }.first()
+        relayDetailsRepository.saveAll(listOf(relay1, relay2, relay3))
+
+        val familyIdentifiers = relayDetailsRepository.findFamilyIdentifiers(listOf(relay1.familyId!!)).first()
         familyIdentifiers.id shouldBe relay1.familyId!!
         familyIdentifiers.memberCount shouldBe 2
         familyIdentifiers.nicknames shouldBe "${relay1.nickname}, ${relay2.nickname}"
@@ -103,13 +92,10 @@ class RelayDetailsRepositoryTest(
     "clearFamiliesFromMonth" {
         setCommonMonthAndFamilyForRelay1And2()
 
-        val updatedEntryCount = withContext(Dispatchers.IO) {
-            relayDetailsRepository.saveAll(listOf(relay1, relay2, relay3))
-            relayDetailsRepository.clearFamiliesFromMonth(relay1.month)
-        }
+        relayDetailsRepository.saveAll(listOf(relay1, relay2, relay3))
+        val updatedEntryCount = relayDetailsRepository.clearFamiliesFromMonth(relay1.month)
+
         updatedEntryCount shouldBe 2
-        withContext(Dispatchers.IO) {
-            relayDetailsRepository.findAllByFamilyId(relay1.familyId!!)
-        }.size shouldBe 0
+        relayDetailsRepository.findAllByFamilyId(relay1.familyId!!).size shouldBe 0
     }
 })
