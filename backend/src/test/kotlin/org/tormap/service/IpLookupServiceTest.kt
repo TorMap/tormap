@@ -21,4 +21,15 @@ class IpLookupServiceTest(
     "lookupAutonomousSystem" {
         ipLookupService.lookupAutonomousSystem(hetznerIPAddress)?.autonomousSystemNumber shouldBe hetznerAutonomousSystemNumber
     }
+
+    "returns null for invalid IP address" {
+        ipLookupService.lookupLocation("invalid IP address") shouldBe null
+        ipLookupService.lookupAutonomousSystem("invalid IP address") shouldBe null
+    }
+
+    "returns null for private IP address" {
+        repeat(10000) {
+            ipLookupService.lookupLocation("10.0.0.$it") shouldBe null
+        }
+    }
 })
