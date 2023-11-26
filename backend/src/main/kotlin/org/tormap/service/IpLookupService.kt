@@ -12,45 +12,69 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.net.InetAddress
 
-
-/**
- * This service handles location tasks requiring a geo location database
- */
 @Service
 class IpLookupService(
     ipLookupConfig: IpLookupConfig,
 ) {
     private val logger = logger()
     private var dbipLocationDB =
-        maxmindTypeDatabaseReader(javaClass.getResource(ipLookupConfig.locationLookup.dbipDatabaseFile)!!.path, ipLookupConfig.shouldCache)
+        maxmindTypeDatabaseReader(
+            javaClass.getResource(ipLookupConfig.locationLookup.dbipDatabaseFile)!!.path,
+            ipLookupConfig.shouldCache
+        )
     private var maxmindAutonomousSystemDB =
-        maxmindTypeDatabaseReader(javaClass.getResource(ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile)!!.path, ipLookupConfig.shouldCache)
+        maxmindTypeDatabaseReader(
+            javaClass.getResource(ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile)!!.path,
+            ipLookupConfig.shouldCache
+        )
 
-    /**
-     * Get the approximate geo location of an [ipAddress]
-     * by looking it up with two different file based DB providers (IP2Location & Maxmind)
-     */
     fun lookupLocation(ipAddress: String): Location? = try {
-        Location(dbipLocationDB.city(InetAddress.getByName(ipAddress)))
+        if (isValidPublicIPAddress(ipAddress)) {
+            Location(dbipLocationDB.city(InetAddress.getByName(ipAddress)))
+        } else null
     } catch (exception: Exception) {
-        logger.warn("Location lookup for IP $ipAddress with provider dbip failed! ${exception.javaClass}: ${exception.message}")
+        logger.debug("Location lookup for IP $ipAddress failed! ${exception.javaClass}: ${exception.message}")
         null
     }
 
-    /**
-     * Get the approximate geo location of an [ipAddress]
-     * by looking it up with two different file based DB providers (IP2Location & Maxmind)
-     */
     fun lookupAutonomousSystem(ipAddress: String): AsnResponse? = try {
-        maxmindAutonomousSystemDB.asn(InetAddress.getByName(ipAddress))
+        if (isValidPublicIPAddress(ipAddress)) {
+            maxmindAutonomousSystemDB.asn(InetAddress.getByName(ipAddress))
+        } else null
     } catch (exception: Exception) {
-        logger.debug("Autonomous System lookup for IP $ipAddress with provider MaxMind failed! ${exception.javaClass}: ${exception.message}")
+        logger.debug("Autonomous System lookup for IP $ipAddress failed! ${exception.javaClass}: ${exception.message}")
         null
     }
 
-    /**
-     * Create a database reader for the [.mmdb file format](https://maxmind.github.io/MaxMind-DB/)
-     */
+    private fun isValidPublicIPAddress(ipAddress: String) =
+        isValidIPAddress(ipAddress) && !isPrivateIPAddress(ipAddress)
+
+    private fun isValidIPAddress(ipAddress: String) =
+        Regex("^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}\$").matches(ipAddress)
+
+    private fun isPrivateIPAddress(ipAddress: String): Boolean {
+        val ipParts = ipAddress.split(".")
+        val firstOctet = ipParts[0].toInt()
+
+        when (firstOctet) {
+            in 10..10 -> return true // 10.0.0.0 to 10.255.255.255
+            in 172..172 -> {
+                val secondOctet = ipParts[1].toInt()
+                if (secondOctet in 16..31) {
+                    return true // 172.16.0.0 to 172.31.255.255
+                }
+            }
+
+            in 192..192 -> {
+                val secondOctet = ipParts[1].toInt()
+                if (secondOctet == 168) {
+                    return true // 192.168.0.0 to 192.168.255.255
+                }
+            }
+        }
+        return false
+    }
+
     private fun maxmindTypeDatabaseReader(databaseFilePath: String, shouldCache: Boolean) =
         if (shouldCache)
             DatabaseReader.Builder(File(databaseFilePath)).withCache(CHMCache()).build()

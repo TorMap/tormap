@@ -1,7 +1,6 @@
 package org.tormap.service
 
 import org.springframework.jdbc.support.incrementer.PostgresSequenceMaxValueIncrementer
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.tormap.adapter.controller.RelayLocationController
 import org.tormap.database.entity.RelayDetails
@@ -30,10 +29,8 @@ class RelayDetailsUpdateService(
     /**
      * Updates [RelayDetails.autonomousSystemName] and [RelayDetails.autonomousSystemNumber] for all [RelayDetails] missing this info.
      */
-    @Async
     fun updateAutonomousSystems() {
         try {
-            relayDetailsRepositoryImpl.flush()
             val monthsToProcess = relayDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
             logger.info("... Updating Autonomous Systems for months: ${monthsToProcess.joinToString(", ")}")
             monthsToProcess.forEach {
@@ -57,7 +54,7 @@ class RelayDetailsUpdateService(
     }
 
     /**
-     * Trys to add an Autonomous System to [this]
+     * Trys to add Autonomous System info to [RelayDetails]
      * @return true if node was changed
      */
     private fun RelayDetails.updateAutonomousSystem(): Boolean {
@@ -89,7 +86,6 @@ class RelayDetailsUpdateService(
     fun updateFamilies(months: Set<String>) {
         try {
             logger.info("... Updating relay families for months: ${months.joinToString(", ")}")
-            relayDetailsRepositoryImpl.flush()
             months.forEach { month ->
                 try {
                     updateFamiliesForMonth(month)

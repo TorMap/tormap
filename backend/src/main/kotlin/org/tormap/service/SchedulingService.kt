@@ -14,11 +14,12 @@ import org.tormap.database.entity.DescriptorType
  */
 @Service
 @Async
-class ScheduleService(
+class SchedulingService(
     private val descriptorConfig: DescriptorConfig,
     private val scheduleConfig: ScheduleConfig,
-    private val torDescriptorService: TorDescriptorService,
+    private val descriptorCoordinationService: DescriptorCoordinationService,
     private val relayDetailsUpdateService: RelayDetailsUpdateService,
+    private val descriptorFileService: DescriptorFileService,
 ) {
     /**
      * Fetches and processes relay consensus descriptors of the last 3 days.
@@ -27,7 +28,7 @@ class ScheduleService(
      */
     @Scheduled(fixedRateString = "\${schedule.rate.recentRelayConsensuses}")
     fun recentRelayConsensuses() =
-        torDescriptorService.collectAndProcessDescriptors(
+        descriptorCoordinationService.collectAndProcessDescriptors(
             descriptorConfig.recentRelayConsensuses,
             DescriptorType.RECENT_RELAY_CONSENSUS
         )
@@ -39,7 +40,7 @@ class ScheduleService(
      */
     @Scheduled(fixedRateString = "\${schedule.rate.recentRelayServers}")
     fun recentRelayServers() =
-        torDescriptorService.collectAndProcessDescriptors(
+        descriptorCoordinationService.collectAndProcessDescriptors(
             descriptorConfig.recentRelayServers,
             DescriptorType.RECENT_RELAY_SERVER
         )
@@ -51,7 +52,7 @@ class ScheduleService(
      */
     @Scheduled(fixedRateString = "\${schedule.rate.archiveRelayConsensuses}")
     fun archiveRelayConsensuses() =
-        torDescriptorService.collectAndProcessDescriptors(
+        descriptorCoordinationService.collectAndProcessDescriptors(
             descriptorConfig.archiveRelayConsensuses,
             DescriptorType.ARCHIVE_RELAY_CONSENSUS
         )
@@ -63,7 +64,7 @@ class ScheduleService(
      */
     @Scheduled(fixedRateString = "\${schedule.rate.archiveRelayServers}")
     fun archiveRelayServers() =
-        torDescriptorService.collectAndProcessDescriptors(
+        descriptorCoordinationService.collectAndProcessDescriptors(
             descriptorConfig.archiveRelayServers,
             DescriptorType.ARCHIVE_RELAY_SERVER
         )
@@ -83,5 +84,9 @@ class ScheduleService(
     @Scheduled(fixedRateString = "\${schedule.rate.updateRelayAutonomousSystems}")
     fun updateRelayAutonomousSystems() =
         relayDetailsUpdateService.updateAutonomousSystems()
+
+    @Scheduled(fixedRateString = "P1D")
+    fun deleteRecentFileReference() =
+        descriptorFileService.deleteRecentFileReferences()
 }
 

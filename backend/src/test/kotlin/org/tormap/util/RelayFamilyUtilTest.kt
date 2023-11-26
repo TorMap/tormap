@@ -5,14 +5,14 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import org.tormap.relayDetailsMock
+import org.tormap.mockRelayDetails
 
 @SpringBootTest
 @ActiveProfiles("test")
 class RelayFamilyUtilTest : StringSpec({
-    val relay1 = relayDetailsMock('A')
-    val relay2 = relayDetailsMock('B')
-    val relay3 = relayDetailsMock('C')
+    val relay1 = mockRelayDetails('A')
+    val relay2 = mockRelayDetails('B')
+    val relay3 = mockRelayDetails('C')
 
     listOf(
         relay2.nickname,

@@ -1,6 +1,5 @@
 package org.tormap.database.entity
 
-import org.tormap.util.stripLengthForDB
 import java.io.Serializable
 import java.time.LocalDateTime
 import javax.persistence.Embeddable
@@ -18,13 +17,7 @@ class ProcessedFile(
     var id: DescriptorFileId,
     var lastModified: Long,
     var processedAt: LocalDateTime = LocalDateTime.now(),
-    error: String? = null,
-) {
-    var error: String? = error.stripLengthForDB()
-        set(value) {
-            field = value.stripLengthForDB()
-        }
-}
+)
 
 /**
  * This represents a composite id
@@ -62,3 +55,9 @@ enum class DescriptorType {
 
 fun DescriptorType.isRecent() =
     this === DescriptorType.RECENT_RELAY_CONSENSUS || this === DescriptorType.RECENT_RELAY_SERVER
+
+fun DescriptorType.isRelayServerType() =
+    this === DescriptorType.ARCHIVE_RELAY_SERVER || this === DescriptorType.RECENT_RELAY_SERVER
+
+fun DescriptorType.isRelayConsensusType() =
+    this === DescriptorType.ARCHIVE_RELAY_CONSENSUS || this === DescriptorType.RECENT_RELAY_CONSENSUS
