@@ -1,6 +1,7 @@
 package org.tormap.database.repository
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -11,6 +12,10 @@ import org.tormap.mockRelayDetails
 class RelayDetailsRepositoryTest(
     private val relayDetailsRepository: RelayDetailsRepositoryImpl,
 ) : StringSpec({
+    beforeEach {
+        relayDetailsRepository.deleteAll()
+    }
+
     val relay1 = mockRelayDetails('A')
     val relay2 = mockRelayDetails('B')
     val relay3 = mockRelayDetails('C')
@@ -23,10 +28,6 @@ class RelayDetailsRepositoryTest(
         relay1.familyId = 0L
         relay2.familyId = 0L
         relay3.familyId = 1L
-    }
-
-    beforeEach {
-        relayDetailsRepository.deleteAll()
     }
 
     "findDistinctMonthFamilyMemberCount" {
@@ -54,27 +55,27 @@ class RelayDetailsRepositoryTest(
     }
 
     "findRelayIdentifiers" {
-        relay1.id = 0
-        relay2.id = 1
-        relay3.id = 2
+        val savedRelay1 = relayDetailsRepository.save(relay1)
+        val savedRelay2 = relayDetailsRepository.save(relay2)
+        relayDetailsRepository.save(relay3)
 
-        relayDetailsRepository.saveAll(listOf(relay1, relay2, relay3))
-        val relayIdentifiersList = relayDetailsRepository.findRelayIdentifiers(listOf(relay1.id!!, relay2.id!!))
 
-        // TODO
-//        relayIdentifiersList.find { relayIdentifiers ->
-//            relayIdentifiers.id == relay1.id!!
-//                && relayIdentifiers.fingerprint == relay1.fingerprint
-//                && relayIdentifiers.nickname == relay1.nickname
-//        }.shouldNotBeNull()
-//
-//        relayIdentifiersList.find { relayIdentifiers ->
-//            relayIdentifiers.id == relay2.id!!
-//                && relayIdentifiers.fingerprint == relay2.fingerprint
-//                && relayIdentifiers.nickname == relay2.nickname
-//        }.shouldNotBeNull()
-//
-//        relayIdentifiersList.size shouldBe 2
+        val relayIdentifiersList =
+            relayDetailsRepository.findRelayIdentifiers(listOf(savedRelay1.id!!, savedRelay2.id!!))
+
+        relayIdentifiersList.find { relayIdentifiers ->
+            relayIdentifiers.id == savedRelay1.id!!
+                && relayIdentifiers.fingerprint == savedRelay1.fingerprint
+                && relayIdentifiers.nickname == savedRelay1.nickname
+        }.shouldNotBeNull()
+
+        relayIdentifiersList.find { relayIdentifiers ->
+            relayIdentifiers.id == savedRelay2.id!!
+                && relayIdentifiers.fingerprint == savedRelay2.fingerprint
+                && relayIdentifiers.nickname == savedRelay2.nickname
+        }.shouldNotBeNull()
+
+        relayIdentifiersList.size shouldBe 2
     }
 
     "findFamilyIdentifiers" {
