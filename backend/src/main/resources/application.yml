@@ -7,10 +7,8 @@ descriptor:
     recentRelayServers: /recent/relay-descriptors/server-descriptors/
 ip-lookup:
     shouldCache: true
-    locationLookup:
-        dbipDatabaseFile: /ip-lookup/location/dbip-city-lite-2023-11.mmdb
-    autonomousSystemLookup:
-        maxmindDatabaseFile: /ip-lookup/autonomous-system/GeoLite2-ASN-2023-11.mmdb
+    locationDatabaseFile: /ip-lookup/location.mmdb
+    autonomousSystemDatabaseFile: /ip-lookup/autonomous-system.mmdb
 management:
     endpoint:
         health:

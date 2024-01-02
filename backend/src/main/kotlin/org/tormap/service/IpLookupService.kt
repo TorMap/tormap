@@ -19,12 +19,12 @@ class IpLookupService(
     private val logger = logger()
     private var dbipLocationDB =
         maxmindTypeDatabaseReader(
-            javaClass.getResource(ipLookupConfig.locationLookup.dbipDatabaseFile)!!.path,
+            javaClass.getResource(ipLookupConfig.locationDatabaseFile)!!.path,
             ipLookupConfig.shouldCache
         )
     private var maxmindAutonomousSystemDB =
         maxmindTypeDatabaseReader(
-            javaClass.getResource(ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile)!!.path,
+            javaClass.getResource(ipLookupConfig.autonomousSystemDatabaseFile)!!.path,
             ipLookupConfig.shouldCache
         )
 

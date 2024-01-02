@@ -2,8 +2,3 @@
 backend/src/main/java/** linguist-vendored
 backend/src/main/kotlin/com/** linguist-vendored
 frontend/src/leaflet.css linguist-vendored
-
-# Store IP lookup related files in git Large File Storage (LFS)
-*.mmdb filter=lfs diff=lfs merge=lfs -text
-backend/src/main/resources/ip-lookup/** filter=lfs diff=lfs merge=lfs -text
-*.pdf filter=lfs diff=lfs merge=lfs -text

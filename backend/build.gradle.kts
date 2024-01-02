@@ -97,6 +97,23 @@ tasks.withType<KotlinCompile> {
     }
 }
 
+tasks.register<Copy>("unpackFiles") {
+    val tree = fileTree("ip-lookup")
+    tree.include("*.zip")
+    fileTree("ip-lookup").forEach { file ->
+        from(zipTree(file).files)
+        into("src/main/resources/ip-lookup")
+        rename(".*GeoLite2-ASN.*mmdb", "autonomous-system.mmdb")
+        rename(".*dbip-city-lite.*mmdb", "location.mmdb")
+    }
+}
+tasks.assemble {
+    dependsOn("unpackFiles")
+}
+tasks.processResources {
+    dependsOn("unpackFiles")
+}
+
 // Configure tests
 tasks.withType<Test> {
     useJUnitPlatform()
