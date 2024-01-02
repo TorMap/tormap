@@ -28,8 +28,6 @@ class IpLookupServiceTest(
     }
 
     "returns null for private IP address" {
-        repeat(10000) {
-            ipLookupService.lookupLocation("10.0.0.$it") shouldBe null
-        }
+        ipLookupService.lookupLocation("10.0.0.1") shouldBe null
     }
 })

@@ -29,10 +29,12 @@
       "enabled": false
     },
     {
+      "description": "Leaflet related updates",
       "packagePatterns": [
-        "^@types/leaflet$"
+        "leaflet"
       ],
-      "allowedVersions": ">1.9.3"
+      "groupName": "leaflet",
+      "prPriority": 0
     }
   ]
 }
