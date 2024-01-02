@@ -6,8 +6,8 @@ visualize markers on a world map we use [Leaflet](https://leafletjs.com/).
 
 ## Requirements
 
-- [NodeJS](https://nodejs.org/en/)  (12.0.0 >= version < 17.0.0)
-- [yarn](https://yarnpkg.com/en/docs/install) (3.0.0 >= version)
+- [NodeJS](https://nodejs.org/en/)  (v20)
+- [yarn](https://yarnpkg.com/en/docs/install)
 
 ## Run Development Server
 

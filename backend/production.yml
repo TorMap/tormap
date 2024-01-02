@@ -3,7 +3,7 @@ version: '3.8'
 name: tormap
 services:
     backend:
-        image: tormap/backend:${TORMAP_VERSION:-1}
+        image: tormap/backend:${TORMAP_VERSION:-2}
         volumes:
             - ./tormap-data:/tormap-data
         depends_on:
@@ -24,6 +24,6 @@ services:
             - "5432:5432"
 
     frontend:
-        image: tormap/frontend:${TORMAP_VERSION:-1}
+        image: tormap/frontend:${TORMAP_VERSION:-2}
         ports:
             - "80:80"
