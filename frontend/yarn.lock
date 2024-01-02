@@ -1121,21 +1121,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/leaflet@npm:*":
+"@types/leaflet@npm:*, @types/leaflet@npm:1.9.0":
   version: 1.9.0
   resolution: "@types/leaflet@npm:1.9.0"
   dependencies:
     "@types/geojson": "npm:*"
   checksum: 8e35dee0c64300acd71209db777e9ba831c793532ad4a68ac43f7c910e40812ac58152254045fe07e28fb2d6c28fbe7ecd328ae45fb681f6ee9571a71cf95491
-  languageName: node
-  linkType: hard
-
-"@types/leaflet@npm:1.9.8":
-  version: 1.9.8
-  resolution: "@types/leaflet@npm:1.9.8"
-  dependencies:
-    "@types/geojson": "npm:*"
-  checksum: c0c68ae0d1ccbed60e08ad82670df48f8bb6f19e3abaf84a9cd0a6cbc6d6efdd46852ee7be56744dfa7f3d8665adb56bb06ab02d09f979d3367c941a1fd90f2f
   languageName: node
   linkType: hard
 
@@ -1174,16 +1165,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:18.2.18":
-  version: 18.2.18
-  resolution: "@types/react-dom@npm:18.2.18"
+"@types/react-dom@npm:18.2.7":
+  version: 18.2.7
+  resolution: "@types/react-dom@npm:18.2.7"
   dependencies:
     "@types/react": "npm:*"
-  checksum: 4ef7725b4cebd4a32e049097ddfdfd855a178e63ead97ab6d3084872e7d6c1acd71aa923488123cd1015f0e0b11489d2b44f674a1df8fe82d7827eabbec6dbf1
+  checksum: 9b70ef66cbe2d2898ea37eb79ee3697e0e4ad3d950e769a601f79be94097d43b8ef45b98a0b29528203c7d731c81666f637b2b7032deeced99214b4bc0662614
   languageName: node
   linkType: hard
 
-"@types/react-infinite-scroller@npm:^1":
+"@types/react-infinite-scroller@npm:1.2.5":
   version: 1.2.5
   resolution: "@types/react-infinite-scroller@npm:1.2.5"
   dependencies:
@@ -1230,14 +1221,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:18.2.46":
-  version: 18.2.46
-  resolution: "@types/react@npm:18.2.46"
+"@types/react@npm:18.2.15":
+  version: 18.2.15
+  resolution: "@types/react@npm:18.2.15"
   dependencies:
     "@types/prop-types": "npm:*"
     "@types/scheduler": "npm:*"
     csstype: "npm:^3.0.2"
-  checksum: 10fb28a5b8504106512ce3b154c45d1ac045c31633786773a29f003b3079b434060368bb56f95ef6c39510835ceec4fb8fdc271d6ca2b9cdd979379cf53f126b
+  checksum: 282f3f86f94983ef1af1d66cb552b78131cf3650d29c3080e08a4de8f81489e5b6111c635ad59acf6984ce72281dfcf95004514985b84b5af35898d10414e84f
   languageName: node
   linkType: hard
 
@@ -5081,12 +5072,12 @@ __metadata:
     "@mui/styles": "npm:5.15.2"
     "@mui/x-date-pickers": "npm:5.0.20"
     "@types/geojson": "npm:7946.0.13"
-    "@types/leaflet": "npm:1.9.8"
+    "@types/leaflet": "npm:1.9.0"
     "@types/leaflet.heat": "npm:0.2.4"
     "@types/node": "npm:16.18.69"
-    "@types/react": "npm:18.2.46"
-    "@types/react-dom": "npm:18.2.18"
-    "@types/react-infinite-scroller": "npm:^1"
+    "@types/react": "npm:18.2.15"
+    "@types/react-dom": "npm:18.2.7"
+    "@types/react-infinite-scroller": "npm:1.2.5"
     "@typescript-eslint/eslint-plugin": "npm:6.16.0"
     "@typescript-eslint/parser": "npm:6.16.0"
     "@vitejs/plugin-react-swc": "npm:3.5.0"
