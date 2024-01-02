@@ -13,29 +13,12 @@ data class IpLookupConfig(
     val shouldCache: Boolean,
 
     /**
-     * Config for looking up location
+     * Database file for looking up location
      */
-    val locationLookup: LocationLookupConfig,
-
+    val locationDatabaseFile: String,
 
     /**
-     * Config for looking up autonomous system
+     * Database file for looking up autonomous system
      */
-    val autonomousSystemLookup: AutonomousSystemLookupConfig,
-)
-
-data class LocationLookupConfig(
-
-    /**
-     * Relative backend path to the dbip DB file
-     */
-    val dbipDatabaseFile: String,
-)
-
-data class AutonomousSystemLookupConfig(
-
-    /**
-     * Relative backend path to the MaxMind DB file
-     */
-    val maxmindDatabaseFile: String,
+    val autonomousSystemDatabaseFile: String,
 )

@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "org.tormap"
-version = "1.2.0"
+version = "2.0.0"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
@@ -95,6 +95,23 @@ tasks.withType<KotlinCompile> {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = "11"
     }
+}
+
+tasks.register<Copy>("unpackFiles") {
+    val tree = fileTree("ip-lookup")
+    tree.include("*.zip")
+    fileTree("ip-lookup").forEach { file ->
+        from(zipTree(file).files)
+        into("src/main/resources/ip-lookup")
+        rename(".*GeoLite2-ASN.*mmdb", "autonomous-system.mmdb")
+        rename(".*dbip-city-lite.*mmdb", "location.mmdb")
+    }
+}
+tasks.assemble {
+    dependsOn("unpackFiles")
+}
+tasks.processResources {
+    dependsOn("unpackFiles")
 }
 
 // Configure tests

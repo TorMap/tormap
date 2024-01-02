@@ -6,12 +6,9 @@ build/
 !**/src/test/**/build/
 /logs/
 /*.db
-descriptors/
 .log
-tormap.*.db
-**/*password.txt
-resources/**
 tormap-data/**
+src/main/resources/ip-lookup
 
 ### STS ###
 .apt_generated

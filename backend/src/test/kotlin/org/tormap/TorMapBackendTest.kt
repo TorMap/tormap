@@ -24,8 +24,8 @@ class TorMapBackendTest(
     }
 
     "ip-lookup files exist" {
-        javaClass.getResource(ipLookupConfig.locationLookup.dbipDatabaseFile) shouldNotBe null
-        javaClass.getResource(ipLookupConfig.autonomousSystemLookup.maxmindDatabaseFile) shouldNotBe null
+        javaClass.getResource(ipLookupConfig.locationDatabaseFile) shouldNotBe null
+        javaClass.getResource(ipLookupConfig.autonomousSystemDatabaseFile) shouldNotBe null
     }
 })
 
