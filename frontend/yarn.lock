@@ -3563,12 +3563,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:^3.3.6":
-  version: 3.3.6
-  resolution: "nanoid@npm:3.3.6"
+"nanoid@npm:^3.3.7":
+  version: 3.3.7
+  resolution: "nanoid@npm:3.3.7"
   bin:
     nanoid: bin/nanoid.cjs
-  checksum: 67235c39d1bc05851383dadde5cf77ae1c90c2a1d189e845c7f20f646f0488d875ad5f5226bbba072a88cebbb085a3f784a6673117daf785bdf614a852550362
+  checksum: ac1eb60f615b272bccb0e2b9cd933720dad30bf9708424f691b8113826bb91aca7e9d14ef5d9415a6ba15c266b37817256f58d8ce980c82b0ba3185352565679
   languageName: node
   linkType: hard
 
@@ -3864,14 +3864,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.4.25":
-  version: 8.4.26
-  resolution: "postcss@npm:8.4.26"
+"postcss@npm:^8.4.27":
+  version: 8.4.32
+  resolution: "postcss@npm:8.4.32"
   dependencies:
-    nanoid: "npm:^3.3.6"
+    nanoid: "npm:^3.3.7"
     picocolors: "npm:^1.0.0"
     source-map-js: "npm:^1.0.2"
-  checksum: d220ac966369b32a0b58a3816fdb3c0040c1ae9740681f50415d0df6e589044b3e753e9f24d8d6d1433788e4c4fa0a4fd8922ec232e129c22a5aca28d653079b
+  checksum: 28084864122f29148e1f632261c408444f5ead0e0b9ea9bd9729d0468818ebe73fe5dc0075acd50c1365dbe639b46a79cba27d355ec857723a24bc9af0f18525
   languageName: node
   linkType: hard
 
@@ -4189,9 +4189,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup@npm:^3.25.2":
-  version: 3.26.3
-  resolution: "rollup@npm:3.26.3"
+"rollup@npm:^3.27.1":
+  version: 3.29.4
+  resolution: "rollup@npm:3.29.4"
   dependencies:
     fsevents: "npm:~2.3.2"
   dependenciesMeta:
@@ -4199,7 +4199,7 @@ __metadata:
       optional: true
   bin:
     rollup: dist/bin/rollup
-  checksum: edd5fb7e8c491e581edce9e4881e4b46e2d87bef4691077b29d28cd8e0e79ecd9ecec24b519e09694db9a994f14545e1104b8333f2f19500a8eb34d26bcc8fb9
+  checksum: 9e39d54e23731a4c4067e9c02910cdf7479a0f9a7584796e2dc6efaa34bb1e5e015c062c87d1e64d96038baca76cefd47681ff22604fae5827147f54123dc6d0
   languageName: node
   linkType: hard
 
@@ -4597,7 +4597,7 @@ __metadata:
     react-leaflet: "npm:4.2.1"
     react-sliding-pane: "npm:7.3.0"
     typescript: "npm:5.1.6"
-    vite: "npm:4.4.4"
+    vite: "npm:4.4.12"
     vite-plugin-checker: "npm:0.6.2"
   languageName: unknown
   linkType: soft
@@ -4770,14 +4770,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:4.4.4":
-  version: 4.4.4
-  resolution: "vite@npm:4.4.4"
+"vite@npm:4.4.12":
+  version: 4.4.12
+  resolution: "vite@npm:4.4.12"
   dependencies:
     esbuild: "npm:^0.18.10"
     fsevents: "npm:~2.3.2"
-    postcss: "npm:^8.4.25"
-    rollup: "npm:^3.25.2"
+    postcss: "npm:^8.4.27"
+    rollup: "npm:^3.27.1"
   peerDependencies:
     "@types/node": ">= 14"
     less: "*"
@@ -4806,7 +4806,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: c598950f4848666286156aa5776731ed5b8f528fdb9dc44a2190187c688c2e8f4ab5a8cdded0f0a53de9317c1472a205027ef89c90cfe5d90273e622f6a620a6
+  checksum: 5f44dc16c1e66ff5fe003403f2d74d9306682181981cdbfe2ef62a4497cc740c3888dedb028b7d35c1d2a44a47598cf3cc145988e80cd5d44d200d2d25e30600
   languageName: node
   linkType: hard
 
