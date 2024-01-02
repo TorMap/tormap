@@ -1,5 +1,5 @@
 # Build app
-FROM node:16-alpine as builder
+FROM node:20-alpine as builder
 WORKDIR /app
 COPY . .
 RUN yarn install --immutable
