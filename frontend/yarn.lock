@@ -1513,14 +1513,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.4.0":
-  version: 1.4.0
-  resolution: "axios@npm:1.4.0"
+"axios@npm:1.6.0":
+  version: 1.6.0
+  resolution: "axios@npm:1.6.0"
   dependencies:
     follow-redirects: "npm:^1.15.0"
     form-data: "npm:^4.0.0"
     proxy-from-env: "npm:^1.1.0"
-  checksum: b987e4259e5cfc93e95ee306c267a44380bbc045789a91b716e8434a75e22987344605eb4e133482fe285dd3a2e0b7e791ba26999965f04a5ecdde25f56930cb
+  checksum: f069d938a05d2293e27c7cd6f0c08a1cb764f7cc43a1e637572f8d5928837ecd735890ad67a867d696094ee4b8b4dfdb3727a57aae600845e4c295581cb32f9a
   languageName: node
   linkType: hard
 
@@ -4582,7 +4582,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:6.7.2"
     "@typescript-eslint/parser": "npm:6.7.2"
     "@vitejs/plugin-react-swc": "npm:3.3.2"
-    axios: "npm:1.4.0"
+    axios: "npm:1.6.0"
     date-fns: "npm:2.30.0"
     eslint: "npm:8.45.0"
     eslint-plugin-jsx-a11y: "npm:6.7.1"
