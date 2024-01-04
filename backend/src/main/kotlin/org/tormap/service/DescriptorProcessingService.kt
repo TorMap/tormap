@@ -1,7 +1,6 @@
 package org.tormap.service
 
 import org.springframework.stereotype.Service
-import org.tormap.adapter.controller.RelayLocationController
 import org.tormap.database.entity.RelayDetails
 import org.tormap.database.entity.RelayLocation
 import org.tormap.database.repository.RelayDetailsRepository
@@ -19,7 +18,6 @@ class DescriptorProcessingService(
     private val relayLocationRepositoryImpl: RelayLocationRepositoryImpl,
     private val relayDetailsRepository: RelayDetailsRepository,
     private val ipLookupService: IpLookupService,
-    private val relayLocationController: RelayLocationController,
 ) {
     private val logger = logger()
     fun processDescriptor(descriptor: Descriptor): ProcessedDescriptorInfo {
@@ -42,29 +40,27 @@ class DescriptorProcessingService(
 
     private fun processRelayConsensusDescriptor(descriptor: RelayNetworkStatusConsensus): ProcessedDescriptorInfo {
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.validAfterMillis)
+        val existingFingerprintsForDay = relayLocationRepositoryImpl.findDistinctFingerprintsByDay(descriptorDay)
+        val relayLocationsToInsert = mutableListOf<RelayLocation>()
         descriptor.statusEntries.forEach {
             val networkStatusEntry = it.value
-            if (!relayLocationRepositoryImpl.existsByDayAndFingerprint(
-                    descriptorDay,
-                    networkStatusEntry.fingerprint
-                )
-            ) {
-                val location = ipLookupService.lookupLocation(networkStatusEntry.address)
-                if (location != null) {
-                    relayLocationRepositoryImpl.save(
-                        RelayLocation(
-                            networkStatusEntry,
-                            descriptorDay,
-                            location.latitude,
-                            location.longitude,
-                            location.countryCode,
-                        )
+            if (existingFingerprintsForDay.contains(networkStatusEntry.fingerprint)) {
+                return@forEach
+            }
+            val location = ipLookupService.lookupLocation(networkStatusEntry.address)
+            if (location != null) {
+                relayLocationsToInsert.add(
+                    RelayLocation(
+                        networkStatusEntry,
+                        descriptorDay,
+                        location.latitude,
+                        location.longitude,
+                        location.countryCode,
                     )
-                }
+                )
             }
         }
-        relayLocationRepositoryImpl.flush()
-        relayLocationController.updateCache(descriptorDay.toString())
+        relayLocationRepositoryImpl.saveAllAndFlush(relayLocationsToInsert)
         return ProcessedDescriptorInfo(YearMonth.from(descriptorDay).toString())
     }
 

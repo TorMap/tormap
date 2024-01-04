@@ -2,7 +2,6 @@ package org.tormap.service
 
 import org.springframework.jdbc.support.incrementer.PostgresSequenceMaxValueIncrementer
 import org.springframework.stereotype.Service
-import org.tormap.adapter.controller.RelayLocationController
 import org.tormap.database.entity.RelayDetails
 import org.tormap.database.repository.RelayDetailsRepositoryImpl
 import org.tormap.util.addFamilyMember
@@ -20,7 +19,6 @@ import javax.transaction.Transactional
 class RelayDetailsUpdateService(
     private val relayDetailsRepositoryImpl: RelayDetailsRepositoryImpl,
     private val ipLookupService: IpLookupService,
-    private val relayLocationController: RelayLocationController,
     dataSource: DataSource,
 ) {
     private val logger = logger()
@@ -29,27 +27,31 @@ class RelayDetailsUpdateService(
     /**
      * Updates [RelayDetails.autonomousSystemName] and [RelayDetails.autonomousSystemNumber] for all [RelayDetails] missing this info.
      */
-    fun updateAutonomousSystems() {
-        try {
-            val monthsToProcess = relayDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
-            logger.info("... Updating Autonomous Systems for months: ${monthsToProcess.joinToString(", ")}")
-            monthsToProcess.forEach {
+    fun lookupAllMissingAutonomousSystems() {
+        val monthsWithRelaysMissingAutonomousSystem =
+            relayDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
+        logger.info("Batch updating ASs for months: ${monthsWithRelaysMissingAutonomousSystem.joinToString(", ")}")
+        lookupMissingAutonomousSystems(monthsWithRelaysMissingAutonomousSystem)
+        logger.info("Finished batch update of ASs")
+    }
+
+    fun lookupMissingAutonomousSystems(months: Set<String>) {
+        months.forEach { month ->
+            try {
+                logger.info("... Updating ASs for month: $month")
                 var changedRelaysCount = 0
                 val relaysWithoutAutonomousSystem =
-                    relayDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(it)
+                    relayDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(month)
                 relaysWithoutAutonomousSystem.forEach { relay ->
-                    if (relay.updateAutonomousSystem()) {
+                    if (relay.lookupAndSetAutonomousSystem()) {
                         changedRelaysCount++
                     }
                 }
-                relayDetailsRepositoryImpl.flush()
-                if (changedRelaysCount > 0) {
-                    logger.info("Finished Autonomous Systems for month $it. Updated $changedRelaysCount relays.")
-                }
+                relayDetailsRepositoryImpl.saveAllAndFlush(relaysWithoutAutonomousSystem)
+                logger.info("Determined the AS of $changedRelaysCount / ${relaysWithoutAutonomousSystem.size} relays for month $month")
+            } catch (exception: Exception) {
+                logger.error("Could not update ASs for month $month! ${exception.message}")
             }
-            logger.info("Finished updating Autonomous System")
-        } catch (exception: Exception) {
-            logger.error("Could not update Autonomous System! ${exception.message}")
         }
     }
 
@@ -57,39 +59,35 @@ class RelayDetailsUpdateService(
      * Trys to add Autonomous System info to [RelayDetails]
      * @return true if node was changed
      */
-    private fun RelayDetails.updateAutonomousSystem(): Boolean {
+    private fun RelayDetails.lookupAndSetAutonomousSystem(): Boolean {
         val autonomousSystem = ipLookupService.lookupAutonomousSystem(this.address)
         if (autonomousSystem != null) {
             this.autonomousSystemName = autonomousSystem.autonomousSystemOrganization
             this.autonomousSystemNumber = autonomousSystem.autonomousSystemNumber.toInt()
-            relayDetailsRepositoryImpl.save(this)
             return true
         }
         return false
     }
 
     /**
-     * Updates [RelayDetails.familyId] for all entities and if desired can also [overwriteExistingFamilies].
+     * Updates [RelayDetails.familyId] for all entities
      */
-    fun updateAllFamilies(overwriteExistingFamilies: Boolean) {
-        var monthFamilyMemberCount = relayDetailsRepositoryImpl.findDistinctMonthFamilyMemberCount()
-        if (!overwriteExistingFamilies) {
-            monthFamilyMemberCount = monthFamilyMemberCount.filter { it.count == 0L }
-        }
-        updateFamilies(monthFamilyMemberCount.map { it.month }.toSet())
+    fun computeAllMissingFamilies() {
+        val monthFamilyMemberCount =
+            relayDetailsRepositoryImpl.findDistinctMonthFamilyMemberCount().filter { it.count == 0L }
+        computeFamilies(monthFamilyMemberCount.map { it.month }.toSet())
     }
 
 
     /**
      * Updates [RelayDetails.familyId] for all entities of the requested [months].
      */
-    fun updateFamilies(months: Set<String>) {
+    fun computeFamilies(months: Set<String>) {
         try {
             logger.info("... Updating relay families for months: ${months.joinToString(", ")}")
             months.forEach { month ->
                 try {
-                    updateFamiliesForMonth(month)
-                    relayLocationController.cacheDaysOfMonth(month)
+                    computeFamiliesForMonth(month)
                 } catch (exception: Exception) {
                     logger.error("Could not update relay families for month $month! ${exception.message}")
                 }
@@ -103,7 +101,7 @@ class RelayDetailsUpdateService(
     /**
      * Updates [RelayDetails.familyId] of all entities for the given [month].
      */
-    private fun updateFamiliesForMonth(month: String) {
+    private fun computeFamiliesForMonth(month: String) {
         var confirmedFamilyConnectionCount = 0
         var rejectedFamilyConnectionCount = 0
         val families = mutableListOf<Set<RelayDetails>>()

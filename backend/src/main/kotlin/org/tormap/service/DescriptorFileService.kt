@@ -2,9 +2,7 @@ package org.tormap.service
 
 import org.springframework.stereotype.Service
 import org.tormap.config.value.DescriptorConfig
-import org.tormap.database.entity.DescriptorFileId
-import org.tormap.database.entity.DescriptorType
-import org.tormap.database.entity.ProcessedFile
+import org.tormap.database.entity.*
 import org.tormap.database.repository.ProcessedFileRepository
 import org.torproject.descriptor.Descriptor
 import org.torproject.descriptor.impl.DescriptorReaderImpl
@@ -24,7 +22,10 @@ class DescriptorFileService(
      * Read descriptors which were previously saved to disk at [apiPath].
      * A reader can consume quite some memory. Try not to create multiple readers in a short time.
      */
-    fun getDescriptorDiskReader(apiPath: String, descriptorType: DescriptorType): MutableIterable<Descriptor> {
+    fun getDescriptorDiskReader(
+        apiPath: String,
+        descriptorType: DescriptorType,
+    ): MutableIterable<Descriptor> {
         val descriptorReader = DescriptorReaderImpl()
         val parentDirectory = File(descriptorConfig.localDownloadDirectory + apiPath)
         val excludedFiles = processedFileRepository.findAllById_TypeEquals(descriptorType)
@@ -34,7 +35,13 @@ class DescriptorFileService(
                 it.lastModified,
             )
         }.toSortedMap()
-
+        descriptorReader.setMaxDescriptorsInQueue(
+            when {
+                descriptorType.isRelayConsensusType() -> 10 // 1 consensus descriptors ~= 8 MB in heap => 10 descriptors ~= 80 MB
+                descriptorType.isRelayServerType() -> 400 // 1 server descriptor often < 50 KB in heap => 400 descriptors ~= 20 MB
+                else -> throw Exception("Descriptor type ${descriptorType.name} is not yet supported!")
+            }
+        )
         return descriptorReader.readDescriptors(parentDirectory)
     }
 
