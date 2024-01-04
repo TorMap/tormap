@@ -16,7 +16,7 @@ be available, if the corresponding relay server descriptors have been processed.
 
 ## Requirements
 
-- At least 50 GB of free disk space (for downloaded archive and database)
+- At least 50 GB of free disk space (for downloaded archives)
 - [Docker](https://docs.docker.com/get-docker/)
 - [Oracle JDK](https://www.oracle.com/java/technologies/javase-downloads.html)
   / [OpenJDK](https://openjdk.java.net/install/index.html) (`JAVA_HOME` should point to a version >= 11)
@@ -92,6 +92,14 @@ Build docker image:
 4. Run new image in a container with: `docker run -p 8080:8080 tormap/backend`
 5. Backend should be available at http://localhost:8080
 
+Prebuild docker images are available at https://hub.docker.com/r/tormap/backend.
+
+### Hardware / VM Requirements
+
+- 50 GB of free disk space (for downloaded archives)
+- 2 GB of RAM (typical backend usage is below 1 GB)
+- It is recommended to set a JVM max heap size of 1.5 GB or more (e.g. `-Xmx1500m`)
+- Additional resources if PostgreSQL is deployed on the same machine
 
 
 

@@ -37,3 +37,5 @@ First make sure you have installed all requirements for development.
 4. Go into the directory where `index.html` is located
 5. Install [serve](https://www.npmjs.com/package/serve) and run command: `serve -l 3000`
 6. Frontend should be available at http://localhost:3000
+
+Prebuild docker images are available at https://hub.docker.com/r/tormap/frontend.
