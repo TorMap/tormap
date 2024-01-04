@@ -26,12 +26,6 @@ management:
 logging:
     file:
         path: logs/spring-boot-logger.log
-# LOG SQL STATEMENTS
-#    level:
-#      org:
-#          hibernate:
-#              SQL: DEBUG
-#              descriptor.sql.BasicBinder: TRACE
 server:
     port: 8080
     http2:
@@ -53,10 +47,12 @@ spring:
             ddl-auto: validate
         open-in-view: false
         properties:
-          hibernate:
-              jdbc:
-                  batch_size: 30
-                  batch_versioned_data: true
+            hibernate:
+                jdbc:
+                    batch_size: 30
+                    order_inserts: true
+                    batch_versioned_data: true
+                order_updates: true
     output:
         ansi:
             enabled: ALWAYS
