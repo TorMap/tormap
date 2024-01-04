@@ -1,6 +1,8 @@
 package org.tormap.service
 
+import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
+import org.tormap.adapter.controller.RelayLocationController
 import org.tormap.config.value.DescriptorConfig
 import org.tormap.database.entity.DescriptorType
 import org.tormap.database.entity.isRecent
@@ -26,6 +28,8 @@ class DescriptorCoordinationService(
     private val descriptorProcessingService: DescriptorProcessingService,
     private val relayDetailsRepository: RelayDetailsRepository,
     private val relayLocationRepository: RelayLocationRepository,
+    private val relayLocationController: RelayLocationController,
+    private val cacheManager: CacheManager,
 ) {
     private val logger = logger()
     private val descriptorCollector: DescriptorCollector = DescriptorIndexCollector()
@@ -65,7 +69,8 @@ class DescriptorCoordinationService(
                 if (it != descriptor.descriptorFile) {
                     flushRelayRepositoryAndSaveProcessedFile(it, descriptorType, errorCount)
                     if (descriptorType.isRelayServerType()) {
-                        relayDetailsUpdateService.updateFamilies(processedMonths)
+                        relayDetailsUpdateService.computeFamilies(processedMonths)
+                        relayDetailsUpdateService.lookupMissingAutonomousSystems(processedMonths)
                     }
                     processedMonths.clear()
                     errorCount = 0
@@ -82,7 +87,10 @@ class DescriptorCoordinationService(
         try {
             when {
                 descriptorType.isRelayServerType() -> relayDetailsRepository.flush()
-                descriptorType.isRelayConsensusType() -> relayLocationRepository.flush()
+                descriptorType.isRelayConsensusType() -> {
+                    relayLocationRepository.flush()
+                    updateRelayLocationDaysCache()
+                }
                 else -> throw Exception("Descriptor type ${descriptorType.name} is not yet supported!")
             }
             if (errorCount == 0) {
@@ -92,6 +100,11 @@ class DescriptorCoordinationService(
         } catch (exception: Exception) {
             logger.error("Could not flush relay repository for ${descriptorType.name}! ${exception.message}")
         }
+    }
+
+    private fun updateRelayLocationDaysCache() {
+        cacheManager.getCache(RelayLocationController.CacheName.RELAY_LOCATION_DAYS)?.invalidate()
+        relayLocationController.getDays()
     }
 
     private fun logFinishedProcessingDescriptorFile(

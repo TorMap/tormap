@@ -20,4 +20,7 @@ interface RelayLocationRepositoryImpl : RelayLocationRepository {
                 "WHERE g.day = :day"
     )
     fun findAllUsingDay(day: LocalDate): List<RelayLocationDto>
+
+    @Query("SELECT DISTINCT fingerprint FROM RelayLocation WHERE day = :day")
+    fun findDistinctFingerprintsByDay(day: LocalDate): Set<String>
 }
