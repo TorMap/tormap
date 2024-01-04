@@ -4,8 +4,8 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.tormap.config.value.DescriptorConfig
-import org.tormap.config.value.ScheduleConfig
 import org.tormap.database.entity.DescriptorType
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -16,41 +16,37 @@ import org.tormap.database.entity.DescriptorType
 @Async
 class SchedulingService(
     private val descriptorConfig: DescriptorConfig,
-    private val scheduleConfig: ScheduleConfig,
     private val descriptorCoordinationService: DescriptorCoordinationService,
     private val relayDetailsUpdateService: RelayDetailsUpdateService,
     private val descriptorFileService: DescriptorFileService,
 ) {
     /**
-     * Fetches and processes relay consensus descriptors of the last 3 days.
      * The 3 days of descriptors equals about 175 MB.
-     * Can take 20 minutes depending on your machine.
+     * Takes ~20 min to process.
      */
-    @Scheduled(fixedRateString = "\${schedule.rate.recentRelayConsensuses}")
-    fun recentRelayConsensuses() =
+    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.HOURS)
+    fun recentConsensousDescriptors() =
         descriptorCoordinationService.collectAndProcessDescriptors(
             descriptorConfig.recentRelayConsensuses,
             DescriptorType.RECENT_RELAY_CONSENSUS
         )
 
     /**
-     * Fetches and processes relay server descriptors of the last 3 days.
      * The 3 days of descriptors equals about 150 MB.
-     * Can take 20 minutes depending on your machine.
+     * Takes ~20 min to process after download.
      */
-    @Scheduled(fixedRateString = "\${schedule.rate.recentRelayServers}")
-    fun recentRelayServers() =
+    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.HOURS)
+    fun recentServerDescriptors() =
         descriptorCoordinationService.collectAndProcessDescriptors(
             descriptorConfig.recentRelayServers,
             DescriptorType.RECENT_RELAY_SERVER
         )
 
     /**
-     * Fetches and processes archive relay consensus descriptors.
      * The years 2007 - 2021 equal about 3 GB in size.
-     * After the download finished, and you start with an empty DB this takes about 20 hours depending on your machine.
+     * Takes ~12 hours to process after download.
      */
-    @Scheduled(fixedRateString = "\${schedule.rate.archiveRelayConsensuses}")
+    @Scheduled(fixedDelay = 12, timeUnit = TimeUnit.HOURS)
     fun archiveRelayConsensuses() =
         descriptorCoordinationService.collectAndProcessDescriptors(
             descriptorConfig.archiveRelayConsensuses,
@@ -58,34 +54,25 @@ class SchedulingService(
         )
 
     /**
-     * Fetches and processes archive relay server descriptors.
      * The years 2005 - 2021 equal about 30 GB in size.
-     * After the download finished, and you start with an empty DB this takes about 10 hours depending on your machine.
+     * Takes ~10 hours to process after download.
      */
-    @Scheduled(fixedRateString = "\${schedule.rate.archiveRelayServers}")
+    @Scheduled(fixedDelay = 12, timeUnit = TimeUnit.HOURS)
     fun archiveRelayServers() =
         descriptorCoordinationService.collectAndProcessDescriptors(
             descriptorConfig.archiveRelayServers,
             DescriptorType.ARCHIVE_RELAY_SERVER
         )
 
-    /**
-     * Updates all relays which do not have a family set and optionally can overwrite existing family structures.
-     * Can take a few minutes depending on how many months are updated.
-     */
-    @Scheduled(fixedRateString = "\${schedule.rate.updateRelayFamilies}")
+    @Scheduled(fixedDelay = 1, initialDelay = 1, timeUnit = TimeUnit.DAYS)
     fun updateRelayFamilies() =
-        relayDetailsUpdateService.updateAllFamilies(scheduleConfig.shouldOverwriteFamilies)
+        relayDetailsUpdateService.computeAllMissingFamilies()
 
-    /**
-     * Updates all relays which do not have any Autonomous System set.
-     * Can take a few minutes depending on how many months are updated.
-     */
-    @Scheduled(fixedRateString = "\${schedule.rate.updateRelayAutonomousSystems}")
+    @Scheduled(fixedDelay = 1, initialDelay = 1, timeUnit = TimeUnit.DAYS)
     fun updateRelayAutonomousSystems() =
-        relayDetailsUpdateService.updateAutonomousSystems()
+        relayDetailsUpdateService.lookupAllMissingAutonomousSystems()
 
-    @Scheduled(fixedRateString = "P1D")
+    @Scheduled(fixedDelayString = "P1D", initialDelay = DAYS_TO_KEEP_RECENT_FILES, timeUnit = TimeUnit.DAYS)
     fun deleteRecentFileReference() =
         descriptorFileService.deleteRecentFileReferences()
 }
