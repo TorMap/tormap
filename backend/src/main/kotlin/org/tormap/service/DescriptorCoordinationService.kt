@@ -65,14 +65,7 @@ class DescriptorCoordinationService(
         descriptorFileService.getDescriptorDiskReader(apiPath, descriptorType).forEach { descriptor ->
             lastProcessedFile?.let {
                 if (it != descriptor.descriptorFile) {
-                    flushRelayRepository(descriptorType)
-                    saveProcessedFileReference(it, descriptorType, errorCount)
-                    if (descriptorType.isRecent()) {
-                        updateCaches(descriptorType, processedMonthsFromFile.toSet())
-                    } else {
-                        computeRelayDetailsAndCaches(descriptorType, processedMonthsFromFile.toSet())
-                    }
-                    processedMonthsFromFile.clear()
+                    handleFinishedFile(descriptorType, it, errorCount, processedMonthsFromFile)
                     errorCount = 0
                 }
             }
@@ -87,6 +80,22 @@ class DescriptorCoordinationService(
         if (descriptorType.isRecent()) {
             computeRelayDetailsAndCaches(descriptorType, processedMonthsFromAllFiles)
         }
+    }
+
+    private fun handleFinishedFile(
+        descriptorType: DescriptorType,
+        it: File,
+        errorCount: Int,
+        processedMonthsFromFile: MutableSet<String>
+    ) {
+        flushRelayRepository(descriptorType)
+        saveProcessedFileReference(it, descriptorType, errorCount)
+        if (descriptorType.isRecent()) {
+            updateCaches(descriptorType, processedMonthsFromFile.toSet())
+        } else {
+            computeRelayDetailsAndCaches(descriptorType, processedMonthsFromFile.toSet())
+        }
+        processedMonthsFromFile.clear()
     }
 
     private fun flushRelayRepository(descriptorType: DescriptorType) {
@@ -110,7 +119,7 @@ class DescriptorCoordinationService(
         }
     }
 
-    fun computeRelayDetailsAndCaches(descriptorType: DescriptorType, processedMonths: Set<String>) {
+    private fun computeRelayDetailsAndCaches(descriptorType: DescriptorType, processedMonths: Set<String>) {
         if (descriptorType.isRelayServerType()) {
             relayDetailsUpdateService.computeFamilies(processedMonths)
             relayDetailsUpdateService.lookupMissingAutonomousSystems(processedMonths)
@@ -118,7 +127,7 @@ class DescriptorCoordinationService(
         updateCaches(descriptorType, processedMonths)
     }
 
-    fun updateCaches(descriptorType: DescriptorType, processedMonths: Set<String>) {
+    private fun updateCaches(descriptorType: DescriptorType, processedMonths: Set<String>) {
         if (descriptorType.isRelayConsensusType()) {
             cacheService.cacheRelayLocationDistinctDays()
         }
