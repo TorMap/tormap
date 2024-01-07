@@ -8,6 +8,7 @@ import org.tormap.database.repository.RelayLocationRepositoryImpl
 import org.tormap.util.logger
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
@@ -22,7 +23,7 @@ class CacheService(
     private val lockRelayLocationsPerDay: Lock = ReentrantLock()
 
     @Async
-    fun cacheRelayLocationDistinctDays() {
+    fun cacheRelayLocationDistinctDays(): CompletableFuture<Void> {
         if (lockRelayLocationDistinctDays.tryLock()) {
             try {
                 logger.info("Caching distinct relay location days")
@@ -38,21 +39,11 @@ class CacheService(
             Thread.sleep(1000)
             cacheRelayLocationDistinctDays()
         }
+        return CompletableFuture.completedFuture(null)
     }
 
     @Async
-    fun evictRelayLocationsPerDay(months: Set<String>) {
-        logger.info("Evicting cache of relay locations per day for months: ${months.joinToString(", ")}")
-        months.forEach { month ->
-            val yearMonth = YearMonth.parse(month)
-            yearMonth.atDay(1).datesUntil(yearMonth.plusMonths(1).atDay(1)).forEach {
-                cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)?.evict(it.toString())
-            }
-        }
-    }
-
-    @Async
-    fun cacheRelayLocationsPerDay(months: Set<String>) {
+    fun cacheRelayLocationsPerDay(months: Set<String>): CompletableFuture<Void> {
         if (lockRelayLocationsPerDay.tryLock()) {
             try {
                 logger.info("Caching relay locations for each day of months: ${months.joinToString(", ")}")
@@ -60,10 +51,13 @@ class CacheService(
                     val yearMonth = YearMonth.parse(month)
                     yearMonth.atDay(1).datesUntil(yearMonth.plusMonths(1).atDay(1)).forEach {
                         val day = it.toString()
-                        cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)?.put(
-                            day,
-                            relayLocationRepositoryImpl.findAllUsingDay(LocalDate.parse(day))
-                        )
+                        val relayLocations = relayLocationRepositoryImpl.findAllUsingDay(LocalDate.parse(day))
+                        if (relayLocations.isNotEmpty()) {
+                            cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)?.put(
+                                day,
+                                relayLocations
+                            )
+                        }
                     }
                 }
             } finally {
@@ -74,5 +68,18 @@ class CacheService(
             Thread.sleep(1000)
             cacheRelayLocationsPerDay(months)
         }
+        return CompletableFuture.completedFuture(null)
+    }
+
+    @Async
+    fun evictRelayLocationsPerDay(months: Set<String>): CompletableFuture<Void> {
+        logger.info("Evicting cache of relay locations per day for months: ${months.joinToString(", ")}")
+        months.forEach { month ->
+            val yearMonth = YearMonth.parse(month)
+            yearMonth.atDay(1).datesUntil(yearMonth.plusMonths(1).atDay(1)).forEach {
+                cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)?.evict(it.toString())
+            }
+        }
+        return CompletableFuture.completedFuture(null)
     }
 }
