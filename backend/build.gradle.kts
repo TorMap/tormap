@@ -46,6 +46,9 @@ dependencies {
     // Postgres Database
     implementation("org.postgresql:postgresql:42.7.1")
 
+    // Caching with Ehcache https://www.ehcache.org/
+    implementation("org.ehcache:ehcache:3.10.8")
+
     // Run Flyway DB migration tool on startup https://flywaydb.org/
     implementation("org.flywaydb:flyway-core:8.5.13")
 
