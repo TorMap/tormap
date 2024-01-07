@@ -19,6 +19,7 @@ import javax.transaction.Transactional
 class RelayDetailsUpdateService(
     private val relayDetailsRepositoryImpl: RelayDetailsRepositoryImpl,
     private val ipLookupService: IpLookupService,
+    private val cacheService: CacheService,
     dataSource: DataSource,
 ) {
     private val logger = logger()
@@ -72,10 +73,12 @@ class RelayDetailsUpdateService(
     /**
      * Updates [RelayDetails.familyId] for all entities
      */
-    fun computeAllMissingFamilies() {
+    fun computeAllMissingFamiliesAndEvictCache() {
         val monthFamilyMemberCount =
             relayDetailsRepositoryImpl.findDistinctMonthFamilyMemberCount().filter { it.count == 0L }
-        computeFamilies(monthFamilyMemberCount.map { it.month }.toSet())
+        val monthsToProcess = monthFamilyMemberCount.map { it.month }.toSet()
+        computeFamilies(monthsToProcess)
+        cacheService.evictRelayLocationsPerDay(monthsToProcess)
     }
 
 

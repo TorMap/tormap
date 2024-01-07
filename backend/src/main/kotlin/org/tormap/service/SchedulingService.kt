@@ -21,7 +21,7 @@ class SchedulingService(
     private val descriptorFileService: DescriptorFileService,
 ) {
     /**
-     * The 3 days of descriptors equals about 175 MB.
+     * The most recent 3 days of descriptors equals about 175 MB.
      * Takes ~20 min to process.
      */
     @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.HOURS)
@@ -32,7 +32,7 @@ class SchedulingService(
         )
 
     /**
-     * The 3 days of descriptors equals about 150 MB.
+     * The most recent 3 days of descriptors equals about 150 MB.
      * Takes ~20 min to process after download.
      */
     @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.HOURS)
@@ -66,7 +66,7 @@ class SchedulingService(
 
     @Scheduled(fixedDelay = 1, initialDelay = 1, timeUnit = TimeUnit.DAYS)
     fun updateRelayFamilies() =
-        relayDetailsUpdateService.computeAllMissingFamilies()
+        relayDetailsUpdateService.computeAllMissingFamiliesAndEvictCache()
 
     @Scheduled(fixedDelay = 1, initialDelay = 1, timeUnit = TimeUnit.DAYS)
     fun updateRelayAutonomousSystems() =

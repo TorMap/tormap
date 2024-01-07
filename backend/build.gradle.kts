@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "org.tormap"
-version = "2.1.0"
+version = "2.2.0"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
@@ -45,6 +45,9 @@ dependencies {
 
     // Postgres Database
     implementation("org.postgresql:postgresql:42.7.1")
+
+    // Caching with Ehcache https://www.ehcache.org/
+    implementation("org.ehcache:ehcache:3.10.8")
 
     // Run Flyway DB migration tool on startup https://flywaydb.org/
     implementation("org.flywaydb:flyway-core:8.5.13")
