@@ -66,7 +66,7 @@ class SchedulingService(
 
     @Scheduled(fixedDelay = 1, initialDelay = 1, timeUnit = TimeUnit.DAYS)
     fun updateRelayFamilies() =
-        relayDetailsUpdateService.computeAllMissingFamilies()
+        relayDetailsUpdateService.computeAllMissingFamiliesAndEvictCache()
 
     @Scheduled(fixedDelay = 1, initialDelay = 1, timeUnit = TimeUnit.DAYS)
     fun updateRelayAutonomousSystems() =

@@ -26,7 +26,7 @@ class DescriptorCoordinationService(
     private val descriptorProcessingService: DescriptorProcessingService,
     private val relayDetailsRepository: RelayDetailsRepository,
     private val relayLocationRepository: RelayLocationRepository,
-    private val cacheService: CacheService
+    private val cacheService: CacheService,
 ) {
     private val logger = logger()
     private val descriptorCollector: DescriptorCollector = DescriptorIndexCollector()
@@ -60,21 +60,32 @@ class DescriptorCoordinationService(
     private fun processLocalDescriptorFiles(apiPath: String, descriptorType: DescriptorType) {
         var lastProcessedFile: File? = null
         var errorCount = 0
-        val processedMonths = mutableSetOf<String>()
+        val processedMonthsFromAllFiles = mutableSetOf<String>()
+        val processedMonthsFromFile = mutableSetOf<String>()
         descriptorFileService.getDescriptorDiskReader(apiPath, descriptorType).forEach { descriptor ->
             lastProcessedFile?.let {
                 if (it != descriptor.descriptorFile) {
                     flushRelayRepository(descriptorType)
                     saveProcessedFileReference(it, descriptorType, errorCount)
-                    updateRelayDetailsAndCaches(descriptorType, processedMonths)
-                    processedMonths.clear()
+                    if (descriptorType.isRecent()) {
+                        updateCaches(descriptorType, processedMonthsFromFile.toSet())
+                    } else {
+                        computeRelayDetailsAndCaches(descriptorType, processedMonthsFromFile.toSet())
+                    }
+                    processedMonthsFromFile.clear()
                     errorCount = 0
                 }
             }
             val descriptorInfo = descriptorProcessingService.processDescriptor(descriptor)
-            descriptorInfo.yearMonth?.let { processedMonths.add(it) }
+            descriptorInfo.yearMonth?.let {
+                processedMonthsFromFile.add(it)
+                processedMonthsFromAllFiles.add(it)
+            }
             descriptorInfo.error?.let { errorCount++ }
             lastProcessedFile = descriptor.descriptorFile
+        }
+        if (descriptorType.isRecent()) {
+            computeRelayDetailsAndCaches(descriptorType, processedMonthsFromAllFiles)
         }
     }
 
@@ -99,20 +110,22 @@ class DescriptorCoordinationService(
         }
     }
 
-    private fun updateRelayDetailsAndCaches(descriptorType: DescriptorType, processedMonths: Set<String>) {
-        if (processedMonths.isNotEmpty()) {
-            if (descriptorType.isRelayServerType()) {
-                relayDetailsUpdateService.computeFamilies(processedMonths)
-                relayDetailsUpdateService.lookupMissingAutonomousSystems(processedMonths)
-            }
-            if (descriptorType.isRelayConsensusType()) {
-                cacheService.cacheRelayLocationDistinctDays()
-            }
-            if (descriptorType.isRecent()) {
-                cacheService.cacheRelayLocationsPerDay(processedMonths)
-            } else {
-                cacheService.evictRelayLocationsPerDay(processedMonths)
-            }
+    fun computeRelayDetailsAndCaches(descriptorType: DescriptorType, processedMonths: Set<String>) {
+        if (descriptorType.isRelayServerType()) {
+            relayDetailsUpdateService.computeFamilies(processedMonths)
+            relayDetailsUpdateService.lookupMissingAutonomousSystems(processedMonths)
+        }
+        updateCaches(descriptorType, processedMonths)
+    }
+
+    fun updateCaches(descriptorType: DescriptorType, processedMonths: Set<String>) {
+        if (descriptorType.isRelayConsensusType()) {
+            cacheService.cacheRelayLocationDistinctDays()
+        }
+        if (descriptorType.isRecent()) {
+            cacheService.cacheRelayLocationsPerDay(processedMonths)
+        } else {
+            cacheService.evictRelayLocationsPerDay(processedMonths)
         }
     }
 }
