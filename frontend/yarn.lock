@@ -1121,12 +1121,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/leaflet@npm:*, @types/leaflet@npm:1.9.0":
+"@types/leaflet@npm:*":
   version: 1.9.0
   resolution: "@types/leaflet@npm:1.9.0"
   dependencies:
     "@types/geojson": "npm:*"
   checksum: 8e35dee0c64300acd71209db777e9ba831c793532ad4a68ac43f7c910e40812ac58152254045fe07e28fb2d6c28fbe7ecd328ae45fb681f6ee9571a71cf95491
+  languageName: node
+  linkType: hard
+
+"@types/leaflet@npm:1.9.8":
+  version: 1.9.8
+  resolution: "@types/leaflet@npm:1.9.8"
+  dependencies:
+    "@types/geojson": "npm:*"
+  checksum: c0c68ae0d1ccbed60e08ad82670df48f8bb6f19e3abaf84a9cd0a6cbc6d6efdd46852ee7be56744dfa7f3d8665adb56bb06ab02d09f979d3367c941a1fd90f2f
   languageName: node
   linkType: hard
 
@@ -5074,7 +5083,7 @@ __metadata:
     "@mui/styles": "npm:5.15.2"
     "@mui/x-date-pickers": "npm:5.0.20"
     "@types/geojson": "npm:7946.0.13"
-    "@types/leaflet": "npm:1.9.0"
+    "@types/leaflet": "npm:1.9.8"
     "@types/leaflet.heat": "npm:0.2.4"
     "@types/node": "npm:20.10.6"
     "@types/react": "npm:18.2.15"
