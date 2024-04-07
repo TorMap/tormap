@@ -35,6 +35,13 @@
       ],
       "groupName": "leaflet",
       "prPriority": 0
+    },
+    {
+      "description": "Limit @types/react version, due to react-infinite-scroller package not being maintained",
+      "matchPackageNames": [
+        "@types/react"
+      ],
+      "allowedVersions": "<=18.2.21"
     }
   ]
 }
