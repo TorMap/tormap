@@ -12,8 +12,8 @@ plugins {
     kotlin("plugin.jpa") version "1.9.23"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "2.7.6"
-    id("io.spring.dependency-management") version "1.1.0"
+    id("org.springframework.boot") version "2.7.18"
+    id("io.spring.dependency-management") version "1.1.4"
 
     // Build and push docker images
     id("com.google.cloud.tools.jib") version "3.4.2"
