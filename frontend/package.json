@@ -41,7 +41,7 @@
     "@typescript-eslint/eslint-plugin": "7.6.0",
     "@typescript-eslint/parser": "7.6.0",
     "@vitejs/plugin-react-swc": "3.6.0",
-    "eslint": "8.57.0",
+    "eslint": "9.0.0",
     "eslint-plugin-jsx-a11y": "6.8.0",
     "eslint-plugin-react": "7.34.1",
     "typescript": "5.4.3",
