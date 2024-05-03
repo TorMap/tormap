@@ -37,11 +37,14 @@
       "prPriority": 0
     },
     {
-      "description": "Limit @types/react version, due to react-infinite-scroller package not being maintained",
+      "description": "Limit react version to ensure compatibility with react-infinite-scroller",
       "matchPackageNames": [
-        "@types/react"
+        "@types/react",
+        "@types/react-dom",
+        "react",
+        "react-dom"
       ],
-      "allowedVersions": "<=18.2.21"
+      "enabled": false
     }
   ]
 }
