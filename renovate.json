@@ -35,6 +35,16 @@
       ],
       "groupName": "leaflet",
       "prPriority": 0
+    },
+    {
+      "description": "Limit react version to ensure compatibility with react-infinite-scroller",
+      "matchPackageNames": [
+        "@types/react",
+        "@types/react-dom",
+        "react",
+        "react-dom"
+      ],
+      "enabled": false
     }
   ]
 }

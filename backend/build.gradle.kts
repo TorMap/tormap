@@ -5,18 +5,18 @@ version = "2.2.0"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
-    kotlin("jvm") version "1.7.22"
-    kotlin("kapt") version "1.7.22"
-    kotlin("plugin.spring") version "1.7.22"
-    kotlin("plugin.allopen") version "1.7.22"
-    kotlin("plugin.jpa") version "1.7.22"
+    kotlin("jvm") version "1.9.23"
+    kotlin("kapt") version "1.9.23"
+    kotlin("plugin.spring") version "1.9.23"
+    kotlin("plugin.allopen") version "1.9.23"
+    kotlin("plugin.jpa") version "1.9.23"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "2.7.6"
-    id("io.spring.dependency-management") version "1.1.0"
+    id("org.springframework.boot") version "2.7.18"
+    id("io.spring.dependency-management") version "1.1.4"
 
     // Build and push docker images
-    id("com.google.cloud.tools.jib") version "3.3.1"
+    id("com.google.cloud.tools.jib") version "3.4.2"
 }
 
 repositories {
@@ -37,14 +37,14 @@ dependencies {
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-    implementation("org.springdoc:springdoc-openapi-ui:1.7.0")
-    implementation("org.springdoc:springdoc-openapi-kotlin:1.7.0")
+    implementation("org.springdoc:springdoc-openapi-ui:1.8.0")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.8.0")
 
     // Serialization
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.0")
 
     // Postgres Database
-    implementation("org.postgresql:postgresql:42.7.1")
+    implementation("org.postgresql:postgresql:42.7.3")
 
     // Caching with Ehcache https://www.ehcache.org/
     implementation("org.ehcache:ehcache:3.10.8")
@@ -71,15 +71,15 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
-    testImplementation("io.kotest:kotest-assertions-core:5.8.0")
+    testImplementation("io.kotest:kotest-runner-junit5:5.8.1")
+    testImplementation("io.kotest:kotest-assertions-core:5.8.1")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.3")
     // Testcontainers to provide Postgres DB (https://testcontainers.org/)
-    testImplementation("org.testcontainers:testcontainers:1.19.3")
-    testImplementation("org.testcontainers:junit-jupiter:1.19.3")
-    testImplementation("org.testcontainers:postgresql:1.19.3")
+    testImplementation("org.testcontainers:testcontainers:1.19.7")
+    testImplementation("org.testcontainers:junit-jupiter:1.19.7")
+    testImplementation("org.testcontainers:postgresql:1.19.7")
     // Mocking with Mockk (https://mockk.io/)
-    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("io.mockk:mockk:1.13.10")
 }
 
 // Fix version requirement from Kotest
