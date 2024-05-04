@@ -45,6 +45,13 @@
         "react-dom"
       ],
       "enabled": false
+    },
+    {
+      "description": "Limit @types/leaflet version to ensure compatibility with leaflet heatmap",
+      "matchPackageNames": [
+        "@types/leaflet"
+      ],
+      "enabled": false
     }
   ]
 }
