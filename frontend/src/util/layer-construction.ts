@@ -1,5 +1,14 @@
 import {Feature, GeoJsonObject, GeometryObject} from "geojson";
-import L, {circleMarker, GeoJSON, HeatLatLngTuple, Layer, LayerGroup, LeafletMouseEvent, PathOptions} from "leaflet";
+import L, {
+    CircleMarker,
+    circleMarker,
+    GeoJSON,
+    HeatLatLngTuple,
+    Layer,
+    LayerGroup,
+    LeafletMouseEvent,
+    PathOptions
+} from "leaflet";
 
 import {Colors} from "../config";
 import {RelayLocationDto} from "../dto/relay";
@@ -14,6 +23,7 @@ import {
     sortFamilyCoordinatesMap
 } from "./aggregate-relays";
 import {getUniqueCountryColor} from "./geojson";
+import {backend} from "./util";
 
 /**
  * Returns a Layer with markers with size relative to number of relays on a coordinate.
@@ -46,51 +56,98 @@ export const buildAggregatedCoordinatesLayer = (
 
 /**
  * Returns a Layer with markers for each relay.
- * @param latLonMap - The LatLonMap
+ * @param relayCoordinatesMap - The LatLonMap
  * @param singleColor - Whether all markers should have the same color
  * @param onMarkerClick - Event handler for clicking on a marker
  */
 export const buildRelayLayer = (
-    latLonMap: Map<string, RelayLocationDto[]>,
+    relayCoordinatesMap: Map<string, RelayLocationDto[]>,
     singleColor: boolean,
     onMarkerClick: (e: LeafletMouseEvent) => void,
 ): LayerGroup => {
-    const defaultLayer = new LayerGroup()
-    const exitLayer = new LayerGroup()
-    const guardLayer = new LayerGroup()
-    const defaultMarkerLayer = new LayerGroup([defaultLayer, guardLayer, exitLayer])
-    latLonMap.forEach((coordinate, key) => {
-        coordinate.forEach(relay => {
-            let color = Colors.Default
-            let layer = defaultLayer
-            switch (getRelayType(relay)) {
-                case RelayType.Exit: {
-                    color = Colors.Exit
-                    layer = exitLayer
-                    break
-                }
-                case RelayType.Guard: {
-                    color = Colors.Guard
-                    layer = guardLayer
-                    break
-                }
-            }
-            if (singleColor) color = "#989898"
+    const layer = new LayerGroup()
+    relayCoordinatesMap.forEach((relaysAtCoordinates, coordinatesKey) => {
+        if (relaysAtCoordinates.length == 0) return
 
-            circleMarker(
-                [relay.lat, relay.long],
-                {
-                    radius: 1,
-                    className: key,
-                    color: color,
-                    weight: 3,
-                },
-            )
-                .on("click", onMarkerClick)
-                .addTo(layer)
-        })
+        const {
+            mostImportantRelay,
+            marker
+        } = addRelayMarker(relaysAtCoordinates, layer, singleColor, coordinatesKey, onMarkerClick)
+
+        addRelayNicknameTooltip(relaysAtCoordinates, mostImportantRelay, marker, layer);
     })
-    return defaultMarkerLayer
+    return layer
+}
+
+function addRelayMarker(relaysAtCoordinates: RelayLocationDto[], targetLayer: LayerGroup, singleColor: boolean, coordinatesKey: string, onMarkerClick: (e: LeafletMouseEvent) => void) {
+    let mostImportantRelay = relaysAtCoordinates[0]
+    for (const relay of relaysAtCoordinates) {
+        if (getRelayType(relay) === RelayType.Exit) {
+            mostImportantRelay = relay
+            break
+        } else if (getRelayType(relay) === RelayType.Guard) {
+            mostImportantRelay = relay
+        }
+    }
+    let color = Colors.Default
+    switch (getRelayType(mostImportantRelay)) {
+        case RelayType.Exit: {
+            color = Colors.Exit
+            break
+        }
+        case RelayType.Guard: {
+            color = Colors.Guard
+            break
+        }
+    }
+    if (singleColor) color = "#989898"
+
+    const marker = circleMarker(
+        [mostImportantRelay.lat, mostImportantRelay.long],
+        {
+            radius: 1,
+            className: coordinatesKey,
+            color: color,
+            weight: 3,
+        },
+    )
+        .on("click", onMarkerClick)
+        .addTo(targetLayer)
+    return {mostImportantRelay, marker};
+}
+
+function addRelayNicknameTooltip(relays: RelayLocationDto[], mostImportantRelay: RelayLocationDto, marker: CircleMarker, targetLayer: LayerGroup) {
+    const knownRelayDetailIds: number[] = relays.map(relay => relay.detailsId)
+        .filter(id => id !== undefined && id !== null) as number[]
+
+    // Create an invisible larger circle around the marker
+    const hoverRadius = 15;
+    const hoverMarker = circleMarker(
+        [mostImportantRelay.lat, mostImportantRelay.long],
+        {
+            radius: hoverRadius,
+            fillOpacity: 0,
+            fill: false,
+            stroke: false,
+        },
+    )
+        .on('mouseover', async function (this: L.Marker, e) {
+            let tooltip = `${relays.length} relays`
+            const maxNicknamesShownFully = 3
+            if (knownRelayDetailIds.length <= maxNicknamesShownFully) {
+                await backend.post<string[]>('/relay/details/relay/nicknames', knownRelayDetailIds).then(response => {
+                    tooltip = response.data.join(", ")
+                })
+            }
+            marker.bindTooltip(tooltip, {permanent: true, direction: 'top'}).openTooltip();
+        })
+        .on('mouseout', function (this: L.Marker, e) {
+            marker.unbindTooltip();
+        })
+        .on("click", function (this: L.Marker, e) {
+            marker.fire('click'); // Trigger the click event of the actual marker
+        })
+        .addTo(targetLayer)
 }
 
 /**
