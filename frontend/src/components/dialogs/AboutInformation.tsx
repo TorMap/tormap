@@ -24,9 +24,6 @@ import React, {useState} from "react";
 import {ContributorCard} from "../card/ContributorCard";
 import {ExternalLink} from "../link/ExternalLink";
 import BitcoinCard from "../card/BitcoinCard";
-import CardContent from "@mui/material/CardContent";
-import LaunchIcon from "@mui/icons-material/Launch";
-import Card from "@mui/material/Card";
 
 /**
  * A component for displaying information about TorMap
@@ -38,8 +35,6 @@ export const AboutInformation: React.FunctionComponent = () => {
     // App context
     const theme = useTheme()
     const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
-    const nowpaymentsApiKey = import.meta.env.VITE_NOWPAYMENTS_API_KEY
-    const nowpaymentsDonationUrl = `https://nowpayments.io/donation?api_key=${nowpaymentsApiKey}&source=lk_donation&medium=referral`
 
     return (
         <>
@@ -144,29 +139,10 @@ export const AboutInformation: React.FunctionComponent = () => {
                     </Stack>
                     <h2>Donations</h2>
                     <Typography variant={"body1"} gutterBottom>
-                        If you like our project and want to support us, you can donate to us via Bitcoin or other
-                        cryptocurrencies. Your donation helps us to cover server costs and keep the project running.
+                        If you like TorMap and want to support us, you can donate to us via Bitcoin or other
+                        cryptocurrencies. Your donation helps us to cover server costs and keep the project running ❤️
                     </Typography>
-                    <Stack
-                        direction={{sm: 'column', md: 'row'}}
-                        justifyContent="flex-start"
-                        alignItems="flex-start"
-                        spacing={{xs: 3, sm: 3}}
-                    >
-                        <BitcoinCard/>
-                        <Card sx={{margin: 'auto', mt: 5, height: 128}}>
-                            <CardContent sx={{paddingBottom: '0'}}>
-                                <Typography gutterBottom variant="subtitle1" component="div">
-                                    Other cryptocurrencies
-                                </Typography>
-                                <a href={nowpaymentsDonationUrl} target="_blank" rel="noreferrer noopener">
-                                    <Button size="small" startIcon={<LaunchIcon/>}>
-                                        Donate via NOWPayments
-                                    </Button>
-                                </a>
-                            </CardContent>
-                        </Card>
-                    </Stack>
+                    <BitcoinCard/>
                     <Divider sx={{my: 2}}/>
                     <Typography variant={"body2"}>
                         We use IP geolocation data by <ExternalLink href={"https://db-ip.com"}

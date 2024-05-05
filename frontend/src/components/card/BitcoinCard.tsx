@@ -9,9 +9,12 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import LightningIcon from '@mui/icons-material/FlashOn';
 import WalletIcon from '@mui/icons-material/Wallet';
 import {Stack} from '@mui/material';
+import LaunchIcon from "@mui/icons-material/Launch";
 
 export default function BitcoinCard() {
     const bitcoinAddress = import.meta.env.VITE_DONATION_BITCOIN_ADDRESS
+    const nowpaymentsClientApiKey = import.meta.env.VITE_NOWPAYMENTS_CLIENT_API_KEY
+    const nowpaymentsDonationUrl = `https://nowpayments.io/donation?api_key=${nowpaymentsClientApiKey}&source=lk_donation&medium=referral`
 
     const handleCopyAddress = () => {
         navigator.clipboard.writeText(bitcoinAddress);
@@ -22,8 +25,8 @@ export default function BitcoinCard() {
     };
 
     return (
-        <Card sx={{margin: 'auto', mt: 5, height: 128}}>
-            <CardContent sx={{paddingBottom: '0'}}>
+        <Card sx={{margin: 'auto', mt: 2, display: 'inline-block'}}>
+            <CardContent>
                 <Typography gutterBottom variant="subtitle1" component="div">
                     Bitcoin
                 </Typography>
@@ -38,11 +41,16 @@ export default function BitcoinCard() {
             </CardContent>
             <CardActions>
                 <Button size="small" startIcon={<WalletIcon/>} onClick={openInWallet}>
-                    Open Wallet
+                    Open in Wallet
                 </Button>
                 <a href="https://tippin.me/@TorMapOrg" target="_blank" rel="noreferrer noopener">
                     <Button size="small" startIcon={<LightningIcon/>}>
                         Lightning
+                    </Button>
+                </a>
+                <a href={nowpaymentsDonationUrl} target="_blank" rel="noreferrer noopener">
+                    <Button size="small" startIcon={<LaunchIcon/>}>
+                        Other Crypto
                     </Button>
                 </a>
             </CardActions>

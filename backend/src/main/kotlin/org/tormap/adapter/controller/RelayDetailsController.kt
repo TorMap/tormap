@@ -31,6 +31,7 @@ class RelayDetailsController(
     fun getFamilyIdentifiers(@RequestBody familyIds: List<Long>) =
         relayDetailsRepositoryImpl.findFamilyIdentifiers(familyIds)
 
+    @Deprecated("Nickname is passed together with RelayLocationDto when quering a specific day")
     @Operation(summary = "Return the nicknames of the relays that are associated with a list of relay details IDs.")
     @PostMapping("relay/nicknames")
     fun getRelayNicknames(@RequestBody ids: List<Long>) = relayDetailsRepositoryImpl.findAllByIdIn(ids).map { it.nickname }

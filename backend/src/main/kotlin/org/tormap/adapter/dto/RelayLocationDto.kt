@@ -16,6 +16,7 @@ class RelayLocationDto(
     flags: String?,
     val detailsId: Long?,
     val familyId: Long?,
+    val nickname: String?,
 ) {
     val lat = latitude
     val long = longitude
