@@ -8,4 +8,5 @@ interface RelayDetailsRepository : JpaRepository<RelayDetails, Long> {
     fun findAllByMonthEqualsAndFamilyEntriesNotNull(month: String): List<RelayDetails>
     fun findAllByMonthEqualsAndAutonomousSystemNumberNull(month: String): List<RelayDetails>
     fun findAllByFamilyId(familyId: Long): List<RelayDetails>
+    fun findAllByIdIn(ids: List<Long>): List<RelayDetails>
 }

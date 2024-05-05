@@ -2,6 +2,7 @@
   "name": "tormap",
   "version": "2.2.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "start": "vite --port 3000",
     "build": "tsc && vite build",

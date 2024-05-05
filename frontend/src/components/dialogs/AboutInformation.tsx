@@ -22,8 +22,11 @@ import {
 import React, {useState} from "react";
 
 import {ContributorCard} from "../card/ContributorCard";
-import {BitcoinIcon} from "../icons/BitcoinIcon";
 import {ExternalLink} from "../link/ExternalLink";
+import BitcoinCard from "../card/BitcoinCard";
+import CardContent from "@mui/material/CardContent";
+import LaunchIcon from "@mui/icons-material/Launch";
+import Card from "@mui/material/Card";
 
 /**
  * A component for displaying information about TorMap
@@ -35,6 +38,8 @@ export const AboutInformation: React.FunctionComponent = () => {
     // App context
     const theme = useTheme()
     const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
+    const nowpaymentsApiKey = import.meta.env.VITE_NOWPAYMENTS_API_KEY
+    const nowpaymentsDonationUrl = `https://nowpayments.io/donation?api_key=${nowpaymentsApiKey}&source=lk_donation&medium=referral`
 
     return (
         <>
@@ -70,10 +75,6 @@ export const AboutInformation: React.FunctionComponent = () => {
                             <Grid item>
                                 <ExternalLink sx={{color: "white"}} href={"mailto:hi@tormap.org"} label={<EmailIcon/>}/>
                             </Grid>
-                            <Grid item>
-                                <ExternalLink sx={{color: "white"}} href={"https://tippin.me/@TorMapOrg"}
-                                              label={<BitcoinIcon/>}/>
-                            </Grid>
                         </Grid>
                         <IconButton aria-label="close" sx={{
                             position: "absolute",
@@ -91,9 +92,9 @@ export const AboutInformation: React.FunctionComponent = () => {
                         TorMap is a world map displaying approximate locations where Tor relays are being hosted.
                         You can group, filter and analyze thousands of Tor relays, which route anonymous internet
                         traffic daily. The historic state of the network can be viewed for any day between October 2007
-                        and today.<br/> We developed TorMap for our practical P4-Project at the <ExternalLink
+                        and today.<br/> Initially TorMap was developed by us at the <ExternalLink
                         href={"https://www.tu-darmstadt.de/"} label={"Technical University of Darmstadt"}/> as part of
-                        the <ExternalLink href={"https://panda-projekt.de/"} label={"PANDA project"}/>. It was
+                        the <ExternalLink href={"https://panda-projekt.de/"} label={"PANDA project"}/>. The project was
                         supervised
                         by <ExternalLink href={"mailto:florian.platzer@sit.fraunhofer.de"}
                                          label={"Florian Platzer"}/> from <ExternalLink
@@ -140,6 +141,31 @@ export const AboutInformation: React.FunctionComponent = () => {
                             website={"https://www.linkedin.com/in/felix-krauspe-202bb9218/"}
                             roles={["Server Admin"]}
                         />
+                    </Stack>
+                    <h2>Donations</h2>
+                    <Typography variant={"body1"} gutterBottom>
+                        If you like our project and want to support us, you can donate to us via Bitcoin or other
+                        cryptocurrencies. Your donation helps us to cover server costs and keep the project running.
+                    </Typography>
+                    <Stack
+                        direction={{sm: 'column', md: 'row'}}
+                        justifyContent="flex-start"
+                        alignItems="flex-start"
+                        spacing={{xs: 3, sm: 3}}
+                    >
+                        <BitcoinCard/>
+                        <Card sx={{margin: 'auto', mt: 5, height: 128}}>
+                            <CardContent sx={{paddingBottom: '0'}}>
+                                <Typography gutterBottom variant="subtitle1" component="div">
+                                    Other cryptocurrencies
+                                </Typography>
+                                <a href={nowpaymentsDonationUrl} target="_blank" rel="noreferrer noopener">
+                                    <Button size="small" startIcon={<LaunchIcon/>}>
+                                        Donate via NOWPayments
+                                    </Button>
+                                </a>
+                            </CardContent>
+                        </Card>
                     </Stack>
                     <Divider sx={{my: 2}}/>
                     <Typography variant={"body2"}>
