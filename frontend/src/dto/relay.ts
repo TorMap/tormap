@@ -7,6 +7,7 @@ export interface RelayLocationDto {
     flags?: RelayFlag[] | null
     detailsId?: number | null
     familyId?: number | null
+    nickname: string
 }
 
 export interface RelayDetailsDto {

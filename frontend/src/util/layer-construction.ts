@@ -117,12 +117,14 @@ function addRelayMarker(relaysAtCoordinates: RelayLocationDto[], targetLayer: La
 }
 
 function addRelayNicknameTooltip(relays: RelayLocationDto[], mostImportantRelay: RelayLocationDto, marker: CircleMarker, targetLayer: LayerGroup) {
-    const knownRelayDetailIds: number[] = relays.map(relay => relay.detailsId)
-        .filter(id => id !== undefined && id !== null) as number[]
+    let tooltip = `${relays.length} relays`
+    const maxNicknamesShownFully = 3
+    if (relays.length <= maxNicknamesShownFully) {
+        tooltip = relays.map(relay => relay.nickname).filter(name => !!name).join(", ") || tooltip
+    }
 
-    // Create an invisible larger circle around the marker
     const hoverRadius = 15;
-    const hoverMarker = circleMarker(
+    circleMarker(
         [mostImportantRelay.lat, mostImportantRelay.long],
         {
             radius: hoverRadius,
@@ -132,14 +134,7 @@ function addRelayNicknameTooltip(relays: RelayLocationDto[], mostImportantRelay:
         },
     )
         .on('mouseover', async function (this: L.Marker, e) {
-            let tooltip = `${relays.length} relays`
-            const maxNicknamesShownFully = 3
-            if (knownRelayDetailIds.length <= maxNicknamesShownFully) {
-                await backend.post<string[]>('/relay/details/relay/nicknames', knownRelayDetailIds).then(response => {
-                    tooltip = response.data.join(", ")
-                })
-            }
-            marker.bindTooltip(tooltip, {permanent: true, direction: 'top'}).openTooltip();
+            marker.bindTooltip(tooltip, {permanent: false, direction: 'top'}).openTooltip();
         })
         .on('mouseout', function (this: L.Marker, e) {
             marker.unbindTooltip();
