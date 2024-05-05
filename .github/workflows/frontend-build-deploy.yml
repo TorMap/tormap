@@ -11,7 +11,7 @@ on:
       - '.github/workflows/frontend*'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
           yarn build
 
       - name: Deploy to preview channel
-        if: github.event_name == 'pull_request' && (github.ref == 'development' || github.ref == 'dev')
+        if: github.event_name == 'pull_request' && (github.ref_name == 'development' || github.ref_name == 'dev')
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
@@ -39,7 +39,7 @@ jobs:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
       - name: Deploy to dev.tormap.org
-        if: github.event_name == 'push' && (github.ref == 'development' || github.ref == 'dev')
+        if: github.event_name == 'push' && (github.ref_name == 'development' || github.ref_name == 'dev')
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
@@ -51,7 +51,7 @@ jobs:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
       - name: Deploy to tormap.org
-        if: github.event_name == 'push' && (github.ref == 'master' || github.ref == 'main')
+        if: github.event_name == 'push' && (github.ref_name == 'master' || github.ref_name == 'main')
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
