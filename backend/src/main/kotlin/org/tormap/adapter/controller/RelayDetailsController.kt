@@ -30,4 +30,8 @@ class RelayDetailsController(
     @PostMapping("family/identifiers")
     fun getFamilyIdentifiers(@RequestBody familyIds: List<Long>) =
         relayDetailsRepositoryImpl.findFamilyIdentifiers(familyIds)
+
+    @Operation(summary = "Return the nicknames of the relays that are associated with a list of relay details IDs.")
+    @PostMapping("relay/nicknames")
+    fun getRelayNicknames(@RequestBody ids: List<Long>) = relayDetailsRepositoryImpl.findAllByIdIn(ids).map { it.nickname }
 }
