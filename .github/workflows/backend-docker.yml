@@ -23,7 +23,7 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v3
       - uses: gradle/wrapper-validation-action@v3
 
       - name: Build and push docker image
