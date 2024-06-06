@@ -19,7 +19,7 @@
     "@mui/material": "5.15.18",
     "@mui/styles": "5.15.18",
     "@mui/x-date-pickers": "5.0.20",
-    "axios": "1.6.8",
+    "axios": "1.7.2",
     "date-fns": "2.30.0",
     "jotai": "2.8.2",
     "leaflet": "1.9.4",
@@ -35,13 +35,13 @@
     "@types/geojson": "7946.0.14",
     "@types/leaflet": "1.9.0",
     "@types/leaflet.heat": "0.2.4",
-    "@types/node": "20.12.12",
+    "@types/node": "20.14.0",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.24",
     "@types/react-infinite-scroller": "1.2.5",
-    "@typescript-eslint/eslint-plugin": "7.7.0",
-    "@typescript-eslint/parser": "7.7.0",
-    "@vitejs/plugin-react-swc": "3.6.0",
+    "@typescript-eslint/eslint-plugin": "7.11.0",
+    "@typescript-eslint/parser": "7.11.0",
+    "@vitejs/plugin-react-swc": "3.7.0",
     "eslint": "8.57.0",
     "eslint-plugin-jsx-a11y": "6.8.0",
     "eslint-plugin-react": "7.34.2",
@@ -49,5 +49,5 @@
     "vite": "5.2.12",
     "vite-plugin-checker": "0.6.4"
   },
-  "packageManager": "yarn@4.1.1"
+  "packageManager": "yarn@4.2.2"
 }
