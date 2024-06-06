@@ -71,9 +71,9 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("io.kotest:kotest-runner-junit5:5.8.1")
-    testImplementation("io.kotest:kotest-assertions-core:5.8.1")
-    testImplementation("io.kotest.extensions:kotest-extensions-spring:1.1.3")
+    testImplementation("io.kotest:kotest-runner-junit5:5.9.0")
+    testImplementation("io.kotest:kotest-assertions-core:5.9.0")
+    testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
     // Testcontainers to provide Postgres DB (https://testcontainers.org/)
     testImplementation("org.testcontainers:testcontainers:1.19.8")
     testImplementation("org.testcontainers:junit-jupiter:1.19.8")
