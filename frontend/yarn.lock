@@ -669,16 +669,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/core-downloads-tracker@npm:^5.15.20":
-  version: 5.15.20
-  resolution: "@mui/core-downloads-tracker@npm:5.15.20"
-  checksum: 10/8cc71169ce1201c5a37fad6c5c58739850694e90c7bda636c692d47a79fd4c7884eab2c24b0084d6732a3d28c9a4a6d222dd5747f9d91f5075614700a3a3282a
+"@mui/core-downloads-tracker@npm:^5.15.21":
+  version: 5.16.0
+  resolution: "@mui/core-downloads-tracker@npm:5.16.0"
+  checksum: 10/cf625680553eb918f033a6dbeb78078e4a81d0939a3db9a97a7daaacd1449c894b05dab53864d03e8831a98cc32af6780c7c9db82829a2a3967c05b1ee33f222
   languageName: node
   linkType: hard
 
-"@mui/icons-material@npm:5.15.20":
-  version: 5.15.20
-  resolution: "@mui/icons-material@npm:5.15.20"
+"@mui/icons-material@npm:5.15.21":
+  version: 5.15.21
+  resolution: "@mui/icons-material@npm:5.15.21"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
   peerDependencies:
@@ -688,17 +688,17 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10/fe83713840b84f745005ef457cf3a3672099d1cc9db538214016a2679d964a0b93b82bb6c33c27e405a6d0204c1d1325fc68f0d546b20b4d2d0b5a6a4bec152f
+  checksum: 10/812671dbb47c1d15878badf5665fe020579590c36e22eca2e6b0dd898671dec0428afb004907bdde9d06b6e26dc10afe9a0dddf82baa43e96e1c9bbce79057f3
   languageName: node
   linkType: hard
 
-"@mui/material@npm:5.15.20":
-  version: 5.15.20
-  resolution: "@mui/material@npm:5.15.20"
+"@mui/material@npm:5.15.21":
+  version: 5.15.21
+  resolution: "@mui/material@npm:5.15.21"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
     "@mui/base": "npm:5.0.0-beta.40"
-    "@mui/core-downloads-tracker": "npm:^5.15.20"
+    "@mui/core-downloads-tracker": "npm:^5.15.21"
     "@mui/system": "npm:^5.15.20"
     "@mui/types": "npm:^7.2.14"
     "@mui/utils": "npm:^5.15.20"
@@ -721,7 +721,7 @@ __metadata:
       optional: true
     "@types/react":
       optional: true
-  checksum: 10/1e568f82334b3a556bd248130238746bcd59951aad654e43c0df292076fae6799172113c3e2eb93fffaf49bd81023fbee0494b073e8808400ad00bea9f030e9b
+  checksum: 10/3369cb1d0ddd790de2d972dd5a2039eb2cd26e35ff1c515308d0d03929f9ded02d2ba3038551d94258ac5d5dc9a4433ca76ad60f81573346aa0d69075d72f403
   languageName: node
   linkType: hard
 
@@ -763,9 +763,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/styles@npm:5.15.20":
-  version: 5.15.20
-  resolution: "@mui/styles@npm:5.15.20"
+"@mui/styles@npm:5.15.21":
+  version: 5.15.21
+  resolution: "@mui/styles@npm:5.15.21"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
     "@emotion/hash": "npm:^0.9.1"
@@ -790,7 +790,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10/3a74a64a005cf4a51a9efbbfc2354629a6a7b01c665bb9d66c51652e58cb6abd675016b50ba1fe9366998a2fb57f031ae2a665f974d06fa5231be83f8833bd69
+  checksum: 10/ab94396142916bc66a2159828b6d86ba00edeee46901dcabc7b8f9c966aec4ec1d529dbaaaf5587ce1a92d6ea3b7eacec8b8e95f245aa84bc44cbb04304770fb
   languageName: node
   linkType: hard
 
@@ -4027,9 +4027,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jotai@npm:2.8.3":
-  version: 2.8.3
-  resolution: "jotai@npm:2.8.3"
+"jotai@npm:2.8.4":
+  version: 2.8.4
+  resolution: "jotai@npm:2.8.4"
   peerDependencies:
     "@types/react": ">=17.0.0"
     react: ">=17.0.0"
@@ -4038,7 +4038,7 @@ __metadata:
       optional: true
     react:
       optional: true
-  checksum: 10/9dd603d854849e9ef3dc4fb8ed6deae9034310f55cd8de9c54df53f3ac2a62b8f90c773f4bbc28da40ced08d8195805210e658c670f0c8973d78e7c898fb4179
+  checksum: 10/b0931bdb6b38c1f5285b6ffd6b9ec84286fc3233b15d20cc7723b6b1e1e0d2c153ceb8aa5615c34d4d7fd16cbb060fedea5b97de5b33369b45b9268eacaf2748
   languageName: node
   linkType: hard
 
@@ -5773,9 +5773,9 @@ __metadata:
   dependencies:
     "@emotion/react": "npm:11.11.4"
     "@emotion/styled": "npm:11.11.5"
-    "@mui/icons-material": "npm:5.15.20"
-    "@mui/material": "npm:5.15.20"
-    "@mui/styles": "npm:5.15.20"
+    "@mui/icons-material": "npm:5.15.21"
+    "@mui/material": "npm:5.15.21"
+    "@mui/styles": "npm:5.15.21"
     "@mui/x-date-pickers": "npm:5.0.20"
     "@types/geojson": "npm:7946.0.14"
     "@types/leaflet": "npm:1.9.0"
@@ -5792,7 +5792,7 @@ __metadata:
     eslint: "npm:8.57.0"
     eslint-plugin-jsx-a11y: "npm:6.8.0"
     eslint-plugin-react: "npm:7.34.3"
-    jotai: "npm:2.8.3"
+    jotai: "npm:2.8.4"
     leaflet: "npm:1.9.4"
     leaflet.heat: "npm:0.2.0"
     notistack: "npm:3.0.1"
