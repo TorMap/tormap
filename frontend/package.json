@@ -15,9 +15,9 @@
   "dependencies": {
     "@emotion/react": "11.11.4",
     "@emotion/styled": "11.11.5",
-    "@mui/icons-material": "5.15.21",
-    "@mui/material": "5.15.21",
-    "@mui/styles": "5.15.21",
+    "@mui/icons-material": "5.16.0",
+    "@mui/material": "5.16.0",
+    "@mui/styles": "5.16.0",
     "@mui/x-date-pickers": "5.0.20",
     "axios": "1.7.2",
     "date-fns": "2.30.0",
@@ -39,15 +39,15 @@
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.24",
     "@types/react-infinite-scroller": "1.2.5",
-    "@typescript-eslint/eslint-plugin": "7.11.0",
-    "@typescript-eslint/parser": "7.11.0",
+    "@typescript-eslint/eslint-plugin": "7.15.0",
+    "@typescript-eslint/parser": "7.15.0",
     "@vitejs/plugin-react-swc": "3.7.0",
     "eslint": "8.57.0",
-    "eslint-plugin-jsx-a11y": "6.8.0",
+    "eslint-plugin-jsx-a11y": "6.9.0",
     "eslint-plugin-react": "7.34.3",
-    "typescript": "5.4.5",
-    "vite": "5.2.13",
+    "typescript": "5.5.3",
+    "vite": "5.3.3",
     "vite-plugin-checker": "0.6.4"
   },
-  "packageManager": "yarn@4.2.2"
+  "packageManager": "yarn@4.3.1"
 }
