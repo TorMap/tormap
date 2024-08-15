@@ -19,7 +19,7 @@
     "@mui/material": "5.15.15",
     "@mui/styles": "5.15.15",
     "@mui/x-date-pickers": "5.0.20",
-    "axios": "1.6.8",
+    "axios": "1.7.4",
     "date-fns": "2.30.0",
     "jotai": "2.8.0",
     "leaflet": "1.9.4",
