@@ -27,7 +27,7 @@ jobs:
           yarn build
 
       - name: Deploy to preview channel
-        if: github.event_name == 'pull_request' && (github.ref_name == 'development' || github.ref_name == 'dev')
+        if: github.event_name == 'pull_request' && (github.ref_name == 'master' || github.ref_name == 'main' || github.ref_name == 'development' || github.ref_name == 'dev')
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
@@ -50,7 +50,7 @@ jobs:
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
-      - name: Deploy to tormap.org
+      - name: Deploy to live tormap.org
         if: github.event_name == 'push' && (github.ref_name == 'master' || github.ref_name == 'main')
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
