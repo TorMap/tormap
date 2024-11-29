@@ -4,7 +4,7 @@
     "github>juliushenke/renovate-preset"
   ],
   "baseBranches": [
-    "dev"
+    "master"
   ],
   "assignees": [
     "JuliusHenke"
