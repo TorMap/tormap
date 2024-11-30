@@ -41,7 +41,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-kotlin:1.8.0")
 
     // Serialization
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.2")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.1")
 
     // Postgres Database
     implementation("org.postgresql:postgresql:42.7.4")
