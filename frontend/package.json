@@ -13,15 +13,16 @@
     "node": "^20"
   },
   "dependencies": {
-    "@emotion/react": "11.13.0",
-    "@emotion/styled": "11.13.0",
-    "@mui/icons-material": "5.16.0",
-    "@mui/material": "5.16.0",
-    "@mui/styles": "5.16.0",
+    "@emotion/react": "11.13.5",
+    "@emotion/styled": "11.13.5",
+    "@mui/base": "5.0.0-beta.63",
+    "@mui/icons-material": "5.16.7",
+    "@mui/material": "5.16.7",
+    "@mui/styles": "5.16.7",
     "@mui/x-date-pickers": "5.0.20",
-    "axios": "1.7.4",
+    "axios": "1.7.8",
     "date-fns": "2.30.0",
-    "jotai": "2.10.1",
+    "jotai": "2.10.3",
     "leaflet": "1.9.4",
     "leaflet.heat": "0.2.0",
     "notistack": "3.0.1",
@@ -41,13 +42,13 @@
     "@types/react-infinite-scroller": "1.2.5",
     "@typescript-eslint/eslint-plugin": "7.18.0",
     "@typescript-eslint/parser": "7.18.0",
-    "@vitejs/plugin-react-swc": "3.7.0",
-    "eslint": "8.57.0",
-    "eslint-plugin-jsx-a11y": "6.10.0",
-    "eslint-plugin-react": "7.37.1",
+    "@vitejs/plugin-react-swc": "3.7.2",
+    "eslint": "8.57.1",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react": "7.37.2",
     "typescript": "5.7.2",
-    "vite": "5.4.6",
+    "vite": "5.4.11",
     "vite-plugin-checker": "0.8.0"
   },
-  "packageManager": "yarn@4.5.1"
+  "packageManager": "yarn@4.5.3"
 }
