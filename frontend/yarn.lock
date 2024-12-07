@@ -691,38 +691,38 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/core-downloads-tracker@npm:^5.16.7":
-  version: 5.16.8
-  resolution: "@mui/core-downloads-tracker@npm:5.16.8"
-  checksum: 10/1d099442aabf0a17ae0045d370565fca9c8654a654f88a08595542e6566d159aa632cc7d73aefa247f2ae3ab853709ea2e37118a080891bfbd200c58212202ca
+"@mui/core-downloads-tracker@npm:^5.16.8":
+  version: 5.16.9
+  resolution: "@mui/core-downloads-tracker@npm:5.16.9"
+  checksum: 10/25e7cf746627e12671e2bae4ea8f81967fbb7e05188c268052104d05f249eea1baa3f3d97f66d1242112afa944a7b025a331527392797d620acbcc1dde23a3df
   languageName: node
   linkType: hard
 
-"@mui/icons-material@npm:5.16.7":
-  version: 5.16.7
-  resolution: "@mui/icons-material@npm:5.16.7"
+"@mui/icons-material@npm:5.16.8":
+  version: 5.16.8
+  resolution: "@mui/icons-material@npm:5.16.8"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
   peerDependencies:
     "@mui/material": ^5.0.0
-    "@types/react": ^17.0.0 || ^18.0.0
-    react: ^17.0.0 || ^18.0.0
+    "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10/39bd989f566951e8898e955309506b4f37eeed50bc3631869b5967ecb143c19372ea13e49994504f6c0e3969e8b73ad17cdc6cfc4eaff1201a852231539b83df
+  checksum: 10/1513a5c69b0adb4b70cdcf49fd01dc5d6ed058e7813e75a0524ac111cc97fb7ee2d154a433076d6526e88cd099442b6a6c336e1594c8b53d2191f3fb444a2f7e
   languageName: node
   linkType: hard
 
-"@mui/material@npm:5.16.7":
-  version: 5.16.7
-  resolution: "@mui/material@npm:5.16.7"
+"@mui/material@npm:5.16.8":
+  version: 5.16.8
+  resolution: "@mui/material@npm:5.16.8"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
-    "@mui/core-downloads-tracker": "npm:^5.16.7"
-    "@mui/system": "npm:^5.16.7"
+    "@mui/core-downloads-tracker": "npm:^5.16.8"
+    "@mui/system": "npm:^5.16.8"
     "@mui/types": "npm:^7.2.15"
-    "@mui/utils": "npm:^5.16.6"
+    "@mui/utils": "npm:^5.16.8"
     "@popperjs/core": "npm:^2.11.8"
     "@types/react-transition-group": "npm:^4.4.10"
     clsx: "npm:^2.1.0"
@@ -733,9 +733,9 @@ __metadata:
   peerDependencies:
     "@emotion/react": ^11.5.0
     "@emotion/styled": ^11.3.0
-    "@types/react": ^17.0.0 || ^18.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
   peerDependenciesMeta:
     "@emotion/react":
       optional: true
@@ -743,11 +743,11 @@ __metadata:
       optional: true
     "@types/react":
       optional: true
-  checksum: 10/67f118e5a4bc89553d87b1b5bfe8c37b979ee981415dfda39fba0b27d08636be91fa9f270ea674d19f5a23186f53be67e3eb397f03333a7342170f43db8d0058
+  checksum: 10/e39345677e43b42085f45b1e490b50a8cf531823becf437a782a5e6433cab4094b813c627a07066be08e6c1ee73ba145359a9e6681cafea22f14b3fb5375436a
   languageName: node
   linkType: hard
 
-"@mui/private-theming@npm:^5.16.6, @mui/private-theming@npm:^5.16.8":
+"@mui/private-theming@npm:^5.16.8":
   version: 5.16.8
   resolution: "@mui/private-theming@npm:5.16.8"
   dependencies:
@@ -785,15 +785,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/styles@npm:5.16.7":
-  version: 5.16.7
-  resolution: "@mui/styles@npm:5.16.7"
+"@mui/styles@npm:5.16.8":
+  version: 5.16.8
+  resolution: "@mui/styles@npm:5.16.8"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
     "@emotion/hash": "npm:^0.9.1"
-    "@mui/private-theming": "npm:^5.16.6"
+    "@mui/private-theming": "npm:^5.16.8"
     "@mui/types": "npm:^7.2.15"
-    "@mui/utils": "npm:^5.16.6"
+    "@mui/utils": "npm:^5.16.8"
     clsx: "npm:^2.1.0"
     csstype: "npm:^3.1.3"
     hoist-non-react-statics: "npm:^3.3.2"
@@ -807,16 +807,16 @@ __metadata:
     jss-plugin-vendor-prefixer: "npm:^10.10.0"
     prop-types: "npm:^15.8.1"
   peerDependencies:
-    "@types/react": ^17.0.0 || ^18.0.0
-    react: ^17.0.0
+    "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10/acdaf8139ab0847c3b38d2e9dbf45e91b413dc46230ba09db4f36f838545ac3e58f8562ad32d950851c5d9ff7636786497775a330f307187deebbbe167ab1da6
+  checksum: 10/7eb2095346ee8d06e2df2f9b689af32ab6d276dbcd67fde0d4146bb1f032d06b4294a10f1ee1258f1290db9f882401e93494b9270ecefbf07178e354d4285741
   languageName: node
   linkType: hard
 
-"@mui/system@npm:^5.16.7":
+"@mui/system@npm:^5.16.8":
   version: 5.16.8
   resolution: "@mui/system@npm:5.16.8"
   dependencies:
@@ -871,7 +871,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/utils@npm:^5.16.6, @mui/utils@npm:^5.16.8":
+"@mui/utils@npm:^5.16.8":
   version: 5.16.8
   resolution: "@mui/utils@npm:5.16.8"
   dependencies:
@@ -1310,12 +1310,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:20.17.8":
-  version: 20.17.8
-  resolution: "@types/node@npm:20.17.8"
+"@types/node@npm:20.17.9":
+  version: 20.17.9
+  resolution: "@types/node@npm:20.17.9"
   dependencies:
     undici-types: "npm:~6.19.2"
-  checksum: 10/e3e968b327abc70fd437a223f8950dd4436047e954aa7db09abde5df1f58a5c49f33d6f14524e256d09719e1960d22bf072d62e4bda7375f7895a092c7eb2f9d
+  checksum: 10/11604a47adf383892394a59a339136b2746a71addf4a3b13f661d23b6e81e8a4f3b35e69dbcffc94698368e5ab5ec056a43a86c87eff00b1b8ea8cfcbfe641df
   languageName: node
   linkType: hard
 
@@ -5744,14 +5744,14 @@ __metadata:
     "@emotion/react": "npm:11.13.5"
     "@emotion/styled": "npm:11.13.5"
     "@mui/base": "npm:5.0.0-beta.63"
-    "@mui/icons-material": "npm:5.16.7"
-    "@mui/material": "npm:5.16.7"
-    "@mui/styles": "npm:5.16.7"
+    "@mui/icons-material": "npm:5.16.8"
+    "@mui/material": "npm:5.16.8"
+    "@mui/styles": "npm:5.16.8"
     "@mui/x-date-pickers": "npm:5.0.20"
     "@types/geojson": "npm:7946.0.14"
     "@types/leaflet": "npm:1.9.0"
     "@types/leaflet.heat": "npm:0.2.4"
-    "@types/node": "npm:20.17.8"
+    "@types/node": "npm:20.17.9"
     "@types/react": "npm:18.2.21"
     "@types/react-dom": "npm:18.2.24"
     "@types/react-infinite-scroller": "npm:1.2.5"
