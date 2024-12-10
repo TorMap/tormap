@@ -23,7 +23,7 @@ jobs:
           yarn build
 
       - name: Deploy to preview channel
-        if: github.event.pull_request.base.ref == 'master'
+        if: github.event.pull_request.base.ref == 'master' || github.event.pull_request.base.ref == 'dev'
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
