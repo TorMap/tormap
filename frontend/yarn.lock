@@ -669,38 +669,38 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/base@npm:5.0.0-beta.63":
-  version: 5.0.0-beta.63
-  resolution: "@mui/base@npm:5.0.0-beta.63"
+"@mui/base@npm:5.0.0-beta.66":
+  version: 5.0.0-beta.66
+  resolution: "@mui/base@npm:5.0.0-beta.66"
   dependencies:
     "@babel/runtime": "npm:^7.26.0"
     "@floating-ui/react-dom": "npm:^2.1.1"
     "@mui/types": "npm:^7.2.19"
-    "@mui/utils": "npm:^6.1.9"
+    "@mui/utils": "npm:^6.2.0"
     "@popperjs/core": "npm:^2.11.8"
     clsx: "npm:^2.1.1"
     prop-types: "npm:^15.8.1"
   peerDependencies:
-    "@types/react": ^17.0.0 || ^18.0.0
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
+    "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
+    react: ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10/1225feac3421152151cf02c21c60bebbb8b2ee9b6565e3c2c9c27628914c31e5079819a6c346642b9245470d41fd1166f431f6344caa34e88e10eef089b9ac08
+  checksum: 10/1960ebab3c4348c43af30cb28d3337004e2fbe035c5830295becdf710e621cbea46d03291c1e31d74465da2526e6f98e314a6ad196595281123bc54c0c6f73ac
   languageName: node
   linkType: hard
 
-"@mui/core-downloads-tracker@npm:^5.16.8":
-  version: 5.16.9
-  resolution: "@mui/core-downloads-tracker@npm:5.16.9"
-  checksum: 10/25e7cf746627e12671e2bae4ea8f81967fbb7e05188c268052104d05f249eea1baa3f3d97f66d1242112afa944a7b025a331527392797d620acbcc1dde23a3df
+"@mui/core-downloads-tracker@npm:^5.16.9":
+  version: 5.16.11
+  resolution: "@mui/core-downloads-tracker@npm:5.16.11"
+  checksum: 10/87243dedefde3ec4b9b9b84185d48598bc9b0966e829a1d656f47a72e739e3f07a31039d5c010894620693916f53cc146f2870c422d824eca93a8c6ac2d00498
   languageName: node
   linkType: hard
 
-"@mui/icons-material@npm:5.16.8":
-  version: 5.16.8
-  resolution: "@mui/icons-material@npm:5.16.8"
+"@mui/icons-material@npm:5.16.10":
+  version: 5.16.10
+  resolution: "@mui/icons-material@npm:5.16.10"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
   peerDependencies:
@@ -710,16 +710,16 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10/1513a5c69b0adb4b70cdcf49fd01dc5d6ed058e7813e75a0524ac111cc97fb7ee2d154a433076d6526e88cd099442b6a6c336e1594c8b53d2191f3fb444a2f7e
+  checksum: 10/48bef1e5bcc38969218de30af376880f2e64d38c5abdd2099e7b4d24503d3259a24c8c36984ba88d293e0425f64fe51db6a8899492d58ee0335cad790c91668e
   languageName: node
   linkType: hard
 
-"@mui/material@npm:5.16.8":
-  version: 5.16.8
-  resolution: "@mui/material@npm:5.16.8"
+"@mui/material@npm:5.16.9":
+  version: 5.16.9
+  resolution: "@mui/material@npm:5.16.9"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
-    "@mui/core-downloads-tracker": "npm:^5.16.8"
+    "@mui/core-downloads-tracker": "npm:^5.16.9"
     "@mui/system": "npm:^5.16.8"
     "@mui/types": "npm:^7.2.15"
     "@mui/utils": "npm:^5.16.8"
@@ -743,7 +743,7 @@ __metadata:
       optional: true
     "@types/react":
       optional: true
-  checksum: 10/e39345677e43b42085f45b1e490b50a8cf531823becf437a782a5e6433cab4094b813c627a07066be08e6c1ee73ba145359a9e6681cafea22f14b3fb5375436a
+  checksum: 10/0bbdb2a0309e70b7e43f04c0af19dbe3d4d5180f69aecd599182d92e21869a449cba8f94dfc280c0e6aa26d3b5a0c72c424e5c445ee4a2fdd01e79e7c24639e1
   languageName: node
   linkType: hard
 
@@ -785,9 +785,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/styles@npm:5.16.8":
-  version: 5.16.8
-  resolution: "@mui/styles@npm:5.16.8"
+"@mui/styles@npm:5.16.10":
+  version: 5.16.10
+  resolution: "@mui/styles@npm:5.16.10"
   dependencies:
     "@babel/runtime": "npm:^7.23.9"
     "@emotion/hash": "npm:^0.9.1"
@@ -812,7 +812,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10/7eb2095346ee8d06e2df2f9b689af32ab6d276dbcd67fde0d4146bb1f032d06b4294a10f1ee1258f1290db9f882401e93494b9270ecefbf07178e354d4285741
+  checksum: 10/0afcb50bcb2f978eb1e2fee150edea3ddbb5ecd5de9f6fcad8a2f82b72bf28922894b1d2b03457ffacdfb69dd19d79e518771595e0774163b909f5ebe00a4ec3
   languageName: node
   linkType: hard
 
@@ -891,23 +891,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/utils@npm:^6.1.9":
-  version: 6.1.9
-  resolution: "@mui/utils@npm:6.1.9"
+"@mui/utils@npm:^6.2.0":
+  version: 6.2.0
+  resolution: "@mui/utils@npm:6.2.0"
   dependencies:
     "@babel/runtime": "npm:^7.26.0"
     "@mui/types": "npm:^7.2.19"
-    "@types/prop-types": "npm:^15.7.13"
+    "@types/prop-types": "npm:^15.7.14"
     clsx: "npm:^2.1.1"
     prop-types: "npm:^15.8.1"
-    react-is: "npm:^18.3.1"
+    react-is: "npm:^19.0.0"
   peerDependencies:
     "@types/react": ^17.0.0 || ^18.0.0 || ^19.0.0
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10/6f44a59abdda446fb886092ecd2904304097123029659677af743cb3c6bf2da3d74f57f2d0bf4e006167bf8e51f0af365ea47569d8a6ee3bfdfc1e9ffdaf28fd
+  checksum: 10/37ccee4f6edff7aecb049767ebf7cfb771561e6378c3164e67cffa60eb554ddade0d36feb3c2069feeb6a63fd05aeca9517133395d2834fc716cffbc0e9a9645
   languageName: node
   linkType: hard
 
@@ -1285,10 +1285,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/geojson@npm:7946.0.14":
-  version: 7946.0.14
-  resolution: "@types/geojson@npm:7946.0.14"
-  checksum: 10/ae511bee6488ae3bd5a3a3347aedb0371e997b14225b8983679284e22fa4ebd88627c6e3ff8b08bf4cc35068cb29310c89427311ffc9322c255615821a922e71
+"@types/geojson@npm:7946.0.15":
+  version: 7946.0.15
+  resolution: "@types/geojson@npm:7946.0.15"
+  checksum: 10/226d7ab59540632b19f7889c76c4c586a5104c18c43a81f32974aa035eafe557f86bd5a79ca5568bb63cbe5bfa9014c8e9a29cb0bb3d2f0bd71b0cc13ad8ccb3
   languageName: node
   linkType: hard
 
@@ -1333,10 +1333,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/prop-types@npm:^15.7.12, @types/prop-types@npm:^15.7.13":
+"@types/prop-types@npm:^15.7.12":
   version: 15.7.13
   resolution: "@types/prop-types@npm:15.7.13"
   checksum: 10/8935cad87c683c665d09a055919d617fe951cb3b2d5c00544e3a913f861a2bd8d2145b51c9aa6d2457d19f3107ab40784c40205e757232f6a80cc8b1c815513c
+  languageName: node
+  linkType: hard
+
+"@types/prop-types@npm:^15.7.14":
+  version: 15.7.14
+  resolution: "@types/prop-types@npm:15.7.14"
+  checksum: 10/d0c5407b9ccc3dd5fae0ccf9b1007e7622ba5e6f1c18399b4f24dff33619d469da4b9fa918a374f19dc0d9fe6a013362aab0b844b606cfc10676efba3f5f736d
   languageName: node
   linkType: hard
 
@@ -4884,6 +4891,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-is@npm:^19.0.0":
+  version: 19.0.0
+  resolution: "react-is@npm:19.0.0"
+  checksum: 10/6cd3695c462ec3f0d4db98583f0c1b9a439248d60214f6c42c2b0e2951a1066339d0eefa74707f03484042e043fca87750282a35b652492c035f5f3da0d6498a
+  languageName: node
+  linkType: hard
+
 "react-leaflet@npm:4.2.1":
   version: 4.2.1
   resolution: "react-leaflet@npm:4.2.1"
@@ -5743,12 +5757,12 @@ __metadata:
   dependencies:
     "@emotion/react": "npm:11.13.5"
     "@emotion/styled": "npm:11.13.5"
-    "@mui/base": "npm:5.0.0-beta.63"
-    "@mui/icons-material": "npm:5.16.8"
-    "@mui/material": "npm:5.16.8"
-    "@mui/styles": "npm:5.16.8"
+    "@mui/base": "npm:5.0.0-beta.66"
+    "@mui/icons-material": "npm:5.16.10"
+    "@mui/material": "npm:5.16.9"
+    "@mui/styles": "npm:5.16.10"
     "@mui/x-date-pickers": "npm:5.0.20"
-    "@types/geojson": "npm:7946.0.14"
+    "@types/geojson": "npm:7946.0.15"
     "@types/leaflet": "npm:1.9.0"
     "@types/leaflet.heat": "npm:0.2.4"
     "@types/node": "npm:20.17.9"
