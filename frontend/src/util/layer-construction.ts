@@ -23,7 +23,6 @@ import {
     sortFamilyCoordinatesMap
 } from "./aggregate-relays";
 import {getUniqueCountryColor} from "./geojson";
-import {backend} from "./util";
 
 /**
  * Returns a Layer with markers with size relative to number of relays on a coordinate.
@@ -133,13 +132,13 @@ function addRelayNicknameTooltip(relays: RelayLocationDto[], mostImportantRelay:
             stroke: false,
         },
     )
-        .on('mouseover', async function (this: L.Marker, e) {
+        .on('mouseover', async function (this: L.Marker) {
             marker.bindTooltip(tooltip, {permanent: false, direction: 'top'}).openTooltip();
         })
-        .on('mouseout', function (this: L.Marker, e) {
+        .on('mouseout', function (this: L.Marker) {
             marker.unbindTooltip();
         })
-        .on("click", function (this: L.Marker, e) {
+        .on("click", function (this: L.Marker) {
             marker.fire('click'); // Trigger the click event of the actual marker
         })
         .addTo(targetLayer)

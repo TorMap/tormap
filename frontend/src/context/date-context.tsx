@@ -31,7 +31,7 @@ interface DateInterface {
 const DateContext = React.createContext<DateInterface | null>(null)
 
 export function useDate() {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+     
     return useContext(DateContext)!
 }
 
