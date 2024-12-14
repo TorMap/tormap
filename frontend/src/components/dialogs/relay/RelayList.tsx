@@ -1,5 +1,5 @@
 import {Box, CircularProgress, List, ListItemButton, ListItemIcon, ListItemText} from "@mui/material";
-import React, {FunctionComponent, useMemo, useState} from "react";
+import React, {FunctionComponent, useState} from "react";
 import InfiniteScroll from "react-infinite-scroller";
 
 import {getIcon, RelayFamilyIcon} from "../../../types/icons";

@@ -1,4 +1,4 @@
-import {Box, Dialog, DialogTitle, Divider, Grid} from "@mui/material";
+import {Dialog, DialogTitle, Divider, Grid} from "@mui/material";
 import React from "react";
 
 import {RelayDetailsHeader} from "./RelayDetailsHeader";
