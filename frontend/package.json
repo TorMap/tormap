@@ -50,7 +50,7 @@
     "eslint-plugin-react": "7.37.3",
     "globals": "15.13.0",
     "typescript": "5.7.2",
-    "vite": "6.0.7",
+    "vite": "6.0.9",
     "vite-plugin-checker": "0.8.0"
   },
   "packageManager": "yarn@4.5.3"
