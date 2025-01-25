@@ -1,4 +1,3 @@
-import {ReactJSXElement} from "@emotion/react/types/jsx-namespace";
 import {Table, TableBody, TableCell, TableRow, Typography} from "@mui/material";
 import React, {FunctionComponent} from "react";
 
@@ -77,7 +76,7 @@ export const RelayDetailsTable: FunctionComponent<Props> = ({relayDetailsMatch})
 
 interface RelayDetailsTableRow {
     name: string
-    value: string | number | ReactJSXElement | undefined
+    value: string | number | React.ReactNode | undefined
 }
 
 const formatBytesToMBPerSecond = (bandwidthInBytes?: number) => bandwidthInBytes ?
