@@ -41,7 +41,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-kotlin:1.8.0")
 
     // Serialization
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.2")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.3")
 
     // Postgres Database
     implementation("org.postgresql:postgresql:42.7.5")
@@ -75,11 +75,11 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core:5.9.1")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
     // Testcontainers to provide Postgres DB (https://testcontainers.org/)
-    testImplementation("org.testcontainers:testcontainers:1.20.5")
-    testImplementation("org.testcontainers:junit-jupiter:1.20.5")
-    testImplementation("org.testcontainers:postgresql:1.20.5")
+    testImplementation("org.testcontainers:testcontainers:1.20.6")
+    testImplementation("org.testcontainers:junit-jupiter:1.20.6")
+    testImplementation("org.testcontainers:postgresql:1.20.6")
     // Mocking with Mockk (https://mockk.io/)
-    testImplementation("io.mockk:mockk:1.13.16")
+    testImplementation("io.mockk:mockk:1.13.17")
 }
 
 // Fix version requirement from Kotest
