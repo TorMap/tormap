@@ -5,18 +5,18 @@ version = "2.3.1"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
-    kotlin("jvm") version "1.9.23"
-    kotlin("kapt") version "1.9.23"
-    kotlin("plugin.spring") version "1.9.23"
-    kotlin("plugin.allopen") version "1.9.23"
-    kotlin("plugin.jpa") version "1.9.23"
+    kotlin("jvm") version "1.9.25"
+    kotlin("kapt") version "1.9.25"
+    kotlin("plugin.spring") version "1.9.25"
+    kotlin("plugin.allopen") version "1.9.25"
+    kotlin("plugin.jpa") version "1.9.25"
 
     // Spring https://spring.io/projects/spring-boot
     id("org.springframework.boot") version "2.7.18"
-    id("io.spring.dependency-management") version "1.1.4"
+    id("io.spring.dependency-management") version "1.1.7"
 
     // Build and push docker images
-    id("com.google.cloud.tools.jib") version "3.4.2"
+    id("com.google.cloud.tools.jib") version "3.4.5"
 }
 
 repositories {
