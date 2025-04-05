@@ -1386,12 +1386,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:20.17.27":
-  version: 20.17.27
-  resolution: "@types/node@npm:20.17.27"
+"@types/node@npm:20.17.30":
+  version: 20.17.30
+  resolution: "@types/node@npm:20.17.30"
   dependencies:
     undici-types: "npm:~6.19.2"
-  checksum: 10/60e3ce01266eb1b5a8e6815829b5becec471c5c33f1b30fe4568102919b4704b53a31e86de463257ccab93b8c2eeb80beaef8075ef84dc3fbd51fe258cef66f7
+  checksum: 10/69fd3b177417be77b459e8f1dd4e78c85c686167086920fbf35a9fda301709bbeee6a87ad2591fb1ddd96c65e725ec6bb527a06496626a1c94367d1361048f8d
   languageName: node
   linkType: hard
 
@@ -6315,7 +6315,7 @@ __metadata:
     "@types/geojson": "npm:7946.0.16"
     "@types/leaflet": "npm:1.9.0"
     "@types/leaflet.heat": "npm:0.2.4"
-    "@types/node": "npm:20.17.27"
+    "@types/node": "npm:20.17.30"
     "@types/react": "npm:18.2.21"
     "@types/react-dom": "npm:18.2.24"
     "@types/react-infinite-scroller": "npm:1.2.5"
