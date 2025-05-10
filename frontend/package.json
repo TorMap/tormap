@@ -22,7 +22,7 @@
     "@mui/x-date-pickers": "5.0.20",
     "axios": "1.8.4",
     "date-fns": "2.30.0",
-    "jotai": "2.12.3",
+    "jotai": "2.12.4",
     "leaflet": "1.9.4",
     "leaflet.heat": "0.2.0",
     "notistack": "3.0.2",
@@ -38,7 +38,7 @@
     "@types/geojson": "7946.0.16",
     "@types/leaflet": "1.9.0",
     "@types/leaflet.heat": "0.2.4",
-    "@types/node": "20.17.32",
+    "@types/node": "20.17.43",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.24",
     "@types/react-infinite-scroller": "1.2.5",
@@ -51,7 +51,7 @@
     "globals": "16.0.0",
     "typescript": "5.8.3",
     "vite": "6.2.7",
-    "vite-plugin-checker": "0.9.1"
+    "vite-plugin-checker": "0.9.3"
   },
   "packageManager": "yarn@4.7.0"
 }
