@@ -44,7 +44,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.19.0")
 
     // Postgres Database
-    implementation("org.postgresql:postgresql:42.7.5")
+    implementation("org.postgresql:postgresql:42.7.6")
 
     // Caching with Ehcache https://www.ehcache.org/
     implementation("org.ehcache:ehcache:3.10.8")
@@ -53,7 +53,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core:8.5.13")
 
     // Read .mmdb (MaxMind) DB files for IP lookups https://maxmind.github.io/MaxMind-DB/
-    implementation("com.maxmind.geoip2:geoip2:4.3.0")
+    implementation("com.maxmind.geoip2:geoip2:4.3.1")
 
     // Collect metrics
     implementation("com.newrelic.telemetry:micrometer-registry-new-relic:0.10.0")
@@ -75,9 +75,9 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core:5.9.1")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
     // Testcontainers to provide Postgres DB (https://testcontainers.org/)
-    testImplementation("org.testcontainers:testcontainers:1.21.0")
-    testImplementation("org.testcontainers:junit-jupiter:1.21.0")
-    testImplementation("org.testcontainers:postgresql:1.21.0")
+    testImplementation("org.testcontainers:testcontainers:1.21.1")
+    testImplementation("org.testcontainers:junit-jupiter:1.21.1")
+    testImplementation("org.testcontainers:postgresql:1.21.1")
     // Mocking with Mockk (https://mockk.io/)
     testImplementation("io.mockk:mockk:1.14.2")
 }
