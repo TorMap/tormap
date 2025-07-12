@@ -7,7 +7,7 @@ java.sourceCompatibility = JavaVersion.VERSION_11
 plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("kapt") version "1.9.25"
-    kotlin("plugin.spring") version "1.9.25"
+    kotlin("plugin.spring") version "2.2.0"
     kotlin("plugin.allopen") version "1.9.25"
     kotlin("plugin.jpa") version "1.9.25"
 
