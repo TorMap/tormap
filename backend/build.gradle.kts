@@ -9,7 +9,7 @@ plugins {
     kotlin("kapt") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     kotlin("plugin.allopen") version "1.9.25"
-    kotlin("plugin.jpa") version "1.9.25"
+    kotlin("plugin.jpa") version "2.2.0"
 
     // Spring https://spring.io/projects/spring-boot
     id("org.springframework.boot") version "2.7.18"
