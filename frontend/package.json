@@ -38,7 +38,7 @@
     "@types/geojson": "7946.0.16",
     "@types/leaflet": "1.9.0",
     "@types/leaflet.heat": "0.2.4",
-    "@types/node": "20.19.6",
+    "@types/node": "20.19.8",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.24",
     "@types/react-infinite-scroller": "1.2.5",
@@ -50,7 +50,7 @@
     "eslint-plugin-react": "7.37.5",
     "globals": "16.3.0",
     "typescript": "5.8.3",
-    "vite": "7.0.2",
+    "vite": "7.0.4",
     "vite-plugin-checker": "0.9.3"
   },
   "packageManager": "yarn@4.9.2"
