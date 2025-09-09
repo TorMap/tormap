@@ -6509,7 +6509,7 @@ __metadata:
     react-leaflet: "npm:4.2.1"
     react-sliding-pane: "npm:7.3.0"
     typescript: "npm:5.8.3"
-    vite: "npm:7.0.6"
+    vite: "npm:7.0.7"
     vite-plugin-checker: "npm:0.10.2"
   languageName: unknown
   linkType: soft
@@ -6823,9 +6823,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:7.0.6":
-  version: 7.0.6
-  resolution: "vite@npm:7.0.6"
+"vite@npm:7.0.7":
+  version: 7.0.7
+  resolution: "vite@npm:7.0.7"
   dependencies:
     esbuild: "npm:^0.25.0"
     fdir: "npm:^6.4.6"
@@ -6874,7 +6874,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10/729ddefd6710b0b5aa38a62a537f3dc28577edaf57958c815a1964f1e348a1c7cb17ce8f708675668d7e80d95fb62f7c433b718fe12d80dd8a756ccec519bc2a
+  checksum: 10/9bfbd6c6a84cbb977f3a7a8a38889c3b099461178644ffe7e94dc4e8ccc722f07befe0f2fc628d76cad56803f4b8f908e330c80224e57d9514d49195c646690c
   languageName: node
   linkType: hard
 
