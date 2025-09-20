@@ -1428,12 +1428,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:20.19.11":
-  version: 20.19.11
-  resolution: "@types/node@npm:20.19.11"
+"@types/node@npm:20.19.16":
+  version: 20.19.16
+  resolution: "@types/node@npm:20.19.16"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10/7179ed464a781cad20117362df58c12839b40922b53356e1a74f86c99d9d1ef9a27edce360901608f896c247c9c4131ba9c7222331e92cde17b723c75d5c8f2e
+  checksum: 10/19e2887c09f920f629f04b874542f277da6db35812f8acc2ad6d09652d21c9a26161f70752e2b9473b1e185cd63c64439875e0b714b9e0f7c3168aed9a2f514a
   languageName: node
   linkType: hard
 
@@ -6486,7 +6486,7 @@ __metadata:
     "@types/geojson": "npm:7946.0.16"
     "@types/leaflet": "npm:1.9.0"
     "@types/leaflet.heat": "npm:0.2.4"
-    "@types/node": "npm:20.19.11"
+    "@types/node": "npm:20.19.16"
     "@types/react": "npm:18.2.21"
     "@types/react-dom": "npm:18.2.24"
     "@types/react-infinite-scroller": "npm:1.2.5"
@@ -6510,7 +6510,7 @@ __metadata:
     react-sliding-pane: "npm:7.3.0"
     typescript: "npm:5.8.3"
     vite: "npm:7.0.7"
-    vite-plugin-checker: "npm:0.10.2"
+    vite-plugin-checker: "npm:0.10.3"
   languageName: unknown
   linkType: soft
 
@@ -6776,9 +6776,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-plugin-checker@npm:0.10.2":
-  version: 0.10.2
-  resolution: "vite-plugin-checker@npm:0.10.2"
+"vite-plugin-checker@npm:0.10.3":
+  version: 0.10.3
+  resolution: "vite-plugin-checker@npm:0.10.3"
   dependencies:
     "@babel/code-frame": "npm:^7.27.1"
     chokidar: "npm:^4.0.3"
@@ -6819,7 +6819,7 @@ __metadata:
       optional: true
     vue-tsc:
       optional: true
-  checksum: 10/8b8e82ef37b04fa6bbe6d2ae62b50f6a13e0f459a1f3a9b23905e722cda6e538ac227894c25ba43a988f8b2ae85b4e12a4a0fd0aa25579d4b1311710302d2fc6
+  checksum: 10/d679703dbd88fca5b7fa72adf62ea806b2cf94e32b5f50118009d234f70d8e756ab0f2b0c2258467cfdaae6c55a9b6e28213e4a0fcda8b8122c43e3fdf344903
   languageName: node
   linkType: hard
 
