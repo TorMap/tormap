@@ -41,19 +41,19 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-kotlin:1.8.0")
 
     // Serialization
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.19.2")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.20.0")
 
     // Postgres Database
     implementation("org.postgresql:postgresql:42.7.7")
 
     // Caching with Ehcache https://www.ehcache.org/
-    implementation("org.ehcache:ehcache:3.10.8")
+    implementation("org.ehcache:ehcache:3.11.1")
 
     // Run Flyway DB migration tool on startup https://flywaydb.org/
     implementation("org.flywaydb:flyway-core:8.5.13")
 
     // Read .mmdb (MaxMind) DB files for IP lookups https://maxmind.github.io/MaxMind-DB/
-    implementation("com.maxmind.geoip2:geoip2:4.3.1")
+    implementation("com.maxmind.geoip2:geoip2:4.4.0")
 
     // Collect metrics
     implementation("com.newrelic.telemetry:micrometer-registry-new-relic:0.10.0")
