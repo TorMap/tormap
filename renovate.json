@@ -3,9 +3,6 @@
   "extends": [
     "github>juliushenke/renovate-preset"
   ],
-  "baseBranchPatterns": [
-    "master"
-  ],
   "assignees": [
     "JuliusHenke"
   ],
