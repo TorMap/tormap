@@ -3,7 +3,7 @@
   "extends": [
     "github>juliushenke/renovate-preset"
   ],
-  "baseBranches": [
+  "baseBranchPatterns": [
     "master"
   ],
   "assignees": [
@@ -12,32 +12,32 @@
   "packageRules": [
     {
       "description": "Ignore outdated dependencies required by TorProject descriptor library",
-      "managers": [
+      "matchManagers": [
         "gradle"
       ],
-      "packagePatterns": [
-        "^commons-codec",
-        "^org.apache.commons",
-        "^com.fasterxml.jackson.core",
-        "^org.slf4j",
-        "^org.tukaani"
-      ],
-      "enabled": false
+      "enabled": false,
+      "matchPackageNames": [
+        "/^commons-codec/",
+        "/^org.apache.commons/",
+        "/^com.fasterxml.jackson.core/",
+        "/^org.slf4j/",
+        "/^org.tukaani/"
+      ]
     },
     {
       "description": "Ignore specific docker images",
-      "packagePatterns": [
-        "^eclipse-temurin"
-      ],
-      "enabled": false
+      "enabled": false,
+      "matchPackageNames": [
+        "/^eclipse-temurin/"
+      ]
     },
     {
       "description": "Leaflet related updates",
-      "packagePatterns": [
-        "leaflet"
-      ],
       "groupName": "leaflet",
-      "prPriority": 0
+      "prPriority": 0,
+      "matchPackageNames": [
+        "/leaflet/"
+      ]
     },
     {
       "description": "Limit react version to ensure compatibility with react-infinite-scroller",
