@@ -24,7 +24,7 @@ jobs:
 
       - name: Deploy to preview channel
         if: github.event.pull_request.base.ref == 'master' || github.event.pull_request.base.ref == 'dev'
-        uses: FirebaseExtended/action-hosting-deploy@v0
+        uses: FirebaseExtended/action-hosting-deploy@e2eda2e106cfa35cdbcf4ac9ddaf6c4756df2c8c # v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_TORMAP_36F44 }}'
