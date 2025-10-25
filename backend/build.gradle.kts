@@ -44,7 +44,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.20.0")
 
     // Postgres Database
-    implementation("org.postgresql:postgresql:42.7.7")
+    implementation("org.postgresql:postgresql:42.7.8")
 
     // Caching with Ehcache https://www.ehcache.org/
     implementation("org.ehcache:ehcache:3.11.1")
@@ -79,7 +79,7 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:1.21.3")
     testImplementation("org.testcontainers:postgresql:1.21.3")
     // Mocking with Mockk (https://mockk.io/)
-    testImplementation("io.mockk:mockk:1.14.5")
+    testImplementation("io.mockk:mockk:1.14.6")
 }
 
 // Fix version requirement from Kotest
