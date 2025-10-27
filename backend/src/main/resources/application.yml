@@ -1,3 +1,7 @@
+app:
+    security:
+        cors:
+            allowed-origins: http://localhost:3000
 descriptor:
     apiBaseURL: https://collector.torproject.org
     localDownloadDirectory: tormap-data/descriptors
@@ -63,5 +67,7 @@ spring:
 springdoc:
     api-docs:
         path: /openapi
+        enabled: true
     swagger-ui:
-        path: /
+        path: /swagger
+        enabled: true

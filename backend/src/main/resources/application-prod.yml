@@ -1,0 +1,9 @@
+app:
+    security:
+        cors:
+            allowed-origins: https://tormap.org,https://www.tormap.org
+springdoc:
+    api-docs:
+        enabled: false
+    swagger-ui:
+        enabled: false

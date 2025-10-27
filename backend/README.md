@@ -11,8 +11,8 @@ network information which has been collected by Tor's directory authorities. A s
 information about an individual relay that it published itself.
 
 Processing of descriptors does not necessarily happen in a chronological order, but one month of descriptors is always
-processed together. Different descriptor types can be handled in parallel. Frontend features like family grouping or relay details will only
-be available, if the corresponding relay server descriptors have been processed.
+processed together. Different descriptor types can be handled in parallel. Frontend features like family grouping or
+relay details will only be available, if the corresponding relay server descriptors have been processed.
 
 ## Requirements
 
@@ -36,23 +36,42 @@ on your bandwidth and hardware, but can be expected to take at least several hou
 
 ### Swagger UI
 
-An interactive Swagger UI is available under http://localhost:8080 and the specification can also be viewed in raw JSON
-under http://localhost:8080/openapi.
+An interactive Swagger UI is available under http://localhost:8080/swagger and the specification can also be viewed in raw JSON
+under http://localhost:8080/openapi. In the production environment, Swagger UI and API docs are disabled by default.
 
 ### Admin access
 
-When the backend is started, an admin password is displayed in the console. After the first startup it is saved
-in `backend/resources/admin-password.txt` for future runs. While the backend is running you can login
-with `username=admin` and the password at `http://localhost:8080/login`.
+To access `/actuator/**` endpoints, HTTP Basic is used. The admin username and password file are configured via Spring
+properties:
 
-This grants you access to the Spring actuator endpoints: http://localhost:8080/actuator
+- `spring.security.user.name` (default: `admin`)
+- `spring.security.user.passwordFile` (default: `tormap-data/admin-password.txt`)
+
+On first start:
+
+- If the password file does not exist, a random password is generated and written to the file.
+- You can retrieve it on the host where the backend runs (e.g. `cat tormap-data/admin-password.txt`).
+
+Pre-seeding a password (recommended):
+
+- You can place a BCrypt hash (starting with `$2a$`, `$2b$`, or `$2y$`) into the password file before the first start.
+  The backend will use it as-is.
+- To generate a BCrypt hash of your chosen password you can use the Apache httpd htpasswd tool (
+  bcrypt mode):
+
+```bash
+# Requires Docker; will prompt for password and print the hash to stdout
+docker run --rm -it httpd:2.4-alpine htpasswd -nBC 12 admin
+# Copy the printed hash starting from $2y$ into tormap-data/admin-password.txt
+```
 
 ## Config
 
-The main `backend` config is located at `backend/srv/main/resorces/application.yml`. Logging options can be configured
-with
-`backend/srv/main/resorces/logback-spring.xml`. Dependencies are managed with `Gradle` and located
-at `backend/build.gradle.kts`.
+- `backend/src/main/resources/application.yml` - main backend config
+- `backend/src/main/resources/application-prod.yml` - production specific overwrites
+- `backend/src/main/resources/logback-spring.xml` - logging options
+- `backend/build.gradle.kts` - dependencies are managed with Gradle
+
 When deploying, the environment variable `NEW_RELIC_INGEST_KEY` can be set to collect metrics to https://newrelic.com.
 
 ### IP lookups
@@ -100,8 +119,3 @@ Prebuild docker images are available at https://hub.docker.com/r/tormap/backend.
 - 2 GB of RAM (typical backend usage is below 1 GB)
 - It is recommended to set a JVM max heap size of 1.5 GB or more (e.g. `-Xmx1500m`)
 - Additional resources if PostgreSQL is deployed on the same machine
-
-
-
-
-
