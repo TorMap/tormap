@@ -92,6 +92,11 @@ allOpen {
     annotation("javax.persistence.MappedSuperclass")
 }
 
+// Allow version info to be injected
+springBoot {
+    buildInfo()
+}
+
 // Compile options for JVM build
 tasks.withType<KotlinCompile> {
     kotlinOptions {
