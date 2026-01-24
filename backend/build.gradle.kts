@@ -44,7 +44,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.20.1")
 
     // Postgres Database
-    implementation("org.postgresql:postgresql:42.7.8")
+    implementation("org.postgresql:postgresql:42.7.9")
 
     // Caching with Ehcache https://www.ehcache.org/
     implementation("org.ehcache:ehcache:3.11.1")
