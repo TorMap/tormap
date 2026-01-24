@@ -3731,10 +3731,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globals@npm:16.4.0":
-  version: 16.4.0
-  resolution: "globals@npm:16.4.0"
-  checksum: 10/1627a9f42fb4c82d7af6a0c8b6cd616e00110908304d5f1ddcdf325998f3aed45a4b29d8a1e47870f328817805263e31e4f1673f00022b9c2b210552767921cf
+"globals@npm:17.0.0":
+  version: 17.0.0
+  resolution: "globals@npm:17.0.0"
+  checksum: 10/af6213db9bf5f599b8a609061984c4d5fedb23db336228b866eba70819fe13ea3d11ca507b4799e8afc888331d0f7e5760d01507e38cb988fff9ad3a9635b312
   languageName: node
   linkType: hard
 
@@ -6534,7 +6534,7 @@ __metadata:
     eslint: "npm:9.38.0"
     eslint-plugin-jsx-a11y: "npm:6.10.2"
     eslint-plugin-react: "npm:7.37.5"
-    globals: "npm:16.4.0"
+    globals: "npm:17.0.0"
     jotai: "npm:2.15.1"
     leaflet: "npm:1.9.4"
     leaflet.heat: "npm:0.2.0"
