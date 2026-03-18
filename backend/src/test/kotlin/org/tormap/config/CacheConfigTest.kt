@@ -13,14 +13,17 @@ class CacheConfigTest(
 ): StringSpec({
     val relayLocationDistinctDaysCache = cacheManager.getCache(CacheConfig.RELAY_LOCATION_DISTINCT_DAYS)
     val relayLocationsPerDayCache = cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)
+    val reverseDnsLookupsCache = cacheManager.getCache(CacheConfig.REVERSE_DNS_LOOKUPS)
 
     beforeEach {
         relayLocationDistinctDaysCache?.clear()
         relayLocationsPerDayCache?.clear()
+        reverseDnsLookupsCache?.clear()
     }
 
     "caches exists" {
         relayLocationDistinctDaysCache shouldNotBe null
         relayLocationsPerDayCache shouldNotBe null
+        reverseDnsLookupsCache shouldNotBe null
     }
 })

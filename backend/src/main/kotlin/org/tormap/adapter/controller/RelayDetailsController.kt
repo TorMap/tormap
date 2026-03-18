@@ -2,21 +2,18 @@ package org.tormap.adapter.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import org.springframework.web.bind.annotation.*
-import org.tormap.adapter.controller.exception.RelayNotFoundException
-import org.tormap.database.entity.RelayDetails
 import org.tormap.database.repository.RelayDetailsRepositoryImpl
+import org.tormap.service.RelayDetailsQueryService
 
 @RestController
 @RequestMapping("relay/details/")
 class RelayDetailsController(
     val relayDetailsRepositoryImpl: RelayDetailsRepositoryImpl,
+    val relayDetailsQueryService: RelayDetailsQueryService,
 ) {
     @Operation(summary = "Returns all relay details for a given relay.")
     @GetMapping("relay/{id}")
-    fun getRelay(@PathVariable id: Long): RelayDetails {
-        val details = relayDetailsRepositoryImpl.findById(id)
-        return if (details.isPresent) details.get() else throw RelayNotFoundException()
-    }
+    fun getRelay(@PathVariable id: Long) = relayDetailsQueryService.getRelay(id)
 
     @Operation(summary = "Returns all relay details for a given family.")
     @GetMapping("family/{id}")

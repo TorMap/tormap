@@ -1,15 +1,17 @@
-import {Table, TableBody, TableCell, TableRow, Typography} from "@mui/material";
+import {Box, Table, TableBody, TableCell, TableRow, Typography} from "@mui/material";
 import React, {FunctionComponent} from "react";
 
 import {RelayDetailsMatch, RelayFlag, RelayFlagLabel} from "../../../types/relay";
 import {ExternalLink} from "../../link/ExternalLink";
+import {SelectFamilyButton} from "../../buttons/SelectFamilyButton";
 
 interface Props {
     relayDetailsMatch: RelayDetailsMatch
+    closeDialog: () => void
 }
 
-export const RelayDetailsTable: FunctionComponent<Props> = ({relayDetailsMatch}) => {
-    const tableRows: RelayDetailsTableRow[] = [
+export const RelayDetailsTable: FunctionComponent<Props> = ({relayDetailsMatch, closeDialog}) => {
+    const tableRows = [
         {
             name: "Fingerprint",
             value:
@@ -32,10 +34,7 @@ export const RelayDetailsTable: FunctionComponent<Props> = ({relayDetailsMatch})
         },
         {
             name: "Autonomous System",
-            value: <ExternalLink
-                href={`https://metrics.torproject.org/rs.html#search/as:${relayDetailsMatch.autonomousSystemNumber}`}
-                label={`${relayDetailsMatch.autonomousSystemName} (${relayDetailsMatch.autonomousSystemNumber})`}
-            />
+            value: renderAutonomousSystem(relayDetailsMatch.autonomousSystemName, relayDetailsMatch.autonomousSystemNumber)
         },
         {name: "Platform", value: relayDetailsMatch.platform},
         {name: "Uptime", value: formatSecondsToHours(relayDetailsMatch.uptime)},
@@ -52,20 +51,33 @@ export const RelayDetailsTable: FunctionComponent<Props> = ({relayDetailsMatch})
         {name: "Link protocol versions", value: relayDetailsMatch.linkProtocolVersions},
         {name: "Circuit protocol versions", value: relayDetailsMatch.circuitProtocolVersions},
         {name: "Self reported family members", value: relayDetailsMatch.familyEntries},
+        {
+            name: "Confirmed family members",
+            value: renderConfirmedFamilyMembers(relayDetailsMatch.confirmedFamilyMembers)
+        },
+        relayDetailsMatch.familyId ? {
+            name: "Show family on map",
+            value: <SelectFamilyButton
+                familyId={relayDetailsMatch.familyId}
+                furtherAction={closeDialog}
+                label="Show confirmed family"
+            />
+        } : undefined,
+        {name: "Verified host names", value: renderHostNames(relayDetailsMatch.verifiedHostNames)},
+        {name: "Unverified host names", value: renderHostNames(relayDetailsMatch.unverifiedHostNames)},
         {name: "Infos published by relay on", value: relayDetailsMatch.day},
-    ]
+    ].filter(isTableRow) as RelayDetailsTableRow[]
 
     return (
         <Table size={"small"}>
             <TableBody>
                 {tableRows.map((row) =>
-                    row.value &&
                     <TableRow key={row.name}>
                         <TableCell scope="row" sx={{minWidth: "150px",}}>
                             <Typography>{row.name}</Typography>
                         </TableCell>
                         <TableCell scope="row">
-                            <Typography>{row.value}</Typography>
+                            {renderTableRowValue(row.value)}
                         </TableCell>
                     </TableRow>
                 )}
@@ -78,6 +90,13 @@ interface RelayDetailsTableRow {
     name: string
     value: string | number | React.ReactNode | undefined
 }
+
+const isTableRow = (row: RelayDetailsTableRow | undefined): row is RelayDetailsTableRow =>
+    row !== undefined && row.value !== undefined && row.value !== null && row.value !== ""
+
+const renderTableRowValue = (value: RelayDetailsTableRow["value"]) => typeof value === "string" || typeof value === "number" ?
+    <Typography>{value}</Typography> :
+    value
 
 const formatBytesToMBPerSecond = (bandwidthInBytes?: number) => bandwidthInBytes ?
     (bandwidthInBytes / 1000000).toFixed(2) + " MB/s"
@@ -95,3 +114,35 @@ const constructFlagString = (flags: RelayFlag[] | null | undefined) => {
     }
     return "no flags assigned"
 }
+
+const renderAutonomousSystem = (autonomousSystemName?: string, autonomousSystemNumber?: number | null) =>
+    autonomousSystemName && autonomousSystemNumber !== null && autonomousSystemNumber !== undefined ?
+        <ExternalLink
+            href={`https://metrics.torproject.org/rs.html#search/as:${autonomousSystemNumber}`}
+            label={`${autonomousSystemName} (${autonomousSystemNumber})`}
+        /> :
+        undefined
+
+const renderConfirmedFamilyMembers = (confirmedFamilyMembers?: {
+    id: number
+    fingerprint: string
+    nickname: string
+}[]) => confirmedFamilyMembers && confirmedFamilyMembers.length > 0 ?
+    <Box sx={{display: "flex", flexDirection: "column", gap: 0.5}}>
+        {confirmedFamilyMembers.map((familyMember) =>
+            <ExternalLink
+                key={familyMember.id}
+                href={`https://metrics.torproject.org/rs.html#details/${familyMember.fingerprint}`}
+                label={`${familyMember.nickname} (${familyMember.fingerprint})`}
+            />
+        )}
+    </Box> :
+    undefined
+
+const renderHostNames = (hostNames?: string[]) => hostNames && hostNames.length > 0 ?
+    <Box sx={{display: "flex", flexDirection: "column", gap: 0.5}}>
+        {hostNames.map((hostName) =>
+            <Typography key={hostName}>{hostName}</Typography>
+        )}
+    </Box> :
+    undefined
