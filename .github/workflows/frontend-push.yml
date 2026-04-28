@@ -34,6 +34,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: frontend_build
     if: github.ref_type == 'branch' && (github.ref_name == 'dev' || github.ref_name == 'master')
+    permissions:
+      contents: read
+      deployments: write
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
@@ -44,7 +47,7 @@ jobs:
           path: frontend/build
 
       - name: Deploy to dev.tormap.org
-        if: github.ref_type == 'branch' && github.ref_name == 'dev'
+        if: github.ref_name == 'dev'
         uses: FirebaseExtended/action-hosting-deploy@e2eda2e106cfa35cdbcf4ac9ddaf6c4756df2c8c # v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
@@ -56,7 +59,7 @@ jobs:
           FIREBASE_CLI_PREVIEWS: hostingchannels
 
       - name: Deploy to live tormap.org
-        if: github.ref_type == 'branch' && github.ref_name == 'master'
+        if: github.ref_name == 'master'
         uses: FirebaseExtended/action-hosting-deploy@e2eda2e106cfa35cdbcf4ac9ddaf6c4756df2c8c # v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
