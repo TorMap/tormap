@@ -31,7 +31,7 @@ class RelayDetailsController(
 
     @Operation(summary = "Returns family identifiers that are associated with a list of family IDs.")
     @PostMapping("family/identifiers")
-    fun getFamilyIdentifiers(@RequestBody @Size(min = 1, max = 250) familyIds: List<Long>) =
+    fun getFamilyIdentifiers(@RequestBody @Size(min = 1, max = 500) familyIds: List<Long>) =
         relayDetailsRepositoryImpl.findFamilyIdentifiers(familyIds.distinct())
 
     @Deprecated("Nickname is passed together with RelayLocationDto when quering a specific day")
