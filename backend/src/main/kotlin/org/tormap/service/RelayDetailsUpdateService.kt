@@ -9,6 +9,7 @@ import org.tormap.util.commaSeparatedToList
 import org.tormap.util.getFamilyMember
 import org.tormap.util.logger
 import javax.sql.DataSource
+import java.util.concurrent.locks.ReentrantLock
 import javax.transaction.Transactional
 
 
@@ -24,6 +25,7 @@ class RelayDetailsUpdateService(
 ) {
     private val logger = logger()
     private val dbSequenceIncrementer = PostgresSequenceMaxValueIncrementer(dataSource, "hibernate_sequence")
+    private val autonomousSystemUpdateLock = ReentrantLock()
 
     /**
      * Updates [RelayDetails.autonomousSystemName] and [RelayDetails.autonomousSystemNumber] for all [RelayDetails] missing this info.
@@ -37,22 +39,30 @@ class RelayDetailsUpdateService(
     }
 
     fun lookupMissingAutonomousSystems(months: Set<String>) {
-        months.forEach { month ->
-            try {
-                logger.info("... Updating ASs for month: $month")
-                var changedRelaysCount = 0
-                val relaysWithoutAutonomousSystem =
-                    relayDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(month)
-                relaysWithoutAutonomousSystem.forEach { relay ->
-                    if (relay.lookupAndSetAutonomousSystem()) {
-                        changedRelaysCount++
+        if (!autonomousSystemUpdateLock.tryLock()) {
+            logger.info("Skipping AS update for months ${months.joinToString(", ")} because another update is running")
+            return
+        }
+        try {
+            months.forEach { month ->
+                try {
+                    logger.info("... Updating ASs for month: $month")
+                    var changedRelaysCount = 0
+                    val relaysWithoutAutonomousSystem =
+                        relayDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(month)
+                    relaysWithoutAutonomousSystem.forEach { relay ->
+                        if (relay.lookupAndSetAutonomousSystem()) {
+                            changedRelaysCount++
+                        }
                     }
+                    relayDetailsRepositoryImpl.saveAllAndFlush(relaysWithoutAutonomousSystem)
+                    logger.info("Determined the AS of $changedRelaysCount / ${relaysWithoutAutonomousSystem.size} relays for month $month")
+                } catch (exception: Exception) {
+                    logger.error("Could not update ASs for month $month! ${exception.message}")
                 }
-                relayDetailsRepositoryImpl.saveAllAndFlush(relaysWithoutAutonomousSystem)
-                logger.info("Determined the AS of $changedRelaysCount / ${relaysWithoutAutonomousSystem.size} relays for month $month")
-            } catch (exception: Exception) {
-                logger.error("Could not update ASs for month $month! ${exception.message}")
             }
+        } finally {
+            autonomousSystemUpdateLock.unlock()
         }
     }
 
