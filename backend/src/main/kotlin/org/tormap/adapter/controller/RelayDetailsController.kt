@@ -1,13 +1,16 @@
 package org.tormap.adapter.controller
 
 import io.swagger.v3.oas.annotations.Operation
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.tormap.adapter.controller.exception.RelayNotFoundException
 import org.tormap.database.entity.RelayDetails
 import org.tormap.database.repository.RelayDetailsRepositoryImpl
+import javax.validation.constraints.Size
 
 @RestController
 @RequestMapping("relay/details/")
+@Validated
 class RelayDetailsController(
     val relayDetailsRepositoryImpl: RelayDetailsRepositoryImpl,
 ) {
@@ -28,8 +31,8 @@ class RelayDetailsController(
 
     @Operation(summary = "Returns family identifiers that are associated with a list of family IDs.")
     @PostMapping("family/identifiers")
-    fun getFamilyIdentifiers(@RequestBody familyIds: List<Long>) =
-        relayDetailsRepositoryImpl.findFamilyIdentifiers(familyIds)
+    fun getFamilyIdentifiers(@RequestBody @Size(min = 1, max = 500) familyIds: List<Long>) =
+        relayDetailsRepositoryImpl.findFamilyIdentifiers(familyIds.distinct())
 
     @Deprecated("Nickname is passed together with RelayLocationDto when quering a specific day")
     @Operation(summary = "Return the nicknames of the relays that are associated with a list of relay details IDs.")

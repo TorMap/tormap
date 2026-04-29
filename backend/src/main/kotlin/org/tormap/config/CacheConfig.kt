@@ -23,25 +23,29 @@ class CacheConfig {
         val provider = Caching.getCachingProvider()
         val cacheManager = provider.cacheManager
 
-        cacheManager.createCache(
-            RELAY_LOCATION_DISTINCT_DAYS,
-            Eh107Configuration.fromEhcacheCacheConfiguration(
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(
-                    String::class.java, Set::class.java,
-                    ResourcePoolsBuilder.heap(1)
+        if (!cacheManager.cacheNames.contains(RELAY_LOCATION_DISTINCT_DAYS)) {
+            cacheManager.createCache(
+                RELAY_LOCATION_DISTINCT_DAYS,
+                Eh107Configuration.fromEhcacheCacheConfiguration(
+                    CacheConfigurationBuilder.newCacheConfigurationBuilder(
+                        String::class.java, Set::class.java,
+                        ResourcePoolsBuilder.heap(1)
+                    )
                 )
             )
-        )
+        }
 
-        cacheManager.createCache(
-            RELAY_LOCATIONS_PER_DAY,
-            Eh107Configuration.fromEhcacheCacheConfiguration(
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(
-                    String::class.java, List::class.java,
-                    ResourcePoolsBuilder.heap(40) // 1 entry ~= 2.5 MB of memory -> 40 entries ~= 100 MB of memory
+        if (!cacheManager.cacheNames.contains(RELAY_LOCATIONS_PER_DAY)) {
+            cacheManager.createCache(
+                RELAY_LOCATIONS_PER_DAY,
+                Eh107Configuration.fromEhcacheCacheConfiguration(
+                    CacheConfigurationBuilder.newCacheConfigurationBuilder(
+                        String::class.java, List::class.java,
+                        ResourcePoolsBuilder.heap(40) // 1 entry ~= 2.5 MB of memory -> 40 entries ~= 100 MB of memory
+                    )
                 )
             )
-        )
+        }
         return cacheManager
     }
 }
