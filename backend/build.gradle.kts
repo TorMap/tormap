@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "org.tormap"
-version = "2.3.1"
+version = "2.4.0"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
@@ -59,6 +59,9 @@ dependencies {
     // Collect metrics
     implementation("com.newrelic.telemetry:micrometer-registry-new-relic:0.10.0")
 
+    // Reverse DNS lookups with dnsjava
+    implementation("dnsjava:dnsjava:3.6.4")
+
     // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
     implementation("commons-codec:commons-codec:1.10")
     implementation("org.apache.commons:commons-compress:1.13")
@@ -75,10 +78,12 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
     testImplementation("io.kotest:kotest-assertions-core:5.9.1")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
+
     // Testcontainers to provide Postgres DB (https://testcontainers.org/)
     testImplementation("org.testcontainers:testcontainers:1.21.4")
     testImplementation("org.testcontainers:junit-jupiter:1.21.4")
     testImplementation("org.testcontainers:postgresql:1.21.4")
+
     // Mocking with Mockk (https://mockk.io/)
     testImplementation("io.mockk:mockk:1.14.9")
 }
