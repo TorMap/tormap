@@ -20,12 +20,6 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Login to DockerHub
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Set up JDK 11
         uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
         with:
@@ -35,5 +29,18 @@ jobs:
       - uses: gradle/gradle-build-action@ac2d340dc04d9e1113182899e983b5400c17cda1 # v3
       - uses: gradle/actions/wrapper-validation@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6
 
-      - name: Build and push docker image
-        run: cd backend && ./gradlew jib
+      - name: Login to DockerHub
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # On master push → :edge only
+      - name: Build and push docker edge image
+        if: github.ref_type == 'branch' && github.ref_name == 'master'
+        run: cd backend && ./gradlew jib -Djib.to.tags=edge
+
+      # On v* tag → semver + latest
+      - name: Build and push docker release image
+        if: github.ref_type == 'tag'
+        run: cd backend && ./gradlew jib # see backend/build.gradle.kts for jib config
