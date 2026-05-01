@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import org.tormap.config.CacheConfig
 import org.tormap.util.logger
+import org.tormap.util.sanitizeForLog
 import org.xbill.DNS.Lookup
 import org.xbill.DNS.PTRRecord
 import org.xbill.DNS.ReverseMap
@@ -32,7 +33,7 @@ class DNSJavaReverseDnsResolver : ReverseDnsResolver {
                 ?: return emptyList()
             records.filterIsInstance<PTRRecord>().map { it.target.toString().trimEnd('.') }
         } catch (e: Exception) {
-            logger.debug("PTR record lookup for IP $ipAddress failed! ${e.javaClass}: ${e.message}")
+            logger.debug("PTR record lookup for IP ${ipAddress.sanitizeForLog()} failed! ${e.javaClass}: ${e.message?.sanitizeForLog()}")
             emptyList()
         }
     }
@@ -43,7 +44,7 @@ class DNSJavaReverseDnsResolver : ReverseDnsResolver {
                 .filter { it.isPubliclyRoutable() }
                 .map { it.hostAddress }
         } catch (e: Exception) {
-            logger.debug("Address lookup for hostname $hostName failed! ${e.javaClass}: ${e.message}")
+            logger.debug("Address lookup for hostname ${hostName.sanitizeForLog()} failed! ${e.javaClass}: ${e.message?.sanitizeForLog()}")
             emptyList()
         }
     }
