@@ -8,6 +8,7 @@ import org.xbill.DNS.Lookup
 import org.xbill.DNS.PTRRecord
 import org.xbill.DNS.ReverseMap
 import org.xbill.DNS.Type
+import java.net.Inet6Address
 import java.net.InetAddress
 import java.net.UnknownHostException
 
@@ -25,19 +26,39 @@ interface ReverseDnsResolver {
 class DNSJavaReverseDnsResolver : ReverseDnsResolver {
     override fun lookupPtrRecords(ipAddress: String): List<String> {
         return try {
-            val name = ReverseMap.fromAddress(ipAddress)
-            val records = Lookup(name, Type.PTR).run() ?: return emptyList()
-            records.filterIsInstance<PTRRecord>().map { it.target.toString() }
+            val records = Lookup(ReverseMap.fromAddress(ipAddress), Type.PTR).run()
+                ?: return emptyList()
+            records.filterIsInstance<PTRRecord>().map { it.target.toString().trimEnd('.') }
         } catch (_: Exception) {
             emptyList()
         }
     }
 
-    override fun lookupAddresses(hostName: String): List<String> = try {
-        InetAddress.getAllByName(hostName).map { it.hostAddress }
-    } catch (_: UnknownHostException) {
-        emptyList()
+    override fun lookupAddresses(hostName: String): List<String> {
+        return try {
+            InetAddress.getAllByName(hostName)
+                .filterNot { it.isPubliclyRoutable() }
+                .map { it.hostAddress }
+        } catch (_: UnknownHostException) {
+            emptyList()
+        }
     }
+
+    private fun InetAddress.isULA(): Boolean =
+        this is Inet6Address &&
+            (address[0].toInt() and 0xFE) == 0xFC  // fc00::/7
+
+    private fun InetAddress.isPubliclyRoutable(): Boolean =
+        isLoopbackAddress ||
+            isLinkLocalAddress ||
+            isSiteLocalAddress ||   // reliable for IPv4
+            isULA() ||              // fills the IPv6 gap isSiteLocalAddress misses
+            isMulticastAddress ||
+            isAnyLocalAddress ||
+            address.first() == 0.toByte() ||
+            (address.size == 4 &&
+                address[0] == 100.toByte() &&
+                (address[1].toInt() and 0xFF) in 64..127)
 }
 
 @Service
