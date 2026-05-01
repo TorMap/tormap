@@ -4,13 +4,12 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import org.tormap.config.CacheConfig
+import org.xbill.DNS.Lookup
+import org.xbill.DNS.PTRRecord
+import org.xbill.DNS.ReverseMap
+import org.xbill.DNS.Type
 import java.net.InetAddress
 import java.net.UnknownHostException
-import java.util.Hashtable
-import javax.naming.Context
-import javax.naming.NamingException
-import javax.naming.directory.Attributes
-import javax.naming.directory.InitialDirContext
 
 data class ReverseDnsLookupResult(
     val verifiedHostNames: List<String> = emptyList(),
@@ -23,19 +22,14 @@ interface ReverseDnsResolver {
 }
 
 @Component
-class JndiReverseDnsResolver : ReverseDnsResolver {
+class DNSJavaReverseDnsResolver : ReverseDnsResolver {
     override fun lookupPtrRecords(ipAddress: String): List<String> {
-        val environment = Hashtable<String, String>()
-        environment[Context.INITIAL_CONTEXT_FACTORY] = "com.sun.jndi.dns.DnsContextFactory"
-        var context: InitialDirContext? = null
         return try {
-            context = InitialDirContext(environment)
-            val attributes = context.getAttributes(ipAddress.toReverseLookupDomain(), arrayOf("PTR"))
-            attributes.getAttributeValues("PTR").map { it.trimEnd('.') }
-        } catch (_: NamingException) {
+            val name = ReverseMap.fromAddress(ipAddress)
+            val records = Lookup(name, Type.PTR).run() ?: return emptyList()
+            records.filterIsInstance<PTRRecord>().map { it.target.toString() }
+        } catch (_: Exception) {
             emptyList()
-        } finally {
-            context?.close()
         }
     }
 
@@ -70,11 +64,4 @@ class ReverseDnsLookupService(
             unverifiedHostNames = unverifiedHostNames,
         )
     }
-}
-
-private fun String.toReverseLookupDomain(): String = split('.').reversed().joinToString(".") + ".in-addr.arpa"
-
-private fun Attributes.getAttributeValues(attributeName: String): List<String> {
-    val attribute = get(attributeName) ?: return emptyList()
-    return (0 until attribute.size()).map { attribute.get(it).toString() }
 }
