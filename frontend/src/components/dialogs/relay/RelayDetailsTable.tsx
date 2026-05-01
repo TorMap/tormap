@@ -4,6 +4,7 @@ import React, {FunctionComponent} from "react";
 import {RelayDetailsMatch, RelayFlag, RelayFlagLabel} from "../../../types/relay";
 import {ExternalLink} from "../../link/ExternalLink";
 import {SelectFamilyButton} from "../../buttons/SelectFamilyButton";
+import {RelayIdentifierDto} from "../../../dto/relay";
 
 interface Props {
     relayDetailsMatch: RelayDetailsMatch
@@ -123,11 +124,7 @@ const renderAutonomousSystem = (autonomousSystemName?: string, autonomousSystemN
         /> :
         undefined
 
-const renderConfirmedFamilyMembers = (confirmedFamilyMembers?: {
-    id: number
-    fingerprint: string
-    nickname: string
-}[]) => confirmedFamilyMembers && confirmedFamilyMembers.length > 0 ?
+const renderConfirmedFamilyMembers = (confirmedFamilyMembers?: RelayIdentifierDto[]) => confirmedFamilyMembers && confirmedFamilyMembers.length > 0 ?
     <Box sx={{display: "flex", flexDirection: "column", gap: 0.5}}>
         {confirmedFamilyMembers.map((familyMember) =>
             <ExternalLink
