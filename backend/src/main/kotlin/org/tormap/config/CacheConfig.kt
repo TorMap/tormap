@@ -1,12 +1,14 @@
 package org.tormap.config
 
 import org.ehcache.config.builders.CacheConfigurationBuilder
+import org.ehcache.config.builders.ExpiryPolicyBuilder
 import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.ehcache.jsr107.Eh107Configuration
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.tormap.service.ReverseDnsLookupResult
+import java.time.Duration
 import javax.cache.CacheManager
 import javax.cache.Caching
 
@@ -30,7 +32,7 @@ class CacheConfig {
             Eh107Configuration.fromEhcacheCacheConfiguration(
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(
                     String::class.java, Set::class.java,
-                    ResourcePoolsBuilder.heap(1)
+                    ResourcePoolsBuilder.heap(1) // 1 entry ~= 250–300 KB for ~6,700 days (2007-10 to 2026-05)
                 )
             )
         )
@@ -51,8 +53,10 @@ class CacheConfig {
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(
                     String::class.java,
                     ReverseDnsLookupResult::class.java,
-                    ResourcePoolsBuilder.heap(10000)
+                    ResourcePoolsBuilder.heap(10000) // 1 entry ~= 0.5 KB of memory -> 10,000 entries ~= 5 MB of memory
                 )
+                // 6h TTL balances DNS freshness for relay monitoring with cache efficiency
+                .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofHours(6)))
             )
         )
         return cacheManager
