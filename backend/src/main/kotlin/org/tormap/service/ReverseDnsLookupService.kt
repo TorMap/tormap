@@ -37,7 +37,7 @@ class DNSJavaReverseDnsResolver : ReverseDnsResolver {
     override fun lookupAddresses(hostName: String): List<String> {
         return try {
             InetAddress.getAllByName(hostName)
-                .filterNot { it.isPubliclyRoutable() }
+                .filter { it.isPubliclyRoutable() }
                 .map { it.hostAddress }
         } catch (_: UnknownHostException) {
             emptyList()
@@ -49,14 +49,14 @@ class DNSJavaReverseDnsResolver : ReverseDnsResolver {
             (address[0].toInt() and 0xFE) == 0xFC  // fc00::/7
 
     private fun InetAddress.isPubliclyRoutable(): Boolean =
-        isLoopbackAddress ||
-            isLinkLocalAddress ||
-            isSiteLocalAddress ||   // reliable for IPv4
-            isULA() ||              // fills the IPv6 gap isSiteLocalAddress misses
-            isMulticastAddress ||
-            isAnyLocalAddress ||
-            address.first() == 0.toByte() ||
-            (address.size == 4 &&
+        !isLoopbackAddress &&
+            !isLinkLocalAddress &&
+            !isSiteLocalAddress &&   // reliable for IPv4
+            !isULA() &&              // fills the IPv6 gap isSiteLocalAddress misses
+            !isMulticastAddress &&
+            !isAnyLocalAddress &&
+            address.first() != 0.toByte() &&
+            !(address.size == 4 &&
                 address[0] == 100.toByte() &&
                 (address[1].toInt() and 0xFF) in 64..127)
 }
