@@ -4,13 +4,13 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import org.tormap.config.CacheConfig
+import org.tormap.util.logger
 import org.xbill.DNS.Lookup
 import org.xbill.DNS.PTRRecord
 import org.xbill.DNS.ReverseMap
 import org.xbill.DNS.Type
 import java.net.Inet6Address
 import java.net.InetAddress
-import java.net.UnknownHostException
 
 data class ReverseDnsLookupResult(
     val verifiedHostNames: List<String> = emptyList(),
@@ -24,12 +24,15 @@ interface ReverseDnsResolver {
 
 @Component
 class DNSJavaReverseDnsResolver : ReverseDnsResolver {
+    private val logger = logger()
+
     override fun lookupPtrRecords(ipAddress: String): List<String> {
         return try {
             val records = Lookup(ReverseMap.fromAddress(ipAddress), Type.PTR).run()
                 ?: return emptyList()
             records.filterIsInstance<PTRRecord>().map { it.target.toString().trimEnd('.') }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            logger.debug("PTR record lookup for IP $ipAddress failed! ${e.javaClass}: ${e.message}")
             emptyList()
         }
     }
@@ -39,7 +42,8 @@ class DNSJavaReverseDnsResolver : ReverseDnsResolver {
             InetAddress.getAllByName(hostName)
                 .filter { it.isPubliclyRoutable() }
                 .map { it.hostAddress }
-        } catch (_: UnknownHostException) {
+        } catch (e: Exception) {
+            logger.debug("Address lookup for hostname $hostName failed! ${e.javaClass}: ${e.message}")
             emptyList()
         }
     }
