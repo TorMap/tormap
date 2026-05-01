@@ -27,38 +27,42 @@ class CacheConfig {
         val provider = Caching.getCachingProvider()
         val cacheManager = provider.cacheManager
 
-        cacheManager.createCache(
-            RELAY_LOCATION_DISTINCT_DAYS,
-            Eh107Configuration.fromEhcacheCacheConfiguration(
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(
-                    String::class.java, Set::class.java,
-                    ResourcePoolsBuilder.heap(1) // 1 entry ~= 250–300 KB for ~6,700 days (2007-10 to 2026-05)
+        if (!cacheManager.cacheNames.contains(RELAY_LOCATION_DISTINCT_DAYS)) {
+            cacheManager.createCache(
+                RELAY_LOCATION_DISTINCT_DAYS,
+                Eh107Configuration.fromEhcacheCacheConfiguration(
+                    CacheConfigurationBuilder.newCacheConfigurationBuilder(
+                        String::class.java, Set::class.java,
+                        ResourcePoolsBuilder.heap(1)  // 1 entry ~= 250–300 KB for ~6,700 days (2007-10 to 2026-05)
+                    )
                 )
             )
-        )
-
-        cacheManager.createCache(
-            RELAY_LOCATIONS_PER_DAY,
-            Eh107Configuration.fromEhcacheCacheConfiguration(
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(
-                    String::class.java, List::class.java,
-                    ResourcePoolsBuilder.heap(40) // 1 entry ~= 2.5 MB of memory -> 40 entries ~= 100 MB of memory
+        }
+        if (!cacheManager.cacheNames.contains(RELAY_LOCATIONS_PER_DAY)) {
+            cacheManager.createCache(
+                RELAY_LOCATIONS_PER_DAY,
+                Eh107Configuration.fromEhcacheCacheConfiguration(
+                    CacheConfigurationBuilder.newCacheConfigurationBuilder(
+                        String::class.java, List::class.java,
+                        ResourcePoolsBuilder.heap(40) // 1 entry ~= 2.5 MB of memory -> 40 entries ~= 100 MB of memory
+                    )
                 )
             )
-        )
-
-        cacheManager.createCache(
-            REVERSE_DNS_LOOKUPS,
-            Eh107Configuration.fromEhcacheCacheConfiguration(
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(
-                    String::class.java,
-                    ReverseDnsLookupResult::class.java,
-                    ResourcePoolsBuilder.heap(10000) // 1 entry ~= 0.5 KB of memory -> 10,000 entries ~= 5 MB of memory
+        }
+        if (!cacheManager.cacheNames.contains(REVERSE_DNS_LOOKUPS)) {
+            cacheManager.createCache(
+                REVERSE_DNS_LOOKUPS,
+                Eh107Configuration.fromEhcacheCacheConfiguration(
+                    CacheConfigurationBuilder.newCacheConfigurationBuilder(
+                        String::class.java,
+                        ReverseDnsLookupResult::class.java,
+                        ResourcePoolsBuilder.heap(10000) // 1 entry ~= 0.5 KB of memory -> 10,000 entries ~= 5 MB of memory
+                    )
+                        // 6h TTL balances DNS freshness for relay monitoring with cache efficiency
+                        .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofHours(6)))
                 )
-                // 6h TTL balances DNS freshness for relay monitoring with cache efficiency
-                .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofHours(6)))
             )
-        )
+        }
         return cacheManager
     }
 }
