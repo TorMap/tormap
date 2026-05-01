@@ -25,5 +25,3 @@ fun String?.stripLengthForDB(maximumCharacters: Int = 255) = when {
     this == null || this.length <= maximumCharacters -> this
     else -> this.substring(0, maximumCharacters - 3) + "..."
 }
-
-fun String.sanitizeForLog(): String = this.replace(Regex("[\u0000-\u001F\u007F]"), " ")
