@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - master
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-docker.yml'
 
 jobs:
   backend_docker:
