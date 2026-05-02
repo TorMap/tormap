@@ -70,7 +70,11 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                 </AppBar>
                 <DialogContent>
                     {showRelayDetails ?
-                        relayDetailsMatch ? <RelayDetailsTable relayDetailsMatch={relayDetailsMatch}/> :
+                        relayDetailsMatch ?
+                            <RelayDetailsTable
+                                relayDetailsMatch={relayDetailsMatch}
+                                closeDialog={closeDialog}
+                            /> :
                             <LoadingAnimation/> :
                         <RelayList
                             relayMatches={filteredRelayMatches}

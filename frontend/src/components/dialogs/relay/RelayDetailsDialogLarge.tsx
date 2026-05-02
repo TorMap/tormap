@@ -54,7 +54,11 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
                 </Grid>}
                 <Grid item xs={12} sm={canShowRelayList ? 8 : 12}
                       sx={{maxHeight: "70vh", overflow: 'auto'}}>
-                    {relayDetailsMatch && <RelayDetailsTable relayDetailsMatch={relayDetailsMatch}/>}
+                    {relayDetailsMatch &&
+                        <RelayDetailsTable
+                            relayDetailsMatch={relayDetailsMatch}
+                            closeDialog={closeDialog}
+                        />}
                 </Grid>
             </Grid>
         </Dialog>

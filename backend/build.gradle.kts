@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "org.tormap"
-version = "2.3.1"
+version = "2.4.0"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
@@ -16,7 +16,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
 
     // Build and push docker images
-    id("com.google.cloud.tools.jib") version "3.4.5"
+    id("com.google.cloud.tools.jib") version "3.5.3"
 }
 
 repositories {
@@ -34,6 +34,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
@@ -41,10 +42,10 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-kotlin:1.8.0")
 
     // Serialization
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.20.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.20.1")
 
     // Postgres Database
-    implementation("org.postgresql:postgresql:42.7.8")
+    implementation("org.postgresql:postgresql:42.7.11")
 
     // Caching with Ehcache https://www.ehcache.org/
     implementation("org.ehcache:ehcache:3.11.1")
@@ -57,6 +58,9 @@ dependencies {
 
     // Collect metrics
     implementation("com.newrelic.telemetry:micrometer-registry-new-relic:0.10.0")
+
+    // Reverse DNS lookups with dnsjava
+    implementation("dnsjava:dnsjava:3.6.4")
 
     // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
     implementation("commons-codec:commons-codec:1.10")
@@ -74,12 +78,14 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
     testImplementation("io.kotest:kotest-assertions-core:5.9.1")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
+
     // Testcontainers to provide Postgres DB (https://testcontainers.org/)
-    testImplementation("org.testcontainers:testcontainers:1.21.3")
-    testImplementation("org.testcontainers:junit-jupiter:1.21.3")
-    testImplementation("org.testcontainers:postgresql:1.21.3")
+    testImplementation("org.testcontainers:testcontainers:1.21.4")
+    testImplementation("org.testcontainers:junit-jupiter:1.21.4")
+    testImplementation("org.testcontainers:postgresql:1.21.4")
+
     // Mocking with Mockk (https://mockk.io/)
-    testImplementation("io.mockk:mockk:1.14.6")
+    testImplementation("io.mockk:mockk:1.14.9")
 }
 
 // Fix version requirement from Kotest

@@ -16,7 +16,7 @@ export interface RelayDetailsDto {
     day: string
     address: string
     autonomousSystemName: string
-    autonomousSystemNumber: string
+    autonomousSystemNumber?: number | null
     allowSingleHopExits: boolean
     nickname: string
     bandwidthRate: number
@@ -29,11 +29,15 @@ export interface RelayDetailsDto {
     uptime: number
     contact: string
     familyEntries: string
+    familyId?: number | null
     cachesExtraInfo: boolean
     isHiddenServiceDir: boolean
     linkProtocolVersions: string
     circuitProtocolVersions: string
     tunnelledDirServer: boolean
+    confirmedFamilyMembers: RelayIdentifierDto[]
+    verifiedHostNames: string[]
+    unverifiedHostNames: string[]
 }
 
 export interface RelayIdentifierDto {
