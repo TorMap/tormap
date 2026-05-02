@@ -82,10 +82,11 @@ class SecurityConfig(
     fun corsConfigurationSource(): CorsConfigurationSource {
         val cors = CorsConfiguration().apply {
             allowedOrigins = allowedOriginsCsv.split(',').map { it.trim() }.filter { it.isNotEmpty() }
-            allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+            // API is read-mostly; only advertise methods that exist.
+            allowedMethods = listOf("GET", "POST", "OPTIONS")
             allowedHeaders = listOf("Authorization", "Content-Type", "Accept", "X-Requested-With")
             exposedHeaders = listOf("Location")
-            allowCredentials = false // Prefer tokens; set true only if you use cookies across origins
+            allowCredentials = false
             maxAge = 3600L
         }
         return UrlBasedCorsConfigurationSource().also { it.registerCorsConfiguration("/**", cors) }

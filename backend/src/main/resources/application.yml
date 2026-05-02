@@ -1,4 +1,8 @@
 app:
+    http:
+        cache:
+            public:
+                max-age-seconds: 0
     security:
         cors:
             allowed-origins: http://localhost:3000
@@ -57,6 +61,9 @@ server:
     compression:
         enabled: true
         min-response-size: 1024
+    tomcat:
+        max-http-form-post-size: 1048576 # 1 MiB
+        max-swallow-size: 1048576       # 1 MiB
 spring:
     datasource:
         url: jdbc:postgresql://localhost:5432/postgres
@@ -83,6 +90,10 @@ spring:
     security:
         user:
             name: admin
+    servlet:
+        multipart:
+            max-file-size: 1MB
+            max-request-size: 1MB
 springdoc:
     api-docs:
         path: /openapi
