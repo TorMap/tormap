@@ -33,15 +33,12 @@ class HttpCachingConfig(
 
                 if (!isPublicApi || isActuator || isDocs) return true
 
-                // If a controller already set Cache-Control, keep it.
-                if (!response.containsHeader(HttpHeaders.CACHE_CONTROL)) {
-                    response.setHeader(
-                        HttpHeaders.CACHE_CONTROL,
-                        CacheControl.maxAge(Duration.ofSeconds(publicCacheMaxAgeSeconds)).cachePublic().headerValue
-                    )
-                    // Useful for CDNs/proxies to vary correctly.
-                    response.setHeader(HttpHeaders.VARY, "Origin, Accept-Encoding")
-                }
+                response.setHeader(
+                    HttpHeaders.CACHE_CONTROL,
+                    CacheControl.maxAge(Duration.ofSeconds(publicCacheMaxAgeSeconds)).cachePublic().headerValue
+                )
+                // Useful for CDNs/proxies to vary correctly.
+                response.setHeader(HttpHeaders.VARY, "Origin, Accept-Encoding")
 
                 return true
             }
