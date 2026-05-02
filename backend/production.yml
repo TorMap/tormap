@@ -13,7 +13,7 @@ services:
             - SPRING_DATASOURCE_USERNAME=postgres
             - SPRING_DATASOURCE_PASSWORD=postgres
             # Optional: enable actuator admin access
-            # - APP_ADMIN_PASSWORD_BCRYPT=$2y$...
+            # - TORMAP_ADMIN_PASSWORD_BCRYPT=$2y$...
             # and explicitly enable/ expose the actuator endpoints you need via management.* properties
         ports:
             - "8080:8080"

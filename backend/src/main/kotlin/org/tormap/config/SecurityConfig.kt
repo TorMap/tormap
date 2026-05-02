@@ -26,9 +26,6 @@ class SecurityConfig(
     @Value("\${spring.security.user.name}")
     private val adminUserName: String,
 
-    @Value("\${spring.security.user.password:}")
-    private val adminPassword: String,
-
     @Value("\${management.endpoints.web.base-path}")
     private val actuatorPath: String,
 
@@ -42,24 +39,37 @@ class SecurityConfig(
 ) {
     private val logger = logger()
 
+    companion object {
+        private const val ENV_ADMIN_PASSWORD = "TORMAP_ADMIN_PASSWORD"
+        private const val ENV_ADMIN_PASSWORD_BCRYPT = "TORMAP_ADMIN_PASSWORD_BCRYPT"
+
+        private fun isBcrypt(passwordOrHash: String): Boolean =
+            passwordOrHash.startsWith("$2a$") || passwordOrHash.startsWith("$2b$") || passwordOrHash.startsWith("$2y$")
+    }
+
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
     @Bean
     fun userDetailsService(passwordEncoder: PasswordEncoder): UserDetailsService {
-        if (adminPassword.isBlank()) {
+        val bcryptFromEnv = System.getenv(ENV_ADMIN_PASSWORD_BCRYPT)?.trim().orEmpty()
+        val passwordFromEnv = System.getenv(ENV_ADMIN_PASSWORD)?.trim().orEmpty()
+
+        val secret = when {
+            bcryptFromEnv.isNotBlank() -> bcryptFromEnv
+            passwordFromEnv.isNotBlank() -> passwordFromEnv
+            else -> ""
+        }
+
+        if (secret.isBlank()) {
             logger.warn("------------------------------------------------------")
-            logger.warn("No admin password configured! Actuator endpoints will be unavailable.")
-            logger.warn("Set spring.security.user.password to enable admin access.")
+            logger.warn("No admin password configured; actuator endpoints will not be accessible.")
+            logger.warn("Set $ENV_ADMIN_PASSWORD (plaintext) or $ENV_ADMIN_PASSWORD_BCRYPT (bcrypt hash) to enable actuator admin access.")
             logger.warn("------------------------------------------------------")
-            // Return an empty manager so no users can authenticate
             return InMemoryUserDetailsManager()
         }
 
-        // If the property is already a bcrypt hash, use it directly.
-        val isBcrypt = adminPassword.startsWith("$2a$") || adminPassword.startsWith("$2b$") || adminPassword.startsWith("$2y$")
-        val hashedPassword = if (isBcrypt) adminPassword else passwordEncoder.encode(adminPassword)
-
+        val hashedPassword = if (isBcrypt(secret)) secret else passwordEncoder.encode(secret)
         val user = User.withUsername(adminUserName)
             .password(hashedPassword)
             .roles("ADMIN")

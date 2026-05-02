@@ -50,14 +50,14 @@ properties:
 
 The admin password is **env-only** and must be provided via one of the following environment variables:
 
-- `APP_ADMIN_PASSWORD` (plaintext)
-- `APP_ADMIN_PASSWORD_BCRYPT` (BCrypt hash starting with `$2a$`, `$2b$`, or `$2y$`)
+- `TORMAP_ADMIN_PASSWORD` (plaintext)
+- `TORMAP_ADMIN_PASSWORD_BCRYPT` (BCrypt hash starting with `$2a$`, `$2b$`, or `$2y$`)
 
 If neither env var is set, a warning is logged and actuator endpoints remain unavailable.
 
 Recommended (production):
 
-- Provide `APP_ADMIN_PASSWORD_BCRYPT` via your secret manager (Kubernetes Secret, Docker secret -> env, systemd env file, etc.).
+- Provide `TORMAP_ADMIN_PASSWORD_BCRYPT` via your secret manager (Kubernetes Secret, Docker secret, env etc.).
 - Do not put passwords/hashes into `application.yml`.
 
 Generate a BCrypt hash:
