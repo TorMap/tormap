@@ -105,8 +105,8 @@ class SecurityConfig(
                 auth
                     // Allow CORS preflight
                     .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                    // Public API
-                    .antMatchers("/", "/error", "/relay/**").permitAll()
+                    // Public API and static resources
+                    .antMatchers("/", "/error", "/relay/**", "/favicon.ico", "/robots.txt", "/static/**").permitAll()
                     // Allow OpenAPI/Swagger only when enabled
                     .apply {
                         if (swaggerEnabled) {
