@@ -41,29 +41,33 @@ under http://localhost:8080/openapi. In the production environment, Swagger UI a
 
 ### Admin access
 
-To access `/actuator/**` endpoints, HTTP Basic is used. The admin username and password file are configured via Spring
+By default, actuator endpoints are **disabled** at the management layer and are not exposed over HTTP.
+
+To enable admin access to `/actuator/**` endpoints, HTTP Basic is used. The admin username is configured via Spring
 properties:
 
 - `spring.security.user.name` (default: `admin`)
-- `spring.security.user.passwordFile` (default: `tormap-data/admin-password.txt`)
 
-On first start:
+The admin password is **env-only** and must be provided via one of the following environment variables:
 
-- If the password file does not exist, a random password is generated and written to the file.
-- You can retrieve it on the host where the backend runs (e.g. `cat tormap-data/admin-password.txt`).
+- `APP_ADMIN_PASSWORD` (plaintext)
+- `APP_ADMIN_PASSWORD_BCRYPT` (BCrypt hash starting with `$2a$`, `$2b$`, or `$2y$`)
 
-Pre-seeding a password (recommended):
+If neither env var is set, a warning is logged and actuator endpoints remain unavailable.
 
-- You can place a BCrypt hash (starting with `$2a$`, `$2b$`, or `$2y$`) into the password file before the first start.
-  The backend will use it as-is.
-- To generate a BCrypt hash of your chosen password you can use the Apache httpd htpasswd tool (
-  bcrypt mode):
+Recommended (production):
+
+- Provide `APP_ADMIN_PASSWORD_BCRYPT` via your secret manager (Kubernetes Secret, Docker secret -> env, systemd env file, etc.).
+- Do not put passwords/hashes into `application.yml`.
+
+Generate a BCrypt hash:
 
 ```bash
 # Requires Docker; will prompt for password and print the hash to stdout
 docker run --rm -it httpd:2.4-alpine htpasswd -nBC 12 admin
-# Copy the printed hash starting from $2y$ into tormap-data/admin-password.txt
 ```
+
+Also ensure your deployment explicitly enables the actuator endpoints you need (e.g. `management.endpoints.enabled-by-default` and `management.endpoints.web.exposure.include`).
 
 ## Config
 

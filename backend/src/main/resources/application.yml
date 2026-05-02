@@ -14,19 +14,25 @@ ip-lookup:
     locationDatabaseFile: /ip-lookup/location.mmdb
     autonomousSystemDatabaseFile: /ip-lookup/autonomous-system.mmdb
 management:
-    endpoint:
-        health:
-            show-details: when_authorized
-        logfile:
-            external-file: logs/spring-boot-logger.log
     endpoints:
+        enabled-by-default: false
         jmx:
             exposure:
                 include:
         web:
+            # Actuator endpoints are disabled by default. When enabled, this list is used.
             exposure:
                 include: health,info,metrics,caches,httptrace,flyway,logfile,mappings,scheduledtasks,threaddump,heapdump
             base-path: /actuator
+    endpoint:
+        health:
+            enabled: true
+            show-details: when_authorized
+        info:
+            enabled: true
+        logfile:
+            enabled: true
+            external-file: logs/spring-boot-logger.log
 logging:
     file:
         path: logs/spring-boot-logger.log
@@ -63,7 +69,6 @@ spring:
     security:
         user:
             name: admin
-            passwordFile: tormap-data/admin-password.txt
 springdoc:
     api-docs:
         path: /openapi

@@ -19,8 +19,6 @@ import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.ForwardedHeaderFilter
 import org.tormap.util.logger
-import java.io.File
-import java.util.*
 
 @Configuration
 @EnableWebSecurity
@@ -28,8 +26,8 @@ class SecurityConfig(
     @Value("\${spring.security.user.name}")
     private val adminUserName: String,
 
-    @Value("\${spring.security.user.passwordFile}")
-    private val adminPasswordFile: String,
+    @Value("\${spring.security.user.password:}")
+    private val adminPassword: String,
 
     @Value("\${management.endpoints.web.base-path}")
     private val actuatorPath: String,
@@ -49,23 +47,19 @@ class SecurityConfig(
 
     @Bean
     fun userDetailsService(passwordEncoder: PasswordEncoder): UserDetailsService {
-        val passwordFile = File(adminPasswordFile)
-        var rawPassword = UUID.randomUUID().toString()
-        if (passwordFile.exists()) {
-            rawPassword = passwordFile.readText().trim()
-        } else {
-            passwordFile.parentFile?.mkdirs()
-            passwordFile.writeText(rawPassword)
+        if (adminPassword.isBlank()) {
+            logger.warn("------------------------------------------------------")
+            logger.warn("No admin password configured! Actuator endpoints will be unavailable.")
+            logger.warn("Set spring.security.user.password to enable admin access.")
+            logger.warn("------------------------------------------------------")
+            // Return an empty manager so no users can authenticate
+            return InMemoryUserDetailsManager()
         }
-        logger.info("------------------------------------------------------")
-        logger.info("Admin password is stored in file: ${adminPasswordFile}")
-        logger.info("------------------------------------------------------")
 
-        // If the file already contains a bcrypt hash, use it. Otherwise, encode the plaintext for in-memory storage.
-        val isBcrypt = rawPassword.startsWith("$2a$") || rawPassword.startsWith("$2b$") || rawPassword.startsWith("$2y$")
-        val hashedPassword = if (isBcrypt) rawPassword else passwordEncoder.encode(rawPassword)
+        // If the property is already a bcrypt hash, use it directly.
+        val isBcrypt = adminPassword.startsWith("$2a$") || adminPassword.startsWith("$2b$") || adminPassword.startsWith("$2y$")
+        val hashedPassword = if (isBcrypt) adminPassword else passwordEncoder.encode(adminPassword)
 
-        // Create the valid user that will be used to check the basic auth credentials
         val user = User.withUsername(adminUserName)
             .password(hashedPassword)
             .roles("ADMIN")
@@ -108,7 +102,7 @@ class SecurityConfig(
                             antMatchers("/openapi/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         }
                     }
-                    // Admin-only actuator
+                    // Admin-only actuator; will deny all if no users exist
                     .antMatchers("$actuatorPath/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
             }
