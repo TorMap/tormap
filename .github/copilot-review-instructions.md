@@ -1,7 +1,7 @@
 When reviewing pull requests from branches starting with `renovate/`:
 
-1. Identify the packages being updated and the exact version ranges (from → to)
-2. Check the changelog or release notes of each package's authoritative source for any breaking changes between the old and new version
+1. Identify the packages being updated and the exact version ranges (from → to).
+2. Read the changelog/release notes included in the PR description by Renovate.
 3. Assess whether any breaking changes affect this specific codebase by examining:
     - Direct usages of the updated package's public API in the source code
     - Configuration files that reference the package
