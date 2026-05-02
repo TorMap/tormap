@@ -22,7 +22,7 @@ management:
         enabled-by-default: false
         jmx:
             exposure:
-                include:
+                include: []
         web:
             # Actuator endpoints that are enabled individually from the endpoint config, will be exposed via web, if appearing in this list:
             exposure:
