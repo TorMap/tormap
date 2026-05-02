@@ -42,13 +42,13 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-kotlin:1.8.0")
 
     // Serialization
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.20.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.21.3")
 
     // Postgres Database
     implementation("org.postgresql:postgresql:42.7.11")
 
     // Caching with Ehcache https://www.ehcache.org/
-    implementation("org.ehcache:ehcache:3.11.1")
+    implementation("org.ehcache:ehcache:3.12.0")
 
     // Run Flyway DB migration tool on startup https://flywaydb.org/
     implementation("org.flywaydb:flyway-core:8.5.13")
