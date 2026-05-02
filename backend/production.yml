@@ -12,6 +12,8 @@ services:
             - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/postgres
             - SPRING_DATASOURCE_USERNAME=postgres
             - SPRING_DATASOURCE_PASSWORD=postgres
+            # Optional: enable New Relic monitoring by providing the license key as an environment variable
+            # - NEW_RELIC_INGEST_KEY=${NEW_RELIC_INGEST_KEY}
             # Optional: enable actuator admin access
             # - TORMAP_ADMIN_PASSWORD_BCRYPT=$2y$...
             # and explicitly enable/ expose the actuator endpoints you need via management.* properties
