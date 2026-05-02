@@ -14,6 +14,11 @@ class RelayDetailsController(
     val relayDetailsRepositoryImpl: RelayDetailsRepositoryImpl,
     val relayDetailsQueryService: RelayDetailsQueryService,
 ) {
+    companion object {
+        internal const val MAXIMUM_EXPECTED_RELAYS_PER_DAY = 50000 // In 2026-05 we are around 10,000 relays per day
+        internal const val MAXIMUM_EXPECTED_FAMILIES_PER_MONTH = 5000 // In 2026-05 we are around 500 unique families per month
+    }
+
     @Operation(summary = "Returns all relay details for a given relay.")
     @GetMapping("relay/{id}")
     fun getRelay(@PathVariable id: Long) = relayDetailsQueryService.getRelay(id)
@@ -24,15 +29,10 @@ class RelayDetailsController(
 
     @Operation(summary = "Returns all identifiers that are associated with a list of relay details IDs.")
     @PostMapping("relay/identifiers")
-    fun getRelayIdentifiers(@RequestBody ids: List<Long>) = relayDetailsRepositoryImpl.findRelayIdentifiers(ids)
+    fun getRelayIdentifiers(@RequestBody @Size(min = 1, max = MAXIMUM_EXPECTED_RELAYS_PER_DAY) ids: List<Long>) = relayDetailsRepositoryImpl.findRelayIdentifiers(ids)
 
     @Operation(summary = "Returns family identifiers that are associated with a list of family IDs.")
     @PostMapping("family/identifiers")
-    fun getFamilyIdentifiers(@RequestBody @Size(min = 1, max = 500) familyIds: List<Long>) =
+    fun getFamilyIdentifiers(@RequestBody @Size(min = 1, max = MAXIMUM_EXPECTED_FAMILIES_PER_MONTH) familyIds: List<Long>) =
         relayDetailsRepositoryImpl.findFamilyIdentifiers(familyIds.distinct())
-
-    @Deprecated("Nickname is passed together with RelayLocationDto when quering a specific day")
-    @Operation(summary = "Return the nicknames of the relays that are associated with a list of relay details IDs.")
-    @PostMapping("relay/nicknames")
-    fun getRelayNicknames(@RequestBody ids: List<Long>) = relayDetailsRepositoryImpl.findAllByIdIn(ids).map { it.nickname }
 }

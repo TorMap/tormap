@@ -1,3 +1,11 @@
+app:
+    http:
+        cache:
+            public:
+                max-age-seconds: 0
+    security:
+        cors:
+            allowed-origins: http://localhost:3000
 descriptor:
     apiBaseURL: https://collector.torproject.org
     localDownloadDirectory: tormap-data/descriptors
@@ -10,19 +18,39 @@ ip-lookup:
     locationDatabaseFile: /ip-lookup/location.mmdb
     autonomousSystemDatabaseFile: /ip-lookup/autonomous-system.mmdb
 management:
-    endpoint:
-        health:
-            show-details: when_authorized
-        logfile:
-            external-file: logs/spring-boot-logger.log
     endpoints:
+        enabled-by-default: false
         jmx:
             exposure:
-                include:
+                include: []
         web:
+            # Actuator endpoints that are enabled individually from the endpoint config, will be exposed via web, if appearing in this list:
             exposure:
-                include: health,info,metrics,caches,httptrace,flyway,logfile,mappings,scheduledtasks,threaddump,heapdump
+                include: health,info,metrics,caches,httptrace,flyway,logfile,mappings,scheduledtasks,threaddump
             base-path: /actuator
+    endpoint:
+        health:
+            enabled: true
+            show-details: when_authorized
+        info:
+            enabled: true
+        metrics:
+            enabled: true
+        caches:
+            enabled: true
+        httptrace:
+            enabled: true
+        flyway:
+            enabled: true
+        logfile:
+            enabled: true
+            external-file: logs/spring-boot-logger.log
+        mappings:
+            enabled: true
+        scheduledtasks:
+            enabled: true
+        threaddump:
+            enabled: true
 logging:
     file:
         path: logs/spring-boot-logger.log
@@ -33,6 +61,9 @@ server:
     compression:
         enabled: true
         min-response-size: 1024
+    tomcat:
+        max-http-form-post-size: 1048576 # 1 MiB
+        max-swallow-size: 1048576       # 1 MiB
 spring:
     datasource:
         url: jdbc:postgresql://localhost:5432/postgres
@@ -59,9 +90,14 @@ spring:
     security:
         user:
             name: admin
-            passwordFile: tormap-data/admin-password.txt
+    servlet:
+        multipart:
+            max-file-size: 1MB
+            max-request-size: 1MB
 springdoc:
     api-docs:
         path: /openapi
+        enabled: true
     swagger-ui:
-        path: /
+        path: /swagger
+        enabled: true

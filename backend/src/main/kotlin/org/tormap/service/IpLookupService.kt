@@ -33,7 +33,7 @@ class IpLookupService(
             Location(dbipLocationDB.city(InetAddress.getByName(ipAddress)))
         } else null
     } catch (exception: Exception) {
-        logger.debug("Location lookup for IP $ipAddress failed! ${exception.javaClass}: ${exception.message}")
+        logger.debug("Location lookup for IP {} failed! {}: {}", ipAddress, exception.javaClass, exception.message)
         null
     }
 
@@ -42,7 +42,12 @@ class IpLookupService(
             maxmindAutonomousSystemDB.asn(InetAddress.getByName(ipAddress))
         } else null
     } catch (exception: Exception) {
-        logger.debug("Autonomous System lookup for IP $ipAddress failed! ${exception.javaClass}: ${exception.message}")
+        logger.debug(
+            "Autonomous System lookup for IP {} failed! {}: {}",
+            ipAddress,
+            exception.javaClass,
+            exception.message
+        )
         null
     }
 

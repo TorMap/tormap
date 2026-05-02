@@ -41,7 +41,7 @@ class DescriptorCoordinationService(
             processLocalDescriptorFiles(apiPath, descriptorType)
             logger.info("Finished processing descriptors from API path: $apiPath")
         } catch (exception: Exception) {
-            logger.error("Could not collect or process descriptors from API path: $apiPath! ${exception.message}")
+            logger.error("Could not collect or process descriptors from API path: {}! {}", apiPath, exception.message)
         }
     }
 
@@ -106,16 +106,16 @@ class DescriptorCoordinationService(
                 else -> throw Exception("Descriptor type ${descriptorType.name} is not yet supported!")
             }
         } catch (exception: Exception) {
-            logger.error("Could not flush relay repository for ${descriptorType.name}! ${exception.message}")
+            logger.error("Could not flush relay repository for {}! {}", descriptorType.name, exception.message)
         }
     }
 
     private fun saveProcessedFileReference(file: File, descriptorType: DescriptorType, errorCount: Int) {
         if (errorCount == 0) {
             descriptorFileService.saveProcessedFileReference(file, descriptorType)
-            logger.info("Finished ${file.name} with 0 errors")
+            logger.info("Finished {} with 0 errors", file.name)
         } else {
-            logger.error("Failed ${file.name} with $errorCount errors. Not saving as finished file reference!")
+            logger.error("Failed {} with {} errors. Not saving as finished file reference!", file.name, errorCount)
         }
     }
 

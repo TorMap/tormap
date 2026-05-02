@@ -3,15 +3,11 @@
 
     <property name="LOGS" value="./logs"/>
 
-    <!-- Reusable sanitization pattern: strips control chars and unicode direction overrides -->
-    <property name="SAFE_MSG"
-              value="%replace(%msg){&apos;[\u0000-\u001F\u007F\u202A-\u202E\u2066-\u2069\u2028\u2029]&apos;, &apos; &apos;}"/>
-
     <appender name="Console"
               class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
-                %black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): ${SAFE_MSG}%n%throwable
+                %black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable
             </Pattern>
         </layout>
     </appender>
@@ -19,8 +15,9 @@
     <appender name="RollingFile"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOGS}/spring-boot-logger.log</file>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>%d %p %C{1.} [%t] ${SAFE_MSG}%n</Pattern>
+        <encoder
+            class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
         </encoder>
 
         <rollingPolicy

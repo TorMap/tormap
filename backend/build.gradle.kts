@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "org.tormap"
-version = "2.4.0"
+version = "3.0.0"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 plugins {
@@ -96,6 +96,11 @@ allOpen {
     annotation("javax.persistence.Entity")
     annotation("javax.persistence.Embeddable")
     annotation("javax.persistence.MappedSuperclass")
+}
+
+// Allow version info to be injected
+springBoot {
+    buildInfo()
 }
 
 // Compile options for JVM build

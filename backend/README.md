@@ -11,8 +11,8 @@ network information which has been collected by Tor's directory authorities. A s
 information about an individual relay that it published itself.
 
 Processing of descriptors does not necessarily happen in a chronological order, but one month of descriptors is always
-processed together. Different descriptor types can be handled in parallel. Frontend features like family grouping or relay details will only
-be available, if the corresponding relay server descriptors have been processed.
+processed together. Different descriptor types can be handled in parallel. Frontend features like family grouping or
+relay details will only be available, if the corresponding relay server descriptors have been processed.
 
 ## Requirements
 
@@ -36,23 +36,47 @@ on your bandwidth and hardware, but can be expected to take at least several hou
 
 ### Swagger UI
 
-An interactive Swagger UI is available under http://localhost:8080 and the specification can also be viewed in raw JSON
-under http://localhost:8080/openapi.
+For development purposes, an interactive Swagger UI is available under http://localhost:8080/swagger and the
+specification can also be viewed in raw JSON
+under http://localhost:8080/openapi. In the production environment, Swagger UI and API docs are disabled by default.
 
 ### Admin access
 
-When the backend is started, an admin password is displayed in the console. After the first startup it is saved
-in `backend/resources/admin-password.txt` for future runs. While the backend is running you can login
-with `username=admin` and the password at `http://localhost:8080/login`.
+A selection of actuator endpoints are **enabled** by default at the management layer and exposed via HTTP Basic Auth
+only. Ensure your deployment exposes only the actuator endpoints you need (Spring property
+`management.endpoints.web.exposure.include`).
 
-This grants you access to the Spring actuator endpoints: http://localhost:8080/actuator
+To enable admin access to `/actuator/**` endpoints. The admin username is configured via Spring
+properties:
+
+- `spring.security.user.name` (default: `admin`)
+
+The admin password is **env-only** and must be provided via one of the following environment variables:
+
+- `TORMAP_ADMIN_PASSWORD` (plaintext)
+- `TORMAP_ADMIN_PASSWORD_BCRYPT` (BCrypt hash starting with `$2a$`, `$2b$`, or `$2y$`)
+
+If neither env var is set, a warning is logged and actuator endpoints remain unavailable.
+
+Recommended (production):
+
+- Provide `TORMAP_ADMIN_PASSWORD_BCRYPT` via your secret manager (Kubernetes Secret, Docker secret, env etc.).
+- Do not put passwords/hashes into `application.yml`.
+
+Generate a BCrypt hash:
+
+```bash
+# Requires Docker; will prompt for password and print the hash to stdout
+docker run --rm -it httpd:2.4-alpine htpasswd -nBC 12 admin
+```
 
 ## Config
 
-The main `backend` config is located at `backend/srv/main/resorces/application.yml`. Logging options can be configured
-with
-`backend/srv/main/resorces/logback-spring.xml`. Dependencies are managed with `Gradle` and located
-at `backend/build.gradle.kts`.
+- `backend/src/main/resources/application.yml` - main backend config
+- `backend/src/main/resources/application-prod.yml` - production specific overwrites
+- `backend/src/main/resources/logback-spring.xml` - logging options
+- `backend/build.gradle.kts` - dependencies are managed with Gradle
+
 When deploying, the environment variable `NEW_RELIC_INGEST_KEY` can be set to collect metrics to https://newrelic.com.
 
 ### IP lookups
@@ -97,11 +121,23 @@ Prebuild docker images are available at https://hub.docker.com/r/tormap/backend.
 ### Hardware / VM Requirements
 
 - 50 GB of free disk space (for downloaded archives)
-- 2 GB of RAM (typical backend usage is below 1 GB)
-- It is recommended to set a JVM max heap size of 1.5 GB or more (e.g. `-Xmx1500m`)
+- 500 MB of RAM (typical actual backend usage is ~300 MB). It is recommended to set a JVM max heap size of 500 MB or more (e.g., `-Xmx500m`)
 - Additional resources if PostgreSQL is deployed on the same machine
 
+### CORS and caching
 
+#### CORS
 
+The backend enables CORS so specific frontend browser origins can call the public API. Configuration:
 
+- Dev (default): `app.security.cors.allowed-origins: http://localhost:3000`
+- Prod: `application-prod.yml` overrides to `https://tormap.org,https://www.tormap.org`
 
+#### HTTP caching
+
+Public `GET` endpoints under `/relay/**` can return `Cache-Control` headers to allow browser and CDN/proxy caching.
+
+- Dev/default: caching headers are **disabled** (`app.http.cache.public.max-age-seconds` defaults to `0`).
+  Responses are typically not cached unless a controller explicitly sets caching headers.
+- Prod: `application-prod.yml` sets `app.http.cache.public.max-age-seconds: 300`, so `/relay/**` responses include
+  `Cache-Control: public, max-age=300`.

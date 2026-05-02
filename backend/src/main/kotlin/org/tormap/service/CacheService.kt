@@ -46,7 +46,7 @@ class CacheService(
     fun cacheRelayLocationsPerDay(months: Set<String>): CompletableFuture<Void> {
         if (lockRelayLocationsPerDay.tryLock()) {
             try {
-                logger.info("Caching relay locations for each day of months: ${months.joinToString(", ")}")
+                logger.info("Caching relay locations for each day of months: {}", months.joinToString(", "))
                 months.forEach { month ->
                     val yearMonth = YearMonth.parse(month)
                     yearMonth.atDay(1).datesUntil(yearMonth.plusMonths(1).atDay(1)).forEach {
