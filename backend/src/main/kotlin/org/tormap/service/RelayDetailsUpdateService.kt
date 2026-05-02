@@ -33,20 +33,20 @@ class RelayDetailsUpdateService(
     fun lookupAllMissingAutonomousSystems() {
         val monthsWithRelaysMissingAutonomousSystem =
             relayDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
-        logger.info("Batch updating ASs for months: ${monthsWithRelaysMissingAutonomousSystem.joinToString(", ")}")
+        logger.info("Batch updating ASs for months: {}", monthsWithRelaysMissingAutonomousSystem.joinToString(", "))
         lookupMissingAutonomousSystems(monthsWithRelaysMissingAutonomousSystem)
         logger.info("Finished batch update of ASs")
     }
 
     fun lookupMissingAutonomousSystems(months: Set<String>) {
         if (!autonomousSystemUpdateLock.tryLock()) {
-            logger.info("Skipping AS update for months ${months.joinToString(", ")} because another update is running")
+            logger.info("Skipping AS update for months {} because another update is running", months.joinToString(", "))
             return
         }
         try {
             months.forEach { month ->
                 try {
-                    logger.info("... Updating ASs for month: $month")
+                    logger.info("... Updating ASs for month: {}", month)
                     var changedRelaysCount = 0
                     val relaysWithoutAutonomousSystem =
                         relayDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(month)
@@ -58,7 +58,7 @@ class RelayDetailsUpdateService(
                     relayDetailsRepositoryImpl.saveAllAndFlush(relaysWithoutAutonomousSystem)
                     logger.info("Determined the AS of $changedRelaysCount / ${relaysWithoutAutonomousSystem.size} relays for month $month")
                 } catch (exception: Exception) {
-                    logger.error("Could not update ASs for month $month! ${exception.message}")
+                    logger.error("Could not update ASs for month {}! {}", month, exception.message)
                 }
             }
         } finally {
@@ -97,17 +97,17 @@ class RelayDetailsUpdateService(
      */
     fun computeFamilies(months: Set<String>) {
         try {
-            logger.info("... Updating relay families for months: ${months.joinToString(", ")}")
+            logger.info("... Updating relay families for months: {}", months.joinToString(", "))
             months.forEach { month ->
                 try {
                     computeFamiliesForMonth(month)
                 } catch (exception: Exception) {
-                    logger.error("Could not update relay families for month $month! ${exception.message}")
+                    logger.error("Could not update relay families for month {}! {}", month, exception.message)
                 }
             }
             logger.info("Finished updating relay families")
         } catch (exception: Exception) {
-            logger.error("Could not update relay families! ${exception.message}")
+            logger.error("Could not update relay families! {}", exception.message)
         }
     }
 

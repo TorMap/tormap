@@ -32,7 +32,7 @@ class DNSJavaReverseDnsResolver : ReverseDnsResolver {
                 ?: return emptyList()
             records.filterIsInstance<PTRRecord>().map { it.target.toString().trimEnd('.') }
         } catch (e: Exception) {
-            logger.debug("PTR record lookup for IP $ipAddress failed! ${e.javaClass}: ${e.message}")
+            logger.debug("PTR record lookup for IP {} failed! {}: {}", ipAddress, e.javaClass, e.message)
             emptyList()
         }
     }
@@ -43,7 +43,7 @@ class DNSJavaReverseDnsResolver : ReverseDnsResolver {
                 .filter { it.isPubliclyRoutable() }
                 .map { it.hostAddress }
         } catch (e: Exception) {
-            logger.debug("Address lookup for hostname $hostName failed! ${e.javaClass}: ${e.message}")
+            logger.debug("Address lookup for hostname {} failed! {}: {}", hostName, e.javaClass, e.message)
             emptyList()
         }
     }

@@ -26,14 +26,14 @@ class DescriptorProcessingService(
                 is RelayNetworkStatusConsensus -> processRelayConsensusDescriptor(descriptor)
                 is ServerDescriptor -> processServerDescriptor(descriptor)
                 is UnparseableDescriptor -> {
-                    logger.debug("Unparsable descriptor in file ${descriptor.descriptorFile.name}: ${descriptor.descriptorParseException.message}")
+                    logger.debug("Unparsable descriptor in file {}: {}", descriptor.descriptorFile.name, descriptor.descriptorParseException.message)
                     ProcessedDescriptorInfo()
                 }
 
                 else -> throw Exception("Descriptor type ${descriptor.javaClass.name} is not yet supported!")
             }
         } catch (exception: Exception) {
-            logger.error("Could not process descriptor part of ${descriptor.descriptorFile.name}! ${exception.message}")
+            logger.error("Could not process descriptor part of {}! {}", descriptor.descriptorFile.name, exception.message)
             ProcessedDescriptorInfo(error = exception.message)
         }
     }

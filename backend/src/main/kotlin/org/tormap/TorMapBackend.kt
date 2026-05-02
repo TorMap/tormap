@@ -11,7 +11,7 @@ import java.time.ZonedDateTime
 class TorMapBackend : ApplicationRunner {
 
     override fun run(args: ApplicationArguments) {
-        logger().info("TorMap backend started successfully, running in timezone: " + ZonedDateTime.now().zone)
+        logger().info("TorMap backend started successfully, running in timezone: {}", ZonedDateTime.now().zone)
     }
 
 }
