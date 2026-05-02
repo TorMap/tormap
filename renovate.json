@@ -52,6 +52,13 @@
         "@types/leaflet"
       ],
       "enabled": false
+    },
+    {
+      "description": "Keep all @mui packages on major version 5",
+      "matchPackageNames": [
+        "/^@mui\\//"
+      ],
+      "allowedVersions": "/^5\\./"
     }
   ]
 }
