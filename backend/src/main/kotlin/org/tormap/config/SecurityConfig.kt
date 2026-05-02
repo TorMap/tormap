@@ -110,7 +110,14 @@ class SecurityConfig(
                     // Allow OpenAPI/Swagger only when enabled
                     .apply {
                         if (swaggerEnabled) {
-                            antMatchers("/openapi/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                            antMatchers(
+                                "/openapi/**",
+                                "/v3/api-docs/**",
+                                "/swagger",
+                                "/swagger/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                            ).permitAll()
                         }
                     }
                     // Admin-only actuator; will deny all if no users exist
