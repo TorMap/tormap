@@ -123,3 +123,21 @@ Prebuild docker images are available at https://hub.docker.com/r/tormap/backend.
 - 50 GB of free disk space (for downloaded archives)
 - 500 MB of RAM (typical actual backend usage is ~300 MB). It is recommended to set a JVM max heap size of 500 MB or more (e.g., `-Xmx500m`)
 - Additional resources if PostgreSQL is deployed on the same machine
+
+### CORS and caching
+
+#### CORS
+
+The backend enables CORS so specific frontend browser origins can call the public API. Configuration:
+
+- Dev (default): `app.security.cors.allowed-origins: http://localhost:3000`
+- Prod: `application-prod.yml` overrides to `https://tormap.org,https://www.tormap.org`
+
+#### HTTP caching
+
+Public `GET` endpoints under `/relay/**` can return `Cache-Control` headers to allow browser and CDN/proxy caching.
+
+- Dev/default: caching headers are **disabled** (`app.http.cache.public.max-age-seconds` defaults to `0`).
+  Responses are typically not cached unless a controller explicitly sets caching headers.
+- Prod: `application-prod.yml` sets `app.http.cache.public.max-age-seconds: 300`, so `/relay/**` responses include
+  `Cache-Control: public, max-age=300`.
