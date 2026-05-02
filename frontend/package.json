@@ -20,7 +20,7 @@
     "@mui/material": "5.18.0",
     "@mui/styles": "5.18.0",
     "@mui/x-date-pickers": "5.0.20",
-    "axios": "1.15.2",
+    "axios": "1.16.0",
     "date-fns": "2.30.0",
     "jotai": "2.19.1",
     "leaflet": "1.9.4",
@@ -48,7 +48,7 @@
     "eslint": "9.39.4",
     "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-react": "7.37.5",
-    "globals": "17.5.0",
+    "globals": "17.6.0",
     "typescript": "5.9.3",
     "vite": "7.3.2",
     "vite-plugin-checker": "0.12.0"
