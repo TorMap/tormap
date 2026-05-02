@@ -36,14 +36,17 @@ on your bandwidth and hardware, but can be expected to take at least several hou
 
 ### Swagger UI
 
-An interactive Swagger UI is available under http://localhost:8080/swagger and the specification can also be viewed in raw JSON
+For development purposes, an interactive Swagger UI is available under http://localhost:8080/swagger and the
+specification can also be viewed in raw JSON
 under http://localhost:8080/openapi. In the production environment, Swagger UI and API docs are disabled by default.
 
 ### Admin access
 
-By default, actuator endpoints are **disabled** at the management layer and are not exposed over HTTP.
+A selection of actuator endpoints are **enabled** by default at the management layer and exposed via HTTP Basic Auth
+only. Ensure your deployment exposes only the actuator endpoints you need (Spring property
+`management.endpoints.web.exposure.include`).
 
-To enable admin access to `/actuator/**` endpoints, HTTP Basic is used. The admin username is configured via Spring
+To enable admin access to `/actuator/**` endpoints. The admin username is configured via Spring
 properties:
 
 - `spring.security.user.name` (default: `admin`)
@@ -66,8 +69,6 @@ Generate a BCrypt hash:
 # Requires Docker; will prompt for password and print the hash to stdout
 docker run --rm -it httpd:2.4-alpine htpasswd -nBC 12 admin
 ```
-
-Also ensure your deployment explicitly enables the actuator endpoints you need (e.g. `management.endpoints.enabled-by-default` and `management.endpoints.web.exposure.include`).
 
 ## Config
 
@@ -120,6 +121,5 @@ Prebuild docker images are available at https://hub.docker.com/r/tormap/backend.
 ### Hardware / VM Requirements
 
 - 50 GB of free disk space (for downloaded archives)
-- 2 GB of RAM (typical backend usage is below 1 GB)
-- It is recommended to set a JVM max heap size of 1.5 GB or more (e.g. `-Xmx1500m`)
+- 500 MB of RAM (typical actual backend usage is ~300 MB). It is recommended to set a JVM max heap size of 500 MB or more (e.g., `-Xmx500m`)
 - Additional resources if PostgreSQL is deployed on the same machine

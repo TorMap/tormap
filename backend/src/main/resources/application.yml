@@ -20,9 +20,9 @@ management:
             exposure:
                 include:
         web:
-            # Actuator endpoints are disabled by default. When enabled, this list is used.
+            # Actuator endpoints that are enabled individually from the endpoint config, will be exposed via web, if appearing in this list:
             exposure:
-                include: health,info,metrics,caches,httptrace,flyway,logfile,mappings,scheduledtasks,threaddump,heapdump
+                include: health,info,metrics,caches,httptrace,flyway,logfile,mappings,scheduledtasks,threaddump
             base-path: /actuator
     endpoint:
         health:
@@ -30,9 +30,23 @@ management:
             show-details: when_authorized
         info:
             enabled: true
+        metrics:
+            enabled: true
+        caches:
+            enabled: true
+        httptrace:
+            enabled: true
+        flyway:
+            enabled: true
         logfile:
             enabled: true
             external-file: logs/spring-boot-logger.log
+        mappings:
+            enabled: true
+        scheduledtasks:
+            enabled: true
+        threaddump:
+            enabled: true
 logging:
     file:
         path: logs/spring-boot-logger.log
