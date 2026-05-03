@@ -1,5 +1,4 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import SearchIcon from '@mui/icons-material/Search';
+import {ExpandMore as ExpandMoreIcon, Search as SearchIcon} from "@mui/icons-material";
 import {
     Accordion,
     AccordionDetails,

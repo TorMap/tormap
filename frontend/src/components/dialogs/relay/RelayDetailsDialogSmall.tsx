@@ -1,4 +1,4 @@
-import CloseIcon from "@mui/icons-material/Close";
+import {Close as CloseIcon} from "@mui/icons-material";
 import {AppBar, Button, Dialog, DialogActions, DialogContent, IconButton, Toolbar} from "@mui/material";
 import React, {FunctionComponent, useEffect, useState} from "react";
 

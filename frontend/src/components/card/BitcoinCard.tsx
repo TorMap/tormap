@@ -5,11 +5,8 @@ import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import LightningIcon from '@mui/icons-material/FlashOn';
-import WalletIcon from '@mui/icons-material/Wallet';
+import {ContentCopy as ContentCopyIcon, FlashOn as LightningIcon, Launch as LaunchIcon, Wallet as WalletIcon} from "@mui/icons-material";
 import {Stack} from '@mui/material';
-import LaunchIcon from "@mui/icons-material/Launch";
 
 export default function BitcoinCard() {
     const bitcoinAddress = import.meta.env.VITE_DONATION_BITCOIN_ADDRESS

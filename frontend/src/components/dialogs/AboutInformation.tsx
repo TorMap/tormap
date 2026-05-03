@@ -1,8 +1,4 @@
-import CloseIcon from "@mui/icons-material/Close";
-import EmailIcon from '@mui/icons-material/Email';
-import GitHubIcon from '@mui/icons-material/GitHub';
-import InfoIcon from '@mui/icons-material/Info';
-import TwitterIcon from '@mui/icons-material/Twitter';
+import {Close as CloseIcon, Email as EmailIcon, GitHub as GitHubIcon, Info as InfoIcon, Twitter as TwitterIcon} from "@mui/icons-material";
 import {
     Avatar,
     Box,

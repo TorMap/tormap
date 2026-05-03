@@ -1,9 +1,11 @@
-import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
-import GroupIcon from "@mui/icons-material/Group";
-import PublicIcon from "@mui/icons-material/Public";
-import SecurityIcon from "@mui/icons-material/Security";
-import FunctionsIcon from '@mui/icons-material/Functions';
-import TimelineIcon from "@mui/icons-material/Timeline";
+import {
+    DirectionsRun as DirectionsRunIcon,
+    Functions as FunctionsIcon,
+    Group as GroupIcon,
+    Public as PublicIcon,
+    Security as SecurityIcon,
+    Timeline as TimelineIcon,
+} from "@mui/icons-material";
 import React from "react";
 
 import {Colors} from "../config";
