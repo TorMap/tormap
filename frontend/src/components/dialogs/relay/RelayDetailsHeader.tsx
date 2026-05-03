@@ -1,4 +1,4 @@
-import CloseIcon from "@mui/icons-material/Close";
+import {Close as CloseIcon} from "@mui/icons-material";
 import {Box, CircularProgress, IconButton, Tooltip, Typography} from "@mui/material";
 import React, {FunctionComponent} from "react";
 

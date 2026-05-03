@@ -1,4 +1,4 @@
-import CloseIcon from "@mui/icons-material/Close";
+import {Close as CloseIcon} from "@mui/icons-material";
 import {
     AppBar,
     Button,
