@@ -69,12 +69,16 @@ class DNSJavaReverseDnsResolver : ReverseDnsResolver {
 class ReverseDnsLookupService(
     private val reverseDnsResolver: ReverseDnsResolver,
 ) {
-    @Cacheable(CacheConfig.REVERSE_DNS_LOOKUPS, key = "#ipAddress")
+    companion object {
+        private const val MAX_PTR_HOSTNAMES_TO_VERIFY = 10
+    }
+    @Cacheable(CacheConfig.REVERSE_DNS_LOOKUPS, key = "#ipAddress", sync = true)
     fun lookupHostNames(ipAddress: String): ReverseDnsLookupResult {
         val hostNames = reverseDnsResolver.lookupPtrRecords(ipAddress)
             .map { it.trim().trimEnd('.') }
             .filter { it.isNotBlank() }
             .distinct()
+            .take(MAX_PTR_HOSTNAMES_TO_VERIFY)
 
         if (hostNames.isEmpty()) {
             return ReverseDnsLookupResult()
