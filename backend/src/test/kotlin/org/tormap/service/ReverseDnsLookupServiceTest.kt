@@ -35,6 +35,22 @@ class ReverseDnsLookupServiceTest : StringSpec({
         result shouldBe ReverseDnsLookupResult()
         reverseDnsResolver.lookupAddressesCallCount shouldBe 0
     }
+
+
+    "lookupHostNames limits number of host names verified" {
+        val ptrRecords = (1..20).map { "host$it.example." }
+        val reverseDnsResolver = LookupServiceFakeReverseDnsResolver(
+            ptrRecordsByIpAddress = mapOf("1.2.3.4" to ptrRecords),
+            addressesByHostName = ptrRecords.associate { it.trimEnd('.') to listOf("5.6.7.8") },
+        )
+        val reverseDnsLookupService = ReverseDnsLookupService(reverseDnsResolver)
+
+        val result = reverseDnsLookupService.lookupHostNames("1.2.3.4")
+
+        result.verifiedHostNames shouldBe emptyList()
+        result.unverifiedHostNames.size shouldBe 10
+        reverseDnsResolver.lookupAddressesCallCount shouldBe 10
+    }
 })
 
 private class LookupServiceFakeReverseDnsResolver(
