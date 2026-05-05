@@ -33,9 +33,9 @@ jobs:
         # On v* tag → semver + :latest. On non-tag push → :edge only.
         run: |
           cd backend
-          if [ "${{ github.ref_type }}" = "tag" ]; then
+          if [[ "${{ github.ref_type }}" = "tag" ]]; then
             ./gradlew jib # tags come from build.gradle.kts
-          elif [ "${{ github.ref_type }}" = "branch" && "${{ github.ref_name }}" = "master" ]; then
+          elif [[ "${{ github.ref_type }}" = "branch" && "${{ github.ref_name }}" = "master" ]]; then
             ./gradlew jib -Djib.to.tags=edge
           fi
         env:
