@@ -29,18 +29,15 @@ jobs:
       - uses: gradle/gradle-build-action@ac2d340dc04d9e1113182899e983b5400c17cda1 # v3
       - uses: gradle/actions/wrapper-validation@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6
 
-      - name: Login to DockerHub
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # On master push → :edge only
-      - name: Build and push docker edge image
-        if: github.ref_type == 'branch' && github.ref_name == 'master'
-        run: cd backend && ./gradlew jib -Djib.to.tags=edge
-
-      # On v* tag → semver + latest
-      - name: Build and push docker release image
-        if: github.ref_type == 'tag'
-        run: cd backend && ./gradlew jib # see backend/build.gradle.kts for jib config
+      - name: Build and push docker image
+        # On v* tag → semver + :latest. On non-tag push → :edge only.
+        run: |
+          cd backend
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            ./gradlew jib # tags come from build.gradle.kts
+          elif [ "${{ github.ref_type }}" = "branch" && "${{ github.ref_name }}" = "master" ]; then
+            ./gradlew jib -Djib.to.tags=edge
+          fi
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

@@ -137,6 +137,10 @@ tasks.withType<Test> {
 jib {
     to {
         image = "tormap/backend"
+        auth {
+            username = System.getenv("DOCKERHUB_USERNAME")
+            password = System.getenv("DOCKERHUB_TOKEN")
+        }
         tags = setOf(version.toString(), version.toString().substringBefore('.'))
     }
     from {
