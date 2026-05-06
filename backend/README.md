@@ -1,7 +1,7 @@
 # Backend
 
 The backend uses a [Spring Boot](https://spring.io/projects/spring-boot) standalone webserver and is written
-in [Kotlin](https://kotlinlang.org/). A PostgresSQL database is used to store backend data and needs to be available
+in [Kotlin](https://kotlinlang.org/). A PostgreSQL database is used to store backend data and needs to be available
 when starting the backend.
 
 ## Tor Descriptors
@@ -24,7 +24,7 @@ relay details will only be available, if the corresponding relay server descript
 ## Run Development Server
 
 1. Go into `backend` directory
-2. Start PostgresSQL database: `docker compose up -d database`
+2. Start PostgreSQL database: `docker compose up -d database`
 3. Run `./gradlew bootRun` or on Windows `gradlew.bat bootRun`
 4. Backend should be available at http://localhost:8080
 
