@@ -24,7 +24,7 @@ relay details will only be available, if the corresponding relay server descript
 ## Run Development Server
 
 1. Go into `backend` directory
-2. Start PostgresSQL database: `docker-compose -f production.yml up -d database`
+2. Start PostgresSQL database: `docker compose up -d database`
 3. Run `./gradlew bootRun` or on Windows `gradlew.bat bootRun`
 4. Backend should be available at http://localhost:8080
 
@@ -76,8 +76,17 @@ docker run --rm -it httpd:2.4-alpine htpasswd -nBC 12 admin
 - `backend/src/main/resources/application-prod.yml` - production specific overwrites
 - `backend/src/main/resources/logback-spring.xml` - logging options
 - `backend/build.gradle.kts` - dependencies are managed with Gradle
+- `docker-compose.yml` - example docker compose file for production deployment
+- `docker-compose.override.yml` - overrides `docker-compose.yml` for local development
+- `.env.example` can be copied to `.env` - control docker compose environment variables for local development
 
-When deploying, the environment variable `NEW_RELIC_INGEST_KEY` can be set to collect metrics to https://newrelic.com.
+### Production environment variables
+
+It is recommended to set following production environment variables via a secret manager:
+
+- `TORMAP_DATABASE_PASSWORD` - Overrides the database password
+- `TORMAP_ADMIN_PASSWORD` - Optionally set admin password for accessing actuator endpoints
+- `NEW_RELIC_INGEST_KEY` - Collect metrics to https://newrelic.com
 
 ### IP lookups
 
@@ -116,12 +125,15 @@ Build docker image:
 4. Run new image in a container with: `docker run -p 8080:8080 tormap/backend`
 5. Backend should be available at http://localhost:8080
 
-Prebuild docker images are available at https://hub.docker.com/r/tormap/backend.
+Prebuild docker images are available at https://hub.docker.com/r/tormap/backend. An example docker compose file for
+production deployment is available at `docker-compose.yml`. To execute it without development overrides, run
+`docker compose -f docker-compose.yml up -d`.
 
 ### Hardware / VM Requirements
 
 - 50 GB of free disk space (for downloaded archives)
-- 500 MB of RAM (typical actual backend usage is ~300 MB). It is recommended to set a JVM max heap size of 500 MB or more (e.g., `-Xmx500m`)
+- 500 MB of RAM (typical actual backend usage is ~300 MB). It is recommended to set a JVM max heap size of 500 MB or
+  more (e.g., `-Xmx500m`)
 - Additional resources if PostgreSQL is deployed on the same machine
 
 ### CORS and caching
