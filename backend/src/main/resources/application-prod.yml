@@ -14,4 +14,4 @@ springdoc:
 spring:
     datasource:
         # Required in production environment
-        password: ${SPRING_DATASOURCE_PASSWORD}
+        password: ${SPRING_DATASOURCE_PASSWORD:${TORMAP_DATABASE_PASSWORD}}
