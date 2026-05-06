@@ -1,5 +1,4 @@
 # Example Docker compose file for production deployment
-version: '3.8'
 name: tormap
 services:
     backend:
@@ -11,11 +10,11 @@ services:
         environment:
             - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/postgres
             - SPRING_DATASOURCE_USERNAME=postgres
-            - SPRING_DATASOURCE_PASSWORD=postgres
+            - SPRING_DATASOURCE_PASSWORD=${TORMAP_DATABASE_PASSWORD:?Set TORMAP_DATABASE_PASSWORD to a strong generated password}
             # Optional: enable New Relic monitoring by providing the license key as an environment variable
-            # - NEW_RELIC_INGEST_KEY=${NEW_RELIC_INGEST_KEY}
+            # - NEW_RELIC_INGEST_KEY=${NEW_RELIC_INGEST_KEY:?Set NEW_RELIC_INGEST_KEY to your New Relic license key to enable monitoring}
             # Optional: enable actuator admin access
-            # - TORMAP_ADMIN_PASSWORD_BCRYPT=$2y$...
+            # - TORMAP_ADMIN_PASSWORD=${TORMAP_ADMIN_PASSWORD:?Set TORMAP_ADMIN_PASSWORD to a strong generated password}
             # and explicitly enable/ expose the actuator endpoints you need via management.* properties
         ports:
             - "8080:8080"
@@ -24,7 +23,7 @@ services:
         image: postgres:14-alpine
         environment:
             - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_PASSWORD=${TORMAP_DATABASE_PASSWORD:?Set TORMAP_DATABASE_PASSWORD to a strong generated password}
         ports:
             - "5432:5432"
 

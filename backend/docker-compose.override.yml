@@ -1,0 +1,10 @@
+# Overrides for development environment. Do not use in production!
+name: tormap
+services:
+    backend:
+        environment:
+            - SPRING_DATASOURCE_PASSWORD=${TORMAP_DATABASE_PASSWORD:-postgres}
+
+    database:
+        environment:
+            - POSTGRES_PASSWORD=${TORMAP_DATABASE_PASSWORD:-postgres}

@@ -66,9 +66,10 @@ server:
         max-swallow-size: 1048576       # 1 MiB
 spring:
     datasource:
-        url: jdbc:postgresql://localhost:5432/postgres
-        username: postgres
-        password: postgres
+        url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/postgres}
+        username: ${SPRING_DATASOURCE_USERNAME:postgres}
+        # You should override the default password in production environment via environment variable
+        password: ${SPRING_DATASOURCE_PASSWORD:${TORMAP_DATABASE_PASSWORD:postgres}}
     flyway:
         baselineOnMigrate: true
         locations: classpath:database/migration

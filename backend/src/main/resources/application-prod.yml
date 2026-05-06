@@ -11,3 +11,7 @@ springdoc:
         enabled: false
     swagger-ui:
         enabled: false
+spring:
+    datasource:
+        # Required in production environment
+        password: ${SPRING_DATASOURCE_PASSWORD:${TORMAP_DATABASE_PASSWORD}}
