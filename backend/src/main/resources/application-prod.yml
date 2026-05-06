@@ -13,4 +13,4 @@ springdoc:
         enabled: false
 spring:
     datasource:
-        password: ${SPRING_DATASOURCE_PASSWORD:${TORMAP_DATABASE_PASSWORD}}
+        password: ${SPRING_DATASOURCE_PASSWORD}
