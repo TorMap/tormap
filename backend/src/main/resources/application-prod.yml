@@ -13,4 +13,5 @@ springdoc:
         enabled: false
 spring:
     datasource:
+        # Required in production environment
         password: ${SPRING_DATASOURCE_PASSWORD}
