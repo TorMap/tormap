@@ -77,6 +77,9 @@ class DescriptorCoordinationService(
             descriptorInfo.error?.let { errorCount++ }
             lastProcessedFile = descriptor.descriptorFile
         }
+        lastProcessedFile?.let {
+            handleFinishedFile(descriptorType, it, errorCount, processedMonthsFromFile)
+        }
         if (descriptorType.isRecent()) {
             computeRelayDetailsAndCaches(descriptorType, processedMonthsFromAllFiles)
         }
