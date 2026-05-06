@@ -92,9 +92,17 @@ public class DescriptorIndexCollector implements DescriptorCollector {
 
   boolean fetchRemoteFiles(String baseUrl, SortedMap<String, FileNode> remotes,
       long minLastModified, File localDir, SortedMap<String, Long> locals) {
+    Path localDirPath = localDir.toPath().toAbsolutePath().normalize();
     for (Map.Entry<String, FileNode> entry : remotes.entrySet()) {
       String filepathname = entry.getKey();
       String filename = entry.getValue().path;
+      if (filename == null || filename.isEmpty()
+          || filename.contains("/") || filename.contains("\\")
+          || ".".equals(filename) || "..".equals(filename)) {
+        logger.warn("Remote file path {} has invalid file name {}. Skipping that file.",
+            filepathname, filename);
+        continue;
+      }
       File filepath = new File(localDir,
           filepathname.replace(filename, ""));
       long lastModifiedMillis = entry.getValue().lastModifiedMillis();
@@ -110,6 +118,14 @@ public class DescriptorIndexCollector implements DescriptorCollector {
       }
       File destinationFile = new File(filepath, filename);
       File tempDestinationFile = new File(filepath, "." + filename);
+      Path destinationPath = destinationFile.toPath().toAbsolutePath().normalize();
+      Path tempDestinationPath = tempDestinationFile.toPath().toAbsolutePath().normalize();
+      if (!destinationPath.startsWith(localDirPath)
+          || !tempDestinationPath.startsWith(localDirPath)) {
+        logger.warn("Remote file path {} resolves outside local directory {}. "
+            + "Skipping that file.", filepathname, localDirPath);
+        continue;
+      }
       logger.debug("Fetching remote file {} with expected size of {} bytes "
           + "from {}, storing locally to temporary file {}, then renaming to "
           + "{}.",
@@ -183,4 +199,3 @@ public class DescriptorIndexCollector implements DescriptorCollector {
     return locals;
   }
 }
-
