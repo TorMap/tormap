@@ -116,16 +116,25 @@ public class DescriptorIndexCollector implements DescriptorCollector {
             + "Aborting descriptor collection.", filepath, filename);
         return false;
       }
-      File destinationFile = new File(filepath, filename);
-      File tempDestinationFile = new File(filepath, "." + filename);
-      Path destinationPath = destinationFile.toPath().toAbsolutePath().normalize();
-      Path tempDestinationPath = tempDestinationFile.toPath().toAbsolutePath().normalize();
-      if (!destinationPath.startsWith(localDirPath)
-          || !tempDestinationPath.startsWith(localDirPath)) {
-        logger.warn("Remote file path {} resolves outside local directory {}. "
-            + "Skipping that file.", filepathname, localDirPath);
+      Path localDirRealPath;
+      Path parentRealPath;
+      try {
+        localDirRealPath = localDir.toPath().toRealPath();
+        parentRealPath = filepath.toPath().toRealPath();
+      } catch (IOException e) {
+        logger.warn("Cannot resolve local directory {} or target directory {}. "
+            + "Skipping remote file {}.", localDir, filepath, filepathname, e);
         continue;
       }
+      if (!parentRealPath.startsWith(localDirRealPath)) {
+        logger.warn("Remote file path {} resolves outside local directory {}. "
+            + "Skipping that file.", filepathname, localDirRealPath);
+        continue;
+      }
+      Path destinationPath = parentRealPath.resolve(filename).normalize();
+      Path tempDestinationPath = parentRealPath.resolve("." + filename).normalize();
+      File destinationFile = destinationPath.toFile();
+      File tempDestinationFile = tempDestinationPath.toFile();
       logger.debug("Fetching remote file {} with expected size of {} bytes "
           + "from {}, storing locally to temporary file {}, then renaming to "
           + "{}.",
