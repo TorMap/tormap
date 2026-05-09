@@ -95,6 +95,13 @@ public class DescriptorIndexCollector implements DescriptorCollector {
     for (Map.Entry<String, FileNode> entry : remotes.entrySet()) {
       String filepathname = entry.getKey();
       String filename = entry.getValue().path;
+      if (filename == null || filename.isEmpty()
+          || filename.contains("/") || filename.contains("\\")
+          || ".".equals(filename) || "..".equals(filename)) {
+        logger.warn("Remote file path {} has invalid file name {}. Skipping that file.",
+            filepathname, filename);
+        continue;
+      }
       File filepath = new File(localDir,
           filepathname.replace(filename, ""));
       long lastModifiedMillis = entry.getValue().lastModifiedMillis();
@@ -108,8 +115,25 @@ public class DescriptorIndexCollector implements DescriptorCollector {
             + "Aborting descriptor collection.", filepath, filename);
         return false;
       }
-      File destinationFile = new File(filepath, filename);
-      File tempDestinationFile = new File(filepath, "." + filename);
+      Path localDirRealPath;
+      Path parentRealPath;
+      try {
+        localDirRealPath = localDir.toPath().toRealPath();
+        parentRealPath = filepath.toPath().toRealPath();
+      } catch (IOException e) {
+        logger.warn("Cannot resolve local directory {} or target directory {}. "
+            + "Skipping remote file {}.", localDir, filepath, filepathname, e);
+        continue;
+      }
+      if (!parentRealPath.startsWith(localDirRealPath)) {
+        logger.warn("Remote file path {} resolves outside local directory {}. "
+            + "Skipping that file.", filepathname, localDirRealPath);
+        continue;
+      }
+      Path destinationPath = parentRealPath.resolve(filename).normalize();
+      Path tempDestinationPath = parentRealPath.resolve("." + filename).normalize();
+      File destinationFile = destinationPath.toFile();
+      File tempDestinationFile = tempDestinationPath.toFile();
       logger.debug("Fetching remote file {} with expected size of {} bytes "
           + "from {}, storing locally to temporary file {}, then renaming to "
           + "{}.",
@@ -183,4 +207,3 @@ public class DescriptorIndexCollector implements DescriptorCollector {
     return locals;
   }
 }
-
