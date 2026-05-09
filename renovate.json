@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "github>juliushenke/renovate-preset"
+    "github>juliushenke/renovate-preset#v3.0.0"
   ],
   "assignees": [
     "JuliusHenke"
