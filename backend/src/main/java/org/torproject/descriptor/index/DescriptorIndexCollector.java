@@ -92,7 +92,6 @@ public class DescriptorIndexCollector implements DescriptorCollector {
 
   boolean fetchRemoteFiles(String baseUrl, SortedMap<String, FileNode> remotes,
       long minLastModified, File localDir, SortedMap<String, Long> locals) {
-    Path localDirPath = localDir.toPath().toAbsolutePath().normalize();
     for (Map.Entry<String, FileNode> entry : remotes.entrySet()) {
       String filepathname = entry.getKey();
       String filename = entry.getValue().path;
