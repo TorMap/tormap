@@ -1,6 +1,7 @@
 package org.tormap.config
 
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
+import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.EnableAsync
@@ -30,12 +31,23 @@ class AppConfig : WebMvcConfigurer {
     }
 
     /**
-     * Include an unique ETag hash for each response to enable client side caching.
+     * Include a weak ETag hash only for small, bounded GET endpoints.
+     *
+     * Shallow ETags require Spring to buffer the full response body before it can be hashed.
+     * Keep this filter away from large public endpoints such as /relay/location/day/{day},
+     * where buffering an entire day's relay locations can amplify memory and CPU usage.
      */
     @Bean
-    fun shallowEtagHeaderFilter(): ShallowEtagHeaderFilter {
+    fun shallowEtagHeaderFilterRegistration(): FilterRegistrationBean<ShallowEtagHeaderFilter> {
         val filter = ShallowEtagHeaderFilter()
         filter.isWriteWeakETag = true
-        return filter
+
+        return FilterRegistrationBean(filter).apply {
+            addUrlPatterns(
+                "/relay/location/days",
+                "/relay/details/relay/*",
+                "/relay/details/family/*",
+            )
+        }
     }
 }
