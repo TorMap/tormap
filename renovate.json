@@ -13,19 +13,15 @@
         "gradle"
       ],
       "enabled": false,
+      "matchUpdateTypes": [
+        "major"
+      ],
       "matchPackageNames": [
         "/^commons-codec/",
         "/^org.apache.commons/",
         "/^com.fasterxml.jackson.core/",
         "/^org.slf4j/",
         "/^org.tukaani/"
-      ]
-    },
-    {
-      "description": "Ignore specific docker images",
-      "enabled": false,
-      "matchPackageNames": [
-        "/^eclipse-temurin/"
       ]
     },
     {
