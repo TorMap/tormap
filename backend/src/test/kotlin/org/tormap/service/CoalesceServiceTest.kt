@@ -65,4 +65,9 @@ class CoalesceServiceTest(
         maxActive.get() shouldBe 1
         runs.get() shouldBe 2
     }
+
+    "removes key state after task completion" {
+        coalesceService.submitAsync("coalesce-cleanup") {}.get(5, TimeUnit.SECONDS)
+        coalesceService.hasStateForKey("coalesce-cleanup") shouldBe false
+    }
 })

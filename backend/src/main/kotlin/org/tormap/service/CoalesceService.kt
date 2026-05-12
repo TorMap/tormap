@@ -22,17 +22,35 @@ class CoalesceService(
     private val states = ConcurrentHashMap<String, CoalesceState>()
 
     fun submitAsync(key: String, task: () -> Unit): CompletableFuture<Void> {
-        val state = states.computeIfAbsent(key) { CoalesceState() }
+        while (true) {
+            val state = states.computeIfAbsent(key) { CoalesceState() }
+            var shouldStartTask = false
 
-        synchronized(state.monitor) {
-            if (state.running) {
-                state.pending = true
-                return CompletableFuture.completedFuture(null)
+            synchronized(state.monitor) {
+                // Another thread may have completed and removed this state, then a new one could have been
+                // inserted for the same key. If this state is stale, retry with the current mapped state.
+                if (states[key] !== state) {
+                    return@synchronized
+                }
+                if (state.running) {
+                    state.pending = true
+                    return CompletableFuture.completedFuture(null)
+                }
+                state.running = true
+                shouldStartTask = true
             }
-            state.running = true
-        }
 
-        return CompletableFuture.runAsync({
+            if (shouldStartTask) {
+                return runTaskAsync(key, state, task)
+            }
+        }
+    }
+
+    internal fun hasStateForKey(key: String): Boolean = states.containsKey(key)
+
+    private fun runTaskAsync(key: String, state: CoalesceState, task: () -> Unit): CompletableFuture<Void> {
+        return CompletableFuture.runAsync(
+            {
             var finishedAllReruns = false
             try {
                 while (true) {
@@ -44,7 +62,7 @@ class CoalesceService(
                         break
                     }
 
-                    if (!continueOrFinish(state)) {
+                    if (!continueOrFinish(key, state)) {
                         finishedAllReruns = true
                         break
                     }
@@ -53,19 +71,24 @@ class CoalesceService(
                 if (!finishedAllReruns) {
                     synchronized(state.monitor) {
                         state.running = false
+                        state.pending = false
+                        states.remove(key, state)
                     }
                 }
             }
-        }, coalesceExecutor)
+        },
+            coalesceExecutor
+        )
     }
 
-    private fun continueOrFinish(state: CoalesceState): Boolean {
+    private fun continueOrFinish(key: String, state: CoalesceState): Boolean {
         synchronized(state.monitor) {
             if (state.pending) {
                 state.pending = false
                 return true
             }
             state.running = false
+            states.remove(key, state)
             return false
         }
     }
