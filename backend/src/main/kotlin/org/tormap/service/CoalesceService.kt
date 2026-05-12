@@ -21,7 +21,7 @@ class CoalesceService(
 
     private val states = ConcurrentHashMap<String, CoalesceState>()
 
-    fun submit(key: String, task: () -> Unit): CompletableFuture<Void> {
+    fun submitAsync(key: String, task: () -> Unit): CompletableFuture<Void> {
         val state = states.computeIfAbsent(key) { CoalesceState() }
 
         if (!state.running.compareAndSet(false, true)) {

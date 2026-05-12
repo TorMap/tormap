@@ -26,10 +26,10 @@ class CoalesceServiceTest(
             }
         }
 
-        val first = coalesceService.submit("coalesce-rerun", task)
+        val first = coalesceService.submitAsync("coalesce-rerun", task)
 
         started.await(5, TimeUnit.SECONDS) shouldBe true
-        val second = coalesceService.submit("coalesce-rerun", task)
+        val second = coalesceService.submitAsync("coalesce-rerun", task)
         release.countDown()
 
         first.get(5, TimeUnit.SECONDS)
@@ -55,10 +55,10 @@ class CoalesceServiceTest(
             active.decrementAndGet()
         }
 
-        val first = coalesceService.submit("coalesce-serial", task)
+        val first = coalesceService.submitAsync("coalesce-serial", task)
 
         started.await(5, TimeUnit.SECONDS) shouldBe true
-        repeat(10) { coalesceService.submit("coalesce-serial", task) }
+        repeat(10) { coalesceService.submitAsync("coalesce-serial", task) }
         release.countDown()
 
         first.get(5, TimeUnit.SECONDS)
