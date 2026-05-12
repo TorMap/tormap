@@ -15,7 +15,7 @@ class CoalesceService {
     private val pendingFlags = ConcurrentHashMap<String, AtomicBoolean>()
 
     @Async("coalesceExecutor")
-    fun submit(key: String, task: () -> Unit): CompletableFuture<Void> {
+    fun submitAsync(key: String, task: () -> Unit): CompletableFuture<Void> {
         val pending = pendingFlags.computeIfAbsent(key) { AtomicBoolean(false) }
         val lock = runningLocks.computeIfAbsent(key) { ReentrantLock() }
 

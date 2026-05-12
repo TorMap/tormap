@@ -39,7 +39,7 @@ class RelayDetailsUpdateService(
 
     fun lookupMissingAutonomousSystems(months: Set<String>) {
         months.forEach { month ->
-            coalesceService.submit("lookupMissingAutonomousSystems-$month") {
+            coalesceService.submitAsync("lookupMissingAutonomousSystems-$month") {
                 logger.info("... Updating ASs for month: {}", month)
                 var changedRelaysCount = 0
                 val relaysWithoutAutonomousSystem =
@@ -87,11 +87,10 @@ class RelayDetailsUpdateService(
     fun computeFamilies(months: Set<String>) {
         logger.info("... Updating relay families for months: {}", months.joinToString(", "))
         months.forEach { month ->
-            coalesceService.submit("computeFamilies-$month") {
+            coalesceService.submitAsync("computeFamilies-$month") {
                 computeFamiliesForMonth(month)
             }
         }
-        logger.info("Finished updating relay families")
     }
 
     /**

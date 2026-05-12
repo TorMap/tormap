@@ -21,7 +21,7 @@ class CacheService(
 
     @Async
     fun cacheRelayLocationDistinctDays(): CompletableFuture<Void> {
-        return coalesceService.submit("cacheRelayLocationDistinctDays") {
+        return coalesceService.submitAsync("cacheRelayLocationDistinctDays") {
             logger.info("Caching distinct relay location days")
             cacheManager.getCache(CacheConfig.RELAY_LOCATION_DISTINCT_DAYS)?.put(
                 CacheConfig.RELAY_LOCATION_DISTINCT_DAYS_KEY,
@@ -34,7 +34,7 @@ class CacheService(
     fun cacheRelayLocationsPerDay(months: Set<String>): CompletableFuture<Void> {
         logger.info("Caching relay locations for each day of months: {}", months.joinToString(", "))
         months.forEach { month ->
-            coalesceService.submit("cacheRelayLocationsPerDay-$month") {
+            coalesceService.submitAsync("cacheRelayLocationsPerDay-$month") {
                 val yearMonth = YearMonth.parse(month)
                 yearMonth.atDay(1).datesUntil(yearMonth.plusMonths(1).atDay(1)).forEach {
                     val day = it.toString()
