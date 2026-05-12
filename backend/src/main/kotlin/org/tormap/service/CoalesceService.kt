@@ -1,56 +1,61 @@
 package org.tormap.service
 
-import org.springframework.scheduling.annotation.Async
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import org.tormap.util.logger
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.locks.ReentrantLock
 
 @Service
-class CoalesceService {
+class CoalesceService(
+    @Qualifier("coalesceExecutor")
+    private val coalesceExecutor: Executor,
+) {
     private val logger = logger()
-    private val runningLocks = ConcurrentHashMap<String, ReentrantLock>()
-    private val pendingFlags = ConcurrentHashMap<String, AtomicBoolean>()
+    private data class CoalesceState(
+        val running: AtomicBoolean = AtomicBoolean(false),
+        val pending: AtomicBoolean = AtomicBoolean(false),
+    )
 
-    @Async("coalesceExecutor")
+    private val states = ConcurrentHashMap<String, CoalesceState>()
+
     fun submit(key: String, task: () -> Unit): CompletableFuture<Void> {
-        val pending = pendingFlags.computeIfAbsent(key) { AtomicBoolean(false) }
-        val lock = runningLocks.computeIfAbsent(key) { ReentrantLock() }
+        val state = states.computeIfAbsent(key) { CoalesceState() }
 
-        // If a task is already running for this key, just mark "pending" and return
-        if (!lock.tryLock()) {
-            pending.set(true)
+        if (!state.running.compareAndSet(false, true)) {
+            state.pending.set(true)
             return CompletableFuture.completedFuture(null)
         }
 
-        try {
-            do {
-                // Clear before running; if anything comes in while running,
-                // it will set the flag back to true.
-                pending.set(false)
+        return CompletableFuture.runAsync({
+            try {
+                while (true) {
+                    state.pending.set(false)
 
-                try {
-                    task()
-                } catch (ex: Exception) {
-                    logger.error("Coalesced task failed for key={}", key, ex)
-                    // Avoid tight error loops; break instead of immediately rerunning.
+                    try {
+                        task()
+                    } catch (ex: Exception) {
+                        logger.error("Coalesced task failed for key={}", key, ex)
+                        break
+                    }
+
+                    if (state.pending.compareAndSet(true, false)) {
+                        continue
+                    }
+
+                    state.running.set(false)
+
+                    if (state.pending.compareAndSet(true, false) && state.running.compareAndSet(false, true)) {
+                        continue
+                    }
+
                     break
                 }
-
-                // Loop once more if someone called submit(key, ...) while we were running.
-            } while (pending.compareAndSet(true, false))
-        } finally {
-            lock.unlock()
-
-            // Best-effort cleanup of maps for ephemeral keys
-            if (!lock.isLocked) {
-                runningLocks.remove(key, lock)
-                pendingFlags.remove(key, pending)
+            } finally {
+                state.running.set(false)
             }
-        }
-
-        return CompletableFuture.completedFuture(null)
+        }, coalesceExecutor)
     }
 }
