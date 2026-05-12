@@ -30,6 +30,7 @@ class CoalesceServiceTest(
 
         started.await(5, TimeUnit.SECONDS) shouldBe true
         val second = coalesceService.submitAsync("coalesce-rerun", task)
+        second.isDone shouldBe false
         release.countDown()
 
         first.get(5, TimeUnit.SECONDS)

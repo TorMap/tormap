@@ -17,6 +17,8 @@ class CoalesceService(
         val monitor: Any = Any(),
         var running: Boolean = false,
         var pending: Boolean = false,
+        var currentFuture: CompletableFuture<Void>? = null,
+        var pendingFuture: CompletableFuture<Void>? = null,
     )
 
     private val states = ConcurrentHashMap<String, CoalesceState>()
@@ -25,6 +27,7 @@ class CoalesceService(
         while (true) {
             val state = states.computeIfAbsent(key) { CoalesceState() }
             var shouldStartTask = false
+            var completionFuture: CompletableFuture<Void>? = null
 
             synchronized(state.monitor) {
                 // Another thread may have completed and removed this state, then a new one could have been
@@ -34,62 +37,95 @@ class CoalesceService(
                 }
                 if (state.running) {
                     state.pending = true
-                    return CompletableFuture.completedFuture(null)
+                    if (state.pendingFuture == null) {
+                        state.pendingFuture = CompletableFuture()
+                    }
+                    return state.pendingFuture!!
                 }
                 state.running = true
+                if (state.currentFuture == null) {
+                    state.currentFuture = CompletableFuture()
+                }
+                completionFuture = state.currentFuture
                 shouldStartTask = true
             }
 
             if (shouldStartTask) {
-                return runTaskAsync(key, state, task)
+                runTaskAsync(key, state, task)
+                return completionFuture!!
             }
         }
     }
 
     internal fun hasStateForKey(key: String): Boolean = states.containsKey(key)
 
-    private fun runTaskAsync(key: String, state: CoalesceState, task: () -> Unit): CompletableFuture<Void> {
-        return CompletableFuture.runAsync(
+    private fun runTaskAsync(key: String, state: CoalesceState, task: () -> Unit) {
+        CompletableFuture.runAsync(
             {
-            var finishedAllReruns = false
-            try {
-                while (true) {
-                    try {
-                        task()
-                    } catch (ex: Exception) {
-                        // Keep existing behavior: stop reruns for this cycle after a failed execution.
-                        logger.error("Coalesced task failed for key={}", key, ex)
-                        break
-                    }
+                var finishedAllReruns = false
+                try {
+                    while (true) {
+                        try {
+                            task()
+                        } catch (ex: Exception) {
+                            // Keep existing behavior: stop reruns for this cycle after a failed execution.
+                            logger.error("Coalesced task failed for key={}", key, ex)
+                            break
+                        }
 
-                    if (!continueOrFinish(key, state)) {
-                        finishedAllReruns = true
-                        break
+                        if (!continueOrFinish(key, state)) {
+                            finishedAllReruns = true
+                            break
+                        }
+                    }
+                } finally {
+                    if (!finishedAllReruns) {
+                        finishCurrentState(key, state)
                     }
                 }
-            } finally {
-                if (!finishedAllReruns) {
-                    synchronized(state.monitor) {
-                        state.running = false
-                        state.pending = false
-                        states.remove(key, state)
-                    }
-                }
-            }
-        },
+            },
             coalesceExecutor
         )
     }
 
     private fun continueOrFinish(key: String, state: CoalesceState): Boolean {
+        var completedFuture: CompletableFuture<Void>? = null
+        var continueWithRerun = false
         synchronized(state.monitor) {
             if (state.pending) {
                 state.pending = false
-                return true
+                completedFuture = state.currentFuture
+                state.currentFuture = state.pendingFuture
+                state.pendingFuture = null
+                continueWithRerun = true
+            } else {
+                state.running = false
+                completedFuture = state.currentFuture
+                state.currentFuture = null
+                state.pendingFuture = null
+                states.remove(key, state)
+            }
+        }
+        completedFuture?.complete(null)
+        return continueWithRerun
+    }
+
+    private fun finishCurrentState(key: String, state: CoalesceState) {
+        var currentFuture: CompletableFuture<Void>? = null
+        var pendingFuture: CompletableFuture<Void>? = null
+        synchronized(state.monitor) {
+            if (!state.running) {
+                return
             }
             state.running = false
+            state.pending = false
+            currentFuture = state.currentFuture
+            pendingFuture = state.pendingFuture
+            state.currentFuture = null
+            state.pendingFuture = null
             states.remove(key, state)
-            return false
         }
+        currentFuture?.complete(null)
+        pendingFuture?.complete(null)
     }
 }
