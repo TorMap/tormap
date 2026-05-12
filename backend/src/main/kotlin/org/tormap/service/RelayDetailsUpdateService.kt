@@ -9,7 +9,6 @@ import org.tormap.util.commaSeparatedToList
 import org.tormap.util.getFamilyMember
 import org.tormap.util.logger
 import javax.sql.DataSource
-import java.util.concurrent.locks.ReentrantLock
 import javax.transaction.Transactional
 
 
@@ -21,11 +20,11 @@ class RelayDetailsUpdateService(
     private val relayDetailsRepositoryImpl: RelayDetailsRepositoryImpl,
     private val ipLookupService: IpLookupService,
     private val cacheService: CacheService,
+    private val coalesceService: CoalesceService,
     dataSource: DataSource,
 ) {
     private val logger = logger()
     private val dbSequenceIncrementer = PostgresSequenceMaxValueIncrementer(dataSource, "hibernate_sequence")
-    private val autonomousSystemUpdateLock = ReentrantLock()
 
     /**
      * Updates [RelayDetails.autonomousSystemName] and [RelayDetails.autonomousSystemNumber] for all [RelayDetails] missing this info.
@@ -39,13 +38,9 @@ class RelayDetailsUpdateService(
     }
 
     fun lookupMissingAutonomousSystems(months: Set<String>) {
-        if (!autonomousSystemUpdateLock.tryLock()) {
-            logger.info("Skipping AS update for months {} because another update is running", months.joinToString(", "))
-            return
-        }
-        try {
-            months.forEach { month ->
-                try {
+        months.forEach { month ->
+            try {
+                coalesceService.submit("lookupMissingAutonomousSystems-$month") {
                     logger.info("... Updating ASs for month: {}", month)
                     var changedRelaysCount = 0
                     val relaysWithoutAutonomousSystem =
@@ -57,12 +52,10 @@ class RelayDetailsUpdateService(
                     }
                     relayDetailsRepositoryImpl.saveAllAndFlush(relaysWithoutAutonomousSystem)
                     logger.info("Determined the AS of $changedRelaysCount / ${relaysWithoutAutonomousSystem.size} relays for month $month")
-                } catch (exception: Exception) {
-                    logger.error("Could not update ASs for month {}! {}", month, exception.message)
                 }
+            } catch (exception: Exception) {
+                logger.error("Could not update ASs for month {}! {}", month, exception.message)
             }
-        } finally {
-            autonomousSystemUpdateLock.unlock()
         }
     }
 
@@ -99,10 +92,12 @@ class RelayDetailsUpdateService(
         try {
             logger.info("... Updating relay families for months: {}", months.joinToString(", "))
             months.forEach { month ->
-                try {
-                    computeFamiliesForMonth(month)
-                } catch (exception: Exception) {
-                    logger.error("Could not update relay families for month {}! {}", month, exception.message)
+                coalesceService.submit("computeFamilies-$month") {
+                    try {
+                        computeFamiliesForMonth(month)
+                    } catch (exception: Exception) {
+                        logger.error("Could not update relay families for month {}! {}", month, exception.message)
+                    }
                 }
             }
             logger.info("Finished updating relay families")
