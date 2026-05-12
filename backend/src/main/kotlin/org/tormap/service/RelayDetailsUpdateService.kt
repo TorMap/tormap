@@ -39,22 +39,18 @@ class RelayDetailsUpdateService(
 
     fun lookupMissingAutonomousSystems(months: Set<String>) {
         months.forEach { month ->
-            try {
-                coalesceService.submit("lookupMissingAutonomousSystems-$month") {
-                    logger.info("... Updating ASs for month: {}", month)
-                    var changedRelaysCount = 0
-                    val relaysWithoutAutonomousSystem =
-                        relayDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(month)
-                    relaysWithoutAutonomousSystem.forEach { relay ->
-                        if (relay.lookupAndSetAutonomousSystem()) {
-                            changedRelaysCount++
-                        }
+            coalesceService.submit("lookupMissingAutonomousSystems-$month") {
+                logger.info("... Updating ASs for month: {}", month)
+                var changedRelaysCount = 0
+                val relaysWithoutAutonomousSystem =
+                    relayDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(month)
+                relaysWithoutAutonomousSystem.forEach { relay ->
+                    if (relay.lookupAndSetAutonomousSystem()) {
+                        changedRelaysCount++
                     }
-                    relayDetailsRepositoryImpl.saveAllAndFlush(relaysWithoutAutonomousSystem)
-                    logger.info("Determined the AS of $changedRelaysCount / ${relaysWithoutAutonomousSystem.size} relays for month $month")
                 }
-            } catch (exception: Exception) {
-                logger.error("Could not update ASs for month {}! {}", month, exception.message)
+                relayDetailsRepositoryImpl.saveAllAndFlush(relaysWithoutAutonomousSystem)
+                logger.info("Determined the AS of $changedRelaysCount / ${relaysWithoutAutonomousSystem.size} relays for month $month")
             }
         }
     }
@@ -89,21 +85,13 @@ class RelayDetailsUpdateService(
      * Updates [RelayDetails.familyId] for all entities of the requested [months].
      */
     fun computeFamilies(months: Set<String>) {
-        try {
-            logger.info("... Updating relay families for months: {}", months.joinToString(", "))
-            months.forEach { month ->
-                coalesceService.submit("computeFamilies-$month") {
-                    try {
-                        computeFamiliesForMonth(month)
-                    } catch (exception: Exception) {
-                        logger.error("Could not update relay families for month {}! {}", month, exception.message)
-                    }
-                }
+        logger.info("... Updating relay families for months: {}", months.joinToString(", "))
+        months.forEach { month ->
+            coalesceService.submit("computeFamilies-$month") {
+                computeFamiliesForMonth(month)
             }
-            logger.info("Finished updating relay families")
-        } catch (exception: Exception) {
-            logger.error("Could not update relay families! {}", exception.message)
         }
+        logger.info("Finished updating relay families")
     }
 
     /**
