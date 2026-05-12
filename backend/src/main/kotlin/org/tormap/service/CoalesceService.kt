@@ -6,7 +6,6 @@ import org.tormap.util.logger
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
-import java.util.concurrent.atomic.AtomicBoolean
 
 @Service
 class CoalesceService(
@@ -15,8 +14,9 @@ class CoalesceService(
 ) {
     private val logger = logger()
     private data class CoalesceState(
-        val running: AtomicBoolean = AtomicBoolean(false),
-        val pending: AtomicBoolean = AtomicBoolean(false),
+        val monitor: Any = Any(),
+        var running: Boolean = false,
+        var pending: Boolean = false,
     )
 
     private val states = ConcurrentHashMap<String, CoalesceState>()
@@ -24,38 +24,49 @@ class CoalesceService(
     fun submit(key: String, task: () -> Unit): CompletableFuture<Void> {
         val state = states.computeIfAbsent(key) { CoalesceState() }
 
-        if (!state.running.compareAndSet(false, true)) {
-            state.pending.set(true)
-            return CompletableFuture.completedFuture(null)
+        synchronized(state.monitor) {
+            if (state.running) {
+                state.pending = true
+                return CompletableFuture.completedFuture(null)
+            }
+            state.running = true
         }
 
         return CompletableFuture.runAsync({
+            var finishedAllReruns = false
             try {
                 while (true) {
-                    state.pending.set(false)
-
                     try {
                         task()
                     } catch (ex: Exception) {
+                        // Keep existing behavior: stop reruns for this cycle after a failed execution.
                         logger.error("Coalesced task failed for key={}", key, ex)
                         break
                     }
 
-                    if (state.pending.compareAndSet(true, false)) {
-                        continue
+                    if (!continueOrFinish(state)) {
+                        finishedAllReruns = true
+                        break
                     }
-
-                    state.running.set(false)
-
-                    if (state.pending.compareAndSet(true, false) && state.running.compareAndSet(false, true)) {
-                        continue
-                    }
-
-                    break
                 }
             } finally {
-                state.running.set(false)
+                if (!finishedAllReruns) {
+                    synchronized(state.monitor) {
+                        state.running = false
+                    }
+                }
             }
         }, coalesceExecutor)
+    }
+
+    private fun continueOrFinish(state: CoalesceState): Boolean {
+        synchronized(state.monitor) {
+            if (state.pending) {
+                state.pending = false
+                return true
+            }
+            state.running = false
+            return false
+        }
     }
 }
