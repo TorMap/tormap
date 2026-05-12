@@ -34,7 +34,6 @@ class RelayDetailsUpdateService(
             relayDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
         logger.info("Batch updating ASs for months: {}", monthsWithRelaysMissingAutonomousSystem.joinToString(", "))
         lookupMissingAutonomousSystems(monthsWithRelaysMissingAutonomousSystem)
-        logger.info("Finished batch update of ASs")
     }
 
     fun lookupMissingAutonomousSystems(months: Set<String>) {
