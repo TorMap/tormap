@@ -9,7 +9,6 @@ import org.tormap.util.commaSeparatedToList
 import org.tormap.util.getFamilyMember
 import org.tormap.util.logger
 import javax.sql.DataSource
-import java.util.concurrent.locks.ReentrantLock
 import javax.transaction.Transactional
 
 
@@ -21,11 +20,11 @@ class RelayDetailsUpdateService(
     private val relayDetailsRepositoryImpl: RelayDetailsRepositoryImpl,
     private val ipLookupService: IpLookupService,
     private val cacheService: CacheService,
+    private val coalesceService: CoalesceService,
     dataSource: DataSource,
 ) {
     private val logger = logger()
     private val dbSequenceIncrementer = PostgresSequenceMaxValueIncrementer(dataSource, "hibernate_sequence")
-    private val autonomousSystemUpdateLock = ReentrantLock()
 
     /**
      * Updates [RelayDetails.autonomousSystemName] and [RelayDetails.autonomousSystemNumber] for all [RelayDetails] missing this info.
@@ -35,34 +34,23 @@ class RelayDetailsUpdateService(
             relayDetailsRepositoryImpl.findDistinctMonthsAndAutonomousSystemNumberNull()
         logger.info("Batch updating ASs for months: {}", monthsWithRelaysMissingAutonomousSystem.joinToString(", "))
         lookupMissingAutonomousSystems(monthsWithRelaysMissingAutonomousSystem)
-        logger.info("Finished batch update of ASs")
     }
 
     fun lookupMissingAutonomousSystems(months: Set<String>) {
-        if (!autonomousSystemUpdateLock.tryLock()) {
-            logger.info("Skipping AS update for months {} because another update is running", months.joinToString(", "))
-            return
-        }
-        try {
-            months.forEach { month ->
-                try {
-                    logger.info("... Updating ASs for month: {}", month)
-                    var changedRelaysCount = 0
-                    val relaysWithoutAutonomousSystem =
-                        relayDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(month)
-                    relaysWithoutAutonomousSystem.forEach { relay ->
-                        if (relay.lookupAndSetAutonomousSystem()) {
-                            changedRelaysCount++
-                        }
+        months.forEach { month ->
+            coalesceService.submitAsync("lookupMissingAutonomousSystems-$month") {
+                logger.info("... Updating ASs for month: {}", month)
+                var changedRelaysCount = 0
+                val relaysWithoutAutonomousSystem =
+                    relayDetailsRepositoryImpl.findAllByMonthEqualsAndAutonomousSystemNumberNull(month)
+                relaysWithoutAutonomousSystem.forEach { relay ->
+                    if (relay.lookupAndSetAutonomousSystem()) {
+                        changedRelaysCount++
                     }
-                    relayDetailsRepositoryImpl.saveAllAndFlush(relaysWithoutAutonomousSystem)
-                    logger.info("Determined the AS of $changedRelaysCount / ${relaysWithoutAutonomousSystem.size} relays for month $month")
-                } catch (exception: Exception) {
-                    logger.error("Could not update ASs for month {}! {}", month, exception.message)
                 }
+                relayDetailsRepositoryImpl.saveAllAndFlush(relaysWithoutAutonomousSystem)
+                logger.info("Determined the AS of $changedRelaysCount / ${relaysWithoutAutonomousSystem.size} relays for month $month")
             }
-        } finally {
-            autonomousSystemUpdateLock.unlock()
         }
     }
 
@@ -96,18 +84,11 @@ class RelayDetailsUpdateService(
      * Updates [RelayDetails.familyId] for all entities of the requested [months].
      */
     fun computeFamilies(months: Set<String>) {
-        try {
-            logger.info("... Updating relay families for months: {}", months.joinToString(", "))
-            months.forEach { month ->
-                try {
-                    computeFamiliesForMonth(month)
-                } catch (exception: Exception) {
-                    logger.error("Could not update relay families for month {}! {}", month, exception.message)
-                }
+        logger.info("... Updating relay families for months: {}", months.joinToString(", "))
+        months.forEach { month ->
+            coalesceService.submitAsync("computeFamilies-$month") {
+                computeFamiliesForMonth(month)
             }
-            logger.info("Finished updating relay families")
-        } catch (exception: Exception) {
-            logger.error("Could not update relay families! {}", exception.message)
         }
     }
 
