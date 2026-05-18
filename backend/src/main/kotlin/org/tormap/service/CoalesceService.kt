@@ -6,6 +6,7 @@ import org.tormap.util.logger
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Service
 class CoalesceService(
@@ -13,119 +14,86 @@ class CoalesceService(
     private val coalesceExecutor: Executor,
 ) {
     private val logger = logger()
-    private data class CoalesceState(
-        val monitor: Any = Any(),
-        var running: Boolean = false,
-        var pending: Boolean = false,
-        var currentFuture: CompletableFuture<Void>? = null,
-        var pendingFuture: CompletableFuture<Void>? = null,
-    )
 
-    private val states = ConcurrentHashMap<String, CoalesceState>()
+    /**
+     * Latest-wins coalescing per key:
+     * - At most one execution runs at a time per key.
+     * - If submit happens while running, at most one rerun is queued.
+     * - All submissions while running share the same future for that rerun.
+     */
+    private class Slot {
+        val running = AtomicBoolean(false)
+        val rerunRequested = AtomicBoolean(false)
+
+        val monitor = Any()
+        var nextFuture: CompletableFuture<Void>? = null
+    }
+
+    private val slots = ConcurrentHashMap<String, Slot>()
 
     fun submitAsync(key: String, task: () -> Unit): CompletableFuture<Void> {
-        while (true) {
-            val state = states.computeIfAbsent(key) { CoalesceState() }
-            var shouldStartTask = false
-            var completionFuture: CompletableFuture<Void>? = null
+        val slot = slots.computeIfAbsent(key) { Slot() }
 
-            synchronized(state.monitor) {
-                // Another thread may have completed and removed this state, then a new one could have been
-                // inserted for the same key. If this state is stale, retry with the current mapped state.
-                if (states[key] !== state) {
-                    return@synchronized
-                }
-                if (state.running) {
-                    state.pending = true
-                    if (state.pendingFuture == null) {
-                        state.pendingFuture = CompletableFuture()
-                    }
-                    return state.pendingFuture!!
-                }
-                state.running = true
-                if (state.currentFuture == null) {
-                    state.currentFuture = CompletableFuture()
-                }
-                completionFuture = state.currentFuture
-                shouldStartTask = true
-            }
+        // If no run is in flight, start the loop and return a future for the first run.
+        if (slot.running.compareAndSet(false, true)) {
+            val firstFuture = CompletableFuture<Void>()
+            runLoopAsync(key, slot, task, firstFuture)
+            return firstFuture
+        }
 
-            if (shouldStartTask) {
-                runTaskAsync(key, state, task)
-                return completionFuture!!
-            }
+        // Already running: request one rerun (collapsed) and return the shared future for that rerun.
+        slot.rerunRequested.set(true)
+        synchronized(slot.monitor) {
+            val existing = slot.nextFuture
+            if (existing != null) return existing
+            return CompletableFuture<Void>().also { slot.nextFuture = it }
         }
     }
 
-    internal fun hasStateForKey(key: String): Boolean = states.containsKey(key)
+    internal fun hasStateForKey(key: String): Boolean = slots.containsKey(key)
 
-    private fun runTaskAsync(key: String, state: CoalesceState, task: () -> Unit) {
+    private fun runLoopAsync(
+        key: String,
+        slot: Slot,
+        task: () -> Unit,
+        initialFuture: CompletableFuture<Void>,
+    ) {
         CompletableFuture.runAsync(
             {
-                var finishedAllReruns = false
-                try {
-                    while (true) {
-                        try {
-                            task()
-                        } catch (ex: Exception) {
-                            // Keep existing behavior: stop reruns for this cycle after a failed execution.
-                            logger.error("Coalesced task failed for key={}", key, ex)
-                            break
-                        }
+                var currentFuture: CompletableFuture<Void>? = initialFuture
+                var keepGoing = true
 
-                        if (!continueOrFinish(key, state)) {
-                            finishedAllReruns = true
-                            break
-                        }
+                while (keepGoing) {
+                    try {
+                        task()
+                        currentFuture?.complete(null)
+                    } catch (ex: Exception) {
+                        logger.error("Coalesced task failed for key={}", key, ex)
+                        currentFuture?.completeExceptionally(ex)
+                        // Keep existing behavior: stop reruns for this cycle after a failed execution.
+                        keepGoing = false
+                        continue
                     }
-                } finally {
-                    if (!finishedAllReruns) {
-                        finishCurrentState(key, state)
+
+                    // If no rerun requested, finish.
+                    if (!slot.rerunRequested.getAndSet(false)) {
+                        keepGoing = false
+                        continue
+                    }
+
+                    // Promote the shared next future for the rerun. If none exists (rare race), create one.
+                    currentFuture = synchronized(slot.monitor) {
+                        val next = slot.nextFuture ?: CompletableFuture<Void>()
+                        slot.nextFuture = null
+                        next
                     }
                 }
+
+                // Mark not running and remove slot. If a submit races here, it will start a new loop.
+                slot.running.set(false)
+                slots.remove(key, slot)
             },
-            coalesceExecutor
+            coalesceExecutor,
         )
-    }
-
-    private fun continueOrFinish(key: String, state: CoalesceState): Boolean {
-        var completedFuture: CompletableFuture<Void>? = null
-        var continueWithRerun = false
-        synchronized(state.monitor) {
-            if (state.pending) {
-                state.pending = false
-                completedFuture = state.currentFuture
-                state.currentFuture = state.pendingFuture
-                state.pendingFuture = null
-                continueWithRerun = true
-            } else {
-                state.running = false
-                completedFuture = state.currentFuture
-                state.currentFuture = null
-                state.pendingFuture = null
-                states.remove(key, state)
-            }
-        }
-        completedFuture?.complete(null)
-        return continueWithRerun
-    }
-
-    private fun finishCurrentState(key: String, state: CoalesceState) {
-        var currentFuture: CompletableFuture<Void>? = null
-        var pendingFuture: CompletableFuture<Void>? = null
-        synchronized(state.monitor) {
-            if (!state.running) {
-                return
-            }
-            state.running = false
-            state.pending = false
-            currentFuture = state.currentFuture
-            pendingFuture = state.pendingFuture
-            state.currentFuture = null
-            state.pendingFuture = null
-            states.remove(key, state)
-        }
-        currentFuture?.complete(null)
-        pendingFuture?.complete(null)
     }
 }
