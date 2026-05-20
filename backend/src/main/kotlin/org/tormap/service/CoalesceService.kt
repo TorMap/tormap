@@ -82,9 +82,16 @@ class CoalesceService(
                     } catch (ex: Exception) {
                         logger.error("Coalesced task failed for key={}", key, ex)
                         currentFuture?.completeExceptionally(ex)
+                        synchronized(slot.monitor) {
+                            val pendingNext = slot.nextFuture
+                            slot.nextFuture = null
+                            slot.rerunRequested.set(false)
+                            slot.running.set(false)
+                            slots.remove(key, slot)
+                            pendingNext?.completeExceptionally(ex)
+                        }
                         // Keep existing behavior: stop reruns for this cycle after a failed execution.
                         keepGoing = false
-                        continue
                     }
 
                     synchronized(slot.monitor) {
@@ -93,13 +100,12 @@ class CoalesceService(
                             slot.running.set(false)
                             slots.remove(key, slot)
                             keepGoing = false
-                            continue
+                        } else {
+                            // Promote the shared next future for the rerun. If none exists (rare race), create one.
+                            val next = slot.nextFuture ?: CompletableFuture<Void>()
+                            slot.nextFuture = null
+                            currentFuture = next
                         }
-
-                        // Promote the shared next future for the rerun. If none exists (rare race), create one.
-                        val next = slot.nextFuture ?: CompletableFuture<Void>()
-                        slot.nextFuture = null
-                        currentFuture = next
                     }
                 }
             },
