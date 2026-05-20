@@ -2,6 +2,7 @@ package org.tormap.service
 
 import org.springframework.jdbc.support.incrementer.PostgresSequenceMaxValueIncrementer
 import org.springframework.stereotype.Service
+import org.springframework.transaction.support.TransactionTemplate
 import org.tormap.database.entity.RelayDetails
 import org.tormap.database.repository.RelayDetailsRepositoryImpl
 import org.tormap.util.addFamilyMember
@@ -10,7 +11,6 @@ import org.tormap.util.getFamilyMember
 import org.tormap.util.logger
 import javax.sql.DataSource
 import javax.transaction.Transactional
-
 
 /**
  * This service deals with [RelayDetails] entities
@@ -21,6 +21,7 @@ class RelayDetailsUpdateService(
     private val ipLookupService: IpLookupService,
     private val cacheService: CacheService,
     private val coalesceService: CoalesceService,
+    private val transactionTemplate: TransactionTemplate,
     dataSource: DataSource,
 ) {
     private val logger = logger()
@@ -87,7 +88,9 @@ class RelayDetailsUpdateService(
         logger.info("... Updating relay families for months: {}", months.joinToString(", "))
         months.forEach { month ->
             coalesceService.submitAsync("computeFamilies-$month") {
-                computeFamiliesForMonth(month)
+                transactionTemplate.executeWithoutResult {
+                    computeFamiliesForMonth(month)
+                }
             }
         }
     }
