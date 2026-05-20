@@ -32,26 +32,34 @@ class CoalesceService(
     private val slots = ConcurrentHashMap<String, Slot>()
 
     fun submitAsync(key: String, task: () -> Unit): CompletableFuture<Void> {
-        val slot = slots.computeIfAbsent(key) { Slot() }
-        var firstFuture: CompletableFuture<Void>? = null
+        while (true) {
+            val slot = slots.computeIfAbsent(key) { Slot() }
+            var firstFuture: CompletableFuture<Void>? = null
 
-        synchronized(slot.monitor) {
-            // If no run is in flight, start the loop and return a future for the first run.
-            if (!slot.running.get()) {
-                firstFuture = CompletableFuture<Void>()
-                slot.running.set(true)
-                return@synchronized
+            val queuedFuture = synchronized(slot.monitor) {
+                if (slots[key] !== slot) return@synchronized null
+
+                // If no run is in flight, start the loop and return a future for the first run.
+                if (!slot.running.get()) {
+                    firstFuture = CompletableFuture<Void>()
+                    slot.running.set(true)
+                    return@synchronized null
+                }
+
+                // Already running: request one rerun (collapsed) and return the shared future for that rerun.
+                slot.rerunRequested.set(true)
+                val existing = slot.nextFuture
+                if (existing != null) return@synchronized existing
+                CompletableFuture<Void>().also { slot.nextFuture = it }
             }
 
-            // Already running: request one rerun (collapsed) and return the shared future for that rerun.
-            slot.rerunRequested.set(true)
-            val existing = slot.nextFuture
-            if (existing != null) return existing
-            return CompletableFuture<Void>().also { slot.nextFuture = it }
+            if (queuedFuture != null) return queuedFuture
+            val startFuture = firstFuture
+            if (startFuture != null) {
+                runLoopAsync(key, slot, task, startFuture)
+                return startFuture
+            }
         }
-
-        runLoopAsync(key, slot, task, firstFuture!!)
-        return firstFuture!!
     }
 
     internal fun hasStateForKey(key: String): Boolean = slots.containsKey(key)
