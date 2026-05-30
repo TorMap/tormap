@@ -60,7 +60,7 @@ dependencies {
     implementation("com.newrelic.telemetry:micrometer-registry-new-relic:0.10.0")
 
     // Reverse DNS lookups with dnsjava
-    implementation("dnsjava:dnsjava:3.6.4")
+    implementation("dnsjava:dnsjava:3.6.5")
 
     // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
     implementation("commons-codec:commons-codec:1.10")
@@ -85,7 +85,7 @@ dependencies {
     testImplementation("org.testcontainers:postgresql:1.21.4")
 
     // Mocking with Mockk (https://mockk.io/)
-    testImplementation("io.mockk:mockk:1.14.9")
+    testImplementation("io.mockk:mockk:1.14.11")
 }
 
 // Fix version requirement from Kotest
