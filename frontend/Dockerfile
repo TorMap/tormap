@@ -6,7 +6,7 @@ RUN yarn install --immutable
 RUN yarn run build
 
 # Bundle static assets with nginx
-FROM nginx:1.30.0-alpine@sha256:0272e4604ed93c1792f03695a033a6e8546840f86e0de20a884bb17d2c924883 AS production
+FROM nginx:1.31.2-alpine@sha256:20316569d8f81a160065d7d2a5eeffc7ca97d79022462ee255fd23fa103a6b5c AS production
 ENV NODE_ENV production
 # Copy built assets from `builder` image
 COPY --from=builder /app/build /usr/share/nginx/html
