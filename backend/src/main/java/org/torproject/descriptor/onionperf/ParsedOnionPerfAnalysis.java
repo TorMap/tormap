@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 
 import java.io.IOException;
 import java.util.Map;
@@ -25,7 +25,7 @@ public class ParsedOnionPerfAnalysis {
    * of this class.
    */
   private static final ObjectMapper objectMapper = new ObjectMapper()
-      .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+      .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
       .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
       .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -543,4 +543,3 @@ public class ParsedOnionPerfAnalysis {
     Double unixTsEnd;
   }
 }
-
