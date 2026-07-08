@@ -20,7 +20,7 @@ services:
             - "8080:8080"
 
     database:
-        image: postgres:14-alpine@sha256:f1148c0146b1cd042c566ea15873b479e17bd14589c9eb6bd44a03224a7989c7
+        image: postgres:18-alpine@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15
         environment:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=${TORMAP_DATABASE_PASSWORD:?Set TORMAP_DATABASE_PASSWORD to a strong generated password}
