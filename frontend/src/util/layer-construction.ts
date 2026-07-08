@@ -3,12 +3,12 @@ import L, {
     CircleMarker,
     circleMarker,
     GeoJSON,
-    HeatLatLngTuple,
     Layer,
     LayerGroup,
     LeafletMouseEvent,
     PathOptions
 } from "leaflet";
+import "leaflet.heat";
 
 import {Colors} from "../config";
 import {RelayLocationDto} from "../dto/relay";
@@ -255,7 +255,7 @@ export const calculateFamilyColor = (familyId: number) => {
 }
 
 export const buildRelayHeatmapLayer = (relays: RelayLocationDto[]): LayerGroup => {
-    const coordinates = new Array<HeatLatLngTuple>()
+    const coordinates = new Array<L.HeatLatLngTuple>()
     relays.forEach(relay => coordinates.push([relay.lat, relay.long, 1]))
     return L.heatLayer(coordinates, {
         radius: 25,
