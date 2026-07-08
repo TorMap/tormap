@@ -33,6 +33,16 @@
       ]
     },
     {
+      "description": "Require manual review for frontend dependency updates",
+      "matchManagers": [
+        "npm"
+      ],
+      "matchFileNames": [
+        "frontend/package.json"
+      ],
+      "automerge": false
+    },
+    {
       "description": "Limit react version to ensure compatibility with react-infinite-scroller",
       "matchPackageNames": [
         "@types/react",
@@ -46,6 +56,13 @@
       "description": "Limit @types/leaflet version to ensure compatibility with leaflet heatmap",
       "matchPackageNames": [
         "@types/leaflet"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Limit @types/leaflet.heat version to ensure compatibility with leaflet heatmap",
+      "matchPackageNames": [
+        "@types/leaflet.heat"
       ],
       "enabled": false
     },
