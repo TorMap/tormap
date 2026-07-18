@@ -16,7 +16,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
 
     // Build and push docker images
-    id("com.google.cloud.tools.jib") version "3.5.3"
+    id("com.google.cloud.tools.jib") version "3.5.4"
 }
 
 repositories {
@@ -45,7 +45,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.20.1")
 
     // Postgres Database
-    implementation("org.postgresql:postgresql:42.7.12")
+    implementation("org.postgresql:postgresql:42.7.13")
 
     // Caching with Ehcache https://www.ehcache.org/
     implementation("org.ehcache:ehcache:3.11.1")
