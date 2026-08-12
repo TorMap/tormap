@@ -42,7 +42,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-kotlin:1.8.0")
 
     // Serialization
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.20.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.22.1")
 
     // Postgres Database
     implementation("org.postgresql:postgresql:42.7.13")
@@ -63,13 +63,13 @@ dependencies {
     implementation("dnsjava:dnsjava:3.6.5")
 
     // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
-    implementation("commons-codec:commons-codec:1.10")
-    implementation("org.apache.commons:commons-compress:1.13")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.12.4")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.4")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.12.4")
+    implementation("commons-codec:commons-codec:1.22.0")
+    implementation("org.apache.commons:commons-compress:1.28.0")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.1")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.22.1")
     implementation("org.slf4j:slf4j-api:1.7.36")
-    implementation("org.tukaani:xz:1.6")
+    implementation("org.tukaani:xz:1.12")
 
     // Testing JUnit and Kotest (https://kotest.io/)
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
