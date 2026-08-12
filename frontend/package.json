@@ -7,7 +7,9 @@
     "start": "vite --port 3000",
     "build": "tsc && vite build",
     "preview": "vite preview --port 3000",
-    "lint": "eslint ./src --fix"
+    "lint": "eslint ./src --fix",
+    "smoke:load": "bash ./scripts/smoke-load.sh",
+    "smoke:load:ci": "bash ./scripts/smoke-load.sh --skip-build"
   },
   "engines": {
     "node": "^22.0.0"
