@@ -9,7 +9,6 @@ import {SnackbarMessage} from "../../types/ui";
 import {backend} from "../../util/util";
 import {LeafletLayers} from "./LeafletLayers";
 
-import "leaflet.heat"
 import 'leaflet/dist/leaflet.css';
 
 interface Props {

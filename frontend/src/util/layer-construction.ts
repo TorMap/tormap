@@ -8,7 +8,7 @@ import L, {
     LeafletMouseEvent,
     PathOptions
 } from "leaflet";
-import "leaflet.heat";
+import "./leaflet-heat-init";
 
 import {Colors} from "../config";
 import {RelayLocationDto} from "../dto/relay";
