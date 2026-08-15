@@ -63,7 +63,7 @@ dependencies {
     implementation("dnsjava:dnsjava:3.6.5")
 
     // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
-    implementation("commons-codec:commons-codec:1.22.0")
+    implementation("commons-codec:commons-codec:1.22.1")
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.22.1")
