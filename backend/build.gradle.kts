@@ -42,7 +42,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-kotlin:1.8.0")
 
     // Serialization
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.22.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.22.2")
 
     // Postgres Database
     implementation("org.postgresql:postgresql:42.7.13")
@@ -66,8 +66,8 @@ dependencies {
     implementation("commons-codec:commons-codec:1.22.1")
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.1")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.22.1")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.2")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.22.2")
     implementation("org.slf4j:slf4j-api:1.7.36")
     implementation("org.tukaani:xz:1.12")
 
