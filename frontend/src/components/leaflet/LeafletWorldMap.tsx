@@ -85,7 +85,7 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
                 />
                 <TileLayer
                     maxZoom={19}
-                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=cb1_2kmx_1_d709cb99db288b90b866bc72"
                     noWrap={true}
                 />
             </React.StrictMode>
