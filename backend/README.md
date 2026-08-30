@@ -143,7 +143,7 @@ production deployment is available at `docker-compose.yml`. To execute it withou
 The backend enables CORS so specific frontend browser origins can call the public API. Configuration:
 
 - Dev (default): `app.security.cors.allowed-origins: http://localhost:3000`
-- Prod: `application-prod.yml` overrides to `https://tormap.org,https://www.tormap.org`
+- Prod: `application-prod.yml` overrides to `https://tormap.org,https://www.tormap.org,https://tormap-*.web.app`
 
 #### HTTP caching
 

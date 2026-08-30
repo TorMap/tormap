@@ -30,8 +30,8 @@ class SecurityConfig(
     private val actuatorPath: String,
 
     // Comma-separated list of allowed frontend origins
-    @Value("\${app.security.cors.allowed-origins:https://tormap.org,https://www.tormap.org}")
-    private val allowedOriginsCsv: String,
+    @Value("\${app.security.cors.allowed-origins:https://tormap.org,https://www.tormap.org,https://tormap-*.web.app}")
+    private val allowedOriginPatternsCSV: String,
 
     // Avoid exposing Swagger unless explicitly enabled
     @Value("\${springdoc.swagger-ui.enabled:false}")
@@ -81,7 +81,7 @@ class SecurityConfig(
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val cors = CorsConfiguration().apply {
-            allowedOrigins = allowedOriginsCsv.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+            allowedOriginPatterns = allowedOriginPatternsCSV.split(',').map { it.trim() }.filter { it.isNotEmpty() }
             // API is read-mostly; only advertise methods that exist.
             allowedMethods = listOf("GET", "POST", "OPTIONS")
             allowedHeaders = listOf("Authorization", "Content-Type", "Accept", "X-Requested-With")
