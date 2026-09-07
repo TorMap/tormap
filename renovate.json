@@ -7,7 +7,7 @@
     "JuliusHenke"
   ],
   "lockFileMaintenance": {
-   "enabled": false
+    "enabled": false
   },
   "packageRules": [
     {
