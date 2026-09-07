@@ -6,6 +6,9 @@
   "assignees": [
     "JuliusHenke"
   ],
+  "lockFileMaintenance": {
+   "enabled": false
+  },
   "packageRules": [
     {
       "description": "Ignore outdated dependencies required by TorProject descriptor library",
