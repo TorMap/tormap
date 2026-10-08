@@ -86,7 +86,7 @@ It is recommended to set following production environment variables via a secret
 
 - `TORMAP_DATABASE_PASSWORD` - Overrides the database password
 - `TORMAP_ADMIN_PASSWORD` - Optionally set admin password for accessing actuator endpoints
-- `NEW_RELIC_INGEST_KEY` - Collect metrics to https://newrelic.com
+- `NEW_RELIC_INGEST_KEY` - Export metrics to New Relic (EU region) via OTLP, see `management.otlp.metrics.export` in `application.yml`
 
 ### IP lookups
 
