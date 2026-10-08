@@ -91,6 +91,13 @@ dependencies {
 // Fix version requirement from Kotest
 extra["kotlin-coroutines.version"] = "1.6.0"
 
+// Interim security patches: Spring Boot 2.7 is end-of-life, so override managed versions with the latest releases of the
+// same lines. Remove these when migrating to Spring Boot 3+.
+extra["tomcat.version"] = "9.0.122"
+extra["spring-framework.version"] = "5.3.39"
+extra["spring-security.version"] = "5.7.14"
+extra["logback.version"] = "1.2.13"
+
 // Allow JPA annotations for Kotlin classes
 allOpen {
     annotation("javax.persistence.Entity")
