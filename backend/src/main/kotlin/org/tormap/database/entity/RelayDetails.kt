@@ -5,7 +5,7 @@ import org.tormap.util.jointToCommaSeparated
 import org.tormap.util.stripLengthForDB
 import org.torproject.descriptor.ServerDescriptor
 import java.time.LocalDate
-import javax.persistence.*
+import jakarta.persistence.*
 
 const val FIND_FAMILY_IDENTIFIERS_QUERY = "findFamilyIdentifiers"
 

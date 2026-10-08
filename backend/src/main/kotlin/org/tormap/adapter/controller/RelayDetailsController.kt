@@ -5,7 +5,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.tormap.database.repository.RelayDetailsRepositoryImpl
 import org.tormap.service.RelayDetailsQueryService
-import javax.validation.constraints.Size
+import jakarta.validation.constraints.Size
 
 @RestController
 @RequestMapping("relay/details/")

@@ -5,6 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
+import org.tormap.database.entity.RelayDetails
 import org.tormap.mockRelayDetails
 
 @SpringBootTest
@@ -12,13 +13,18 @@ import org.tormap.mockRelayDetails
 class RelayDetailsRepositoryTest(
     private val relayDetailsRepository: RelayDetailsRepositoryImpl,
 ) : StringSpec({
+    // Fresh instances per test: entities that were saved once carry an id, and Hibernate 6 refuses to merge such a
+    // detached entity after its row was deleted
+    lateinit var relay1: RelayDetails
+    lateinit var relay2: RelayDetails
+    lateinit var relay3: RelayDetails
+
     beforeEach {
         relayDetailsRepository.deleteAll()
+        relay1 = mockRelayDetails('A')
+        relay2 = mockRelayDetails('B')
+        relay3 = mockRelayDetails('C')
     }
-
-    val relay1 = mockRelayDetails('A')
-    val relay2 = mockRelayDetails('B')
-    val relay3 = mockRelayDetails('C')
 
     fun setCommonMonthAndFamilyForRelay1And2() {
         relay1.month = "2023-01"
