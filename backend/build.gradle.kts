@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "org.tormap"
@@ -5,11 +6,11 @@ version = "3.0.1"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 plugins {
-    kotlin("jvm") version "1.9.25"
-    kotlin("kapt") version "1.9.25"
-    kotlin("plugin.spring") version "1.9.25"
-    kotlin("plugin.allopen") version "1.9.25"
-    kotlin("plugin.jpa") version "1.9.25"
+    kotlin("jvm") version "2.4.20"
+    kotlin("kapt") version "2.4.20"
+    kotlin("plugin.spring") version "2.4.20"
+    kotlin("plugin.allopen") version "2.4.20"
+    kotlin("plugin.jpa") version "2.4.20"
 
     // Spring https://spring.io/projects/spring-boot
     id("org.springframework.boot") version "2.7.18"
@@ -88,9 +89,6 @@ dependencies {
     testImplementation("io.mockk:mockk:1.14.11")
 }
 
-// Fix version requirement from Kotest
-extra["kotlin-coroutines.version"] = "1.6.0"
-
 // Interim security patches: Spring Boot 2.7 is end-of-life, so override managed versions with the latest releases of the
 // same lines. Remove these when migrating to Spring Boot 3+.
 extra["tomcat.version"] = "9.0.122"
@@ -112,9 +110,9 @@ springBoot {
 
 // Compile options for JVM build
 tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "17"
+    compilerOptions {
+        freeCompilerArgs.add("-Xjsr305=strict")
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
