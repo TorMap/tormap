@@ -129,6 +129,13 @@ Prebuild docker images are available at https://hub.docker.com/r/tormap/backend.
 production deployment is available at `docker-compose.yml`. To execute it without development overrides, run
 `docker compose -f docker-compose.yml up -d`.
 
+#### Deployment notes
+
+The container runs as non-root user `1000:1000`. The descriptor data is stored in the volume at `/tormap-data`; logs go
+to `/tmp/logs` (set `LOG_DIR` to change).
+
+- **Bind mount or volume created by an older (root) version:** run once `chown -R 1000:1000 <host dir or volume path>`.
+
 ### Hardware / VM Requirements
 
 - 50 GB of free disk space (for downloaded archives)

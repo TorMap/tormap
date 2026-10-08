@@ -140,6 +140,16 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+// Mount point for the downloaded descriptors. Jib cannot set file ownership, so the empty directory is world-writable:
+// a fresh (named or anonymous) volume mounted there inherits this, and the non-root container user can write to it.
+val jibExtraDir = layout.buildDirectory.dir("jib-extra")
+val prepareJibExtraDirectories by tasks.registering {
+    val dataDir = jibExtraDir.map { it.dir("tormap-data").asFile }
+    outputs.dir(jibExtraDir)
+    doLast { dataDir.get().mkdirs() }
+}
+tasks.matching { it.name.startsWith("jib") }.configureEach { dependsOn(prepareJibExtraDirectories) }
+
 // Configure docker build and push
 jib {
     to {
@@ -149,6 +159,22 @@ jib {
             password = System.getenv("DOCKERHUB_TOKEN")
         }
         tags = setOf(version.toString(), version.toString().substringBefore('.'))
+    }
+    container {
+        // Run as non-root. Logs go to /tmp since the root filesystem is not writable for this user.
+        user = "1000:1000"
+        workingDirectory = "/"
+        environment = mapOf("LOG_DIR" to "/tmp/logs")
+        volumes = listOf("/tormap-data")
+    }
+    extraDirectories {
+        paths {
+            path {
+                setFrom(jibExtraDir)
+                into = "/"
+            }
+        }
+        permissions = mapOf("/tormap-data" to "777")
     }
     from {
         // Pinned by digest for reproducible builds; Renovate keeps the digest current
