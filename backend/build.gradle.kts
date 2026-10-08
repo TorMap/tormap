@@ -27,7 +27,6 @@ repositories {
 dependencies {
     // Kotlin
     kotlin("reflect")
-    kotlin("stdlib-jdk8")
 
     // Spring Boot https://spring.io/projects/spring-boot
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -73,9 +72,7 @@ dependencies {
     implementation("org.tukaani:xz:1.12")
 
     // Testing JUnit and Kotest (https://kotest.io/)
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
-        exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
-    }
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.kotest:kotest-runner-junit5:6.2.5")
     testImplementation("io.kotest:kotest-assertions-core:6.2.5")
     testImplementation("io.kotest:kotest-extensions-spring:6.2.5")
