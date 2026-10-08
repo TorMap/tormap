@@ -18,6 +18,19 @@ ip-lookup:
     locationDatabaseFile: /ip-lookup/location.mmdb
     autonomousSystemDatabaseFile: /ip-lookup/autonomous-system.mmdb
 management:
+    otlp:
+        metrics:
+            export:
+                # Only enabled when NEW_RELIC_INGEST_KEY is set (see NewRelicMetricsConfig)
+                enabled: false
+                url: https://otlp.eu01.nr-data.net:4318/v1/metrics
+                step: 30s
+                aggregation-temporality: delta
+                headers:
+                    api-key: ${NEW_RELIC_INGEST_KEY:}
+                resource-attributes:
+                    service.name: TorMap
+                    host.name: ${HOSTNAME:unknown}
     endpoints:
         enabled-by-default: false
         jmx:
@@ -26,7 +39,7 @@ management:
         web:
             # Actuator endpoints that are enabled individually from the endpoint config, will be exposed via web, if appearing in this list:
             exposure:
-                include: health,info,metrics,caches,httptrace,flyway,logfile,mappings,scheduledtasks,threaddump
+                include: health,info,metrics,caches,httpexchanges,flyway,logfile,mappings,scheduledtasks,threaddump
             base-path: /actuator
     endpoint:
         health:
@@ -38,7 +51,7 @@ management:
             enabled: true
         caches:
             enabled: true
-        httptrace:
+        httpexchanges:
             enabled: true
         flyway:
             enabled: true
@@ -74,7 +87,6 @@ spring:
         baselineOnMigrate: true
         locations: classpath:database/migration
     jpa:
-        database-platform: org.hibernate.dialect.PostgreSQLDialect
         hibernate:
             ddl-auto: validate
         open-in-view: false

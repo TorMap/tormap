@@ -13,7 +13,7 @@ plugins {
     kotlin("plugin.jpa") version "2.4.20"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "2.7.18"
+    id("org.springframework.boot") version "3.5.16"
     id("io.spring.dependency-management") version "1.1.7"
 
     // Build and push docker images
@@ -39,8 +39,7 @@ dependencies {
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-    implementation("org.springdoc:springdoc-openapi-ui:1.8.0")
-    implementation("org.springdoc:springdoc-openapi-kotlin:1.8.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17")
 
     // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.22.2")
@@ -49,17 +48,17 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.13")
 
     // Caching with Ehcache https://www.ehcache.org/
-    implementation("org.ehcache:ehcache:3.11.1")
+    implementation("org.ehcache:ehcache:3.12.0:jakarta")
 
     // Run Flyway DB migration tool on startup https://flywaydb.org/
-    implementation("org.flywaydb:flyway-core:11.20.3")
-    implementation("org.flywaydb:flyway-database-postgresql:11.20.3")
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-database-postgresql")
 
     // Read .mmdb (MaxMind) DB files for IP lookups https://maxmind.github.io/MaxMind-DB/
     implementation("com.maxmind.geoip2:geoip2:4.4.0")
 
-    // Collect metrics
-    implementation("com.newrelic.telemetry:micrometer-registry-new-relic:0.10.0")
+    // Export metrics to New Relic via OTLP (https://micrometer.io/)
+    implementation("io.micrometer:micrometer-registry-otlp")
 
     // Reverse DNS lookups with dnsjava
     implementation("dnsjava:dnsjava:3.6.5")
@@ -70,7 +69,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.22.2")
     implementation("com.fasterxml.jackson.core:jackson-core:2.22.2")
-    implementation("org.slf4j:slf4j-api:1.7.36")
+    implementation("org.slf4j:slf4j-api") // SLF4J 2 (Boot-managed): required by Logback 1.5; compatible with metrics-lib
     implementation("org.tukaani:xz:1.12")
 
     // Testing JUnit and Kotest (https://kotest.io/)
@@ -88,18 +87,11 @@ dependencies {
     testImplementation("io.mockk:mockk:1.14.11")
 }
 
-// Interim security patches: Spring Boot 2.7 is end-of-life, so override managed versions with the latest releases of the
-// same lines. Remove these when migrating to Spring Boot 3+.
-extra["tomcat.version"] = "9.0.122"
-extra["spring-framework.version"] = "5.3.39"
-extra["spring-security.version"] = "5.8.16"
-extra["logback.version"] = "1.2.13"
-
 // Allow JPA annotations for Kotlin classes
 allOpen {
-    annotation("javax.persistence.Entity")
-    annotation("javax.persistence.Embeddable")
-    annotation("javax.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.Embeddable")
+    annotation("jakarta.persistence.MappedSuperclass")
 }
 
 // Allow version info to be injected

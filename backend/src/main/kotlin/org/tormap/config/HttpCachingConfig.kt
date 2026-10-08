@@ -9,8 +9,8 @@ import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.time.Duration
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 
 @Configuration
 class HttpCachingConfig(
@@ -21,7 +21,7 @@ class HttpCachingConfig(
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(object : HandlerInterceptor {
             override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-                if (publicCacheMaxAgeSeconds <= 0 || request.method != HttpMethod.GET.name) return true
+                if (publicCacheMaxAgeSeconds <= 0 || request.method != HttpMethod.GET.name()) return true
 
                 val path = request.requestURI ?: return true
 

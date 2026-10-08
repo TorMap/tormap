@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -134,12 +135,12 @@ class SecurityConfig(
             // Security headers
             .headers { headers ->
                 headers.defaultsDisabled()
-                headers.xssProtection { it.block(true) }
-                headers.contentTypeOptions()
-                headers.frameOptions().deny()
+                headers.xssProtection { it.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK) }
+                headers.contentTypeOptions(Customizer.withDefaults())
+                headers.frameOptions { it.deny() }
                 headers.referrerPolicy { it.policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER) }
                 if (!swaggerEnabled) {
-                    headers.contentSecurityPolicy("default-src 'none'; frame-ancestors 'none'; base-uri 'none'")
+                    headers.contentSecurityPolicy { it.policyDirectives("default-src 'none'; frame-ancestors 'none'; base-uri 'none'") }
                 }
             }
         return http.build()
