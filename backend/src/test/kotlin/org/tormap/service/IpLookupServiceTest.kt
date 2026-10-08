@@ -19,7 +19,7 @@ class IpLookupServiceTest(
     }
 
     "lookupAutonomousSystem" {
-        ipLookupService.lookupAutonomousSystem(hetznerIPAddress)?.autonomousSystemNumber shouldBe hetznerAutonomousSystemNumber
+        ipLookupService.lookupAutonomousSystem(hetznerIPAddress)?.autonomousSystemNumber() shouldBe hetznerAutonomousSystemNumber
     }
 
     "returns null for invalid IP address" {
