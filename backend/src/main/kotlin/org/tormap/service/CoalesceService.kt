@@ -6,7 +6,6 @@ import org.tormap.util.logger
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
-import java.util.concurrent.atomic.AtomicBoolean
 
 @Service
 class CoalesceService(
@@ -18,98 +17,98 @@ class CoalesceService(
     /**
      * Latest-wins coalescing per key:
      * - At most one execution runs at a time per key.
-     * - If submit happens while running, at most one rerun is queued.
+     * - If submit happens while running, at most one rerun is queued, using the latest submitted task.
      * - All submissions while running share the same future for that rerun.
+     *
+     * A slot is present in [slots] exactly while a run loop for its key is active.
+     * All fields are guarded by the slot's monitor.
      */
     private class Slot {
-        val running = AtomicBoolean(false)
-        val rerunRequested = AtomicBoolean(false)
-
-        val monitor = Any()
-        var nextFuture: CompletableFuture<Void>? = null
+        var pendingTask: (() -> Unit)? = null
+        var pendingFuture: CompletableFuture<Void>? = null
     }
 
     private val slots = ConcurrentHashMap<String, Slot>()
 
     fun submitAsync(key: String, task: () -> Unit): CompletableFuture<Void> {
         while (true) {
-            val slot = slots.computeIfAbsent(key) { Slot() }
-            var firstFuture: CompletableFuture<Void>? = null
+            val newSlot = Slot()
+            val slot = slots.putIfAbsent(key, newSlot)
+            if (slot == null) {
+                val future = CompletableFuture<Void>()
+                startLoop(key, newSlot, task, future)
+                return future
+            }
 
-            val queuedFuture = synchronized(slot.monitor) {
-                if (slots[key] !== slot) return@synchronized null
-
-                // If no run is in flight, start the loop and return a future for the first run.
-                if (!slot.running.get()) {
-                    firstFuture = CompletableFuture<Void>()
-                    slot.running.set(true)
-                    return@synchronized null
+            synchronized(slot) {
+                // The loop removes its slot under this monitor, so a slot still mapped here is guaranteed to pick up the rerun.
+                if (slots[key] === slot) {
+                    slot.pendingTask = task
+                    return slot.pendingFuture ?: CompletableFuture<Void>().also { slot.pendingFuture = it }
                 }
-
-                // Already running: request one rerun (collapsed) and return the shared future for that rerun.
-                slot.rerunRequested.set(true)
-                val existing = slot.nextFuture
-                if (existing != null) return@synchronized existing
-                CompletableFuture<Void>().also { slot.nextFuture = it }
             }
-
-            if (queuedFuture != null) return queuedFuture
-            val startFuture = firstFuture
-            if (startFuture != null) {
-                runLoopAsync(key, slot, task, startFuture)
-                return startFuture
-            }
+            // The loop finished between lookup and lock: retry and start a new one.
         }
     }
 
     internal fun hasStateForKey(key: String): Boolean = slots.containsKey(key)
 
-    private fun runLoopAsync(
+    private fun startLoop(
         key: String,
         slot: Slot,
         task: () -> Unit,
+        future: CompletableFuture<Void>,
+    ) {
+        try {
+            coalesceExecutor.execute { runLoop(key, slot, task, future) }
+        } catch (ex: Throwable) {
+            logger.error("Could not schedule coalesced task for key={}", key, ex)
+            val pendingFuture = synchronized(slot) {
+                slots.remove(key, slot)
+                slot.pendingFuture
+            }
+            future.completeExceptionally(ex)
+            pendingFuture?.completeExceptionally(ex)
+        }
+    }
+
+    private fun runLoop(
+        key: String,
+        slot: Slot,
+        initialTask: () -> Unit,
         initialFuture: CompletableFuture<Void>,
     ) {
-        CompletableFuture.runAsync(
-            {
-                var currentFuture: CompletableFuture<Void>? = initialFuture
-                var keepGoing = true
+        var task = initialTask
+        var future = initialFuture
 
-                while (keepGoing) {
-                    try {
-                        task()
-                        currentFuture?.complete(null)
-                    } catch (ex: Exception) {
-                        logger.error("Coalesced task failed for key={}", key, ex)
-                        currentFuture?.completeExceptionally(ex)
-                        synchronized(slot.monitor) {
-                            val pendingNext = slot.nextFuture
-                            slot.nextFuture = null
-                            slot.rerunRequested.set(false)
-                            slot.running.set(false)
-                            slots.remove(key, slot)
-                            pendingNext?.completeExceptionally(ex)
-                        }
-                        // Keep existing behavior: stop reruns for this cycle after a failed execution.
-                        keepGoing = false
-                    }
+        while (true) {
+            val failure = try {
+                task()
+                null
+            } catch (ex: Throwable) {
+                logger.error("Coalesced task failed for key={}", key, ex)
+                ex
+            }
 
-                    synchronized(slot.monitor) {
-                        // If no rerun requested, finish.
-                        if (!slot.rerunRequested.getAndSet(false)) {
-                            slot.running.set(false)
-                            slots.remove(key, slot)
-                            keepGoing = false
-                        } else {
-                            // Promote the shared next future for the rerun. If none exists (rare race), create one.
-                            val next = slot.nextFuture ?: CompletableFuture<Void>()
-                            slot.nextFuture = null
-                            currentFuture = next
-                        }
-                    }
+            // Release or hand over the slot before completing the future, so callers observe a consistent state.
+            val next = synchronized(slot) {
+                val nextTask = slot.pendingTask
+                val nextFuture = slot.pendingFuture
+                slot.pendingTask = null
+                slot.pendingFuture = null
+                if (nextTask == null || nextFuture == null) {
+                    slots.remove(key, slot)
+                    null
+                } else {
+                    nextTask to nextFuture
                 }
-            },
-            coalesceExecutor,
-        )
+            }
+
+            if (failure == null) future.complete(null) else future.completeExceptionally(failure)
+
+            if (next == null) return
+            task = next.first
+            future = next.second
+        }
     }
 }
