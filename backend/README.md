@@ -19,7 +19,7 @@ relay details will only be available, if the corresponding relay server descript
 - At least 50 GB of free disk space (for downloaded archives)
 - [Docker](https://docs.docker.com/get-docker/)
 - [Oracle JDK](https://www.oracle.com/java/technologies/javase-downloads.html)
-  / [OpenJDK](https://openjdk.java.net/install/index.html) (`JAVA_HOME` should point to a version >= 17)
+  / [OpenJDK](https://openjdk.java.net/install/index.html) (`JAVA_HOME` should point to a version >= 21)
 
 ## Run Development Server
 
