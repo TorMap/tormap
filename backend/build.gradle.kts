@@ -81,8 +81,6 @@ dependencies {
     testImplementation("io.kotest:kotest-extensions-spring:6.2.5")
 
     // Testcontainers to provide Postgres DB (https://testcontainers.org/)
-    testImplementation("org.testcontainers:testcontainers:2.0.5")
-    testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.5")
     testImplementation("org.testcontainers:testcontainers-postgresql:2.0.5")
 
     // Mocking with Mockk (https://mockk.io/)
