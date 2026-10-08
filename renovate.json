@@ -23,7 +23,6 @@
         "/^commons-codec/",
         "/^org.apache.commons/",
         "/^com.fasterxml.jackson.core/",
-        "/^org.slf4j/",
         "/^org.tukaani/"
       ]
     },
