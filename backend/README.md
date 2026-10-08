@@ -134,9 +134,7 @@ production deployment is available at `docker-compose.yml`. To execute it withou
 The container runs as non-root user `1000:1000`. The descriptor data is stored in the volume at `/tormap-data`; logs go
 to `/tmp/logs` (set `LOG_DIR` to change).
 
-- **New named volume** (Portainer / compose default): works without further steps.
 - **Bind mount or volume created by an older (root) version:** run once `chown -R 1000:1000 <host dir or volume path>`.
-- **Rollback / escape hatch:** add `user: "0:0"` to the backend service to run as root again.
 
 ### Hardware / VM Requirements
 
