@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "org.tormap"
 version = "3.0.1"
-java.sourceCompatibility = JavaVersion.VERSION_11
+java.sourceCompatibility = JavaVersion.VERSION_17
 
 plugins {
     kotlin("jvm") version "1.9.25"
@@ -107,7 +107,7 @@ springBoot {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
 
@@ -144,6 +144,8 @@ jib {
         tags = setOf(version.toString(), version.toString().substringBefore('.'))
     }
     from {
+        // Pinned by digest for reproducible builds; Renovate keeps the digest current
+        image = "eclipse-temurin:17-jre@sha256:207ecae0b2b104dfc6dfa763d1e9cd2041cb344800a180e24cb1a28ed533ff90"
         platforms {
             platform {
                 architecture = "amd64"
