@@ -3,10 +3,10 @@ package org.tormap.database.repository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import org.springframework.transaction.annotation.Transactional
 import org.tormap.adapter.dto.RelayFamilyIdentifiersDto
 import org.tormap.adapter.dto.RelayIdentifiersDto
 import org.tormap.database.entity.FIND_FAMILY_IDENTIFIERS_QUERY
-import javax.transaction.Transactional
 
 
 interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
