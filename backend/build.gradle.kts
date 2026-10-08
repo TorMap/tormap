@@ -91,7 +91,7 @@ dependencies {
 // same lines. Remove these when migrating to Spring Boot 3+.
 extra["tomcat.version"] = "9.0.122"
 extra["spring-framework.version"] = "5.3.39"
-extra["spring-security.version"] = "5.7.14"
+extra["spring-security.version"] = "5.8.16"
 extra["logback.version"] = "1.2.13"
 
 // Allow JPA annotations for Kotlin classes

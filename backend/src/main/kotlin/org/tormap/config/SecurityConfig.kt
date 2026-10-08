@@ -101,16 +101,16 @@ class SecurityConfig(
             .cors(Customizer.withDefaults())
             // Stateless API: disable CSRF
             .csrf { it.disable() }
-            .authorizeRequests { auth ->
+            .authorizeHttpRequests { auth ->
                 auth
                     // Allow CORS preflight
-                    .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     // Public API and static resources
-                    .antMatchers("/", "/error", "/relay/**", "/favicon.ico", "/robots.txt", "/static/**").permitAll()
+                    .requestMatchers("/", "/error", "/relay/**", "/favicon.ico", "/robots.txt", "/static/**").permitAll()
                     // Allow OpenAPI/Swagger only when enabled
                     .apply {
                         if (swaggerEnabled) {
-                            antMatchers(
+                            requestMatchers(
                                 "/openapi/**",
                                 "/v3/api-docs/**",
                                 "/swagger",
@@ -121,7 +121,7 @@ class SecurityConfig(
                         }
                     }
                     // Admin-only actuator; will deny all if no users exist
-                    .antMatchers("$actuatorPath/**").hasRole("ADMIN")
+                    .requestMatchers("$actuatorPath/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
             }
             // HTTP Basic for admin endpoints; no login pages
