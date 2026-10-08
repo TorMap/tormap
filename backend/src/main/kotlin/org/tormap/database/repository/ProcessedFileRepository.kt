@@ -4,10 +4,10 @@ package org.tormap.database.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
+import org.springframework.transaction.annotation.Transactional
 import org.tormap.database.entity.DescriptorFileId
 import org.tormap.database.entity.DescriptorType
 import org.tormap.database.entity.ProcessedFile
-import javax.transaction.Transactional
 
 
 /**
