@@ -76,8 +76,8 @@ class DescriptorProcessingService(
                     descriptor,
                     descriptorMonth,
                     descriptorDay,
-                    autonomousSystem?.autonomousSystemOrganization,
-                    autonomousSystem?.autonomousSystemNumber?.toInt(),
+                    autonomousSystem?.autonomousSystemOrganization(),
+                    autonomousSystem?.autonomousSystemNumber()?.toInt(),
                     existingRelay?.id,
                 )
             )

@@ -62,8 +62,8 @@ class RelayDetailsUpdateService(
     private fun RelayDetails.lookupAndSetAutonomousSystem(): Boolean {
         val autonomousSystem = ipLookupService.lookupAutonomousSystem(this.address)
         if (autonomousSystem != null) {
-            this.autonomousSystemName = autonomousSystem.autonomousSystemOrganization
-            this.autonomousSystemNumber = autonomousSystem.autonomousSystemNumber.toInt()
+            this.autonomousSystemName = autonomousSystem.autonomousSystemOrganization()
+            this.autonomousSystemNumber = autonomousSystem.autonomousSystemNumber().toInt()
             return true
         }
         return false

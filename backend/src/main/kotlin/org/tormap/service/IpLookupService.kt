@@ -95,10 +95,10 @@ class Location(maxMindCityResponse: CityResponse) {
 
     init {
         this.latitude =
-            maxMindCityResponse.location.latitude.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN)
+            maxMindCityResponse.location().latitude().toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN)
         this.longitude =
-            maxMindCityResponse.location.longitude.toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN)
-        this.countryCode = maxMindCityResponse.country.isoCode
+            maxMindCityResponse.location().longitude().toBigDecimal().setScale(geoDecimalPlaces, RoundingMode.HALF_EVEN)
+        this.countryCode = maxMindCityResponse.country().isoCode()
         this.ensureCompleteLocation()
     }
 
