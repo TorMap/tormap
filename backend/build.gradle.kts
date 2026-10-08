@@ -13,7 +13,7 @@ plugins {
     kotlin("plugin.jpa") version "2.4.20"
 
     // Spring https://spring.io/projects/spring-boot
-    id("org.springframework.boot") version "3.5.16"
+    id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
 
     // Build and push docker images
@@ -29,7 +29,7 @@ dependencies {
     kotlin("reflect")
 
     // Spring Boot https://spring.io/projects/spring-boot
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -38,10 +38,10 @@ dependencies {
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
 
     // Serialization
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.22.2")
+    implementation("tools.jackson.module:jackson-module-kotlin")
 
     // Postgres Database
     implementation("org.postgresql:postgresql:42.7.13")
@@ -50,13 +50,15 @@ dependencies {
     implementation("org.ehcache:ehcache:3.12.0:jakarta")
 
     // Run Flyway DB migration tool on startup https://flywaydb.org/
-    implementation("org.flywaydb:flyway-core")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.flywaydb:flyway-database-postgresql")
 
     // Read .mmdb (MaxMind) DB files for IP lookups https://maxmind.github.io/MaxMind-DB/
     implementation("com.maxmind.geoip2:geoip2:4.4.0")
 
     // Export metrics to New Relic via OTLP (https://micrometer.io/)
+    implementation("org.springframework.boot:spring-boot-starter-micrometer-metrics")
+    implementation("org.springframework.boot:spring-boot-starter-opentelemetry")
     implementation("io.micrometer:micrometer-registry-otlp")
 
     // Reverse DNS lookups with dnsjava
@@ -73,6 +75,7 @@ dependencies {
 
     // Testing JUnit and Kotest (https://kotest.io/)
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("io.kotest:kotest-runner-junit5:6.2.5")
     testImplementation("io.kotest:kotest-assertions-core:6.2.5")
     testImplementation("io.kotest:kotest-extensions-spring:6.2.5")
