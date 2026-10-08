@@ -2,9 +2,9 @@ package org.tormap.config
 
 import io.micrometer.core.instrument.config.MeterFilter
 import io.micrometer.registry.otlp.OtlpMeterRegistry
-import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer
+import org.springframework.boot.micrometer.metrics.autoconfigure.MeterRegistryCustomizer
 import org.springframework.boot.SpringApplication
-import org.springframework.boot.env.EnvironmentPostProcessor
+import org.springframework.boot.EnvironmentPostProcessor
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.ConfigurableEnvironment
