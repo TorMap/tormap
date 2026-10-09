@@ -1,6 +1,7 @@
 package org.tormap.config
 
 import io.kotest.core.spec.style.StringSpec
+import jakarta.servlet.http.Cookie
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.springframework.beans.factory.annotation.Value
@@ -11,6 +12,7 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 
 /**
  * Verifies the access rules of [SecurityConfig] over HTTP.
@@ -37,6 +39,25 @@ class SecurityRulesTest(
     "actuator endpoints require authentication" {
         statusOf("/actuator/health") shouldBe 401
         statusOf("/actuator/metrics") shouldBe 401
+    }
+
+    "actuator rejects unsafe methods without CSRF token before authentication" {
+        mockMvc.perform(post("/actuator/loggers/ROOT")).andReturn().response.status shouldBe 403
+    }
+
+    "actuator accepts a matching CSRF cookie and header, then requires authentication" {
+        val status = mockMvc.perform(
+            post("/actuator/loggers/ROOT")
+                .cookie(Cookie("XSRF-TOKEN", "token"))
+                .header("X-XSRF-TOKEN", "token")
+        ).andReturn().response.status
+        status shouldBe 401
+    }
+
+    "public API POST is not subject to CSRF" {
+        val status = mockMvc.perform(post("/relay/missing")).andReturn().response.status
+        status shouldNotBe 403
+        status shouldNotBe 401
     }
 
     "other paths require authentication" {
