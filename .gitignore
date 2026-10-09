@@ -5,6 +5,14 @@
 *.log
 *.cache
 
+# macOS
+.DS_Store
+
+# AI coding agents: shared rules live in AGENTS.md, local agent state is not committed.
+# Shared files (e.g. settings.json, skills) can be re-included with a "!" rule if needed.
+**/.claude/*
+CLAUDE.md
+
 # Please use yarn package manager instead
 package-lock.json
 
