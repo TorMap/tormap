@@ -58,6 +58,10 @@ The admin password is **env-only** and must be provided via one of the following
 
 If neither env var is set, a warning is logged and actuator endpoints remain unavailable.
 
+`POST`/`PUT`/`PATCH`/`DELETE` requests to actuator endpoints are CSRF protected (double submit cookie, no session):
+send the same value as cookie `XSRF-TOKEN` and header `X-XSRF-TOKEN`, e.g.
+`curl -u admin -X POST -H 'X-XSRF-TOKEN: x' --cookie 'XSRF-TOKEN=x' ...`. `GET` requests are unaffected.
+
 Recommended (production):
 
 - Provide `TORMAP_ADMIN_PASSWORD_BCRYPT` via your secret manager (Kubernetes Secret, Docker secret, env etc.).

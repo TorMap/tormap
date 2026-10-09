@@ -24,6 +24,12 @@ repositories {
     mavenCentral()
 }
 
+// Overrides of Spring Boot managed versions to pick up security fixes ahead of a Boot release (reported by Snyk).
+// Remove an override once the Boot-managed version is at or above it.
+extra["tomcat.version"] = "11.0.26"
+extra["jackson-bom.version"] = "3.1.7" // Jackson 3 (tools.jackson)
+extra["jackson-2-bom.version"] = "2.22.3" // Jackson 2 (com.fasterxml.jackson), keep in sync with the pins for metrics-lib below
+
 dependencies {
     // Kotlin
     kotlin("reflect")
@@ -44,7 +50,7 @@ dependencies {
     implementation("tools.jackson.module:jackson-module-kotlin")
 
     // Postgres Database
-    implementation("org.postgresql:postgresql:42.7.13")
+    implementation("org.postgresql:postgresql:42.7.14")
 
     // Caching with Ehcache https://www.ehcache.org/
     implementation("org.ehcache:ehcache:3.12.0:jakarta")
@@ -68,8 +74,8 @@ dependencies {
     implementation("commons-codec:commons-codec:1.22.1")
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.2")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.22.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.3")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.22.3")
     implementation("org.slf4j:slf4j-api") // SLF4J 2 (Boot-managed): required by Logback 1.5; compatible with metrics-lib
     implementation("org.tukaani:xz:1.12")
 

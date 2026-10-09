@@ -14,7 +14,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
+import org.springframework.security.web.util.matcher.RequestMatchers
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -100,8 +104,20 @@ class SecurityConfig(
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .cors(Customizer.withDefaults())
-            // Stateless API: disable CSRF
-            .csrf { it.disable() }
+            // The public API is stateless and uses no cookies, so CSRF only matters for the admin actuator, which
+            // authenticates with HTTP Basic (browsers resend cached credentials). Unsafe methods there require the
+            // XSRF-TOKEN cookie value to be echoed in the X-XSRF-TOKEN header (double submit, no server-side session).
+            .csrf { csrf ->
+                csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                csrf.csrfTokenRequestHandler(CsrfTokenRequestAttributeHandler())
+                csrf.requireCsrfProtectionMatcher(
+                    RequestMatchers.anyOf(
+                        *listOf(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH, HttpMethod.DELETE)
+                            .map { PathPatternRequestMatcher.withDefaults().matcher(it, "$actuatorPath/**") }
+                            .toTypedArray()
+                    )
+                )
+            }
             .authorizeHttpRequests { auth ->
                 auth
                     // Allow CORS preflight
@@ -125,9 +141,8 @@ class SecurityConfig(
                     .requestMatchers("$actuatorPath/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
             }
-            // HTTP Basic for admin endpoints; no login pages
+            // HTTP Basic for admin endpoints; form login is not configured, so there are no login pages
             .httpBasic(Customizer.withDefaults())
-            .formLogin { it.disable() }
             // Fully stateless sessions
             .sessionManagement { sessions ->
                 sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
