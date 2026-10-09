@@ -1,0 +1,140 @@
+name: codeql
+
+# Advanced setup for CodeQL code scanning. Requires "default setup" to be disabled in
+# Settings > Advanced Security > Code scanning, otherwise results are rejected.
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: '0 5 * * 1' # weekly, new queries and vulnerabilities appear without code changes
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Pull requests only analyze the languages they touch. Skipped jobs count as passed for required checks.
+  # Pushes to master and the schedule always analyze everything, which keeps the baseline on master complete.
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      workflows: ${{ steps.filter.outputs.workflows }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 2 # pull_request checks out a merge commit, its first parent is the base
+
+      - name: Detect changed languages
+        id: filter
+        run: |
+          all=false
+          if [ "$GITHUB_EVENT_NAME" != "pull_request" ]; then
+            all=true
+          fi
+          files=$(git diff --name-only HEAD^1 HEAD || true)
+          if [ -z "$files" ]; then
+            all=true # could not determine the changes, analyze everything
+          fi
+          if grep -qx '.github/workflows/codeql.yml' <<< "$files"; then
+            all=true
+          fi
+          matches() { [ "$all" = true ] || grep -qE "$1" <<< "$files"; }
+          for entry in "backend:^backend/" "frontend:^frontend/" "workflows:^\.github/"; do
+            name="${entry%%:*}"
+            if matches "${entry#*:}"; then
+              echo "$name=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "$name=false" >> "$GITHUB_OUTPUT"
+            fi
+          done
+
+  java_kotlin:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          languages: java-kotlin
+          build-mode: manual
+
+      # Compile only. CodeQL must observe the compiler, so no daemon and no build cache hits
+      - name: Compile
+        run: cd backend && ./gradlew --no-daemon --no-build-cache compileKotlin compileTestKotlin
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          category: /language:java-kotlin
+
+  javascript_typescript:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          languages: javascript-typescript
+          build-mode: none
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          category: /language:javascript-typescript
+
+  actions:
+    needs: changes
+    if: needs.changes.outputs.workflows == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          languages: actions
+          build-mode: none
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          category: /language:actions
