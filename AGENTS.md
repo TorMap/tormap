@@ -27,6 +27,13 @@ Rules for AI coding agents (and a quick reference for humans) working in this re
 - Renovate manages updates. Respect the intentional pins and disabled updates in `renovate.json` (React, MUI, Tor metrics-lib support libraries).
 - Gradle versions are inline in `backend/build.gradle.kts`. The project version is duplicated in `backend/build.gradle.kts` and `frontend/package.json`.
 
+## Security scanning
+- Run SCA whenever dependencies change (add, remove, bump, lockfile): `cd backend && ./gradlew snykTest` and/or `cd frontend && yarn snyk:test`. Fix or report new high/critical findings before opening the PR.
+- Run SAST (`./gradlew snykCode`, `yarn snyk:code`) when changing security-relevant code (auth, input handling, networking, serialization).
+- PRs are gated by the Snyk GitHub integration (PR status checks), not by a CI workflow. Don't add Snyk steps or `SNYK_TOKEN` to workflows. Keep shared flags in the Gradle task or yarn script.
+- Never run `snyk auth` or handle tokens. If the CLI is not authenticated, ask the maintainer. Snyk uploads dependency and code data to snyk.io, so only run it once the maintainer has authenticated.
+- Don't add `.snyk` ignores without a documented reason and an expiry date.
+
 ## Commits and secrets
 - End commit messages written by an agent with the Co-Authored-By trailer for the agent, and PR descriptions with the generated-with note.
 - Never commit secrets or `.env` files. New Relic and admin credentials come from environment variables.
