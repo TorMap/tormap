@@ -1,7 +1,8 @@
-import React, {useCallback, useContext, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 
 import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/accordion/AppSettings";
 import {Settings} from "../types/settings";
+import {loadSettings, saveSettings} from "../util/settings-storage";
 
 interface SettingsInterface {
     settings: Settings
@@ -39,13 +40,16 @@ function withValidSelection(settings: Settings): Settings {
 }
 
 /**
- * A provider, providing a Settings context that handles all settings
- * @param defaultSettings - a Settings object with the default settings
+ * A provider, providing a Settings context that handles all settings. Settings are kept in the browser's local storage,
+ * so they survive page reloads.
+ * @param defaultSettings - a Settings object with the default settings, used for settings that are not stored
  * @param children - the child elements in the DOM
  */
 export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = ({defaultSettings, children}) => {
     // Component state
-    const [settings, setSettingsState] = useState<Settings>(() => withValidSelection(defaultSettings))
+    const [settings, setSettingsState] = useState<Settings>(() => withValidSelection(loadSettings(defaultSettings)))
+
+    useEffect(() => saveSettings(settings), [settings])
 
     const setSettings = useCallback((newSettings: Settings) => {
         setSettingsState(withValidSelection(newSettings))
