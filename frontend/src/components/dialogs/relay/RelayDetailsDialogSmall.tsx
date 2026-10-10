@@ -1,6 +1,6 @@
 import {Close as CloseIcon} from "@mui/icons-material";
 import {AppBar, Button, Dialog, DialogActions, DialogContent, IconButton, Toolbar} from "@mui/material";
-import {FunctionComponent, useEffect, useState} from "react";
+import {FunctionComponent, useState} from "react";
 
 import {SlideUpTransition} from "../../../types/ui";
 import {LoadingAnimation} from "../../loading/LoadingAnimation";
@@ -21,11 +21,16 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                                                                                    canShowRelayList
                                                                                }) => {
     // Component state
-    const [showRelayDetails, setShowRelayDetails] = useState(false)
+    const [showRelayDetails, setShowRelayDetails] = useState(!canShowRelayList)
 
-    useEffect(() => {
+    // Show the details directly if there is no list to choose from, whenever the dialog opens or the list changes
+    const [syncedCanShowRelayList, setSyncedCanShowRelayList] = useState(canShowRelayList)
+    const [syncedShowDialog, setSyncedShowDialog] = useState(showDialog)
+    if (syncedCanShowRelayList !== canShowRelayList || syncedShowDialog !== showDialog) {
+        setSyncedCanShowRelayList(canShowRelayList)
+        setSyncedShowDialog(showDialog)
         setShowRelayDetails(!canShowRelayList)
-    }, [canShowRelayList, showDialog])
+    }
 
     const handleSelectDetails = (id: number) => {
         setRelayDetailsId(id)

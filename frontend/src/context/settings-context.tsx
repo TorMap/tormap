@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useState} from 'react';
 
 import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/accordion/AppSettings";
 import {Settings} from "../types/settings";
@@ -25,23 +25,31 @@ interface SettingsProviderProps {
 }
 
 /**
+ * Resets the selection if the corresponding grouping is disabled
+ */
+function withValidSelection(settings: Settings): Settings {
+    let result = settings
+    if (!result.sortCountry && result.selectedCountry) {
+        result = {...result, selectedCountry: undefined}
+    }
+    if (!result.sortFamily && result.selectedFamily) {
+        result = {...result, selectedFamily: undefined}
+    }
+    return result
+}
+
+/**
  * A provider, providing a Settings context that handles all settings
  * @param defaultSettings - a Settings object with the default settings
  * @param children - the child elements in the DOM
  */
 export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = ({defaultSettings, children}) => {
     // Component state
-    const [settings, setSettings] = useState<Settings>(defaultSettings)
+    const [settings, setSettingsState] = useState<Settings>(() => withValidSelection(defaultSettings))
 
-    // Resets selection if grouping gets disabled
-    useEffect(() => {
-        if (!settings.sortCountry && settings.selectedCountry) {
-            setSettings({...settings, selectedCountry: undefined})
-        }
-        if (!settings.sortFamily && settings.selectedFamily) {
-            setSettings({...settings, selectedFamily: undefined})
-        }
-    }, [settings, setSettings])
+    const setSettings = useCallback((newSettings: Settings) => {
+        setSettingsState(withValidSelection(newSettings))
+    }, [])
 
     /**
      * input event handler for setting changes

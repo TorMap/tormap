@@ -100,25 +100,39 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
         [orderedRelayIdentifierMatches, searchRelaysBy]
     )
 
-    useEffect(() => {
+    // Select the relay if the search narrowed the list down to a single one
+    const [syncedSearchedMatches, setSyncedSearchedMatches] = useState(searchedRelayIdentifierMatches)
+    if (syncedSearchedMatches !== searchedRelayIdentifierMatches) {
+        setSyncedSearchedMatches(searchedRelayIdentifierMatches)
         if (searchedRelayIdentifierMatches.length === 1) {
             setRelayDetailsId(searchedRelayIdentifierMatches[0].id)
         }
-    }, [searchedRelayIdentifierMatches])
+    }
+
+    // Discard the previous relays as soon as the relays of another location are passed to the dialog
+    const [syncedRelayDetailsIdToLocationMap, setSyncedRelayDetailsIdToLocationMap] = useState(relayDetailsIdToLocationMap)
+    if (syncedRelayDetailsIdToLocationMap !== relayDetailsIdToLocationMap) {
+        setSyncedRelayDetailsIdToLocationMap(relayDetailsIdToLocationMap)
+        setRelayDetailsMatch(undefined)
+        setRelayIdentifiers([])
+        if (relayDetailsIdToLocationMap.size === 1) {
+            setRelayDetailsId(relayDetailsIdToLocationMap.keys().next().value)
+        } else if (relayDetailsIdToLocationMap.size > 1) {
+            setRelayDetailsId(undefined)
+        }
+    }
+
+    // Until the user picks a relay, the first one of the list is selected
+    const selectedRelayDetailsId = relayDetailsId || orderedRelayIdentifierMatches[0]?.id
 
     /**
      * Query relayIdentifiers for relays from backend
      */
     useEffect(() => {
-        setRelayDetailsMatch(undefined)
-        setRelayIdentifiers([])
         if (relaysForDetailsDialog.length > 0 && relayDetailsIdToLocationMap.size === 0) {
             enqueueSnackbar(SnackbarMessage.NoRelayDetails, {variant: "warning"})
             setShowRelayDetailsDialog(false)
-        } else if (relayDetailsIdToLocationMap.size === 1) {
-            setRelayDetailsId(relayDetailsIdToLocationMap.keys().next().value)
         } else if (relayDetailsIdToLocationMap.size > 1) {
-            setRelayDetailsId(undefined)
             backend.post<RelayIdentifierDto[]>(
                 '/relay/details/relay/identifiers',
                 Array.from(relayDetailsIdToLocationMap.keys())
@@ -129,18 +143,15 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
                 setShowRelayDetailsDialog(false)
             })
         }
-
     }, [enqueueSnackbar, relayDetailsIdToLocationMap, relaysForDetailsDialog, setShowRelayDetailsDialog])
 
     /**
      * Query more information for the selected relay
      */
     useEffect(() => {
-        if (!relayDetailsId && orderedRelayIdentifierMatches.length > 0) {
-            setRelayDetailsId(orderedRelayIdentifierMatches[0].id)
-        } else if (relayDetailsId) {
-            backend.get<RelayDetailsDto>(`/relay/details/relay/${relayDetailsId}`).then(response => {
-                const relayLocation = relayDetailsIdToLocationMap.get(relayDetailsId)
+        if (selectedRelayDetailsId) {
+            backend.get<RelayDetailsDto>(`/relay/details/relay/${selectedRelayDetailsId}`).then(response => {
+                const relayLocation = relayDetailsIdToLocationMap.get(selectedRelayDetailsId)
                 if (relayLocation) {
                     setRelayDetailsMatch({
                         ...response.data,
@@ -152,7 +163,7 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
                 enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
             })
         }
-    }, [orderedRelayIdentifierMatches, relayDetailsId, relayDetailsIdToLocationMap, enqueueSnackbar])
+    }, [selectedRelayDetailsId, relayDetailsIdToLocationMap, enqueueSnackbar])
 
     return (isLargeScreen ?
             <RelayDetailsDialogLarge
@@ -161,7 +172,7 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
                 closeDialog={() => setShowRelayDetailsDialog(false)}
                 setRelayDetailsId={setRelayDetailsId}
                 filteredRelayMatches={searchedRelayIdentifierMatches}
-                relayDetailsId={relayDetailsId}
+                relayDetailsId={selectedRelayDetailsId}
                 canShowRelayList={relayIdentifierMatches.length > 1}
             />
             : <RelayDetailsDialogSmall
@@ -170,7 +181,7 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
                 closeDialog={() => setShowRelayDetailsDialog(false)}
                 setRelayDetailsId={setRelayDetailsId}
                 filteredRelayMatches={searchedRelayIdentifierMatches}
-                relayDetailsId={relayDetailsId}
+                relayDetailsId={selectedRelayDetailsId}
                 canShowRelayList={relayIdentifierMatches.length > 1}
             />
     )

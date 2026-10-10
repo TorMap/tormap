@@ -1,6 +1,6 @@
 import {differenceInDays} from "date-fns";
 import {useSnackbar} from "notistack";
-import React, {FunctionComponent, useContext, useEffect, useState} from "react";
+import React, {FunctionComponent, useCallback, useContext, useState} from "react";
 
 import {SnackbarMessage} from "../types/ui";
 
@@ -41,20 +41,22 @@ interface DateProviderProps {
 
 export const DateProvider: FunctionComponent<DateProviderProps> = ({children}) => {
     // Component state
-    const [availableDays, setAvailableDays] = useState<string[]>([])
+    const [availableDays, setAvailableDaysState] = useState<string[]>([])
     const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined)
     const {enqueueSnackbar} = useSnackbar();
 
-    useEffect(() => {
-        if (availableDays.length > 0) {
-            setSelectedDate(availableDays[availableDays.length - 1])
+    // Selects the latest day whenever new days are available
+    const setAvailableDays = useCallback((days: string[]) => {
+        setAvailableDaysState(days)
+        if (days.length > 0) {
+            setSelectedDate(days[days.length - 1])
             const oldestConsensusDateAvailable = new Date("2007-10-27")
             const minExpectedNumberOfDays = Math.abs(differenceInDays(oldestConsensusDateAvailable, new Date())) - 5
-            if (availableDays.length < minExpectedNumberOfDays) {
+            if (days.length < minExpectedNumberOfDays) {
                 enqueueSnackbar(SnackbarMessage.HistoricDataProcessing, {variant: "info"})
             }
         }
-    }, [availableDays, enqueueSnackbar])
+    }, [enqueueSnackbar])
 
     return (
         <DateContext.Provider

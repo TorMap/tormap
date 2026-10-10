@@ -1,6 +1,6 @@
 import {Slider, SliderProps} from "@mui/material";
 import {format} from "date-fns";
-import {FunctionComponent, useEffect, useState} from "react";
+import {FunctionComponent, useEffect, useMemo, useState} from "react";
 
 import {useDate} from "../../context/date-context";
 import {useDebounce} from "../../util/util";
@@ -15,39 +15,39 @@ export const DateSlider: FunctionComponent = () => {
     const {availableDays, setSelectedDate, selectedDate} = useDate()
 
     // Component state
-    const [sliderMarks, setSliderMarks] = useState<Mark[]>([])
-    const [sliderValue, setSliderValue] = useState<number>(availableDays.length - 1)
+    const [sliderValue, setSliderValue] = useState<number>(() => availableDays.findIndex((value) => value === selectedDate))
+    const [syncedAvailableDays, setSyncedAvailableDays] = useState(availableDays)
+    const [syncedSelectedDate, setSyncedSelectedDate] = useState(selectedDate)
 
-    let debouncedSliderValue = useDebounce<number>(sliderValue, 500)
+    const debouncedSliderValue = useDebounce<number>(sliderValue, 500)
 
-    useEffect(() => {
+    // Move the slider whenever the selected day got changed from outside
+    if (syncedAvailableDays !== availableDays || syncedSelectedDate !== selectedDate) {
+        setSyncedAvailableDays(availableDays)
+        setSyncedSelectedDate(selectedDate)
         setSliderValue(availableDays.findIndex((value) => value === selectedDate))
-    }, [availableDays, selectedDate])
+    }
 
     // Calculate the marks for the slider
-    useEffect(() => {
+    const sliderMarks = useMemo(() => {
+        const marks: Mark[] = []
         if (availableDays.length > 0) {
-            let markCount = 6
-            if (availableDays.length < markCount) {
-                markCount = availableDays.length
-            }
-            const marks = []
+            const markCount = Math.min(6, availableDays.length)
             for (let i = 0; i < markCount; i++) {
-                const dateIndex = Math.round(i * (availableDays.length - 1) / (markCount - 1))
-                const date = availableDays[dateIndex]
-                const mark: Mark = {
+                const dateIndex = Math.round(i * (availableDays.length - 1) / Math.max(markCount - 1, 1))
+                marks.push({
                     value: dateIndex,
-                    label: format(new Date(date), "yyyy-MM")
-                }
-                marks.push(mark);
+                    label: format(new Date(availableDays[dateIndex]), "yyyy-MM")
+                })
             }
-            setSliderMarks(marks)
         }
+        return marks
     }, [availableDays])
 
     // Handle debouncing of the slider value when dragging
     useEffect(() => {
-        if (debouncedSliderValue !== undefined) {
+        // The index is -1 until a day is selected, which must not overwrite the selection
+        if (debouncedSliderValue !== undefined && availableDays[debouncedSliderValue]) {
             setSelectedDate(availableDays[debouncedSliderValue])
         }
     }, [availableDays, debouncedSliderValue, setSelectedDate])
@@ -60,7 +60,8 @@ export const DateSlider: FunctionComponent = () => {
                 setSliderValue(newValue as number)
             }}
             onChangeCommitted={(_, newValue: number | number[]) => {
-                debouncedSliderValue = newValue as number
+                // Select the day right away instead of waiting for the debounce
+                setSelectedDate(availableDays[newValue as number])
             }}
             valueLabelDisplay={(availableDays.length === 0) ? "off" : "on"}
             name={"slider"}

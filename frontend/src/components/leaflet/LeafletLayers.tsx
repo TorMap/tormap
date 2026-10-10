@@ -90,7 +90,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
     )
     const filteredRelays = useMemo(
         () => buildFilteredRelays(filteredRelaysByFlags, relayCountryMap, relayFamilyMap, settings),
-        [filteredRelaysByFlags, relayCountryMap, relayFamilyMap, settings, setFilteredRelays]
+        [filteredRelaysByFlags, relayCountryMap, relayFamilyMap, settings]
     )
 
     /**
@@ -104,7 +104,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
             setShowRelayDetailsDialog(true)
             setRelayDetailsDialogSearch("")
         }
-    }, [relayCoordinatesMap, relays])
+    }, [relayCoordinatesMap, relays, setRelaysForDetailsDialog, setShowRelayDetailsDialog, setRelayDetailsDialogSearch])
 
     const relayLayer = useMemo(
         () => buildRelayLayer(relayCoordinatesMap, settings.sortFamily, openRelayDetailsDialog),
@@ -197,7 +197,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
                 closeSnackbar(SnackbarMessage.NoFamilyData)
             }
         }
-    }, [filteredRelays, leafletMarkerLayers, relays, statistics, setStatistics, filteredRelaysByFlags.length, settings, relayFamilyMap, leafletMap, relayCountryMap, closeSnackbar, enqueueSnackbar, setSettings, relayLocationHeatmapLayer, countryBordersLayer, aggregatedCoordinatesLayer, relayCountryLayer, relayLayer, relaySelectedFamilyLayer, relayFamilyCoordinatesLayer])
+    }, [filteredRelays, setFilteredRelays, leafletMarkerLayers, relays, statistics, setStatistics, filteredRelaysByFlags.length, settings, relayFamilyMap, leafletMap, relayCountryMap, closeSnackbar, enqueueSnackbar, setSettings, relayLocationHeatmapLayer, countryBordersLayer, aggregatedCoordinatesLayer, relayCountryLayer, relayLayer, relaySelectedFamilyLayer, relayFamilyCoordinatesLayer])
 
     return (
         <Suspense fallback={<LoadingAnimation/>}>
