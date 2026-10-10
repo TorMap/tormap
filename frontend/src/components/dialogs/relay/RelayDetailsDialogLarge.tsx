@@ -14,7 +14,8 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
                                                                                          filteredRelayMatches,
                                                                                          relayDetailsId,
                                                                                          setRelayDetailsId,
-                                                                                         canShowRelayList
+                                                                                         canShowRelayList,
+                                                                                         showMatchesOnMap
                                                                                      }) => {
     return (
         <Dialog
@@ -51,6 +52,7 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
                         relayMatches={filteredRelayMatches}
                         selectedRelayId={relayDetailsId}
                         setSelectedRelayId={setRelayDetailsId}
+                        showMatchesOnMap={showMatchesOnMap}
                     />
                 </Grid>}
                 <Grid size={{xs: 12, sm: canShowRelayList ? 8 : 12}}

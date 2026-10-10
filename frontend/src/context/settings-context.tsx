@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useMemo, useState} from 'react';
 
 import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/accordion/AppSettings";
 import {Settings} from "../types/settings";
@@ -8,6 +8,8 @@ interface SettingsInterface {
     settings: Settings
     changeSettings: (event: React.ChangeEvent<HTMLInputElement>) => void
     setSettings: (s: Settings) => void
+    resetSettings: () => void
+    isDefaultSettings: boolean
 }
 
 const SettingsContext = React.createContext<SettingsInterface | null>(null)
@@ -23,6 +25,28 @@ export function useSettings() {
 interface SettingsProviderProps {
     children?: React.ReactNode;
     defaultSettings: Settings;
+}
+
+/**
+ * Compares two Settings objects by value, including the nested relay type and flag records
+ */
+export function settingsEqual(a: Settings, b: Settings): boolean {
+    const keys = new Set([...Object.keys(a), ...Object.keys(b)]) as Set<keyof Settings>
+    for (const key of keys) {
+        const valueA = a[key]
+        const valueB = b[key]
+        if (typeof valueA === "object" && typeof valueB === "object") {
+            const nestedA = valueA as Record<string, unknown>
+            const nestedB = valueB as Record<string, unknown>
+            const nestedKeys = new Set([...Object.keys(nestedA), ...Object.keys(nestedB)])
+            for (const nestedKey of nestedKeys) {
+                if (nestedA[nestedKey] !== nestedB[nestedKey]) return false
+            }
+        } else if (valueA !== valueB) {
+            return false
+        }
+    }
+    return true
 }
 
 /**
@@ -55,6 +79,15 @@ export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = 
         setSettingsState(withValidSelection(newSettings))
     }, [])
 
+    const resetSettings = useCallback(() => {
+        setSettingsState(withValidSelection(defaultSettings))
+    }, [defaultSettings])
+
+    const isDefaultSettings = useMemo(
+        () => settingsEqual(settings, withValidSelection(defaultSettings)),
+        [settings, defaultSettings]
+    )
+
     /**
      * input event handler for setting changes
      * @param event
@@ -79,7 +112,7 @@ export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = 
     };
 
     return (
-        <SettingsContext.Provider value={{settings, changeSettings: changeSetting, setSettings}}>
+        <SettingsContext.Provider value={{settings, changeSettings: changeSetting, setSettings, resetSettings, isDefaultSettings}}>
             {children}
         </SettingsContext.Provider>
     )

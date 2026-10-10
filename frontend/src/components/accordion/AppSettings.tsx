@@ -1,8 +1,9 @@
-import {ExpandMore as ExpandMoreIcon, Search as SearchIcon} from "@mui/icons-material";
+import {ExpandMore as ExpandMoreIcon, RestartAlt as RestartAltIcon, Search as SearchIcon} from "@mui/icons-material";
 import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
+    Alert,
     Box, Button,
     Checkbox,
     FormControlLabel,
@@ -21,7 +22,11 @@ import {relayMustIncludeFlagOptions, Settings} from "../../types/settings";
 import {nameOfFactory} from "../../util/util";
 import {ExternalLink} from "../link/ExternalLink";
 import {useAtom} from "jotai";
-import {relaysForDetailsDialogAtom, showRelayDetailsDialogAtom} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
+import {
+    relaysForDetailsDialogAtom,
+    relaySearchOnMapAtom,
+    showRelayDetailsDialogAtom
+} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
 import {filteredRelaysAtom} from "../leaflet/LeafletLayers";
 import {relayDetailsDialogSearchAtom} from "../dialogs/relay/RelayDetailsSelectionHeader";
 import {RelayTypeColorInput} from "./RelayTypeColorInput";
@@ -35,13 +40,14 @@ interface Props {
  */
 export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     // App context
-    const {settings, changeSettings, setSettings} = useSettings()
+    const {settings, changeSettings, setSettings, resetSettings, isDefaultSettings} = useSettings()
 
     // Atom state
     const [, setShowRelayDetailsDialog] = useAtom(showRelayDetailsDialogAtom)
     const [, setRelaysForDetailsDialog] = useAtom(relaysForDetailsDialogAtom)
     const [, setRelayDetailsDialogSearch] = useAtom(relayDetailsDialogSearchAtom)
     const [filteredRelays] = useAtom(filteredRelaysAtom)
+    const [relaySearchOnMap, setRelaySearchOnMap] = useAtom(relaySearchOnMapAtom)
 
     // Util
     const nameOfSetting = nameOfFactory<Settings>()
@@ -59,6 +65,18 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
             }}>
                 Search {filteredRelays.length} relays
             </Button>
+            {relaySearchOnMap &&
+                <Alert
+                    severity="info"
+                    sx={{mb: "16px"}}
+                    action={
+                        <Button color="inherit" size="small" onClick={() => setRelaySearchOnMap(undefined)}>
+                            Show all
+                        </Button>
+                    }
+                >
+                    Map only shows relays matching &quot;{relaySearchOnMap.search}&quot;
+                </Alert>}
             <Accordion elevation={elevation} defaultExpanded>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
@@ -212,6 +230,17 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                     </Box>
                 </AccordionDetails>
             </Accordion>
+            {!isDefaultSettings &&
+                <Button
+                    variant="outlined"
+                    startIcon={<RestartAltIcon/>}
+                    fullWidth={true}
+                    sx={{mt: "16px"}}
+                    onClick={resetSettings}
+                >
+                    Restore default settings
+                </Button>
+            }
         </>
     )
 }

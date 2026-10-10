@@ -1,5 +1,5 @@
 import {CircleMarker, GeoJSON, Layer, Map as LeafletMap, Path} from "leaflet";
-import {useAtomValue} from "jotai";
+import {useAtomValue, useSetAtom} from "jotai";
 import {ReactNode, useEffect} from "react";
 import {MapContainer, useMap} from "react-leaflet";
 import {describe, expect, it, vi} from "vitest";
@@ -14,6 +14,8 @@ import {renderWithProviders} from "../../test/render";
 import {RelayFlag} from "../../types/relay";
 import {Settings} from "../../types/settings";
 import {SnackbarMessage} from "../../types/ui";
+import {AppSettings} from "../accordion/AppSettings";
+import {RelaySearchOnMap, relaySearchOnMapAtom} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
 import {filteredRelaysAtom, LeafletLayers} from "./LeafletLayers";
 
 let leafletMap: LeafletMap
@@ -31,14 +33,25 @@ const State = () => {
     const {settings} = useSettings()
     const {statistics} = useStatistics()
     const filtered = useAtomValue(filteredRelaysAtom)
+    const searchOnMap = useAtomValue(relaySearchOnMapAtom)
     return (
         <output aria-label="state">{JSON.stringify({
             selectedCountry: settings.selectedCountry ?? null,
             selectedFamily: settings.selectedFamily ?? null,
             statistics,
             filtered: filtered.length,
+            searchOnMap: searchOnMap?.search ?? null,
         })}</output>
     )
+}
+
+// Shows search results on the map, like the relay details dialog does
+const SearchOnMap = ({searchOnMap}: { searchOnMap: RelaySearchOnMap }) => {
+    const setSearchOnMap = useSetAtom(relaySearchOnMapAtom)
+    useEffect(() => {
+        setSearchOnMap(searchOnMap)
+    }, [searchOnMap, setSearchOnMap])
+    return null
 }
 
 // Everything LeafletLayers has drawn onto the map
@@ -201,6 +214,40 @@ describe("LeafletLayers", () => {
             familyCircles()[0].fire("click")
 
             await expectState(/"selectedFamily":null/)
+        })
+    })
+
+    describe("search results on the map", () => {
+        const searchFrance = {search: "fr", relays: [relays[2]]}
+
+        it("draws only the searched relays and zooms to them", async () => {
+            await renderLayers(relays, {}, <SearchOnMap searchOnMap={searchFrance}/>)
+
+            await expectState(/"filtered":1/)
+            await expectState(/"searchOnMap":"fr"/)
+            expect(circles()).toHaveLength(2)
+            expect(circles()[0].options.className).toBe("48,2")
+            await expect.poll(() => leafletMap.getCenter().lat).toBeCloseTo(48, 0)
+        })
+
+        it("forgets the search when the day has none of the searched relays", async () => {
+            const otherMonth = {search: "gone", relays: [makeRelay({detailsId: 99})]}
+            await renderLayers(relays, {}, <SearchOnMap searchOnMap={otherMonth}/>)
+
+            await expectState(/"searchOnMap":null/)
+            await expectState(/"filtered":3/)
+        })
+
+        it("shows all relays again from the settings", async () => {
+            await renderLayers(relays, {}, <><SearchOnMap searchOnMap={searchFrance}/><AppSettings elevation={0}/></>)
+            await expectState(/"filtered":1/)
+            await expect.element(page.getByText('Map only shows relays matching "fr"')).toBeVisible()
+
+            await page.getByRole("button", {name: "Show all"}).click()
+
+            await expectState(/"searchOnMap":null/)
+            await expectState(/"filtered":3/)
+            await expect.element(page.getByText('Map only shows relays matching "fr"')).not.toBeInTheDocument()
         })
     })
 

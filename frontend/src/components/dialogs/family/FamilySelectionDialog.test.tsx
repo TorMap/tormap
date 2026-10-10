@@ -65,6 +65,34 @@ describe.each([
         expect(closeDialog).toHaveBeenCalledOnce()
     })
 
+    it("sorts the families by the clicked column", async () => {
+        mockBackend.onPost("/relay/details/family/identifiers", [
+            makeFamilyIdentifier({id: 3, nicknames: "bravo", memberCount: 2, autonomousSystems: "AS10"}),
+            makeFamilyIdentifier({id: 4, nicknames: "alpha", memberCount: 9, autonomousSystems: undefined}),
+            makeFamilyIdentifier({id: 5, nicknames: "charlie", memberCount: 5, autonomousSystems: "AS9"}),
+        ])
+        await open()
+        const nicknames = () => Array.from(document.querySelectorAll("tbody tr"))
+            .map(row => row.querySelector("td")?.textContent)
+
+        // Largest families first by default
+        await expect.poll(nicknames).toEqual(["alpha", "charlie", "bravo"])
+
+        await page.getByRole("button", {name: "Relay nicknames"}).click()
+        await expect.poll(nicknames).toEqual(["alpha", "bravo", "charlie"])
+        await page.getByRole("button", {name: "Relay nicknames"}).click()
+        await expect.poll(nicknames).toEqual(["charlie", "bravo", "alpha"])
+
+        // Numeric order for AS numbers, families without data stay last
+        await page.getByRole("button", {name: "Autonomous Systems"}).click()
+        await expect.poll(nicknames).toEqual(["charlie", "bravo", "alpha"])
+        await page.getByRole("button", {name: "Autonomous Systems"}).click()
+        await expect.poll(nicknames).toEqual(["bravo", "charlie", "alpha"])
+
+        await page.getByRole("button", {name: "Count"}).click()
+        await expect.poll(nicknames).toEqual(["alpha", "charlie", "bravo"])
+    })
+
     it("reloads the day when the families are outdated", async () => {
         mockBackend.onPost("/relay/details/family/identifiers", [])
         const {closeDialog, reloadSelectedDay} = await open()

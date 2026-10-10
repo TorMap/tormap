@@ -18,7 +18,8 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                                                                                    filteredRelayMatches,
                                                                                    relayDetailsId,
                                                                                    setRelayDetailsId,
-                                                                                   canShowRelayList
+                                                                                   canShowRelayList,
+                                                                                   showMatchesOnMap
                                                                                }) => {
     // Component state
     const [showRelayDetails, setShowRelayDetails] = useState(!canShowRelayList)
@@ -85,6 +86,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                             relayMatches={filteredRelayMatches}
                             selectedRelayId={relayDetailsId}
                             setSelectedRelayId={handleSelectDetails}
+                            showMatchesOnMap={showMatchesOnMap}
                         />
                     }
                 </DialogContent>

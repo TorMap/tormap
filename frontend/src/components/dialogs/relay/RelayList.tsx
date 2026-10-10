@@ -1,4 +1,5 @@
-import {Box, CircularProgress, List, ListItemButton, ListItemIcon, ListItemText} from "@mui/material";
+import {Map as MapIcon} from "@mui/icons-material";
+import {Box, Button, CircularProgress, List, ListItemButton, ListItemIcon, ListItemText} from "@mui/material";
 import {FunctionComponent, useEffect, useRef, useState} from "react";
 
 import {RelayFamilyIcon, RelayTypeIcon} from "../../../types/icons";
@@ -20,6 +21,11 @@ interface Props {
      * Setter for the currently selected relay
      */
     setSelectedRelayId: (id: number) => void
+
+    /**
+     * Shows the relay matches on the map, if available
+     */
+    showMatchesOnMap?: () => void
 }
 
 const MATCHES_PER_SCROLL = 50
@@ -28,6 +34,7 @@ export const RelayList: FunctionComponent<Props> = ({
                                                         relayMatches,
                                                         selectedRelayId,
                                                         setSelectedRelayId,
+                                                        showMatchesOnMap,
                                                     }) => {
     // Component state
     const [numberOfMatchesToDisplay, setNumberOfMatchesToDisplay] = useState(MATCHES_PER_SCROLL)
@@ -57,6 +64,12 @@ export const RelayList: FunctionComponent<Props> = ({
 
     return (
         <Box>
+            {showMatchesOnMap &&
+                <Box sx={{p: "16px 16px 0 16px"}}>
+                    <Button variant="outlined" startIcon={<MapIcon/>} fullWidth={true} onClick={showMatchesOnMap}>
+                        Show {relayMatches.length} {relayMatches.length === 1 ? "result" : "results"} on map
+                    </Button>
+                </Box>}
             {relayMatches.length > 0 ?
                 <List>
                     {relayMatches.slice(0, numberOfMatchesToDisplay).map(relayMatch =>
