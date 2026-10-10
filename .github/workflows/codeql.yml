@@ -87,10 +87,10 @@ jobs:
           queries: security-and-quality
 
       # Compile only. CodeQL must observe the compiler, so no daemon and no build cache hits.
-      # This deliberately skips compileJava: the Java sources are the vendored metrics-lib (org.torproject.descriptor),
-      # so only the Kotlin code is extracted and analyzed.
+      # Only main Kotlin is compiled on purpose: compileTestKotlin depends on compileJava, which would also trace the
+      # vendored metrics-lib Java sources (org.torproject.descriptor) that should not be analyzed.
       - name: Compile
-        run: cd backend && ./gradlew --no-daemon --no-build-cache compileKotlin compileTestKotlin
+        run: cd backend && ./gradlew --no-daemon --no-build-cache compileKotlin
 
       - name: Analyze
         uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
