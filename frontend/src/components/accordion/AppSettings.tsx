@@ -3,6 +3,7 @@ import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
+    Alert,
     Box, Button,
     Checkbox,
     FormControlLabel,
@@ -21,7 +22,11 @@ import {relayMustIncludeFlagOptions, Settings} from "../../types/settings";
 import {nameOfFactory} from "../../util/util";
 import {ExternalLink} from "../link/ExternalLink";
 import {useAtom} from "jotai";
-import {relaysForDetailsDialogAtom, showRelayDetailsDialogAtom} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
+import {
+    relaysForDetailsDialogAtom,
+    relaySearchOnMapAtom,
+    showRelayDetailsDialogAtom
+} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
 import {filteredRelaysAtom} from "../leaflet/LeafletLayers";
 import {relayDetailsDialogSearchAtom} from "../dialogs/relay/RelayDetailsSelectionHeader";
 
@@ -41,6 +46,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     const [, setRelaysForDetailsDialog] = useAtom(relaysForDetailsDialogAtom)
     const [, setRelayDetailsDialogSearch] = useAtom(relayDetailsDialogSearchAtom)
     const [filteredRelays] = useAtom(filteredRelaysAtom)
+    const [relaySearchOnMap, setRelaySearchOnMap] = useAtom(relaySearchOnMapAtom)
 
     // Util
     const nameOfSetting = nameOfFactory<Settings>()
@@ -54,6 +60,18 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
             }}>
                 Search {filteredRelays.length} relays
             </Button>
+            {relaySearchOnMap &&
+                <Alert
+                    severity="info"
+                    sx={{mb: "16px"}}
+                    action={
+                        <Button color="inherit" size="small" onClick={() => setRelaySearchOnMap(undefined)}>
+                            Show all
+                        </Button>
+                    }
+                >
+                    Map only shows relays matching &quot;{relaySearchOnMap.search}&quot;
+                </Alert>}
             <Accordion elevation={elevation} defaultExpanded>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}

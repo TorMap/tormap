@@ -1,4 +1,4 @@
-import {LayerGroup, LeafletMouseEvent} from "leaflet";
+import {LayerGroup, latLngBounds, LeafletMouseEvent} from "leaflet";
 import {useSnackbar} from "notistack";
 import React, {FunctionComponent, Suspense, useCallback, useEffect, useMemo, useState} from "react";
 import {useMap} from "react-leaflet";
@@ -28,6 +28,7 @@ import {LoadingAnimation} from "../loading/LoadingAnimation";
 import {atom, useAtom} from "jotai";
 import {
     relaysForDetailsDialogAtom,
+    relaySearchOnMapAtom,
     showRelayDetailsDialogAtom
 } from "../dialogs/relay/ResponsiveRelayDetailsDialog";
 import {relayDetailsDialogSearchAtom} from "../dialogs/relay/RelayDetailsSelectionHeader";
@@ -61,6 +62,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
     const [, setRelaysForDetailsDialog] = useAtom(relaysForDetailsDialogAtom)
     const [, setRelayDetailsDialogSearch] = useAtom(relayDetailsDialogSearchAtom)
     const [, setFilteredRelays] = useAtom(filteredRelaysAtom)
+    const [relaySearchOnMap, setRelaySearchOnMap] = useAtom(relaySearchOnMapAtom)
 
     // App context
     const leafletMap = useMap()
@@ -68,9 +70,19 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
     const {setStatistics} = useStatistics()
     const {enqueueSnackbar, closeSnackbar} = useSnackbar();
 
+    // Only the relays found by a search, as long as the selected day still has some of them
+    const searchedRelays = useMemo(
+        () => {
+            if (!relays || !relaySearchOnMap) return relays
+            const searchedIds = new Set(relaySearchOnMap.relays.map(relay => relay.detailsId))
+            const matches = relays.filter(relay => relay.detailsId && searchedIds.has(relay.detailsId))
+            return matches.length > 0 ? matches : relays
+        },
+        [relays, relaySearchOnMap]
+    )
     const filteredRelaysByFlags = useMemo(
-        () => relays ? filterRelaysByFlags(relays, settings) : [],
-        [relays, settings]
+        () => searchedRelays ? filterRelaysByFlags(searchedRelays, settings) : [],
+        [searchedRelays, settings]
     )
     const relayCoordinatesMap = useMemo(
         () => buildRelayCoordinatesMap(filteredRelaysByFlags),
@@ -138,6 +150,27 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
         () => buildStatistics(filteredRelays, relayCountryMap, relayFamilyMap, settings),
         [filteredRelays, relayCountryMap, relayFamilyMap, settings]
     )
+
+    /**
+     * Forget the search once the selected day has none of the searched relays, e.g. in another month
+     */
+    useEffect(() => {
+        if (relays && relaySearchOnMap && searchedRelays === relays) {
+            setRelaySearchOnMap(undefined)
+        }
+    }, [relays, relaySearchOnMap, searchedRelays, setRelaySearchOnMap])
+
+    /**
+     * Move the map to the relays of a new search
+     */
+    useEffect(() => {
+        if (relaySearchOnMap && relaySearchOnMap.relays.length > 0) {
+            leafletMap.fitBounds(
+                latLngBounds(relaySearchOnMap.relays.map(relay => [relay.lat, relay.long])),
+                {maxZoom: 6, padding: [50, 50], animate: false}
+            )
+        }
+    }, [leafletMap, relaySearchOnMap])
 
     /**
      * Redraw relays whenever settings get changed or new relays got downloaded.
