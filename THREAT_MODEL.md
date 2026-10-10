@@ -38,13 +38,13 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 | # | Boundary                         | Input (attacker control)                                                                 | Main threats                                                   | Code |
 |---|----------------------------------|------------------------------------------------------------------------------------------|----------------------------------------------------------------|------|
 | 1 | Public API `/relay/**`, `/`      | Path params `id`, `day`; JSON arrays of IDs (≤ 50 000 / 5 000); headers (direct)         | Memory/CPU/DB exhaustion, cache thrash, error leakage          | `adapter/controller/`, `config/AppConfig.kt`, `config/CacheConfig.kt` |
-| 2 | HTTP Basic authentication        | `Authorization` header on any path (direct)                                               | Brute force, BCrypt CPU exhaustion, cleartext creds without TLS | `config/SecurityConfig.kt` |
+| 2 | HTTP Basic authentication        | `Authorization` header (direct)                                                           | Brute force, password-hashing CPU cost, cleartext creds without TLS | `config/SecurityConfig.kt` |
 | 3 | Admin plane `/actuator/**`       | Requests from whoever holds the admin password                                            | Info disclosure (log file, thread dumps, exchanges), cache eviction | `application.yml` `management.*` |
 | 4 | Reverse proxy headers            | `Forwarded`, `X-Forwarded-*` (direct if the backend port is exposed)                      | Spoofed client IP/scheme/host in logs, redirects, exchanges    | `ForwardedHeaderFilter` in `SecurityConfig.kt` |
-| 5 | Relay-published descriptor data  | Nickname, contact, platform, family entries, address (indirect: any relay operator)       | Parser edge cases, quadratic family computation, stored XSS    | `service/Descriptor*`, `util/RelayFamilyUtil.kt`, vendored `org.torproject.descriptor` |
-| 6 | Collector download                | `index.json` (`path`, file names, sizes, mtimes), tar/xz/bz2 archives (trusted, HTTPS)    | SSRF/`file:` via index `path`, path traversal, decompression or disk bombs, hung downloads | `descriptor/index/*`, `impl/DescriptorReaderImpl.java` |
+| 5 | Relay-published descriptor data  | Nickname, contact, platform, family entries, address (indirect: any relay operator)       | Parser edge cases, expensive family computation, stored XSS    | `service/Descriptor*`, `util/RelayFamilyUtil.kt`, vendored `org.torproject.descriptor` |
+| 6 | Collector download                | `index.json` (`path`, file names, sizes, mtimes), tar/xz/bz2 archives (trusted, HTTPS)    | SSRF via index URLs, path traversal, decompression or disk bombs, hung downloads | `descriptor/index/*`, `impl/DescriptorReaderImpl.java` |
 | 7 | DNS                               | PTR records and forward lookups for relay IPs (indirect: whoever controls the IP's reverse zone) | Slow lookups that tie up request threads, spoofed host names   | `service/ReverseDnsLookupService.kt` |
-| 8 | Frontend rendering                | API JSON (backend-controlled, relay-derived strings)                                     | XSS through HTML sinks (Leaflet tooltips render strings as HTML) | `frontend/src/util/layer-construction.ts`, `components/dialogs/relay/` |
+| 8 | Frontend rendering                | API JSON (backend-controlled, relay-derived strings)                                     | XSS through HTML sinks (map tooltips/popups, raw HTML APIs)     | `frontend/src/util/layer-construction.ts`, `components/dialogs/relay/` |
 | 9 | Deployment configuration          | Env vars, Spring profile, compose port mappings (operator)                               | Exposed DB, Swagger on, no TLS, default credentials            | `docker-compose*.yml`, `application*.yml`, `build.gradle.kts` (Jib) |
 | 10| CI/CD and supply chain            | Dependencies, actions, Renovate PRs, AI agent instructions (developer / upstream)         | Malicious package, secret theft, prompt injection via changelogs | `.github/`, `renovate.json`, `frontend/.yarnrc.yml`, `AGENTS.md` |
 
@@ -88,20 +88,19 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 
 ## Threat scenarios
 
-1. **API flooder (unauthenticated, low effort).** Large JSON bodies to the POST endpoints, distinct `day` values to
-   evict the 40-entry location cache, crafted `Authorization: Basic` headers on public paths to force BCrypt work, or
-   relay-detail requests that trigger slow DNS lookups. Goal: exhaust heap, Tomcat threads, CPU or DB.
+1. **API flooder (unauthenticated, low effort).** Oversized request bodies, cache-busting parameters, authentication
+   attempts and requests that trigger expensive back-end work (DB queries, DNS lookups). Goal: exhaust heap, Tomcat
+   threads, CPU or DB.
 2. **Malicious relay operator.** Publishes descriptors with large or many family entries, odd nicknames, or a PTR zone
    with slow or many answers, to slow down family computation, tie up request threads, or inject content that the
    frontend renders.
-3. **Compromised or spoofed Collector.** Serves an index whose `path` points to another scheme or host, oversized or
-   endless files, or decompression bombs. Goal: SSRF, local file read into the pipeline, disk/heap exhaustion, poisoned
+3. **Compromised or spoofed Collector.** Serves a manipulated index (URLs, file names, sizes), oversized or endless
+   files, or decompression bombs. Goal: SSRF, local file read into the pipeline, disk/heap exhaustion, poisoned
    data.
-4. **Admin credential attacker.** Brute-forces HTTP Basic (no lockout or rate limit in the app), sniffs it on a plain
-   HTTP deployment, or finds it in shell history or compose files. Goal: log file, thread dumps, HTTP exchanges, cache
-   eviction.
-5. **Misconfiguration opportunist.** Scans for deployments that follow `docker-compose.yml` verbatim: PostgreSQL
-   published on `0.0.0.0:5432`, backend on plain HTTP, `prod` profile not active (Swagger and docs exposed).
+4. **Admin credential attacker.** Brute-forces HTTP Basic, sniffs it on a deployment without TLS, or finds it in
+   shell history or compose files. Goal: log file, thread dumps, HTTP exchanges, cache eviction.
+5. **Misconfiguration opportunist.** Scans for deployments with a reachable PostgreSQL port, the backend on plain
+   HTTP, or the `prod` profile not active (Swagger and docs exposed).
 6. **Supply-chain attacker.** Publishes a malicious version of a dependency or action, or plants instructions in a
    changelog that an AI reviewer acting on Renovate PRs follows.
 
