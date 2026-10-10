@@ -6,6 +6,10 @@ on:
       - 'frontend/**'
       - '.github/workflows/frontend*'
 
+permissions:
+  contents: read
+  packages: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
