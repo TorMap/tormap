@@ -2,7 +2,7 @@ import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
 import {format, isValid, parseISO} from "date-fns";
 import {enCA} from "date-fns/locale";
-import {FunctionComponent, useEffect, useState} from "react";
+import {FunctionComponent, useState} from "react";
 
 import {useDate} from "../../context/date-context";
 
@@ -22,10 +22,12 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
 
     // The field keeps what the user is typing. Intermediate values (e.g. a new year while typing a full date)
     // are often not available days and must not be reverted by the controlled value.
-    const [inputValue, setInputValue] = useState<Date | null>(null)
-    useEffect(() => {
+    const [inputValue, setInputValue] = useState<Date | null>(() => selectedDate ? parseISO(selectedDate) : null)
+    const [syncedSelectedDate, setSyncedSelectedDate] = useState(selectedDate)
+    if (syncedSelectedDate !== selectedDate) {
+        setSyncedSelectedDate(selectedDate)
         setInputValue(selectedDate ? parseISO(selectedDate) : null)
-    }, [selectedDate])
+    }
 
     const handleDateChange = (date: Date | null) => {
         setInputValue(date)

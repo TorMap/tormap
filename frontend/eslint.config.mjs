@@ -17,9 +17,7 @@ export default tseslint.config(
             "react-hooks": reactHooks,
         },
         rules: {
-            // Classic hook rules only; the React Compiler rules of the v7 preset need effect refactors first
-            "react-hooks/rules-of-hooks": "error",
-            "react-hooks/exhaustive-deps": "warn",
+            ...reactHooks.configs.flat.recommended.rules,
         },
         languageOptions: {
             globals: {

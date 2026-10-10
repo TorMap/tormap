@@ -1,6 +1,6 @@
 import {Box, Button, useMediaQuery, useTheme} from "@mui/material";
 import {useSnackbar} from "notistack";
-import React, {FunctionComponent, Suspense, useCallback, useEffect, useState} from 'react';
+import React, {FunctionComponent, Suspense, useEffect, useState} from 'react';
 
 import {useDate} from "../context/date-context";
 import {SnackbarMessage} from "../types/ui";
@@ -27,14 +27,16 @@ export const App: FunctionComponent = () => {
 
     useEffect(() => {
         closeSnackbar()
-        setIsLoading(true)
         backend.get<string[]>('/relay/location/days').then(response => {
             setAvailableDays(response.data)
             setIsLoading(false)
         }).catch(() => {
             enqueueSnackbar(SnackbarMessage.ConnectionFailed, {
                 variant: "error",
-                action: <Button onClick={() => setConnectionRetryCount(connectionRetryCount + 1)}>Retry</Button>,
+                action: <Button onClick={() => {
+                    setIsLoading(true)
+                    setConnectionRetryCount(connectionRetryCount + 1)
+                }}>Retry</Button>,
                 persist: true,
                 preventDuplicate: false,
             })
@@ -49,7 +51,7 @@ export const App: FunctionComponent = () => {
                     {isLoading ? <LoadingAnimation/> : null}
                 </React.StrictMode>
                 <LeafletWorldMap
-                    setIsLoading={useCallback(setIsLoading, [setIsLoading])}
+                    setIsLoading={setIsLoading}
                 />
                 <React.StrictMode>
                     {isLargeScreen ? <OverlayLarge/> : <OverlaySmall/>}

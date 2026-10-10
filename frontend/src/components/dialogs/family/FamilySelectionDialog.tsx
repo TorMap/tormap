@@ -45,7 +45,7 @@ export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
                                                                                }) => {
     // Component state
     const [isLoading, setIsLoading] = useState(true)
-    const [familyIdentifiers, setFamilyIdentifiers] = useState<RelayFamilyIdentifier[]>()
+    const [familyIdentifiers, setFamilyIdentifiers] = useState<RelayFamilyIdentifier[]>([])
 
     // App context
     const {enqueueSnackbar} = useSnackbar();
@@ -53,13 +53,21 @@ export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
     const theme = useTheme()
     const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
 
+    // Discard the results of the previous families
+    const [syncedFamilyIds, setSyncedFamilyIds] = useState(familyIds)
+    if (syncedFamilyIds !== familyIds) {
+        setSyncedFamilyIds(familyIds)
+        setFamilyIdentifiers([])
+        if (familyIds.length > 0) {
+            setIsLoading(true)
+        }
+    }
+
     /**
      * Query more information about the Families specified in "families" parameter
      */
     useEffect(() => {
-        setFamilyIdentifiers([])
         if (familyIds.length > 0) {
-            setIsLoading(true)
             backend.post<RelayFamilyIdentifier[]>(
                 '/relay/details/family/identifiers',
                 familyIds
