@@ -46,7 +46,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                 open={showDialog}
                 onClose={closeDialog}
                 fullScreen={true}
-                TransitionComponent={SlideUpTransition}
+                slots={{transition: SlideUpTransition}}
             >
                 <AppBar sx={{position: 'relative'}}>
                     <Toolbar>

@@ -20,22 +20,23 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
         <Dialog
             open={showDialog}
             onClose={closeDialog}
-            onBackdropClick={closeDialog}
             maxWidth={canShowRelayList ? "lg" : "md"}
             fullWidth={true}
-            PaperProps={{
-                sx: {
-                    minHeight: "80vh",
-                    maxHeight: "80vh",
+            slotProps={{
+                paper: {
+                    sx: {
+                        minHeight: "80vh",
+                        maxHeight: "80vh",
+                    }
                 }
             }}
         >
             <DialogTitle>
                 <Grid container>
-                    {canShowRelayList && <Grid item xs={12} sm={4}>
+                    {canShowRelayList && <Grid size={{xs: 12, sm: 4}}>
                         <RelayDetailsSelectionHeader/>
                     </Grid>}
-                    <Grid item xs={12} sm={canShowRelayList ? 8 : 12}>
+                    <Grid size={{xs: 12, sm: canShowRelayList ? 8 : 12}}>
                         <RelayDetailsHeader
                             closeDialog={closeDialog}
                             relayDetailsMatch={relayDetailsMatch}
@@ -45,14 +46,14 @@ export const RelayDetailsDialogLarge: React.FunctionComponent<DetailsDialogProps
             </DialogTitle>
             <Divider/>
             <Grid container>
-                {canShowRelayList && <Grid item xs={12} sm={4} sx={{maxHeight: "70vh", overflow: 'auto'}}>
+                {canShowRelayList && <Grid size={{xs: 12, sm: 4}} sx={{maxHeight: "70vh", overflow: 'auto'}}>
                     <RelayList
                         relayMatches={filteredRelayMatches}
                         selectedRelayId={relayDetailsId}
                         setSelectedRelayId={setRelayDetailsId}
                     />
                 </Grid>}
-                <Grid item xs={12} sm={canShowRelayList ? 8 : 12}
+                <Grid size={{xs: 12, sm: canShowRelayList ? 8 : 12}}
                       sx={{maxHeight: "70vh", overflow: 'auto'}}>
                     {relayDetailsMatch &&
                         <RelayDetailsTable

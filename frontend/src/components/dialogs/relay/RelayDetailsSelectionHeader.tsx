@@ -17,12 +17,14 @@ export const RelayDetailsSelectionHeader: FunctionComponent = () => {
         <Stack direction={"row"}>
             <TextField
                 label="Nickname or fingerprint"
-                InputProps={{
-                    startAdornment: (
-                        <InputAdornment position="start">
-                            <Search/>
-                        </InputAdornment>
-                    ),
+                slotProps={{
+                    input: {
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <Search/>
+                            </InputAdornment>
+                        ),
+                    },
                 }}
                 variant="standard"
                 onChange={(event) => setSearchRelaysBy(event.target.value)}

@@ -18,13 +18,14 @@ export const FamilySelectionDialogLarge: FunctionComponent<FamilySelectionDialog
         <Dialog
             open={shouldShowDialog}
             onClose={closeDialog}
-            onBackdropClick={closeDialog}
             maxWidth={"lg"}
             fullWidth={true}
-            PaperProps={{
-                sx: {
-                    minHeight: "80vh",
-                    maxHeight: "80vh",
+            slotProps={{
+                paper: {
+                    sx: {
+                        minHeight: "80vh",
+                        maxHeight: "80vh",
+                    }
                 }
             }}
         >

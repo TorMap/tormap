@@ -46,24 +46,24 @@ export const AboutInformation: React.FunctionComponent = () => {
                 open={showDialog}
                 fullWidth={true}
                 maxWidth={"md"}
-                onBackdropClick={() => setShowDialog(false)}
+                onClose={() => setShowDialog(false)}
                 fullScreen={!isLargeScreen}
             >
                 <DialogTitle>
-                    <Box display="flex" alignItems={"center"}>
+                    <Box sx={{display: "flex", alignItems: "center"}}>
                         <Avatar sx={{marginRight: "24px"}} src={"android-chrome-192x192.png"} alt={"TorMap logo"}/>
                         <Typography variant="h5">TorMap</Typography>
                         <Grid sx={{flexGrow: 1, paddingLeft: "24px", paddingRight: "30px", paddingTop: "8px"}} container
                               spacing={{xs: 2, sm: 4}}>
-                            <Grid item>
+                            <Grid>
                                 <ExternalLink sx={{color: "white"}} href={"https://github.com/TorMap/tormap"}
                                               label={<GitHubIcon/>}/>
                             </Grid>
-                            <Grid item>
+                            <Grid>
                                 <ExternalLink sx={{color: "white"}} href={"https://twitter.com/TorMapOrg"}
                                               label={<TwitterIcon/>}/>
                             </Grid>
-                            <Grid item>
+                            <Grid>
                                 <ExternalLink sx={{color: "white"}} href={"mailto:hi@tormap.org"} label={<EmailIcon/>}/>
                             </Grid>
                         </Grid>
@@ -110,9 +110,8 @@ export const AboutInformation: React.FunctionComponent = () => {
                     <h2>Contributors</h2>
                     <Stack
                         direction={{sm: 'column', md: 'row'}}
-                        justifyContent="flex-start"
-                        alignItems="flex-start"
                         spacing={{xs: 3, sm: 3}}
+                        sx={{justifyContent: "flex-start", alignItems: "flex-start"}}
                     >
                         <ContributorCard
                             avatar={<Avatar src={"https://avatars.githubusercontent.com/u/23460202?s=96&v=4"}/>}

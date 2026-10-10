@@ -1,7 +1,6 @@
-import {TextField, TextFieldProps} from "@mui/material";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
-import {format, isValid} from "date-fns";
+import {format, isValid, parseISO} from "date-fns";
 import {enCA} from "date-fns/locale";
 import {FunctionComponent} from "react";
 
@@ -18,8 +17,8 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
     // App context
     const {selectedDate, availableDays, setSelectedDate} = useDate()
 
-    const firstAvailableDate = selectedDate ? new Date(availableDays[0]) : undefined
-    const lastAvailableDate = selectedDate ? new Date(availableDays[availableDays.length - 1]) : undefined
+    const firstAvailableDate = selectedDate ? parseISO(availableDays[0]) : undefined
+    const lastAvailableDate = selectedDate ? parseISO(availableDays[availableDays.length - 1]) : undefined
 
     const handleDateChange = (date: Date | null) => {
         if (date && isValid(date)) {
@@ -33,26 +32,25 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enCA}>
             <DatePicker
-                value={selectedDate}
-                mask={"____-__-__"}
-                renderInput={(params: TextFieldProps) =>
-                    largeScreen ? <TextField variant={"standard"}
-                                             {...params}
-                                             sx={{
-                                                 position: "fixed",
-                                                 bottom: "37px",
-                                                 right: "1%",
-                                                 maxWidth: "20%",
-                                             }}
-                        /> :
-                        <TextField variant={"standard"}
-                                   {...params}
-                                   sx={{
-                                       padding: 2
-                                   }}
-                                   helperText={"Select a date"}
-                        />
-                }
+                value={selectedDate ? parseISO(selectedDate) : null}
+                format={"yyyy-MM-dd"}
+                slotProps={{
+                    textField: largeScreen ? {
+                        variant: "standard",
+                        sx: {
+                            position: "fixed",
+                            bottom: "37px",
+                            right: "1%",
+                            maxWidth: "20%",
+                        },
+                    } : {
+                        variant: "standard",
+                        sx: {
+                            padding: 2,
+                        },
+                        helperText: "Select a date",
+                    },
+                }}
                 onChange={handleDateChange}
                 onAccept={handleDateChange}
                 minDate={firstAvailableDate}
