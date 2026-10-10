@@ -43,7 +43,7 @@ Before proposing a new dependency or version, check these public APIs with `curl
 
 ## Security scanning
 - Run SCA whenever dependencies change (add, remove, bump, lockfile): `cd backend && ./gradlew snykTest` and/or `cd frontend && yarn snyk:test`. Fix or report new high/critical findings before opening the PR.
-- Also run `cd frontend && yarn npm audit --severity high` (add `--environment production` for runtime dependencies only) when frontend dependencies change. Node ignores the sandbox proxy (`ENOTFOUND registry.yarnpkg.com`), so it needs to run outside the sandbox. It only sends package names and versions to the registry.
+- Also run `cd frontend && yarn npm audit --all --recursive --severity high` (add `--environment production` for runtime dependencies only) when frontend dependencies change. Without `--all --recursive` only direct dependencies are checked and transitive ones are missed. Use `yarn why <name>` to trace a transitive package. Node ignores the sandbox proxy (`ENOTFOUND registry.yarnpkg.com`), so it needs to run outside the sandbox. It only sends package names and versions to the registry.
 - Gradle has no built-in audit task, `./gradlew snykTest` is the backend SCA. To see why a version is resolved before adding an override, use `./gradlew dependencyInsight --dependency <name>`. Don't add another scanner plugin without maintainer approval.
 - Run SAST (`./gradlew snykCode`, `yarn snyk:code`) when changing security-relevant code (auth, input handling, networking, serialization).
 - PRs are gated by the Snyk GitHub integration (PR status checks), not by a CI workflow. Don't add Snyk steps or `SNYK_TOKEN` to workflows. Keep shared flags in the Gradle task or yarn script.
