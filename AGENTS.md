@@ -52,6 +52,7 @@ Before proposing a new dependency or version, check these public APIs with `curl
 - Don't add `.snyk` ignores without a documented reason and an expiry date.
 
 ## Secure coding
+- Read [THREAT_MODEL.md](THREAT_MODEL.md) before changing endpoints, `SecurityConfig`, descriptor ingestion, outbound calls (Collector, DNS, metrics) or deployment defaults. Follow its review checklist and update the model when a trust boundary or assumption changes.
 - Don't loosen `SecurityConfig`: no wider `permitAll`, no `csrf.disable`, no new unauthenticated actuator or admin paths. Any change there needs a matching change in `SecurityRulesTest`.
 - Descriptors, request parameters and headers are untrusted. Use parameterized queries (no string-built JPQL or SQL), validate input at the controller, and never log secrets or raw untrusted input.
 - Workflows: keep `permissions:` least-privilege per job, never check out PR head code under `pull_request_target`, and treat any change under `.github/workflows/` as security-relevant (pin actions by SHA).
