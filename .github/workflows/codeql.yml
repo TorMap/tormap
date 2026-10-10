@@ -83,8 +83,12 @@ jobs:
         with:
           languages: java-kotlin
           build-mode: manual
+          # Security plus maintainability and reliability queries
+          queries: security-and-quality
 
-      # Compile only. CodeQL must observe the compiler, so no daemon and no build cache hits
+      # Compile only. CodeQL must observe the compiler, so no daemon and no build cache hits.
+      # This deliberately skips compileJava: the Java sources are the vendored metrics-lib (org.torproject.descriptor),
+      # so only the Kotlin code is extracted and analyzed.
       - name: Compile
         run: cd backend && ./gradlew --no-daemon --no-build-cache compileKotlin compileTestKotlin
 
@@ -110,6 +114,8 @@ jobs:
         with:
           languages: javascript-typescript
           build-mode: none
+          # Security plus maintainability and reliability queries
+          queries: security-and-quality
 
       - name: Analyze
         uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
