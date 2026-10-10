@@ -1,4 +1,4 @@
-import {useSetAtom} from "jotai";
+import {useAtomValue, useSetAtom} from "jotai";
 import {useEffect} from "react";
 import {describe, expect, it, vi} from "vitest";
 import {page} from "vitest/browser";
@@ -10,7 +10,12 @@ import {mockBackend, networkError} from "../../../test/mock-backend";
 import {renderWithProviders} from "../../../test/render";
 import {RelayFlag, RelayType} from "../../../types/relay";
 import {SnackbarMessage} from "../../../types/ui";
-import {relaysForDetailsDialogAtom, ResponsiveRelayDetailsDialog, showRelayDetailsDialogAtom} from "./ResponsiveRelayDetailsDialog";
+import {
+    relaysForDetailsDialogAtom,
+    relaySearchOnMapAtom,
+    ResponsiveRelayDetailsDialog,
+    showRelayDetailsDialogAtom
+} from "./ResponsiveRelayDetailsDialog";
 
 /**
  * Opens the dialog for the given relays, like a marker click on the map does, and exposes the settings it changes.
@@ -19,6 +24,7 @@ const Harness = ({relays}: { relays: RelayLocationDto[] }) => {
     const setRelays = useSetAtom(relaysForDetailsDialogAtom)
     const setShow = useSetAtom(showRelayDetailsDialogAtom)
     const {settings} = useSettings()
+    const searchOnMap = useAtomValue(relaySearchOnMapAtom)
     useEffect(() => {
         setRelays(relays)
         setShow(true)
@@ -31,6 +37,10 @@ const Harness = ({relays}: { relays: RelayLocationDto[] }) => {
                 sortFamily: settings.sortFamily,
                 showRelayTypes: settings.showRelayTypes,
             })}</output>
+            <output aria-label="search on map">{JSON.stringify(searchOnMap ? {
+                search: searchOnMap.search,
+                relayIds: searchOnMap.relays.map(relay => relay.detailsId),
+            } : null)}</output>
         </>
     )
 }
@@ -127,12 +137,28 @@ describe.each([
         await expect.element(page.getByRole("button", {name: "charlie"})).toBeVisible()
     })
 
+    it("shows the search results on the map", async () => {
+        mockLocationWithThreeRelays()
+        await open([alpha, bravo, charlie])
+        await expect.element(page.getByRole("button", {name: "charlie"})).toBeVisible()
+        await expect.element(page.getByRole("button", {name: /on map/})).not.toBeInTheDocument()
+
+        await page.getByLabelText("Nickname or fingerprint").fill("a")
+        await expect.element(page.getByRole("button", {name: "charlie"})).toBeVisible()
+        await page.getByRole("button", {name: "Show 3 results on map"}).click()
+
+        await expect.element(page.getByRole("dialog")).not.toBeInTheDocument()
+        await expect.element(page.getByRole("status", {name: "search on map"}))
+            .toHaveTextContent(JSON.stringify({search: "a", relayIds: [21, 22, 23]}))
+    })
+
     it("shows a message when nothing matches the search", async () => {
         mockLocationWithThreeRelays()
         await open([alpha, bravo, charlie])
         await page.getByLabelText("Nickname or fingerprint").fill("zzz")
 
         await expect.element(page.getByText("No results found")).toBeVisible()
+        await expect.element(page.getByRole("button", {name: /on map/})).not.toBeInTheDocument()
     })
 
     it("restricts the map to the relay's type", async () => {
