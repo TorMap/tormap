@@ -77,7 +77,8 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   bounds concurrent background recomputation per key.
 - Ingestion: remote file names must not contain `/`, `\`, `.` or `..`, and target directories must resolve inside the
   download directory (real-path check). Downloads are written to a temp file and kept only if the size matches the
-  index. Long descriptor strings are truncated to 255 characters.
+  index. Free-text descriptor fields (contact, platform, protocols) are truncated to 255 characters; family
+  entries are stored untruncated.
 - Reverse DNS: at most 10 PTR names verified per IP, forward results filtered to public addresses, results cached for
   6 hours with `sync = true`.
 - Container runs as non-root `1000:1000` from a digest-pinned base image.
