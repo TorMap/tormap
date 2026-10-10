@@ -2,7 +2,7 @@ import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
 import {format, isValid, parseISO} from "date-fns";
 import {enCA} from "date-fns/locale";
-import {FunctionComponent} from "react";
+import {FunctionComponent, useEffect, useState} from "react";
 
 import {useDate} from "../../context/date-context";
 
@@ -20,7 +20,15 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
     const firstAvailableDate = selectedDate ? parseISO(availableDays[0]) : undefined
     const lastAvailableDate = selectedDate ? parseISO(availableDays[availableDays.length - 1]) : undefined
 
+    // The field keeps what the user is typing. Intermediate values (e.g. a new year while typing a full date)
+    // are often not available days and must not be reverted by the controlled value.
+    const [inputValue, setInputValue] = useState<Date | null>(null)
+    useEffect(() => {
+        setInputValue(selectedDate ? parseISO(selectedDate) : null)
+    }, [selectedDate])
+
     const handleDateChange = (date: Date | null) => {
+        setInputValue(date)
         if (date && isValid(date)) {
             const day: string = format(date, "yyyy-MM-dd")
             if (availableDays.includes(day)) {
@@ -29,14 +37,18 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
         }
     }
 
+    // Discard input which does not correspond to the loaded day
+    const resetInput = () => setInputValue(selectedDate ? parseISO(selectedDate) : null)
+
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enCA}>
             <DatePicker
-                value={selectedDate ? parseISO(selectedDate) : null}
+                value={inputValue}
                 format={"yyyy-MM-dd"}
                 slotProps={{
                     textField: largeScreen ? {
                         variant: "standard",
+                        onBlur: resetInput,
                         sx: {
                             position: "fixed",
                             bottom: "37px",
@@ -45,6 +57,7 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
                         },
                     } : {
                         variant: "standard",
+                        onBlur: resetInput,
                         sx: {
                             padding: 2,
                         },
