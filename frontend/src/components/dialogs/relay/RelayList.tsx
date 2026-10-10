@@ -32,6 +32,13 @@ export const RelayList: FunctionComponent<Props> = ({
     // Component state
     const [numberOfMatchesToDisplay, setNumberOfMatchesToDisplay] = useState(MATCHES_PER_SCROLL)
 
+    // Start again with the first batch when the matches change, e.g. after a search
+    const [syncedRelayMatches, setSyncedRelayMatches] = useState(relayMatches)
+    if (syncedRelayMatches !== relayMatches) {
+        setSyncedRelayMatches(relayMatches)
+        setNumberOfMatchesToDisplay(MATCHES_PER_SCROLL)
+    }
+
     const hasMore = numberOfMatchesToDisplay < relayMatches.length
     const loaderRef = useRef<HTMLDivElement>(null)
 
@@ -52,7 +59,7 @@ export const RelayList: FunctionComponent<Props> = ({
         <Box>
             {relayMatches.length > 0 ?
                 <List>
-                    {relayMatches.slice(0, numberOfMatchesToDisplay + 1).map(relayMatch =>
+                    {relayMatches.slice(0, numberOfMatchesToDisplay).map(relayMatch =>
                         (relayMatch.id &&
                             <ListItemButton
                                 key={relayMatch.id}
