@@ -6,31 +6,27 @@ import {
     Security as SecurityIcon,
     Timeline as TimelineIcon,
 } from "@mui/icons-material";
-import type {JSX} from "react";
+import {FunctionComponent} from "react";
 
-import {Colors} from "../config";
+import {useSettings} from "../context/settings-context";
 import {RelayType} from "./relay";
 
-/**
- * Returns the Icon's JSX.Element
- * @param relayType the Icon-/ Relay-Type
- */
-export function getIcon(relayType: RelayType): JSX.Element | null {
-    switch (relayType) {
-        case RelayType.Exit:
-            return ExitRelayIcon
-        case RelayType.Guard:
-            return GuardRelayIcon
-        case RelayType.Other:
-            return OtherRelayIcon
-        default:
-            return null
-    }
+const relayTypeIcons = {
+    [RelayType.Exit]: DirectionsRunIcon,
+    [RelayType.Guard]: SecurityIcon,
+    [RelayType.Other]: TimelineIcon,
 }
 
-export const ExitRelayIcon = <DirectionsRunIcon sx={{color: Colors.Exit}}/>
-export const GuardRelayIcon = <SecurityIcon sx={{color: Colors.Guard}}/>
-export const OtherRelayIcon = <TimelineIcon sx={{color: Colors.Default}}/>
+/**
+ * The icon of a relay type, painted in the color selected in the settings
+ * @param relayType the Icon-/ Relay-Type
+ */
+export const RelayTypeIcon: FunctionComponent<{ relayType: RelayType }> = ({relayType}) => {
+    const {settings} = useSettings()
+    const Icon = relayTypeIcons[relayType]
+    return <Icon sx={{color: settings.relayTypeColors[relayType]}}/>
+}
+
 export const TotalRelaysIcon = <FunctionsIcon/>
 export const RelayFamilyIcon = <GroupIcon/>
 export const EarthIcon = <PublicIcon/>

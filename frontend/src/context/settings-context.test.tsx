@@ -6,6 +6,7 @@ import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/acc
 import {makeSettings} from "../test/fixtures";
 import {RelayFlag, RelayType} from "../types/relay";
 import {Settings} from "../types/settings";
+import {settingsStorageKey} from "../util/settings-storage";
 import {SettingsProvider, settingsEqual, useSettings} from "./settings-context";
 
 const render = (defaults: Settings = makeSettings()) =>
@@ -58,6 +59,52 @@ describe("SettingsProvider", () => {
         expect(result.current.settings.aggregateCoordinates).toBe(true)
     })
 
+    describe("local storage", () => {
+        const stored = () => JSON.parse(localStorage.getItem(settingsStorageKey) ?? "null")
+
+        it("restores settings stored by an earlier page load", async () => {
+            localStorage.setItem(settingsStorageKey, JSON.stringify({
+                heatMap: true,
+                relayTypeColors: {[RelayType.Exit]: "#123456"},
+            }))
+            const {result} = await render()
+            expect(result.current.settings.heatMap).toBe(true)
+            expect(result.current.settings.relayTypeColors[RelayType.Exit]).toBe("#123456")
+            expect(result.current.settings.aggregateCoordinates).toBe(false)
+        })
+
+        it("stores changed settings", async () => {
+            const {result, act} = await render()
+            await act(() => result.current.changeSettings(changeEvent("heatMap", "heatMap", true)))
+            expect(stored()).toMatchObject({heatMap: true})
+        })
+
+        it("stores the selected country but not the selected family", async () => {
+            const {result, act} = await render()
+            await act(() => result.current.setSettings(makeSettings({
+                sortCountry: true,
+                selectedCountry: "DE",
+                sortFamily: true,
+                selectedFamily: 3,
+            })))
+            expect(stored()).toMatchObject({sortCountry: true, selectedCountry: "DE", sortFamily: true})
+            expect(stored()).not.toHaveProperty("selectedFamily")
+        })
+
+        it("falls back to the defaults for broken storage", async () => {
+            localStorage.setItem(settingsStorageKey, "not json")
+            const defaults = makeSettings({sortFamily: true})
+            const {result} = await render(defaults)
+            expect(result.current.settings).toEqual(defaults)
+        })
+
+        it("drops a stored selection whose grouping is off", async () => {
+            localStorage.setItem(settingsStorageKey, JSON.stringify({sortCountry: false, selectedCountry: "DE"}))
+            const {result} = await render()
+            expect(result.current.settings.selectedCountry).toBeUndefined()
+        })
+    })
+
     describe("restore defaults", () => {
         it("reports default settings on load", async () => {
             const {result} = await render()
@@ -69,6 +116,14 @@ describe("SettingsProvider", () => {
             await act(() => result.current.changeSettings(
                 changeEvent(relaysMustIncludeFlagInput, String(RelayFlag.Stable), true)
             ))
+            expect(result.current.isDefaultSettings).toBe(false)
+        })
+
+        it("reports non-default settings after a relay type color change", async () => {
+            const {result, act} = await render()
+            await act(() => result.current.setSettings(makeSettings({
+                relayTypeColors: {...makeSettings().relayTypeColors, [RelayType.Guard]: "#123456"},
+            })))
             expect(result.current.isDefaultSettings).toBe(false)
         })
 

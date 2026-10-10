@@ -14,9 +14,9 @@ import {
 } from "@mui/material";
 import {FunctionComponent} from "react";
 
-import {tooltipTimeDelay} from "../../config";
+import {defaultSettings, tooltipTimeDelay} from "../../config";
 import {useSettings} from "../../context/settings-context";
-import {getIcon} from "../../types/icons";
+import {RelayTypeIcon} from "../../types/icons";
 import {RelayFlagLabel, RelayType, RelayTypeLabel, RelayTypeTooltip} from "../../types/relay";
 import {relayMustIncludeFlagOptions, Settings} from "../../types/settings";
 import {nameOfFactory} from "../../util/util";
@@ -29,6 +29,7 @@ import {
 } from "../dialogs/relay/ResponsiveRelayDetailsDialog";
 import {filteredRelaysAtom} from "../leaflet/LeafletLayers";
 import {relayDetailsDialogSearchAtom} from "../dialogs/relay/RelayDetailsSelectionHeader";
+import {RelayTypeColorInput} from "./RelayTypeColorInput";
 
 interface Props {
     elevation: number
@@ -39,7 +40,7 @@ interface Props {
  */
 export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     // App context
-    const {settings, changeSettings, resetSettings, isDefaultSettings} = useSettings()
+    const {settings, changeSettings, setSettings, resetSettings, isDefaultSettings} = useSettings()
 
     // Atom state
     const [, setShowRelayDetailsDialog] = useAtom(showRelayDetailsDialogAtom)
@@ -50,6 +51,10 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
 
     // Util
     const nameOfSetting = nameOfFactory<Settings>()
+    const relayTypes = [RelayType.Exit, RelayType.Guard, RelayType.Other]
+    const hasCustomRelayTypeColors = relayTypes.some(relayType =>
+        settings.relayTypeColors[relayType] !== defaultSettings.relayTypeColors[relayType]
+    )
 
     return (
         <>
@@ -147,33 +152,43 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                 </AccordionSummary>
                 <AccordionDetails sx={{padding: "0px 8px 20px 8px"}}>
                     <FormGroup>
-                        {[RelayType.Exit, RelayType.Guard, RelayType.Other].map(relayType =>
-                            <Tooltip
-                                key={relayType}
-                                title={RelayTypeTooltip[relayType]}
-                                placement={"left"}
-                                enterDelay={tooltipTimeDelay}
-                            >
-                                <FormControlLabel
-                                    key={relayType}
-                                    control={
-                                        <Checkbox
-                                            id={relayType.toString()}
-                                            checked={settings.showRelayTypes[relayType]}
-                                            onChange={changeSettings}
-                                        />
-                                    }
-                                    label={
-                                        <Box sx={{display: "flex", alignItems: "center"}}>
-                                            <span style={{paddingRight: "10px"}}>{RelayTypeLabel[relayType]}</span>
-                                            {getIcon(relayType)}
-                                        </Box>
-                                    }
-                                    name={showRelayTypesInput}
-                                />
-                            </Tooltip>
+                        {relayTypes.map(relayType =>
+                            <Box key={relayType} sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
+                                <Tooltip
+                                    title={RelayTypeTooltip[relayType]}
+                                    placement={"left"}
+                                    enterDelay={tooltipTimeDelay}
+                                >
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                id={relayType.toString()}
+                                                checked={settings.showRelayTypes[relayType]}
+                                                onChange={changeSettings}
+                                            />
+                                        }
+                                        label={
+                                            <Box sx={{display: "flex", alignItems: "center"}}>
+                                                <span style={{paddingRight: "10px"}}>{RelayTypeLabel[relayType]}</span>
+                                                <RelayTypeIcon relayType={relayType}/>
+                                            </Box>
+                                        }
+                                        name={showRelayTypesInput}
+                                    />
+                                </Tooltip>
+                                <RelayTypeColorInput relayType={relayType}/>
+                            </Box>
                         )}
                     </FormGroup>
+                    {hasCustomRelayTypeColors &&
+                        <Button
+                            size={"small"}
+                            sx={{mt: 1}}
+                            onClick={() => setSettings({...settings, relayTypeColors: {...defaultSettings.relayTypeColors}})}
+                        >
+                            Reset colors
+                        </Button>
+                    }
                 </AccordionDetails>
             </Accordion>
             <Accordion elevation={elevation}>
@@ -215,13 +230,16 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                     </Box>
                 </AccordionDetails>
             </Accordion>
-            {!isDefaultSettings &&
+            {(!isDefaultSettings || relaySearchOnMap) &&
                 <Button
                     variant="outlined"
                     startIcon={<RestartAltIcon/>}
                     fullWidth={true}
                     sx={{mt: "16px"}}
-                    onClick={resetSettings}
+                    onClick={() => {
+                        resetSettings()
+                        setRelaySearchOnMap(undefined)
+                    }}
                 >
                     Restore default settings
                 </Button>

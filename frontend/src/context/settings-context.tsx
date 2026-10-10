@@ -1,7 +1,8 @@
-import React, {useCallback, useContext, useMemo, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useMemo, useState} from 'react';
 
 import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/accordion/AppSettings";
 import {Settings} from "../types/settings";
+import {loadSettings, saveSettings} from "../util/settings-storage";
 
 interface SettingsInterface {
     settings: Settings
@@ -35,8 +36,8 @@ export function settingsEqual(a: Settings, b: Settings): boolean {
         const valueA = a[key]
         const valueB = b[key]
         if (typeof valueA === "object" && typeof valueB === "object") {
-            const nestedA = valueA as Record<string, boolean>
-            const nestedB = valueB as Record<string, boolean>
+            const nestedA = valueA as Record<string, unknown>
+            const nestedB = valueB as Record<string, unknown>
             const nestedKeys = new Set([...Object.keys(nestedA), ...Object.keys(nestedB)])
             for (const nestedKey of nestedKeys) {
                 if (nestedA[nestedKey] !== nestedB[nestedKey]) return false
@@ -63,13 +64,16 @@ function withValidSelection(settings: Settings): Settings {
 }
 
 /**
- * A provider, providing a Settings context that handles all settings
- * @param defaultSettings - a Settings object with the default settings
+ * A provider, providing a Settings context that handles all settings. Settings are kept in the browser's local storage,
+ * so they survive page reloads.
+ * @param defaultSettings - a Settings object with the default settings, used for settings that are not stored
  * @param children - the child elements in the DOM
  */
 export const SettingsProvider: React.FunctionComponent<SettingsProviderProps> = ({defaultSettings, children}) => {
     // Component state
-    const [settings, setSettingsState] = useState<Settings>(() => withValidSelection(defaultSettings))
+    const [settings, setSettingsState] = useState<Settings>(() => withValidSelection(loadSettings(defaultSettings)))
+
+    useEffect(() => saveSettings(settings), [settings])
 
     const setSettings = useCallback((newSettings: Settings) => {
         setSettingsState(withValidSelection(newSettings))

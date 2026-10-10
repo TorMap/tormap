@@ -6,6 +6,8 @@ import {afterEach, beforeEach, expect} from "vitest";
 import {mockBackend} from "./mock-backend";
 
 beforeEach(() => {
+    // Settings are persisted, so they would leak between tests
+    localStorage.clear()
     mockBackend.reset()
     mockBackend.install()
 })

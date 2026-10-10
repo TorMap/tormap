@@ -1,11 +1,13 @@
 import {Close as CloseIcon, Settings as SettingsIcon} from "@mui/icons-material";
 import {AppBar, Box, Button, Dialog, DialogActions, Fab, IconButton, Toolbar, Typography} from "@mui/material";
+import {useAtomValue} from "jotai";
 import {FunctionComponent, useState} from "react";
 
 import {SlideUpTransition} from "../../types/ui";
 import {AppSettings} from "../accordion/AppSettings";
 import {MapStats} from "../accordion/MapStats";
 import {ResponsiveDatePicker} from "../date/ResponsiveDatePicker";
+import {relaySearchOnMapAtom} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
 
 /**
  * A component wrapping all UI elements for devices with small screen sizes
@@ -13,6 +15,14 @@ import {ResponsiveDatePicker} from "../date/ResponsiveDatePicker";
 export const OverlaySmall: FunctionComponent = () => {
     // Component state
     const [open, setOpen] = useState(false);
+
+    // Close the settings as soon as search results are shown on the map, otherwise they would cover the map
+    const relaySearchOnMap = useAtomValue(relaySearchOnMapAtom)
+    const [syncedRelaySearchOnMap, setSyncedRelaySearchOnMap] = useState(relaySearchOnMap)
+    if (syncedRelaySearchOnMap !== relaySearchOnMap) {
+        setSyncedRelaySearchOnMap(relaySearchOnMap)
+        if (relaySearchOnMap) setOpen(false)
+    }
 
     return (
         <Box>

@@ -1,10 +1,9 @@
 import {CircleMarker, GeoJSON, Layer, LayerGroup, LeafletMouseEvent, Path} from "leaflet";
 import {describe, expect, it, vi} from "vitest";
 
-import {Colors} from "../config";
 import {RelayLocationDto} from "../dto/relay";
 import {makeRelay, makeRelays, makeSettings} from "../test/fixtures";
-import {RelayFlag} from "../types/relay";
+import {RelayFlag, RelayType} from "../types/relay";
 import {buildFamilyCoordinatesMap, buildRelayCoordinatesMap, buildRelayCountryMap, buildRelayFamilyMap} from "./aggregate-relays";
 import {getUniqueCountryColor} from "./geojson";
 import {
@@ -54,9 +53,15 @@ describe("buildAggregatedCoordinatesLayer", () => {
 })
 
 describe("buildRelayLayer", () => {
+    const colors = {
+        [RelayType.Exit]: "#000001",
+        [RelayType.Guard]: "#000002",
+        [RelayType.Other]: "#000003",
+    }
+
     // Each coordinate yields a visible marker followed by an invisible, larger hover target
     const build = (relays: RelayLocationDto[], singleColor = false, onClick = vi.fn()) => {
-        const layer = buildRelayLayer(buildRelayCoordinatesMap(relays), singleColor, onClick)
+        const layer = buildRelayLayer(buildRelayCoordinatesMap(relays), singleColor, colors, onClick)
         return {layer: markers(layer), onClick}
     }
 
@@ -70,15 +75,15 @@ describe("buildRelayLayer", () => {
     })
 
     it("skips coordinates that have no relays", () => {
-        const layer = buildRelayLayer(new Map([["1,1", []]]), false, vi.fn())
+        const layer = buildRelayLayer(new Map([["1,1", []]]), false, colors, vi.fn())
         expect(layer.getLayers()).toHaveLength(0)
     })
 
     it.each([
-        ["exit", [RelayFlag.Exit], Colors.Exit],
-        ["guard", [RelayFlag.Guard], Colors.Guard],
-        ["other", [RelayFlag.Fast], Colors.Default],
-    ])("colors a %s relay", (_name, flags, color) => {
+        ["exit", [RelayFlag.Exit], colors[RelayType.Exit]],
+        ["guard", [RelayFlag.Guard], colors[RelayType.Guard]],
+        ["other", [RelayFlag.Fast], colors[RelayType.Other]],
+    ])("colors a %s relay with its relay type color", (_name, flags, color) => {
         const {layer} = build([makeRelay({flags})])
         expect(layer[0].options.color).toBe(color)
         expect(layer[0].options.className).toBe("0,0")
@@ -91,8 +96,8 @@ describe("buildRelayLayer", () => {
             makeRelay({flags: [RelayFlag.Exit]}),
             makeRelay({flags: [RelayFlag.Guard]}),
         ]
-        expect(build(guardAndExit).layer[0].options.color).toBe(Colors.Exit)
-        expect(build(guardAndExit.slice(0, 2)).layer[0].options.color).toBe(Colors.Guard)
+        expect(build(guardAndExit).layer[0].options.color).toBe(colors[RelayType.Exit])
+        expect(build(guardAndExit.slice(0, 2)).layer[0].options.color).toBe(colors[RelayType.Guard])
     })
 
     it("uses one color when singleColor is set", () => {

@@ -30,6 +30,7 @@ export const makeRelays = (count: number, overrides: Partial<RelayLocationDto> =
 export const makeSettings = (overrides: Partial<Settings> = {}): Settings => ({
     ...defaultSettings,
     showRelayTypes: {...defaultSettings.showRelayTypes},
+    relayTypeColors: {...defaultSettings.relayTypeColors},
     relaysMustHaveFlag: {...defaultSettings.relaysMustHaveFlag},
     ...overrides,
 })
