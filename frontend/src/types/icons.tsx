@@ -6,6 +6,7 @@ import {
     Security as SecurityIcon,
     Timeline as TimelineIcon,
 } from "@mui/icons-material";
+import type {JSX} from "react";
 
 import {Colors} from "../config";
 import {RelayType} from "./relay";
