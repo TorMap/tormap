@@ -6,7 +6,7 @@ visualize markers on a world map we use [Leaflet](https://leafletjs.com/).
 
 ## Requirements
 
-- [NodeJS](https://nodejs.org/en/)  (v20)
+- [NodeJS](https://nodejs.org/en/) (v24, see `.nvmrc`)
 - [yarn](https://yarnpkg.com/en/docs/install)
 
 ## Run Development Server
@@ -23,7 +23,7 @@ in the `.env` file.
 
 ## Config
 
-The main `frontend` config is located at `frontend/srv/util/config.ts`. Further environment options like enable/disable
+The main `frontend` config is located at `frontend/src/config.ts`. Further environment options like enable/disable
 Browser autostart and default port can be configured in `frontend/.env`. Dependencies are managed with `yarn` and
 located in `frontend/package.json`. Compiler options for `TypeScript` are located at `frontend/tsconfig.json`.
 
