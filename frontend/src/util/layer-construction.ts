@@ -10,7 +10,6 @@ import L, {
 } from "leaflet";
 import "./leaflet-heat-init";
 
-import {Colors} from "../config";
 import {RelayLocationDto} from "../dto/relay";
 import worldGeoData from "../resources/world.geo.json";
 import {RelayType} from "../types/relay";
@@ -57,11 +56,13 @@ export const buildAggregatedCoordinatesLayer = (
  * Returns a Layer with markers for each relay.
  * @param relayCoordinatesMap - The LatLonMap
  * @param singleColor - Whether all markers should have the same color
+ * @param relayTypeColors - The marker color for each relay type
  * @param onMarkerClick - Event handler for clicking on a marker
  */
 export const buildRelayLayer = (
     relayCoordinatesMap: Map<string, RelayLocationDto[]>,
     singleColor: boolean,
+    relayTypeColors: Record<RelayType, string>,
     onMarkerClick: (e: LeafletMouseEvent) => void,
 ): LayerGroup => {
     const layer = new LayerGroup()
@@ -71,14 +72,14 @@ export const buildRelayLayer = (
         const {
             mostImportantRelay,
             marker
-        } = addRelayMarker(relaysAtCoordinates, layer, singleColor, coordinatesKey, onMarkerClick)
+        } = addRelayMarker(relaysAtCoordinates, layer, singleColor, relayTypeColors, coordinatesKey, onMarkerClick)
 
         addRelayNicknameTooltip(relaysAtCoordinates, mostImportantRelay, marker, layer);
     })
     return layer
 }
 
-function addRelayMarker(relaysAtCoordinates: RelayLocationDto[], targetLayer: LayerGroup, singleColor: boolean, coordinatesKey: string, onMarkerClick: (e: LeafletMouseEvent) => void) {
+function addRelayMarker(relaysAtCoordinates: RelayLocationDto[], targetLayer: LayerGroup, singleColor: boolean, relayTypeColors: Record<RelayType, string>, coordinatesKey: string, onMarkerClick: (e: LeafletMouseEvent) => void) {
     let mostImportantRelay = relaysAtCoordinates[0]
     for (const relay of relaysAtCoordinates) {
         if (getRelayType(relay) === RelayType.Exit) {
@@ -88,18 +89,7 @@ function addRelayMarker(relaysAtCoordinates: RelayLocationDto[], targetLayer: La
             mostImportantRelay = relay
         }
     }
-    let color = Colors.Default
-    switch (getRelayType(mostImportantRelay)) {
-        case RelayType.Exit: {
-            color = Colors.Exit
-            break
-        }
-        case RelayType.Guard: {
-            color = Colors.Guard
-            break
-        }
-    }
-    if (singleColor) color = "#989898"
+    const color = singleColor ? "#989898" : relayTypeColors[getRelayType(mostImportantRelay)]
 
     const marker = circleMarker(
         [mostImportantRelay.lat, mostImportantRelay.long],

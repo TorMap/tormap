@@ -15,12 +15,11 @@ import {useSettings} from "../../context/settings-context";
 import {useStatistics} from "../../context/statistics-context";
 import {
     EarthIcon,
-    ExitRelayIcon,
-    GuardRelayIcon,
-    OtherRelayIcon,
     RelayFamilyIcon,
+    RelayTypeIcon,
     TotalRelaysIcon
 } from "../../types/icons";
+import {RelayType} from "../../types/relay";
 import {getFullCountryName} from "../../util/geojson";
 
 interface Props {
@@ -46,9 +45,9 @@ export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation})
 
     // Construct the stats rows to display
     const rows: StatsRow[] = [
-        {icon: ExitRelayIcon, title: "Exit relays", value: statistics.relayExitCount},
-        {icon: GuardRelayIcon, title: "Guard relays", value: statistics.relayGuardCount},
-        {icon: OtherRelayIcon, title: "Other relays", value: statistics.relayOtherCount},
+        {icon: <RelayTypeIcon relayType={RelayType.Exit}/>, title: "Exit relays", value: statistics.relayExitCount},
+        {icon: <RelayTypeIcon relayType={RelayType.Guard}/>, title: "Guard relays", value: statistics.relayGuardCount},
+        {icon: <RelayTypeIcon relayType={RelayType.Other}/>, title: "Other relays", value: statistics.relayOtherCount},
         {
             icon: TotalRelaysIcon,
             title: "Total relays",

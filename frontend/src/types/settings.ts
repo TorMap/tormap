@@ -11,6 +11,7 @@ export interface Settings {
 
     // Relay flags
     showRelayTypes: Record<RelayType, boolean>
+    relayTypeColors: Record<RelayType, string>
     relaysMustHaveFlag: Record<RelayFlag, boolean>
 }
 

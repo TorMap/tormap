@@ -3,7 +3,7 @@ import {Box, CircularProgress, IconButton, Tooltip, Typography} from "@mui/mater
 import {FunctionComponent} from "react";
 
 import {useSettings} from "../../../context/settings-context";
-import {getIcon} from "../../../types/icons";
+import {RelayTypeIcon} from "../../../types/icons";
 import {RelayDetailsMatch, RelayType, RelayTypeLabel} from "../../../types/relay";
 import {getRelayType} from "../../../util/aggregate-relays";
 import {SelectFamilyButton} from "../../buttons/SelectFamilyButton";
@@ -50,7 +50,7 @@ export const RelayDetailsHeader: FunctionComponent<Props> = ({
                             finishQuickAction()
                         }}
                     >
-                        {getIcon(getRelayType(relayDetailsMatch))}
+                        <RelayTypeIcon relayType={relayType}/>
                     </IconButton>
                 </Tooltip>
                 {relayDetailsMatch?.familyId &&

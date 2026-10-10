@@ -1,7 +1,7 @@
 import {Box, CircularProgress, List, ListItemButton, ListItemIcon, ListItemText} from "@mui/material";
 import {FunctionComponent, useEffect, useRef, useState} from "react";
 
-import {getIcon, RelayFamilyIcon} from "../../../types/icons";
+import {RelayFamilyIcon, RelayTypeIcon} from "../../../types/icons";
 import {RelayIdentifierMatch} from "../../../types/relay";
 import {calculateFamilyColor} from "../../../util/layer-construction";
 
@@ -68,7 +68,7 @@ export const RelayList: FunctionComponent<Props> = ({
                             >
                                 <ListItemText primary={relayMatch.nickname}/>
                                 <ListItemIcon sx={{minWidth: "70px"}}>
-                                    {getIcon(relayMatch.relayType)}
+                                    <RelayTypeIcon relayType={relayMatch.relayType}/>
                                     {relayMatch.familyId &&
                                         <Box sx={{color: calculateFamilyColor(relayMatch.familyId), ml: 2}}>
                                             {RelayFamilyIcon}

@@ -18,6 +18,12 @@ export const defaultSettings: Settings = {
         [RelayType.Guard]: true,
         [RelayType.Other]: true,
     },
+    // Lowercase #rrggbb, as reported by <input type="color">
+    relayTypeColors: {
+        [RelayType.Exit]: "#ff4848",
+        [RelayType.Guard]: "#ffd371",
+        [RelayType.Other]: "#b78aff",
+    },
 
     relaysMustHaveFlag: {
         [RelayFlag.Authority]: false,
@@ -40,10 +46,3 @@ export const defaultSettings: Settings = {
 
 // The time it takes before the tooltip is shown
 export const tooltipTimeDelay = 750
-
-// Colors for relay types
-export const Colors = {
-    Exit: "#FF4848",
-    Guard: "#FFD371",
-    Default: "#b78aff",
-}
