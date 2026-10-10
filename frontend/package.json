@@ -8,6 +8,9 @@
     "build": "tsc && vite build",
     "preview": "vite preview --port 3000",
     "lint": "eslint ./src --fix",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "snyk:test": "snyk test --severity-threshold=high",
     "snyk:code": "snyk code test --severity-threshold=high",
     "smoke:load": "bash ./scripts/smoke-load.sh",
@@ -34,6 +37,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
     "@types/geojson": "7946.0.16",
     "@types/leaflet": "1.9.22",
     "@types/leaflet.heat": "0.2.5",
@@ -41,15 +45,21 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react-swc": "4.3.3",
+    "@vitest/browser-playwright": "5.0.2",
+    "@vitest/coverage-v8": "5.0.2",
     "eslint": "10.12.0",
     "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "7.1.1",
     "globals": "17.13.0",
+    "msw": "3.0.2",
+    "playwright": "1.63.0",
     "typescript": "5.9.3",
     "typescript-eslint": "8.71.0",
     "vite": "8.3.0",
-    "vite-plugin-checker": "0.14.5"
+    "vite-plugin-checker": "0.14.5",
+    "vitest": "5.0.2",
+    "vitest-browser-react": "2.3.0"
   },
   "resolutions": {
     "tar": "7.5.22"
