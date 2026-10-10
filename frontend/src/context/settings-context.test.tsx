@@ -6,7 +6,7 @@ import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/acc
 import {makeSettings} from "../test/fixtures";
 import {RelayFlag, RelayType} from "../types/relay";
 import {Settings} from "../types/settings";
-import {SettingsProvider, useSettings} from "./settings-context";
+import {SettingsProvider, settingsEqual, useSettings} from "./settings-context";
 
 const render = (defaults: Settings = makeSettings()) =>
     renderHook(() => useSettings(), {
@@ -58,6 +58,43 @@ describe("SettingsProvider", () => {
         expect(result.current.settings.aggregateCoordinates).toBe(true)
     })
 
+    describe("restore defaults", () => {
+        it("reports default settings on load", async () => {
+            const {result} = await render()
+            expect(result.current.isDefaultSettings).toBe(true)
+        })
+
+        it("reports non-default settings after a change", async () => {
+            const {result, act} = await render()
+            await act(() => result.current.changeSettings(
+                changeEvent(relaysMustIncludeFlagInput, String(RelayFlag.Stable), true)
+            ))
+            expect(result.current.isDefaultSettings).toBe(false)
+        })
+
+        it("reports default settings again when a change is undone by hand", async () => {
+            const {result, act} = await render()
+            await act(() => result.current.changeSettings(changeEvent("heatMap", "heatMap", true)))
+            await act(() => result.current.changeSettings(changeEvent("heatMap", "heatMap", false)))
+            expect(result.current.isDefaultSettings).toBe(true)
+        })
+
+        it("restores the provided defaults", async () => {
+            const defaults = makeSettings({aggregateCoordinates: true})
+            const {result, act} = await render(defaults)
+            await act(() => result.current.setSettings(makeSettings({
+                sortCountry: true,
+                selectedCountry: "DE",
+                showRelayTypes: {[RelayType.Exit]: false, [RelayType.Guard]: true, [RelayType.Other]: true},
+            })))
+            expect(result.current.isDefaultSettings).toBe(false)
+
+            await act(() => result.current.resetSettings())
+            expect(result.current.settings).toEqual(defaults)
+            expect(result.current.isDefaultSettings).toBe(true)
+        })
+    })
+
     describe("selection reset", () => {
         it("clears the selected country when country grouping is off", async () => {
             const {result} = await render(makeSettings({sortCountry: false, selectedCountry: "DE"}))
@@ -84,5 +121,21 @@ describe("SettingsProvider", () => {
             await act(() => result.current.changeSettings(changeEvent("sortCountry", "sortCountry", false)))
             expect(result.current.settings.selectedCountry).toBeUndefined()
         })
+    })
+})
+
+describe("settingsEqual", () => {
+    it("treats equal values in different objects as equal", () => {
+        expect(settingsEqual(makeSettings(), makeSettings())).toBe(true)
+    })
+
+    it("detects a changed top-level value", () => {
+        expect(settingsEqual(makeSettings(), makeSettings({sortFamily: true, selectedFamily: 1}))).toBe(false)
+    })
+
+    it("detects a changed nested value", () => {
+        const changed = makeSettings()
+        changed.relaysMustHaveFlag[RelayFlag.Exit] = true
+        expect(settingsEqual(makeSettings(), changed)).toBe(false)
     })
 })

@@ -1,4 +1,4 @@
-import {ExpandMore as ExpandMoreIcon, Search as SearchIcon} from "@mui/icons-material";
+import {ExpandMore as ExpandMoreIcon, RestartAlt as RestartAltIcon, Search as SearchIcon} from "@mui/icons-material";
 import {
     Accordion,
     AccordionDetails,
@@ -34,7 +34,7 @@ interface Props {
  */
 export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     // App context
-    const {settings, changeSettings} = useSettings()
+    const {settings, changeSettings, resetSettings, isDefaultSettings} = useSettings()
 
     // Atom state
     const [, setShowRelayDetailsDialog] = useAtom(showRelayDetailsDialogAtom)
@@ -197,6 +197,17 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                     </Box>
                 </AccordionDetails>
             </Accordion>
+            {!isDefaultSettings &&
+                <Button
+                    variant="outlined"
+                    startIcon={<RestartAltIcon/>}
+                    fullWidth={true}
+                    sx={{mt: "16px"}}
+                    onClick={resetSettings}
+                >
+                    Restore default settings
+                </Button>
+            }
         </>
     )
 }
