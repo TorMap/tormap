@@ -241,7 +241,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                         setRelaySearchOnMap(undefined)
                     }}
                 >
-                    Restore default settings
+                    Restore settings
                 </Button>
             }
         </>
