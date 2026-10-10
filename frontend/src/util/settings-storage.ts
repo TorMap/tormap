@@ -47,7 +47,8 @@ export function parseStoredSettings(json: string | null, defaults: Settings): Se
         sortCountry: booleanSetting("sortCountry"),
         selectedCountry: typeof stored.selectedCountry === "string" ? stored.selectedCountry : defaults.selectedCountry,
         sortFamily: booleanSetting("sortFamily"),
-        selectedFamily: Number.isSafeInteger(stored.selectedFamily) ? stored.selectedFamily as number : defaults.selectedFamily,
+        // Family IDs differ between dates, so a selected family is never stored
+        selectedFamily: defaults.selectedFamily,
         aggregateCoordinates: booleanSetting("aggregateCoordinates"),
         heatMap: booleanSetting("heatMap"),
         showRelayTypes: mergeRecord(defaults.showRelayTypes, stored.showRelayTypes, isBoolean),
@@ -72,7 +73,7 @@ export function loadSettings(defaults: Settings): Settings {
  */
 export function saveSettings(settings: Settings) {
     try {
-        window.localStorage.setItem(settingsStorageKey, JSON.stringify(settings))
+        window.localStorage.setItem(settingsStorageKey, JSON.stringify({...settings, selectedFamily: undefined}))
     } catch {
         // Settings are then only kept until the page is reloaded
     }

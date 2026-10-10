@@ -79,6 +79,18 @@ describe("SettingsProvider", () => {
             expect(stored()).toMatchObject({heatMap: true})
         })
 
+        it("stores the selected country but not the selected family", async () => {
+            const {result, act} = await render()
+            await act(() => result.current.setSettings(makeSettings({
+                sortCountry: true,
+                selectedCountry: "DE",
+                sortFamily: true,
+                selectedFamily: 3,
+            })))
+            expect(stored()).toMatchObject({sortCountry: true, selectedCountry: "DE", sortFamily: true})
+            expect(stored()).not.toHaveProperty("selectedFamily")
+        })
+
         it("falls back to the defaults for broken storage", async () => {
             localStorage.setItem(settingsStorageKey, "not json")
             const defaults = makeSettings({sortFamily: true})

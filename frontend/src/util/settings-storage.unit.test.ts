@@ -21,7 +21,6 @@ describe("parseStoredSettings", () => {
             sortCountry: true,
             selectedCountry: "DE",
             sortFamily: true,
-            selectedFamily: 42,
             aggregateCoordinates: true,
             heatMap: true,
             showRelayTypes: {[RelayType.Exit]: false, [RelayType.Guard]: true, [RelayType.Other]: false},
@@ -29,6 +28,12 @@ describe("parseStoredSettings", () => {
         })
         stored.relaysMustHaveFlag[RelayFlag.Stable] = true
         expect(parseStoredSettings(JSON.stringify(stored), defaults)).toEqual(stored)
+    })
+
+    it("does not restore a selected family", () => {
+        const parsed = parseStoredSettings(JSON.stringify({sortFamily: true, selectedFamily: 42}), defaults)
+        expect(parsed.sortFamily).toBe(true)
+        expect(parsed.selectedFamily).toBeUndefined()
     })
 
     it("keeps defaults for missing settings", () => {
@@ -44,7 +49,6 @@ describe("parseStoredSettings", () => {
         const parsed = parseStoredSettings(JSON.stringify({
             sortCountry: "yes",
             selectedCountry: 1,
-            selectedFamily: 1.5,
             heatMap: null,
             showRelayTypes: [false, false, false],
             relaysMustHaveFlag: {[RelayFlag.Exit]: 1, 99: true},
