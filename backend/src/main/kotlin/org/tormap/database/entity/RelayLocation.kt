@@ -32,7 +32,7 @@ class RelayLocation(
     var fingerprint: String = networkStatusEntry.fingerprint
 
     var flags: String? = try {
-        networkStatusEntry.flags.map { TorRelayFlag.valueOf(it.toString()).ordinal }.joinToString(", ")
+        networkStatusEntry.flags.map { TorRelayFlag.valueOf(it).ordinal }.joinToString(", ")
     } catch (exception: Exception) {
         null
     }
