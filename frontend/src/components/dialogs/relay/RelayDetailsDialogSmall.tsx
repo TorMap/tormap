@@ -1,6 +1,6 @@
 import {Close as CloseIcon} from "@mui/icons-material";
 import {AppBar, Button, Dialog, DialogActions, DialogContent, IconButton, Toolbar} from "@mui/material";
-import React, {FunctionComponent, useEffect, useState} from "react";
+import {FunctionComponent, useEffect, useState} from "react";
 
 import {SlideUpTransition} from "../../../types/ui";
 import {LoadingAnimation} from "../../loading/LoadingAnimation";

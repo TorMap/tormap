@@ -1,5 +1,5 @@
 import {Box} from "@mui/material";
-import React, {FunctionComponent} from "react";
+import {FunctionComponent} from "react";
 
 import {AppSettings} from "../accordion/AppSettings";
 import {MapStats} from "../accordion/MapStats";

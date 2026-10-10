@@ -11,7 +11,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import React, {FunctionComponent} from "react";
+import {FunctionComponent} from "react";
 
 import {tooltipTimeDelay} from "../../config";
 import {useSettings} from "../../context/settings-context";

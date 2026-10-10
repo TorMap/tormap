@@ -1,6 +1,6 @@
 import {Close as CloseIcon, Settings as SettingsIcon} from "@mui/icons-material";
 import {AppBar, Box, Button, Dialog, DialogActions, Fab, IconButton, Toolbar, Typography} from "@mui/material";
-import React, {FunctionComponent, useState} from "react";
+import {FunctionComponent, useState} from "react";
 
 import {SlideUpTransition} from "../../types/ui";
 import {AppSettings} from "../accordion/AppSettings";

@@ -3,7 +3,7 @@ import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
 import {format, isValid} from "date-fns";
 import {enCA} from "date-fns/locale";
-import React, {FunctionComponent} from "react";
+import {FunctionComponent} from "react";
 
 import {useDate} from "../../context/date-context";
 

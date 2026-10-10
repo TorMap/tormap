@@ -4,7 +4,7 @@
  */
 import {useMediaQuery, useTheme} from "@mui/material";
 import {useSnackbar} from "notistack";
-import React, {FunctionComponent, useEffect, useMemo, useState} from "react";
+import {FunctionComponent, useEffect, useMemo, useState} from "react";
 
 import {RelayDetailsDto, RelayIdentifierDto, RelayLocationDto} from "../../../dto/relay";
 import {RelayDetailsMatch, RelayIdentifierMatch} from "../../../types/relay";

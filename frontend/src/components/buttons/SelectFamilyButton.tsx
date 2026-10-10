@@ -1,5 +1,5 @@
 import {Button, IconButton} from "@mui/material";
-import React, {FunctionComponent} from "react";
+import {FunctionComponent} from "react";
 
 import {useSettings} from "../../context/settings-context";
 import {RelayFamilyIcon} from "../../types/icons";

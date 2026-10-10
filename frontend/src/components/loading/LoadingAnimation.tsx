@@ -1,5 +1,5 @@
 import {CircularProgress} from "@mui/material";
-import React, {FunctionComponent} from "react";
+import {FunctionComponent} from "react";
 
 /**
  * A Component for a loading Animation

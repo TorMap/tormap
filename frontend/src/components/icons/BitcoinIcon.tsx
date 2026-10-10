@@ -1,5 +1,5 @@
 import {SvgIcon} from "@mui/material";
-import React, {FunctionComponent} from "react";
+import {FunctionComponent} from "react";
 
 export const BitcoinIcon: FunctionComponent = () => {
     return (

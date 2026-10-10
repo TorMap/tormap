@@ -1,6 +1,6 @@
 import {Close as CloseIcon} from "@mui/icons-material";
 import {Box, CircularProgress, IconButton, Tooltip, Typography} from "@mui/material";
-import React, {FunctionComponent} from "react";
+import {FunctionComponent} from "react";
 
 import {useSettings} from "../../../context/settings-context";
 import {getIcon} from "../../../types/icons";

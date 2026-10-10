@@ -1,6 +1,6 @@
 import {Slider, SliderProps} from "@mui/material";
 import {format} from "date-fns";
-import React, {FunctionComponent, useEffect, useState} from "react";
+import {FunctionComponent, useEffect, useState} from "react";
 
 import {useDate} from "../../context/date-context";
 import {useDebounce} from "../../util/util";

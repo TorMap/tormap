@@ -1,5 +1,5 @@
 import {Box, CircularProgress, List, ListItemButton, ListItemIcon, ListItemText} from "@mui/material";
-import React, {FunctionComponent, useEffect, useRef, useState} from "react";
+import {FunctionComponent, useEffect, useRef, useState} from "react";
 
 import {getIcon, RelayFamilyIcon} from "../../../types/icons";
 import {RelayIdentifierMatch} from "../../../types/relay";

@@ -9,7 +9,7 @@ import {
     TableRow,
     Typography
 } from "@mui/material";
-import React, {FunctionComponent, ReactElement} from "react";
+import {FunctionComponent, ReactElement} from "react";
 
 import {useSettings} from "../../context/settings-context";
 import {useStatistics} from "../../context/statistics-context";

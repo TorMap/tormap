@@ -2,7 +2,6 @@ import './index.css';
 
 import {createTheme, ThemeProvider} from "@mui/material";
 import {SnackbarProvider} from "notistack";
-import React from 'react';
 import {createRoot} from "react-dom/client";
 
 import {App} from "./components/App";

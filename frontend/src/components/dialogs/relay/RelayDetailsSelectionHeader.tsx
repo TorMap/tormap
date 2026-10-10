@@ -1,5 +1,5 @@
 import {FormControl, InputAdornment, InputLabel, MenuItem, Select, Stack, TextField} from "@mui/material";
-import React, {FunctionComponent} from "react";
+import {FunctionComponent} from "react";
 import {RelayIdentifierMatch} from "../../../types/relay";
 import {nameOfFactory} from "../../../util/util";
 import {Search} from "@mui/icons-material";
