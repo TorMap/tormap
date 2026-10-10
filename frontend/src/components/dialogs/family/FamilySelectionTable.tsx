@@ -1,5 +1,5 @@
 import {Table, TableBody, TableCell, TableHead, TableRow, Typography} from "@mui/material";
-import React, {FunctionComponent} from "react";
+import {FunctionComponent} from "react";
 
 import {useSettings} from "../../../context/settings-context";
 import {RelayFamilyIdentifier} from "../../../dto/relay";

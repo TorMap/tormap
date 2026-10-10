@@ -45,23 +45,6 @@
       "automerge": false
     },
     {
-      "description": "Limit react version to ensure compatibility with react-infinite-scroller",
-      "matchPackageNames": [
-        "@types/react",
-        "@types/react-dom",
-        "react",
-        "react-dom"
-      ],
-      "enabled": false
-    },
-    {
-      "description": "Limit @types/leaflet version to ensure compatibility with leaflet heatmap",
-      "matchPackageNames": [
-        "@types/leaflet"
-      ],
-      "enabled": false
-    },
-    {
       "description": "Limit @types/leaflet.heat version to ensure compatibility with leaflet heatmap",
       "matchPackageNames": [
         "@types/leaflet.heat"
@@ -69,11 +52,21 @@
       "enabled": false
     },
     {
-      "description": "Keep all @mui packages on major version 5",
+      "description": "Group MUI updates",
+      "groupName": "mui",
       "matchPackageNames": [
         "/^@mui\\//"
-      ],
-      "allowedVersions": "/^5\\./"
+      ]
+    },
+    {
+      "description": "Group React updates",
+      "groupName": "react",
+      "matchPackageNames": [
+        "react",
+        "react-dom",
+        "@types/react",
+        "@types/react-dom"
+      ]
     }
   ]
 }

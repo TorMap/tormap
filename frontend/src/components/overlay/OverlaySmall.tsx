@@ -1,6 +1,6 @@
 import {Close as CloseIcon, Settings as SettingsIcon} from "@mui/icons-material";
 import {AppBar, Box, Button, Dialog, DialogActions, Fab, IconButton, Toolbar, Typography} from "@mui/material";
-import React, {FunctionComponent, useState} from "react";
+import {FunctionComponent, useState} from "react";
 
 import {SlideUpTransition} from "../../types/ui";
 import {AppSettings} from "../accordion/AppSettings";
@@ -29,7 +29,7 @@ export const OverlaySmall: FunctionComponent = () => {
                 open={open}
                 fullScreen
                 onClose={() => setOpen(false)}
-                TransitionComponent={SlideUpTransition}
+                slots={{transition: SlideUpTransition}}
             >
                 <AppBar sx={{position: 'relative'}}>
                     <Toolbar>
@@ -48,7 +48,7 @@ export const OverlaySmall: FunctionComponent = () => {
                 <ResponsiveDatePicker largeScreen={false} />
                 <Box sx={{padding: 1}}>
                     <AppSettings elevation={0}/>
-                    <Box height={"10px"}/>
+                    <Box sx={{height: "10px"}}/>
                     <MapStats elevation={0} defaultExpanded={false}/>
                 </Box>
                 <DialogActions sx={{

@@ -1,10 +1,11 @@
-import {Mark} from "@mui/base";
-import {Slider} from "@mui/material";
+import {Slider, SliderProps} from "@mui/material";
 import {format} from "date-fns";
-import React, {FunctionComponent, useEffect, useState} from "react";
+import {FunctionComponent, useEffect, useState} from "react";
 
 import {useDate} from "../../context/date-context";
 import {useDebounce} from "../../util/util";
+
+type Mark = Exclude<SliderProps["marks"], boolean | undefined>[number]
 
 /**
  * A Slider for date selection

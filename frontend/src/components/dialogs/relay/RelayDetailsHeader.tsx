@@ -1,6 +1,6 @@
 import {Close as CloseIcon} from "@mui/icons-material";
 import {Box, CircularProgress, IconButton, Tooltip, Typography} from "@mui/material";
-import React, {FunctionComponent} from "react";
+import {FunctionComponent} from "react";
 
 import {useSettings} from "../../../context/settings-context";
 import {getIcon} from "../../../types/icons";
@@ -26,7 +26,7 @@ export const RelayDetailsHeader: FunctionComponent<Props> = ({
     const {settings, setSettings} = useSettings()
     const relayType = relayDetailsMatch ? getRelayType(relayDetailsMatch) : undefined
     return (
-        <Box display="flex" alignItems={"center"} sx={{mt: 0.5}}>
+        <Box sx={{display: "flex", alignItems: "center", mt: 0.5}}>
             {relayDetailsMatch && relayType != undefined ? <>
                 <Tooltip title={`Relay's nickname`}>
                     <Typography sx={{display: "inline"}}

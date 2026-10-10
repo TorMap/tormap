@@ -1,9 +1,8 @@
-import {TextField, TextFieldProps} from "@mui/material";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDateFns} from "@mui/x-date-pickers/AdapterDateFns";
-import {format, isValid} from "date-fns";
+import {format, isValid, parseISO} from "date-fns";
 import {enCA} from "date-fns/locale";
-import React, {FunctionComponent} from "react";
+import {FunctionComponent, useEffect, useState} from "react";
 
 import {useDate} from "../../context/date-context";
 
@@ -18,10 +17,18 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
     // App context
     const {selectedDate, availableDays, setSelectedDate} = useDate()
 
-    const firstAvailableDate = selectedDate ? new Date(availableDays[0]) : undefined
-    const lastAvailableDate = selectedDate ? new Date(availableDays[availableDays.length - 1]) : undefined
+    const firstAvailableDate = selectedDate ? parseISO(availableDays[0]) : undefined
+    const lastAvailableDate = selectedDate ? parseISO(availableDays[availableDays.length - 1]) : undefined
+
+    // The field keeps what the user is typing. Intermediate values (e.g. a new year while typing a full date)
+    // are often not available days and must not be reverted by the controlled value.
+    const [inputValue, setInputValue] = useState<Date | null>(null)
+    useEffect(() => {
+        setInputValue(selectedDate ? parseISO(selectedDate) : null)
+    }, [selectedDate])
 
     const handleDateChange = (date: Date | null) => {
+        setInputValue(date)
         if (date && isValid(date)) {
             const day: string = format(date, "yyyy-MM-dd")
             if (availableDays.includes(day)) {
@@ -30,29 +37,33 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
         }
     }
 
+    // Discard input which does not correspond to the loaded day
+    const resetInput = () => setInputValue(selectedDate ? parseISO(selectedDate) : null)
+
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={enCA}>
             <DatePicker
-                value={selectedDate}
-                mask={"____-__-__"}
-                renderInput={(params: TextFieldProps) =>
-                    largeScreen ? <TextField variant={"standard"}
-                                             {...params}
-                                             sx={{
-                                                 position: "fixed",
-                                                 bottom: "37px",
-                                                 right: "1%",
-                                                 maxWidth: "20%",
-                                             }}
-                        /> :
-                        <TextField variant={"standard"}
-                                   {...params}
-                                   sx={{
-                                       padding: 2
-                                   }}
-                                   helperText={"Select a date"}
-                        />
-                }
+                value={inputValue}
+                format={"yyyy-MM-dd"}
+                slotProps={{
+                    textField: largeScreen ? {
+                        variant: "standard",
+                        onBlur: resetInput,
+                        sx: {
+                            position: "fixed",
+                            bottom: "37px",
+                            right: "1%",
+                            maxWidth: "20%",
+                        },
+                    } : {
+                        variant: "standard",
+                        onBlur: resetInput,
+                        sx: {
+                            padding: 2,
+                        },
+                        helperText: "Select a date",
+                    },
+                }}
                 onChange={handleDateChange}
                 onAccept={handleDateChange}
                 minDate={firstAvailableDate}

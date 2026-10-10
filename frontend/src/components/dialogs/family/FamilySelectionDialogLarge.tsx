@@ -1,6 +1,6 @@
 import {Close as CloseIcon} from "@mui/icons-material";
 import {CircularProgress, Dialog, DialogContent, DialogTitle, IconButton} from "@mui/material";
-import React, {FunctionComponent} from "react";
+import {FunctionComponent} from "react";
 
 import {FamilySelectionDialogProps} from "./FamilySelectionDialog";
 import {FamilySelectionTable} from "./FamilySelectionTable";
@@ -18,13 +18,14 @@ export const FamilySelectionDialogLarge: FunctionComponent<FamilySelectionDialog
         <Dialog
             open={shouldShowDialog}
             onClose={closeDialog}
-            onBackdropClick={closeDialog}
             maxWidth={"lg"}
             fullWidth={true}
-            PaperProps={{
-                sx: {
-                    minHeight: "80vh",
-                    maxHeight: "80vh",
+            slotProps={{
+                paper: {
+                    sx: {
+                        minHeight: "80vh",
+                        maxHeight: "80vh",
+                    }
                 }
             }}
         >

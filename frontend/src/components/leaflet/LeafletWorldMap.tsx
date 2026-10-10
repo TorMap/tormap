@@ -1,4 +1,3 @@
-import {useMediaQuery, useTheme} from "@mui/material";
 import {useSnackbar} from "notistack";
 import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
 import {MapContainer, TileLayer} from "react-leaflet";
@@ -34,8 +33,6 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
     // App context
     const {enqueueSnackbar} = useSnackbar();
     const {selectedDate} = useDate()
-    const theme = useTheme()
-    const isAtLeastMediumScreen = useMediaQuery(theme.breakpoints.up("md"))
 
     /**
      * Query all relays for the selected date whenever a new date is selected
@@ -76,7 +73,6 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
             preferCanvas={true}
             attributionControl={false}
             maxBounds={[[-180, -360], [180, 360]]}
-            tap={isAtLeastMediumScreen ? false : undefined} // fixes macOS/Safari bug for Leaflet v1.7.1
         >
             <React.StrictMode>
                 <LeafletLayers

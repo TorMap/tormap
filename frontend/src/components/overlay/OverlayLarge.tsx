@@ -1,5 +1,5 @@
 import {Box} from "@mui/material";
-import React, {FunctionComponent} from "react";
+import {FunctionComponent} from "react";
 
 import {AppSettings} from "../accordion/AppSettings";
 import {MapStats} from "../accordion/MapStats";
@@ -22,10 +22,12 @@ export const OverlayLarge: FunctionComponent = () => {
             </Box>
             <ResponsiveDatePicker largeScreen={true}/>
             <Box sx={{
-                position: "absolute",
+                position: "fixed",
                 right: "1%",
                 top: "15px",
-                paddingBottom: "10px",
+                // Leave room for the date field in the bottom right corner and scroll the panel instead
+                maxHeight: "calc(100vh - 110px)",
+                overflowY: "auto",
                 maxWidth: "20%",
             }}>
                 <AppSettings elevation={24}/>

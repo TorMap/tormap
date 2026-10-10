@@ -11,7 +11,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import React, {FunctionComponent} from "react";
+import {FunctionComponent} from "react";
 
 import {tooltipTimeDelay} from "../../config";
 import {useSettings} from "../../context/settings-context";
@@ -146,10 +146,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                                         />
                                     }
                                     label={
-                                        <Box
-                                            display="flex"
-                                            alignItems="center"
-                                        >
+                                        <Box sx={{display: "flex", alignItems: "center"}}>
                                             <span style={{paddingRight: "10px"}}>{RelayTypeLabel[relayType]}</span>
                                             {getIcon(relayType)}
                                         </Box>

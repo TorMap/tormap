@@ -24,7 +24,7 @@ Rules for AI coding agents (and a quick reference for humans) working in this re
 
 ## Dependencies
 - Before running a build or tests with a new dependency or a changed dependency name or version, ask the maintainer to verify it.
-- Renovate manages updates. Respect the intentional pins and disabled updates in `renovate.json` (React, MUI, Tor metrics-lib support libraries).
+- Renovate manages updates. Respect the intentional pins and disabled updates in `renovate.json` (`@types/leaflet.heat`, Tor metrics-lib support libraries).
 - Gradle versions are inline in `backend/build.gradle.kts`. The project version is duplicated in `backend/build.gradle.kts` and `frontend/package.json`.
 
 ### Supply chain

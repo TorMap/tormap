@@ -1,10 +1,7 @@
 import './index.css';
-import "@mui/styles";
-import "react-sliding-pane/dist/react-sliding-pane.css";
 
 import {createTheme, ThemeProvider} from "@mui/material";
 import {SnackbarProvider} from "notistack";
-import React from 'react';
 import {createRoot} from "react-dom/client";
 
 import {App} from "./components/App";

@@ -1,6 +1,6 @@
 import {Close as CloseIcon} from "@mui/icons-material";
 import {AppBar, Button, Dialog, DialogActions, DialogContent, IconButton, Toolbar} from "@mui/material";
-import React, {FunctionComponent, useEffect, useState} from "react";
+import {FunctionComponent, useEffect, useState} from "react";
 
 import {SlideUpTransition} from "../../../types/ui";
 import {LoadingAnimation} from "../../loading/LoadingAnimation";
@@ -46,7 +46,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                 open={showDialog}
                 onClose={closeDialog}
                 fullScreen={true}
-                TransitionComponent={SlideUpTransition}
+                slots={{transition: SlideUpTransition}}
             >
                 <AppBar sx={{position: 'relative'}}>
                     <Toolbar>
