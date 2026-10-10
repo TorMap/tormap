@@ -11,6 +11,7 @@ Rules for AI coding agents (and a quick reference for humans) working in this re
 - Backend: `cd backend && ./gradlew test` (needs a JDK matching `sourceCompatibility` in `backend/build.gradle.kts` and a running Docker daemon for Testcontainers).
 - Local backend image: `./gradlew jibDockerBuild -Djib.to.image=tormap/backend:local -Djib.to.tags=local`.
 - Frontend: `cd frontend && yarn install --immutable && yarn build && yarn lint`.
+- Frontend tests: `cd frontend && yarn test:run` (Vitest). `*.unit.test.ts` run in plain Node, all other `*.test.ts(x)` run in headless Chromium (browser mode), so run `yarn playwright install chromium` once. Use `yarn test` for watch mode and `yarn test:coverage` for coverage. The sandbox blocks Chromium, so browser tests must run outside it.
 
 ## Pull requests
 - Use Conventional Commit titles, e.g. `chore(backend): ...`, `fix(frontend): ...`. The PR title becomes the release note line.
