@@ -16,6 +16,11 @@ for additional information or guidance.
 Report security bugs in third-party modules to the person or team maintaining the module. Issues in the Tor protocol or
 the Tor network itself should be reported to the [Tor Project](https://www.torproject.org/contact/).
 
+## Threat model
+
+[THREAT_MODEL.md](THREAT_MODEL.md) describes the assets, trust boundaries, assumptions and severity calibration used to
+triage reports. Please use it to judge the impact of a finding. Update it when a change adds or moves a trust boundary.
+
 ## Supported versions
 
 Only the latest release receives security fixes. Releases and Docker images are published at:
