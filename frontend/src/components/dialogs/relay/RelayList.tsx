@@ -1,6 +1,5 @@
 import {Box, CircularProgress, List, ListItemButton, ListItemIcon, ListItemText} from "@mui/material";
-import React, {FunctionComponent, useState} from "react";
-import InfiniteScroll from "react-infinite-scroller";
+import React, {FunctionComponent, useEffect, useRef, useState} from "react";
 
 import {getIcon, RelayFamilyIcon} from "../../../types/icons";
 import {RelayIdentifierMatch} from "../../../types/relay";
@@ -33,20 +32,24 @@ export const RelayList: FunctionComponent<Props> = ({
     // Component state
     const [numberOfMatchesToDisplay, setNumberOfMatchesToDisplay] = useState(MATCHES_PER_SCROLL)
 
+    const hasMore = numberOfMatchesToDisplay < relayMatches.length
+    const loaderRef = useRef<HTMLDivElement>(null)
+
+    // Load the next batch once the loader at the end of the list scrolls into view
+    useEffect(() => {
+        const loader = loaderRef.current
+        if (!hasMore || !loader) return
+        const observer = new IntersectionObserver((entries) => {
+            if (entries.some(entry => entry.isIntersecting)) {
+                setNumberOfMatchesToDisplay(count => count + MATCHES_PER_SCROLL)
+            }
+        })
+        observer.observe(loader)
+        return () => observer.disconnect()
+    }, [hasMore, numberOfMatchesToDisplay])
+
     return (
-        <InfiniteScroll
-            pageStart={0}
-            loadMore={() => setNumberOfMatchesToDisplay(numberOfMatchesToDisplay + MATCHES_PER_SCROLL)}
-            hasMore={numberOfMatchesToDisplay < relayMatches.length}
-            loader={<Box key={0} sx={{textAlign: "center"}}><CircularProgress
-                color={"inherit"}
-                sx={{
-                    backgroundColor: "transparent",
-                    color: "rgba(255,255,255,.6)",
-                    zIndex: 1000,
-                }}/></Box>}
-            useWindow={false}
-        >
+        <Box>
             {relayMatches.length > 0 ?
                 <List>
                     {relayMatches.slice(0, numberOfMatchesToDisplay + 1).map(relayMatch =>
@@ -70,6 +73,14 @@ export const RelayList: FunctionComponent<Props> = ({
                     )}
                 </List>
                 : <Box sx={{textAlign: "center", p: "16px"}}>No results found</Box>}
-        </InfiniteScroll>
+            {hasMore &&
+                <Box ref={loaderRef} sx={{textAlign: "center"}}><CircularProgress
+                    color={"inherit"}
+                    sx={{
+                        backgroundColor: "transparent",
+                        color: "rgba(255,255,255,.6)",
+                        zIndex: 1000,
+                    }}/></Box>}
+        </Box>
     )
 }
