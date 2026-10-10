@@ -1,10 +1,13 @@
+import {useAtom} from "jotai";
 import {describe, expect, it} from "vitest";
 import {page} from "vitest/browser";
 
 import {defaultSettings} from "../../config";
 import {useSettings} from "../../context/settings-context";
+import {makeRelay} from "../../test/fixtures";
 import {renderWithProviders} from "../../test/render";
 import {RelayType} from "../../types/relay";
+import {relaySearchOnMapAtom} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
 import {AppSettings} from "./AppSettings";
 
 const State = () => {
@@ -82,6 +85,31 @@ describe("AppSettings", () => {
 
         await screen.getByRole("button", restoreButton).click()
         await expect.element(heatMap).not.toBeChecked()
+        await expect.element(screen.getByRole("button", restoreButton)).not.toBeInTheDocument()
+    })
+})
+
+describe("AppSettings relay search on map", () => {
+    const restoreButton = {name: "Restore default settings"}
+
+    const ShowSearchOnMap = () => {
+        const [relaySearchOnMap, setRelaySearchOnMap] = useAtom(relaySearchOnMapAtom)
+        return <>
+            <button onClick={() => setRelaySearchOnMap({search: "relay", relays: [makeRelay()]})}>Show search</button>
+            <output aria-label="search">{relaySearchOnMap?.search ?? "none"}</output>
+        </>
+    }
+
+    it("restoring the defaults shows all relays again", async () => {
+        const screen = await renderWithProviders(<><AppSettings elevation={0}/><ShowSearchOnMap/></>)
+        await expect.element(screen.getByRole("button", restoreButton)).not.toBeInTheDocument()
+
+        await screen.getByRole("button", {name: "Show search"}).click()
+        await expect.element(screen.getByText('Map only shows relays matching "relay"')).toBeVisible()
+
+        await screen.getByRole("button", restoreButton).click()
+        await expect.element(screen.getByRole("status", {name: "search"})).toHaveTextContent("none")
+        await expect.element(screen.getByText('Map only shows relays matching "relay"')).not.toBeInTheDocument()
         await expect.element(screen.getByRole("button", restoreButton)).not.toBeInTheDocument()
     })
 })

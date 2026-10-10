@@ -230,13 +230,16 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                     </Box>
                 </AccordionDetails>
             </Accordion>
-            {!isDefaultSettings &&
+            {(!isDefaultSettings || relaySearchOnMap) &&
                 <Button
                     variant="outlined"
                     startIcon={<RestartAltIcon/>}
                     fullWidth={true}
                     sx={{mt: "16px"}}
-                    onClick={resetSettings}
+                    onClick={() => {
+                        resetSettings()
+                        setRelaySearchOnMap(undefined)
+                    }}
                 >
                     Restore default settings
                 </Button>
