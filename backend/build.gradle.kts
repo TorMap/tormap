@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "org.tormap"
 version = "3.0.1"
-java.sourceCompatibility = JavaVersion.VERSION_21
+java.sourceCompatibility = JavaVersion.VERSION_25
 
 plugins {
     kotlin("jvm") version "2.4.20"
@@ -108,7 +108,7 @@ springBoot {
 tasks.withType<KotlinCompile> {
     compilerOptions {
         freeCompilerArgs.add("-Xjsr305=strict")
-        jvmTarget.set(JvmTarget.JVM_21)
+        jvmTarget.set(JvmTarget.JVM_25)
     }
 }
 
@@ -183,7 +183,7 @@ jib {
     }
     from {
         // Pinned by digest for reproducible builds; Renovate keeps the digest current
-        image = "eclipse-temurin:21-jre@sha256:cff19e6215689161eb6162c11b86b0c60ddf802164f2eaf48d570f8fb79a36c5"
+        image = "eclipse-temurin:25-jre@sha256:fcd7fd7b387f94bb2ac461478a7436ad8e349924c374ea8313919624dceae636"
         platforms {
             platform {
                 architecture = "amd64"
