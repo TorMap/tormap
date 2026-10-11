@@ -14,6 +14,8 @@ class CacheConfig {
     companion object {
         const val RELAY_LOCATION_DISTINCT_DAYS = "RELAY_LOCATION_DISTINCT_DAYS"
         const val RELAY_LOCATION_DISTINCT_DAYS_KEY = "RELAY_LOCATION_DISTINCT_DAYS_KEY"
+        const val RELAY_DAILY_COUNTS = "RELAY_DAILY_COUNTS"
+        const val RELAY_DAILY_COUNTS_KEY = "RELAY_DAILY_COUNTS_KEY"
         const val RELAY_LOCATIONS_PER_DAY = "RELAY_LOCATIONS_OF_DAY"
         const val REVERSE_DNS_LOOKUPS = "REVERSE_DNS_LOOKUPS"
     }
@@ -25,6 +27,11 @@ class CacheConfig {
         registerCustomCache(
             RELAY_LOCATION_DISTINCT_DAYS,
             // 1 entry ~= 250–300 KB for ~6,700 days (2007-10 to 2026-05)
+            Caffeine.newBuilder().maximumSize(1).recordStats().build()
+        )
+        registerCustomCache(
+            RELAY_DAILY_COUNTS,
+            // 1 entry ~= 400 KB for ~6,700 days (4 numbers per day)
             Caffeine.newBuilder().maximumSize(1).recordStats().build()
         )
         registerCustomCache(

@@ -18,6 +18,8 @@ concurrency:
 jobs:
   frontend_build:
     uses: ./.github/workflows/frontend-build.yml
+    secrets:
+      OSM_TOKEN: ${{ secrets.OSM_TOKEN }}
 
   frontend_build_deploy:
     runs-on: ubuntu-latest

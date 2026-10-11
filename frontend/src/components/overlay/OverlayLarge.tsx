@@ -4,6 +4,7 @@ import {FunctionComponent} from "react";
 import {AppSettings} from "../accordion/AppSettings";
 import {MapStats} from "../accordion/MapStats";
 import {DateSlider} from "../date/DateSlider";
+import {RelayCountTimeline} from "../date/RelayCountTimeline";
 import {ResponsiveDatePicker} from "../date/ResponsiveDatePicker";
 
 /**
@@ -18,6 +19,7 @@ export const OverlayLarge: FunctionComponent = () => {
                 width: "50%",
                 left: "25%",
             }}>
+                <RelayCountTimeline/>
                 <DateSlider/>
             </Box>
             <ResponsiveDatePicker largeScreen={true}/>

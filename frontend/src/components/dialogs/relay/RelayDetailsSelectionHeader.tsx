@@ -3,10 +3,9 @@ import {FunctionComponent} from "react";
 import {RelayIdentifierMatch} from "../../../types/relay";
 import {nameOfFactory} from "../../../util/util";
 import {Search} from "@mui/icons-material";
-import {atom, useAtom} from "jotai";
+import {useAtom} from "jotai";
+import {relayDetailsDialogOrderAtom, relayDetailsDialogSearchAtom} from "./relay-details-atoms";
 
-export const relayDetailsDialogSearchAtom = atom("");
-export const relayDetailsDialogOrderAtom = atom<keyof RelayIdentifierMatch>("nickname");
 
 export const RelayDetailsSelectionHeader: FunctionComponent = () => {
     const nameOfRelayMatch = nameOfFactory<RelayIdentifierMatch>()

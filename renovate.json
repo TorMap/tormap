@@ -45,13 +45,6 @@
       "automerge": false
     },
     {
-      "description": "Limit @types/leaflet.heat version to ensure compatibility with leaflet heatmap",
-      "matchPackageNames": [
-        "@types/leaflet.heat"
-      ],
-      "enabled": false
-    },
-    {
       "description": "Group MUI updates",
       "groupName": "mui",
       "matchPackageNames": [

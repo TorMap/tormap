@@ -29,6 +29,16 @@ class CacheService(
         }
     }
 
+    fun cacheRelayDailyCounts(): CompletableFuture<Void> {
+        return coalesceService.submitAsync("cacheRelayDailyCounts") {
+            logger.info("Caching daily relay counts")
+            cacheManager.getCache(CacheConfig.RELAY_DAILY_COUNTS)?.put(
+                CacheConfig.RELAY_DAILY_COUNTS_KEY,
+                relayLocationRepositoryImpl.findDailyRelayCounts()
+            )
+        }
+    }
+
     fun cacheRelayLocationsPerDay(months: Set<String>): CompletableFuture<Void> {
         logger.info("Caching relay locations for each day of months: {}", months.joinToString(", "))
         val futures = months.map { month ->

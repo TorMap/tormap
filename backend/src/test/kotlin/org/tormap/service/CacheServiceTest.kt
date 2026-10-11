@@ -20,9 +20,11 @@ class CacheServiceTest(
 ) : StringSpec({
     val relayLocationDistinctDaysCache = cacheManager.getCache(CacheConfig.RELAY_LOCATION_DISTINCT_DAYS)
     val relayLocationsPerDayCache = cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)
+    val relayDailyCountsCache = cacheManager.getCache(CacheConfig.RELAY_DAILY_COUNTS)
 
     beforeEach {
         relayLocationRepositoryImpl.deleteAll()
+        relayDailyCountsCache?.clear()
         relayLocationDistinctDaysCache?.clear()
         relayLocationsPerDayCache?.clear()
     }
@@ -43,6 +45,19 @@ class CacheServiceTest(
         relayLocationDistinctDaysCache?.get(
             CacheConfig.RELAY_LOCATION_DISTINCT_DAYS_KEY
         )?.get() shouldBe setOf(januaryOne, januaryTwo)
+    }
+
+    "cacheRelayDailyCounts" {
+        relayLocationRepositoryImpl.saveAll(
+            listOf(
+                mockRelayLocation(januaryOne),
+                mockRelayLocation(januaryTwo, 'A'),
+                mockRelayLocation(januaryTwo, 'B'),
+            )
+        )
+        cacheService.cacheRelayDailyCounts().get()
+        val cached = relayDailyCountsCache?.get(CacheConfig.RELAY_DAILY_COUNTS_KEY)?.get() as List<*>
+        cached.size shouldBe 2
     }
 
     "cacheRelayLocationsPerDay" {
