@@ -927,17 +927,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playwright/test@npm:1.63.0":
-  version: 1.63.0
-  resolution: "@playwright/test@npm:1.63.0"
-  dependencies:
-    playwright: "npm:1.63.0"
-  bin:
-    playwright: cli.js
-  checksum: 10/b5e561b8f11488b8062b98c5cf975740f48ae7e9b455fb7152e0fb90d8e13f20c3c3ae6a15833655364246b99f5a46f6601daa5a9eef01de5004c8be7e2b3af3
-  languageName: node
-  linkType: hard
-
 "@polka/url@npm:^1.0.0-next.24":
   version: 1.0.0-next.29
   resolution: "@polka/url@npm:1.0.0-next.29"
@@ -6370,7 +6359,6 @@ __metadata:
     "@mui/icons-material": "npm:9.4.0"
     "@mui/material": "npm:9.4.0"
     "@mui/x-date-pickers": "npm:9.14.0"
-    "@playwright/test": "npm:1.63.0"
     "@types/geojson": "npm:7946.0.16"
     "@types/leaflet": "npm:1.9.22"
     "@types/leaflet.heat": "npm:0.2.5"
