@@ -15,7 +15,7 @@ import {RelayFlag} from "../../types/relay";
 import {Settings} from "../../types/settings";
 import {SnackbarMessage} from "../../types/ui";
 import {AppSettings} from "../accordion/AppSettings";
-import {RelaySearchOnMap, relaySearchOnMapAtom} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
+import {RelaySearchOnMap, relaySearchOnMapAtom} from "../dialogs/relay/relay-details-atoms";
 import {filteredRelaysAtom, LeafletLayers} from "./LeafletLayers";
 
 let leafletMap: LeafletMap

@@ -23,12 +23,12 @@ import {nameOfFactory} from "../../util/util";
 import {ExternalLink} from "../link/ExternalLink";
 import {useAtom} from "jotai";
 import {
+    relayDetailsDialogSearchAtom,
     relaysForDetailsDialogAtom,
     relaySearchOnMapAtom,
     showRelayDetailsDialogAtom
-} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
+} from "../dialogs/relay/relay-details-atoms";
 import {filteredRelaysAtom} from "../leaflet/LeafletLayers";
-import {relayDetailsDialogSearchAtom} from "../dialogs/relay/RelayDetailsSelectionHeader";
 import {RelayTypeColorInput} from "./RelayTypeColorInput";
 
 interface Props {
