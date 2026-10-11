@@ -25,7 +25,8 @@ export const RelayCountTimeline: FunctionComponent = () => {
     useEffect(() => {
         let cancelled = false
         backend.get<DailyRelayCountDto[]>("/relay/statistics/daily-counts").then(response => {
-            if (!cancelled) setCounts(response.data)
+            // An older backend answers 404, and a proxy may answer 200 with something else than the expected list
+            if (!cancelled && Array.isArray(response.data)) setCounts(response.data)
         }).catch(() => undefined)
         return () => {
             cancelled = true

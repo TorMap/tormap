@@ -4,8 +4,9 @@ import {page} from "vitest/browser";
 
 import {useDate} from "../../context/date-context";
 import {DailyRelayCountDto} from "../../dto/relay";
-import {mockBackend, networkError} from "../../test/mock-backend";
+import {mockBackend, networkError, reply} from "../../test/mock-backend";
 import {renderWithProviders} from "../../test/render";
+import {SnackbarMessage} from "../../types/ui";
 import {RelayCountTimeline} from "./RelayCountTimeline";
 
 // 40 days with ~6000 relays and a sudden drop on day 20
@@ -57,6 +58,20 @@ describe("RelayCountTimeline", () => {
         mockBackend.onGet("/relay/statistics/daily-counts", [])
         await renderTimeline()
         await expect.element(page.getByRole("img", {name: /Relays per day/})).not.toBeInTheDocument()
+    })
+
+    it("stays quiet when the backend does not know the endpoint yet", async () => {
+        mockBackend.onGet("/relay/statistics/daily-counts", reply(404, {error: "Not Found"}))
+        await renderTimeline()
+        await expect.element(page.getByRole("img", {name: /Relays per day/})).not.toBeInTheDocument()
+        await expect.element(page.getByText(SnackbarMessage.ConnectionFailed)).not.toBeInTheDocument()
+    })
+
+    it("ignores an unexpected response body", async () => {
+        mockBackend.onGet("/relay/statistics/daily-counts", "<html>not the api</html>")
+        await renderTimeline()
+        await expect.element(page.getByRole("img", {name: /Relays per day/})).not.toBeInTheDocument()
+        await expect.element(page.getByTestId("selected-date")).toHaveTextContent(days[39])
     })
 
     it("stays quiet when the request fails", async () => {
