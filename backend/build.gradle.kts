@@ -7,7 +7,6 @@ java.sourceCompatibility = JavaVersion.VERSION_21
 
 plugins {
     kotlin("jvm") version "2.4.20"
-    kotlin("kapt") version "2.4.20"
     kotlin("plugin.spring") version "2.4.20"
     kotlin("plugin.allopen") version "2.4.20"
     kotlin("plugin.jpa") version "2.4.20"
@@ -41,7 +40,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
