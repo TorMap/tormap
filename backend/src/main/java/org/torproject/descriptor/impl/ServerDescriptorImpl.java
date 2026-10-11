@@ -33,7 +33,7 @@ public abstract class ServerDescriptorImpl extends DescriptorImpl
       Key.IPV6_POLICY, Key.NTOR_ONION_KEY, Key.ONION_KEY_CROSSCERT,
       Key.NTOR_ONION_KEY_CROSSCERT, Key.TUNNELLED_DIR_SERVER,
       Key.ROUTER_SIG_ED25519, Key.ROUTER_SIGNATURE, Key.ROUTER_DIGEST_SHA256,
-      Key.ROUTER_DIGEST, Key.BRIDGE_DISTRIBUTION_REQUEST, Key.FAMILY_CERT);
+      Key.ROUTER_DIGEST, Key.BRIDGE_DISTRIBUTION_REQUEST);
 
   private static final Set<Key> exactlyOnce = EnumSet.of(
       Key.ROUTER, Key.BANDWIDTH, Key.PUBLISHED);
@@ -224,7 +224,11 @@ public abstract class ServerDescriptorImpl extends DescriptorImpl
               this.ntorOnionKeyCrosscert = cryptoString;
               break;
             case FAMILY_CERT:
-              this.familyCert = cryptoString;
+              /* A relay that is a member of several families publishes one
+               * family-cert per family. Keep the first one. */
+              if (this.familyCert == null) {
+                this.familyCert = cryptoString;
+              }
               break;
             default:
               if (this.unrecognizedLines == null) {
