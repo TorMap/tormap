@@ -3,15 +3,20 @@
 
 package org.torproject.descriptor.index;
 
+import org.torproject.descriptor.DescriptorCollector;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.torproject.descriptor.DescriptorCollector;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
 import java.util.SortedMap;
@@ -95,13 +100,6 @@ public class DescriptorIndexCollector implements DescriptorCollector {
     for (Map.Entry<String, FileNode> entry : remotes.entrySet()) {
       String filepathname = entry.getKey();
       String filename = entry.getValue().path;
-      if (filename == null || filename.isEmpty()
-          || filename.contains("/") || filename.contains("\\")
-          || ".".equals(filename) || "..".equals(filename)) {
-        logger.warn("Remote file path {} has invalid file name {}. Skipping that file.",
-            filepathname, filename);
-        continue;
-      }
       File filepath = new File(localDir,
           filepathname.replace(filename, ""));
       long lastModifiedMillis = entry.getValue().lastModifiedMillis();
@@ -115,25 +113,8 @@ public class DescriptorIndexCollector implements DescriptorCollector {
             + "Aborting descriptor collection.", filepath, filename);
         return false;
       }
-      Path localDirRealPath;
-      Path parentRealPath;
-      try {
-        localDirRealPath = localDir.toPath().toRealPath();
-        parentRealPath = filepath.toPath().toRealPath();
-      } catch (IOException e) {
-        logger.warn("Cannot resolve local directory {} or target directory {}. "
-            + "Skipping remote file {}.", localDir, filepath, filepathname, e);
-        continue;
-      }
-      if (!parentRealPath.startsWith(localDirRealPath)) {
-        logger.warn("Remote file path {} resolves outside local directory {}. "
-            + "Skipping that file.", filepathname, localDirRealPath);
-        continue;
-      }
-      Path destinationPath = parentRealPath.resolve(filename).normalize();
-      Path tempDestinationPath = parentRealPath.resolve("." + filename).normalize();
-      File destinationFile = destinationPath.toFile();
-      File tempDestinationFile = tempDestinationPath.toFile();
+      File destinationFile = new File(filepath, filename);
+      File tempDestinationFile = new File(filepath, "." + filename);
       logger.debug("Fetching remote file {} with expected size of {} bytes "
           + "from {}, storing locally to temporary file {}, then renaming to "
           + "{}.",
@@ -194,7 +175,7 @@ public class DescriptorIndexCollector implements DescriptorCollector {
             public FileVisitResult visitFile(Path path,
                 BasicFileAttributes bfa) {
               locals.put(path.toFile().getAbsolutePath()
-                  .replace(localDir.getAbsolutePath() + File.separator, ""),
+                  .replace(localDir.getAbsolutePath() + "/", ""),
                       path.toFile().lastModified());
               return FileVisitResult.CONTINUE;
             }
@@ -207,3 +188,4 @@ public class DescriptorIndexCollector implements DescriptorCollector {
     return locals;
   }
 }
+

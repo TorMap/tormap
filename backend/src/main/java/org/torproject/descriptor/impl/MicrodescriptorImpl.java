@@ -3,13 +3,19 @@
 
 package org.torproject.descriptor.impl;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
 import org.torproject.descriptor.DescriptorParseException;
 import org.torproject.descriptor.Microdescriptor;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
+
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
 
 /* Contains a microdescriptor. */
 public class MicrodescriptorImpl extends DescriptorImpl
@@ -26,7 +32,7 @@ public class MicrodescriptorImpl extends DescriptorImpl
     this.convertDigestSha256Base64ToHex();
     this.checkExactlyOnceKeys(EnumSet.of(Key.ONION_KEY));
     Set<Key> atMostOnceKeys = EnumSet.of(
-        Key.NTOR_ONION_KEY, Key.FAMILY, Key.P, Key.P6, Key.ID);
+        Key.NTOR_ONION_KEY, Key.FAMILY, Key.FAMILY_IDS, Key.P, Key.P6, Key.ID);
     this.checkAtMostOnceKeys(atMostOnceKeys);
     this.checkFirstKey(Key.ONION_KEY);
     this.clearParsedKeys();
@@ -45,7 +51,7 @@ public class MicrodescriptorImpl extends DescriptorImpl
       Key key = Key.get(parts[0]);
       switch (key) {
         case ONION_KEY:
-          this.parseOnionKeyLine(line, parts);
+          this.parseOnionKeyLine(line);
           nextCrypto = key;
           break;
         case NTOR_ONION_KEY:
@@ -86,6 +92,9 @@ public class MicrodescriptorImpl extends DescriptorImpl
           }
           nextCrypto = Key.EMPTY;
           break;
+        case FAMILY_IDS:
+          this.parseFamilyIdsLine(line, parts);
+          break;
         default:
           if (crypto != null) {
             crypto.append(line).append(NL);
@@ -100,7 +109,7 @@ public class MicrodescriptorImpl extends DescriptorImpl
     }
   }
 
-  private void parseOnionKeyLine(String line, String[] parts)
+  private void parseOnionKeyLine(String line)
       throws DescriptorParseException {
     if (!line.equals("onion-key")) {
       throw new DescriptorParseException("Illegal line '" + line + "'.");
@@ -147,6 +156,17 @@ public class MicrodescriptorImpl extends DescriptorImpl
       }
     }
     this.familyEntries = familyEntries;
+  }
+
+  private void parseFamilyIdsLine(String line, String[] parts) {
+    String[] familyIds = new String[parts.length - 1];
+    for (int i = 1; i < parts.length; i++) {
+      if (parts[i].startsWith("ed25519:")) {
+        String familyId = parts[i].substring("ed25519:".length());
+        familyIds[i - 1] = familyId;
+      }
+    }
+    this.familyIds = familyIds;
   }
 
   private void parsePLine(String line, String[] parts)
@@ -249,6 +269,14 @@ public class MicrodescriptorImpl extends DescriptorImpl
   public List<String> getFamilyEntries() {
     return this.familyEntries == null ? null
         : Arrays.asList(this.familyEntries);
+  }
+
+  private String[] familyIds;
+
+  @Override
+  public List<String> getFamilyIds() {
+    return this.familyIds == null ? null
+        : Arrays.asList(this.familyIds);
   }
 
   private String defaultPolicy;

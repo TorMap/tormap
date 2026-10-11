@@ -490,9 +490,18 @@ public interface ServerDescriptor extends Descriptor {
    *
    * @return Ed25519 certificate
    *
-   * @since 1.1.0
+   * @since 2.27.0
    */
   String getIdentityEd25519();
+
+  /**
+   * Get the Family certificate, or null if the descriptor doesn't contain one.
+   *
+   * @return Ed25519 certificate
+   *
+   * @since 2.27.0
+   */
+  String getFamilyCert();
 
   /**
    * Get the Ed25519 master key, encoded as 43 base64 characters

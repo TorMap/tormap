@@ -140,5 +140,14 @@ public interface Microdescriptor extends Descriptor {
    * @since 1.1.0
    */
   String getEd25519Identity();
+
+  /**
+   * Return a SHA-256 digest of the server's Ed25519 family id,
+   * encoded as 43 base64 characters without padding characters, or null
+   * if no such id is included.
+   *
+   * @since 2.27.0
+   */
+  List<String> getFamilyIds();
 }
 

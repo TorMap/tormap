@@ -3,13 +3,17 @@
 
 package org.torproject.descriptor.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.torproject.descriptor.impl.DescriptorImpl.NL;
+import static org.torproject.descriptor.impl.DescriptorImpl.SP;
+
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.DescriptorParseException;
 import org.torproject.descriptor.DescriptorParser;
 import org.torproject.descriptor.log.LogDescriptorImpl;
 import org.torproject.descriptor.onionperf.OnionPerfAnalysisConverter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -17,9 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.torproject.descriptor.impl.DescriptorImpl.NL;
-import static org.torproject.descriptor.impl.DescriptorImpl.SP;
 
 public class DescriptorParserImpl implements DescriptorParser {
 

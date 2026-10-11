@@ -3,22 +3,36 @@
 
 package org.torproject.descriptor.impl;
 
+import org.torproject.descriptor.Descriptor;
+import org.torproject.descriptor.DescriptorParser;
+import org.torproject.descriptor.DescriptorReader;
+
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 import org.apache.commons.compress.utils.IOUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.torproject.descriptor.Descriptor;
-import org.torproject.descriptor.DescriptorParser;
-import org.torproject.descriptor.DescriptorReader;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.Stack;
+import java.util.TreeMap;
 
 public class DescriptorReaderImpl implements DescriptorReader {
 

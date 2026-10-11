@@ -6,7 +6,13 @@ package org.torproject.descriptor.impl;
 import org.torproject.descriptor.DescriptorParseException;
 import org.torproject.descriptor.ExitList;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class ExitListEntryImpl implements ExitList.Entry {
 

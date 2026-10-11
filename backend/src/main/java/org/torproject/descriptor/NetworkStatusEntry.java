@@ -1,10 +1,11 @@
-/* Copyright 2011--2020 The Tor Project
+/* Copyright 2011--2024 The Tor Project
  * See LICENSE for licensing information */
 
 package org.torproject.descriptor;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -133,6 +134,14 @@ public interface NetworkStatusEntry extends Serializable {
   SortedMap<String, SortedSet<Long>> getProtocols();
 
   /**
+   * Return the various statistics that an authority has computed for
+   * this relay. Each stats is represented as a key + value.
+   *
+   * @since 2.20.0
+   */
+  SortedMap<String, Double> getStats();
+
+  /**
    * Return the bandwidth weight of this server or -1 if the status entry
    * didn't contain a bandwidth line.
    *
@@ -183,5 +192,20 @@ public interface NetworkStatusEntry extends Serializable {
    * @since 1.1.0
    */
   String getMasterKeyEd25519();
-}
 
+  /**
+   * Return the server's supported consensus methods, or null if the status
+   * entry didn't contain this information or if the status is not a vote.
+   *
+   * @since 1.2.20
+   */
+  Set<String> getSupportedConsensusMethods();
+
+  /**
+   * Return the server's supported consensus methods to the corresponding
+   * microdescriptors hashes, or null if the status
+   * entry didn't contain this information or if the status is not a vote.
+   *
+   */
+  Map<String, SortedSet<Integer>> getHashToConsensusMethods();
+}

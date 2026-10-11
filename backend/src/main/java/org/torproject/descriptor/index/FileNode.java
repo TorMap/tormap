@@ -4,6 +4,7 @@
 package org.torproject.descriptor.index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -9,7 +9,13 @@ import org.torproject.descriptor.DescriptorParseException;
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Scanner;
+import java.util.Set;
 
 public class BridgedbMetricsImpl extends DescriptorImpl
     implements BridgedbMetrics {

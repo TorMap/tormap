@@ -1,15 +1,28 @@
-/* Copyright 2011--2020 The Tor Project
+/* Copyright 2011--2024 The Tor Project
  * See LICENSE for licensing information */
 
 package org.torproject.descriptor.impl;
 
+import static org.torproject.descriptor.impl.DescriptorImpl.NL;
+import static org.torproject.descriptor.impl.DescriptorImpl.SP;
+
 import org.torproject.descriptor.DescriptorParseException;
 import org.torproject.descriptor.NetworkStatusEntry;
 
-import java.util.*;
-
-import static org.torproject.descriptor.impl.DescriptorImpl.NL;
-import static org.torproject.descriptor.impl.DescriptorImpl.SP;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class NetworkStatusEntryImpl implements NetworkStatusEntry {
 
@@ -57,7 +70,7 @@ public class NetworkStatusEntryImpl implements NetworkStatusEntry {
   }
 
   private Set<Key> atMostOnceKeys = EnumSet.of(
-      Key.S, Key.V, Key.PR, Key.W, Key.P);
+      Key.S, Key.V, Key.PR, Key.W, Key.P, Key.STATS);
 
   private void parsedAtMostOnceKey(Key key)
       throws DescriptorParseException {
@@ -111,6 +124,9 @@ public class NetworkStatusEntryImpl implements NetworkStatusEntry {
           break;
         case ID:
           this.parseIdLine(line, parts);
+          break;
+        case STATS:
+          this.parseStatsLine(line, parts);
           break;
         default:
           if (this.unrecognizedLines == null) {
@@ -187,10 +203,34 @@ public class NetworkStatusEntryImpl implements NetworkStatusEntry {
     }
   }
 
+  /**
+   * In the following methods `line` is passed twice in the function call
+   * parseProtocolVersions(line, lineNoOpt, partsNoOpt) and
+   * parseStats(line, lineNoOpt, partsNoOpt)
+   * This is because line and lineNoOpt may represent slightly different
+   * versions of the same string.
+   *
+   * <p>The line argument is the original string that the function is parsing,
+   * while the lineNoOpt argument is a modified version of line that has any
+   * optional parts removed.
+   * The function checks whether an entry for the lineNoOpt key already exists
+   * in the parsed map before parsing the line.
+   * If an entry exists, the function immediately returns the
+   * corresponding SortedMap without re-parsing the line.
+   * By passing both line and lineNoOpt to the function, the caller ensures that
+   * the function can distinguish between different versions of the same string
+   * and correctly handle cases where the same line is parsed multiple times.
+   */
   private void parsePrLine(String line, String[] parts)
       throws DescriptorParseException {
     this.parsedAtMostOnceKey(Key.PR);
     this.protocols = ParseHelper.parseProtocolVersions(line, line, parts);
+  }
+
+  private void parseStatsLine(String line, String[] parts)
+      throws DescriptorParseException {
+    this.parsedAtMostOnceKey(Key.STATS);
+    this.stats = ParseHelper.parseStats(line, line, parts);
   }
 
   private void parseWLine(String line, String[] parts)
@@ -242,19 +282,59 @@ public class NetworkStatusEntryImpl implements NetworkStatusEntry {
     }
   }
 
+
   private void parseMLine(String line, String[] parts)
-      throws DescriptorParseException {
+       throws DescriptorParseException {
+    boolean isValid = true;
     if (this.microdescriptorDigests == null) {
       this.microdescriptorDigests = new HashSet<>();
     }
+    if (this.supportedConsensusMethods == null) {
+      this.supportedConsensusMethods = new HashSet<>();
+    }
+    if (this.hashToConsensusMethods == null) {
+      this.hashToConsensusMethods = new HashMap<>();
+    }
+
     if (parts.length == 2) {
       ParseHelper.verifyThirtyTwoByteBase64String(line, parts[1]);
       this.microdescriptorDigests.add(parts[1]);
+      // Add to the map with an empty set of methods
+      this.hashToConsensusMethods.put(parts[1], new TreeSet<>());
     } else if (parts.length == 3 && parts[2].length() > 7) {
       /* 7 == "sha256=".length() */
-      ParseHelper.verifyThirtyTwoByteBase64String(line,
-          parts[2].substring(7));
-      this.microdescriptorDigests.add(parts[2].substring(7));
+      String hash = parts[2].substring(7);
+      ParseHelper.verifyThirtyTwoByteBase64String(line, hash);
+      this.microdescriptorDigests.add(hash);
+      this.supportedConsensusMethods.add(parts[1]);
+
+      // Split and add methods
+      String[] methods = parts[1].split(",", -1);
+      for (String method : methods) {
+        if (method.isEmpty()) {  // Check if the method string is empty
+          isValid = false;
+          break;
+        }
+      }
+
+      // Convert to Integer array
+      Integer[] intMethods = Arrays.stream(methods)
+          .map(Integer::parseInt)    // Convert each String to Integer
+          .toArray(Integer[]::new);  // Collect to Integer array
+
+      // Create a sorted set from the Integer array
+      SortedSet<Integer> methodSet = new TreeSet<>(Arrays.asList(intMethods));
+
+      // Add the hash and corresponding methods to the map
+      if (isValid) {
+        List<Integer> sortedList = new ArrayList<>(methodSet);
+        Collections.sort(sortedList); // Sort explicitly
+        this.hashToConsensusMethods.put(hash, new TreeSet<>(sortedList));
+      }
+    }
+
+    if (!isValid) {
+      throw new DescriptorParseException("Illegal line '" + line + "'.");
     }
   }
 
@@ -366,6 +446,13 @@ public class NetworkStatusEntryImpl implements NetworkStatusEntry {
     return this.protocols;
   }
 
+  private SortedMap<String, Double> stats;
+
+  @Override
+  public SortedMap<String, Double> getStats() {
+    return this.stats;
+  }
+
   private long bandwidth = -1L;
 
   @Override
@@ -407,5 +494,19 @@ public class NetworkStatusEntryImpl implements NetworkStatusEntry {
   public String getMasterKeyEd25519() {
     return this.masterKeyEd25519;
   }
-}
 
+  private Set<String> supportedConsensusMethods;
+
+  @Override
+  public Set<String> getSupportedConsensusMethods() {
+    return this.supportedConsensusMethods == null ? null
+        : new HashSet<>(this.supportedConsensusMethods);
+  }
+
+  private Map<String, SortedSet<Integer>> hashToConsensusMethods;
+
+  @Override
+  public Map<String, SortedSet<Integer>> getHashToConsensusMethods() {
+    return this.hashToConsensusMethods;
+  }
+}
