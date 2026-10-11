@@ -62,7 +62,8 @@ dependencies {
 
     // Export metrics to New Relic via OTLP (https://micrometer.io/)
     implementation("org.springframework.boot:spring-boot-starter-micrometer-metrics")
-    implementation("org.springframework.boot:spring-boot-starter-opentelemetry")
+    // Only the OpenTelemetry SDK setup: management.opentelemetry.resource-attributes for the OTLP export. No tracing.
+    implementation("org.springframework.boot:spring-boot-opentelemetry")
     implementation("io.micrometer:micrometer-registry-otlp")
 
     // Reverse DNS lookups with dnsjava
