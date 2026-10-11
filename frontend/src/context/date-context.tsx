@@ -1,8 +1,9 @@
 import {differenceInDays} from "date-fns";
 import {useSnackbar} from "notistack";
-import React, {FunctionComponent, useCallback, useContext, useState} from "react";
+import React, {FunctionComponent, useCallback, useContext, useEffect, useState} from "react";
 
 import {SnackbarMessage} from "../types/ui";
+import {readPermalink, writePermalink} from "../util/permalink";
 
 interface DateInterface {
     /**
@@ -45,11 +46,17 @@ export const DateProvider: FunctionComponent<DateProviderProps> = ({children}) =
     const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined)
     const {enqueueSnackbar} = useSnackbar();
 
-    // Selects the latest day whenever new days are available
+    // Keeps the day in the URL, so the current view can be shared
+    useEffect(() => {
+        if (selectedDate) writePermalink({day: selectedDate})
+    }, [selectedDate])
+
+    // Selects the day from the URL if available, otherwise the latest day, whenever new days are available
     const setAvailableDays = useCallback((days: string[]) => {
         setAvailableDaysState(days)
         if (days.length > 0) {
-            setSelectedDate(days[days.length - 1])
+            const permalinkDay = readPermalink().day
+            setSelectedDate(permalinkDay && days.includes(permalinkDay) ? permalinkDay : days[days.length - 1])
             const oldestConsensusDateAvailable = new Date("2007-10-27")
             const minExpectedNumberOfDays = Math.abs(differenceInDays(oldestConsensusDateAvailable, new Date())) - 5
             if (days.length < minExpectedNumberOfDays) {

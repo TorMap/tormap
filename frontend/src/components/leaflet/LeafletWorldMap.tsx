@@ -1,10 +1,11 @@
 import {useSnackbar} from "notistack";
 import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
-import {MapContainer, TileLayer} from "react-leaflet";
+import {MapContainer, TileLayer, useMapEvents} from "react-leaflet";
 
 import {useDate} from "../../context/date-context";
 import {RelayLocationDto} from "../../dto/relay";
 import {SnackbarMessage} from "../../types/ui";
+import {readPermalink, writePermalink} from "../../util/permalink";
 import {backend} from "../../util/util";
 import {LeafletLayers} from "./LeafletLayers";
 
@@ -25,6 +26,22 @@ Instead, only the last selected date will be drawn.
  */
 let latestRequestTimestamp: number | undefined = undefined
 
+const defaultCenter: [number, number] = [30, 0]
+const defaultZoom = 3
+
+/**
+ * Keeps the map position and zoom in the URL, so the current view can be shared
+ */
+const MapPermalink: FunctionComponent = () => {
+    const map = useMapEvents({
+        moveend: () => {
+            const center = map.getCenter()
+            writePermalink({lat: center.lat, lng: center.lng, zoom: map.getZoom()})
+        }
+    })
+    return null
+}
+
 export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
     // Component state
     const [relays, setRelays] = useState<RelayLocationDto[]>()
@@ -33,6 +50,15 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
     // App context
     const {enqueueSnackbar} = useSnackbar();
     const {selectedDate} = useDate()
+
+    // The initial view is read once from the URL
+    const [initialView] = useState(() => {
+        const permalink = readPermalink()
+        const center: [number, number] = permalink.lat !== undefined && permalink.lng !== undefined
+            ? [permalink.lat, permalink.lng]
+            : defaultCenter
+        return {center, zoom: permalink.zoom ?? defaultZoom}
+    })
 
     /**
      * Query all relays for the selected date whenever a new date is selected
@@ -62,8 +88,8 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
                 backgroundColor: "#262626",
                 position: "fixed",
             }}
-            center={[30, 0]}
-            zoom={3}
+            center={initialView.center}
+            zoom={initialView.zoom}
             minZoom={2}
             maxZoom={18}
             scrollWheelZoom={true}
@@ -74,6 +100,7 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
             attributionControl={false}
             maxBounds={[[-180, -360], [180, 360]]}
         >
+            <MapPermalink/>
             <React.StrictMode>
                 <LeafletLayers
                     relays={relays}

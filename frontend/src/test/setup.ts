@@ -8,6 +8,8 @@ import {mockBackend} from "./mock-backend";
 beforeEach(() => {
     // Settings are persisted, so they would leak between tests
     localStorage.clear()
+    // The map position and day are kept in the URL hash, so it would leak between tests too
+    window.history.replaceState(null, "", window.location.pathname + window.location.search)
     mockBackend.reset()
     mockBackend.install()
 })

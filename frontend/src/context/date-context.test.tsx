@@ -36,6 +36,26 @@ describe("DateProvider", () => {
         expect(result.current.selectedDate).toBe("2024-01-03")
     })
 
+    it("selects the day from the URL if it is available", async () => {
+        window.location.hash = "#day=2024-01-02"
+        const {result, act} = await render()
+        await act(() => result.current.setAvailableDays(["2024-01-01", "2024-01-02", "2024-01-03"]))
+        expect(result.current.selectedDate).toBe("2024-01-02")
+    })
+
+    it("falls back to the latest day if the day from the URL is not available", async () => {
+        window.location.hash = "#day=2023-05-05"
+        const {result, act} = await render()
+        await act(() => result.current.setAvailableDays(["2024-01-01", "2024-01-02"]))
+        expect(result.current.selectedDate).toBe("2024-01-02")
+    })
+
+    it("writes the selected day to the URL", async () => {
+        const {result, act} = await render()
+        await act(() => result.current.setAvailableDays(["2024-01-01", "2024-01-02"]))
+        expect(window.location.hash).toContain("day=2024-01-02")
+    })
+
     it("lets the user select another day", async () => {
         const {result, act} = await render()
         await act(() => result.current.setAvailableDays(["2024-01-01", "2024-01-02"]))
