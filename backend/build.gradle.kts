@@ -148,7 +148,7 @@ registerSnykTask("snykCode", "code", "test")
 // Mount point for the downloaded descriptors. Jib cannot set file ownership, so the empty directory is world-writable:
 // a fresh (named or anonymous) volume mounted there inherits this, and the non-root container user can write to it.
 val jibExtraDir = layout.buildDirectory.dir("jib-extra")
-val prepareJibExtraDirectories by tasks.registering {
+val prepareJibExtraDirectories = tasks.register("prepareJibExtraDirectories") {
     val dataDir = jibExtraDir.map { it.dir("tormap-data").asFile }
     outputs.dir(jibExtraDir)
     doLast { dataDir.get().mkdirs() }
