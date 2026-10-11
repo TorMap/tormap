@@ -1,5 +1,6 @@
-# Build app
-FROM node:24-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e AS builder
+# Build app. The output is static and architecture independent, so always build on the native build platform
+# instead of emulating the target platform with QEMU (which is very slow and gets multi-arch builds cancelled).
+FROM --platform=$BUILDPLATFORM node:24-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e AS builder
 WORKDIR /app
 COPY . .
 RUN yarn install --immutable
