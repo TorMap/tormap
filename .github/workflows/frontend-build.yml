@@ -2,6 +2,10 @@ name: Frontend Build (reusable)
 
 on:
   workflow_call:  # makes this callable from other workflows
+    secrets:
+      # Reusable workflows only see secrets the caller passes explicitly
+      OSM_TOKEN:
+        required: false
 
 jobs:
   frontend_build:
