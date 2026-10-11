@@ -14,6 +14,7 @@ import {renderWithProviders} from "../../test/render";
 import {RelayFlag} from "../../types/relay";
 import {Settings} from "../../types/settings";
 import {SnackbarMessage} from "../../types/ui";
+import {HeatLayer} from "../../util/heat-layer";
 import {AppSettings} from "../accordion/AppSettings";
 import {RelaySearchOnMap, relaySearchOnMapAtom} from "../dialogs/relay/relay-details-atoms";
 import {filteredRelaysAtom, LeafletLayers} from "./LeafletLayers";
@@ -66,7 +67,7 @@ const polygons = () => drawn().filter(layer => layer instanceof GeoJSON === fals
 })[]
 // Family circles are the only ones drawn with a border weight of 1 (relay markers use 3, aggregates .3)
 const familyCircles = () => circles().filter(circle => circle.options.weight === 1)
-const hasHeatLayer = ()=> drawn().some(layer => "_latlngs" in layer)
+const hasHeatLayer = () => drawn().some(layer => layer instanceof HeatLayer)
 
 // Polls the state output until it matches. (Regular expressions do not work with toHaveTextContent in browser mode.)
 const expectState = (pattern: RegExp) =>
