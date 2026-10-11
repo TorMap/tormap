@@ -36,7 +36,6 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
-    "@playwright/test": "1.63.0",
     "@types/geojson": "7946.0.16",
     "@types/leaflet": "1.9.22",
     "@types/leaflet.heat": "0.2.5",
@@ -55,7 +54,6 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.71.0",
     "vite": "8.3.0",
-    "vite-plugin-checker": "0.14.5",
     "vitest": "5.0.2",
     "vitest-browser-react": "2.3.0"
   },
