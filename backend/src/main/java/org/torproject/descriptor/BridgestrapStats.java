@@ -4,6 +4,8 @@
 
 package org.torproject.descriptor;
 
+import org.torproject.descriptor.Descriptor;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;

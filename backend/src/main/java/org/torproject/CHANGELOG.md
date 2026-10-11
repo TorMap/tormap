@@ -1,3 +1,62 @@
+# Changes in version 2.28.0 - 2025-11-12
+
+ * Medium changes
+    - Use TreeMap for bridgepool assignments entries
+
+# Changes in version 2.27.0 - 2025-05-06
+
+* Medium changes
+    - Add methods to parse family ids
+
+# Changes in version 2.26.0 - 2024-11-07
+
+ * Medium changes
+   - Add method to get microdesc hash mapped to consensus methods
+   - Fix how we parse supported consensus methods in votes
+
+# Changes in version 2.25.0 - 2024-08-28
+
+ * Medium changes
+    - Parse hidserv*seen_value and hidserv*cells_value as long
+    - Set usesEnhancedDnsLogic default value to true
+
+# Changes in version 2.24.0 - 2023-11-23
+
+ * Medium changes
+   - Add new header filed dirauth_nickname to the bandwidth file implementation
+
+# Changes in version 2.23.0 - 2023-10-05
+
+ * Medium changes
+    - Fix out-of-memory error
+
+
+# Changes in version 2.22.0 - 2023-07-17
+
+  * Medium changes
+     - Add new header fields to bandwidth file implementation
+
+
+# Changes in version 2.21.0 - 2023-05-31
+
+  * Medium Changes
+    - Parse supported consensus methods from the m line in votes
+
+
+# Changes in version 2.20.0 - 2023-04-11
+
+  * Medium changes
+    - Parse stats line in network status vote
+    - Update apache commons libraries
+    - Parse tor_version in bandwidth file header
+    - Add MiddleOnly to the list of knonwn flags
+    - Update key fingerprint used to verify metrics library release.
+
+  * Minor changes
+    - Update references to old mailing list/bug trackers
+    - Update outdated links
+
+
 # Changes in version 2.19.0 - 2021-08-17
 
   * Medium changes

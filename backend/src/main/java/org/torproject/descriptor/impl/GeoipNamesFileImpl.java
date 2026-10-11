@@ -5,7 +5,13 @@ import org.torproject.descriptor.DescriptorParseException;
 import org.torproject.descriptor.GeoipNamesFile;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
 
 public class GeoipNamesFileImpl extends DescriptorImpl
         implements GeoipNamesFile {

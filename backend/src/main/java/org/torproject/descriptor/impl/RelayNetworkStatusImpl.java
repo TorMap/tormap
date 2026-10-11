@@ -7,7 +7,14 @@ import org.torproject.descriptor.DescriptorParseException;
 import org.torproject.descriptor.RelayNetworkStatus;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class RelayNetworkStatusImpl extends NetworkStatusImpl
     implements RelayNetworkStatus {

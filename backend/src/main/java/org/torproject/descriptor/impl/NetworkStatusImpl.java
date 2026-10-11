@@ -9,7 +9,12 @@ import org.torproject.descriptor.DirectorySignature;
 import org.torproject.descriptor.NetworkStatusEntry;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /* Parse the common parts of v3 consensuses, v3 votes, v3 microdesc
  * consensuses, v2 statuses, and sanitized bridge network statuses and

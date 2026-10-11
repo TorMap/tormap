@@ -8,7 +8,17 @@ import org.torproject.descriptor.DescriptorParseException;
 import org.torproject.descriptor.ExtraInfoDescriptor;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Contains logic to work with extra-info descriptor files.
@@ -823,7 +833,7 @@ public abstract class ExtraInfoDescriptorImpl extends DescriptorImpl
       throw new DescriptorParseException("Illegal line '" + line + "'.");
     }
     try {
-      this.hidservRendRelayedCells = Double.parseDouble(partsNoOpt[1]);
+      this.hidservRendRelayedCells = Long.parseLong(partsNoOpt[1]);
     } catch (NumberFormatException e) {
       throw new DescriptorParseException("Illegal line '" + line + "'.");
     }
@@ -839,7 +849,7 @@ public abstract class ExtraInfoDescriptorImpl extends DescriptorImpl
       throw new DescriptorParseException("Illegal line '" + line + "'.");
     }
     try {
-      this.hidservDirOnionsSeen = Double.parseDouble(partsNoOpt[1]);
+      this.hidservDirOnionsSeen = Long.parseLong(partsNoOpt[1]);
     } catch (NumberFormatException e) {
       throw new DescriptorParseException("Illegal line '" + line + "'.");
     }
@@ -863,7 +873,7 @@ public abstract class ExtraInfoDescriptorImpl extends DescriptorImpl
       throw new DescriptorParseException("Illegal line '" + line + "'.");
     }
     try {
-      this.hidservRendV3RelayedCells = Double.parseDouble(partsNoOpt[1]);
+      this.hidservRendV3RelayedCells = Long.parseLong(partsNoOpt[1]);
     } catch (NumberFormatException e) {
       throw new DescriptorParseException("Illegal line '" + line + "'.");
     }
@@ -879,7 +889,7 @@ public abstract class ExtraInfoDescriptorImpl extends DescriptorImpl
       throw new DescriptorParseException("Illegal line '" + line + "'.");
     }
     try {
-      this.hidservDirV3OnionsSeen = Double.parseDouble(partsNoOpt[1]);
+      this.hidservDirV3OnionsSeen = Long.parseLong(partsNoOpt[1]);
     } catch (NumberFormatException e) {
       throw new DescriptorParseException("Illegal line '" + line + "'.");
     }
@@ -1469,10 +1479,10 @@ public abstract class ExtraInfoDescriptorImpl extends DescriptorImpl
     return this.hidservStatsIntervalLength;
   }
 
-  private Double hidservRendRelayedCells;
+  private long hidservRendRelayedCells;
 
   @Override
-  public Double getHidservRendRelayedCells() {
+  public long getHidservRendRelayedCells() {
     return this.hidservRendRelayedCells;
   }
 
@@ -1484,10 +1494,10 @@ public abstract class ExtraInfoDescriptorImpl extends DescriptorImpl
         : new HashMap<>(this.hidservRendRelayedCellsParameters);
   }
 
-  private Double hidservDirOnionsSeen;
+  private long hidservDirOnionsSeen;
 
   @Override
-  public Double getHidservDirOnionsSeen() {
+  public long getHidservDirOnionsSeen() {
     return this.hidservDirOnionsSeen;
   }
 
@@ -1513,10 +1523,10 @@ public abstract class ExtraInfoDescriptorImpl extends DescriptorImpl
     return this.hidservV3StatsIntervalLength;
   }
 
-  private Double hidservRendV3RelayedCells;
+  private long hidservRendV3RelayedCells;
 
   @Override
-  public Double getHidservRendV3RelayedCells() {
+  public long getHidservRendV3RelayedCells() {
     return this.hidservRendV3RelayedCells;
   }
 
@@ -1528,10 +1538,10 @@ public abstract class ExtraInfoDescriptorImpl extends DescriptorImpl
         : new HashMap<>(this.hidservRendV3RelayedCellsParameters);
   }
 
-  private Double hidservDirV3OnionsSeen;
+  private long hidservDirV3OnionsSeen;
 
   @Override
-  public Double getHidservDirV3OnionsSeen() {
+  public long getHidservDirV3OnionsSeen() {
     return this.hidservDirV3OnionsSeen;
   }
 

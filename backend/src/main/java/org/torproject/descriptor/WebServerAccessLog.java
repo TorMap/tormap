@@ -69,7 +69,7 @@ public interface WebServerAccessLog extends LogDescriptor {
    * @since 2.3.0
    */
   @Override
-  Stream<Line> logLines()
+  Stream<WebServerAccessLog.Line> logLines()
       throws DescriptorParseException;
 
   /**

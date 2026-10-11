@@ -8,7 +8,15 @@ import org.torproject.descriptor.DescriptorParseException;
 import org.torproject.descriptor.ServerDescriptor;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
 
 /* Contains a server descriptor. */
 public abstract class ServerDescriptorImpl extends DescriptorImpl
@@ -155,6 +163,10 @@ public abstract class ServerDescriptorImpl extends DescriptorImpl
         case NTOR_ONION_KEY:
           this.parseNtorOnionKeyLine(line, partsNoOpt);
           break;
+        case FAMILY_CERT:
+          this.parseFamilyCertLine(line, partsNoOpt);
+          nextCrypto = key;
+          break;
         case IDENTITY_ED25519:
           this.parseIdentityEd25519Line(line, partsNoOpt);
           nextCrypto = key;
@@ -210,6 +222,13 @@ public abstract class ServerDescriptorImpl extends DescriptorImpl
               break;
             case NTOR_ONION_KEY_CROSSCERT:
               this.ntorOnionKeyCrosscert = cryptoString;
+              break;
+            case FAMILY_CERT:
+              /* A relay that is a member of several families publishes one
+               * family-cert per family. Keep the first one. */
+              if (this.familyCert == null) {
+                this.familyCert = cryptoString;
+              }
               break;
             default:
               if (this.unrecognizedLines == null) {
@@ -429,10 +448,10 @@ public abstract class ServerDescriptorImpl extends DescriptorImpl
           String separator = partsNoOpt[i].contains("=") ? "=" : "~";
           String fingerprint = ParseHelper.parseTwentyByteHexString(line,
               partsNoOpt[i].substring(1, partsNoOpt[i].indexOf(
-              separator)));
+                  separator)));
           String nickname = ParseHelper.parseNickname(line,
               partsNoOpt[i].substring(partsNoOpt[i].indexOf(
-              separator) + 1));
+                  separator) + 1));
           familyEntries[i - 1] = "$" + fingerprint + separator + nickname;
         } else {
           familyEntries[i - 1] = "$"
@@ -460,6 +479,7 @@ public abstract class ServerDescriptorImpl extends DescriptorImpl
   private void parseEventdnsLine(String line,
       String[] partsNoOpt) throws DescriptorParseException {
     if (partsNoOpt.length != 2) {
+      this.usesEnhancedDnsLogic = false;
       throw new DescriptorParseException("Illegal line '" + line + "'.");
     }
     this.usesEnhancedDnsLogic = ParseHelper.parseBoolean(partsNoOpt[1],
@@ -599,6 +619,13 @@ public abstract class ServerDescriptorImpl extends DescriptorImpl
   }
 
   private void parseIdentityEd25519Line(String line,
+      String[] partsNoOpt) throws DescriptorParseException {
+    if (partsNoOpt.length != 1) {
+      throw new DescriptorParseException("Illegal line '" + line + "'.");
+    }
+  }
+
+  private void parseFamilyCertLine(String line,
       String[] partsNoOpt) throws DescriptorParseException {
     if (partsNoOpt.length != 1) {
       throw new DescriptorParseException("Illegal line '" + line + "'.");
@@ -859,7 +886,7 @@ public abstract class ServerDescriptorImpl extends DescriptorImpl
     return this.writeHistory;
   }
 
-  private boolean usesEnhancedDnsLogic;
+  private boolean usesEnhancedDnsLogic = true;
 
   @Override
   public boolean getUsesEnhancedDnsLogic() {
@@ -949,6 +976,13 @@ public abstract class ServerDescriptorImpl extends DescriptorImpl
   @Override
   public String getIdentityEd25519() {
     return this.identityEd25519;
+  }
+
+  private String familyCert;
+
+  @Override
+  public String getFamilyCert() {
+    return this.familyCert;
   }
 
   private String masterKeyEd25519;

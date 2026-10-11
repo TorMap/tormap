@@ -77,6 +77,6 @@ public interface ExitList extends Descriptor {
    *
    * @since 1.1.0
    */
-  Set<Entry> getEntries();
+  Set<ExitList.Entry> getEntries();
 }
 

@@ -3,11 +3,12 @@
 
 package org.torproject.descriptor.onionperf;
 
-import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
-import org.apache.commons.compress.utils.IOUtils;
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.DescriptorParseException;
 import org.torproject.descriptor.impl.TorperfResultImpl;
+
+import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
+import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

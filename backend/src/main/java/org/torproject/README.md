@@ -43,8 +43,8 @@ verification process by example.
 Download the release tarball and the separate signature file:
 
 ```
-wget https://dist.torproject.org/metrics-lib/2.0.0/metrics-lib-2.0.0.tar.gz
-wget https://dist.torproject.org/metrics-lib/2.0.0/metrics-lib-2.0.0.tar.gz.asc
+wget https://dist.torproject.org/metrics-lib/<version>/metrics-lib-<version>.tar.gz
+wget https://dist.torproject.org/metrics-lib/<version>/metrics-lib-<version>.tar.gz.asc
 ```
 
 (Note that earlier tarballs were named descriptor-VERSION.tar.gz and could
@@ -53,7 +53,7 @@ be found in https://dist.torproject.org/descriptor/.)
 Attempt to verify the signature on the tarball:
 
 ```
-gpg --verify metrics-lib-2.0.0.tar.gz.asc
+gpg --verify metrics-lib-<version>.tar.gz.asc
 ```
 
 If the signature cannot be verified due to the public key of the signer
@@ -61,9 +61,13 @@ not being locally available, download that public key from one of the key
 servers and retry:
 
 ```
-gpg --keyserver pgp.mit.edu --recv-key 0x4EFD4FDC3F46D41E
-gpg --verify metrics-lib-2.0.0.tar.gz.asc
+gpg --keyserver pgp.mit.edu --recv-key 0x2B4075479596D580
+gpg --verify metrics-lib-<version>.tar.gz.asc
 ```
+
+Alternatively you can also download the key from Tor Project's DB:
+
+https://db.torproject.org/fetchkey.cgi?fingerprint=DC399D73B442F609261F126D2B4075479596D580
 
 If the signature still cannot be verified, something is wrong!
 

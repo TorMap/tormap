@@ -3,16 +3,21 @@
 
 package org.torproject.descriptor.log;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.torproject.descriptor.Method;
 import org.torproject.descriptor.WebServerAccessLog;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

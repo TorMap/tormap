@@ -852,7 +852,7 @@ public interface ExtraInfoDescriptor extends Descriptor {
    *
    * @since 1.1.0
    */
-  Double getHidservRendRelayedCells();
+  long getHidservRendRelayedCells();
 
   /**
    * Get the obfuscation parameters applied to the original
@@ -872,10 +872,9 @@ public interface ExtraInfoDescriptor extends Descriptor {
    * directory, or {@code null} if no such statistics are included.
    *
    * @return number of unique hidden service identities or {@code null}
-   *
    * @since 1.1.0
    */
-  Double getHidservDirOnionsSeen();
+  long getHidservDirOnionsSeen();
 
   /**
    * Get the obfuscation parameters applied to the original
@@ -919,7 +918,7 @@ public interface ExtraInfoDescriptor extends Descriptor {
    *
    * @since 2.15.0
    */
-  Double getHidservRendV3RelayedCells();
+  long getHidservRendV3RelayedCells();
 
   /**
    * Get the obfuscation parameters applied to the original measurement value
@@ -942,7 +941,7 @@ public interface ExtraInfoDescriptor extends Descriptor {
    *
    * @since 2.15.0
    */
-  Double getHidservDirV3OnionsSeen();
+  long getHidservDirV3OnionsSeen();
 
   /**
    * Get the obfuscation parameters applied to the original measurement value

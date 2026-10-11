@@ -70,7 +70,7 @@ dependencies {
     // Reverse DNS lookups with dnsjava
     implementation("dnsjava:dnsjava:3.6.5")
 
-    // Packages required by metrics-lib (org.torproject.descriptor in java module) (JavaDoc: https://metrics.torproject.org/metrics-lib/index.html)
+    // Packages required by the vendored metrics-lib (org.torproject.descriptor in java module, see src/main/java/org/torproject/VENDORED.md)
     implementation("commons-codec:commons-codec:1.22.1")
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")

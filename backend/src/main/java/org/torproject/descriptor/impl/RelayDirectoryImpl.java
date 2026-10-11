@@ -9,7 +9,11 @@ import org.torproject.descriptor.RouterStatusEntry;
 import org.torproject.descriptor.ServerDescriptor;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
 
 public class RelayDirectoryImpl extends DescriptorImpl
     implements RelayDirectory {

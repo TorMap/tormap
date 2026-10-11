@@ -9,7 +9,12 @@ import org.torproject.descriptor.ExitList;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.TimeZone;
 
 public class ExitListImpl extends DescriptorImpl implements ExitList {
 
@@ -111,10 +116,10 @@ public class ExitListImpl extends DescriptorImpl implements ExitList {
     return this.downloadedMillis;
   }
 
-  private Set<Entry> exitListEntries = new HashSet<>();
+  private Set<ExitList.Entry> exitListEntries = new HashSet<>();
 
   @Override
-  public Set<Entry> getEntries() {
+  public Set<ExitList.Entry> getEntries() {
     return new HashSet<>(this.exitListEntries);
   }
 }

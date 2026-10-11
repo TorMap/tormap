@@ -3,11 +3,16 @@
 
 package org.torproject.descriptor.index;
 
-import com.fasterxml.jackson.annotation.*;
+import org.torproject.descriptor.internal.FileType;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import org.torproject.descriptor.internal.FileType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -187,3 +192,4 @@ public class IndexNode {
         + ",\nfns: " + files + ",\ndirs: " + directories;
   }
 }
+

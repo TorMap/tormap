@@ -7,7 +7,17 @@ import org.torproject.descriptor.DescriptorParseException;
 import org.torproject.descriptor.RelayNetworkStatusVote;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /* Contains a network status vote. */
 public class RelayNetworkStatusVoteImpl extends NetworkStatusImpl

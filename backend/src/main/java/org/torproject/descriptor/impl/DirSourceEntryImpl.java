@@ -3,13 +3,17 @@
 
 package org.torproject.descriptor.impl;
 
+import static org.torproject.descriptor.impl.DescriptorImpl.NL;
+import static org.torproject.descriptor.impl.DescriptorImpl.SP;
+
 import org.torproject.descriptor.DescriptorParseException;
 import org.torproject.descriptor.DirSourceEntry;
 
-import java.util.*;
-
-import static org.torproject.descriptor.impl.DescriptorImpl.NL;
-import static org.torproject.descriptor.impl.DescriptorImpl.SP;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
 
 public class DirSourceEntryImpl implements DirSourceEntry {
 

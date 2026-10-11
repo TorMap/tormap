@@ -3,7 +3,8 @@
 
 package org.torproject.descriptor;
 
-import java.util.SortedMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Contains a sanitized list of bridges together with the distribution
@@ -42,6 +43,6 @@ public interface BridgePoolAssignment extends Descriptor {
    *
    * @since 1.0.0
    */
-  SortedMap<String, String> getEntries();
+  Map<String, List<String>> getEntries();
 }
 

@@ -12,12 +12,23 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Scanner;
+
 
 public class BandwidthFileImpl extends DescriptorImpl implements BandwidthFile {
 
   private enum KeyWithStringValue {
-    version, software, software_version
+    version, software, software_version, tor_version,
+    // It could be checked that this corresponds to one of the current possible
+    // dirauths, but for simplicity, just check that it is an `String`.
+    dirauth_nickname
   }
 
   private enum KeyWithLocalDateTimeValue {
@@ -88,6 +99,8 @@ public class BandwidthFileImpl extends DescriptorImpl implements BandwidthFile {
       case "version":
       case "software":
       case "software_version":
+      case "tor_version":
+      case "dirauth_nickname":
         this.parsedStrings.put(KeyWithStringValue.valueOf(key), value);
         break;
       case "file_created":
@@ -145,6 +158,22 @@ public class BandwidthFileImpl extends DescriptorImpl implements BandwidthFile {
         } catch (NumberFormatException | DateTimeParseException e) {
           throw new DescriptorParseException(String.format(
               "Unable to parse duration: '%s'.", value), e);
+        }
+        break;
+      case "mu":
+        try {
+          this.mu = Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+          throw new DescriptorParseException(String.format(
+              "Unable to parse int: '%s'.", value), e);
+        }
+        break;
+      case "muf":
+        try {
+          this.muf = Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+          throw new DescriptorParseException(String.format(
+              "Unable to parse int: '%s'.", value), e);
         }
         break;
       case "node_id":
@@ -284,6 +313,18 @@ public class BandwidthFileImpl extends DescriptorImpl implements BandwidthFile {
         this.parsedStrings.get(KeyWithStringValue.software_version));
   }
 
+  @Override
+  public Optional<String> torVersion() {
+    return Optional.ofNullable(
+        this.parsedStrings.get(KeyWithStringValue.tor_version));
+  }
+
+  @Override
+  public Optional<String> dirauthNickname() {
+    return Optional.ofNullable(
+        this.parsedStrings.get(KeyWithStringValue.dirauth_nickname));
+  }
+
   private EnumMap<KeyWithLocalDateTimeValue, LocalDateTime> parsedLocalDateTimes
       = new EnumMap<>(KeyWithLocalDateTimeValue.class);
 
@@ -419,6 +460,20 @@ public class BandwidthFileImpl extends DescriptorImpl implements BandwidthFile {
     return Optional.ofNullable(this.timeToReportHalfNetwork);
   }
 
+  private int mu;
+
+  @Override
+  public Optional<Integer> mu() {
+    return Optional.ofNullable(this.mu);
+  }
+
+  private int muf;
+
+  @Override
+  public Optional<Integer> muf() {
+    return Optional.ofNullable(this.muf);
+  }
+
   private List<RelayLine> relayLines = new ArrayList<>();
 
   @Override
@@ -427,4 +482,3 @@ public class BandwidthFileImpl extends DescriptorImpl implements BandwidthFile {
         : Collections.unmodifiableList(this.relayLines);
   }
 }
-

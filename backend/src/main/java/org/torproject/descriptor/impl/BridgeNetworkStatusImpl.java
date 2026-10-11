@@ -9,7 +9,13 @@ import org.torproject.descriptor.DescriptorParseException;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TimeZone;
 
 /* Contains a bridge network status. */
 public class BridgeNetworkStatusImpl extends NetworkStatusImpl

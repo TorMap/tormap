@@ -9,7 +9,12 @@ import org.torproject.descriptor.SnowflakeStats;
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.Optional;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.SortedMap;
 
 public class SnowflakeStatsImpl extends DescriptorImpl
     implements SnowflakeStats {

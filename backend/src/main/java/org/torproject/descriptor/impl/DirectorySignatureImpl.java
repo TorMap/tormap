@@ -3,15 +3,15 @@
 
 package org.torproject.descriptor.impl;
 
+import static org.torproject.descriptor.impl.DescriptorImpl.NL;
+import static org.torproject.descriptor.impl.DescriptorImpl.SP;
+
 import org.torproject.descriptor.DescriptorParseException;
 import org.torproject.descriptor.DirectorySignature;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
-import static org.torproject.descriptor.impl.DescriptorImpl.NL;
-import static org.torproject.descriptor.impl.DescriptorImpl.SP;
 
 public class DirectorySignatureImpl implements DirectorySignature {
 

@@ -3,10 +3,11 @@
 
 package org.torproject.descriptor.impl;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
 import org.torproject.descriptor.Descriptor;
 import org.torproject.descriptor.DescriptorParseException;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -14,7 +15,12 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
 
 public abstract class DescriptorImpl implements Descriptor {
 
@@ -77,7 +83,8 @@ public abstract class DescriptorImpl implements Descriptor {
    *
    * @param offset The index of the first byte to include.
    * @param length The number of bytes to include.
-   * @return Copy of the given raw descriptor bytes.
+   * @return Copy of the given raw descriptor bytes or null in case of running
+   *         out of memory.
    */
   protected byte[] getRawDescriptorBytes(int offset, int length) {
     if (offset < this.offset || offset + length > this.offset + this.length
@@ -87,7 +94,11 @@ public abstract class DescriptorImpl implements Descriptor {
           + this.length);
     }
     byte[] result = new byte[length];
-    System.arraycopy(this.rawDescriptorBytes, offset, result, 0, length);
+    try {
+      System.arraycopy(this.rawDescriptorBytes, offset, result, 0, length);
+    } catch (OutOfMemoryError err) {
+      return null;
+    }
     return result;
   }
 

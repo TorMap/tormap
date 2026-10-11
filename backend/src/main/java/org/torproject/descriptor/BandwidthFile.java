@@ -56,6 +56,13 @@ public interface BandwidthFile extends Descriptor {
   Optional<String> softwareVersion();
 
   /**
+   * The Tor version of the Tor process controlled by the generator.
+   *
+   * @since 2.20.0
+   */
+  Optional<String> torVersion();
+
+  /**
    * Timestamp in UTC time zone when the file was created.
    *
    * @since 2.6.0
@@ -217,6 +224,32 @@ public interface BandwidthFile extends Descriptor {
   Optional<Duration> timeToReportHalfNetwork();
 
   /**
+   * The network stream bandwidth average calculated as explained in the
+   * bandwidth file specification.
+   * This Line was added in version 1.7.0 of the bandwidth file specification.
+   *
+   * @since 2.22.0
+   */
+  Optional<Integer> mu();
+
+  /**
+   * The network stream bandwidth average filtered calculated as explained in
+   * the bandwidth file specification.
+   * This Line was added in version 1.7.0 of the bandwidth file specification.
+   *
+   * @since 2.22.0
+   */
+  Optional<Integer> muf();
+
+  /**
+   * The dirauth's nickname which publishes this V3BandwidthsFile.
+   * This Line was added in version 1.8.0 of this specification.
+   *
+   * @since 2.24.0
+   */
+  Optional<String> dirauthNickname();
+
+  /**
    * List of zero or more {@link RelayLine}s containing relay identities and
    * bandwidths in the order as they are contained in the bandwidth file.
    *
@@ -256,4 +289,3 @@ public interface BandwidthFile extends Descriptor {
     Map<String, String> additionalKeyValues();
   }
 }
-

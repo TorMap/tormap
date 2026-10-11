@@ -3,9 +3,10 @@
 
 package org.torproject.descriptor.impl;
 
+import org.torproject.descriptor.DescriptorParseException;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import org.torproject.descriptor.DescriptorParseException;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -14,7 +15,15 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TimeZone;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 /**
@@ -528,5 +537,27 @@ public class ParseHelper {
     }
     return parsedProtocolVersions.get(lineNoOpt);
   }
-}
 
+  private static Map<String, SortedMap<String, Double>>
+      parsedStats = new HashMap<>();
+
+  protected static SortedMap<String, Double> parseStats(
+      String line, String lineNoOpt, String[] partsNoOpt)
+      throws DescriptorParseException {
+    if (!parsedStats.containsKey(lineNoOpt)) {
+      SortedMap<String, Double> parsed = new TreeMap<>();
+      try {
+        for (int i = 1; i < partsNoOpt.length; i++) {
+          String[] part = partsNoOpt[i].split("=");
+          Double stats = Double.parseDouble(part[1]);
+          parsed.put(part[0], stats);
+        }
+
+      } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
+        throw new DescriptorParseException("Invalid line '" + line + "'.", e);
+      }
+      parsedStats.put(lineNoOpt, Collections.unmodifiableSortedMap(parsed));
+    }
+    return parsedStats.get(lineNoOpt);
+  }
+}

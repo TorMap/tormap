@@ -491,4 +491,3 @@ public interface RelayNetworkStatusVote extends Descriptor {
    */
   String getDigestSha1Hex();
 }
-
