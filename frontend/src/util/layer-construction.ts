@@ -8,7 +8,6 @@ import L, {
     LeafletMouseEvent,
     PathOptions
 } from "leaflet";
-import "./leaflet-heat-init";
 
 import {RelayLocationDto} from "../dto/relay";
 import worldGeoData from "../resources/world.geo.json";
@@ -22,6 +21,7 @@ import {
     sortFamilyCoordinatesMap
 } from "./aggregate-relays";
 import {getUniqueCountryColor} from "./geojson";
+import {HeatLatLngTuple, HeatLayer, heatLayer} from "./heat-layer";
 
 /**
  * Returns a Layer with markers with size relative to number of relays on a coordinate.
@@ -244,16 +244,15 @@ export const calculateFamilyColor = (familyId: number) => {
     return `hsl(${hue},${sat},60%)`
 }
 
-export const buildRelayHeatmapLayer = (relays: RelayLocationDto[]): LayerGroup => {
-    const coordinates = new Array<L.HeatLatLngTuple>()
-    relays.forEach(relay => coordinates.push([relay.lat, relay.long, 1]))
-    return L.heatLayer(coordinates, {
+export const buildRelayHeatmapLayer = (relays: RelayLocationDto[]): HeatLayer => {
+    const coordinates = relays.map((relay): HeatLatLngTuple => [relay.lat, relay.long, 1])
+    return heatLayer(coordinates, {
         radius: 25,
         max: 1,
         blur: 35,
         minOpacity: .55,
         gradient: {0.4: '#2e53dc', 0.65: '#c924ae', .75: '#ff4646', .83: "#ff0000"},
-    }) as unknown as LayerGroup
+    })
 }
 
 /**
