@@ -7,7 +7,7 @@ import {useSettings} from "../../context/settings-context";
 import {makeRelay} from "../../test/fixtures";
 import {renderWithProviders} from "../../test/render";
 import {RelayType} from "../../types/relay";
-import {relaySearchOnMapAtom} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
+import {relaySearchOnMapAtom} from "../dialogs/relay/relay-details-atoms";
 import {AppSettings} from "./AppSettings";
 
 const State = () => {

@@ -13,8 +13,14 @@ import {getRelayType} from "../../../util/aggregate-relays";
 import {backend, nameOfFactory} from "../../../util/util";
 import {RelayDetailsDialogLarge} from "./RelayDetailsDialogLarge";
 import {RelayDetailsDialogSmall} from "./RelayDetailsDialogSmall";
-import {atom, useAtom, useSetAtom} from "jotai";
-import {relayDetailsDialogOrderAtom, relayDetailsDialogSearchAtom} from "./RelayDetailsSelectionHeader";
+import {useAtom, useSetAtom} from "jotai";
+import {
+    relayDetailsDialogOrderAtom,
+    relayDetailsDialogSearchAtom,
+    relaysForDetailsDialogAtom,
+    relaySearchOnMapAtom,
+    showRelayDetailsDialogAtom,
+} from "./relay-details-atoms";
 
 export interface DetailsDialogProps {
     showDialog: boolean
@@ -26,26 +32,6 @@ export interface DetailsDialogProps {
     canShowRelayList: boolean
     showMatchesOnMap?: () => void
 }
-
-export const showRelayDetailsDialogAtom = atom(false);
-export const relaysForDetailsDialogAtom = atom<RelayLocationDto[]>([]);
-
-export interface RelaySearchOnMap {
-    /**
-     * The search term which found the relays
-     */
-    search: string
-
-    /**
-     * The relays found by the search
-     */
-    relays: RelayLocationDto[]
-}
-
-/**
- * If set, the map only shows the relays of this search
- */
-export const relaySearchOnMapAtom = atom<RelaySearchOnMap | undefined>(undefined);
 
 export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
     // Component state

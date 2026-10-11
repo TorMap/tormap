@@ -7,7 +7,7 @@ import {SlideUpTransition} from "../../types/ui";
 import {AppSettings} from "../accordion/AppSettings";
 import {MapStats} from "../accordion/MapStats";
 import {ResponsiveDatePicker} from "../date/ResponsiveDatePicker";
-import {relaySearchOnMapAtom} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
+import {relaySearchOnMapAtom} from "../dialogs/relay/relay-details-atoms";
 
 /**
  * A component wrapping all UI elements for devices with small screen sizes

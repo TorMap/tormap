@@ -10,12 +10,8 @@ import {mockBackend, networkError} from "../../../test/mock-backend";
 import {renderWithProviders} from "../../../test/render";
 import {RelayFlag, RelayType} from "../../../types/relay";
 import {SnackbarMessage} from "../../../types/ui";
-import {
-    relaysForDetailsDialogAtom,
-    relaySearchOnMapAtom,
-    ResponsiveRelayDetailsDialog,
-    showRelayDetailsDialogAtom
-} from "./ResponsiveRelayDetailsDialog";
+import {relaysForDetailsDialogAtom, relaySearchOnMapAtom, showRelayDetailsDialogAtom} from "./relay-details-atoms";
+import {ResponsiveRelayDetailsDialog} from "./ResponsiveRelayDetailsDialog";
 
 /**
  * Opens the dialog for the given relays, like a marker click on the map does, and exposes the settings it changes.

@@ -27,11 +27,11 @@ import {
 import {LoadingAnimation} from "../loading/LoadingAnimation";
 import {atom, useAtom} from "jotai";
 import {
+    relayDetailsDialogSearchAtom,
     relaysForDetailsDialogAtom,
     relaySearchOnMapAtom,
     showRelayDetailsDialogAtom
-} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
-import {relayDetailsDialogSearchAtom} from "../dialogs/relay/RelayDetailsSelectionHeader";
+} from "../dialogs/relay/relay-details-atoms";
 
 // Lazy loaded components
 const ResponsiveRelayDetailsDialog = React.lazy(() => import('../dialogs/relay/ResponsiveRelayDetailsDialog'));
