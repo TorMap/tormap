@@ -66,7 +66,7 @@ describe("AppSettings relay type colors", () => {
 })
 
 describe("AppSettings", () => {
-    const restoreButton = {name: "Restore default settings"}
+    const restoreButton = {name: "Restore settings"}
 
     it("hides the restore button while the settings are default", async () => {
         const screen = await renderWithProviders(<AppSettings elevation={0}/>)
@@ -90,7 +90,7 @@ describe("AppSettings", () => {
 })
 
 describe("AppSettings relay search on map", () => {
-    const restoreButton = {name: "Restore default settings"}
+    const restoreButton = {name: "Restore settings"}
 
     const ShowSearchOnMap = () => {
         const [relaySearchOnMap, setRelaySearchOnMap] = useAtom(relaySearchOnMapAtom)
