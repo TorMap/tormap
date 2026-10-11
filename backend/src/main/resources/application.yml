@@ -18,6 +18,11 @@ ip-lookup:
     locationDatabaseFile: /ip-lookup/location.mmdb
     autonomousSystemDatabaseFile: /ip-lookup/autonomous-system.mmdb
 management:
+    opentelemetry:
+        # Attached to the OTLP metrics export (management.otlp.metrics.export.resource-attributes no longer exists)
+        resource-attributes:
+            service.name: TorMap
+            host.name: ${HOSTNAME:unknown}
     otlp:
         metrics:
             export:
@@ -28,9 +33,6 @@ management:
                 aggregation-temporality: delta
                 headers:
                     api-key: ${NEW_RELIC_INGEST_KEY:}
-                resource-attributes:
-                    service.name: TorMap
-                    host.name: ${HOSTNAME:unknown}
     endpoints:
         enabled-by-default: false
         jmx:

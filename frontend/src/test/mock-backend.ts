@@ -1,10 +1,9 @@
-import {AxiosAdapter, AxiosError, AxiosResponse} from "axios";
-
-import {backend} from "../util/util";
+import {backendApiUrl} from "../config";
+import {backend, BackendTransport} from "../util/util";
 
 /*
- Replaces the transport of the app's axios instance. Requests still pass through axios (interceptors and transforms),
- but nothing leaves the browser. Routes are registered per test; unmocked requests are recorded and fail the test.
+ Replaces the transport of the app's backend client. Requests still pass through the client (URL, headers, JSON parsing
+ and status handling), but nothing leaves the browser. Routes are registered per test; unmocked requests are recorded and fail the test.
  */
 
 type Path = string | RegExp
@@ -65,20 +64,24 @@ let routes: Route[] = []
 let requests: MockRequest[] = []
 let unhandled: string[] = []
 
-const originalAdapter = backend.defaults.adapter
+const originalTransport = backend.transport
 
-const parseBody = (data: unknown): unknown => {
-    if (typeof data !== "string") return data
+const parseBody = (body: RequestInit["body"]): unknown => {
+    if (typeof body !== "string") return body ?? undefined
     try {
-        return JSON.parse(data)
+        return JSON.parse(body)
     } catch {
-        return data
+        return body
     }
 }
 
-const adapter: AxiosAdapter = async (config) => {
-    const method = (config.method ?? "get").toUpperCase()
-    const url = config.url ?? ""
+// Like fetch, a lost connection rejects with a TypeError instead of resolving with a response
+const connectionFailure = () => new TypeError("Failed to fetch")
+
+const transport: BackendTransport = async (fullUrl, init) => {
+    const method = (init.method ?? "GET").toUpperCase()
+    const base = (backendApiUrl ?? "").replace(/\/+$/, "")
+    const url = fullUrl.startsWith(base) ? fullUrl.slice(base.length) : fullUrl
     let match: RegExpMatchArray | null = null
     const route = routes.find(candidate => {
         if (candidate.method !== method) return false
@@ -86,31 +89,22 @@ const adapter: AxiosAdapter = async (config) => {
         match = url.match(candidate.path)
         return match !== null
     })
-    const request: MockRequest = {method, url, data: parseBody(config.data), match}
+    const request: MockRequest = {method, url, data: parseBody(init.body), match}
     requests.push(request)
 
     if (!route) {
         unhandled.push(`${method} ${url}`)
-        throw new AxiosError(`No mock registered for ${method} ${url}`, AxiosError.ERR_NETWORK, config)
+        throw connectionFailure()
     }
 
     let result = await route.handler(request)
-    if (result instanceof NetworkFailure) {
-        throw new AxiosError("Network Error", AxiosError.ERR_NETWORK, config)
-    }
+    if (result instanceof NetworkFailure) throw connectionFailure()
     if (!(result instanceof Reply)) result = new Reply(200, result)
     const {status, data} = result as Reply
-
-    const response: AxiosResponse = {data, status, statusText: String(status), headers: {}, config, request: {}}
-    const valid = config.validateStatus ? config.validateStatus(status) : status >= 200 && status < 300
-    if (valid) return response
-    throw new AxiosError(
-        `Request failed with status code ${status}`,
-        status >= 500 ? AxiosError.ERR_BAD_RESPONSE : AxiosError.ERR_BAD_REQUEST,
-        config,
-        response.request,
-        response,
-    )
+    return new Response(data === undefined ? null : JSON.stringify(data), {
+        status,
+        headers: {"Content-Type": "application/json"},
+    })
 }
 
 const register = (method: string, path: Path, handler: Handler | unknown) => {
@@ -121,17 +115,17 @@ const register = (method: string, path: Path, handler: Handler | unknown) => {
 
 export const mockBackend = {
     /**
-     * Routes the app's axios instance to the registered handlers. Called once from the test setup.
+     * Routes the app's backend client to the registered handlers. Called once from the test setup.
      */
     install() {
-        backend.defaults.adapter = adapter
+        backend.transport = transport
     },
 
     /**
      * Restores the real transport. Only needed by tests of the setup itself.
      */
     uninstall() {
-        backend.defaults.adapter = originalAdapter
+        backend.transport = originalTransport
     },
 
     /**

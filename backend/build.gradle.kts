@@ -7,7 +7,6 @@ java.sourceCompatibility = JavaVersion.VERSION_21
 
 plugins {
     kotlin("jvm") version "2.4.20"
-    kotlin("kapt") version "2.4.20"
     kotlin("plugin.spring") version "2.4.20"
     kotlin("plugin.allopen") version "2.4.20"
     kotlin("plugin.jpa") version "2.4.20"
@@ -41,7 +40,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
@@ -52,8 +50,8 @@ dependencies {
     // Postgres Database
     implementation("org.postgresql:postgresql:42.7.14")
 
-    // Caching with Ehcache https://www.ehcache.org/
-    implementation("org.ehcache:ehcache:3.12.0:jakarta")
+    // In-memory caching with Caffeine https://github.com/ben-manes/caffeine (version managed by Spring Boot)
+    implementation("com.github.ben-manes.caffeine:caffeine")
 
     // Run Flyway DB migration tool on startup https://flywaydb.org/
     implementation("org.springframework.boot:spring-boot-starter-flyway")
@@ -64,7 +62,8 @@ dependencies {
 
     // Export metrics to New Relic via OTLP (https://micrometer.io/)
     implementation("org.springframework.boot:spring-boot-starter-micrometer-metrics")
-    implementation("org.springframework.boot:spring-boot-starter-opentelemetry")
+    // Only the OpenTelemetry SDK setup: management.opentelemetry.resource-attributes for the OTLP export. No tracing.
+    implementation("org.springframework.boot:spring-boot-opentelemetry")
     implementation("io.micrometer:micrometer-registry-otlp")
 
     // Reverse DNS lookups with dnsjava
