@@ -73,7 +73,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 - Input validation: `@Size` limits on POST ID lists, typed `Long` path variables, strict `LocalDate.parse`.
 - Persistence uses Spring Data derived queries and bound parameters only, no string-built SQL/JPQL. Flyway migrations
   with `ddl-auto: validate`.
-- Caches with bounded entry counts (Ehcache heap tiers). Shallow ETags only on small endpoints. `CoalesceService`
+- Caches with bounded entry counts (Caffeine `maximumSize`, unknown cache names rejected). Shallow ETags only on small endpoints. `CoalesceService`
   bounds concurrent background recomputation per key.
 - Ingestion: remote file names must not contain `/`, `\`, `.` or `..`, and target directories must resolve inside the
   download directory (real-path check). Downloads are written to a temp file and kept only if the size matches the
