@@ -34,16 +34,24 @@ fun mockRelayDetails(mockLetter: Char = 'A') = RelayDetails(
     false,
 )
 
-fun mockRelayLocation(day: LocalDate = LocalDate.now(), mockLetter: Char = 'A'): RelayLocation {
+fun mockRelayLocation(
+    day: LocalDate = LocalDate.now(),
+    mockLetter: Char = 'A',
+    flags: Set<String> = emptySet(),
+    consensusWeight: Long = -1,
+    bandwidthWeights: Map<String, Int>? = null,
+): RelayLocation {
     val networkStatusEntry = mockk<NetworkStatusEntry>()
     every { networkStatusEntry.fingerprint } returns mockLetter.toString().repeat(40)
-    every { networkStatusEntry.flags } returns sortedSetOf()
+    every { networkStatusEntry.flags } returns flags.toSortedSet()
+    every { networkStatusEntry.bandwidth } returns consensusWeight
     return RelayLocation(
         networkStatusEntry,
         day,
         BigDecimal(50),
         BigDecimal(50),
-        "DE"
+        "DE",
+        bandwidthWeights,
     )
 }
 
