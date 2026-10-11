@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +47,7 @@ public class IndexNode {
       new TreeSet<>(), new TreeSet<>());
 
   private static ObjectMapper objectMapper = new ObjectMapper()
-      .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
+      .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
       .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
       .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
       .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
