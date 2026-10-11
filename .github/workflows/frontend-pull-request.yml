@@ -5,6 +5,7 @@ on:
     paths:
       - 'frontend/**'
       - '.github/workflows/frontend*'
+      - '.github/scripts/osm-check.py'
 
 permissions:
   contents: read

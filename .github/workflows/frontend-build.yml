@@ -12,6 +12,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+          fetch-depth: 2 # base commit is needed to find new or changed dependencies
+
+      # Only looks up packages that are new or changed in yarn.lock, before anything is installed.
+      - name: Check dependencies against OpenSourceMalware
+        if: github.event_name == 'pull_request'
+        run: python3 .github/scripts/osm-check.py npm frontend/yarn.lock
+        env:
+          OSM_TOKEN: ${{ secrets.OSM_TOKEN }}
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:

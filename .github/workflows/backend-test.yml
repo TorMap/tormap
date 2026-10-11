@@ -5,10 +5,12 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/backend*'
+      - '.github/scripts/osm-check.py'
   pull_request:
     paths:
       - 'backend/**'
       - '.github/workflows/backend*'
+      - '.github/scripts/osm-check.py'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -23,6 +25,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+          fetch-depth: 2 # base commit is needed to find new or changed dependencies
+
+      # Only looks up coordinates that are new or changed in the Gradle build files, before Gradle resolves anything.
+      - name: Check dependencies against OpenSourceMalware
+        if: github.event_name == 'pull_request'
+        run: python3 .github/scripts/osm-check.py maven backend/build.gradle.kts backend/settings.gradle.kts
+        env:
+          OSM_TOKEN: ${{ secrets.OSM_TOKEN }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
