@@ -84,7 +84,9 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 - Container runs as non-root `1000:1000` from a digest-pinned base image.
 - Supply chain: Maven Central and npm registry only, Yarn install scripts disabled, 3-day npm age gate, Renovate with
   release age, actions pinned by SHA, Gradle wrapper validation, least-privilege workflow `permissions`, no
-  `pull_request_target`, CodeQL weekly, Snyk PR checks, GitHub secret scanning with push protection.
+  `pull_request_target`, CodeQL weekly, Snyk PR checks, GitHub secret scanning with push protection. The vendored
+  metrics-lib is copied from an upstream release tarball. Its checksum and local patches are listed in
+  `backend/src/main/java/org/torproject/VENDORED.md`.
 
 ## Threat scenarios
 
