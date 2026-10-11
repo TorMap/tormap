@@ -1,4 +1,4 @@
-import {describe, expect, it, vi} from "vitest";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 import {page} from "vitest/browser";
 
 import {makeRelays} from "../test/fixtures";
@@ -16,6 +16,11 @@ vi.mock("react-leaflet", async (importOriginal) => ({
 const days = ["2024-01-01", "2024-01-02"]
 
 describe("App", () => {
+    beforeEach(() => {
+        // Requested by the timeline of the large overlay
+        mockBackend.onGet("/relay/statistics/daily-counts", [])
+    })
+
     it("loads the available days and then the latest one", async () => {
         mockBackend.onGet("/relay/location/days", days)
         mockBackend.onGet("/relay/location/day/2024-01-02", makeRelays(2))

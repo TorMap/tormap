@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.tormap.database.entity.RelayDetails
 import org.tormap.database.entity.RelayLocation
+import org.tormap.database.entity.TorRelayFlag
 import org.torproject.descriptor.NetworkStatusEntry
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -34,10 +35,14 @@ fun mockRelayDetails(mockLetter: Char = 'A') = RelayDetails(
     false,
 )
 
-fun mockRelayLocation(day: LocalDate = LocalDate.now(), mockLetter: Char = 'A'): RelayLocation {
+fun mockRelayLocation(
+    day: LocalDate = LocalDate.now(),
+    mockLetter: Char = 'A',
+    flags: Set<TorRelayFlag> = emptySet(),
+): RelayLocation {
     val networkStatusEntry = mockk<NetworkStatusEntry>()
     every { networkStatusEntry.fingerprint } returns mockLetter.toString().repeat(40)
-    every { networkStatusEntry.flags } returns sortedSetOf()
+    every { networkStatusEntry.flags } returns flags.map { it.name }.toSortedSet()
     return RelayLocation(
         networkStatusEntry,
         day,

@@ -10,6 +10,14 @@ export interface RelayLocationDto {
     nickname: string
 }
 
+export interface DailyRelayCountDto {
+    day: string
+    total: number
+    exit: number
+    guard: number
+    other: number
+}
+
 export interface RelayDetailsDto {
     id: number
     month: string
