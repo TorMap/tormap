@@ -30,6 +30,7 @@ class CacheConfigTest(
 
     "caches exists" {
         relayLocationDistinctDaysCache shouldNotBe null
+        cacheManager.getCache(CacheConfig.RELAY_DAILY_COUNTS) shouldNotBe null
         relayLocationsPerDayCache shouldNotBe null
         reverseDnsLookupsCache shouldNotBe null
     }
@@ -41,6 +42,7 @@ class CacheConfigTest(
     "caches are bounded" {
         mapOf(
             CacheConfig.RELAY_LOCATION_DISTINCT_DAYS to 1L,
+            CacheConfig.RELAY_DAILY_COUNTS to 1L,
             CacheConfig.RELAY_LOCATIONS_PER_DAY to 40L,
             CacheConfig.REVERSE_DNS_LOOKUPS to 10_000L,
         ).forEach { (name, maximumSize) ->

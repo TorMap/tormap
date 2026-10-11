@@ -133,6 +133,7 @@ class DescriptorCoordinationService(
     private fun updateCaches(descriptorType: DescriptorType, processedMonths: Set<String>) {
         if (descriptorType.isRelayConsensusType()) {
             cacheService.cacheRelayLocationDistinctDays()
+            cacheService.cacheRelayDailyCounts()
         }
         if (descriptorType.isRecent()) {
             cacheService.cacheRelayLocationsPerDay(processedMonths)
