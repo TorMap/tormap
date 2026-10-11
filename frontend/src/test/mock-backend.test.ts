@@ -1,7 +1,6 @@
-import {AxiosError} from "axios";
 import {describe, expect, it} from "vitest";
 
-import {backend} from "../util/util";
+import {backend, BackendError} from "../util/util";
 import {deferred, mockBackend, networkError, reply} from "./mock-backend";
 
 describe("mockBackend", () => {
@@ -27,17 +26,17 @@ describe("mockBackend", () => {
 
     it("rejects with the response for error statuses", async () => {
         mockBackend.onGet("/broken", () => reply(500, {message: "boom"}))
-        const error = await backend.get("/broken").catch(e => e as AxiosError)
-        expect(error).toBeInstanceOf(AxiosError)
-        expect((error as AxiosError).response?.status).toBe(500)
-        expect((error as AxiosError).response?.data).toEqual({message: "boom"})
+        const error = await backend.get("/broken").catch(e => e as BackendError)
+        expect(error).toBeInstanceOf(BackendError)
+        expect((error as BackendError).status).toBe(500)
+        expect((error as BackendError).data).toEqual({message: "boom"})
     })
 
     it("rejects without a response for network errors", async () => {
         mockBackend.onGet("/offline", () => networkError())
-        const error = await backend.get("/offline").catch(e => e as AxiosError)
-        expect((error as AxiosError).code).toBe(AxiosError.ERR_NETWORK)
-        expect((error as AxiosError).response).toBeUndefined()
+        const error = await backend.get("/offline").catch(e => e as BackendError)
+        expect(error).toBeInstanceOf(BackendError)
+        expect((error as BackendError).status).toBeUndefined()
     })
 
     it("waits for deferred answers", async () => {
@@ -49,8 +48,8 @@ describe("mockBackend", () => {
     })
 
     it("records unmocked requests and rejects them", async () => {
-        const error = await backend.get("/unknown").catch(e => e as AxiosError)
-        expect((error as AxiosError).code).toBe(AxiosError.ERR_NETWORK)
+        const error = await backend.get("/unknown").catch(e => e as BackendError)
+        expect((error as BackendError).status).toBeUndefined()
         expect(mockBackend.unhandled).toEqual(["GET /unknown"])
         // The shared teardown fails tests with unmocked requests, so clear it for this deliberate one
         mockBackend.reset()

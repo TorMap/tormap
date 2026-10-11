@@ -2,7 +2,7 @@ import {renderHook} from "vitest-browser-react";
 import {afterEach, describe, expect, it, vi} from "vitest";
 
 import {backendApiUrl} from "../config";
-import {backend, nameOfFactory, useDebounce} from "./util";
+import {backend, BackendError, BackendTransport, nameOfFactory, useDebounce} from "./util";
 
 describe("useDebounce", () => {
     afterEach(() => {
@@ -57,8 +57,53 @@ describe("nameOfFactory", () => {
 })
 
 describe("backend", () => {
-    it("targets the configured backend and sends JSON", () => {
-        expect(backend.defaults.baseURL).toBe(backendApiUrl)
-        expect(backend.defaults.headers["Content-type"]).toBe("application/json")
+    // The test setup installs the mock transport again before each test
+    const useTransport = (respond: () => Response | Promise<Response>) => {
+        const transport = vi.fn<BackendTransport>(async () => respond())
+        backend.transport = transport
+        return transport
+    }
+
+    it("sends GET requests to the configured backend without a Content-Type", async () => {
+        const transport = useTransport(() => Response.json(["2024-01-01"]))
+        const response = await backend.get<string[]>("/relay/location/days")
+
+        expect(response).toEqual({data: ["2024-01-01"], status: 200})
+        const [url, init] = transport.mock.calls[0]
+        expect(url).toBe(`${backendApiUrl}/relay/location/days`)
+        expect(init).toEqual({method: "GET", headers: {Accept: "application/json"}})
+    })
+
+    it("sends POST bodies as JSON", async () => {
+        const transport = useTransport(() => Response.json([]))
+        await backend.post("/relay/details/relay/identifiers", [1, 2])
+
+        const [, init] = transport.mock.calls[0]
+        expect(init.method).toBe("POST")
+        expect(init.headers).toEqual({Accept: "application/json", "Content-Type": "application/json"})
+        expect(init.body).toBe("[1,2]")
+    })
+
+    it("returns non-JSON bodies as text", async () => {
+        useTransport(() => new Response("plain"))
+        expect((await backend.get("/text")).data).toBe("plain")
+    })
+
+    it("rejects error statuses with status and body", async () => {
+        useTransport(() => Response.json({message: "boom"}, {status: 503}))
+        const error = await backend.get("/broken").catch(e => e)
+
+        expect(error).toBeInstanceOf(BackendError)
+        expect(error).toMatchObject({status: 503, data: {message: "boom"}})
+    })
+
+    it("rejects connection failures without a status", async () => {
+        const cause = new TypeError("Failed to fetch")
+        useTransport(() => Promise.reject(cause))
+        const error = await backend.get("/offline").catch(e => e)
+
+        expect(error).toBeInstanceOf(BackendError)
+        expect(error.status).toBeUndefined()
+        expect(error.cause).toBe(cause)
     })
 })
