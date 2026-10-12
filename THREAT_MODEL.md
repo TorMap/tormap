@@ -81,7 +81,8 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   entries are stored untruncated.
 - Reverse DNS: at most 10 PTR names verified per IP, forward results filtered to public addresses, results cached for
   6 hours with `sync = true`.
-- Container runs as non-root `1000:1000` from a digest-pinned base image.
+- Backend container runs as non-root `1000:1000` from a digest-pinned base image. The frontend image (static files only)
+  is based on the digest-pinned `nginxinc/nginx-unprivileged`, runs as non-root `101` and listens on port 8080.
 - Supply chain: Maven Central and npm registry only, Yarn install scripts disabled, 3-day npm age gate, Renovate with
   release age, actions pinned by SHA, Gradle wrapper validation, least-privilege workflow `permissions`, no
   `pull_request_target`, CodeQL weekly, Snyk PR checks, GitHub secret scanning with push protection. The vendored
