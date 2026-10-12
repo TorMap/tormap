@@ -1,11 +1,11 @@
 import {CircleMarker, GeoJSON, Layer, LayerGroup, LeafletMouseEvent, Path} from "leaflet";
-import {describe, expect, it, vi} from "vitest";
+import {beforeAll, describe, expect, it, vi} from "vitest";
 
 import {RelayLocationDto} from "../dto/relay";
 import {makeRelay, makeRelays, makeSettings} from "../test/fixtures";
 import {RelayFlag, RelayType} from "../types/relay";
 import {buildFamilyCoordinatesMap, buildRelayCoordinatesMap, buildRelayCountryMap, buildRelayFamilyMap} from "./aggregate-relays";
-import {getUniqueCountryColor} from "./geojson";
+import {CountryFeature, getUniqueCountryColor, loadWorldFeatures} from "./geojson";
 import {HeatLayer} from "./heat-layer";
 import {
     buildAggregatedCoordinatesLayer,
@@ -272,11 +272,15 @@ describe("buildRelayCountryLayer", () => {
 
 describe("buildCountryLayer", () => {
     const countryMap = buildRelayCountryMap([makeRelay({country: "DE"}), makeRelay({country: "FR"})])
+    let worldFeatures: CountryFeature[]
+    beforeAll(async () => {
+        worldFeatures = await loadWorldFeatures()
+    })
     const countryOf = (layer: Layer) => (layer as Layer & {feature: {properties: {iso_a2: string}}}).feature.properties.iso_a2
     const build = (selectedCountry?: string) => {
         const setSettings = vi.fn()
         const settings = makeSettings({selectedCountry})
-        const layer = buildCountryLayer(countryMap, settings, setSettings) as GeoJSON
+        const layer = buildCountryLayer(countryMap, settings, setSettings, worldFeatures) as GeoJSON
         return {layers: layer.getLayers() as Path[], settings, setSettings}
     }
 

@@ -1,6 +1,6 @@
 import {useAtom} from "jotai";
 import {useSnackbar} from "notistack";
-import {FunctionComponent, useEffect} from "react";
+import {FunctionComponent, useEffect, useState} from "react";
 import {useMap} from "react-leaflet";
 
 import {useDate} from "../../context/date-context";
@@ -8,6 +8,7 @@ import {useSettings} from "../../context/settings-context";
 import {CountryUsageDto} from "../../dto/relay";
 import {SnackbarMessage} from "../../types/ui";
 import {buildCountryUsageLayer, countryUsagePane, countryUsagePaneZIndex} from "../../util/country-usage";
+import {CountryFeature, loadWorldFeatures} from "../../util/geojson";
 import {backend} from "../../util/util";
 import {countryUsageAtom} from "./country-usage-atoms";
 
@@ -21,6 +22,7 @@ export const CountryUsageLayer: FunctionComponent = () => {
     const {selectedDate} = useDate()
     const {enqueueSnackbar} = useSnackbar()
     const [countryUsage, setCountryUsage] = useAtom(countryUsageAtom)
+    const [worldFeatures, setWorldFeatures] = useState<CountryFeature[]>()
 
     // Load the estimates of the selected day
     useEffect(() => {
@@ -50,17 +52,31 @@ export const CountryUsageLayer: FunctionComponent = () => {
         }
     }, [settings.showCountryUsage, selectedDate, setCountryUsage, enqueueSnackbar])
 
+    // Load the country borders once the estimates are shown, switching the setting again retries a failed load
+    useEffect(() => {
+        if (!settings.showCountryUsage || worldFeatures) return undefined
+        let cancelled = false
+        loadWorldFeatures().then(features => {
+            if (!cancelled) setWorldFeatures(features)
+        }).catch(() => {
+            if (!cancelled) enqueueSnackbar(SnackbarMessage.CountryBordersFailed, {variant: "error"})
+        })
+        return () => {
+            cancelled = true
+        }
+    }, [settings.showCountryUsage, worldFeatures, enqueueSnackbar])
+
     // Draw the estimates
     useEffect(() => {
-        if (!countryUsage || countryUsage.usage.length === 0) return
+        if (!countryUsage || countryUsage.usage.length === 0 || !worldFeatures) return
         if (!map.getPane(countryUsagePane)) {
             map.createPane(countryUsagePane).style.zIndex = String(countryUsagePaneZIndex)
         }
-        const layer = buildCountryUsageLayer(countryUsage.usage).addTo(map)
+        const layer = buildCountryUsageLayer(countryUsage.usage, worldFeatures).addTo(map)
         return () => {
             layer.remove()
         }
-    }, [map, countryUsage])
+    }, [map, countryUsage, worldFeatures])
 
     return null
 }

@@ -22,6 +22,10 @@ export interface Settings {
     relaysMustHaveFlag: Record<RelayFlag, boolean>
 }
 
+// Names of the settings inputs that need special handling when they change
+export const showRelayTypesInput = "showRelayTypesInput"
+export const relaysMustIncludeFlagInput = "relaysMustIncludeFlagInput"
+
 // How many relays with the highest consensus weight can be selected
 export const topRelayCountOptions = [10, 50, 100, 500, 1000]
 

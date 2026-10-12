@@ -10,7 +10,6 @@ import L, {
 } from "leaflet";
 
 import {RelayLocationDto} from "../dto/relay";
-import worldGeoData from "../resources/world.geo.json";
 import {RelayType} from "../types/relay";
 import {Settings} from "../types/settings";
 import {
@@ -20,7 +19,7 @@ import {
     RelayFamilyLocation,
     sortFamilyCoordinatesMap
 } from "./aggregate-relays";
-import {getUniqueCountryColor} from "./geojson";
+import {CountryFeature, getUniqueCountryColor} from "./geojson";
 import {HeatLatLngTuple, HeatLayer, heatLayer} from "./heat-layer";
 
 /**
@@ -321,11 +320,13 @@ export const buildRelayCountryLayer = (
  * @param countryMap - The CountryMap
  * @param settings - The app settings
  * @param setSettingsCallback - The callback for changing settings
+ * @param worldFeatures - The borders of all countries, see loadWorldFeatures
  */
 export const buildCountryLayer = (
     countryMap: Map<string, RelayLocationDto[]>,
     settings: Settings,
-    setSettingsCallback: (s: Settings) => void
+    setSettingsCallback: (s: Settings) => void,
+    worldFeatures: CountryFeature[]
 ): LayerGroup => {
     // style for countries
     const style = (feature: Feature<GeometryObject>): PathOptions => {
@@ -349,7 +350,7 @@ export const buildCountryLayer = (
             onEachCountry(feature, layer, settings, setSettingsCallback)
         }
     })
-    worldGeoData.features.forEach(feature => {
+    worldFeatures.forEach(feature => {
         if (countryMap.has(feature.properties.iso_a2)) {
             filteredGeoData.addData(feature as GeoJsonObject)
         }

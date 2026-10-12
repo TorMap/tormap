@@ -20,7 +20,13 @@ import {defaultSettings, tooltipTimeDelay} from "../../config";
 import {useSettings} from "../../context/settings-context";
 import {RelayTypeIcon} from "../../types/icons";
 import {RelayFlagLabel, RelayType, RelayTypeLabel, RelayTypeTooltip} from "../../types/relay";
-import {relayMustIncludeFlagOptions, Settings, topRelayCountOptions} from "../../types/settings";
+import {
+    relayMustIncludeFlagOptions,
+    relaysMustIncludeFlagInput,
+    Settings,
+    showRelayTypesInput,
+    topRelayCountOptions
+} from "../../types/settings";
 import {usageColorGradient} from "../../util/country-usage";
 import {nameOfFactory} from "../../util/util";
 import {ExternalLink} from "../link/ExternalLink";
@@ -87,8 +93,8 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
             <Accordion elevation={elevation} defaultExpanded>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
-                    aria-controls="panel2a-content"
-                    id="panel2a-header"
+                    aria-controls="group-relays-content"
+                    id="group-relays-header"
                 >
                     <Typography className={"heading"}>Group relays by</Typography>
                 </AccordionSummary>
@@ -152,8 +158,8 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
             <Accordion elevation={elevation}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
-                    aria-controls="panel2a-content"
-                    id="panel2a-header"
+                    aria-controls="consensus-weight-content"
+                    id="consensus-weight-header"
                 >
                     <Typography className={"heading"}>Consensus weight</Typography>
                 </AccordionSummary>
@@ -192,8 +198,8 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
             <Accordion elevation={elevation}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
-                    aria-controls="panel2a-content"
-                    id="panel2a-header"
+                    aria-controls="country-usage-content"
+                    id="country-usage-header"
                 >
                     <Typography className={"heading"}>Tor users per country</Typography>
                 </AccordionSummary>
@@ -242,8 +248,8 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
             <Accordion elevation={elevation} defaultExpanded>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
-                    aria-controls="panel2a-content"
-                    id="panel2a-header"
+                    aria-controls="relay-types-content"
+                    id="relay-types-header"
                 >
                     <Typography className={"heading"}>Show relay types</Typography>
                 </AccordionSummary>
@@ -291,8 +297,8 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
             <Accordion elevation={elevation}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
-                    aria-controls="panel2a-content"
-                    id="panel2a-header"
+                    aria-controls="relay-flags-content"
+                    id="relay-flags-header"
                 >
                     <Typography className={"heading"}>Relays must have flag</Typography>
                 </AccordionSummary>
@@ -345,5 +351,3 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     )
 }
 
-export const showRelayTypesInput = "showRelayTypesInput"
-export const relaysMustIncludeFlagInput = "relaysMustIncludeFlagInput"

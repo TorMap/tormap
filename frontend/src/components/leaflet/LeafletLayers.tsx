@@ -15,6 +15,7 @@ import {
     buildRelayFamilyMap,
     buildStatistics, buildFilteredRelays
 } from "../../util/aggregate-relays";
+import {CountryFeature, loadWorldFeatures} from "../../util/geojson";
 import {
     buildAggregatedCoordinatesLayer,
     buildCountryLayer,
@@ -55,14 +56,22 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
     // Component state
     const [showFamilySelectionDialog, setShowFamilySelectionDialog] = useState(false)
     const [familiesForSelectionDialog, setFamiliesForSelectionDialog] = useState<number[]>([])
+    // The dialogs are separate chunks and are only loaded when they are opened for the first time. They stay mounted
+    // afterwards, so they can close with their transition.
+    const [hasOpenedRelayDetailsDialog, setHasOpenedRelayDetailsDialog] = useState(false)
+    const [hasOpenedFamilySelectionDialog, setHasOpenedFamilySelectionDialog] = useState(false)
     const [leafletMarkerLayers] = useState<LayerGroup>(new LayerGroup())
+    // The country borders are a separate chunk, which is only loaded once the countries are shown
+    const [worldFeatures, setWorldFeatures] = useState<CountryFeature[]>()
 
     // Atom state
-    const [, setShowRelayDetailsDialog] = useAtom(showRelayDetailsDialogAtom)
+    const [showRelayDetailsDialog, setShowRelayDetailsDialog] = useAtom(showRelayDetailsDialogAtom)
     const [, setRelaysForDetailsDialog] = useAtom(relaysForDetailsDialogAtom)
     const [, setRelayDetailsDialogSearch] = useAtom(relayDetailsDialogSearchAtom)
     const [, setFilteredRelays] = useAtom(filteredRelaysAtom)
     const [relaySearchOnMap, setRelaySearchOnMap] = useAtom(relaySearchOnMapAtom)
+    if (showRelayDetailsDialog && !hasOpenedRelayDetailsDialog) setHasOpenedRelayDetailsDialog(true)
+    if (showFamilySelectionDialog && !hasOpenedFamilySelectionDialog) setHasOpenedFamilySelectionDialog(true)
 
     // App context
     const leafletMap = useMap()
@@ -127,8 +136,8 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
         [openRelayDetailsDialog, relayCountryMap, settings]
     )
     const countryBordersLayer = useMemo(
-        () => buildCountryLayer(relayCountryMap, settings, setSettings),
-        [relayCountryMap, setSettings, settings]
+        () => worldFeatures ? buildCountryLayer(relayCountryMap, settings, setSettings, worldFeatures) : undefined,
+        [relayCountryMap, setSettings, settings, worldFeatures]
     )
     const relayLocationHeatmapLayer = useMemo(
         () => buildRelayHeatmapLayer(filteredRelaysByFlags),
@@ -159,6 +168,22 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
             setRelaySearchOnMap(undefined)
         }
     }, [relays, relaySearchOnMap, searchedRelays, setRelaySearchOnMap])
+
+    /**
+     * Load the country borders once the countries are shown, switching the setting again retries a failed load
+     */
+    useEffect(() => {
+        if (!settings.sortCountry || worldFeatures) return undefined
+        let isCancelled = false
+        loadWorldFeatures().then(features => {
+            if (!isCancelled) setWorldFeatures(features)
+        }).catch(() => {
+            if (!isCancelled) enqueueSnackbar(SnackbarMessage.CountryBordersFailed, {variant: "error"})
+        })
+        return () => {
+            isCancelled = true
+        }
+    }, [settings.sortCountry, worldFeatures, enqueueSnackbar])
 
     /**
      * Move the map to the relays of a new search
@@ -203,7 +228,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
                 leafletMarkerLayers.addLayer(relayLocationHeatmapLayer)
             }
 
-            if (leafletMap && relayCountryMap.size > 0 && settings.sortCountry) {
+            if (leafletMap && relayCountryMap.size > 0 && settings.sortCountry && countryBordersLayer) {
                 leafletMarkerLayers.addLayer(countryBordersLayer)
             }
 
@@ -232,15 +257,17 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
         }
     }, [filteredRelays, setFilteredRelays, leafletMarkerLayers, relays, statistics, setStatistics, filteredRelaysByFlags.length, settings, relayFamilyMap, leafletMap, relayCountryMap, closeSnackbar, enqueueSnackbar, setSettings, relayLocationHeatmapLayer, countryBordersLayer, aggregatedCoordinatesLayer, relayCountryLayer, relayLayer, relaySelectedFamilyLayer, relayFamilyCoordinatesLayer])
 
+    const closeFamilySelectionDialog = useCallback(() => setShowFamilySelectionDialog(false), [])
+
     return (
         <Suspense fallback={<LoadingAnimation/>}>
-            <ResponsiveRelayDetailsDialog/>
-            <FamilySelectionDialog
+            {hasOpenedRelayDetailsDialog ? <ResponsiveRelayDetailsDialog/> : null}
+            {hasOpenedFamilySelectionDialog ? <FamilySelectionDialog
                 shouldShowDialog={showFamilySelectionDialog}
-                closeDialog={useCallback(() => setShowFamilySelectionDialog(false), [])}
+                closeDialog={closeFamilySelectionDialog}
                 reloadSelectedDay={reloadSelectedDay}
                 familyIds={familiesForSelectionDialog}
-            />
+            /> : null}
         </Suspense>
     );
 };

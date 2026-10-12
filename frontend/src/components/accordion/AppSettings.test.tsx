@@ -13,6 +13,7 @@ import {relaySearchOnMapAtom} from "../dialogs/relay/relay-details-atoms";
 import {CountryUsage, countryUsageAtom} from "../leaflet/country-usage-atoms";
 import {filteredRelaysAtom} from "../leaflet/LeafletLayers";
 import {AppSettings} from "./AppSettings";
+import {MapStats} from "./MapStats";
 
 const State = () => {
     const {settings} = useSettings()
@@ -211,5 +212,31 @@ describe("AppSettings country usage", () => {
         )
         await openSection()
         await expect.element(page.getByText("There are no estimates for 2008-01-01. They exist from March 2011 on.")).toBeVisible()
+    })
+})
+
+describe("accordions", () => {
+    it("have unique ids and each controls a region with a matching id", async () => {
+        await renderWithProviders(<><AppSettings elevation={0}/><MapStats elevation={0} defaultExpanded={true}/></>)
+
+        const summaries = Array.from(document.querySelectorAll("button[aria-controls]"))
+        expect(summaries.length).toBeGreaterThanOrEqual(5)
+
+        const summaryIds = summaries.map(summary => summary.id)
+        const regionIds = summaries.map(summary => summary.getAttribute("aria-controls")!)
+        expect(new Set(summaryIds).size).toBe(summaries.length)
+        expect(new Set(regionIds).size).toBe(summaries.length)
+        regionIds.forEach(regionId => {
+            expect(document.querySelectorAll(`[id="${regionId}"]`)).toHaveLength(1)
+        })
+    })
+})
+
+describe("MapStats", () => {
+    it("uses a row header for the label of every statistic", async () => {
+        const screen = await renderWithProviders(<MapStats elevation={0} defaultExpanded={true}/>)
+
+        await expect.element(screen.getByRole("rowheader", {name: "Exit relays"})).toBeVisible()
+        await expect.element(screen.getByRole("rowheader", {name: "Countries"})).toBeVisible()
     })
 })

@@ -13,6 +13,14 @@ const ShowSearchOnMap = () => {
 }
 
 describe("OverlaySmall", () => {
+    it("has an accessible name for the settings dialog", async () => {
+        const screen = await renderWithProviders(<OverlaySmall/>)
+
+        await screen.getByRole("button", {name: "more settings"}).click()
+
+        await expect.element(screen.getByRole("dialog", {name: "Settings"})).toBeVisible()
+    })
+
     it("closes the settings when search results are shown on the map", async () => {
         const screen = await renderWithProviders(<><OverlaySmall/><ShowSearchOnMap/></>)
 

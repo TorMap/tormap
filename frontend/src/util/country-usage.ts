@@ -2,7 +2,7 @@ import {GeoJSON, Layer, PathOptions} from "leaflet";
 import {Feature, GeoJsonObject, GeometryObject} from "geojson";
 
 import {CountryUsageDto} from "../dto/relay";
-import worldGeoData from "../resources/world.geo.json";
+import {CountryFeature, getFullCountryName} from "./geojson";
 
 /**
  * The name of the map pane of the country usage layer. It is placed below the relay markers.
@@ -48,10 +48,11 @@ export function describeUsage(name: string, usage: CountryUsageDto): string {
 
 /**
  * Returns a layer that colors every country with an estimate by its number of users. Countries are only drawn if they
- * exist in the bundled map data.
+ * exist in the map data.
  * @param usage - The estimates of a day
+ * @param worldFeatures - The borders of all countries, see loadWorldFeatures
  */
-export function buildCountryUsageLayer(usage: CountryUsageDto[]): GeoJSON {
+export function buildCountryUsageLayer(usage: CountryUsageDto[], worldFeatures: CountryFeature[]): GeoJSON {
     const usageByCountry = new Map(usage.map(entry => [entry.country, entry]))
     const maxUsers = usage.reduce((max, entry) => Math.max(max, entry.users), 0)
 
@@ -71,11 +72,11 @@ export function buildCountryUsageLayer(usage: CountryUsageDto[]): GeoJSON {
             if (!entry) return
             // A text node instead of a HTML string, so that nothing is interpreted as markup
             const content = document.createElement("div")
-            content.textContent = describeUsage(feature.properties?.name ?? entry.country, entry)
+            content.textContent = describeUsage(getFullCountryName(entry.country), entry)
             featureLayer.bindTooltip(content, {sticky: true})
         },
     })
-    worldGeoData.features.forEach(feature => {
+    worldFeatures.forEach(feature => {
         if (usageByCountry.has(feature.properties.iso_a2)) {
             layer.addData(feature as GeoJsonObject)
         }

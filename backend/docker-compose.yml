@@ -30,4 +30,5 @@ services:
     frontend:
         image: tormap/frontend:${TORMAP_VERSION:-3}
         ports:
-            - "80:80"
+            # The container runs as a non-root user and listens on 8080. The host port stays 80.
+            - "80:8080"

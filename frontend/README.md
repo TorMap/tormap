@@ -39,3 +39,4 @@ First make sure you have installed all requirements for development.
 6. Frontend should be available at http://localhost:3000
 
 Prebuild docker images are available at https://hub.docker.com/r/tormap/frontend.
+The container runs as a non-root user and serves on port 8080, e.g. `docker run -p 3000:8080 tormap/frontend`.

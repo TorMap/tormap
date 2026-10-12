@@ -2,10 +2,9 @@ import React from "react";
 import {renderHook} from "vitest-browser-react";
 import {describe, expect, it} from "vitest";
 
-import {relaysMustIncludeFlagInput, showRelayTypesInput} from "../components/accordion/AppSettings";
 import {makeSettings} from "../test/fixtures";
 import {RelayFlag, RelayType} from "../types/relay";
-import {Settings} from "../types/settings";
+import {relaysMustIncludeFlagInput, Settings, showRelayTypesInput} from "../types/settings";
 import {settingsStorageKey} from "../util/settings-storage";
 import {SettingsProvider, settingsEqual, useSettings} from "./settings-context";
 

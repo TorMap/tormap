@@ -73,9 +73,11 @@ const hasHeatLayer = () => drawn().some(layer => layer instanceof HeatLayer)
 const expectState = (pattern: RegExp) =>
     expect.poll(() => page.getByRole("status", {name: "state"}).element().textContent).toMatch(pattern)
 
-const renderLayers = (relays: RelayLocationDto[] | undefined, settings: Partial<Settings> = {}, extra?: ReactNode) => {
+// The render has to be awaited here: awaiting the returned object would not wait for it, and a render that finishes
+// after the test is over fails as an unhandled rejection
+const renderLayers = async (relays: RelayLocationDto[] | undefined, settings: Partial<Settings> = {}, extra?: ReactNode) => {
     const reloadSelectedDay = vi.fn()
-    const screen = renderWithProviders(
+    const screen = await renderWithProviders(
         <>
             <MapContainer center={[30, 0]} zoom={3} style={{width: 800, height: 600}} preferCanvas={true}>
                 <MapProbe/>
@@ -149,7 +151,8 @@ describe("LeafletLayers", () => {
             await renderLayers(relays, {sortCountry: true})
             await expectState(/"filtered":3/)
 
-            expect(polygons().map(layer => layer.feature.properties.iso_a2).sort()).toEqual(["DE", "FR"])
+            // The country borders are loaded on demand
+            await expect.poll(() => polygons().map(layer => layer.feature.properties.iso_a2).sort()).toEqual(["DE", "FR"])
             polygons().find(layer => layer.feature.properties.iso_a2 === "FR")!.fire("click")
 
             await expectState(/"selectedCountry":"FR"/)

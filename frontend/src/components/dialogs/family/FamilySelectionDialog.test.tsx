@@ -52,6 +52,13 @@ describe.each([
         expect(mockBackend.requests[0].data).toEqual(familyIds)
     })
 
+    it("has an accessible name for the dialog", async () => {
+        mockBackend.onPost("/relay/details/family/identifiers", [makeFamilyIdentifier({id: 3, nicknames: "alpha"})])
+        await open()
+
+        await expect.element(page.getByRole("dialog", {name: new RegExp(title)})).toBeVisible()
+    })
+
     it("selects the family of the clicked row and closes", async () => {
         mockBackend.onPost("/relay/details/family/identifiers", [
             makeFamilyIdentifier({id: 3, nicknames: "alpha, bravo"}),

@@ -1,8 +1,9 @@
 import {GeoJSON, Path, Tooltip} from "leaflet";
-import {describe, expect, it} from "vitest";
+import {beforeAll, describe, expect, it} from "vitest";
 
 import {CountryUsageDto} from "../dto/relay";
 import {buildCountryUsageLayer, describeUsage, formatUsers, usageColor} from "./country-usage";
+import {CountryFeature, loadWorldFeatures} from "./geojson";
 
 const usage = (country: string, users: number, extra: Partial<CountryUsageDto> = {}): CountryUsageDto =>
     ({country, users, lower: null, upper: null, frac: 70, ...extra})
@@ -54,22 +55,28 @@ describe("formatUsers", () => {
 })
 
 describe("buildCountryUsageLayer", () => {
+    let worldFeatures: CountryFeature[]
+
+    beforeAll(async () => {
+        worldFeatures = await loadWorldFeatures()
+    })
+
     it("draws only countries with an estimate", () => {
-        const layer = buildCountryUsageLayer([usage("DE", 1000), usage("FR", 500)])
+        const layer = buildCountryUsageLayer([usage("DE", 1000), usage("FR", 500)], worldFeatures)
         expect(featureLayers(layer).map(countryOf).sort()).toEqual(["DE", "FR"])
     })
 
     it("ignores codes that are not on the map", () => {
-        const layer = buildCountryUsageLayer([usage("DE", 1000), usage("ZZ", 5), usage("AN", 1)])
+        const layer = buildCountryUsageLayer([usage("DE", 1000), usage("ZZ", 5), usage("AN", 1)], worldFeatures)
         expect(featureLayers(layer).map(countryOf)).toEqual(["DE"])
     })
 
     it("is empty without estimates", () => {
-        expect(featureLayers(buildCountryUsageLayer([]))).toHaveLength(0)
+        expect(featureLayers(buildCountryUsageLayer([], worldFeatures))).toHaveLength(0)
     })
 
     it("colors countries relative to the highest estimate", () => {
-        const layer = buildCountryUsageLayer([usage("DE", 100000), usage("FR", 10)])
+        const layer = buildCountryUsageLayer([usage("DE", 100000), usage("FR", 10)], worldFeatures)
         const fill = Object.fromEntries(featureLayers(layer).map(path => [countryOf(path), path.options.fillColor]))
         expect(fill.DE).toBe(usageColor(100000, 100000))
         expect(fill.FR).toBe(usageColor(10, 100000))
@@ -77,12 +84,12 @@ describe("buildCountryUsageLayer", () => {
     })
 
     it("draws in the pane below the relay markers", () => {
-        const layer = buildCountryUsageLayer([usage("DE", 1)])
+        const layer = buildCountryUsageLayer([usage("DE", 1)], worldFeatures)
         expect(featureLayers(layer)[0].options.pane).toBe("countryUsage")
     })
 
     it("describes the estimate as plain text", () => {
-        const layer = buildCountryUsageLayer([usage("DE", 1000, {lower: 900, upper: 1100})])
+        const layer = buildCountryUsageLayer([usage("DE", 1000, {lower: 900, upper: 1100})], worldFeatures)
         const tooltip = featureLayers(layer)[0].getTooltip() as Tooltip
         const content = tooltip.getContent() as HTMLElement
         expect(content).toBeInstanceOf(HTMLElement)

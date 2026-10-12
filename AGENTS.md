@@ -61,4 +61,5 @@ Before proposing a new dependency or version, check these public APIs with `curl
 
 ## Commits and secrets
 - End commit messages written by an agent with the Co-Authored-By trailer for the agent, and PR descriptions with the generated-with note.
+- If commit signing is set up (`commit.gpgsign=true`), run `git commit` outside the sandbox, because the sandbox blocks the GPG agent. Don't disable signing (no `-c commit.gpgsign=false`, `--no-gpg-sign`) and don't touch the key material in `~/.gnupg`.
 - Never commit secrets or `.env` files. New Relic and admin credentials come from environment variables.
