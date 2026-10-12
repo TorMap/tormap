@@ -114,8 +114,11 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
         }
     }
 
-    // Discard the previous relays as soon as the relays of another location are passed to the dialog
-    const [syncedRelayDetailsIdToLocationMap, setSyncedRelayDetailsIdToLocationMap] = useState(relayDetailsIdToLocationMap)
+    // Discard the previous relays as soon as the relays of another location are passed to the dialog.
+    // Starts without a value, because the dialog is only mounted when it is opened for the first time, so the relays of
+    // that first location have to count as a change too.
+    const [syncedRelayDetailsIdToLocationMap, setSyncedRelayDetailsIdToLocationMap] =
+        useState<Map<number, RelayLocationDto>>()
     if (syncedRelayDetailsIdToLocationMap !== relayDetailsIdToLocationMap) {
         setSyncedRelayDetailsIdToLocationMap(relayDetailsIdToLocationMap)
         setRelayDetailsMatch(undefined)
