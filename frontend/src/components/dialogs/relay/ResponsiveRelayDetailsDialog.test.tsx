@@ -88,6 +88,13 @@ describe.each([
         expect(mockBackend.requested).toEqual(["GET /relay/details/relay/21"])
     })
 
+    it("has an accessible name for the dialog", async () => {
+        mockLocationWithThreeRelays()
+        await open([charlie, alpha, bravo])
+
+        await expect.element(page.getByRole("dialog", {name: /\S/})).toBeVisible()
+    })
+
     it("formats the relay's numbers and flags", async () => {
         mockBackend.onGet("/relay/details/relay/21", makeRelayDetails({
             id: 21,

@@ -4,12 +4,16 @@ import React, {FunctionComponent} from "react";
 interface Props {
     href: string
     label: string | React.ReactNode
+    /**
+     * The accessible name of the link, required if the label is only an icon
+     */
+    ariaLabel?: string
     sx?: SxProps<Theme>
 }
 
-export const ExternalLink: FunctionComponent<Props> = ({href,label, sx}) => {
+export const ExternalLink: FunctionComponent<Props> = ({href, label, ariaLabel, sx}) => {
     return (
-        <Link sx={sx} href={href} target={"_blank"} rel={"noopener"}>{label}</Link>
+        <Link sx={sx} href={href} target={"_blank"} rel={"noopener"} aria-label={ariaLabel}>{label}</Link>
     )
 }
 

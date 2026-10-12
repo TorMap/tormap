@@ -38,6 +38,7 @@ export const OverlaySmall: FunctionComponent = () => {
             <Dialog
                 open={open}
                 fullScreen
+                slotProps={{paper: {"aria-label": "Settings"}}}
                 onClose={() => setOpen(false)}
                 slots={{transition: SlideUpTransition}}
             >
