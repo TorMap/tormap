@@ -28,18 +28,18 @@ import org.tormap.util.logger
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
-    @Value("\${spring.security.user.name}")
+    @param:Value("\${spring.security.user.name}")
     private val adminUserName: String,
 
-    @Value("\${management.endpoints.web.base-path}")
+    @param:Value("\${management.endpoints.web.base-path}")
     private val actuatorPath: String,
 
     // Comma-separated list of allowed frontend origins
-    @Value("\${app.security.cors.allowed-origins:https://tormap.org,https://www.tormap.org,https://tormap-*.web.app}")
+    @param:Value("\${app.security.cors.allowed-origins:https://tormap.org,https://www.tormap.org,https://tormap-*.web.app}")
     private val allowedOriginPatternsCSV: String,
 
     // Avoid exposing Swagger unless explicitly enabled
-    @Value("\${springdoc.swagger-ui.enabled:false}")
+    @param:Value("\${springdoc.swagger-ui.enabled:false}")
     private val swaggerEnabled: Boolean,
 ) {
     private val logger = logger()

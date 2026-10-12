@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServletResponse
 
 @Configuration
 class HttpCachingConfig(
-    @Value("\${app.http.cache.public.max-age-seconds:0}")
+    @param:Value("\${app.http.cache.public.max-age-seconds:0}")
     private val publicCacheMaxAgeSeconds: Long,
 ) : WebMvcConfigurer {
 
