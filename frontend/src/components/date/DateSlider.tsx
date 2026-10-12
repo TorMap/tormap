@@ -64,6 +64,8 @@ export const DateSlider: FunctionComponent = () => {
                 setSelectedDate(availableDays[newValue as number])
             }}
             valueLabelDisplay={(availableDays.length === 0) ? "off" : "on"}
+            aria-label={"Selected day"}
+            getAriaValueText={index => availableDays[index] ?? ""}
             name={"slider"}
             min={0}
             max={availableDays.length - 1}

@@ -3,6 +3,7 @@ import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
+    Box,
     Table,
     TableBody,
     TableCell,
@@ -62,8 +63,8 @@ export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation})
             <Accordion defaultExpanded={defaultExpanded} elevation={elevation}>
                 <AccordionSummary
                     expandIcon={defaultExpanded ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
-                    aria-controls="panel2a-content"
-                    id="panel2a-header"
+                    aria-controls="map-stats-content"
+                    id="map-stats-header"
                 >
                     <Typography className={"heading"}>
                         Stats{settings.selectedFamily ? " for family" : null}
@@ -75,11 +76,11 @@ export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation})
                         <TableBody>
                             {rows.map(statsRow =>
                                 <TableRow key={statsRow.title}>
-                                    <TableCell scope="row">
-                                        {statsRow.icon}
-                                    </TableCell>
-                                    <TableCell scope="row">
-                                        <Typography>{statsRow.title}</Typography>
+                                    <TableCell component="th" scope="row">
+                                        <Box sx={{display: "flex", alignItems: "center", gap: 2}}>
+                                            {statsRow.icon}
+                                            <Typography>{statsRow.title}</Typography>
+                                        </Box>
                                     </TableCell>
                                     <TableCell align={"right"}>
                                         {statsRow.value}
