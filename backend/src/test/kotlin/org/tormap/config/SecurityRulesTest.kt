@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 @TestPropertySource(properties = ["springdoc.swagger-ui.enabled=false", "springdoc.api-docs.enabled=false"])
 class SecurityRulesTest(
     private val mockMvc: MockMvc,
-    @Value("\${app.security.cors.allowed-origins}") private val allowedOrigins: String,
+    @param:Value("\${app.security.cors.allowed-origins}") private val allowedOrigins: String,
 ) : StringSpec({
 
     fun statusOf(path: String) = mockMvc.perform(get(path)).andReturn().response.status

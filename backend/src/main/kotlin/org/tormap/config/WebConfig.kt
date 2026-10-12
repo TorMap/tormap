@@ -8,7 +8,7 @@ import java.time.Duration
 
 @Configuration
 class WebConfig(
-    @Value("\${app.http.cache.public.max-age-seconds:0}")
+    @param:Value("\${app.http.cache.public.max-age-seconds:0}")
     private val publicCacheMaxAgeSeconds: Long,
 ) : WebMvcConfigurer {
 

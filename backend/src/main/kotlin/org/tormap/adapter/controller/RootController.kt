@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController
 class RootController(
     private val buildPropertiesProvider: ObjectProvider<BuildProperties>,
 
-    @Value("\${springdoc.swagger-ui.enabled:false}")
+    @param:Value("\${springdoc.swagger-ui.enabled:false}")
     private val swaggerEnabled: Boolean,
 
-    @Value("\${springdoc.swagger-ui.path:/swagger-ui/index.html}")
+    @param:Value("\${springdoc.swagger-ui.path:/swagger-ui/index.html}")
     private val swaggerPath: String,
 ) {
 
