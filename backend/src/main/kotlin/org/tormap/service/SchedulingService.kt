@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit
 /**
  * This scheduler sets reoccurring events to collect and process data about Tor relays
  * With the @Async class annotation all methods run in parallel on separate threads if available.
+ * Spring only allows void or Future return types for @Async methods, so don't return a delegate's result.
  */
 @Service
 @Async
@@ -70,8 +71,9 @@ class SchedulingService(
      * Tor Metrics publishes new estimates once a day.
      */
     @Scheduled(fixedDelay = 12, timeUnit = TimeUnit.HOURS)
-    fun refreshCountryUsage() =
+    fun refreshCountryUsage() {
         countryUsageService.refresh()
+    }
 
     @Scheduled(fixedDelay = 1, initialDelay = 1, timeUnit = TimeUnit.DAYS)
     fun updateRelayFamilies() =
