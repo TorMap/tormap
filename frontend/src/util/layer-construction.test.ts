@@ -15,7 +15,9 @@ import {
     buildRelayHeatmapLayer,
     buildRelayLayer,
     buildSelectedFamilyLayer,
+    calcRadiusForWeight,
     calculateFamilyColor,
+    formatWeightShare,
 } from "./layer-construction";
 
 const markers = (layer: LayerGroup) => layer.getLayers() as CircleMarker[]
@@ -300,5 +302,68 @@ describe("buildCountryLayer", () => {
         const {layers, settings, setSettings} = build("DE")
         layers.find(l => countryOf(l) === "DE")!.fire("click")
         expect(setSettings).toHaveBeenCalledWith({...settings, selectedCountry: undefined})
+    })
+})
+
+describe("buildRelayLayer sized by consensus weight", () => {
+    const colors = {
+        [RelayType.Exit]: "#000001",
+        [RelayType.Guard]: "#000002",
+        [RelayType.Other]: "#000003",
+    }
+    // The first marker of each coordinate is the visible one, followed by the hover target
+    const radii = (relays: RelayLocationDto[], sizeByWeight: boolean) => {
+        const layer = markers(buildRelayLayer(buildRelayCoordinatesMap(relays), false, colors, vi.fn(), sizeByWeight))
+        return layer.filter((_, index) => index % 2 === 0).map(marker => marker.getRadius())
+    }
+
+    it("keeps the default size when sizing is off", () => {
+        expect(radii([makeRelay({lat: 1, long: 1, consensusWeight: 500})], false)).toEqual([1])
+    })
+
+    it("sizes a coordinate by the sum of its relays, relative to the heaviest coordinate", () => {
+        const relays = [
+            makeRelay({lat: 1, long: 1, consensusWeight: 300}),
+            makeRelay({lat: 1, long: 1, consensusWeight: 100}),
+            makeRelay({lat: 2, long: 2, consensusWeight: 100}),
+        ]
+        // 400 is the maximum, 100 is a quarter of it and has half the radius of the range above the minimum
+        expect(radii(relays, true)).toEqual([20, 11])
+    })
+
+    it("treats relays without weight as weightless", () => {
+        const relays = [
+            makeRelay({lat: 1, long: 1, consensusWeight: 100}),
+            makeRelay({lat: 2, long: 2, consensusWeight: null}),
+        ]
+        expect(radii(relays, true)).toEqual([20, 2])
+    })
+
+    it("keeps the default size if no relay has a weight", () => {
+        expect(radii([makeRelay({lat: 1, long: 1}), makeRelay({lat: 2, long: 2})], true)).toEqual([1, 1])
+    })
+})
+
+describe("calcRadiusForWeight", () => {
+    it("scales the area with the weight", () => {
+        expect(calcRadiusForWeight(0, 100)).toBe(2)
+        expect(calcRadiusForWeight(25, 100)).toBeCloseTo(11)
+        expect(calcRadiusForWeight(100, 100)).toBe(20)
+    })
+
+    it("caps the radius and handles a missing maximum", () => {
+        expect(calcRadiusForWeight(500, 100)).toBe(20)
+        expect(calcRadiusForWeight(5, 0)).toBe(2)
+    })
+})
+
+describe("formatWeightShare", () => {
+    it.each([
+        [0.5, "50.00%"],
+        [0.01234, "1.23%"],
+        [0.00001, "<0.01%"],
+        [0, "0.00%"],
+    ])("formats %d as %s", (share, expected) => {
+        expect(formatWeightShare(share)).toBe(expected)
     })
 })

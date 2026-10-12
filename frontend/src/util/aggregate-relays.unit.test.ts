@@ -13,6 +13,7 @@ import {
     filterRelaysByFlags,
     findRelayLocationById,
     getRelayType,
+    keepRelaysWithHighestWeight,
     sortFamilyCoordinatesMap,
 } from "./aggregate-relays";
 
@@ -287,5 +288,56 @@ describe("findRelayLocationById", () => {
 
     it("returns undefined for unknown ids", () => {
         expect(findRelayLocationById(30, relays)).toBeUndefined()
+    })
+})
+
+describe("keepRelaysWithHighestWeight", () => {
+    const relays = [
+        makeRelay({nickname: "light", consensusWeight: 10}),
+        makeRelay({nickname: "heavy", consensusWeight: 900}),
+        makeRelay({nickname: "unknown", consensusWeight: null}),
+        makeRelay({nickname: "medium", consensusWeight: 300}),
+    ]
+
+    it("keeps the relays with the highest weight, heaviest first", () => {
+        expect(keepRelaysWithHighestWeight(relays, 2).map(relay => relay.nickname)).toEqual(["heavy", "medium"])
+    })
+
+    it("ranks relays without weight last", () => {
+        expect(keepRelaysWithHighestWeight(relays, 3).map(relay => relay.nickname)).toEqual(["heavy", "medium", "light"])
+    })
+
+    it("keeps relays with the same weight in their order", () => {
+        const equal = ["a", "b", "c"].map(nickname => makeRelay({nickname, consensusWeight: 5}))
+        expect(keepRelaysWithHighestWeight(equal, 2).map(relay => relay.nickname)).toEqual(["a", "b"])
+    })
+
+    it("returns all relays without a count or if there are fewer", () => {
+        expect(keepRelaysWithHighestWeight(relays, undefined)).toBe(relays)
+        expect(keepRelaysWithHighestWeight(relays, 10)).toBe(relays)
+    })
+
+    it("returns all relays if none has a weight", () => {
+        const unweighted = makeRelays(5)
+        expect(keepRelaysWithHighestWeight(unweighted, 2)).toBe(unweighted)
+    })
+
+    it("does not change the given array", () => {
+        const copy = [...relays]
+        keepRelaysWithHighestWeight(relays, 2)
+        expect(relays).toEqual(copy)
+    })
+})
+
+describe("filterRelaysByFlags with a relay count", () => {
+    it("applies the count after the flag filter", () => {
+        const relays = [
+            makeRelay({nickname: "heavy other", flags: [], consensusWeight: 1000}),
+            makeRelay({nickname: "exit 1", flags: [RelayFlag.Exit], consensusWeight: 50}),
+            makeRelay({nickname: "exit 2", flags: [RelayFlag.Exit], consensusWeight: 80}),
+        ]
+        const settings = makeSettings({topRelayCount: 1})
+        settings.relaysMustHaveFlag[RelayFlag.Exit] = true
+        expect(filterRelaysByFlags(relays, settings).map(relay => relay.nickname)).toEqual(["exit 2"])
     })
 })

@@ -58,28 +58,49 @@ export const buildAggregatedCoordinatesLayer = (
  * @param singleColor - Whether all markers should have the same color
  * @param relayTypeColors - The marker color for each relay type
  * @param onMarkerClick - Event handler for clicking on a marker
+ * @param sizeByWeight - Whether the marker size should be relative to the consensus weight of the relays at a coordinate
  */
 export const buildRelayLayer = (
     relayCoordinatesMap: Map<string, RelayLocationDto[]>,
     singleColor: boolean,
     relayTypeColors: Record<RelayType, string>,
     onMarkerClick: (e: LeafletMouseEvent) => void,
+    sizeByWeight = false,
 ): LayerGroup => {
     const layer = new LayerGroup()
+
+    // The weight of all relays at each coordinate, only needed for sizing
+    const weightByCoordinates = new Map<string, number>()
+    let maxWeight = 0
+    let totalWeight = 0
+    if (sizeByWeight) {
+        relayCoordinatesMap.forEach((relaysAtCoordinates, coordinatesKey) => {
+            const weight = relaysAtCoordinates.reduce((sum, relay) => sum + (relay.consensusWeight ?? 0), 0)
+            weightByCoordinates.set(coordinatesKey, weight)
+            maxWeight = Math.max(maxWeight, weight)
+            totalWeight += weight
+        })
+    }
+    // Without any weight, e.g. for days that were not reprocessed yet, all markers keep their default size
+    const useWeights = sizeByWeight && maxWeight > 0
+
     relayCoordinatesMap.forEach((relaysAtCoordinates, coordinatesKey) => {
         if (relaysAtCoordinates.length == 0) return
 
+        const weight = useWeights ? weightByCoordinates.get(coordinatesKey) ?? 0 : undefined
+        const radius = weight !== undefined ? calcRadiusForWeight(weight, maxWeight) : 1
         const {
             mostImportantRelay,
             marker
-        } = addRelayMarker(relaysAtCoordinates, layer, singleColor, relayTypeColors, coordinatesKey, onMarkerClick)
+        } = addRelayMarker(relaysAtCoordinates, layer, singleColor, relayTypeColors, coordinatesKey, onMarkerClick, radius)
 
-        addRelayNicknameTooltip(relaysAtCoordinates, mostImportantRelay, marker, layer);
+        const weightShare = weight !== undefined ? weight / totalWeight : undefined
+        addRelayNicknameTooltip(relaysAtCoordinates, mostImportantRelay, marker, layer, radius, weightShare);
     })
     return layer
 }
 
-function addRelayMarker(relaysAtCoordinates: RelayLocationDto[], targetLayer: LayerGroup, singleColor: boolean, relayTypeColors: Record<RelayType, string>, coordinatesKey: string, onMarkerClick: (e: LeafletMouseEvent) => void) {
+function addRelayMarker(relaysAtCoordinates: RelayLocationDto[], targetLayer: LayerGroup, singleColor: boolean, relayTypeColors: Record<RelayType, string>, coordinatesKey: string, onMarkerClick: (e: LeafletMouseEvent) => void, radius: number) {
     let mostImportantRelay = relaysAtCoordinates[0]
     for (const relay of relaysAtCoordinates) {
         if (getRelayType(relay) === RelayType.Exit) {
@@ -94,7 +115,7 @@ function addRelayMarker(relaysAtCoordinates: RelayLocationDto[], targetLayer: La
     const marker = circleMarker(
         [mostImportantRelay.lat, mostImportantRelay.long],
         {
-            radius: 1,
+            radius: radius,
             className: coordinatesKey,
             color: color,
             weight: 3,
@@ -105,14 +126,17 @@ function addRelayMarker(relaysAtCoordinates: RelayLocationDto[], targetLayer: La
     return {mostImportantRelay, marker};
 }
 
-function addRelayNicknameTooltip(relays: RelayLocationDto[], mostImportantRelay: RelayLocationDto, marker: CircleMarker, targetLayer: LayerGroup) {
+function addRelayNicknameTooltip(relays: RelayLocationDto[], mostImportantRelay: RelayLocationDto, marker: CircleMarker, targetLayer: LayerGroup, markerRadius = 1, weightShare?: number) {
     let tooltip = `${relays.length} relays`
     const maxNicknamesShownFully = 3
     if (relays.length <= maxNicknamesShownFully) {
         tooltip = relays.map(relay => relay.nickname).filter(name => !!name).join(", ") || tooltip
     }
+    if (weightShare !== undefined) {
+        tooltip += ` (${formatWeightShare(weightShare)} of the consensus weight)`
+    }
 
-    const hoverRadius = 15;
+    const hoverRadius = Math.max(15, markerRadius);
     circleMarker(
         [mostImportantRelay.lat, mostImportantRelay.long],
         {
@@ -353,6 +377,25 @@ const onEachCountry = (
             else setSettingsCallback({...settings, selectedCountry: undefined})
         }
     });
+}
+
+/**
+ * Formats the share of the displayed consensus weight, e.g. 0.0123 as "1.23%"
+ */
+export const formatWeightShare = (share: number): string =>
+    share > 0 && share < 0.0001 ? "<0.01%" : `${(share * 100).toFixed(2)}%`
+
+/**
+ * Returns the radius of a marker whose relays have the given consensus weight. The area of the marker is relative to
+ * the weight, so a relay with a quarter of the weight of the heaviest marker has half of its radius.
+ * @param weight - The weight of the relays at a coordinate
+ * @param maxWeight - The highest weight of all coordinates
+ */
+export const calcRadiusForWeight = (weight: number, maxWeight: number): number => {
+    const minRadius = 2
+    const maxRadius = 20
+    if (maxWeight <= 0) return minRadius
+    return minRadius + (maxRadius - minRadius) * Math.sqrt(Math.min(weight, maxWeight) / maxWeight)
 }
 
 /**

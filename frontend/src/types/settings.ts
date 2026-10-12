@@ -9,11 +9,18 @@ export interface Settings {
     aggregateCoordinates: boolean
     heatMap: boolean
 
+    // Consensus weight
+    sizeByWeight: boolean
+    topRelayCount: number | undefined
+
     // Relay flags
     showRelayTypes: Record<RelayType, boolean>
     relayTypeColors: Record<RelayType, string>
     relaysMustHaveFlag: Record<RelayFlag, boolean>
 }
+
+// How many relays with the highest consensus weight can be selected
+export const topRelayCountOptions = [10, 50, 100, 500, 1000]
 
 // Relay flag options to display. Tooltips according to https://github.com/torproject/torspec/blob/main/dir-spec.txt
 export const relayMustIncludeFlagOptions: RelayMustIncludeFlagOption[] = [{

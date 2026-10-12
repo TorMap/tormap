@@ -8,7 +8,9 @@ import {
     Checkbox,
     FormControlLabel,
     FormGroup,
+    MenuItem,
     Switch,
+    TextField,
     Tooltip,
     Typography,
 } from "@mui/material";
@@ -18,7 +20,7 @@ import {defaultSettings, tooltipTimeDelay} from "../../config";
 import {useSettings} from "../../context/settings-context";
 import {RelayTypeIcon} from "../../types/icons";
 import {RelayFlagLabel, RelayType, RelayTypeLabel, RelayTypeTooltip} from "../../types/relay";
-import {relayMustIncludeFlagOptions, Settings} from "../../types/settings";
+import {relayMustIncludeFlagOptions, Settings, topRelayCountOptions} from "../../types/settings";
 import {nameOfFactory} from "../../util/util";
 import {ExternalLink} from "../link/ExternalLink";
 import {useAtom} from "jotai";
@@ -52,6 +54,8 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     // Util
     const nameOfSetting = nameOfFactory<Settings>()
     const relayTypes = [RelayType.Exit, RelayType.Guard, RelayType.Other]
+    // Days that were not reprocessed yet have no weights, then the weight settings would do nothing
+    const weightsAvailable = filteredRelays.some(relay => relay.consensusWeight != null)
     const hasCustomRelayTypeColors = relayTypes.some(relayType =>
         settings.relayTypeColors[relayType] !== defaultSettings.relayTypeColors[relayType]
     )
@@ -139,6 +143,46 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                                 name={nameOfSetting("heatMap")}
                             />
                         </Tooltip>
+                    </FormGroup>
+                </AccordionDetails>
+            </Accordion>
+            <Accordion elevation={elevation}>
+                <AccordionSummary
+                    expandIcon={<ExpandMoreIcon/>}
+                    aria-controls="panel2a-content"
+                    id="panel2a-header"
+                >
+                    <Typography className={"heading"}>Consensus weight</Typography>
+                </AccordionSummary>
+                <AccordionDetails sx={{padding: "0px 8px 20px 8px"}}>
+                    <Typography variant="body2" sx={{mb: 1}}>
+                        {weightsAvailable
+                            ? "The weight directory authorities assign to a relay. Tor clients use it to choose relays, so it shows how likely a relay is picked, not how much traffic it carried."
+                            : "There are no consensus weights for this day yet."}
+                    </Typography>
+                    <FormGroup>
+                        <FormControlLabel
+                            control={<Switch checked={settings.sizeByWeight} onChange={changeSettings} disabled={!weightsAvailable}/>}
+                            label={"Size by weight"}
+                            name={nameOfSetting("sizeByWeight")}
+                        />
+                        <TextField
+                            select
+                            size="small"
+                            label="Show only the heaviest"
+                            value={settings.topRelayCount ?? ""}
+                            disabled={!weightsAvailable}
+                            onChange={event => setSettings({
+                                ...settings,
+                                topRelayCount: event.target.value === "" ? undefined : Number(event.target.value),
+                            })}
+                            sx={{mt: 1}}
+                        >
+                            <MenuItem value="">All relays</MenuItem>
+                            {topRelayCountOptions.map(count =>
+                                <MenuItem key={count} value={count}>{count} relays</MenuItem>
+                            )}
+                        </TextField>
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>
