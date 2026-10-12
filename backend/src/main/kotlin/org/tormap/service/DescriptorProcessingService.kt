@@ -6,6 +6,7 @@ import org.tormap.database.entity.RelayLocation
 import org.tormap.database.repository.RelayDetailsRepository
 import org.tormap.database.repository.RelayLocationRepositoryImpl
 import org.tormap.util.logger
+import org.tormap.util.PathSelection
 import org.tormap.util.millisSinceEpochToLocalDate
 import org.torproject.descriptor.Descriptor
 import org.torproject.descriptor.RelayNetworkStatusConsensus
@@ -41,10 +42,25 @@ class DescriptorProcessingService(
     private fun processRelayConsensusDescriptor(descriptor: RelayNetworkStatusConsensus): ProcessedDescriptorInfo {
         val descriptorDay = millisSinceEpochToLocalDate(descriptor.validAfterMillis)
         val existingFingerprintsForDay = relayLocationRepositoryImpl.findDistinctFingerprintsByDay(descriptorDay)
+        // Locations stored before the weights were introduced get them from the first consensus of the day seen again
+        val fingerprintsWithoutWeightForDay = when {
+            existingFingerprintsForDay.isEmpty() -> emptySet()
+            else -> relayLocationRepositoryImpl.findDistinctFingerprintsWithoutConsensusWeightByDay(descriptorDay)
+        }
+        val bandwidthWeights = descriptor.bandwidthWeights
         val relayLocationsToInsert = mutableListOf<RelayLocation>()
+        val missingWeights = linkedMapOf<String, Pair<Long, Long?>>()
         descriptor.statusEntries.forEach {
             val networkStatusEntry = it.value
             if (existingFingerprintsForDay.contains(networkStatusEntry.fingerprint)) {
+                if (fingerprintsWithoutWeightForDay.contains(networkStatusEntry.fingerprint)
+                    && networkStatusEntry.bandwidth >= 0
+                ) {
+                    missingWeights[networkStatusEntry.fingerprint] = Pair(
+                        networkStatusEntry.bandwidth,
+                        PathSelection.guardWeight(networkStatusEntry.bandwidth, networkStatusEntry.flags, bandwidthWeights),
+                    )
+                }
                 return@forEach
             }
             val location = ipLookupService.lookupLocation(networkStatusEntry.address)
@@ -56,11 +72,20 @@ class DescriptorProcessingService(
                         location.latitude,
                         location.longitude,
                         location.countryCode,
+                        bandwidthWeights,
                     )
                 )
             }
         }
         relayLocationRepositoryImpl.saveAllAndFlush(relayLocationsToInsert)
+        if (missingWeights.isNotEmpty()) {
+            relayLocationRepositoryImpl.fillMissingConsensusWeights(
+                descriptorDay,
+                missingWeights.keys.joinToString(","),
+                missingWeights.values.joinToString(",") { it.first.toString() },
+                missingWeights.values.joinToString(",") { (it.second ?: -1).toString() },
+            )
+        }
         return ProcessedDescriptorInfo(YearMonth.from(descriptorDay).toString())
     }
 

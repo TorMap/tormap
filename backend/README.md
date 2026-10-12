@@ -14,6 +14,17 @@ Processing of descriptors does not necessarily happen in a chronological order, 
 processed together. Different descriptor types can be handled in parallel. Frontend features like family grouping or
 relay details will only be available, if the corresponding relay server descriptors have been processed.
 
+### Consensus weights
+
+Each relay location stores the relay's consensus weight (`w Bandwidth=` of its consensus entry) and the part of it that
+clients use for picking the relay as entry guard (`guard_weight`, derived from the consensus' `bandwidth-weights`).
+The values come from the first consensus of the day in which the relay was seen.
+
+The migration that introduced them (`V4__Add_consensus_weights.sql`) marks all consensus files as unprocessed once.
+After upgrading, the backend therefore reads every consensus file again and only fills in the missing weights. This takes
+about as long as the initial import and requires the archive files to still be available in the download directory
+(otherwise they are downloaded again). The API keeps serving all data while this runs, relays just have no weight yet.
+
 ## Requirements
 
 - At least 50 GB of free disk space (for downloaded archives)

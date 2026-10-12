@@ -39,16 +39,20 @@ fun mockRelayLocation(
     day: LocalDate = LocalDate.now(),
     mockLetter: Char = 'A',
     flags: Set<TorRelayFlag> = emptySet(),
+    consensusWeight: Long = -1,
+    bandwidthWeights: Map<String, Int>? = null,
 ): RelayLocation {
     val networkStatusEntry = mockk<NetworkStatusEntry>()
     every { networkStatusEntry.fingerprint } returns mockLetter.toString().repeat(40)
     every { networkStatusEntry.flags } returns flags.map { it.name }.toSortedSet()
+    every { networkStatusEntry.bandwidth } returns consensusWeight
     return RelayLocation(
         networkStatusEntry,
         day,
         BigDecimal(50),
         BigDecimal(50),
-        "DE"
+        "DE",
+        bandwidthWeights,
     )
 }
 

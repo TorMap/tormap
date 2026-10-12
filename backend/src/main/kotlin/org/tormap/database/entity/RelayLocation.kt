@@ -1,5 +1,6 @@
 package org.tormap.database.entity
 
+import org.tormap.util.PathSelection
 import org.torproject.descriptor.NetworkStatusEntry
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -27,6 +28,11 @@ class RelayLocation(
 
     @Column(length = 2, columnDefinition = "bpchar(2)")
     var countryCode: String,
+
+    /**
+     * The `bandwidth-weights` of the consensus the entry is part of. They are only used to compute [guardWeight].
+     */
+    bandwidthWeights: Map<String, Int>? = null,
 ): AbstractBaseEntity<Long>() {
     @Column(length = 40, columnDefinition = "bpchar(40)")
     var fingerprint: String = networkStatusEntry.fingerprint
@@ -35,6 +41,20 @@ class RelayLocation(
         networkStatusEntry.flags.map { TorRelayFlag.valueOf(it).ordinal }.joinToString(", ")
     } catch (exception: Exception) {
         null
+    }
+
+    /**
+     * The `w Bandwidth=` value of the consensus entry, which clients use for path selection.
+     * It is a relative weight and not a measured bandwidth. Null if the consensus entry has none.
+     */
+    var consensusWeight: Long? = networkStatusEntry.bandwidth.takeIf { it >= 0 }
+
+    /**
+     * The share of the [consensusWeight] that clients use for choosing this relay as entry guard.
+     * See [org.tormap.util.PathSelection.guardWeight]. Null if it can not be determined.
+     */
+    var guardWeight: Long? = consensusWeight?.let {
+        PathSelection.guardWeight(it, networkStatusEntry.flags, bandwidthWeights)
     }
 }
 
