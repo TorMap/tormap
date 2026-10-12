@@ -90,8 +90,8 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
             <Accordion elevation={elevation} defaultExpanded>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
-                    aria-controls="panel2a-content"
-                    id="panel2a-header"
+                    aria-controls="group-relays-content"
+                    id="group-relays-header"
                 >
                     <Typography className={"heading"}>Group relays by</Typography>
                 </AccordionSummary>
@@ -155,8 +155,8 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
             <Accordion elevation={elevation}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
-                    aria-controls="panel2a-content"
-                    id="panel2a-header"
+                    aria-controls="consensus-weight-content"
+                    id="consensus-weight-header"
                 >
                     <Typography className={"heading"}>Consensus weight</Typography>
                 </AccordionSummary>
@@ -195,8 +195,8 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
             <Accordion elevation={elevation} defaultExpanded>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
-                    aria-controls="panel2a-content"
-                    id="panel2a-header"
+                    aria-controls="relay-types-content"
+                    id="relay-types-header"
                 >
                     <Typography className={"heading"}>Show relay types</Typography>
                 </AccordionSummary>
@@ -244,8 +244,8 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
             <Accordion elevation={elevation}>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
-                    aria-controls="panel2a-content"
-                    id="panel2a-header"
+                    aria-controls="relay-flags-content"
+                    id="relay-flags-header"
                 >
                     <Typography className={"heading"}>Relays must have flag</Typography>
                 </AccordionSummary>

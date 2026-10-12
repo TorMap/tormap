@@ -12,6 +12,7 @@ import {RelayType} from "../../types/relay";
 import {relaySearchOnMapAtom} from "../dialogs/relay/relay-details-atoms";
 import {filteredRelaysAtom} from "../leaflet/LeafletLayers";
 import {AppSettings} from "./AppSettings";
+import {MapStats} from "./MapStats";
 
 const State = () => {
     const {settings} = useSettings()
@@ -167,5 +168,31 @@ describe("AppSettings consensus weight", () => {
         await page.getByRole("combobox", {name: "Show only the heaviest"}).click()
         await page.getByRole("option", {name: "All relays"}).click()
         await expect.poll(() => weightState().topRelayCount).toBe(null)
+    })
+})
+
+describe("accordions", () => {
+    it("have unique ids and each controls a region with a matching id", async () => {
+        await renderWithProviders(<><AppSettings elevation={0}/><MapStats elevation={0} defaultExpanded={true}/></>)
+
+        const summaries = Array.from(document.querySelectorAll("button[aria-controls]"))
+        expect(summaries.length).toBeGreaterThanOrEqual(5)
+
+        const summaryIds = summaries.map(summary => summary.id)
+        const regionIds = summaries.map(summary => summary.getAttribute("aria-controls")!)
+        expect(new Set(summaryIds).size).toBe(summaries.length)
+        expect(new Set(regionIds).size).toBe(summaries.length)
+        regionIds.forEach(regionId => {
+            expect(document.querySelectorAll(`[id="${regionId}"]`)).toHaveLength(1)
+        })
+    })
+})
+
+describe("MapStats", () => {
+    it("uses a row header for the label of every statistic", async () => {
+        const screen = await renderWithProviders(<MapStats elevation={0} defaultExpanded={true}/>)
+
+        await expect.element(screen.getByRole("rowheader", {name: "Exit relays"})).toBeVisible()
+        await expect.element(screen.getByRole("rowheader", {name: "Countries"})).toBeVisible()
     })
 })
