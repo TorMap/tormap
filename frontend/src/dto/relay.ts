@@ -15,6 +15,21 @@ export interface RelayLocationDto {
     consensusWeight?: number | null
 }
 
+export interface CountryUsageDto {
+    /**
+     * ISO 3166-1 alpha-2 code in upper case
+     */
+    country: string
+    users: number
+    lower?: number | null
+    upper?: number | null
+
+    /**
+     * The percentage of the network that contributed to the estimate of the day. Low values are less reliable.
+     */
+    frac: number
+}
+
 export interface DailyRelayCountDto {
     day: string
     total: number

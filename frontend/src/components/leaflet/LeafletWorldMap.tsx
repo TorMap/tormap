@@ -7,6 +7,7 @@ import {RelayLocationDto} from "../../dto/relay";
 import {SnackbarMessage} from "../../types/ui";
 import {readPermalink, writePermalink} from "../../util/permalink";
 import {backend} from "../../util/util";
+import {CountryUsageLayer} from "./CountryUsageLayer";
 import {LeafletLayers} from "./LeafletLayers";
 
 import 'leaflet/dist/leaflet.css';
@@ -101,6 +102,7 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
             maxBounds={[[-180, -360], [180, 360]]}
         >
             <MapPermalink/>
+            <CountryUsageLayer/>
             <React.StrictMode>
                 <LeafletLayers
                     relays={relays}

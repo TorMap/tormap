@@ -21,6 +21,7 @@ import {useSettings} from "../../context/settings-context";
 import {RelayTypeIcon} from "../../types/icons";
 import {RelayFlagLabel, RelayType, RelayTypeLabel, RelayTypeTooltip} from "../../types/relay";
 import {relayMustIncludeFlagOptions, Settings, topRelayCountOptions} from "../../types/settings";
+import {usageColorGradient} from "../../util/country-usage";
 import {nameOfFactory} from "../../util/util";
 import {ExternalLink} from "../link/ExternalLink";
 import {useAtom} from "jotai";
@@ -30,6 +31,7 @@ import {
     relaySearchOnMapAtom,
     showRelayDetailsDialogAtom
 } from "../dialogs/relay/relay-details-atoms";
+import {countryUsageAtom} from "../leaflet/country-usage-atoms";
 import {filteredRelaysAtom} from "../leaflet/LeafletLayers";
 import {RelayTypeColorInput} from "./RelayTypeColorInput";
 
@@ -50,6 +52,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     const [, setRelayDetailsDialogSearch] = useAtom(relayDetailsDialogSearchAtom)
     const [filteredRelays] = useAtom(filteredRelaysAtom)
     const [relaySearchOnMap, setRelaySearchOnMap] = useAtom(relaySearchOnMapAtom)
+    const [countryUsage] = useAtom(countryUsageAtom)
 
     // Util
     const nameOfSetting = nameOfFactory<Settings>()
@@ -184,6 +187,56 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                             )}
                         </TextField>
                     </FormGroup>
+                </AccordionDetails>
+            </Accordion>
+            <Accordion elevation={elevation}>
+                <AccordionSummary
+                    expandIcon={<ExpandMoreIcon/>}
+                    aria-controls="panel2a-content"
+                    id="panel2a-header"
+                >
+                    <Typography className={"heading"}>Tor users per country</Typography>
+                </AccordionSummary>
+                <AccordionDetails sx={{padding: "0px 8px 20px 8px"}}>
+                    <FormGroup>
+                        <FormControlLabel
+                            control={<Switch checked={settings.showCountryUsage} onChange={changeSettings}/>}
+                            label={"Color countries by users"}
+                            name={nameOfSetting("showCountryUsage")}
+                        />
+                    </FormGroup>
+                    <Typography variant="body2" sx={{mt: 1}}>
+                        An estimate by the Tor Project, based on the directory requests that relays report. It counts
+                        users that connect to Tor directly, not the traffic they cause.
+                    </Typography>
+                    {settings.showCountryUsage && countryUsage && countryUsage.usage.length > 0 &&
+                        <Box sx={{mt: 1}}>
+                            <Box
+                                role="img"
+                                aria-label="Color scale from few to many users"
+                                sx={{height: "8px", borderRadius: "4px", background: usageColorGradient}}
+                            />
+                            <Box sx={{display: "flex", justifyContent: "space-between"}}>
+                                <Typography variant="caption">few users</Typography>
+                                <Typography variant="caption">many users</Typography>
+                            </Box>
+                            <Typography variant="body2" sx={{mt: 1}}>
+                                The estimate of {countryUsage.day} is based on {countryUsage.usage[0].frac}% of the relays.
+                                {countryUsage.usage[0].frac < 30 && " Early estimates are less reliable."}
+                            </Typography>
+                        </Box>
+                    }
+                    {settings.showCountryUsage && countryUsage && countryUsage.usage.length === 0 &&
+                        <Typography variant="body2" sx={{mt: 1}}>
+                            There are no estimates for {countryUsage.day}. They exist from March 2011 on.
+                        </Typography>
+                    }
+                    <Box sx={{mt: 1}}>
+                        <ExternalLink
+                            href={"https://metrics.torproject.org/reproducible-metrics.html#relay-users"}
+                            label={"How it is estimated"}
+                        />
+                    </Box>
                 </AccordionDetails>
             </Accordion>
             <Accordion elevation={elevation} defaultExpanded>

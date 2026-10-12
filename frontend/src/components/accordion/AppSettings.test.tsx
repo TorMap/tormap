@@ -10,6 +10,7 @@ import {makeRelay} from "../../test/fixtures";
 import {renderWithProviders} from "../../test/render";
 import {RelayType} from "../../types/relay";
 import {relaySearchOnMapAtom} from "../dialogs/relay/relay-details-atoms";
+import {CountryUsage, countryUsageAtom} from "../leaflet/country-usage-atoms";
 import {filteredRelaysAtom} from "../leaflet/LeafletLayers";
 import {AppSettings} from "./AppSettings";
 
@@ -167,5 +168,48 @@ describe("AppSettings consensus weight", () => {
         await page.getByRole("combobox", {name: "Show only the heaviest"}).click()
         await page.getByRole("option", {name: "All relays"}).click()
         await expect.poll(() => weightState().topRelayCount).toBe(null)
+    })
+})
+
+const UsageState: FunctionComponent<{ usage?: CountryUsage }> = ({usage}) => {
+    const [, setCountryUsage] = useAtom(countryUsageAtom)
+    const {settings} = useSettings()
+    useEffect(() => setCountryUsage(usage), [usage, setCountryUsage])
+    return <output aria-label="usage setting">{String(settings.showCountryUsage)}</output>
+}
+
+describe("AppSettings country usage", () => {
+    const openSection = () => page.getByText("Tor users per country").click()
+    const enabled = {settings: {showCountryUsage: true}}
+
+    it("toggles the layer", async () => {
+        await renderWithProviders(<><AppSettings elevation={0}/><UsageState/></>)
+        await openSection()
+        await expect.element(page.getByRole("status", {name: "usage setting"})).toHaveTextContent("false")
+        await page.getByRole("switch", {name: "Color countries by users"}).click()
+        await expect.element(page.getByRole("status", {name: "usage setting"})).toHaveTextContent("true")
+    })
+
+    it("explains how reliable the estimate of the day is", async () => {
+        const usage = {day: "2024-03-05", usage: [{country: "DE", users: 10, lower: null, upper: null, frac: 61}]}
+        await renderWithProviders(<><AppSettings elevation={0}/><UsageState usage={usage}/></>, enabled)
+        await openSection()
+        await expect.element(page.getByText("The estimate of 2024-03-05 is based on 61% of the relays.")).toBeVisible()
+        await expect.element(page.getByText(/Early estimates are less reliable/)).not.toBeInTheDocument()
+    })
+
+    it("warns about estimates that are based on few relays", async () => {
+        const usage = {day: "2011-03-06", usage: [{country: "DE", users: 10, lower: null, upper: null, frac: 11}]}
+        await renderWithProviders(<><AppSettings elevation={0}/><UsageState usage={usage}/></>, enabled)
+        await openSection()
+        await expect.element(page.getByText(/Early estimates are less reliable/)).toBeVisible()
+    })
+
+    it("says when a day has no estimates", async () => {
+        await renderWithProviders(
+            <><AppSettings elevation={0}/><UsageState usage={{day: "2008-01-01", usage: []}}/></>, enabled
+        )
+        await openSection()
+        await expect.element(page.getByText("There are no estimates for 2008-01-01. They exist from March 2011 on.")).toBeVisible()
     })
 })
