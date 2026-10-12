@@ -20,7 +20,13 @@ import {defaultSettings, tooltipTimeDelay} from "../../config";
 import {useSettings} from "../../context/settings-context";
 import {RelayTypeIcon} from "../../types/icons";
 import {RelayFlagLabel, RelayType, RelayTypeLabel, RelayTypeTooltip} from "../../types/relay";
-import {relayMustIncludeFlagOptions, Settings, topRelayCountOptions} from "../../types/settings";
+import {
+    relayMustIncludeFlagOptions,
+    relaysMustIncludeFlagInput,
+    Settings,
+    showRelayTypesInput,
+    topRelayCountOptions
+} from "../../types/settings";
 import {nameOfFactory} from "../../util/util";
 import {ExternalLink} from "../link/ExternalLink";
 import {useAtom} from "jotai";
@@ -292,5 +298,3 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     )
 }
 
-export const showRelayTypesInput = "showRelayTypesInput"
-export const relaysMustIncludeFlagInput = "relaysMustIncludeFlagInput"

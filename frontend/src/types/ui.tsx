@@ -10,6 +10,7 @@ export enum SnackbarMessage {
     UpdatedData = "New data needed to be displayed. Please try again now.",
     NoRelayDetails = "Currently we have no details about this relay for this month.",
     HistoricDataProcessing = "Currently historic data is being processed.",
+    CountryBordersFailed = "Could not load the country borders. Please try again.",
 }
 
 export const FullHeightDialog = styled(Dialog)(() => ({
