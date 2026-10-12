@@ -112,21 +112,39 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-tasks.register<Copy>("unpackFiles") {
-    val tree = fileTree("ip-lookup")
-    tree.include("*.zip")
-    fileTree("ip-lookup").forEach { file ->
-        from(zipTree(file).files)
-        into("src/main/resources/ip-lookup")
-        rename(".*GeoLite2-ASN.*mmdb", "autonomous-system.mmdb")
-        rename(".*dbip-city-lite.*mmdb", "location.mmdb")
-    }
+// Extract the IP lookup databases from the zip archives in ip-lookup/ when the resources are built.
+// The archives are only opened at execution time, and the result is a generated resource directory.
+val ipLookupResources = layout.buildDirectory.dir("generated/ip-lookup-resources")
+interface InjectedArchiveOperations {
+    @get:Inject
+    val archiveOperations: ArchiveOperations
 }
-tasks.assemble {
-    dependsOn("unpackFiles")
+val unpackIpLookupDatabases = tasks.register<Sync>("unpackIpLookupDatabases") {
+    // A service instead of Project.zipTree, so the task does not reference the build script (configuration cache)
+    val archiveOperations = objects.newInstance<InjectedArchiveOperations>().archiveOperations
+    val archives = fileTree("ip-lookup") { include("*.zip") }
+    from(archives.elements.map { zips -> zips.map { archiveOperations.zipTree(it) } }) {
+        exclude("__MACOSX/**")
+        include("**/*.mmdb", "**/COPYRIGHT.txt", "**/LICENSE.txt")
+        // Flatten the directories inside the archives
+        eachFile { path = name }
+        rename(".*GeoLite2-ASN.*\\.mmdb", "autonomous-system.mmdb")
+        rename(".*dbip-city-lite.*\\.mmdb", "location.mmdb")
+    }
+    includeEmptyDirs = false
+    into(ipLookupResources.map { it.dir("ip-lookup") })
+}
+sourceSets.main {
+    resources.srcDir(files(ipLookupResources).builtBy(unpackIpLookupDatabases))
 }
 tasks.processResources {
-    dependsOn("unpackFiles")
+    // Earlier builds extracted the databases into src/main/resources, which would now collide with the generated ones
+    val legacyIpLookupDir = file("src/main/resources/ip-lookup")
+    doFirst {
+        check(!legacyIpLookupDir.exists()) {
+            "Delete $legacyIpLookupDir: the IP lookup databases are now extracted into the build directory."
+        }
+    }
 }
 
 // Configure tests

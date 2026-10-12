@@ -113,12 +113,18 @@ IP ranges and their geographic location changes over time. We only use the curre
 location of some relays in the past might have been different. If desired, the `.mmdb` DB files can be updated every few
 months, to keep the IP ranges up to date.
 
+The zip archives in `backend/ip-lookup/` are the source. The Gradle task `unpackIpLookupDatabases` extracts them into
+`build/generated/ip-lookup-resources/ip-lookup/` (as `location.mmdb` and `autonomous-system.mmdb`) whenever resources
+are built, so they end up in the JAR and the Docker image.
+
 Replacing existing DB files:
 
 1. Download latest MMDB file from https://db-ip.com/db/download/ip-to-city-lite
-2. Replace zip archive `backend/ip-lookup/location/dbip-city-lite-<DATE>.zip`
+2. Replace zip archive `backend/ip-lookup/dbip-city-lite-<DATE>.mmdb.zip`
 3. Create account and download latest GeoLite2 ASN MMDB file from https://www.maxmind.com/
-4. Replace zip archive `backend/ip-lookup/autonomous-system/GeoLite2-ASN-<DATE>.zip`
+4. Replace zip archive `backend/ip-lookup/GeoLite2-ASN_<DATE>.zip`
+
+Keep the `dbip-city-lite` and `GeoLite2-ASN` parts of the file names: the build uses them to rename the databases.
 
 ## Deploy
 
