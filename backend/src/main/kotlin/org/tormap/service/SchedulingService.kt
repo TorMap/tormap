@@ -19,6 +19,7 @@ class SchedulingService(
     private val descriptorCoordinationService: DescriptorCoordinationService,
     private val relayDetailsUpdateService: RelayDetailsUpdateService,
     private val descriptorFileService: DescriptorFileService,
+    private val countryUsageService: CountryUsageService,
 ) {
     /**
      * The most recent 3 days of descriptors equals about 175 MB.
@@ -63,6 +64,14 @@ class SchedulingService(
             descriptorConfig.archiveRelayServers,
             DescriptorType.ARCHIVE_RELAY_SERVER
         )
+
+    /**
+     * The first run downloads the complete history from Tor Metrics (~40 MB), later runs only the latest days.
+     * Tor Metrics publishes new estimates once a day.
+     */
+    @Scheduled(fixedDelay = 12, timeUnit = TimeUnit.HOURS)
+    fun refreshCountryUsage() =
+        countryUsageService.refresh()
 
     @Scheduled(fixedDelay = 1, initialDelay = 1, timeUnit = TimeUnit.DAYS)
     fun updateRelayFamilies() =

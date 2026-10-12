@@ -44,6 +44,7 @@ class CacheConfigTest(
             CacheConfig.RELAY_LOCATION_DISTINCT_DAYS to 1L,
             CacheConfig.RELAY_DAILY_COUNTS to 1L,
             CacheConfig.RELAY_LOCATIONS_PER_DAY to 40L,
+            CacheConfig.COUNTRY_USAGE_PER_DAY to 400L,
             CacheConfig.REVERSE_DNS_LOOKUPS to 10_000L,
         ).forEach { (name, maximumSize) ->
             nativeCache(name).policy().eviction().get().maximum shouldBe maximumSize

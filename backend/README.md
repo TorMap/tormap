@@ -25,6 +25,15 @@ After upgrading, the backend therefore reads every consensus file again and only
 about as long as the initial import and requires the archive files to still be available in the download directory
 (otherwise they are downloaded again). The API keeps serving all data while this runs, relays just have no weight yet.
 
+### Country usage
+
+The estimated number of relay users per country and day is imported from the Tor Metrics CSV
+[`userstats-relay-country.csv`](https://metrics.torproject.org/stats.html) (CC0). The first import downloads the complete
+history (~40 MB, from 2011-03), afterwards every 12 hours only the latest days with some overlap, because Tor Metrics
+revises recent estimates. The source can be changed with the `usage-statistics.*` properties. The estimates are based
+on the directory requests that relays report. Early days are based on very few relays (`frac`), so their numbers are
+less reliable.
+
 ## Requirements
 
 - At least 50 GB of free disk space (for downloaded archives)
