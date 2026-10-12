@@ -149,7 +149,8 @@ describe("LeafletLayers", () => {
             await renderLayers(relays, {sortCountry: true})
             await expectState(/"filtered":3/)
 
-            expect(polygons().map(layer => layer.feature.properties.iso_a2).sort()).toEqual(["DE", "FR"])
+            // The country borders are loaded on demand
+            await expect.poll(() => polygons().map(layer => layer.feature.properties.iso_a2).sort()).toEqual(["DE", "FR"])
             polygons().find(layer => layer.feature.properties.iso_a2 === "FR")!.fire("click")
 
             await expectState(/"selectedCountry":"FR"/)
