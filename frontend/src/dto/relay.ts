@@ -8,6 +8,11 @@ export interface RelayLocationDto {
     detailsId?: number | null
     familyId?: number | null
     nickname: string
+
+    /**
+     * The weight clients use for path selection. Not a measured bandwidth. Missing until the day got reprocessed.
+     */
+    consensusWeight?: number | null
 }
 
 export interface DailyRelayCountDto {

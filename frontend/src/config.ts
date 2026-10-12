@@ -13,6 +13,9 @@ export const defaultSettings: Settings = {
     aggregateCoordinates: false,
     heatMap: false,
 
+    sizeByWeight: false,
+    topRelayCount: undefined,
+
     showRelayTypes: {
         [RelayType.Exit]: true,
         [RelayType.Guard]: true,

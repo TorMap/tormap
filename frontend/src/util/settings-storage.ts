@@ -1,4 +1,4 @@
-import {Settings} from "../types/settings";
+import {Settings, topRelayCountOptions} from "../types/settings";
 
 export const settingsStorageKey = "tormap.settings.v1"
 
@@ -40,7 +40,7 @@ export function parseStoredSettings(json: string | null, defaults: Settings): Se
     }
     if (!isObject(stored)) return defaults
 
-    const booleanSetting = (key: "sortCountry" | "sortFamily" | "aggregateCoordinates" | "heatMap") =>
+    const booleanSetting = (key: "sortCountry" | "sortFamily" | "aggregateCoordinates" | "heatMap" | "sizeByWeight") =>
         isBoolean(stored[key]) ? stored[key] : defaults[key]
 
     return {
@@ -51,6 +51,10 @@ export function parseStoredSettings(json: string | null, defaults: Settings): Se
         selectedFamily: defaults.selectedFamily,
         aggregateCoordinates: booleanSetting("aggregateCoordinates"),
         heatMap: booleanSetting("heatMap"),
+        sizeByWeight: booleanSetting("sizeByWeight"),
+        topRelayCount: topRelayCountOptions.includes(stored.topRelayCount as number)
+            ? stored.topRelayCount as number
+            : defaults.topRelayCount,
         showRelayTypes: mergeRecord(defaults.showRelayTypes, stored.showRelayTypes, isBoolean),
         relayTypeColors: mergeRecord(defaults.relayTypeColors, stored.relayTypeColors, isHexColor),
         relaysMustHaveFlag: mergeRecord(defaults.relaysMustHaveFlag, stored.relaysMustHaveFlag, isBoolean),

@@ -24,7 +24,22 @@ export const filterRelaysByFlags = (relays: RelayLocationDto[], settings: Settin
             filtered.push(relay)
         }
     })
-    return filtered
+    return keepRelaysWithHighestWeight(filtered, settings.topRelayCount)
+}
+
+/**
+ * Returns the `count` relays with the highest consensus weight. Relays are returned unchanged if no count is
+ * given or if none of them has a weight (e.g. before the backend processed the weights of a day).
+ * @param relays - The relays to select from
+ * @param count - How many relays to keep, undefined to keep all
+ */
+export const keepRelaysWithHighestWeight = (relays: RelayLocationDto[], count: number | undefined): RelayLocationDto[] => {
+    if (count === undefined || relays.length <= count) return relays
+    if (!relays.some(relay => relay.consensusWeight != null)) return relays
+    // Array.prototype.sort is stable, so relays with the same weight keep their order
+    return [...relays]
+        .sort((a, b) => (b.consensusWeight ?? -1) - (a.consensusWeight ?? -1))
+        .slice(0, count)
 }
 
 /**

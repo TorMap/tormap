@@ -58,3 +58,21 @@ describe("parseStoredSettings", () => {
         expect(parsed).toEqual(defaults)
     })
 })
+
+describe("parseStoredSettings consensus weight settings", () => {
+    const defaults = makeSettings()
+
+    it("restores a valid relay count and the sizing", () => {
+        const parsed = parseStoredSettings(JSON.stringify({sizeByWeight: true, topRelayCount: 100}), defaults)
+        expect(parsed.sizeByWeight).toBe(true)
+        expect(parsed.topRelayCount).toBe(100)
+    })
+
+    it.each([[7], [-1], ["100"], [null], [1e9]])("ignores the unknown relay count %j", (count) => {
+        expect(parseStoredSettings(JSON.stringify({topRelayCount: count}), defaults).topRelayCount).toBeUndefined()
+    })
+
+    it("ignores a sizing that is not a boolean", () => {
+        expect(parseStoredSettings(JSON.stringify({sizeByWeight: "yes"}), defaults).sizeByWeight).toBe(false)
+    })
+})
