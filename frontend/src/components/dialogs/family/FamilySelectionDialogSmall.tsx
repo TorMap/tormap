@@ -28,6 +28,7 @@ export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialog
                 open={shouldShowDialog}
                 onClose={closeDialog}
                 fullScreen={true}
+                slotProps={{paper: {"aria-label": "Families"}}}
                 slots={{transition: SlideUpTransition}}
             >
                 <AppBar sx={{position: 'relative'}}>

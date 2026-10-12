@@ -57,14 +57,15 @@ export const AboutInformation: React.FunctionComponent = () => {
                               spacing={{xs: 2, sm: 4}}>
                             <Grid>
                                 <ExternalLink sx={{color: "white"}} href={"https://github.com/TorMap/tormap"}
-                                              label={<GitHubIcon/>}/>
+                                              ariaLabel={"TorMap on GitHub"} label={<GitHubIcon/>}/>
                             </Grid>
                             <Grid>
                                 <ExternalLink sx={{color: "white"}} href={"https://twitter.com/TorMapOrg"}
-                                              label={<TwitterIcon/>}/>
+                                              ariaLabel={"TorMap on Twitter"} label={<TwitterIcon/>}/>
                             </Grid>
                             <Grid>
-                                <ExternalLink sx={{color: "white"}} href={"mailto:hi@tormap.org"} label={<EmailIcon/>}/>
+                                <ExternalLink sx={{color: "white"}} href={"mailto:hi@tormap.org"}
+                                              ariaLabel={"Email TorMap"} label={<EmailIcon/>}/>
                             </Grid>
                         </Grid>
                         <IconButton aria-label="close" sx={{

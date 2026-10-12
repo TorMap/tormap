@@ -52,6 +52,7 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
                 open={showDialog}
                 onClose={closeDialog}
                 fullScreen={true}
+                slotProps={{paper: {"aria-label": showRelayDetails ? "Relay details" : "Relays"}}}
                 slots={{transition: SlideUpTransition}}
             >
                 <AppBar sx={{position: 'relative'}}>
