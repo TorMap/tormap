@@ -13,6 +13,8 @@ export const defaultSettings: Settings = {
     aggregateCoordinates: false,
     heatMap: false,
 
+    showCountryUsage: false,
+
     sizeByWeight: false,
     topRelayCount: undefined,
 

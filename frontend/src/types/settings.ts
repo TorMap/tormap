@@ -9,6 +9,9 @@ export interface Settings {
     aggregateCoordinates: boolean
     heatMap: boolean
 
+    // Estimated users per country
+    showCountryUsage: boolean
+
     // Consensus weight
     sizeByWeight: boolean
     topRelayCount: number | undefined

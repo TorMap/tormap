@@ -40,7 +40,7 @@ export function parseStoredSettings(json: string | null, defaults: Settings): Se
     }
     if (!isObject(stored)) return defaults
 
-    const booleanSetting = (key: "sortCountry" | "sortFamily" | "aggregateCoordinates" | "heatMap" | "sizeByWeight") =>
+    const booleanSetting = (key: "sortCountry" | "sortFamily" | "aggregateCoordinates" | "heatMap" | "sizeByWeight" | "showCountryUsage") =>
         isBoolean(stored[key]) ? stored[key] : defaults[key]
 
     return {
@@ -52,6 +52,7 @@ export function parseStoredSettings(json: string | null, defaults: Settings): Se
         aggregateCoordinates: booleanSetting("aggregateCoordinates"),
         heatMap: booleanSetting("heatMap"),
         sizeByWeight: booleanSetting("sizeByWeight"),
+        showCountryUsage: booleanSetting("showCountryUsage"),
         topRelayCount: topRelayCountOptions.includes(stored.topRelayCount as number)
             ? stored.topRelayCount as number
             : defaults.topRelayCount,

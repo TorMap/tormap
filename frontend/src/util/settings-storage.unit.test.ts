@@ -76,3 +76,15 @@ describe("parseStoredSettings consensus weight settings", () => {
         expect(parseStoredSettings(JSON.stringify({sizeByWeight: "yes"}), defaults).sizeByWeight).toBe(false)
     })
 })
+
+describe("parseStoredSettings country usage setting", () => {
+    const defaults = makeSettings()
+
+    it("restores the layer setting", () => {
+        expect(parseStoredSettings(JSON.stringify({showCountryUsage: true}), defaults).showCountryUsage).toBe(true)
+    })
+
+    it("ignores a value that is not a boolean", () => {
+        expect(parseStoredSettings(JSON.stringify({showCountryUsage: 1}), defaults).showCountryUsage).toBe(false)
+    })
+})

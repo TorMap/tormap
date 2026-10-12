@@ -17,6 +17,7 @@ class CacheConfig {
         const val RELAY_DAILY_COUNTS = "RELAY_DAILY_COUNTS"
         const val RELAY_DAILY_COUNTS_KEY = "RELAY_DAILY_COUNTS_KEY"
         const val RELAY_LOCATIONS_PER_DAY = "RELAY_LOCATIONS_OF_DAY"
+        const val COUNTRY_USAGE_PER_DAY = "COUNTRY_USAGE_PER_DAY"
         const val REVERSE_DNS_LOOKUPS = "REVERSE_DNS_LOOKUPS"
     }
 
@@ -38,6 +39,11 @@ class CacheConfig {
             RELAY_LOCATIONS_PER_DAY,
             // 1 entry ~= 2.5 MB of memory -> 40 entries ~= 100 MB of memory
             Caffeine.newBuilder().maximumSize(40).recordStats().build()
+        )
+        registerCustomCache(
+            COUNTRY_USAGE_PER_DAY,
+            // 1 entry ~= 15 KB for ~250 countries -> 400 entries ~= 6 MB of memory
+            Caffeine.newBuilder().maximumSize(400).recordStats().build()
         )
         registerCustomCache(
             REVERSE_DNS_LOOKUPS,

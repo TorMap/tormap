@@ -30,7 +30,7 @@ class SecurityRulesTest(
     fun statusOf(path: String) = mockMvc.perform(get(path)).andReturn().response.status
 
     "public paths are not rejected by security" {
-        listOf("/", "/error", "/favicon.ico", "/robots.txt", "/static/missing.txt", "/relay/missing").forEach { path ->
+        listOf("/", "/error", "/favicon.ico", "/robots.txt", "/static/missing.txt", "/relay/missing", "/relay/country-usage/day/2024-01-01").forEach { path ->
             statusOf(path) shouldNotBe 401
             statusOf(path) shouldNotBe 403
         }

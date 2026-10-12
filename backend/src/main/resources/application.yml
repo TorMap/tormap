@@ -13,6 +13,14 @@ descriptor:
     archiveRelayServers: /archive/relay-descriptors/server-descriptors/
     recentRelayConsensuses: /recent/relay-descriptors/consensuses/
     recentRelayServers: /recent/relay-descriptors/server-descriptors/
+usage-statistics:
+    baseUrl: https://metrics.torproject.org
+    relayUsersPath: /userstats-relay-country.csv
+    # The complete file is about 40 MB
+    maxDownloadBytes: 134217728
+    connectTimeout: 10s
+    requestTimeout: 5m
+    refreshOverlapDays: 14
 ip-lookup:
     shouldCache: true
     locationDatabaseFile: /ip-lookup/location.mmdb

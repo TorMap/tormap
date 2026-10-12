@@ -8,11 +8,13 @@ call, a dependency source or a deployment default. Report vulnerabilities as des
 
 TorMap is a public, read-only data platform. The Spring Boot backend periodically downloads Tor relay descriptors from
 Tor Project Collector, parses them with a vendored copy of metrics-lib, enriches them with offline GeoIP/ASN databases,
-stores them in PostgreSQL and serves them as JSON. The React frontend (static files on Firebase Hosting or nginx) renders
+stores them in PostgreSQL and serves them as JSON. It also imports the estimated number of relay users per country from
+the Tor Metrics CSV `userstats-relay-country.csv`. The React frontend (static files on Firebase Hosting or nginx) renders
 the data on a map. There are no user accounts. The only privileged role is the actuator admin.
 
 ```
-Browser ──HTTPS──> Frontend (static)            Tor Collector (HTTPS, index.json + tarballs)
+Browser ──HTTPS──> Frontend (static)            Tor Collector (HTTPS, index.json + tarballs),
+   │                                            Tor Metrics (HTTPS, one CSV)
    │                                                    │
    └──HTTP(S) /relay/** ──> Backend (Spring Boot) <─────┘ scheduled pulls (hourly / 12h)
    Operator ── Basic auth ─> /actuator/**  │  ├──> PostgreSQL
@@ -47,6 +49,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 | 8 | Frontend rendering                | API JSON (backend-controlled, relay-derived strings)                                     | XSS through HTML sinks (map tooltips/popups, raw HTML APIs)     | `frontend/src/util/layer-construction.ts`, `components/dialogs/relay/` |
 | 9 | Deployment configuration          | Env vars, Spring profile, compose port mappings (operator)                               | Exposed DB, Swagger on, no TLS, default credentials            | `docker-compose*.yml`, `application*.yml`, `build.gradle.kts` (Jib) |
 | 10| CI/CD and supply chain            | Dependencies, actions, Renovate PRs, AI agent instructions (developer / upstream)         | Malicious package, secret theft, prompt injection via changelogs | `.github/`, `renovate.json`, `frontend/.yarnrc.yml`, `AGENTS.md` |
+| 11| Tor Metrics CSV download         | `userstats-relay-country.csv` (HTTPS, trusted host, content untrusted): dates, country codes, numbers | Oversized or endless response, malformed or poisoned rows, redirect to another host | `service/CountryUsageService.kt`, `util/UserStatsCsvParser.kt`, `config/value/UsageStatisticsConfig.kt` |
 
 ## Assumptions
 
@@ -79,6 +82,9 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   download directory (real-path check). Downloads are written to a temp file and kept only if the size matches the
   index. Free-text descriptor fields (contact, platform, protocols) are truncated to 255 characters; family
   entries are stored untruncated.
+- Tor Metrics import: one fixed configured URL (http(s) only, no redirects), connect and request timeouts, at most
+  128 MB read per response, every line validated (strict date, `[a-z]{2}` country, bounded numbers, no future dates),
+  bound parameters only. The API serves the stored rows for a validated `LocalDate`, cached per day with a bounded cache.
 - Reverse DNS: at most 10 PTR names verified per IP, forward results filtered to public addresses, results cached for
   6 hours with `sync = true`.
 - Backend container runs as non-root `1000:1000` from a digest-pinned base image. The frontend image (static files only)
@@ -97,7 +103,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 2. **Malicious relay operator.** Publishes descriptors with large or many family entries, odd nicknames, or a PTR zone
    with slow or many answers, to slow down family computation, tie up request threads, or inject content that the
    frontend renders.
-3. **Compromised or spoofed Collector.** Serves a manipulated index (URLs, file names, sizes), oversized or endless
+3. **Compromised or spoofed Collector (or Tor Metrics).** Serves a manipulated index (URLs, file names, sizes), oversized or endless
    files, or decompression bombs. Goal: SSRF, local file read into the pipeline, disk/heap exhaustion, poisoned
    data.
 4. **Admin credential attacker.** Brute-forces HTTP Basic, sniffs it on a deployment without TLS, or finds it in
