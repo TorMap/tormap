@@ -6,6 +6,7 @@ import {makeRelay, makeRelays, makeSettings} from "../test/fixtures";
 import {RelayFlag, RelayType} from "../types/relay";
 import {buildFamilyCoordinatesMap, buildRelayCoordinatesMap, buildRelayCountryMap, buildRelayFamilyMap} from "./aggregate-relays";
 import {getUniqueCountryColor} from "./geojson";
+import {HeatLayer} from "./heat-layer";
 import {
     buildAggregatedCoordinatesLayer,
     buildCountryLayer,
@@ -230,8 +231,9 @@ describe("calculateFamilyColor", () => {
 describe("buildRelayHeatmapLayer", () => {
     it("creates a heat layer with a point per relay", () => {
         const layer = buildRelayHeatmapLayer([makeRelay({lat: 1, long: 2}), makeRelay({lat: 3, long: 4})])
-        const heat = layer as unknown as {_latlngs: number[][], options: {radius: number}}
-        expect(heat._latlngs).toEqual([[1, 2, 1], [3, 4, 1]])
+        const heat = layer as unknown as {latlngs: number[][], options: {radius: number}}
+        expect(layer).toBeInstanceOf(HeatLayer)
+        expect(heat.latlngs).toEqual([[1, 2, 1], [3, 4, 1]])
         expect(heat.options.radius).toBe(25)
     })
 })

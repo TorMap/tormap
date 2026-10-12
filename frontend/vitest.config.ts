@@ -1,5 +1,5 @@
 import {playwright} from "@vitest/browser-playwright";
-import viteReact from "@vitejs/plugin-react-swc";
+import viteReact from "@vitejs/plugin-react";
 import {defineConfig} from "vitest/config";
 
 /*

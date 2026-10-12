@@ -3,7 +3,7 @@ import {describe, expect, it} from "vitest";
 
 import {makeRelay} from "../../test/fixtures";
 import {renderWithProviders} from "../../test/render";
-import {relaySearchOnMapAtom} from "../dialogs/relay/ResponsiveRelayDetailsDialog";
+import {relaySearchOnMapAtom} from "../dialogs/relay/relay-details-atoms";
 import {OverlaySmall} from "./OverlaySmall";
 
 // Stands in for the relay search dialog, which shows its results on the map
