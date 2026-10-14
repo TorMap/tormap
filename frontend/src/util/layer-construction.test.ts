@@ -321,6 +321,26 @@ describe("buildRelayLayer sized by consensus weight", () => {
         return layer.filter((_, index) => index % 2 === 0).map(marker => marker.getRadius())
     }
 
+    describe("weight share in the tooltip", () => {
+        const tooltip = (topRelayCount?: number) => {
+            const relays = [
+                makeRelay({lat: 1, long: 1, nickname: "heavy", consensusWeight: 300}),
+                makeRelay({lat: 2, long: 2, nickname: "light", consensusWeight: 100}),
+            ]
+            const layer = markers(buildRelayLayer(buildRelayCoordinatesMap(relays), false, colors, vi.fn(), true, topRelayCount))
+            layer[1].fire("mouseover")
+            return layer[0].getTooltip()?.getContent()
+        }
+
+        it("is relative to the consensus weight of the shown relays", () => {
+            expect(tooltip()).toBe("heavy (75.00% of the consensus weight)")
+        })
+
+        it("says that it is relative to the top relays while the map is limited", () => {
+            expect(tooltip(50)).toBe("heavy (75.00% of the top 50 consensus weight)")
+        })
+    })
+
     it("keeps the default size when sizing is off", () => {
         expect(radii([makeRelay({lat: 1, long: 1, consensusWeight: 500})], false)).toEqual([1])
     })

@@ -20,11 +20,12 @@ const relayTypeIcons = {
 /**
  * The icon of a relay type, painted in the color selected in the settings
  * @param relayType the Icon-/ Relay-Type
+ * @param color paints the icon in this color instead, e.g. while a new color is being picked
  */
-export const RelayTypeIcon: FunctionComponent<{ relayType: RelayType }> = ({relayType}) => {
+export const RelayTypeIcon: FunctionComponent<{ relayType: RelayType, color?: string }> = ({relayType, color}) => {
     const {settings} = useSettings()
     const Icon = relayTypeIcons[relayType]
-    return <Icon sx={{color: settings.relayTypeColors[relayType]}}/>
+    return <Icon sx={{color: color ?? settings.relayTypeColors[relayType]}}/>
 }
 
 export const TotalRelaysIcon = <FunctionsIcon/>

@@ -18,7 +18,6 @@ import {FunctionComponent, ReactNode} from "react";
 
 import {defaultSettings, tooltipTimeDelay} from "../../config";
 import {useSettings} from "../../context/settings-context";
-import {RelayTypeIcon} from "../../types/icons";
 import {RelayFlagLabel, RelayType, RelayTypeLabel, RelayTypeTooltip} from "../../types/relay";
 import {
     relayMustIncludeFlagOptions,
@@ -106,6 +105,8 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     const weightsAvailable = filteredRelays.some(relay => relay.consensusWeight != null)
     // The scale only explains the map while the layer is shown and the day has estimates
     const usageScaleActive = settings.showCountryUsage && countryUsage !== undefined && countryUsage.usage.length > 0
+    const shownRelayTypes = relayTypes.filter(relayType => settings.showRelayTypes[relayType])
+    const hiddenRelayTypes = relayTypes.filter(relayType => !settings.showRelayTypes[relayType])
     const weightLimitActive = weightsAvailable && settings.sizeByWeight && settings.topRelayCount !== undefined
     const hasCustomRelayTypeColors = relayTypes.some(relayType =>
         settings.relayTypeColors[relayType] !== defaultSettings.relayTypeColors[relayType]
@@ -126,7 +127,15 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                 </RelayLimitInfo>}
             {weightLimitActive &&
                 <RelayLimitInfo onShowAll={() => setSettings({...settings, topRelayCount: undefined})}>
-                    Highest consensus weight: {shownRelayCount.shown}/{shownRelayCount.total} relays
+                    Top consensus weight: {shownRelayCount.shown}/{shownRelayCount.total} relays
+                </RelayLimitInfo>}
+            {hiddenRelayTypes.length > 0 &&
+                <RelayLimitInfo onShowAll={() => setSettings({
+                    ...settings,
+                    showRelayTypes: {...defaultSettings.showRelayTypes},
+                })}>
+                    {shownRelayTypes.length > 0 ? `Only ${shownRelayTypes.map(type => RelayTypeLabel[type]).join(", ")}` : "No relay types"}
+                    : {shownRelayCount.shown}/{shownRelayCount.total} relays
                 </RelayLimitInfo>}
             <Accordion elevation={elevation} defaultExpanded>
                 <AccordionSummary
@@ -223,7 +232,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                         <TextField
                             select
                             size="small"
-                            label="Show only the heaviest"
+                            label="Show top"
                             value={settings.topRelayCount ?? ""}
                             // Keeps the label above the field for "All", so choosing a value does not change the layout
                             slotProps={{inputLabel: {shrink: true}}}
@@ -304,7 +313,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                     aria-controls="relay-types-content"
                     id="relay-types-header"
                 >
-                    <Typography className={"heading"}>Show relay types</Typography>
+                    <Typography className={"heading"}>Relay types</Typography>
                 </AccordionSummary>
                 <AccordionDetails sx={detailsSx}>
                     <FormGroup>
@@ -314,6 +323,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                                     title={RelayTypeTooltip[relayType]}
                                     placement={"left"}
                                     enterDelay={tooltipTimeDelay}
+                                    describeChild
                                 >
                                     <FormControlLabel
                                         control={
@@ -323,12 +333,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                                                 onChange={changeSettings}
                                             />
                                         }
-                                        label={
-                                            <Box sx={{display: "flex", alignItems: "center"}}>
-                                                <span style={{paddingRight: "10px"}}>{RelayTypeLabel[relayType]}</span>
-                                                <RelayTypeIcon relayType={relayType}/>
-                                            </Box>
-                                        }
+                                        label={RelayTypeLabel[relayType]}
                                         name={showRelayTypesInput}
                                     />
                                 </Tooltip>

@@ -134,8 +134,8 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
     }, [relayCoordinatesMap, relays, setRelaysForDetailsDialog, setShowRelayDetailsDialog, setRelayDetailsDialogSearch])
 
     const relayLayer = useMemo(
-        () => buildRelayLayer(relayCoordinatesMap, settings.sortFamily, settings.relayTypeColors, openRelayDetailsDialog, settings.sizeByWeight),
-        [openRelayDetailsDialog, relayCoordinatesMap, settings.sortFamily, settings.relayTypeColors, settings.sizeByWeight]
+        () => buildRelayLayer(relayCoordinatesMap, settings.sortFamily, settings.relayTypeColors, openRelayDetailsDialog, settings.sizeByWeight, settings.sizeByWeight ? settings.topRelayCount : undefined),
+        [openRelayDetailsDialog, relayCoordinatesMap, settings.sortFamily, settings.relayTypeColors, settings.sizeByWeight, settings.topRelayCount]
     )
     const relayCountryLayer = useMemo(
         () => buildRelayCountryLayer(relayCountryMap, settings, openRelayDetailsDialog),
