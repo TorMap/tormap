@@ -1,11 +1,11 @@
-import {ExpandMore as ExpandMoreIcon, RestartAlt as RestartAltIcon, Search as SearchIcon} from "@mui/icons-material";
+import {Close as CloseIcon, ExpandMore as ExpandMoreIcon, RestartAlt as RestartAltIcon, Search as SearchIcon} from "@mui/icons-material";
 import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
-    Alert,
     Box, Button,
     Checkbox,
+    Chip,
     FormControlLabel,
     FormGroup,
     MenuItem,
@@ -14,7 +14,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import {FunctionComponent} from "react";
+import {FunctionComponent, ReactNode} from "react";
 
 import {defaultSettings, tooltipTimeDelay} from "../../config";
 import {useSettings} from "../../context/settings-context";
@@ -38,12 +38,50 @@ import {
     showRelayDetailsDialogAtom
 } from "../dialogs/relay/relay-details-atoms";
 import {countryUsageAtom} from "../leaflet/country-usage-atoms";
-import {filteredRelaysAtom} from "../leaflet/LeafletLayers";
+import {filteredRelaysAtom, shownRelayCountAtom} from "../leaflet/LeafletLayers";
 import {RelayTypeColorInput} from "./RelayTypeColorInput";
 
 interface Props {
     elevation: number
 }
+
+/**
+ * Aligns the content of every section with its heading: text, switches, checkboxes and color swatches share the
+ * same left and right inset. The negative margins cancel the padding around a switch or checkbox.
+ */
+const detailsSx = {
+    padding: "0px 16px 20px 16px",
+    "& .MuiFormControlLabel-root": {marginLeft: "-12px"},
+    "& .MuiFormControlLabel-root:has(.MuiCheckbox-root)": {marginLeft: "-9px"},
+}
+
+/**
+ * Tells that the map does not show all relays. Removing the chip shows all of them again.
+ */
+const RelayLimitInfo: FunctionComponent<{ onShowAll: () => void, children: ReactNode }> = ({onShowAll, children}) => (
+    <Box sx={{mb: "16px"}}>
+        <Chip
+            // A solid surface like the accordions below, so the text stays readable on every map color
+            variant="filled"
+            label={children}
+            onDelete={onShowAll}
+            deleteIcon={<CloseIcon titleAccess="Show all relays"/>}
+            // The panel has a constant width, so a long text wraps instead of growing the chip
+            sx={{
+                height: "auto",
+                maxWidth: "100%",
+                backgroundColor: "grey.800",
+                color: "text.primary",
+                border: "1px solid",
+                borderColor: "info.light",
+                boxShadow: 3,
+                "&:hover": {backgroundColor: "grey.700"},
+                "& .MuiChip-deleteIcon": {color: "text.primary", opacity: 0.8, "&:hover": {opacity: 1, color: "text.primary"}},
+                "& .MuiChip-label": {whiteSpace: "normal", paddingTop: "6px", paddingBottom: "6px"},
+            }}
+        />
+    </Box>
+)
 
 /**
  * A component for changing the app settings
@@ -59,12 +97,16 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     const [filteredRelays] = useAtom(filteredRelaysAtom)
     const [relaySearchOnMap, setRelaySearchOnMap] = useAtom(relaySearchOnMapAtom)
     const [countryUsage] = useAtom(countryUsageAtom)
+    const [shownRelayCount] = useAtom(shownRelayCountAtom)
 
     // Util
     const nameOfSetting = nameOfFactory<Settings>()
     const relayTypes = [RelayType.Exit, RelayType.Guard, RelayType.Other]
     // Days that were not reprocessed yet have no weights, then the weight settings would do nothing
     const weightsAvailable = filteredRelays.some(relay => relay.consensusWeight != null)
+    // The scale only explains the map while the layer is shown and the day has estimates
+    const usageScaleActive = settings.showCountryUsage && countryUsage !== undefined && countryUsage.usage.length > 0
+    const weightLimitActive = weightsAvailable && settings.sizeByWeight && settings.topRelayCount !== undefined
     const hasCustomRelayTypeColors = relayTypes.some(relayType =>
         settings.relayTypeColors[relayType] !== defaultSettings.relayTypeColors[relayType]
     )
@@ -79,17 +121,13 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                 Search {filteredRelays.length} relays
             </Button>
             {relaySearchOnMap &&
-                <Alert
-                    severity="info"
-                    sx={{mb: "16px"}}
-                    action={
-                        <Button color="inherit" size="small" onClick={() => setRelaySearchOnMap(undefined)}>
-                            Show all
-                        </Button>
-                    }
-                >
-                    Map only shows relays matching &quot;{relaySearchOnMap.search}&quot;
-                </Alert>}
+                <RelayLimitInfo onShowAll={() => setRelaySearchOnMap(undefined)}>
+                    Matching &quot;{relaySearchOnMap.search}&quot;: {shownRelayCount.shown}/{shownRelayCount.total} relays
+                </RelayLimitInfo>}
+            {weightLimitActive &&
+                <RelayLimitInfo onShowAll={() => setSettings({...settings, topRelayCount: undefined})}>
+                    Highest consensus weight: {shownRelayCount.shown}/{shownRelayCount.total} relays
+                </RelayLimitInfo>}
             <Accordion elevation={elevation} defaultExpanded>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon/>}
@@ -98,7 +136,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                 >
                     <Typography className={"heading"}>Group relays by</Typography>
                 </AccordionSummary>
-                <AccordionDetails sx={{padding: "0px 8px 20px 8px"}}>
+                <AccordionDetails sx={detailsSx}>
                     <FormGroup>
                         <Tooltip
                             key={"Family"}
@@ -163,31 +201,40 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                 >
                     <Typography className={"heading"}>Consensus weight</Typography>
                 </AccordionSummary>
-                <AccordionDetails sx={{padding: "0px 8px 20px 8px"}}>
-                    <Typography variant="body2" sx={{mb: 1}}>
-                        {weightsAvailable
-                            ? "The weight directory authorities assign to a relay. Tor clients use it to choose relays, so it shows how likely a relay is picked, not how much traffic it carried."
-                            : "There are no consensus weights for this day yet."}
-                    </Typography>
+                <AccordionDetails sx={detailsSx}>
                     <FormGroup>
-                        <FormControlLabel
-                            control={<Switch checked={settings.sizeByWeight} onChange={changeSettings} disabled={!weightsAvailable}/>}
-                            label={"Size by weight"}
-                            name={nameOfSetting("sizeByWeight")}
-                        />
+                        <Tooltip
+                            title={"Sizes the markers by the weight directory authorities assign to a relay. Tor clients use it to pick relays, so it shows how likely a relay is picked, not how much traffic it carried."}
+                            placement={"left"}
+                            enterDelay={tooltipTimeDelay}
+                            describeChild
+                        >
+                            <FormControlLabel
+                                control={<Switch checked={settings.sizeByWeight} onChange={changeSettings} disabled={!weightsAvailable}/>}
+                                label={"Size relay markers"}
+                                name={nameOfSetting("sizeByWeight")}
+                            />
+                        </Tooltip>
+                        {!weightsAvailable &&
+                            <Typography variant="body1" sx={{my: 1}}>
+                                There are no consensus weights for this day yet.
+                            </Typography>
+                        }
                         <TextField
                             select
                             size="small"
                             label="Show only the heaviest"
                             value={settings.topRelayCount ?? ""}
-                            disabled={!weightsAvailable}
+                            // Keeps the label above the field for "All", so choosing a value does not change the layout
+                            slotProps={{inputLabel: {shrink: true}}}
+                            disabled={!weightsAvailable || !settings.sizeByWeight}
                             onChange={event => setSettings({
                                 ...settings,
                                 topRelayCount: event.target.value === "" ? undefined : Number(event.target.value),
                             })}
                             sx={{mt: 1}}
                         >
-                            <MenuItem value="">All relays</MenuItem>
+                            <MenuItem value="">All</MenuItem>
                             {topRelayCountOptions.map(count =>
                                 <MenuItem key={count} value={count}>{count} relays</MenuItem>
                             )}
@@ -201,46 +248,52 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                     aria-controls="country-usage-content"
                     id="country-usage-header"
                 >
-                    <Typography className={"heading"}>Tor users per country</Typography>
+                    <Typography className={"heading"}>Tor users</Typography>
                 </AccordionSummary>
-                <AccordionDetails sx={{padding: "0px 8px 20px 8px"}}>
+                <AccordionDetails sx={detailsSx}>
                     <FormGroup>
-                        <FormControlLabel
-                            control={<Switch checked={settings.showCountryUsage} onChange={changeSettings}/>}
-                            label={"Color countries by users"}
-                            name={nameOfSetting("showCountryUsage")}
-                        />
-                    </FormGroup>
-                    <Typography variant="body2" sx={{mt: 1}}>
-                        An estimate by the Tor Project, based on the directory requests that relays report. It counts
-                        users that connect to Tor directly, not the traffic they cause.
-                    </Typography>
-                    {settings.showCountryUsage && countryUsage && countryUsage.usage.length > 0 &&
-                        <Box sx={{mt: 1}}>
-                            <Box
-                                role="img"
-                                aria-label="Color scale from few to many users"
-                                sx={{height: "8px", borderRadius: "4px", background: usageColorGradient}}
+                        <Tooltip
+                            title={"An estimate by the Tor Project, based on the directory requests that relays report. It counts users that connect to Tor directly, not the traffic they cause."}
+                            placement={"left"}
+                            enterDelay={tooltipTimeDelay}
+                            describeChild
+                        >
+                            <FormControlLabel
+                                control={<Switch checked={settings.showCountryUsage} onChange={changeSettings}/>}
+                                label={"Color countries"}
+                                name={nameOfSetting("showCountryUsage")}
                             />
-                            <Box sx={{display: "flex", justifyContent: "space-between"}}>
-                                <Typography variant="caption">few users</Typography>
-                                <Typography variant="caption">many users</Typography>
-                            </Box>
-                            <Typography variant="body2" sx={{mt: 1}}>
-                                The estimate of {countryUsage.day} is based on {countryUsage.usage[0].frac}% of the relays.
-                                {countryUsage.usage[0].frac < 30 && " Early estimates are less reliable."}
-                            </Typography>
+                        </Tooltip>
+                    </FormGroup>
+                    <Box
+                        aria-disabled={!usageScaleActive}
+                        sx={{mt: 1, opacity: usageScaleActive ? 1 : 0.4, filter: usageScaleActive ? "none" : "grayscale(1)"}}
+                    >
+                        <Box
+                            role="img"
+                            aria-label="Color scale from few to many users"
+                            sx={{height: "8px", borderRadius: "4px", background: usageColorGradient}}
+                        />
+                        <Box sx={{display: "flex", justifyContent: "space-between"}}>
+                            <Typography variant="caption">few users</Typography>
+                            <Typography variant="caption">many users</Typography>
                         </Box>
+                    </Box>
+                    {settings.showCountryUsage && countryUsage && countryUsage.usage.length > 0 &&
+                        <Typography variant="body1" sx={{mt: 1}}>
+                            Estimate based on {countryUsage.usage[0].frac}% of relays.
+                            {countryUsage.usage[0].frac < 30 && " Early estimates are less reliable."}
+                        </Typography>
                     }
                     {settings.showCountryUsage && countryUsage && countryUsage.usage.length === 0 &&
-                        <Typography variant="body2" sx={{mt: 1}}>
-                            There are no estimates for {countryUsage.day}. They exist from March 2011 on.
+                        <Typography variant="body1" sx={{mt: 1}}>
+                            {countryUsage.day} has no estimate
                         </Typography>
                     }
                     <Box sx={{mt: 1}}>
                         <ExternalLink
                             href={"https://metrics.torproject.org/reproducible-metrics.html#relay-users"}
-                            label={"How it is estimated"}
+                            label={"Learn more"}
                         />
                     </Box>
                 </AccordionDetails>
@@ -253,7 +306,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                 >
                     <Typography className={"heading"}>Show relay types</Typography>
                 </AccordionSummary>
-                <AccordionDetails sx={{padding: "0px 8px 20px 8px"}}>
+                <AccordionDetails sx={detailsSx}>
                     <FormGroup>
                         {relayTypes.map(relayType =>
                             <Box key={relayType} sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
@@ -264,7 +317,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                                 >
                                     <FormControlLabel
                                         control={
-                                            <Checkbox
+                                            <Switch
                                                 id={relayType.toString()}
                                                 checked={settings.showRelayTypes[relayType]}
                                                 onChange={changeSettings}
@@ -286,7 +339,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                     {hasCustomRelayTypeColors &&
                         <Button
                             size={"small"}
-                            sx={{mt: 1}}
+                            sx={{mt: 1, ml: "-5px"}}
                             onClick={() => setSettings({...settings, relayTypeColors: {...defaultSettings.relayTypeColors}})}
                         >
                             Reset colors
@@ -302,7 +355,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                 >
                     <Typography className={"heading"}>Relays must have flag</Typography>
                 </AccordionSummary>
-                <AccordionDetails sx={{padding: "0px 8px 20px 8px"}}>
+                <AccordionDetails sx={detailsSx}>
                     <FormGroup>
                         {relayMustIncludeFlagOptions.map(option =>
                             <Tooltip
@@ -344,7 +397,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                         setRelaySearchOnMap(undefined)
                     }}
                 >
-                    Restore settings
+                    Reset all settings
                 </Button>
             }
         </>

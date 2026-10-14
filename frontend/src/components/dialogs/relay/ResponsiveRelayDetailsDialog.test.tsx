@@ -1,5 +1,5 @@
-import {useAtomValue, useSetAtom} from "jotai";
-import {useEffect} from "react";
+import {useAtom, useAtomValue, useSetAtom} from "jotai";
+import {useEffect, useState} from "react";
 import {describe, expect, it, vi} from "vitest";
 import {page} from "vitest/browser";
 
@@ -37,6 +37,26 @@ const Harness = ({relays}: { relays: RelayLocationDto[] }) => {
                 search: searchOnMap.search,
                 relayIds: searchOnMap.relays.map(relay => relay.detailsId),
             } : null)}</output>
+        </>
+    )
+}
+
+
+/**
+ * Mounts the dialog only once it is opened for the first time, like LeafletLayers does
+ */
+const LazyHarness = ({relays}: { relays: RelayLocationDto[] }) => {
+    const setRelays = useSetAtom(relaysForDetailsDialogAtom)
+    const [show, setShow] = useAtom(showRelayDetailsDialogAtom)
+    const [hasOpened, setHasOpened] = useState(false)
+    if (show && !hasOpened) setHasOpened(true)
+    return (
+        <>
+            <button onClick={() => {
+                setRelays(relays)
+                setShow(true)
+            }}>Open</button>
+            {hasOpened ? <ResponsiveRelayDetailsDialog/> : null}
         </>
     )
 }
@@ -191,6 +211,17 @@ describe.each([
 
         await expect.element(page.getByText(SnackbarMessage.NoRelayDetails)).toBeVisible()
         expect(mockBackend.requested).toEqual([])
+    })
+
+    it("does not block the page when the relays have no details", async () => {
+        // The app mounts the dialog the first time it is opened (see LeafletLayers), so it is mounted already open
+        await renderWithProviders(<LazyHarness relays={[makeRelay({detailsId: null})]}/>)
+        await page.getByRole("button", {name: "Open"}).click()
+        await expect.element(page.getByText(SnackbarMessage.NoRelayDetails)).toBeVisible()
+
+        // A dialog, which was opened and closed again, must not leave its backdrop or scroll lock behind
+        await expect.poll(() => document.querySelector(".MuiModal-root:not(.MuiPopper-root)")).toBeNull()
+        expect(document.body.style.overflow).not.toBe("hidden")
     })
 
     it("reports a failed list lookup and closes", async () => {

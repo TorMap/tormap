@@ -71,7 +71,7 @@ describe("AppSettings relay type colors", () => {
 })
 
 describe("AppSettings", () => {
-    const restoreButton = {name: "Restore settings"}
+    const restoreButton = {name: "Reset all settings"}
 
     it("hides the restore button while the settings are default", async () => {
         const screen = await renderWithProviders(<AppSettings elevation={0}/>)
@@ -95,7 +95,7 @@ describe("AppSettings", () => {
 })
 
 describe("AppSettings relay search on map", () => {
-    const restoreButton = {name: "Restore settings"}
+    const restoreButton = {name: "Reset all settings"}
 
     const ShowSearchOnMap = () => {
         const [relaySearchOnMap, setRelaySearchOnMap] = useAtom(relaySearchOnMapAtom)
@@ -110,11 +110,11 @@ describe("AppSettings relay search on map", () => {
         await expect.element(screen.getByRole("button", restoreButton)).not.toBeInTheDocument()
 
         await screen.getByRole("button", {name: "Show search"}).click()
-        await expect.element(screen.getByText('Map only shows relays matching "relay"')).toBeVisible()
+        await expect.element(screen.getByText(/Matching "relay"/)).toBeVisible()
 
         await screen.getByRole("button", restoreButton).click()
         await expect.element(screen.getByRole("status", {name: "search"})).toHaveTextContent("none")
-        await expect.element(screen.getByText('Map only shows relays matching "relay"')).not.toBeInTheDocument()
+        await expect.element(screen.getByText(/Matching "relay"/)).not.toBeInTheDocument()
         await expect.element(screen.getByRole("button", restoreButton)).not.toBeInTheDocument()
     })
 })
@@ -137,14 +137,21 @@ const weightState = () =>
     JSON.parse(page.getByRole("status", {name: "weight state"}).element().textContent ?? "{}")
 
 describe("AppSettings consensus weight", () => {
-    const openSection = () => page.getByText("Consensus weight").click()
+    const openSection = () => page.getByRole("button", {name: "Consensus weight"}).click()
     const weightedRelays = [makeRelay({consensusWeight: 10})]
 
     it("explains that there are no weights for days without them", async () => {
         await renderWithProviders(<><AppSettings elevation={0}/><Weighted relays={[makeRelay()]}/></>)
         await openSection()
         await expect.element(page.getByText("There are no consensus weights for this day yet.")).toBeVisible()
-        await expect.element(page.getByRole("switch", {name: "Size by weight"})).toBeDisabled()
+        await expect.element(page.getByRole("switch", {name: "Size relay markers"})).toBeDisabled()
+    })
+
+    it("explains the weight in a tooltip of the switch", async () => {
+        await renderWithProviders(<><AppSettings elevation={0}/><Weighted relays={weightedRelays}/></>)
+        await openSection()
+        await page.getByRole("switch", {name: "Size relay markers"}).hover()
+        await expect.element(page.getByRole("tooltip")).toHaveTextContent("Sizes the markers by the weight directory authorities assign to a relay. Tor clients use it to pick relays, so it shows how likely a relay is picked, not how much traffic it carried.")
     })
 
     it("toggles the sizing once weights are available", async () => {
@@ -153,13 +160,44 @@ describe("AppSettings consensus weight", () => {
         )
         await openSection()
         expect(weightState().sizeByWeight).toBe(false)
-        await page.getByRole("switch", {name: "Size by weight"}).click()
+        await page.getByRole("switch", {name: "Size relay markers"}).click()
         await expect.poll(() => weightState().sizeByWeight).toBe(true)
+    })
+
+    it("tells about the limit and shows all relays again", async () => {
+        await renderWithProviders(
+            <><AppSettings elevation={0}/><WeightState/><Weighted relays={weightedRelays}/></>,
+            {settings: {topRelayCount: 50, sizeByWeight: true}}
+        )
+        await expect.element(page.getByText(/Highest consensus weight/)).toBeVisible()
+
+        await page.getByRole("img", {name: "Show all relays"}).click()
+        await expect.poll(() => weightState().topRelayCount).toBe(null)
+        await expect.element(page.getByText(/highest consensus weight/)).not.toBeInTheDocument()
+    })
+
+    it("only limits the relays while the consensus weight switch is on", async () => {
+        await renderWithProviders(
+            <><AppSettings elevation={0}/><Weighted relays={weightedRelays}/></>,
+            {settings: {topRelayCount: 50, sizeByWeight: false}}
+        )
+        await openSection()
+        await expect.element(page.getByText(/Highest consensus weight/)).not.toBeInTheDocument()
+        await expect.element(page.getByRole("combobox", {name: "Show only the heaviest"})).toHaveAttribute("aria-disabled", "true")
+    })
+
+    it("does not tell about a limit that has no effect without weights", async () => {
+        await renderWithProviders(
+            <><AppSettings elevation={0}/><Weighted relays={[makeRelay()]}/></>,
+            {settings: {topRelayCount: 50}}
+        )
+        await expect.element(page.getByText(/highest consensus weight/)).not.toBeInTheDocument()
     })
 
     it("selects how many of the heaviest relays are shown", async () => {
         await renderWithProviders(
-            <><AppSettings elevation={0}/><WeightState/><Weighted relays={weightedRelays}/></>
+            <><AppSettings elevation={0}/><WeightState/><Weighted relays={weightedRelays}/></>,
+            {settings: {sizeByWeight: true}}
         )
         await openSection()
         await page.getByRole("combobox", {name: "Show only the heaviest"}).click()
@@ -167,7 +205,7 @@ describe("AppSettings consensus weight", () => {
         await expect.poll(() => weightState().topRelayCount).toBe(50)
 
         await page.getByRole("combobox", {name: "Show only the heaviest"}).click()
-        await page.getByRole("option", {name: "All relays"}).click()
+        await page.getByRole("option", {name: "All"}).click()
         await expect.poll(() => weightState().topRelayCount).toBe(null)
     })
 })
@@ -180,22 +218,54 @@ const UsageState: FunctionComponent<{ usage?: CountryUsage }> = ({usage}) => {
 }
 
 describe("AppSettings country usage", () => {
-    const openSection = () => page.getByText("Tor users per country").click()
+    const openSection = () => page.getByRole("button", {name: "Tor users"}).click()
     const enabled = {settings: {showCountryUsage: true}}
 
     it("toggles the layer", async () => {
         await renderWithProviders(<><AppSettings elevation={0}/><UsageState/></>)
         await openSection()
         await expect.element(page.getByRole("status", {name: "usage setting"})).toHaveTextContent("false")
-        await page.getByRole("switch", {name: "Color countries by users"}).click()
+        await page.getByRole("switch", {name: "Color countries"}).click()
         await expect.element(page.getByRole("status", {name: "usage setting"})).toHaveTextContent("true")
+    })
+
+    it("always shows the color scale and the link, and explains the data in a tooltip", async () => {
+        await renderWithProviders(<AppSettings elevation={0}/>)
+        await openSection()
+        await expect.element(page.getByRole("img", {name: "Color scale from few to many users"})).toBeVisible()
+        await expect.element(page.getByText("few users")).toBeVisible()
+        await expect.element(page.getByText("many users")).toBeVisible()
+        await expect.element(page.getByRole("link", {name: "Learn more"})).toBeVisible()
+
+        await page.getByRole("switch", {name: "Color countries"}).hover()
+        await expect.element(page.getByRole("tooltip")).toHaveTextContent("An estimate by the Tor Project, based on the directory requests that relays report. It counts users that connect to Tor directly, not the traffic they cause.")
+    })
+
+    it("greys out the scale while the layer is off or the day has no estimate", async () => {
+        const scale = () => page.getByRole("img", {name: "Color scale from few to many users"}).element().parentElement
+        const usage = {day: "2024-03-05", usage: [{country: "DE", users: 10, lower: null, upper: null, frac: 61}]}
+        await renderWithProviders(<><AppSettings elevation={0}/><UsageState usage={usage}/></>)
+        await openSection()
+        expect(scale()?.getAttribute("aria-disabled")).toBe("true")
+
+        await page.getByRole("switch", {name: "Color countries"}).click()
+        await expect.poll(() => scale()?.getAttribute("aria-disabled")).toBe("false")
+    })
+
+    it("greys out the scale for a day without estimate", async () => {
+        await renderWithProviders(
+            <><AppSettings elevation={0}/><UsageState usage={{day: "2008-01-01", usage: []}}/></>, enabled
+        )
+        await openSection()
+        const scale = page.getByRole("img", {name: "Color scale from few to many users"}).element().parentElement
+        expect(scale?.getAttribute("aria-disabled")).toBe("true")
     })
 
     it("explains how reliable the estimate of the day is", async () => {
         const usage = {day: "2024-03-05", usage: [{country: "DE", users: 10, lower: null, upper: null, frac: 61}]}
         await renderWithProviders(<><AppSettings elevation={0}/><UsageState usage={usage}/></>, enabled)
         await openSection()
-        await expect.element(page.getByText("The estimate of 2024-03-05 is based on 61% of the relays.")).toBeVisible()
+        await expect.element(page.getByText("Estimate based on 61% of relays.")).toBeVisible()
         await expect.element(page.getByText(/Early estimates are less reliable/)).not.toBeInTheDocument()
     })
 
@@ -211,7 +281,7 @@ describe("AppSettings country usage", () => {
             <><AppSettings elevation={0}/><UsageState usage={{day: "2008-01-01", usage: []}}/></>, enabled
         )
         await openSection()
-        await expect.element(page.getByText("There are no estimates for 2008-01-01. They exist from March 2011 on.")).toBeVisible()
+        await expect.element(page.getByText("2008-01-01 has no estimate")).toBeVisible()
     })
 })
 

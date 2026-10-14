@@ -245,13 +245,13 @@ describe("LeafletLayers", () => {
         it("shows all relays again from the settings", async () => {
             await renderLayers(relays, {}, <><SearchOnMap searchOnMap={searchFrance}/><AppSettings elevation={0}/></>)
             await expectState(/"filtered":1/)
-            await expect.element(page.getByText('Map only shows relays matching "fr"')).toBeVisible()
+            await expect.element(page.getByText(/Matching "fr": \d+\/\d+ relays/)).toBeVisible()
 
-            await page.getByRole("button", {name: "Show all"}).click()
+            await page.getByRole("img", {name: "Show all relays"}).click()
 
             await expectState(/"searchOnMap":null/)
             await expectState(/"filtered":3/)
-            await expect.element(page.getByText('Map only shows relays matching "fr"')).not.toBeInTheDocument()
+            await expect.element(page.getByText(/Matching "fr": \d+\/\d+ relays/)).not.toBeInTheDocument()
         })
     })
 

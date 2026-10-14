@@ -24,7 +24,8 @@ export const filterRelaysByFlags = (relays: RelayLocationDto[], settings: Settin
             filtered.push(relay)
         }
     })
-    return keepRelaysWithHighestWeight(filtered, settings.topRelayCount)
+    // The limit belongs to the consensus weight setting and only applies while it is active
+    return keepRelaysWithHighestWeight(filtered, settings.sizeByWeight ? settings.topRelayCount : undefined)
 }
 
 /**
