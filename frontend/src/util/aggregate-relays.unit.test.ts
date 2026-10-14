@@ -336,8 +336,17 @@ describe("filterRelaysByFlags with a relay count", () => {
             makeRelay({nickname: "exit 1", flags: [RelayFlag.Exit], consensusWeight: 50}),
             makeRelay({nickname: "exit 2", flags: [RelayFlag.Exit], consensusWeight: 80}),
         ]
-        const settings = makeSettings({topRelayCount: 1})
+        const settings = makeSettings({topRelayCount: 1, sizeByWeight: true})
         settings.relaysMustHaveFlag[RelayFlag.Exit] = true
         expect(filterRelaysByFlags(relays, settings).map(relay => relay.nickname)).toEqual(["exit 2"])
+    })
+
+    it("ignores the count while the consensus weight setting is off", () => {
+        const relays = [
+            makeRelay({nickname: "light", consensusWeight: 1}),
+            makeRelay({nickname: "heavy", consensusWeight: 100}),
+        ]
+        const settings = makeSettings({topRelayCount: 1, sizeByWeight: false})
+        expect(filterRelaysByFlags(relays, settings)).toHaveLength(2)
     })
 })

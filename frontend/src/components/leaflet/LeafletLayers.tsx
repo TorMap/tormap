@@ -52,6 +52,11 @@ interface Props {
 
 export const filteredRelaysAtom = atom<RelayLocationDto[]>([]);
 
+/**
+ * How many of the relays of the selected day the map shows after the search, flag and weight limits
+ */
+export const shownRelayCountAtom = atom<{ shown: number, total: number }>({shown: 0, total: 0});
+
 export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedDay}) => {
     // Component state
     const [showFamilySelectionDialog, setShowFamilySelectionDialog] = useState(false)
@@ -69,6 +74,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
     const [, setRelaysForDetailsDialog] = useAtom(relaysForDetailsDialogAtom)
     const [, setRelayDetailsDialogSearch] = useAtom(relayDetailsDialogSearchAtom)
     const [, setFilteredRelays] = useAtom(filteredRelaysAtom)
+    const [, setShownRelayCount] = useAtom(shownRelayCountAtom)
     const [relaySearchOnMap, setRelaySearchOnMap] = useAtom(relaySearchOnMapAtom)
     if (showRelayDetailsDialog && !hasOpenedRelayDetailsDialog) setHasOpenedRelayDetailsDialog(true)
     if (showFamilySelectionDialog && !hasOpenedFamilySelectionDialog) setHasOpenedFamilySelectionDialog(true)
@@ -204,6 +210,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
         if (relays) {
             setStatistics(statistics)
             setFilteredRelays(filteredRelays)
+            setShownRelayCount({shown: filteredRelaysByFlags.length, total: relays.length})
 
             if (!leafletMap.hasLayer(leafletMarkerLayers)) {
                 leafletMap.addLayer(leafletMarkerLayers)
@@ -255,7 +262,7 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
                 closeSnackbar(SnackbarMessage.NoFamilyData)
             }
         }
-    }, [filteredRelays, setFilteredRelays, leafletMarkerLayers, relays, statistics, setStatistics, filteredRelaysByFlags.length, settings, relayFamilyMap, leafletMap, relayCountryMap, closeSnackbar, enqueueSnackbar, setSettings, relayLocationHeatmapLayer, countryBordersLayer, aggregatedCoordinatesLayer, relayCountryLayer, relayLayer, relaySelectedFamilyLayer, relayFamilyCoordinatesLayer])
+    }, [filteredRelays, setFilteredRelays, setShownRelayCount, leafletMarkerLayers, relays, statistics, setStatistics, filteredRelaysByFlags.length, settings, relayFamilyMap, leafletMap, relayCountryMap, closeSnackbar, enqueueSnackbar, setSettings, relayLocationHeatmapLayer, countryBordersLayer, aggregatedCoordinatesLayer, relayCountryLayer, relayLayer, relaySelectedFamilyLayer, relayFamilyCoordinatesLayer])
 
     const closeFamilySelectionDialog = useCallback(() => setShowFamilySelectionDialog(false), [])
 

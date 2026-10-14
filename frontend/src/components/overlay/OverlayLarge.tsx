@@ -30,7 +30,11 @@ export const OverlayLarge: FunctionComponent = () => {
                 // Leave room for the date field in the bottom right corner and scroll the panel instead
                 maxHeight: "calc(100vh - 110px)",
                 overflowY: "auto",
-                maxWidth: "20%",
+                // A constant width, so the panel does not grow or shrink with its content. The scrollbar gutter is
+                // reserved, so the content does not move when the panel starts to scroll.
+                width: "20%",
+                minWidth: "280px",
+                scrollbarGutter: "stable",
             }}>
                 <AppSettings elevation={24}/>
             </Box>

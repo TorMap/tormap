@@ -137,6 +137,12 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
             setShowRelayDetailsDialog(false)
         } : undefined
 
+    // Relays without details can not be shown. The dialog must not be opened for them at all: it is mounted already
+    // open the first time, and closing it again before its opening transition finished leaves a modal with an
+    // invisible backdrop on the page, which blocks all other UI elements.
+    const hasNoDetails = relaysForDetailsDialog.length > 0 && relayDetailsIdToLocationMap.size === 0
+    const showDialog = showRelayDetailsDialog && !hasNoDetails
+
     // Until the user picks a relay, the first one of the list is selected
     const selectedRelayDetailsId = relayDetailsId || orderedRelayIdentifierMatches[0]?.id
 
@@ -144,7 +150,7 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
      * Query relayIdentifiers for relays from backend
      */
     useEffect(() => {
-        if (relaysForDetailsDialog.length > 0 && relayDetailsIdToLocationMap.size === 0) {
+        if (hasNoDetails) {
             enqueueSnackbar(SnackbarMessage.NoRelayDetails, {variant: "warning"})
             setShowRelayDetailsDialog(false)
         } else if (relayDetailsIdToLocationMap.size > 1) {
@@ -158,7 +164,7 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
                 setShowRelayDetailsDialog(false)
             })
         }
-    }, [enqueueSnackbar, relayDetailsIdToLocationMap, relaysForDetailsDialog, setShowRelayDetailsDialog])
+    }, [enqueueSnackbar, hasNoDetails, relayDetailsIdToLocationMap, relaysForDetailsDialog, setShowRelayDetailsDialog])
 
     /**
      * Query more information for the selected relay
@@ -183,7 +189,7 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
     return (isLargeScreen ?
             <RelayDetailsDialogLarge
                 relayDetailsMatch={relayDetailsMatch}
-                showDialog={showRelayDetailsDialog}
+                showDialog={showDialog}
                 closeDialog={() => setShowRelayDetailsDialog(false)}
                 setRelayDetailsId={setRelayDetailsId}
                 filteredRelayMatches={searchedRelayIdentifierMatches}
@@ -193,7 +199,7 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
             />
             : <RelayDetailsDialogSmall
                 relayDetailsMatch={relayDetailsMatch}
-                showDialog={showRelayDetailsDialog}
+                showDialog={showDialog}
                 closeDialog={() => setShowRelayDetailsDialog(false)}
                 setRelayDetailsId={setRelayDetailsId}
                 filteredRelayMatches={searchedRelayIdentifierMatches}
