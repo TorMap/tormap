@@ -58,6 +58,7 @@ export const buildAggregatedCoordinatesLayer = (
  * @param relayTypeColors - The marker color for each relay type
  * @param onMarkerClick - Event handler for clicking on a marker
  * @param sizeByWeight - Whether the marker size should be relative to the consensus weight of the relays at a coordinate
+ * @param topRelayCount - The number of heaviest relays the map is limited to, the weight shares are relative to them
  */
 export const buildRelayLayer = (
     relayCoordinatesMap: Map<string, RelayLocationDto[]>,
@@ -65,6 +66,7 @@ export const buildRelayLayer = (
     relayTypeColors: Record<RelayType, string>,
     onMarkerClick: (e: LeafletMouseEvent) => void,
     sizeByWeight = false,
+    topRelayCount?: number,
 ): LayerGroup => {
     const layer = new LayerGroup()
 
@@ -94,7 +96,7 @@ export const buildRelayLayer = (
         } = addRelayMarker(relaysAtCoordinates, layer, singleColor, relayTypeColors, coordinatesKey, onMarkerClick, radius)
 
         const weightShare = weight !== undefined ? weight / totalWeight : undefined
-        addRelayNicknameTooltip(relaysAtCoordinates, mostImportantRelay, marker, layer, radius, weightShare);
+        addRelayNicknameTooltip(relaysAtCoordinates, mostImportantRelay, marker, layer, radius, weightShare, topRelayCount);
     })
     return layer
 }
@@ -125,14 +127,16 @@ function addRelayMarker(relaysAtCoordinates: RelayLocationDto[], targetLayer: La
     return {mostImportantRelay, marker};
 }
 
-function addRelayNicknameTooltip(relays: RelayLocationDto[], mostImportantRelay: RelayLocationDto, marker: CircleMarker, targetLayer: LayerGroup, markerRadius = 1, weightShare?: number) {
+function addRelayNicknameTooltip(relays: RelayLocationDto[], mostImportantRelay: RelayLocationDto, marker: CircleMarker, targetLayer: LayerGroup, markerRadius = 1, weightShare?: number, topRelayCount?: number) {
     let tooltip = `${relays.length} relays`
     const maxNicknamesShownFully = 3
     if (relays.length <= maxNicknamesShownFully) {
         tooltip = relays.map(relay => relay.nickname).filter(name => !!name).join(", ") || tooltip
     }
     if (weightShare !== undefined) {
-        tooltip += ` (${formatWeightShare(weightShare)} of the consensus weight)`
+        // With a limit the share is relative to the shown relays, not to the whole network
+        const total = topRelayCount !== undefined ? `of the top ${topRelayCount} consensus weight` : "of the consensus weight"
+        tooltip += ` (${formatWeightShare(weightShare)} ${total})`
     }
 
     const hoverRadius = Math.max(15, markerRadius);

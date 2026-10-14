@@ -169,11 +169,11 @@ describe("AppSettings consensus weight", () => {
             <><AppSettings elevation={0}/><WeightState/><Weighted relays={weightedRelays}/></>,
             {settings: {topRelayCount: 50, sizeByWeight: true}}
         )
-        await expect.element(page.getByText(/Highest consensus weight/)).toBeVisible()
+        await expect.element(page.getByText(/Top consensus weight/)).toBeVisible()
 
         await page.getByRole("img", {name: "Show all relays"}).click()
         await expect.poll(() => weightState().topRelayCount).toBe(null)
-        await expect.element(page.getByText(/highest consensus weight/)).not.toBeInTheDocument()
+        await expect.element(page.getByText(/Top consensus weight/)).not.toBeInTheDocument()
     })
 
     it("only limits the relays while the consensus weight switch is on", async () => {
@@ -182,8 +182,8 @@ describe("AppSettings consensus weight", () => {
             {settings: {topRelayCount: 50, sizeByWeight: false}}
         )
         await openSection()
-        await expect.element(page.getByText(/Highest consensus weight/)).not.toBeInTheDocument()
-        await expect.element(page.getByRole("combobox", {name: "Show only the heaviest"})).toHaveAttribute("aria-disabled", "true")
+        await expect.element(page.getByText(/Top consensus weight/)).not.toBeInTheDocument()
+        await expect.element(page.getByRole("combobox", {name: "Show top"})).toHaveAttribute("aria-disabled", "true")
     })
 
     it("does not tell about a limit that has no effect without weights", async () => {
@@ -191,7 +191,7 @@ describe("AppSettings consensus weight", () => {
             <><AppSettings elevation={0}/><Weighted relays={[makeRelay()]}/></>,
             {settings: {topRelayCount: 50}}
         )
-        await expect.element(page.getByText(/highest consensus weight/)).not.toBeInTheDocument()
+        await expect.element(page.getByText(/Top consensus weight/)).not.toBeInTheDocument()
     })
 
     it("selects how many of the heaviest relays are shown", async () => {
@@ -200,11 +200,11 @@ describe("AppSettings consensus weight", () => {
             {settings: {sizeByWeight: true}}
         )
         await openSection()
-        await page.getByRole("combobox", {name: "Show only the heaviest"}).click()
+        await page.getByRole("combobox", {name: "Show top"}).click()
         await page.getByRole("option", {name: "50 relays"}).click()
         await expect.poll(() => weightState().topRelayCount).toBe(50)
 
-        await page.getByRole("combobox", {name: "Show only the heaviest"}).click()
+        await page.getByRole("combobox", {name: "Show top"}).click()
         await page.getByRole("option", {name: "All"}).click()
         await expect.poll(() => weightState().topRelayCount).toBe(null)
     })
@@ -308,5 +308,48 @@ describe("MapStats", () => {
 
         await expect.element(screen.getByRole("rowheader", {name: "Exit relays"})).toBeVisible()
         await expect.element(screen.getByRole("rowheader", {name: "Countries"})).toBeVisible()
+    })
+})
+
+const TypesState = () => {
+    const {settings} = useSettings()
+    return <output aria-label="types state">{JSON.stringify(settings.showRelayTypes)}</output>
+}
+
+describe("AppSettings relay types", () => {
+    const typesState = () => JSON.parse(page.getByRole("status", {name: "types state"}).element().textContent ?? "{}")
+
+    it("does not show a chip while all relay types are shown", async () => {
+        await renderWithProviders(<><AppSettings elevation={0}/><TypesState/></>)
+        await expect.element(page.getByText(/^Only /)).not.toBeInTheDocument()
+    })
+
+    it("combines the hidden relay types in one chip and shows all of them again", async () => {
+        await renderWithProviders(
+            <><AppSettings elevation={0}/><TypesState/></>,
+            {settings: {showRelayTypes: {[RelayType.Exit]: false, [RelayType.Guard]: true, [RelayType.Other]: false}}}
+        )
+        await expect.element(page.getByText(/^Only Guard: /)).toBeVisible()
+
+        await page.getByRole("img", {name: "Show all relays"}).click()
+        await expect.poll(typesState).toEqual(defaultSettings.showRelayTypes)
+        await expect.element(page.getByText(/^Only /)).not.toBeInTheDocument()
+    })
+
+    it("tells when no relay type is shown", async () => {
+        await renderWithProviders(
+            <AppSettings elevation={0}/>,
+            {settings: {showRelayTypes: {[RelayType.Exit]: false, [RelayType.Guard]: false, [RelayType.Other]: false}}}
+        )
+        await expect.element(page.getByText(/^No relay types: /)).toBeVisible()
+    })
+
+    it("has the group heading Relay types and the icon inside the color picker", async () => {
+        await renderWithProviders(<AppSettings elevation={0}/>)
+        await expect.element(page.getByRole("button", {name: "Relay types"})).toBeVisible()
+        // The switch label is only the name, the icon belongs to the color picker
+        await expect.element(page.getByRole("switch", {name: "Exit"})).toBeVisible()
+        const colorInput = page.getByLabelText("Exit relay color").element()
+        expect(colorInput.parentElement?.querySelector("svg")).not.toBeNull()
     })
 })

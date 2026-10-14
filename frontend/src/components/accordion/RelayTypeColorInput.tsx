@@ -3,6 +3,7 @@ import {ChangeEvent, FunctionComponent, useEffect, useRef, useState} from "react
 
 import {tooltipTimeDelay} from "../../config";
 import {useSettings} from "../../context/settings-context";
+import {RelayTypeIcon} from "../../types/icons";
 import {RelayType, RelayTypeLabel} from "../../types/relay";
 
 interface Props {
@@ -10,7 +11,7 @@ interface Props {
 }
 
 /**
- * A round color swatch, which opens the browser's native color picker for a relay type
+ * The icon of a relay type in its color, which opens the browser's native color picker for the relay type
  */
 export const RelayTypeColorInput: FunctionComponent<Props> = ({relayType}) => {
     // App context
@@ -34,30 +35,31 @@ export const RelayTypeColorInput: FunctionComponent<Props> = ({relayType}) => {
     }, [relayType, setSettings, settings])
 
     const label = `${RelayTypeLabel[relayType]} relay color`
+    const color = draftColor ?? settings.relayTypeColors[relayType]
     return (
         <Tooltip title={`Change ${label}`} placement={"left"} enterDelay={tooltipTimeDelay}>
-            <Box
-                component="input"
-                type="color"
-                ref={inputRef}
-                aria-label={label}
-                value={draftColor ?? settings.relayTypeColors[relayType]}
-                onChange={(event: ChangeEvent<HTMLInputElement>) => setDraftColor(event.target.value)}
-                sx={{
-                    width: 22,
-                    height: 22,
-                    flexShrink: 0,
-                    padding: 0,
-                    border: "2px solid rgba(255, 255, 255, 0.7)",
-                    borderRadius: "50%",
-                    background: "none",
-                    overflow: "hidden",
-                    cursor: "pointer",
-                    "&::-webkit-color-swatch-wrapper": {padding: 0},
-                    "&::-webkit-color-swatch": {border: "none"},
-                    "&::-moz-color-swatch": {border: "none"},
-                }}
-            />
+            <Box sx={{position: "relative", display: "inline-flex", flexShrink: 0, cursor: "pointer"}}>
+                <RelayTypeIcon relayType={relayType} color={color}/>
+                {/* The native color input covers the icon, so a click opens the browser's color picker */}
+                <Box
+                    component="input"
+                    type="color"
+                    ref={inputRef}
+                    aria-label={label}
+                    value={color}
+                    onChange={(event: ChangeEvent<HTMLInputElement>) => setDraftColor(event.target.value)}
+                    sx={{
+                        position: "absolute",
+                        inset: 0,
+                        width: "100%",
+                        height: "100%",
+                        padding: 0,
+                        border: "none",
+                        opacity: 0,
+                        cursor: "pointer",
+                    }}
+                />
+            </Box>
         </Tooltip>
     )
 }
