@@ -6,10 +6,10 @@ version = "3.0.1"
 java.sourceCompatibility = JavaVersion.VERSION_25
 
 plugins {
-    kotlin("jvm") version "2.4.20"
-    kotlin("plugin.spring") version "2.4.20"
-    kotlin("plugin.allopen") version "2.4.20"
-    kotlin("plugin.jpa") version "2.4.20"
+    kotlin("jvm") version "2.4.21"
+    kotlin("plugin.spring") version "2.4.21"
+    kotlin("plugin.allopen") version "2.4.21"
+    kotlin("plugin.jpa") version "2.4.21"
 
     // Spring https://spring.io/projects/spring-boot
     id("org.springframework.boot") version "4.1.1"
