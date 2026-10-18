@@ -29,7 +29,7 @@ Browser ──HTTPS──> Frontend (static)            Tor Collector (HTTPS, in
 | Service availability                 | The main security property: public API, scheduler, DB. Low-effort DoS matters.  |
 | Data integrity                       | Correct relay, family and location data. Users draw conclusions about Tor.      |
 | Actuator admin plane                 | Log file, thread dumps, recent HTTP exchanges, metrics, request mappings, cache eviction.             |
-| Secrets                              | `TORMAP_ADMIN_PASSWORD(_BCRYPT)`, DB password, `NEW_RELIC_INGEST_KEY`, CI secrets (Docker Hub, Firebase). |
+| Secrets                              | `TORMAP_ADMIN_PASSWORD`, DB password, `NEW_RELIC_INGEST_KEY`, CI secrets (Docker Hub, Firebase). |
 | Host and volume                      | `/tormap-data` (tens of GB of descriptors), log directory.                       |
 | Release artifacts                    | `tormap/backend` and `tormap/frontend` images, tormap.org frontend.             |
 
@@ -70,7 +70,8 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   admin password configured, no user exists and the actuator is unreachable. Swagger is public only when enabled.
   Stateless sessions, no form login. CSRF (double-submit cookie) for unsafe actuator methods. `SecurityRulesTest` pins
   these rules.
-- Admin password is read only from the environment, plaintext or BCrypt. Never stored in config files.
+- Admin password is read only from the environment (`TORMAP_ADMIN_PASSWORD`) and only kept BCrypt-hashed in memory.
+  Never stored in config files.
 - Security headers: `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, CSP `default-src 'none'` when
   Swagger is off.
 - Input validation: `@Size` limits on POST ID lists, typed `Long` path variables, strict `LocalDate.parse`.

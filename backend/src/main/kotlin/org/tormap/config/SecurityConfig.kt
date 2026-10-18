@@ -46,10 +46,7 @@ class SecurityConfig(
 
     companion object {
         private const val ENV_ADMIN_PASSWORD = "TORMAP_ADMIN_PASSWORD"
-        private const val ENV_ADMIN_PASSWORD_BCRYPT = "TORMAP_ADMIN_PASSWORD_BCRYPT"
-
-        private fun isBcrypt(passwordOrHash: String): Boolean =
-            passwordOrHash.startsWith("$2a$") || passwordOrHash.startsWith("$2b$") || passwordOrHash.startsWith("$2y$")
+        private const val ENV_REMOVED_ADMIN_PASSWORD_BCRYPT = "TORMAP_ADMIN_PASSWORD_BCRYPT"
     }
 
     @Bean
@@ -57,26 +54,22 @@ class SecurityConfig(
 
     @Bean
     fun userDetailsService(passwordEncoder: PasswordEncoder): UserDetailsService {
-        val bcryptFromEnv = System.getenv(ENV_ADMIN_PASSWORD_BCRYPT)?.trim().orEmpty()
-        val passwordFromEnv = System.getenv(ENV_ADMIN_PASSWORD)?.trim().orEmpty()
-
-        val secret = when {
-            bcryptFromEnv.isNotBlank() -> bcryptFromEnv
-            passwordFromEnv.isNotBlank() -> passwordFromEnv
-            else -> ""
+        if (!System.getenv(ENV_REMOVED_ADMIN_PASSWORD_BCRYPT).isNullOrBlank()) {
+            logger.warn("$ENV_REMOVED_ADMIN_PASSWORD_BCRYPT is no longer supported and is ignored. Use $ENV_ADMIN_PASSWORD instead.")
         }
 
-        if (secret.isBlank()) {
+        val password = System.getenv(ENV_ADMIN_PASSWORD)?.trim().orEmpty()
+
+        if (password.isBlank()) {
             logger.warn("------------------------------------------------------")
             logger.warn("No admin password configured; actuator endpoints will not be accessible.")
-            logger.warn("Set $ENV_ADMIN_PASSWORD (plaintext) or $ENV_ADMIN_PASSWORD_BCRYPT (bcrypt hash) to enable actuator admin access.")
+            logger.warn("Set $ENV_ADMIN_PASSWORD to enable actuator admin access.")
             logger.warn("------------------------------------------------------")
             return InMemoryUserDetailsManager()
         }
 
-        val hashedPassword = if (isBcrypt(secret)) secret else passwordEncoder.encode(secret)
         val user = User.withUsername(adminUserName)
-            .password(hashedPassword)
+            .password(passwordEncoder.encode(password))
             .roles("ADMIN")
             .build()
 

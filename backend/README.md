@@ -71,12 +71,10 @@ properties:
 
 - `spring.security.user.name` (default: `admin`)
 
-The admin password is **env-only** and must be provided via one of the following environment variables:
+The admin password is **env-only** and must be provided via the `TORMAP_ADMIN_PASSWORD` environment variable
+(plaintext; it is BCrypt-hashed in memory at startup).
 
-- `TORMAP_ADMIN_PASSWORD` (plaintext)
-- `TORMAP_ADMIN_PASSWORD_BCRYPT` (BCrypt hash starting with `$2a$`, `$2b$`, or `$2y$`)
-
-If neither env var is set, a warning is logged and actuator endpoints remain unavailable.
+If it is not set, a warning is logged and actuator endpoints remain unavailable.
 
 `POST`/`PUT`/`PATCH`/`DELETE` requests to actuator endpoints are CSRF protected (double submit cookie, no session):
 send the same value as cookie `XSRF-TOKEN` and header `X-XSRF-TOKEN`, e.g.
@@ -84,15 +82,9 @@ send the same value as cookie `XSRF-TOKEN` and header `X-XSRF-TOKEN`, e.g.
 
 Recommended (production):
 
-- Provide `TORMAP_ADMIN_PASSWORD_BCRYPT` via your secret manager (Kubernetes Secret, Docker secret, env etc.).
-- Do not put passwords/hashes into `application.yml`.
-
-Generate a BCrypt hash:
-
-```bash
-# Requires Docker; will prompt for password and print the hash to stdout
-docker run --rm -it httpd:2.4-alpine htpasswd -nBC 12 admin
-```
+- Provide a strong generated `TORMAP_ADMIN_PASSWORD` via your secret manager (Kubernetes Secret, Docker secret, env
+  etc.).
+- Do not put passwords into `application.yml`.
 
 ## Config
 
