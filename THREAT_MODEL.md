@@ -88,7 +88,9 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   128 MB read per response, every line validated (strict date, `[a-z]{2}` country, bounded numbers, no future dates),
   bound parameters only. The API serves the stored rows for a validated `LocalDate`, cached per day with a bounded cache.
 - Reverse DNS: at most 10 PTR names verified per IP, forward results filtered to public addresses, results cached for
-  6 hours with `sync = true`.
+  6 hours with `sync = true`. PTR and forward (A/AAAA) lookups use dnsjava with a 1 s query timeout and run on at most
+  8 dedicated threads with a 2 s deadline per IP. Names not verified by then are returned as unverified. When all
+  threads are busy, the request gets no host names and the result is not cached.
 - Backend container runs as non-root `1000:1000` from a digest-pinned base image. The frontend image (static files only)
   is based on the digest-pinned `nginxinc/nginx-unprivileged`, runs as non-root `101` and listens on port 8080.
 - Supply chain: Maven Central and npm registry only, Yarn install scripts disabled, 3-day npm age gate, Renovate with

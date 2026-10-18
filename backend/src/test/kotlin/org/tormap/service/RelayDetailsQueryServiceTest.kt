@@ -3,6 +3,8 @@ package org.tormap.service
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
 import org.tormap.adapter.controller.exception.RelayNotFoundException
 import org.tormap.database.entity.RelayDetails
 import org.tormap.mockRelayDetails
@@ -61,6 +63,27 @@ class RelayDetailsQueryServiceTest : StringSpec({
         val response = relayDetailsQueryService.getRelay(1L)
 
         response.confirmedFamilyMembers shouldBe emptyList()
+    }
+
+    "getRelay returns empty reverse DNS names when all lookup slots are busy" {
+        val relay = mockRelayDetails('A').apply {
+            id = 1L
+            familyId = null
+            address = "1.2.3.4"
+        }
+        val reverseDnsLookupService = mockk<ReverseDnsLookupService> {
+            every { lookupHostNames("1.2.3.4") } throws ReverseDnsLookupCapacityException()
+        }
+
+        val relayDetailsQueryService = RelayDetailsQueryService(
+            relayDetailsLookup = FakeRelayDetailsLookup(relaysById = mapOf(1L to relay)),
+            reverseDnsLookupService = reverseDnsLookupService,
+        )
+
+        val response = relayDetailsQueryService.getRelay(1L)
+
+        response.verifiedHostNames shouldBe emptyList()
+        response.unverifiedHostNames shouldBe emptyList()
     }
 
     "getRelay throws when relay does not exist" {
