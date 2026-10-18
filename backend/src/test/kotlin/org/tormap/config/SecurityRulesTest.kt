@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import java.util.Base64
 
 /**
  * Verifies the access rules of [SecurityConfig] over HTTP.
@@ -33,6 +34,15 @@ class SecurityRulesTest(
         listOf("/", "/error", "/favicon.ico", "/robots.txt", "/static/missing.txt", "/relay/missing", "/relay/country-usage/day/2024-01-01").forEach { path ->
             statusOf(path) shouldNotBe 401
             statusOf(path) shouldNotBe 403
+        }
+    }
+
+    "public paths ignore HTTP Basic credentials" {
+        val basicAuth = "Basic " + Base64.getEncoder().encodeToString("admin:wrong".toByteArray())
+        listOf("/", "/relay/missing").forEach { path ->
+            val response = mockMvc.perform(get(path).header("Authorization", basicAuth)).andReturn().response
+            response.status shouldNotBe 401
+            response.getHeader("WWW-Authenticate") shouldBe null
         }
     }
 
@@ -60,13 +70,13 @@ class SecurityRulesTest(
         status shouldNotBe 401
     }
 
-    "other paths require authentication" {
-        statusOf("/not-a-public-path") shouldBe 401
+    "other paths are denied" {
+        statusOf("/not-a-public-path") shouldBe 403
     }
 
     "swagger and openapi are not public when disabled" {
         listOf("/swagger-ui.html", "/swagger-ui/index.html", "/v3/api-docs", "/openapi/api.yaml").forEach { path ->
-            statusOf(path) shouldBe 401
+            statusOf(path) shouldBe 403
         }
     }
 

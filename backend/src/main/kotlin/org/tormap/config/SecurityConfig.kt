@@ -3,6 +3,7 @@ package org.tormap.config
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpMethod
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -47,6 +48,7 @@ class SecurityConfig(
     companion object {
         private const val ENV_ADMIN_PASSWORD = "TORMAP_ADMIN_PASSWORD"
         private const val ENV_REMOVED_ADMIN_PASSWORD_BCRYPT = "TORMAP_ADMIN_PASSWORD_BCRYPT"
+        private const val MIN_ADMIN_PASSWORD_LENGTH = 16
     }
 
     @Bean
@@ -66,6 +68,10 @@ class SecurityConfig(
             logger.warn("Set $ENV_ADMIN_PASSWORD to enable actuator admin access.")
             logger.warn("------------------------------------------------------")
             return InMemoryUserDetailsManager()
+        }
+
+        if (password.length < MIN_ADMIN_PASSWORD_LENGTH) {
+            logger.warn("$ENV_ADMIN_PASSWORD is shorter than $MIN_ADMIN_PASSWORD_LENGTH characters. Use a long generated password.")
         }
 
         val user = User.withUsername(adminUserName)
@@ -93,24 +99,29 @@ class SecurityConfig(
     @Bean
     fun forwardedHeaderFilter(): ForwardedHeaderFilter = ForwardedHeaderFilter()
 
+    /** Admin actuator: the only chain that authenticates (HTTP Basic). */
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http
-            .cors(Customizer.withDefaults())
-            // The public API is stateless and uses no cookies, so CSRF only matters for the admin actuator, which
-            // authenticates with HTTP Basic (browsers resend cached credentials). Unsafe methods there require the
-            // XSRF-TOKEN cookie value to be echoed in the X-XSRF-TOKEN header (double submit, no server-side session).
-            .csrf { csrf ->
-                csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                csrf.csrfTokenRequestHandler(CsrfTokenRequestAttributeHandler())
-                csrf.requireCsrfProtectionMatcher(
-                    RequestMatchers.anyOf(
-                        *listOf(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH, HttpMethod.DELETE)
-                            .map { PathPatternRequestMatcher.withDefaults().matcher(it, "$actuatorPath/**") }
-                            .toTypedArray()
-                    )
-                )
+    @Order(1)
+    fun adminFilterChain(http: HttpSecurity): SecurityFilterChain {
+        applyCommonConfig(http)
+            .securityMatcher("$actuatorPath/**")
+            .authorizeHttpRequests { auth ->
+                auth
+                    // Allow CORS preflight
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    // Will deny all if no users exist
+                    .anyRequest().hasRole("ADMIN")
             }
+            // Form login is not configured, so there are no login pages
+            .httpBasic(Customizer.withDefaults())
+        return http.build()
+    }
+
+    /** Everything else: public paths without authentication, all other paths denied. */
+    @Bean
+    @Order(2)
+    fun publicFilterChain(http: HttpSecurity): SecurityFilterChain {
+        applyCommonConfig(http)
             .authorizeHttpRequests { auth ->
                 auth
                     // Allow CORS preflight
@@ -130,12 +141,28 @@ class SecurityConfig(
                             ).permitAll()
                         }
                     }
-                    // Admin-only actuator; will deny all if no users exist
-                    .requestMatchers("$actuatorPath/**").hasRole("ADMIN")
-                    .anyRequest().authenticated()
+                    .anyRequest().denyAll()
             }
-            // HTTP Basic for admin endpoints; form login is not configured, so there are no login pages
-            .httpBasic(Customizer.withDefaults())
+        return http.build()
+    }
+
+    private fun applyCommonConfig(http: HttpSecurity): HttpSecurity =
+        http
+            .cors(Customizer.withDefaults())
+            // The public API is stateless and uses no cookies, so CSRF only matters for the admin actuator, which
+            // authenticates with HTTP Basic (browsers resend cached credentials). Unsafe methods there require the
+            // XSRF-TOKEN cookie value to be echoed in the X-XSRF-TOKEN header (double submit, no server-side session).
+            .csrf { csrf ->
+                csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                csrf.csrfTokenRequestHandler(CsrfTokenRequestAttributeHandler())
+                csrf.requireCsrfProtectionMatcher(
+                    RequestMatchers.anyOf(
+                        *listOf(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH, HttpMethod.DELETE)
+                            .map { PathPatternRequestMatcher.withDefaults().matcher(it, "$actuatorPath/**") }
+                            .toTypedArray()
+                    )
+                )
+            }
             // Fully stateless sessions
             .sessionManagement { sessions ->
                 sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -151,6 +178,4 @@ class SecurityConfig(
                     headers.contentSecurityPolicy { it.policyDirectives("default-src 'none'; frame-ancestors 'none'; base-uri 'none'") }
                 }
             }
-        return http.build()
-    }
 }

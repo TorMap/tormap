@@ -22,7 +22,6 @@ class SecurityConfigTest(
     private val userDetailsService: UserDetailsService,
     private val corsConfigurationSource: CorsConfigurationSource,
     private val forwardedHeaderFilter: ForwardedHeaderFilter,
-    private val securityFilterChain: SecurityFilterChain,
     private val shallowEtagHeaderFilterRegistration: FilterRegistrationBean<ShallowEtagHeaderFilter>,
 ) : StringSpec({
 
@@ -32,7 +31,7 @@ class SecurityConfigTest(
         userDetailsService shouldNotBe null
         corsConfigurationSource shouldNotBe null
         forwardedHeaderFilter shouldNotBe null
-        securityFilterChain shouldNotBe null
+        applicationContext.getBeansOfType(SecurityFilterChain::class.java).size shouldBe 2
     }
 
     "shallow ETag filter is not registered for large relay location responses" {

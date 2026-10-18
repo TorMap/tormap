@@ -82,8 +82,10 @@ send the same value as cookie `XSRF-TOKEN` and header `X-XSRF-TOKEN`, e.g.
 
 Recommended (production):
 
-- Provide a strong generated `TORMAP_ADMIN_PASSWORD` via your secret manager (Kubernetes Secret, Docker secret, env
-  etc.).
+- Provide a generated `TORMAP_ADMIN_PASSWORD` of at least 16 characters via your secret manager (Kubernetes Secret,
+  Docker secret, env etc.). Shorter passwords log a warning at startup.
+- Only `/actuator/**` uses HTTP Basic. Restrict it at your reverse proxy (IP allowlist and/or rate limit) if it does not
+  need to be reachable from the internet.
 - Do not put passwords into `application.yml`.
 
 ## Config
