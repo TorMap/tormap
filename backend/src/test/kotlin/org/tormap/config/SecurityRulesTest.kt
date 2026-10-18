@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import jakarta.servlet.http.Cookie
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldStartWith
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -49,6 +50,10 @@ class SecurityRulesTest(
     "actuator endpoints require authentication" {
         statusOf("/actuator/health") shouldBe 401
         statusOf("/actuator/metrics") shouldBe 401
+    }
+
+    "actuator asks browsers for HTTP Basic credentials" {
+        mockMvc.perform(get("/actuator/health")).andReturn().response.getHeader("WWW-Authenticate") shouldStartWith "Basic"
     }
 
     "actuator rejects unsafe methods without CSRF token before authentication" {

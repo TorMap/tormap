@@ -79,6 +79,8 @@ If it is not set, a warning is logged and actuator endpoints remain unavailable.
 `POST`/`PUT`/`PATCH`/`DELETE` requests to actuator endpoints are CSRF protected (double submit cookie, no session):
 send the same value as cookie `XSRF-TOKEN` and header `X-XSRF-TOKEN`, e.g.
 `curl -u admin -X POST -H 'X-XSRF-TOKEN: x' --cookie 'XSRF-TOKEN=x' ...`. `GET` requests are unaffected.
+`GET` endpoints can also be opened in a browser (e.g. `https://api.tormap.org/actuator`), which prompts for the
+admin credentials.
 
 Recommended (production):
 
