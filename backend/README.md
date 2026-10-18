@@ -71,28 +71,24 @@ properties:
 
 - `spring.security.user.name` (default: `admin`)
 
-The admin password is **env-only** and must be provided via one of the following environment variables:
+The admin password is **env-only** and must be provided via the `TORMAP_ADMIN_PASSWORD` environment variable
+(plaintext; it is BCrypt-hashed in memory at startup).
 
-- `TORMAP_ADMIN_PASSWORD` (plaintext)
-- `TORMAP_ADMIN_PASSWORD_BCRYPT` (BCrypt hash starting with `$2a$`, `$2b$`, or `$2y$`)
-
-If neither env var is set, a warning is logged and actuator endpoints remain unavailable.
+If it is not set, a warning is logged and actuator endpoints remain unavailable.
 
 `POST`/`PUT`/`PATCH`/`DELETE` requests to actuator endpoints are CSRF protected (double submit cookie, no session):
 send the same value as cookie `XSRF-TOKEN` and header `X-XSRF-TOKEN`, e.g.
 `curl -u admin -X POST -H 'X-XSRF-TOKEN: x' --cookie 'XSRF-TOKEN=x' ...`. `GET` requests are unaffected.
+`GET` endpoints can also be opened in a browser (e.g. `https://api.tormap.org/actuator`), which prompts for the
+admin credentials.
 
 Recommended (production):
 
-- Provide `TORMAP_ADMIN_PASSWORD_BCRYPT` via your secret manager (Kubernetes Secret, Docker secret, env etc.).
-- Do not put passwords/hashes into `application.yml`.
-
-Generate a BCrypt hash:
-
-```bash
-# Requires Docker; will prompt for password and print the hash to stdout
-docker run --rm -it httpd:2.4-alpine htpasswd -nBC 12 admin
-```
+- Provide a generated `TORMAP_ADMIN_PASSWORD` of at least 16 characters via your secret manager (Kubernetes Secret,
+  Docker secret, env etc.). Shorter passwords log a warning at startup.
+- Only `/actuator/**` uses HTTP Basic. Restrict it at your reverse proxy (IP allowlist and/or rate limit) if it does not
+  need to be reachable from the internet.
+- Do not put passwords into `application.yml`.
 
 ## Config
 

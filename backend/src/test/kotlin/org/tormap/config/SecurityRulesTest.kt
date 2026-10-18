@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import jakarta.servlet.http.Cookie
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldStartWith
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -13,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import java.util.Base64
 
 /**
  * Verifies the access rules of [SecurityConfig] over HTTP.
@@ -36,9 +38,22 @@ class SecurityRulesTest(
         }
     }
 
+    "public paths ignore HTTP Basic credentials" {
+        val basicAuth = "Basic " + Base64.getEncoder().encodeToString("admin:wrong".toByteArray())
+        listOf("/", "/relay/missing").forEach { path ->
+            val response = mockMvc.perform(get(path).header("Authorization", basicAuth)).andReturn().response
+            response.status shouldNotBe 401
+            response.getHeader("WWW-Authenticate") shouldBe null
+        }
+    }
+
     "actuator endpoints require authentication" {
         statusOf("/actuator/health") shouldBe 401
         statusOf("/actuator/metrics") shouldBe 401
+    }
+
+    "actuator asks browsers for HTTP Basic credentials" {
+        mockMvc.perform(get("/actuator/health")).andReturn().response.getHeader("WWW-Authenticate") shouldStartWith "Basic"
     }
 
     "actuator rejects unsafe methods without CSRF token before authentication" {
@@ -60,13 +75,13 @@ class SecurityRulesTest(
         status shouldNotBe 401
     }
 
-    "other paths require authentication" {
-        statusOf("/not-a-public-path") shouldBe 401
+    "other paths are denied" {
+        statusOf("/not-a-public-path") shouldBe 403
     }
 
     "swagger and openapi are not public when disabled" {
         listOf("/swagger-ui.html", "/swagger-ui/index.html", "/v3/api-docs", "/openapi/api.yaml").forEach { path ->
-            statusOf(path) shouldBe 401
+            statusOf(path) shouldBe 403
         }
     }
 

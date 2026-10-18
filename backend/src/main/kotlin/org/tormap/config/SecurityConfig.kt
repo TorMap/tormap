@@ -3,6 +3,7 @@ package org.tormap.config
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpMethod
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -17,8 +18,6 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter
-import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
-import org.springframework.security.web.util.matcher.RequestMatchers
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -46,10 +45,8 @@ class SecurityConfig(
 
     companion object {
         private const val ENV_ADMIN_PASSWORD = "TORMAP_ADMIN_PASSWORD"
-        private const val ENV_ADMIN_PASSWORD_BCRYPT = "TORMAP_ADMIN_PASSWORD_BCRYPT"
-
-        private fun isBcrypt(passwordOrHash: String): Boolean =
-            passwordOrHash.startsWith("$2a$") || passwordOrHash.startsWith("$2b$") || passwordOrHash.startsWith("$2y$")
+        private const val ENV_REMOVED_ADMIN_PASSWORD_BCRYPT = "TORMAP_ADMIN_PASSWORD_BCRYPT"
+        private const val MIN_ADMIN_PASSWORD_LENGTH = 16
     }
 
     @Bean
@@ -57,26 +54,26 @@ class SecurityConfig(
 
     @Bean
     fun userDetailsService(passwordEncoder: PasswordEncoder): UserDetailsService {
-        val bcryptFromEnv = System.getenv(ENV_ADMIN_PASSWORD_BCRYPT)?.trim().orEmpty()
-        val passwordFromEnv = System.getenv(ENV_ADMIN_PASSWORD)?.trim().orEmpty()
-
-        val secret = when {
-            bcryptFromEnv.isNotBlank() -> bcryptFromEnv
-            passwordFromEnv.isNotBlank() -> passwordFromEnv
-            else -> ""
+        if (!System.getenv(ENV_REMOVED_ADMIN_PASSWORD_BCRYPT).isNullOrBlank()) {
+            logger.warn("$ENV_REMOVED_ADMIN_PASSWORD_BCRYPT is no longer supported and is ignored. Use $ENV_ADMIN_PASSWORD instead.")
         }
 
-        if (secret.isBlank()) {
+        val password = System.getenv(ENV_ADMIN_PASSWORD)?.trim().orEmpty()
+
+        if (password.isBlank()) {
             logger.warn("------------------------------------------------------")
             logger.warn("No admin password configured; actuator endpoints will not be accessible.")
-            logger.warn("Set $ENV_ADMIN_PASSWORD (plaintext) or $ENV_ADMIN_PASSWORD_BCRYPT (bcrypt hash) to enable actuator admin access.")
+            logger.warn("Set $ENV_ADMIN_PASSWORD to enable actuator admin access.")
             logger.warn("------------------------------------------------------")
             return InMemoryUserDetailsManager()
         }
 
-        val hashedPassword = if (isBcrypt(secret)) secret else passwordEncoder.encode(secret)
+        if (password.length < MIN_ADMIN_PASSWORD_LENGTH) {
+            logger.warn("$ENV_ADMIN_PASSWORD is shorter than $MIN_ADMIN_PASSWORD_LENGTH characters. Use a long generated password.")
+        }
+
         val user = User.withUsername(adminUserName)
-            .password(hashedPassword)
+            .password(passwordEncoder.encode(password))
             .roles("ADMIN")
             .build()
 
@@ -100,24 +97,34 @@ class SecurityConfig(
     @Bean
     fun forwardedHeaderFilter(): ForwardedHeaderFilter = ForwardedHeaderFilter()
 
+    /** Admin actuator: the only chain that authenticates (HTTP Basic). */
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
-        http
-            .cors(Customizer.withDefaults())
-            // The public API is stateless and uses no cookies, so CSRF only matters for the admin actuator, which
-            // authenticates with HTTP Basic (browsers resend cached credentials). Unsafe methods there require the
-            // XSRF-TOKEN cookie value to be echoed in the X-XSRF-TOKEN header (double submit, no server-side session).
+    @Order(1)
+    fun adminFilterChain(http: HttpSecurity): SecurityFilterChain {
+        applyCommonConfig(http)
+            .securityMatcher("$actuatorPath/**")
+            // Browsers resend cached HTTP Basic credentials, so unsafe methods require the XSRF-TOKEN cookie value to be
+            // echoed in the X-XSRF-TOKEN header (double submit, no server-side session). GET stays usable in a browser.
             .csrf { csrf ->
                 csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 csrf.csrfTokenRequestHandler(CsrfTokenRequestAttributeHandler())
-                csrf.requireCsrfProtectionMatcher(
-                    RequestMatchers.anyOf(
-                        *listOf(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH, HttpMethod.DELETE)
-                            .map { PathPatternRequestMatcher.withDefaults().matcher(it, "$actuatorPath/**") }
-                            .toTypedArray()
-                    )
-                )
             }
+            // Will deny all if no users exist
+            .authorizeHttpRequests { auth -> auth.anyRequest().hasRole("ADMIN") }
+            // Form login is not configured, so there are no login pages
+            .httpBasic(Customizer.withDefaults())
+        return http.build()
+    }
+
+    /** Everything else: public paths without authentication, all other paths denied. */
+    @Bean
+    @Order(2)
+    fun publicFilterChain(http: HttpSecurity): SecurityFilterChain {
+        applyCommonConfig(http)
+            // The frontend calls the public API from other origins
+            .cors(Customizer.withDefaults())
+            // No authentication, sessions or cookies on this chain, so there is nothing for CSRF to protect
+            .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
                 auth
                     // Allow CORS preflight
@@ -137,12 +144,13 @@ class SecurityConfig(
                             ).permitAll()
                         }
                     }
-                    // Admin-only actuator; will deny all if no users exist
-                    .requestMatchers("$actuatorPath/**").hasRole("ADMIN")
-                    .anyRequest().authenticated()
+                    .anyRequest().denyAll()
             }
-            // HTTP Basic for admin endpoints; form login is not configured, so there are no login pages
-            .httpBasic(Customizer.withDefaults())
+        return http.build()
+    }
+
+    private fun applyCommonConfig(http: HttpSecurity): HttpSecurity =
+        http
             // Fully stateless sessions
             .sessionManagement { sessions ->
                 sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -158,6 +166,4 @@ class SecurityConfig(
                     headers.contentSecurityPolicy { it.policyDirectives("default-src 'none'; frame-ancestors 'none'; base-uri 'none'") }
                 }
             }
-        return http.build()
-    }
 }

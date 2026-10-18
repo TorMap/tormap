@@ -29,7 +29,7 @@ Browser ──HTTPS──> Frontend (static)            Tor Collector (HTTPS, in
 | Service availability                 | The main security property: public API, scheduler, DB. Low-effort DoS matters.  |
 | Data integrity                       | Correct relay, family and location data. Users draw conclusions about Tor.      |
 | Actuator admin plane                 | Log file, thread dumps, recent HTTP exchanges, metrics, request mappings, cache eviction.             |
-| Secrets                              | `TORMAP_ADMIN_PASSWORD(_BCRYPT)`, DB password, `NEW_RELIC_INGEST_KEY`, CI secrets (Docker Hub, Firebase). |
+| Secrets                              | `TORMAP_ADMIN_PASSWORD`, DB password, `NEW_RELIC_INGEST_KEY`, CI secrets (Docker Hub, Firebase). |
 | Host and volume                      | `/tormap-data` (tens of GB of descriptors), log directory.                       |
 | Release artifacts                    | `tormap/backend` and `tormap/frontend` images, tormap.org frontend.             |
 
@@ -40,7 +40,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 | # | Boundary                         | Input (attacker control)                                                                 | Main threats                                                   | Code |
 |---|----------------------------------|------------------------------------------------------------------------------------------|----------------------------------------------------------------|------|
 | 1 | Public API `/relay/**`, `/`      | Path params `id`, `day`; JSON arrays of IDs (≤ 50 000 / 5 000); headers (direct)         | Memory/CPU/DB exhaustion, cache thrash, error leakage          | `adapter/controller/`, `config/AppConfig.kt`, `config/CacheConfig.kt` |
-| 2 | HTTP Basic authentication        | `Authorization` header (direct)                                                           | Brute force, password-hashing CPU cost, cleartext creds without TLS | `config/SecurityConfig.kt` |
+| 2 | HTTP Basic authentication        | `Authorization` header on `/actuator/**` (direct)                                         | Brute force, password-hashing CPU cost, cleartext creds without TLS | `config/SecurityConfig.kt` |
 | 3 | Admin plane `/actuator/**`       | Requests from whoever holds the admin password                                            | Info disclosure (log file, thread dumps, exchanges), cache eviction | `application.yml` `management.*` |
 | 4 | Reverse proxy headers            | `Forwarded`, `X-Forwarded-*` (direct if the backend port is exposed)                      | Spoofed client IP/scheme/host in logs, redirects, exchanges    | `ForwardedHeaderFilter` in `SecurityConfig.kt` |
 | 5 | Relay-published descriptor data  | Nickname, contact, platform, family entries, address (indirect: any relay operator)       | Parser edge cases, expensive family computation, stored XSS    | `service/Descriptor*`, `util/RelayFamilyUtil.kt`, vendored `org.torproject.descriptor` |
@@ -66,11 +66,13 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 
 ## Existing controls
 
-- `SecurityConfig`: only `/`, `/error`, `/relay/**` and static files are public. Actuator requires role `ADMIN`. With no
-  admin password configured, no user exists and the actuator is unreachable. Swagger is public only when enabled.
-  Stateless sessions, no form login. CSRF (double-submit cookie) for unsafe actuator methods. `SecurityRulesTest` pins
-  these rules.
-- Admin password is read only from the environment, plaintext or BCrypt. Never stored in config files.
+- `SecurityConfig`: two filter chains. The actuator chain requires role `ADMIN` via HTTP Basic. The public chain has no
+  authentication: only `/`, `/error`, `/relay/**` and static files are allowed, everything else is denied, and
+  `Authorization` headers are ignored. With no admin password configured, no user exists and the actuator is
+  unreachable. Swagger is public only when enabled. Stateless sessions, no form login. CSRF (double-submit cookie) for
+  unsafe actuator methods. `SecurityRulesTest` pins these rules.
+- Admin password is read only from the environment (`TORMAP_ADMIN_PASSWORD`) and only kept BCrypt-hashed in memory.
+  Never stored in config files.
 - Security headers: `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, CSP `default-src 'none'` when
   Swagger is off.
 - Input validation: `@Size` limits on POST ID lists, typed `Long` path variables, strict `LocalDate.parse`.
