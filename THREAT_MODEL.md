@@ -54,7 +54,8 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 ## Assumptions
 
 - The backend runs as a single instance behind a TLS-terminating reverse proxy or CDN. The app itself serves plain HTTP
-  on 8080 and does not enforce HTTPS or rate limits; both are expected from the edge.
+  on 8080 and does not enforce HTTPS or rate limits; both are expected from the edge. The edge should also limit request
+  body sizes; the app enforces its own limit regardless.
 - The `prod` Spring profile is active in production. It is what disables Swagger, enables the CSP header and sets the
   production CORS origins and cache headers. Without it the default (development) profile applies.
 - Tor Collector and its TLS are trusted in normal operation. Collector compromise is in scope only for "bounded damage"
@@ -75,7 +76,11 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   Never stored in config files.
 - Security headers: `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, CSP `default-src 'none'` when
   Swagger is off.
-- Input validation: `@Size` limits on POST ID lists, typed `Long` path variables, strict `LocalDate.parse`.
+- Input validation: `@Size` limits on POST ID lists, typed `Long` path variables, strict `LocalDate.parse`. Request
+  bodies are limited to `app.http.request.max-body-bytes` (1 MiB, `RequestBodyLimitConfig`: `413` on a larger
+  `Content-Length`, chunked bodies cut off at the same size). Jackson limits the document length to the same size and
+  the token count to 60 000 (`spring.jackson.factory.constraints.read.*`), so oversized ID lists fail before they are
+  fully deserialized.
 - Persistence uses Spring Data derived queries and bound parameters only, no string-built SQL/JPQL. Flyway migrations
   with `ddl-auto: validate`.
 - Caches with bounded entry counts (Caffeine `maximumSize`, unknown cache names rejected). Shallow ETags only on small endpoints. `CoalesceService`
@@ -134,8 +139,8 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 
 ## Review checklist for changes
 
-- New endpoint: add it to `SecurityConfig` explicitly, extend `SecurityRulesTest`, bound input sizes (including the raw
-  request body), and keep heavy work behind a cache with a bounded key space.
+- New endpoint: add it to `SecurityConfig` explicitly, extend `SecurityRulesTest`, bound input sizes (the raw request body
+  is limited globally, keep new JSON bodies within `app.http.request.max-body-bytes` and the Jackson token limit), and keep heavy work behind a cache with a bounded key space.
 - New outbound call: set connect and read timeouts, cap response size, restrict schemes and hosts.
 - New relay-derived field: truncate before storing, render as text only in the frontend (no Leaflet string tooltips or
   popups, no `dangerouslySetInnerHTML`).

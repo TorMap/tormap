@@ -3,6 +3,9 @@ app:
         cache:
             public:
                 max-age-seconds: 0
+        request:
+            # Applies to all request bodies, including JSON (see RequestBodyLimitConfig). 50 000 relay IDs are about 0.5 MiB.
+            max-body-bytes: 1048576 # 1 MiB
     security:
         cors:
             allowed-origins: http://localhost:3000
@@ -96,6 +99,13 @@ spring:
     flyway:
         baselineOnMigrate: true
         locations: classpath:database/migration
+    jackson:
+        factory:
+            constraints:
+                read:
+                    max-document-length: ${app.http.request.max-body-bytes}
+                    # The largest JSON request is a list of at most 50 000 relay IDs (see RelayDetailsController)
+                    max-token-count: 60000
     jpa:
         hibernate:
             ddl-auto: validate

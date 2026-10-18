@@ -162,6 +162,13 @@ to `/tmp/logs` (set `LOG_DIR` to change).
 
 - **Bind mount or volume created by an older (root) version:** run once `chown -R 1000:1000 <host dir or volume path>`.
 
+#### Reverse proxy
+
+Run the backend behind a TLS-terminating reverse proxy or CDN. Besides TLS and rate limits, limit the request body size
+there as well, e.g. `client_max_body_size 1m;` for nginx. The backend itself answers `413` for request bodies above
+`app.http.request.max-body-bytes` (default 1 MiB). The largest legitimate request, a list of 50 000 relay IDs, is about
+0.5 MiB.
+
 ### Hardware / VM Requirements
 
 - 50 GB of free disk space (for downloaded archives)
