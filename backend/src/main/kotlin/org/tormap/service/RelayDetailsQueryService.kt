@@ -32,8 +32,14 @@ class RelayDetailsQueryService(
         return RelayDetailsDto(
             details = details,
             confirmedFamilyMembers = details.confirmedFamilyMembers(),
-            reverseDnsLookupResult = reverseDnsLookupService.lookupHostNames(details.address),
+            reverseDnsLookupResult = lookupHostNames(details.address),
         )
+    }
+
+    private fun lookupHostNames(address: String): ReverseDnsLookupResult = try {
+        reverseDnsLookupService.lookupHostNames(address)
+    } catch (_: ReverseDnsLookupCapacityException) {
+        ReverseDnsLookupResult()
     }
 
     private fun RelayDetails.confirmedFamilyMembers(): List<RelayIdentifiersDto> {

@@ -1,5 +1,6 @@
 package org.tormap.service
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
@@ -69,11 +70,47 @@ class ReverseDnsLookupServiceIntegrationTest(
 
         controllableResolver.lookupPtrRecordsCallCount.get() shouldBe 1
     }
+
+    "lookupHostNames rejects lookups when all slots are busy and does not cache the rejection" {
+        val busyLookupCount = 8
+        controllableResolver.configure(
+            ptrRecords = listOf("host1.example."),
+            addresses = mapOf("host1.example" to listOf("1.2.3.4")),
+            delayMs = 1_000,
+        )
+
+        val executor = Executors.newFixedThreadPool(busyLookupCount)
+        try {
+            repeat(busyLookupCount) {
+                executor.submit { reverseDnsLookupService.lookupHostNames("10.0.0.${it + 1}") }
+            }
+            while (controllableResolver.lookupPtrRecordsCallCount.get() < busyLookupCount) Thread.sleep(10)
+
+            shouldThrow<ReverseDnsLookupCapacityException> {
+                reverseDnsLookupService.lookupHostNames("1.2.3.4")
+            }
+
+            executor.shutdown()
+            executor.awaitTermination(10, TimeUnit.SECONDS)
+        } finally {
+            executor.shutdownNow()
+        }
+
+        controllableResolver.configure(
+            ptrRecords = listOf("host1.example."),
+            addresses = mapOf("host1.example" to listOf("1.2.3.4")),
+        )
+        reverseDnsLookupService.lookupHostNames("1.2.3.4").verifiedHostNames shouldBe listOf("host1.example")
+        controllableResolver.lookupPtrRecordsCallCount.get() shouldBe busyLookupCount + 1
+    }
 })
 
 class ControllableReverseDnsResolver : ReverseDnsResolver {
+    @Volatile
     private var ptrRecords: List<String> = emptyList()
+    @Volatile
     private var addresses: Map<String, List<String>> = emptyMap()
+    @Volatile
     private var delayMs: Long = 0
 
     val lookupPtrRecordsCallCount = AtomicInteger(0)
