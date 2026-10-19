@@ -1,6 +1,7 @@
 spring:
   datasource:
     url: jdbc:tc:postgresql:18-alpine:///postgres
+    password: postgres
 tormap:
   scheduling:
     enabled: false

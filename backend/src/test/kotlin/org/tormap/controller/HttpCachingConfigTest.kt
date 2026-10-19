@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest(properties = ["app.http.cache.public.max-age-seconds=300"])
+@SpringBootTest(properties = ["app.http.cache.public.max-age-seconds=300", "springdoc.api-docs.enabled=true", "springdoc.swagger-ui.enabled=true"])
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class HttpCachingConfigTest(
@@ -64,7 +64,7 @@ class HttpCachingConfigTest(
     }
 
     "GET /openapi does not get caching headers from interceptor" {
-        // openapi may be disabled in prod, but is enabled in test/application.yml.
+        // Swagger and openapi are disabled by default and enabled for this test.
         mockMvc.perform(get("/openapi"))
             .andExpect(status().isOk)
             .andExpect(header().doesNotExist("Cache-Control"))

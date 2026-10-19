@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldNotBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.ApplicationContext
+import org.springframework.core.env.Environment
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
@@ -21,7 +22,7 @@ class SecurityConfigTest(
     private val passwordEncoder: PasswordEncoder,
     private val userDetailsService: UserDetailsService,
     private val corsConfigurationSource: CorsConfigurationSource,
-    private val forwardedHeaderFilter: ForwardedHeaderFilter,
+    private val environment: Environment,
     private val shallowEtagHeaderFilterRegistration: FilterRegistrationBean<ShallowEtagHeaderFilter>,
 ) : StringSpec({
 
@@ -30,8 +31,13 @@ class SecurityConfigTest(
         passwordEncoder shouldNotBe null
         userDetailsService shouldNotBe null
         corsConfigurationSource shouldNotBe null
-        forwardedHeaderFilter shouldNotBe null
         applicationContext.getBeansOfType(SecurityFilterChain::class.java).size shouldBe 2
+    }
+
+    "forwarded headers are only applied by Tomcat for trusted proxies" {
+        applicationContext.getBeansOfType(ForwardedHeaderFilter::class.java) shouldBe emptyMap()
+        environment.getProperty("server.forward-headers-strategy") shouldBe "native"
+        environment.getProperty("server.tomcat.remoteip.internal-proxies") shouldNotBe null
     }
 
     "shallow ETag filter is not registered for large relay location responses" {

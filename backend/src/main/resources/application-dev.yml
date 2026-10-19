@@ -1,0 +1,13 @@
+# Local development only (./gradlew bootRun, docker-compose.override.yml). Never activate in production!
+app:
+    security:
+        cors:
+            allowed-origins: http://localhost:3000
+spring:
+    datasource:
+        password: ${SPRING_DATASOURCE_PASSWORD:${TORMAP_DATABASE_PASSWORD:postgres}}
+springdoc:
+    api-docs:
+        enabled: true
+    swagger-ui:
+        enabled: true

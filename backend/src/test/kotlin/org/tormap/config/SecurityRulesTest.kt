@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options
@@ -22,8 +21,8 @@ import java.util.Base64
  */
 @SpringBootTest
 @AutoConfigureMockMvc
+// No dev or prod profile, so these rules check the defaults from application.yml
 @ActiveProfiles("test")
-@TestPropertySource(properties = ["springdoc.swagger-ui.enabled=false", "springdoc.api-docs.enabled=false"])
 class SecurityRulesTest(
     private val mockMvc: MockMvc,
     @param:Value("\${app.security.cors.allowed-origins}") private val allowedOrigins: String,
@@ -79,7 +78,11 @@ class SecurityRulesTest(
         statusOf("/not-a-public-path") shouldBe 403
     }
 
-    "swagger and openapi are not public when disabled" {
+    "content security policy is sent by default" {
+        mockMvc.perform(get("/")).andReturn().response.getHeader("Content-Security-Policy") shouldStartWith "default-src 'none'"
+    }
+
+    "swagger and openapi are not public by default" {
         listOf("/swagger-ui.html", "/swagger-ui/index.html", "/v3/api-docs", "/openapi/api.yaml").forEach { path ->
             statusOf(path) shouldBe 403
         }

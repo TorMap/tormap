@@ -44,8 +44,10 @@ less reliable.
 ## Run Development Server
 
 1. Go into `backend` directory
-2. Start PostgreSQL database: `docker compose up -d database`
-3. Run `./gradlew bootRun` or on Windows `gradlew.bat bootRun`
+2. Start PostgreSQL database: `docker compose up -d database` (the development override publishes it on
+   `127.0.0.1:5432`)
+3. Run `./gradlew bootRun` or on Windows `gradlew.bat bootRun`. It activates the `dev` Spring profile unless
+   `SPRING_PROFILES_ACTIVE` is set.
 4. Backend should be available at http://localhost:8080
 
 Run `./gradlew test`, to only build & tests.
@@ -56,9 +58,9 @@ on your bandwidth and hardware, but can be expected to take at least several hou
 
 ### Swagger UI
 
-For development purposes, an interactive Swagger UI is available under http://localhost:8080/swagger and the
-specification can also be viewed in raw JSON
-under http://localhost:8080/openapi. In the production environment, Swagger UI and API docs are disabled by default.
+In the `dev` profile, an interactive Swagger UI is available under http://localhost:8080/swagger and the
+specification can also be viewed in raw JSON under http://localhost:8080/openapi. Without the `dev` profile, Swagger UI
+and API docs are disabled.
 
 ### Admin access
 
@@ -92,19 +94,22 @@ Recommended (production):
 
 ## Config
 
-- `backend/src/main/resources/application.yml` - main backend config
-- `backend/src/main/resources/application-prod.yml` - production specific overwrites
+- `backend/src/main/resources/application.yml` - main backend config with secure (production) defaults
+- `backend/src/main/resources/application-prod.yml` - production specific overwrites (public cache headers)
+- `backend/src/main/resources/application-dev.yml` - local development: Swagger UI, CORS for `http://localhost:3000`,
+  database password fallback `postgres`. Never activate it in production.
 - `backend/src/main/resources/logback-spring.xml` - logging options
 - `backend/build.gradle.kts` - dependencies are managed with Gradle
 - `docker-compose.yml` - example docker compose file for production deployment
-- `docker-compose.override.yml` - overrides `docker-compose.yml` for local development
+- `docker-compose.override.yml` - overrides `docker-compose.yml` for local development (`dev` profile, database on
+  `127.0.0.1:5432`)
 - `.env.example` can be copied to `.env` - control docker compose environment variables for local development
 
 ### Production environment variables
 
 It is recommended to set following production environment variables via a secret manager:
 
-- `TORMAP_DATABASE_PASSWORD` - Overrides the database password
+- `TORMAP_DATABASE_PASSWORD` - The database password (required, there is no default outside the `dev` profile)
 - `TORMAP_ADMIN_PASSWORD` - Optionally set admin password for accessing actuator endpoints
 - `NEW_RELIC_INGEST_KEY` - Export metrics to New Relic (EU region) via OTLP, see `management.otlp.metrics.export` in `application.yml`
 
@@ -140,7 +145,8 @@ Build fat JAR:
 1. Go to `backend` directory where file `gradlew` is located
 2. Run command: `./gradlew bootJar`
 3. A fat jar containing all packages should now be located in `backend/build/libs/`.
-4. Run command `java -jar <backend jar file>`
+4. Run command `java -jar <backend jar file>` with `SPRING_DATASOURCE_PASSWORD` set (add `--spring.profiles.active=dev`
+   for local development)
 5. Backend should be available at http://localhost:8080
 
 Build docker image:
@@ -148,12 +154,14 @@ Build docker image:
 1. Go to `backend` directory where file `gradlew` is located
 2. Make sure [docker](https://docs.docker.com/get-docker/) is installed and the docker daemon is running
 3. Run command: `./gradlew bootBuildImage`
-4. Run new image in a container with: `docker run -p 8080:8080 tormap/backend`
+4. Run new image in a container with: `docker run -p 127.0.0.1:8080:8080 tormap/backend`. The image activates the
+   `prod` profile, set `SPRING_PROFILES_ACTIVE=dev` for local development.
 5. Backend should be available at http://localhost:8080
 
 Prebuild docker images are available at https://hub.docker.com/r/tormap/backend. An example docker compose file for
 production deployment is available at `docker-compose.yml`. To execute it without development overrides, run
-`docker compose -f docker-compose.yml up -d`.
+`docker compose -f docker-compose.yml up -d`. It activates the `prod` profile, does not publish the database port and
+binds the backend to `127.0.0.1:8080`, so a reverse proxy on the same host is required (see below).
 
 #### Deployment notes
 
@@ -164,10 +172,16 @@ to `/tmp/logs` (set `LOG_DIR` to change).
 
 #### Reverse proxy
 
-Run the backend behind a TLS-terminating reverse proxy or CDN. Besides TLS and rate limits, limit the request body size
+The backend serves plain HTTP. Run it behind a TLS-terminating reverse proxy (required: admin credentials are sent with
+HTTP Basic) and do not publish port 8080 on a public interface. Docker publishes ports past host firewalls such as ufw,
+so always bind to `127.0.0.1` as in `docker-compose.yml`. Besides TLS and rate limits, limit the request body size
 there as well, e.g. `client_max_body_size 1m;` for nginx. The backend itself answers `413` for request bodies above
 `app.http.request.max-body-bytes` (default 1 MiB). The largest legitimate request, a list of 50 000 relay IDs, is about
 0.5 MiB.
+
+`X-Forwarded-For`, `X-Forwarded-Proto` and `X-Forwarded-Host` are only applied for connections from trusted proxies
+(`server.tomcat.remoteip.internal-proxies`, default: loopback and private networks such as Docker networks). If your
+proxy or CDN connects from another address, add it there, e.g. via `SERVER_TOMCAT_REMOTEIP_INTERNAL_PROXIES`.
 
 ### Hardware / VM Requirements
 
@@ -182,8 +196,8 @@ there as well, e.g. `client_max_body_size 1m;` for nginx. The backend itself ans
 
 The backend enables CORS so specific frontend browser origins can call the public API. Configuration:
 
-- Dev (default): `app.security.cors.allowed-origins: http://localhost:3000`
-- Prod: `application-prod.yml` overrides to `https://tormap.org,https://www.tormap.org,https://tormap-*.web.app`
+- Default: `app.security.cors.allowed-origins: https://tormap.org,https://www.tormap.org,https://tormap-*.web.app`
+- Dev: `application-dev.yml` overrides to `http://localhost:3000`
 
 #### HTTP caching
 

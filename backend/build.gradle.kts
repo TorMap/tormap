@@ -152,6 +152,13 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+// The local development server uses the dev profile unless SPRING_PROFILES_ACTIVE is set
+tasks.bootRun {
+    if (providers.environmentVariable("SPRING_PROFILES_ACTIVE").orNull == null) {
+        systemProperty("spring.profiles.active", "dev")
+    }
+}
+
 // Security scans with the Snyk CLI (needs `snyk` on PATH and a prior `snyk auth` or SNYK_TOKEN).
 // Extra CLI arguments can be passed with e.g. -PsnykArgs="--json".
 fun registerSnykTask(taskName: String, vararg snykCommand: String) = tasks.register<Exec>(taskName) {
@@ -187,7 +194,8 @@ jib {
         // Run as non-root. Logs go to /tmp since the root filesystem is not writable for this user.
         user = "1000:1000"
         workingDirectory = "/"
-        environment = mapOf("LOG_DIR" to "/tmp/logs")
+        // The prod profile is the image default. Development opts in with SPRING_PROFILES_ACTIVE=dev.
+        environment = mapOf("LOG_DIR" to "/tmp/logs", "SPRING_PROFILES_ACTIVE" to "prod")
         volumes = listOf("/tormap-data")
     }
     extraDirectories {

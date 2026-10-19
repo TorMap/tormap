@@ -42,7 +42,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 | 1 | Public API `/relay/**`, `/`      | Path params `id`, `day`; JSON arrays of IDs (≤ 50 000 / 5 000); headers (direct)         | Memory/CPU/DB exhaustion, cache thrash, error leakage          | `adapter/controller/`, `config/AppConfig.kt`, `config/CacheConfig.kt` |
 | 2 | HTTP Basic authentication        | `Authorization` header on `/actuator/**` (direct)                                         | Brute force, password-hashing CPU cost, cleartext creds without TLS | `config/SecurityConfig.kt` |
 | 3 | Admin plane `/actuator/**`       | Requests from whoever holds the admin password                                            | Info disclosure (log file, thread dumps, exchanges), cache eviction | `application.yml` `management.*` |
-| 4 | Reverse proxy headers            | `Forwarded`, `X-Forwarded-*` (direct if the backend port is exposed)                      | Spoofed client IP/scheme/host in logs, redirects, exchanges    | `ForwardedHeaderFilter` in `SecurityConfig.kt` |
+| 4 | Reverse proxy headers            | `X-Forwarded-*` (direct if the backend port is exposed)                                   | Spoofed client IP/scheme/host in logs, redirects, exchanges    | `server.forward-headers-strategy`, `server.tomcat.remoteip.*` in `application.yml` |
 | 5 | Relay-published descriptor data  | Nickname, contact, platform, family entries, address (indirect: any relay operator)       | Parser edge cases, expensive family computation, stored XSS    | `service/Descriptor*`, `util/RelayFamilyUtil.kt`, vendored `org.torproject.descriptor` |
 | 6 | Collector download                | `index.json` (`path`, file names, sizes, mtimes), tar/xz/bz2 archives (trusted, HTTPS)    | SSRF via index URLs, path traversal, decompression or disk bombs, hung downloads | `descriptor/index/*`, `impl/DescriptorReaderImpl.java` |
 | 7 | DNS                               | PTR records and forward lookups for relay IPs (indirect: whoever controls the IP's reverse zone) | Slow lookups that tie up request threads, spoofed host names   | `service/ReverseDnsLookupService.kt` |
@@ -56,8 +56,12 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 - The backend runs as a single instance behind a TLS-terminating reverse proxy or CDN. The app itself serves plain HTTP
   on 8080 and does not enforce HTTPS or rate limits; both are expected from the edge. The edge should also limit request
   body sizes; the app enforces its own limit regardless.
-- The `prod` Spring profile is active in production. It is what disables Swagger, enables the CSP header and sets the
-  production CORS origins and cache headers. Without it the default (development) profile applies.
+- The defaults in `application.yml` are the production settings: Swagger and API docs off, CSP header on, production
+  CORS origins, no database password fallback. The `prod` profile (set in the Docker image and `docker-compose.yml`)
+  only adds the public cache headers. Only the `dev` profile (`./gradlew bootRun`, `docker-compose.override.yml`)
+  enables Swagger, allows `http://localhost:3000` and falls back to the database password `postgres`.
+- The reference `docker-compose.yml` publishes no database port and binds the backend to `127.0.0.1:8080` only, because
+  Docker's port publishing bypasses host firewalls such as ufw.
 - Tor Collector and its TLS are trusted in normal operation. Collector compromise is in scope only for "bounded damage"
   (no code execution, no writes outside `/tormap-data`, no unbounded resource use).
 - Relay operators are untrusted. Running a relay is cheap and its descriptors end up in the DB and permanently in the
@@ -74,6 +78,9 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   unsafe actuator methods. `SecurityRulesTest` pins these rules.
 - Admin password is read only from the environment (`TORMAP_ADMIN_PASSWORD`) and only kept BCrypt-hashed in memory.
   Never stored in config files.
+- Forwarded headers: Tomcat's `RemoteIpValve` (`server.forward-headers-strategy: native`) applies `X-Forwarded-For`,
+  `-Proto` and `-Host` only for connections from `server.tomcat.remoteip.internal-proxies` (loopback and private
+  networks). There is no application filter that trusts these headers from any client.
 - Security headers: `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, CSP `default-src 'none'` when
   Swagger is off.
 - Input validation: `@Size` limits on POST ID lists, typed `Long` path variables, strict `LocalDate.parse`. Request
@@ -146,4 +153,5 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 - New outbound call: set connect and read timeouts, cap response size, restrict schemes and hosts.
 - New relay-derived field: truncate before storing, render as text only in the frontend (no Leaflet string tooltips or
   popups, no `dangerouslySetInnerHTML`).
-- Deployment default change: keep the DB unexposed, the `prod` profile active and the actuator off without a password.
+- Deployment default change: keep the DB unexposed, the backend on localhost behind TLS, secure defaults in
+  `application.yml` (development settings only in the `dev` profile) and the actuator off without a password.

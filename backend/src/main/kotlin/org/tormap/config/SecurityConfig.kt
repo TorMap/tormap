@@ -21,7 +21,6 @@ import org.springframework.security.web.header.writers.XXssProtectionHeaderWrite
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
-import org.springframework.web.filter.ForwardedHeaderFilter
 import org.tormap.util.logger
 
 @Configuration
@@ -93,9 +92,6 @@ class SecurityConfig(
         }
         return UrlBasedCorsConfigurationSource().also { it.registerCorsConfiguration("/**", cors) }
     }
-
-    @Bean
-    fun forwardedHeaderFilter(): ForwardedHeaderFilter = ForwardedHeaderFilter()
 
     /** Admin actuator: the only chain that authenticates (HTTP Basic). */
     @Bean
