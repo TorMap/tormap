@@ -194,8 +194,7 @@ jib {
         // Run as non-root. Logs go to /tmp since the root filesystem is not writable for this user.
         user = "1000:1000"
         workingDirectory = "/"
-        // The prod profile is the image default. Development opts in with SPRING_PROFILES_ACTIVE=dev.
-        environment = mapOf("LOG_DIR" to "/tmp/logs", "SPRING_PROFILES_ACTIVE" to "prod")
+        environment = mapOf("LOG_DIR" to "/tmp/logs")
         volumes = listOf("/tormap-data")
     }
     extraDirectories {

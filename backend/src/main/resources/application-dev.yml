@@ -1,5 +1,9 @@
 # Local development only (./gradlew bootRun, docker-compose.override.yml). Never activate in production!
 app:
+    http:
+        cache:
+            public:
+                max-age-seconds: 0
     security:
         cors:
             allowed-origins: http://localhost:3000

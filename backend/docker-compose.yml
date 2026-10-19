@@ -9,7 +9,6 @@ services:
         depends_on:
             - database
         environment:
-            - SPRING_PROFILES_ACTIVE=prod
             - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/postgres
             - SPRING_DATASOURCE_USERNAME=postgres
             - SPRING_DATASOURCE_PASSWORD=${TORMAP_DATABASE_PASSWORD:?Set TORMAP_DATABASE_PASSWORD to a strong generated password}

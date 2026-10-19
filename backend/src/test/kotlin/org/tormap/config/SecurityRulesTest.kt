@@ -21,7 +21,7 @@ import java.util.Base64
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-// No dev or prod profile, so these rules check the defaults from application.yml
+// No dev profile, so these rules check the defaults from application.yml
 @ActiveProfiles("test")
 class SecurityRulesTest(
     private val mockMvc: MockMvc,

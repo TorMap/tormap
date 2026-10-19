@@ -94,10 +94,9 @@ Recommended (production):
 
 ## Config
 
-- `backend/src/main/resources/application.yml` - main backend config with secure (production) defaults
-- `backend/src/main/resources/application-prod.yml` - production specific overwrites (public cache headers)
+- `backend/src/main/resources/application.yml` - main backend config, its defaults are the production settings
 - `backend/src/main/resources/application-dev.yml` - local development: Swagger UI, CORS for `http://localhost:3000`,
-  database password fallback `postgres`. Never activate it in production.
+  no cache headers, database password fallback `postgres`. Never activate it in production.
 - `backend/src/main/resources/logback-spring.xml` - logging options
 - `backend/build.gradle.kts` - dependencies are managed with Gradle
 - `docker-compose.yml` - example docker compose file for production deployment
@@ -154,14 +153,15 @@ Build docker image:
 1. Go to `backend` directory where file `gradlew` is located
 2. Make sure [docker](https://docs.docker.com/get-docker/) is installed and the docker daemon is running
 3. Run command: `./gradlew bootBuildImage`
-4. Run new image in a container with: `docker run -p 127.0.0.1:8080:8080 tormap/backend`. The image activates the
-   `prod` profile, set `SPRING_PROFILES_ACTIVE=dev` for local development.
+4. Run new image in a container with: `docker run -p 127.0.0.1:8080:8080 tormap/backend`. Set
+   `SPRING_PROFILES_ACTIVE=dev` for local development.
 5. Backend should be available at http://localhost:8080
 
 Prebuild docker images are available at https://hub.docker.com/r/tormap/backend. An example docker compose file for
 production deployment is available at `docker-compose.yml`. To execute it without development overrides, run
-`docker compose -f docker-compose.yml up -d`. It activates the `prod` profile, does not publish the database port and
-binds the backend to `127.0.0.1:8080`, so a reverse proxy on the same host is required (see below).
+`docker compose -f docker-compose.yml up -d`. It does not publish the database port and binds the backend to
+`127.0.0.1:8080`, so a reverse proxy on the same host is required (see below). No Spring profile is needed in
+production. A previously set `SPRING_PROFILES_ACTIVE=prod` has no effect and can be removed.
 
 #### Deployment notes
 
@@ -203,7 +203,7 @@ The backend enables CORS so specific frontend browser origins can call the publi
 
 Public `GET` endpoints under `/relay/**` can return `Cache-Control` headers to allow browser and CDN/proxy caching.
 
-- Dev/default: caching headers are **disabled** (`app.http.cache.public.max-age-seconds` defaults to `0`).
-  Responses are typically not cached unless a controller explicitly sets caching headers.
-- Prod: `application-prod.yml` sets `app.http.cache.public.max-age-seconds: 300`, so `/relay/**` responses include
+- Default: `app.http.cache.public.max-age-seconds: 300`, so `/relay/**` responses include
   `Cache-Control: public, max-age=300`.
+- Dev: `application-dev.yml` sets it to `0`, which disables the caching headers. Responses are then typically not
+  cached unless a controller explicitly sets caching headers.

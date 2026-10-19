@@ -2,7 +2,7 @@ app:
     http:
         cache:
             public:
-                max-age-seconds: 0
+                max-age-seconds: 300
         request:
             # Applies to all request bodies, including JSON (see RequestBodyLimitConfig). 50 000 relay IDs are about 0.5 MiB.
             max-body-bytes: 1048576 # 1 MiB

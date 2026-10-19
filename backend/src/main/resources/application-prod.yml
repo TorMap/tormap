@@ -1,7 +1,0 @@
-# Production overrides. The secure defaults (Swagger off, CSP on, no database password fallback, tormap.org CORS
-# origins) are already set in application.yml.
-app:
-    http:
-        cache:
-            public:
-                max-age-seconds: 300
