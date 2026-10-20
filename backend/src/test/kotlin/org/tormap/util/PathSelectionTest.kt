@@ -4,7 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 
 class PathSelectionTest : StringSpec({
-    val weights = mapOf("Wgg" to 5000, "Wgd" to 2500, "Wgm" to 0)
+    val weights = mapOf("Wgg" to 5000, "Wgd" to 2500, "Wgm" to 5000)
     val running = setOf("Running", "Valid")
 
     "guard relays use Wgg" {
@@ -15,9 +15,15 @@ class PathSelectionTest : StringSpec({
         PathSelection.guardWeight(1000, running + "Guard" + "Exit", weights) shouldBe 250
     }
 
-    "relays without guard flag use Wgm" {
+    "guard relays with the BadExit flag do not count as exits" {
+        PathSelection.guardWeight(1000, running + "Guard" + "Exit" + "BadExit", weights) shouldBe 500
+    }
+
+    "relays without guard flag are never picked as guard" {
         PathSelection.guardWeight(1000, running + "Exit", weights) shouldBe 0
-        PathSelection.guardWeight(1000, running, mapOf("Wgm" to 1000)) shouldBe 100
+        PathSelection.guardWeight(1000, running + "Exit" + "BadExit", weights) shouldBe 0
+        PathSelection.guardWeight(1000, running + "Fast" + "Stable", weights) shouldBe 0
+        PathSelection.guardWeight(1000, running, null) shouldBe 0
     }
 
     "relays that are not running or valid can not be picked" {
@@ -32,5 +38,6 @@ class PathSelectionTest : StringSpec({
     "missing weights result in null" {
         PathSelection.guardWeight(1000, running + "Guard", null) shouldBe null
         PathSelection.guardWeight(1000, running + "Guard", mapOf("Wmm" to 10000)) shouldBe null
+        PathSelection.guardWeight(1000, running + "Guard" + "Exit", mapOf("Wgg" to 10000)) shouldBe null
     }
 })

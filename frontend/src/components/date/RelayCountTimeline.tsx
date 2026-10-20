@@ -116,7 +116,11 @@ export const RelayCountTimeline: FunctionComponent = () => {
                         style={{cursor: "pointer"}}
                         onClick={() => setSelectedDate(outlier.day)}
                         onKeyDown={event => {
-                            if (event.key === "Enter" || event.key === " ") setSelectedDate(outlier.day)
+                            if (event.key === "Enter" || event.key === " ") {
+                                // Space would otherwise scroll the page, like for a native button
+                                event.preventDefault()
+                                setSelectedDate(outlier.day)
+                            }
                         }}
                     >
                         <title>{outlier.label}</title>

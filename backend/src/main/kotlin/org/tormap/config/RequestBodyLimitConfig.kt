@@ -14,6 +14,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.server.ContentTooLargeException
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.io.UnsupportedEncodingException
 import java.nio.charset.Charset
 
 /**
@@ -57,7 +58,12 @@ class RequestBodyLimitFilter(private val maxBodyBytes: Long) : OncePerRequestFil
         override fun getInputStream(): ServletInputStream = inputStream
 
         override fun getReader(): BufferedReader {
-            val charset = characterEncoding?.let { Charset.forName(it) } ?: Charsets.ISO_8859_1
+            val charset = try {
+                characterEncoding?.let { Charset.forName(it) } ?: Charsets.ISO_8859_1
+            } catch (_: IllegalArgumentException) {
+                // The encoding comes from the request, the servlet API reports an unknown one like this
+                throw UnsupportedEncodingException(characterEncoding)
+            }
             return BufferedReader(InputStreamReader(inputStream, charset))
         }
     }

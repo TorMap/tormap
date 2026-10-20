@@ -50,7 +50,7 @@ less reliable.
    `SPRING_PROFILES_ACTIVE` is set.
 4. Backend should be available at http://localhost:8080
 
-Run `./gradlew test`, to only build & tests.
+Run `./gradlew test`, to only build & tests. Run `./gradlew test jacocoTestReport` for a coverage report in `build/reports/jacoco/test/html/index.html`.
 
 In a freshly cloned repository the backend will start to download an archive `>33 GB` in size
 from [TorProject](https://metrics.torproject.org/collector/archive/). The total time for the whole archive will depend

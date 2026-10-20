@@ -52,12 +52,23 @@ class SecurityConfig(
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
     @Bean
-    fun userDetailsService(passwordEncoder: PasswordEncoder): UserDetailsService {
-        if (!System.getenv(ENV_REMOVED_ADMIN_PASSWORD_BCRYPT).isNullOrBlank()) {
+    fun userDetailsService(passwordEncoder: PasswordEncoder): UserDetailsService =
+        buildUserDetailsService(passwordEncoder, System.getenv(ENV_ADMIN_PASSWORD), System.getenv(ENV_REMOVED_ADMIN_PASSWORD_BCRYPT))
+
+    /**
+     * Creates the admin user from the values of [ENV_ADMIN_PASSWORD] and [ENV_REMOVED_ADMIN_PASSWORD_BCRYPT].
+     * Without a password there is no user, so the actuator denies every request.
+     */
+    internal fun buildUserDetailsService(
+        passwordEncoder: PasswordEncoder,
+        adminPassword: String?,
+        removedAdminPasswordBcrypt: String?,
+    ): UserDetailsService {
+        if (!removedAdminPasswordBcrypt.isNullOrBlank()) {
             logger.warn("$ENV_REMOVED_ADMIN_PASSWORD_BCRYPT is no longer supported and is ignored. Use $ENV_ADMIN_PASSWORD instead.")
         }
 
-        val password = System.getenv(ENV_ADMIN_PASSWORD)?.trim().orEmpty()
+        val password = adminPassword?.trim().orEmpty()
 
         if (password.isBlank()) {
             logger.warn("------------------------------------------------------")

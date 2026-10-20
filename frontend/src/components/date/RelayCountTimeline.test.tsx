@@ -79,4 +79,57 @@ describe("RelayCountTimeline", () => {
         await renderTimeline()
         await expect.element(page.getByRole("img", {name: /Relays per day/})).not.toBeInTheDocument()
     })
+
+    it("selects an outlier day with the keyboard", async () => {
+        mockBackend.onGet("/relay/statistics/daily-counts", counts)
+        await renderTimeline()
+
+        const outlier = page.getByTestId("relay-count-outlier")
+        await expect.element(outlier).toBeVisible()
+        outlier.element().dispatchEvent(new KeyboardEvent("keydown", {key: "Tab", bubbles: true}))
+        await expect.element(page.getByTestId("selected-date")).toHaveTextContent(days[39])
+
+        const space = new KeyboardEvent("keydown", {key: " ", bubbles: true, cancelable: true})
+        outlier.element().dispatchEvent(space)
+        await expect.element(page.getByTestId("selected-date")).toHaveTextContent(days[20])
+        expect(space.defaultPrevented).toBe(true)
+
+    })
+
+    it("selects an outlier day with Enter", async () => {
+        mockBackend.onGet("/relay/statistics/daily-counts", counts)
+        await renderTimeline()
+
+        const outlier = page.getByTestId("relay-count-outlier")
+        await expect.element(outlier).toBeVisible()
+        outlier.element().dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}))
+        await expect.element(page.getByTestId("selected-date")).toHaveTextContent(days[20])
+    })
+
+    it("describes the outlier with its change and marks the selected day", async () => {
+        const spike = counts.map((count, i) => i === 10 ? {...count, total: 9000} : count)
+        mockBackend.onGet("/relay/statistics/daily-counts", spike)
+        await renderTimeline()
+
+        await expect.element(page.getByRole("button", {name: new RegExp(`Select ${days[10]}: 9000 relays \\(\\+`)})).toBeVisible()
+        await expect.element(page.getByRole("button", {name: new RegExp(`Select ${days[20]}: 2500 relays \\(-`)})).toBeVisible()
+        // The selected (latest) day is marked with a vertical line at the right end
+        expect(document.querySelector("svg line")?.getAttribute("x1")).toBe("1000")
+    })
+
+    it("breaks the line at days without counts", async () => {
+        const withGap = counts.filter((_, i) => i < 15 || i > 17)
+        mockBackend.onGet("/relay/statistics/daily-counts", withGap)
+        await renderTimeline()
+
+        await expect.element(page.getByRole("img", {name: /Relays per day/})).toBeVisible()
+        expect(document.querySelectorAll("svg polyline")).toHaveLength(2)
+    })
+
+    it("renders nothing if no count matches an available day", async () => {
+        mockBackend.onGet("/relay/statistics/daily-counts", [{day: "2001-01-01", total: 1, exit: 0, guard: 0, other: 1}])
+        await renderTimeline()
+        await expect.element(page.getByTestId("selected-date")).toHaveTextContent(days[39])
+        await expect.element(page.getByRole("img", {name: /Relays per day/})).not.toBeInTheDocument()
+    })
 })

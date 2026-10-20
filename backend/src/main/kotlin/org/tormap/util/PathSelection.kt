@@ -13,9 +13,11 @@ object PathSelection {
     /**
      * Returns the share of a relay's consensus weight that clients use for choosing it as entry guard, so the
      * relay's probability of being picked as guard is `guardWeight / sum of the guard weights of all relays`.
+     * It follows the guard position weights of Tor clients (`compute_weighted_bandwidths` in Tor's node_select.c):
      *
      * - A relay that is not `Running` and `Valid` can not be picked, which results in 0.
-     * - Guard flagged relays use `Wgg`, relays that are also exits use `Wgd`, all other relays `Wgm`.
+     * - Clients only pick relays with the `Guard` flag as entry guards, all other relays result in 0.
+     * - Guard flagged relays that are also exits use `Wgd`, all other guards `Wgg`. A `BadExit` does not count as exit.
      *
      * @param consensusWeight the `w Bandwidth=` value of the relay's consensus entry
      * @param flags the names of the flags the relay has in the consensus
@@ -23,13 +25,9 @@ object PathSelection {
      * @return null, if the consensus does not contain the required weight
      */
     fun guardWeight(consensusWeight: Long, flags: Set<String>, bandwidthWeights: Map<String, Int>?): Long? {
-        if (!flags.contains("Running") || !flags.contains("Valid")) return 0
-        val weightKey = when {
-            flags.contains("Guard") && flags.contains("Exit") -> "Wgd"
-            flags.contains("Guard") -> "Wgg"
-            else -> "Wgm"
-        }
-        val weight = bandwidthWeights?.get(weightKey) ?: return null
+        if (!flags.contains("Running") || !flags.contains("Valid") || !flags.contains("Guard")) return 0
+        val isExit = flags.contains("Exit") && !flags.contains("BadExit")
+        val weight = bandwidthWeights?.get(if (isExit) "Wgd" else "Wgg") ?: return null
         return Math.round(consensusWeight.toDouble() * weight / BANDWIDTH_WEIGHT_SCALE)
     }
 }

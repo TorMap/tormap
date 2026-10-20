@@ -85,23 +85,27 @@ class DNSJavaReverseDnsResolver : ReverseDnsResolver {
 
     private fun lookup(name: Name, type: Int): List<Record> =
         Lookup(name, type).apply { setResolver(dnsResolver) }.run()?.toList() ?: emptyList()
-
-    private fun InetAddress.isULA(): Boolean =
-        this is Inet6Address &&
-            (address[0].toInt() and 0xFE) == 0xFC  // fc00::/7
-
-    private fun InetAddress.isPubliclyRoutable(): Boolean =
-        !isLoopbackAddress &&
-            !isLinkLocalAddress &&
-            !isSiteLocalAddress &&   // reliable for IPv4
-            !isULA() &&              // fills the IPv6 gap isSiteLocalAddress misses
-            !isMulticastAddress &&
-            !isAnyLocalAddress &&
-            address.first() != 0.toByte() &&
-            !(address.size == 4 &&
-                address[0] == 100.toByte() &&
-                (address[1].toInt() and 0xFF) in 64..127)
 }
+
+private fun InetAddress.isULA(): Boolean =
+    this is Inet6Address &&
+        (address[0].toInt() and 0xFE) == 0xFC  // fc00::/7
+
+/**
+ * Whether the address can be reached on the public internet. Forward lookups only verify a PTR name with such
+ * addresses, so that a name pointing to an internal address is never reported as verified.
+ */
+internal fun InetAddress.isPubliclyRoutable(): Boolean =
+    !isLoopbackAddress &&
+        !isLinkLocalAddress &&
+        !isSiteLocalAddress &&   // reliable for IPv4
+        !isULA() &&              // fills the IPv6 gap isSiteLocalAddress misses
+        !isMulticastAddress &&
+        !isAnyLocalAddress &&
+        address.first() != 0.toByte() &&
+        !(address.size == 4 &&
+            address[0] == 100.toByte() &&
+            (address[1].toInt() and 0xFF) in 64..127)
 
 @Service
 class ReverseDnsLookupService(

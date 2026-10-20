@@ -126,6 +126,38 @@ class ReverseDnsLookupServiceTest : StringSpec({
             reverseDnsLookupService.destroy()
         }
     }
+
+    "lookupHostNames returns what is known when a lookup fails" {
+        val failingResolver = object : ReverseDnsResolver {
+            override fun lookupPtrRecords(ipAddress: String) = listOf("host.example.")
+            override fun lookupAddresses(hostName: String): List<String> = throw IllegalStateException("resolver broke")
+        }
+
+        val result = ReverseDnsLookupService(failingResolver).lookupHostNames("1.2.3.4")
+
+        result shouldBe ReverseDnsLookupResult(unverifiedHostNames = listOf("host.example"))
+    }
+
+    "lookupHostNames keeps the interrupt of the calling thread" {
+        val reverseDnsResolver = LookupServiceFakeReverseDnsResolver(
+            ptrRecordsByIpAddress = mapOf("1.2.3.4" to listOf("slow.example.")),
+            ptrLookupDelay = Duration.ofSeconds(5),
+        )
+        val service = ReverseDnsLookupService(reverseDnsResolver, lookupTimeout = Duration.ofSeconds(10))
+        var result: ReverseDnsLookupResult? = null
+        var interrupted = false
+        val caller = thread {
+            result = service.lookupHostNames("1.2.3.4")
+            interrupted = Thread.currentThread().isInterrupted
+        }
+        Thread.sleep(200)
+        caller.interrupt()
+        caller.join(5_000)
+
+        result shouldBe ReverseDnsLookupResult()
+        interrupted shouldBe true
+        service.destroy()
+    }
 })
 
 private class LookupServiceFakeReverseDnsResolver(
