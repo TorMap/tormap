@@ -124,10 +124,14 @@ class DescriptorCoordinationService(
 
     private fun computeRelayDetailsAndCaches(descriptorType: DescriptorType, processedMonths: Set<String>) {
         if (descriptorType.isRelayServerType()) {
-            relayDetailsUpdateService.computeFamilies(processedMonths)
             relayDetailsUpdateService.lookupMissingAutonomousSystems(processedMonths)
+            // The cached relay locations contain the family IDs, so they are only updated once the families are computed
+            relayDetailsUpdateService.computeFamilies(processedMonths).whenComplete { _, _ ->
+                updateCaches(descriptorType, processedMonths)
+            }
+        } else {
+            updateCaches(descriptorType, processedMonths)
         }
-        updateCaches(descriptorType, processedMonths)
     }
 
     private fun updateCaches(descriptorType: DescriptorType, processedMonths: Set<String>) {

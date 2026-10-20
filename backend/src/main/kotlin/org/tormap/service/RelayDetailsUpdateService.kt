@@ -10,6 +10,7 @@ import org.tormap.util.addFamilyMember
 import org.tormap.util.commaSeparatedToList
 import org.tormap.util.getFamilyMember
 import org.tormap.util.logger
+import java.util.concurrent.CompletableFuture
 import javax.sql.DataSource
 
 /**
@@ -76,23 +77,29 @@ class RelayDetailsUpdateService(
         val monthFamilyMemberCount =
             relayDetailsRepositoryImpl.findDistinctMonthFamilyMemberCount().filter { it.count == 0L }
         val monthsToProcess = monthFamilyMemberCount.map { it.month }.toSet()
-        computeFamilies(monthsToProcess)
-        cacheService.evictRelayLocationsPerDay(monthsToProcess)
+        // The families are computed asynchronously, evicting earlier would let requests cache the old families again
+        computeFamilies(monthsToProcess).whenComplete { _, _ ->
+            cacheService.evictRelayLocationsPerDay(monthsToProcess)
+        }
     }
 
 
     /**
-     * Updates [RelayDetails.familyId] for all entities of the requested [months].
+     * Updates [RelayDetails.familyId] for all entities of the requested [months] asynchronously.
+     * @return a future that completes once the families of all [months] are computed (also if some failed)
      */
-    fun computeFamilies(months: Set<String>) {
+    fun computeFamilies(months: Set<String>): CompletableFuture<Void> {
         logger.info("... Updating relay families for months: {}", months.joinToString(", "))
-        months.forEach { month ->
+        val futures = months.map { month ->
             coalesceService.submitAsync("computeFamilies-$month") {
                 transactionTemplate.executeWithoutResult {
                     computeFamiliesForMonth(month)
                 }
             }
+                // Failures are logged by the CoalesceService, a failed month must not hide the others
+                .exceptionally { null }
         }
+        return CompletableFuture.allOf(*futures.toTypedArray())
     }
 
     /**
