@@ -75,4 +75,22 @@ describe("CountryUsageLayer", () => {
         await expect.poll(() => mockBackend.requested.length).toBe(1)
         await expect.element(page.getByRole("status", {name: "usage"})).toHaveTextContent("none")
     })
+
+    it("colors the countries with an estimate on the map", async () => {
+        mockBackend.onGet("/relay/country-usage/day/2024-03-05", usage)
+        await renderLayer(true)
+        await expect.element(page.getByRole("status", {name: "usage"})).toHaveTextContent("2024-03-05:2")
+        // Only the two countries with an estimate are drawn, in their own pane below the markers
+        await expect.poll(() => document.querySelectorAll(".leaflet-countryUsage-pane path").length).toBe(2)
+        const pane = document.querySelector<HTMLElement>(".leaflet-countryUsage-pane")!
+        expect(pane.style.zIndex).toBe("350")
+    })
+
+    it("removes the colors when the estimates are switched off", async () => {
+        mockBackend.onGet("/relay/country-usage/day/2024-03-05", usage)
+        const screen = await renderLayer(true)
+        await expect.poll(() => document.querySelectorAll(".leaflet-countryUsage-pane path").length).toBe(2)
+        await screen.unmount()
+        expect(document.querySelectorAll(".leaflet-countryUsage-pane path").length).toBe(0)
+    })
 })

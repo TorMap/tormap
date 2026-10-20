@@ -14,12 +14,12 @@ describe("HeatLayer", () => {
         container = undefined
     })
 
-    const createMap = () => {
+    const createMap = (zoomAnimation = false) => {
         container = document.createElement("div")
         container.style.width = "400px"
         container.style.height = "300px"
         document.body.appendChild(container)
-        map = L.map(container, {zoomAnimation: false}).setView([0, 0], 2)
+        map = L.map(container, {zoomAnimation}).setView([0, 0], 2)
         return map
     }
 
@@ -60,5 +60,55 @@ describe("HeatLayer", () => {
     it("is a Leaflet layer", () => {
         expect(heatLayer([])).toBeInstanceOf(L.Layer)
         expect(heatLayer([])).toBeInstanceOf(HeatLayer)
+    })
+
+    it("uses the default radius and gradient without options", () => {
+        const leafletMap = createMap()
+        heatLayer([[0, 0, 1]]).addTo(leafletMap)
+        const center = leafletMap.latLngToContainerPoint([0, 0])
+        expect(pixelAt(canvasOf(), Math.round(center.x), Math.round(center.y))[3]).toBeGreaterThan(0)
+        expect(canvasOf().classList).toContain("leaflet-zoom-hide")
+    })
+
+    it("skips points outside of the visible map", () => {
+        const leafletMap = createMap()
+        leafletMap.setView([0, 0], 8)
+        heatLayer([[60, 120, 1]], {radius: 10, blur: 5}).addTo(leafletMap)
+        const canvas = canvasOf()
+        const data = canvas.getContext("2d")!.getImageData(0, 0, canvas.width, canvas.height).data
+        expect(data.some((value, index) => index % 4 === 3 && value > 0)).toBe(false)
+    })
+
+    it("follows the size of the map", () => {
+        const leafletMap = createMap()
+        heatLayer([[0, 0, 1]], {maxZoom: 10}).addTo(leafletMap)
+        container!.style.width = "200px"
+        container!.style.height = "100px"
+        leafletMap.invalidateSize()
+        leafletMap.fire("moveend")
+        expect(canvasOf().width).toBe(200)
+        expect(canvasOf().height).toBe(100)
+    })
+
+    it("can be added again after it was removed", () => {
+        const leafletMap = createMap()
+        const layer = heatLayer([[0, 0, 1]]).addTo(leafletMap)
+        const canvas = canvasOf()
+        leafletMap.removeLayer(layer)
+        layer.addTo(leafletMap)
+        expect(canvasOf()).toBe(canvas)
+    })
+
+    it("scales the canvas while the map animates a zoom", () => {
+        const leafletMap = createMap(true)
+        const layer = heatLayer([[0, 0, 1]]).addTo(leafletMap)
+        expect(canvasOf().classList).toContain("leaflet-zoom-animated")
+
+        leafletMap.fire("zoomanim", {center: leafletMap.getCenter(), zoom: 3, noUpdate: false})
+        expect(canvasOf().style.transform).toContain("scale(2)")
+
+        leafletMap.removeLayer(layer)
+        expect(leafletMap.listens("zoomanim", (layer as unknown as {animateZoom: L.LeafletEventHandlerFn}).animateZoom, layer))
+            .toBe(false)
     })
 })
