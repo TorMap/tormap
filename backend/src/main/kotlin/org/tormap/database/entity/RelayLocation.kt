@@ -37,11 +37,10 @@ class RelayLocation(
     @Column(length = 40, columnDefinition = "bpchar(40)")
     var fingerprint: String = networkStatusEntry.fingerprint
 
-    var flags: String? = try {
-        networkStatusEntry.flags.map { TorRelayFlag.valueOf(it).ordinal }.joinToString(", ")
-    } catch (exception: Exception) {
-        null
-    }
+    // Flags this version does not know (e.g. MiddleOnly) are skipped, so the known flags of the relay are kept
+    var flags: String? = networkStatusEntry.flags
+        .mapNotNull { flag -> TorRelayFlag.entries.find { it.name == flag }?.ordinal }
+        .joinToString(", ")
 
     /**
      * The `w Bandwidth=` value of the consensus entry, which clients use for path selection.
