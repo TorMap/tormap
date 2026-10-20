@@ -3,6 +3,7 @@ package org.tormap.service
 import com.sun.net.httpserver.HttpServer
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cache.CacheManager
 import org.springframework.jdbc.core.JdbcTemplate
@@ -46,9 +47,9 @@ class CountryUsageServiceTest(
     }
     val baseUrl = "http://127.0.0.1:${server.address.port}"
 
-    fun service(maxDownloadBytes: Long = 10_000_000) = CountryUsageService(
+    fun service(maxDownloadBytes: Long = 10_000_000, url: String = baseUrl) = CountryUsageService(
         UsageStatisticsConfig(
-            baseUrl = baseUrl,
+            baseUrl = url,
             relayUsersPath = "/userstats-relay-country.csv",
             maxDownloadBytes = maxDownloadBytes,
             connectTimeout = Duration.ofSeconds(2),
@@ -118,5 +119,26 @@ class CountryUsageServiceTest(
         body = "date,country,users,lower,upper,frac\n$future,de,1,,,50\n2024-03-05,de,2,,,50\n"
         service().refresh() shouldBe 1
         countryUsageRepository.findLatestDay() shouldBe LocalDate.of(2024, 3, 5)
+    }
+
+    "malformed lines are skipped and the valid ones are stored" {
+        body = "date,country,users,lower,upper,frac\n2024-03-05,de,2,,,50\n2024-03-05,fr,many,,,50\n" +
+                "2024-03-05,it,3,,,50,extra\n2024-13-01,es,4,,,50\n"
+        service().refresh() shouldBe 1
+        countryUsageRepository.findAllByDay(LocalDate.of(2024, 3, 5)).map { it.country } shouldBe listOf("DE")
+    }
+
+    "an import without rows keeps the cache" {
+        val cache = cacheManager.getCache(CacheConfig.COUNTRY_USAGE_PER_DAY)!!
+        cache.put("2024-03-05", listOf<Any>())
+        body = "date,country,users,lower,upper,frac\n"
+        service().refresh() shouldBe 0
+        cache.get("2024-03-05") shouldNotBe null
+    }
+
+    "only http and https URLs are requested" {
+        service(url = "file:///etc").refresh() shouldBe 0
+        service(url = "http://").refresh() shouldBe 0
+        requestedUris shouldBe emptyList()
     }
 })
