@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "org.tormap"
-version = "3.0.1"
+version = "4.0.0"
 java.sourceCompatibility = JavaVersion.VERSION_25
 
 plugins {
