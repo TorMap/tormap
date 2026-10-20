@@ -1,4 +1,5 @@
-# Example Docker compose file for production deployment
+# Example Docker compose file for production deployment.
+# The backend only listens on localhost: run it behind a TLS-terminating reverse proxy on the same host (see README).
 name: tormap
 services:
     backend:
@@ -17,15 +18,15 @@ services:
             # - TORMAP_ADMIN_PASSWORD=${TORMAP_ADMIN_PASSWORD:?Set TORMAP_ADMIN_PASSWORD to a strong generated password}
             # and explicitly enable/ expose the actuator endpoints you need via management.* properties
         ports:
-            - "8080:8080"
+            # Plain HTTP on localhost only. Docker publishes ports past host firewalls such as ufw, so never bind to all interfaces.
+            - "127.0.0.1:8080:8080"
 
     database:
         image: postgres:18-alpine@sha256:d3e1620b530c944afa6e887d22eb899824da68e19c52024bf98f5220c88a65b2
         environment:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=${TORMAP_DATABASE_PASSWORD:?Set TORMAP_DATABASE_PASSWORD to a strong generated password}
-        ports:
-            - "5432:5432"
+        # No published port: only the backend reaches the database over the compose network
 
     frontend:
         image: tormap/frontend:${TORMAP_VERSION:-3}

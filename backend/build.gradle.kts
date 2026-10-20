@@ -152,6 +152,13 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+// The local development server uses the dev profile unless SPRING_PROFILES_ACTIVE is set
+tasks.bootRun {
+    if (providers.environmentVariable("SPRING_PROFILES_ACTIVE").orNull == null) {
+        systemProperty("spring.profiles.active", "dev")
+    }
+}
+
 // Security scans with the Snyk CLI (needs `snyk` on PATH and a prior `snyk auth` or SNYK_TOKEN).
 // Extra CLI arguments can be passed with e.g. -PsnykArgs="--json".
 fun registerSnykTask(taskName: String, vararg snykCommand: String) = tasks.register<Exec>(taskName) {

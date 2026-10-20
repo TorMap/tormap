@@ -2,13 +2,14 @@ app:
     http:
         cache:
             public:
-                max-age-seconds: 0
+                max-age-seconds: 300
         request:
             # Applies to all request bodies, including JSON (see RequestBodyLimitConfig). 50 000 relay IDs are about 0.5 MiB.
             max-body-bytes: 1048576 # 1 MiB
     security:
         cors:
-            allowed-origins: http://localhost:3000
+            # Development uses http://localhost:3000 (application-dev.yml)
+            allowed-origins: https://tormap.org,https://www.tormap.org,https://tormap-*.web.app
 descriptor:
     apiBaseURL: https://collector.torproject.org
     localDownloadDirectory: tormap-data/descriptors
@@ -82,20 +83,26 @@ logging:
         path: ${LOG_DIR:./logs}/spring-boot-logger.log
 server:
     port: 8080
+    # X-Forwarded-For/-Proto/-Host are only applied when the connection comes from server.tomcat.remoteip.internal-proxies
+    forward-headers-strategy: native
     http2:
         enabled: true
     compression:
         enabled: true
         min-response-size: 1024
     tomcat:
+        remoteip:
+            # Reverse proxies trusted to set X-Forwarded-* headers: loopback and private networks (e.g. Docker networks).
+            # Add the proxy or CDN addresses if they are outside these ranges.
+            internal-proxies: 127.0.0.0/8, ::1/128, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7
         max-http-form-post-size: 1048576 # 1 MiB
         max-swallow-size: 1048576       # 1 MiB
 spring:
     datasource:
         url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/postgres}
         username: ${SPRING_DATASOURCE_USERNAME:postgres}
-        # You should override the default password in production environment via environment variable
-        password: ${SPRING_DATASOURCE_PASSWORD:${TORMAP_DATABASE_PASSWORD:postgres}}
+        # Required, there is no default outside the dev profile
+        password: ${SPRING_DATASOURCE_PASSWORD:${TORMAP_DATABASE_PASSWORD}}
     flyway:
         baselineOnMigrate: true
         locations: classpath:database/migration
@@ -127,10 +134,11 @@ spring:
         multipart:
             max-file-size: 1MB
             max-request-size: 1MB
+# Disabled by default, the dev profile enables them
 springdoc:
     api-docs:
         path: /openapi
-        enabled: true
+        enabled: false
     swagger-ui:
         path: /swagger
-        enabled: true
+        enabled: false

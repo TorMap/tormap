@@ -3,8 +3,12 @@ name: tormap
 services:
     backend:
         environment:
+            - SPRING_PROFILES_ACTIVE=dev
             - SPRING_DATASOURCE_PASSWORD=${TORMAP_DATABASE_PASSWORD:-postgres}
 
     database:
         environment:
             - POSTGRES_PASSWORD=${TORMAP_DATABASE_PASSWORD:-postgres}
+        ports:
+            # For a backend started with ./gradlew bootRun. Localhost only.
+            - "127.0.0.1:5432:5432"
