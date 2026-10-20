@@ -17,6 +17,9 @@ plugins {
 
     // Build and push docker images
     id("com.google.cloud.tools.jib") version "3.5.4"
+
+    // Test coverage, run with ./gradlew test jacocoTestReport
+    jacoco
 }
 
 repositories {
@@ -150,6 +153,22 @@ tasks.processResources {
 // Configure tests
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+jacoco {
+    // Java 25 class files need JaCoCo 0.8.14 or later
+    toolVersion = "0.8.15"
+}
+
+// Writes build/reports/jacoco/test/html/index.html and an XML report for tools
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required = true
+        html.required = true
+    }
+    // The vendored metrics-lib (org.torproject) is mostly unused by TorMap, so it would dilute the numbers
+    classDirectories.setFrom(classDirectories.files.map { fileTree(it) { exclude("org/torproject/**") } })
 }
 
 // The local development server uses the dev profile unless SPRING_PROFILES_ACTIVE is set
