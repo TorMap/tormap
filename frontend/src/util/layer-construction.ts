@@ -150,7 +150,10 @@ function addRelayNicknameTooltip(relays: RelayLocationDto[], mostImportantRelay:
         },
     )
         .on('mouseover', async function (this: L.Marker) {
-            marker.bindTooltip(tooltip, {permanent: false, direction: 'top'}).openTooltip();
+            // A text node instead of a HTML string, so that relay-derived text is never interpreted as markup
+            const content = document.createElement('div')
+            content.textContent = tooltip
+            marker.bindTooltip(content, {permanent: false, direction: 'top'}).openTooltip();
         })
         .on('mouseout', function (this: L.Marker) {
             marker.unbindTooltip();
