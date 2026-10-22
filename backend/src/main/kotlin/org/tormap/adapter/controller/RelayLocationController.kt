@@ -2,14 +2,17 @@ package org.tormap.adapter.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 import org.tormap.adapter.dto.RelayLocationDto
 import org.tormap.config.CacheConfig
 import org.tormap.database.repository.RelayLocationRepositoryImpl
 import java.time.LocalDate
+import java.time.format.DateTimeParseException
 
 @RestController
 @RequestMapping("relay/location/")
@@ -24,6 +27,13 @@ class RelayLocationController(
     @Cacheable(CacheConfig.RELAY_LOCATIONS_PER_DAY, key = "#day")
     @Operation(summary = "Returns all relay locations for a given day. In Swagger UI, the large result might freeze your browser tab!")
     @GetMapping("day/{day}")
-    fun getDay(@PathVariable day: String): List<RelayLocationDto> =
-        relayLocationRepositoryImpl.findAllUsingDay(LocalDate.parse(day))
+    fun getDay(@PathVariable day: String): List<RelayLocationDto> {
+        // The path variable is untrusted: a malformed day is a client error, not a server error
+        val date = try {
+            LocalDate.parse(day)
+        } catch (_: DateTimeParseException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The day must be a date like 2024-05-01.")
+        }
+        return relayLocationRepositoryImpl.findAllUsingDay(date)
+    }
 }
