@@ -125,16 +125,23 @@ describe("buildRelayLayer", () => {
 
         it("lists up to three nicknames", () => {
             const relays = ["a", "b", "c"].map(nickname => makeRelay({nickname}))
-            expect(tooltipAfterHover(relays).tooltip?.getContent()).toBe("a, b, c")
+            expect(tooltipAfterHover(relays).tooltip?.getContent()).toHaveProperty("textContent", "a, b, c")
         })
 
         it("summarizes more than three relays", () => {
-            expect(tooltipAfterHover(makeRelays(4)).tooltip?.getContent()).toBe("4 relays")
+            expect(tooltipAfterHover(makeRelays(4)).tooltip?.getContent()).toHaveProperty("textContent", "4 relays")
         })
 
         it("summarizes relays without nicknames", () => {
             const relays = [makeRelay({nickname: ""}), makeRelay({nickname: ""})]
-            expect(tooltipAfterHover(relays).tooltip?.getContent()).toBe("2 relays")
+            expect(tooltipAfterHover(relays).tooltip?.getContent()).toHaveProperty("textContent", "2 relays")
+        })
+
+        it("renders relay text as text, not as markup", () => {
+            const relays = [makeRelay({nickname: "<img src=x onerror=alert(1)>"})]
+            const content = tooltipAfterHover(relays).tooltip?.getContent() as HTMLElement
+            expect(content.querySelector("img")).toBeNull()
+            expect(content.textContent).toBe("<img src=x onerror=alert(1)>")
         })
 
         it("removes the tooltip on mouseout", () => {
@@ -329,7 +336,7 @@ describe("buildRelayLayer sized by consensus weight", () => {
             ]
             const layer = markers(buildRelayLayer(buildRelayCoordinatesMap(relays), false, colors, vi.fn(), true, topRelayCount))
             layer[1].fire("mouseover")
-            return layer[0].getTooltip()?.getContent()
+            return (layer[0].getTooltip()?.getContent() as HTMLElement | undefined)?.textContent
         }
 
         it("is relative to the consensus weight of the shown relays", () => {
