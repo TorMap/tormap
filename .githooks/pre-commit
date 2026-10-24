@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Scans staged changes for secrets with betterleaks before every commit.
+# Enable with: scripts/install-git-hooks.sh
+# Bypass in an emergency: git commit --no-verify (CI/push protection still apply).
+set -euo pipefail
+
+if ! command -v betterleaks >/dev/null 2>&1; then
+  cat >&2 <<'EOF'
+pre-commit: betterleaks is not installed, so staged changes were NOT scanned for secrets.
+  Install it (macOS: brew install betterleaks) or see https://github.com/betterleaks/betterleaks
+EOF
+  exit 0
+fi
+
+# `git --staged` works on released versions. The docs' `git diff --cached | betterleaks stdin --git-diff`
+# pattern needs a newer build than 1.9.0.
+exec betterleaks git --staged --redact --no-banner .
