@@ -6,10 +6,10 @@ version = "4.0.0"
 java.sourceCompatibility = JavaVersion.VERSION_25
 
 plugins {
-    kotlin("jvm") version "2.4.20"
-    kotlin("plugin.spring") version "2.4.20"
-    kotlin("plugin.allopen") version "2.4.20"
-    kotlin("plugin.jpa") version "2.4.20"
+    kotlin("jvm") version "2.4.21"
+    kotlin("plugin.spring") version "2.4.21"
+    kotlin("plugin.allopen") version "2.4.21"
+    kotlin("plugin.jpa") version "2.4.21"
 
     // Spring https://spring.io/projects/spring-boot
     id("org.springframework.boot") version "4.1.1"
@@ -76,17 +76,17 @@ dependencies {
     implementation("commons-codec:commons-codec:1.23.0")
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.3")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.22.3")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.4")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.22.4")
     implementation("org.slf4j:slf4j-api") // SLF4J 2 (Boot-managed): required by Logback 1.5; compatible with metrics-lib
     implementation("org.tukaani:xz:1.12")
 
     // Testing JUnit and Kotest (https://kotest.io/)
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
-    testImplementation("io.kotest:kotest-runner-junit5:6.2.5")
-    testImplementation("io.kotest:kotest-assertions-core:6.2.5")
-    testImplementation("io.kotest:kotest-extensions-spring:6.2.5")
+    testImplementation("io.kotest:kotest-runner-junit5:6.2.6")
+    testImplementation("io.kotest:kotest-assertions-core:6.2.6")
+    testImplementation("io.kotest:kotest-extensions-spring:6.2.6")
 
     // Testcontainers to provide Postgres DB (https://testcontainers.org/)
     testImplementation("org.testcontainers:testcontainers-postgresql:2.0.5")
