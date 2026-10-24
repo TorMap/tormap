@@ -57,6 +57,7 @@ Before proposing a new dependency or version, check these public APIs with `curl
 - Don't loosen `SecurityConfig`: no wider `permitAll`, no new unauthenticated actuator or admin paths, and keep CSRF protection on the actuator chain. Any change there needs a matching change in `SecurityRulesTest`.
 - Descriptors, request parameters and headers are untrusted. Use parameterized queries (no string-built JPQL or SQL), validate input at the controller, and never log secrets or raw untrusted input.
 - Workflows: keep `permissions:` least-privilege per job, never check out PR head code under `pull_request_target`, and treat any change under `.github/workflows/` as security-relevant (pin actions by SHA).
+- Enable the pre-commit secret scan once per clone: `scripts/install-git-hooks.sh` (sets `core.hooksPath=.githooks`; the hook runs `betterleaks git --staged`). If betterleaks isn't installed, the hook warns and skips. Don't bypass with `--no-verify`.
 - GitHub secret scanning and push protection are enabled. If a push is blocked, remove the secret from history. Don't bypass the protection.
 
 ## Commits and secrets
