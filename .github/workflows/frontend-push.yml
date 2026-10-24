@@ -36,18 +36,6 @@ jobs:
           name: frontend-build
           path: frontend/build
 
-      - name: Deploy to dev.tormap.org
-        if: github.ref_name == 'dev'
-        uses: FirebaseExtended/action-hosting-deploy@500ac625ca2dd40cbd15f7659af953801858032a # v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_TORMAP_DEV }}'
-          projectId: tormap-dev
-          entryPoint: ./frontend
-          channelId: live
-        env:
-          FIREBASE_CLI_PREVIEWS: hostingchannels
-
       - name: Deploy to live tormap.org
         if: github.ref_name == 'master'
         uses: FirebaseExtended/action-hosting-deploy@500ac625ca2dd40cbd15f7659af953801858032a # v0
