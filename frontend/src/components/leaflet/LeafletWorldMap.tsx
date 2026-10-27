@@ -1,6 +1,5 @@
 import {useSnackbar} from "notistack";
 import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
-import {MapContainer, TileLayer, useMapEvents} from "react-leaflet";
 
 import {useDate} from "../../context/date-context";
 import {RelayLocationDto} from "../../dto/relay";
@@ -9,6 +8,7 @@ import {readPermalink, writePermalink} from "../../util/permalink";
 import {backend} from "../../util/util";
 import {CountryUsageLayer} from "./CountryUsageLayer";
 import {LeafletLayers} from "./LeafletLayers";
+import {MapContainer, TileLayer, useMapEvents} from "./map";
 
 import 'leaflet/dist/leaflet.css';
 

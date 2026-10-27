@@ -1,7 +1,6 @@
 import {LayerGroup, latLngBounds, LeafletMouseEvent} from "leaflet";
 import {useSnackbar} from "notistack";
 import React, {FunctionComponent, Suspense, useCallback, useEffect, useMemo, useState} from "react";
-import {useMap} from "react-leaflet";
 
 import {useSettings} from "../../context/settings-context";
 import {useStatistics} from "../../context/statistics-context";
@@ -33,6 +32,7 @@ import {
     relaySearchOnMapAtom,
     showRelayDetailsDialogAtom
 } from "../dialogs/relay/relay-details-atoms";
+import {useMap} from "./map";
 
 // Lazy loaded components
 const ResponsiveRelayDetailsDialog = React.lazy(() => import('../dialogs/relay/ResponsiveRelayDetailsDialog'));

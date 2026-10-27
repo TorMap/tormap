@@ -13,8 +13,8 @@ import {LeafletWorldMap} from "./LeafletWorldMap";
 import {page} from "vitest/browser";
 
 // Tiles are plain image requests to a CDN, which tests must not hit
-vi.mock("react-leaflet", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("react-leaflet")>()),
+vi.mock("./map", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("./map")>()),
     TileLayer: () => null,
 }))
 

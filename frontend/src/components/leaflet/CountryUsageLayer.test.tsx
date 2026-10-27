@@ -1,6 +1,5 @@
 import {useAtom} from "jotai";
 import {FunctionComponent, useEffect} from "react";
-import {MapContainer} from "react-leaflet";
 import {describe, expect, it} from "vitest";
 import {page} from "vitest/browser";
 
@@ -11,6 +10,7 @@ import {renderWithProviders} from "../../test/render";
 import {SnackbarMessage} from "../../types/ui";
 import {countryUsageAtom} from "./country-usage-atoms";
 import {CountryUsageLayer} from "./CountryUsageLayer";
+import {MapContainer} from "./map";
 
 const Day: FunctionComponent<{ day: string }> = ({day}) => {
     const {setAvailableDays} = useDate()

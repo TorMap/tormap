@@ -1,7 +1,6 @@
 import {useAtom} from "jotai";
 import {useSnackbar} from "notistack";
 import {FunctionComponent, useEffect, useState} from "react";
-import {useMap} from "react-leaflet";
 
 import {useDate} from "../../context/date-context";
 import {useSettings} from "../../context/settings-context";
@@ -11,6 +10,7 @@ import {buildCountryUsageLayer, countryUsagePane, countryUsagePaneZIndex} from "
 import {CountryFeature, loadWorldFeatures} from "../../util/geojson";
 import {backend} from "../../util/util";
 import {countryUsageAtom} from "./country-usage-atoms";
+import {useMap} from "./map";
 
 /**
  * Colors the countries of the map by their estimated number of Tor users, if enabled in the settings.
