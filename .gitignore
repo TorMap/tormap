@@ -11,6 +11,7 @@
 # AI coding agents: shared rules live in AGENTS.md, local agent state is not committed.
 # Shared files (e.g. settings.json, skills) can be re-included with a "!" rule if needed.
 **/.claude/*
+!/.claude/skills/
 CLAUDE.md
 
 # Please use yarn package manager instead
