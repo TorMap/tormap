@@ -45,7 +45,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
     // OpenAPI generation and Swagger UI https://springdoc.org/
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
+    // Only for local development (bootRun) and tests, so it is not in the production image (Jib uses runtimeClasspath).
+    // The controllers only need the annotations at compile time; without springdoc they are ignored at runtime.
+    // Keep the three versions equal. Inline literals, so CI's OpenSourceMalware check sees version changes.
+    compileOnly("org.springdoc:springdoc-openapi-starter-webmvc-api:3.1.1")
+    developmentOnly("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
+    testImplementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
 
     // Serialization
     implementation("tools.jackson.module:jackson-module-kotlin")
@@ -201,6 +206,8 @@ tasks.matching { it.name.startsWith("jib") }.configureEach { dependsOn(prepareJi
 
 // Configure docker build and push
 jib {
+    // Like bootJar: the runtime classpath without developmentOnly dependencies (Swagger UI)
+    configurationName = "productionRuntimeClasspath"
     to {
         image = "tormap/backend"
         auth {
