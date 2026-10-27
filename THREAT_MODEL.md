@@ -59,7 +59,8 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 - The defaults in `application.yml` are the production settings: Swagger and API docs off, CSP header on, production
   CORS origins, public cache headers, no database password fallback. Production needs no Spring profile. Only the
   `dev` profile (`./gradlew bootRun`, `docker-compose.override.yml`) enables Swagger, allows `http://localhost:3000`
-  and falls back to the database password `postgres`.
+  and falls back to the database password `postgres`. springdoc and Swagger UI are `developmentOnly` dependencies:
+  they are not in the boot jar or the Jib image, so only `./gradlew bootRun` can serve Swagger.
 - The reference `docker-compose.yml` publishes no database port and binds the backend to `127.0.0.1:8080` only, because
   Docker's port publishing bypasses host firewalls such as ufw.
 - Tor Collector and its TLS are trusted in normal operation. Collector compromise is in scope only for "bounded damage"
@@ -125,7 +126,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 4. **Admin credential attacker.** Brute-forces HTTP Basic, sniffs it on a deployment without TLS, or finds it in
    shell history or compose files. Goal: log file, thread dumps, HTTP exchanges, cache eviction.
 5. **Misconfiguration opportunist.** Scans for deployments with a reachable PostgreSQL port, the backend on plain
-   HTTP, or the `dev` profile active in production (Swagger and docs exposed).
+   HTTP, or the `dev` profile active in production (CORS for localhost, database password fallback).
 6. **Supply-chain attacker.** Publishes a malicious version of a dependency or action, or plants instructions in a
    changelog that an AI reviewer acting on Renovate PRs follows.
 

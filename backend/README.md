@@ -58,9 +58,10 @@ on your bandwidth and hardware, but can be expected to take at least several hou
 
 ### Swagger UI
 
-In the `dev` profile, an interactive Swagger UI is available under http://localhost:8080/swagger and the
-specification can also be viewed in raw JSON under http://localhost:8080/openapi. Without the `dev` profile, Swagger UI
-and API docs are disabled.
+When started with `./gradlew bootRun` in the `dev` profile, an interactive Swagger UI is available under
+http://localhost:8080/swagger and the specification can also be viewed in raw JSON under http://localhost:8080/openapi.
+Without the `dev` profile, Swagger UI and API docs are disabled. springdoc is a `developmentOnly` dependency, so the boot
+jar and the Docker image do not contain it and never serve Swagger, not even in the `dev` profile.
 
 ### Admin access
 
@@ -95,8 +96,8 @@ Recommended (production):
 ## Config
 
 - `backend/src/main/resources/application.yml` - main backend config, its defaults are the production settings
-- `backend/src/main/resources/application-dev.yml` - local development: Swagger UI, CORS for `http://localhost:3000`,
-  no cache headers, database password fallback `postgres`. Never activate it in production.
+- `backend/src/main/resources/application-dev.yml` - local development: Swagger UI (with `bootRun`), CORS for
+  `http://localhost:3000`, no cache headers, database password fallback `postgres`. Never activate it in production.
 - `backend/src/main/resources/logback-spring.xml` - logging options
 - `backend/build.gradle.kts` - dependencies are managed with Gradle
 - `docker-compose.yml` - example docker compose file for production deployment
