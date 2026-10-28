@@ -84,6 +84,17 @@ describe("backend", () => {
         expect(init.body).toBe("[1,2]")
     })
 
+    it("tells when the service worker answered from its offline copy", async () => {
+        useTransport(() => Response.json([], {headers: {"X-TorMap-Cached-At": "2026-10-28T12:00:00.000Z"}}))
+        const response = await backend.get("/relay/location/days")
+        expect(response.cachedAt).toBe("2026-10-28T12:00:00.000Z")
+    })
+
+    it("has no offline time for answers from the network", async () => {
+        useTransport(() => Response.json([]))
+        expect((await backend.get("/relay/location/days")).cachedAt).toBeUndefined()
+    })
+
     it("returns non-JSON bodies as text", async () => {
         useTransport(() => new Response("plain"))
         expect((await backend.get("/text")).data).toBe("plain")

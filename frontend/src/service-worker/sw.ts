@@ -1,12 +1,14 @@
+/// <reference types="vite/client" />
 /**
  * TorMap's service worker. It serves the app shell from the precache, so installed or returning visitors start the app
- * without waiting for the network. Data requests to the backend and map tiles are not handled here and go to the
- * network as before.
+ * without waiting for the network, and keeps recently viewed relay data for offline use (see data-cache.ts). Map tiles
+ * are not handled here and go to the network as before.
  *
  * The Vite plugin in plugins/service-worker.ts builds this file to /sw.js and replaces `self.__TORMAP_PRECACHE` with
  * the files of the build. It must not import anything that the app imports too, so the output stays a single script.
  */
 import type {ServiceWorkerMessage} from "./messages";
+import {DataCache, matchDataRoute} from "./data-cache";
 import {deleteOtherPrecaches, installPrecache, matchPrecache, PrecacheEntry, precacheKey, precacheName} from "./precache";
 
 declare const self: ServiceWorkerGlobalScope & { __TORMAP_PRECACHE: PrecacheEntry[] }
@@ -14,6 +16,8 @@ declare const self: ServiceWorkerGlobalScope & { __TORMAP_PRECACHE: PrecacheEntr
 const entries = self.__TORMAP_PRECACHE
 const keysByUrl = new Map(entries.map(entry => [entry.url, precacheKey(entry)]))
 const cacheName = precacheName(entries)
+const backendApiUrl = import.meta.env.VITE_BACKEND_API_URL?.toString()
+const dataCache = new DataCache(caches, new URL("/__tormap-data-index", self.location.origin).href)
 
 self.addEventListener("install", event => {
     // `no-cache` revalidates with the server, so an outdated copy in the HTTP cache is not stored
@@ -31,9 +35,19 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("message", event => {
     // Browsers only deliver messages from pages of this origin, the check makes that explicit
-    if (event.origin === self.location.origin && event.data === ("SKIP_WAITING" satisfies ServiceWorkerMessage)) {
+    if (event.origin !== self.location.origin) return
+    const message = event.data as ServiceWorkerMessage
+    if (message === "SKIP_WAITING") {
         void self.skipWaiting()
+        return
     }
+    const port = event.ports[0]
+    if (!port || typeof message !== "object" || message === null) return
+    const answer = message.type === "SET_DATA_CACHING" ? dataCache.setEnabled(message.enabled === true)
+        : message.type === "CLEAR_DATA_CACHE" ? dataCache.clear()
+            : message.type === "GET_DATA_CACHE" ? dataCache.state()
+                : undefined
+    if (answer) event.waitUntil(answer.then(state => port.postMessage(state)))
 })
 
 /**
@@ -46,6 +60,12 @@ function isAppNavigation(request: Request, url: URL): boolean {
 self.addEventListener("fetch", event => {
     const request = event.request
     if (request.method !== "GET") return
+    const route = backendApiUrl ? matchDataRoute(request.url, backendApiUrl, new Date()) : undefined
+    if (route) {
+        event.respondWith(dataCache.handle(request, route, data => fetch(data), promise => event.waitUntil(promise)))
+        return
+    }
+
     const url = new URL(request.url)
     if (url.origin !== self.location.origin) return
 

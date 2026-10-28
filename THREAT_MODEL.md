@@ -107,8 +107,11 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 - Backend container runs as non-root `1000:1000` from a digest-pinned base image. The frontend image (static files only)
   is based on the digest-pinned `nginxinc/nginx-unprivileged`, runs as non-root `101` and listens on port 8080.
 - The frontend's service worker (`frontend/src/service-worker/`, served as `/sw.js`) is hand-written without third-party
-  code. It only answers same-origin GET requests for files of its own build, each checked against the SHA-256 that the
-  build recorded. Both hosts serve `sw.js` with `no-cache`, so a fixed version replaces a faulty one on the next visit.
+  code. It answers same-origin GET requests for files of its own build, each checked against the SHA-256 that the
+  build recorded, and keeps public relay data for offline use: only 200 JSON answers to GET requests on fixed backend
+  paths without query strings, at most 20 days for 60 days and 100 relay details for 7 days. Users can turn this off,
+  which deletes the data. Both hosts serve `sw.js` with `no-cache`, so a fixed version replaces a faulty one on the
+  next visit.
 - Supply chain: Maven Central and npm registry only, Yarn install scripts disabled, 3-day npm age gate, Renovate with
   release age, actions pinned by SHA, Gradle wrapper validation, least-privilege workflow `permissions`, no
   `pull_request_target`, CodeQL weekly, Snyk PR checks, GitHub secret scanning with push protection. The vendored
