@@ -1,8 +1,9 @@
 import {FunctionComponent, useEffect, useRef} from "react";
-import {describe, expect, it} from "vitest";
+import {afterEach, describe, expect, it, vi} from "vitest";
 import {page, userEvent} from "vitest/browser";
 
 import {useDate} from "../../context/date-context";
+import {fakeServiceWorker} from "../../test/fake-service-worker";
 import {renderWithProviders} from "../../test/render";
 import {ResponsiveDatePicker} from "./ResponsiveDatePicker";
 
@@ -30,6 +31,10 @@ const renderPicker = (largeScreen = true) => renderWithProviders(<><Seed/><Respo
 const field = () => document.querySelector<HTMLInputElement>("input.MuiPickersInputBase-input")!
 
 describe("ResponsiveDatePicker", () => {
+    afterEach(() => {
+        vi.restoreAllMocks()
+    })
+
     it("shows the selected day", async () => {
         await renderPicker()
         await expect.element(page.getByTestId("selected-date")).toHaveTextContent("2024-02-05")
@@ -51,6 +56,15 @@ describe("ResponsiveDatePicker", () => {
         await expect.element(page.getByRole("gridcell", {name: "4", exact: true})).toBeEnabled()
         // Days outside the available range are disabled as well
         await expect.element(page.getByRole("gridcell", {name: "6", exact: true})).toBeDisabled()
+    })
+
+    it("offline, only offers the days saved for offline use", async () => {
+        vi.spyOn(Navigator.prototype, "onLine", "get").mockReturnValue(false)
+        fakeServiceWorker({enabled: true, dates: ["2024-02-04", "2024-02-05"]})
+        await renderPicker()
+        await page.getByRole("button", {name: /Choose date/}).click()
+        await expect.element(page.getByRole("gridcell", {name: "2", exact: true})).toBeDisabled()
+        await expect.element(page.getByRole("gridcell", {name: "4", exact: true})).toBeEnabled()
     })
 
     it("follows a day selected elsewhere, e.g. on the slider", async () => {

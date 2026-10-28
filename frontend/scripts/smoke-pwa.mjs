@@ -1,4 +1,4 @@
-// Checks the service worker of the production build in Chromium: the app shell starts offline after one visit, and a
+// Checks the service worker of the production build in Chromium: the app starts offline with the last viewed day, and a
 // new version is offered instead of being activated. Run after `yarn build`: `yarn smoke:pwa`.
 // The backend and map tiles are answered by the test, so no network access is needed.
 import {spawn} from "node:child_process";
@@ -11,7 +11,7 @@ import {chromium} from "playwright";
 const port = 4175
 const origin = `http://127.0.0.1:${port}`
 const updateMessage = "A new version of TorMap is available."
-const offlineMessage = "You are offline. The map loads once you are back online."
+const offlineCopy = /^Offline · saved \d{4}-\d{2}-\d{2} \d{2}:\d{2}$/
 
 // A copy of the build, so the update check can change sw.js without touching build/
 const root = mkdtempSync(path.join(tmpdir(), "tormap-pwa-"))
@@ -58,12 +58,19 @@ try {
         throw new Error(`No app shell cache, found: ${cacheNames.join(", ")}`)
     }
 
-    step("the app starts offline")
+    step("a visit under the worker keeps the viewed day")
+    await page.reload()
+    await page.waitForFunction(async () => {
+        const index = await (await caches.open("tormap-data-v1")).match("/__tormap-data-index")
+        return index !== undefined && Object.keys((await index.json()).entries).length >= 2
+    }, null, {timeout: 30000})
+
+    step("the app starts offline with the saved day")
     await context.unroute("https://api.tormap.org/**")
     await context.setOffline(true)
     await page.reload()
     await page.locator(".leaflet-container").waitFor()
-    await page.getByText(offlineMessage).waitFor()
+    await page.getByText(offlineCopy).waitFor()
 
     step("a new version is offered, not activated")
     await context.setOffline(false)

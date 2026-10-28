@@ -34,6 +34,7 @@ import {useAtom, useSetAtom} from "jotai";
 import {openRelaySearchAtom, relaySearchOnMapAtom} from "../dialogs/relay/relay-details-atoms";
 import {countryUsageAtom} from "../leaflet/country-usage-atoms";
 import {filteredRelaysAtom, shownRelayCountAtom} from "../leaflet/LeafletLayers";
+import {OfflineDataSettings} from "./OfflineDataSettings";
 import {RelayTypeColorInput} from "./RelayTypeColorInput";
 
 interface Props {
@@ -418,6 +419,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                     </Box>
                 </AccordionDetails>
             </Accordion>
+            <OfflineDataSettings elevation={elevation}/>
             {(!isDefaultSettings || relaySearchOnMap) &&
                 <Button
                     variant="outlined"

@@ -8,6 +8,7 @@ import {startServiceWorker} from "../../pwa/register";
 import {isOffline, offlineSnackbarKey, onceOnline} from "../../util/online";
 import {readPermalink, writePermalink} from "../../util/permalink";
 import {backend} from "../../util/util";
+import {CachedDataChip} from "./CachedDataChip";
 import {CountryUsageLayer} from "./CountryUsageLayer";
 import {LeafletLayers} from "./LeafletLayers";
 import {MapContainer, TileLayer, useMapEvents} from "./map";
@@ -48,6 +49,7 @@ const MapPermalink: FunctionComponent = () => {
 export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
     // Component state
     const [relays, setRelays] = useState<RelayLocationDto[]>()
+    const [relaysCachedAt, setRelaysCachedAt] = useState<string>()
     const [refreshDayCount, setRefreshDayCount] = useState<number>(0)
 
     // App context
@@ -77,6 +79,7 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
             setIsLoading(false)
             if (currentTimeStamp === latestRequestTimestamp) {
                 setRelays(response.data)
+                setRelaysCachedAt(response.cachedAt)
             }
         }).catch(() => {
             setIsLoading(false)
@@ -99,41 +102,44 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
     }, [selectedDate, enqueueSnackbar, closeSnackbar, setIsLoading, refreshDayCount])
 
     return (
-        <MapContainer
-            style={{
-                width: "100vw",
-                height: "100vh",
-                // Matches the water of the CARTO dark_all tiles, so the area around the tiles looks the same
-                backgroundColor: "#2c353c",
-                position: "fixed",
-            }}
-            center={initialView.center}
-            zoom={initialView.zoom}
-            minZoom={2}
-            maxZoom={18}
-            scrollWheelZoom={true}
-            zoomSnap={1}
-            zoomDelta={1}
-            wheelPxPerZoomLevel={128}
-            preferCanvas={true}
-            attributionControl={false}
-            maxBounds={[[-180, -360], [180, 360]]}
-        >
-            <MapPermalink/>
-            <CountryUsageLayer/>
-            <React.StrictMode>
-                <LeafletLayers
-                    relays={relays}
-                    reloadSelectedDay={useCallback(() => setRefreshDayCount(prev => prev + 1), [])}
-                />
-                {/* CARTO's documented endpoint, the legacy {s}.basemaps.cartocdn.com/dark_all URLs return tiles in mismatched styles */}
-                <TileLayer
-                    maxZoom={19}
-                    url="https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png?key=cb1_2kmx_1_d709cb99db288b90b866bc72"
-                    noWrap={true}
-                />
-            </React.StrictMode>
-        </MapContainer>
+        <>
+            <MapContainer
+                style={{
+                    width: "100vw",
+                    height: "100vh",
+                    // Matches the water of the CARTO dark_all tiles, so the area around the tiles looks the same
+                    backgroundColor: "#2c353c",
+                    position: "fixed",
+                }}
+                center={initialView.center}
+                zoom={initialView.zoom}
+                minZoom={2}
+                maxZoom={18}
+                scrollWheelZoom={true}
+                zoomSnap={1}
+                zoomDelta={1}
+                wheelPxPerZoomLevel={128}
+                preferCanvas={true}
+                attributionControl={false}
+                maxBounds={[[-180, -360], [180, 360]]}
+            >
+                <MapPermalink/>
+                <CountryUsageLayer/>
+                <React.StrictMode>
+                    <LeafletLayers
+                        relays={relays}
+                        reloadSelectedDay={useCallback(() => setRefreshDayCount(prev => prev + 1), [])}
+                    />
+                    {/* CARTO's documented endpoint, the legacy {s}.basemaps.cartocdn.com/dark_all URLs return tiles in mismatched styles */}
+                    <TileLayer
+                        maxZoom={19}
+                        url="https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png?key=cb1_2kmx_1_d709cb99db288b90b866bc72"
+                        noWrap={true}
+                    />
+                </React.StrictMode>
+            </MapContainer>
+            <CachedDataChip cachedAt={relaysCachedAt}/>
+        </>
     );
 };
 

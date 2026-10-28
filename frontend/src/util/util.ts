@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 
 import {backendApiUrl} from "../config";
+import type {CachedAtHeader} from "../service-worker/messages";
 
 /**
  * new React-Hook for handling
@@ -37,6 +38,8 @@ export const nameOfFactory = <T>() => (name: keyof T) => name;
 export interface BackendResponse<T> {
     data: T
     status: number
+    /** When the service worker answered from its offline copy: the time the data was downloaded (ISO 8601) */
+    cachedAt?: string
 }
 
 /**
@@ -79,7 +82,11 @@ const request = async <T>(method: string, path: string, body?: unknown): Promise
     if (!response.ok) {
         throw new BackendError(`Request failed with status code ${response.status}`, response.status, data)
     }
-    return {data: data as T, status: response.status}
+    return {
+        data: data as T,
+        status: response.status,
+        cachedAt: response.headers.get("X-TorMap-Cached-At" satisfies CachedAtHeader) ?? undefined,
+    }
 }
 
 export const backend = {

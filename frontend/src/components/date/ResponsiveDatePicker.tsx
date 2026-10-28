@@ -5,6 +5,8 @@ import {enCA} from "date-fns/locale";
 import {FunctionComponent, useState} from "react";
 
 import {useDate} from "../../context/date-context";
+import {useDataCacheState} from "../../pwa/data-cache";
+import {useOffline} from "../../util/online";
 
 interface Props {
     /**
@@ -16,6 +18,10 @@ interface Props {
 export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) => {
     // App context
     const {selectedDate, availableDays, setSelectedDate} = useDate()
+    // Offline, only days that were saved for offline use can be loaded
+    const offline = useOffline()
+    const [dataCache] = useDataCacheState(offline)
+    const offlineDays = offline && dataCache?.enabled ? new Set(dataCache.dates) : undefined
 
     const firstAvailableDate = selectedDate ? parseISO(availableDays[0]) : undefined
     const lastAvailableDate = selectedDate ? parseISO(availableDays[availableDays.length - 1]) : undefined
@@ -71,7 +77,8 @@ export const ResponsiveDatePicker: FunctionComponent<Props> = ({largeScreen}) =>
                 minDate={firstAvailableDate}
                 maxDate={lastAvailableDate}
                 shouldDisableDate={(date) => {
-                    return !(availableDays.includes(format(date, "yyyy-MM-dd")))
+                    const day = format(date, "yyyy-MM-dd")
+                    return !availableDays.includes(day) || (offlineDays !== undefined && !offlineDays.has(day))
                 }}
                 views={["year", "month", "day"]}
             />
