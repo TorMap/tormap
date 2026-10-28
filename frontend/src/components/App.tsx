@@ -8,6 +8,7 @@ import {usePwaState} from "../pwa/pwa-state";
 import {SnackbarMessage} from "../types/ui";
 import {isOffline, offlineSnackbarKey, onceOnline} from "../util/online";
 import {backend} from "../util/util";
+import {InstallAppButton} from "./buttons/InstallAppButton";
 import {AboutInformation} from "./dialogs/AboutInformation";
 import {LeafletWorldMap} from "./leaflet/LeafletWorldMap";
 import {ExternalLink} from "./link/ExternalLink";
@@ -104,6 +105,7 @@ export const App: FunctionComponent = () => {
                     </span>
                 </Box>
                 <AboutInformation/>
+                <InstallAppButton/>
             </React.StrictMode>
         </>
     )
