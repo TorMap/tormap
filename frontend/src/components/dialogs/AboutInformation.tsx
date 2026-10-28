@@ -148,13 +148,13 @@ export const AboutInformation: React.FunctionComponent = () => {
                         href={"https://www.tu-darmstadt.de/"} label={"Technical University of Darmstadt"}/> as part
                         of the <ExternalLink href={"https://panda-projekt.de/"} label={"PANDA project"}/>, supervised
                         by Florian Platzer from <ExternalLink href={"https://www.sit.fraunhofer.de/"}
-                                                              label={"Fraunhofer SIT"}/>. Felix Krauspe hosts and
-                        administers the servers.
+                                                              label={"Fraunhofer SIT"}/>. Felix Krauspe provides
+                        hosting.
                     </Typography>
                     <h2>Support TorMap</h2>
                     <Typography variant={"body1"} gutterBottom>
-                        TorMap is free, open source and has no ads. Sponsoring helps to cover the server costs and keep
-                        the project running.
+                        TorMap is free, open source and has no ads. If it is useful to you, you can help cover costs
+                        via GitHub Sponsors.
                     </Typography>
                     <Button
                         href={"https://github.com/sponsors/JuliusHenke"}

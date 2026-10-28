@@ -57,14 +57,14 @@ We use [Semantic Versioning](https://semver.org/) and keep the frontend, backend
 
 ## Support
 
-TorMap is free, open source and has no ads. If it is useful to you, you can help cover the server costs via
+TorMap is free, open source and has no ads. If it is useful to you, you can help cover costs via
 [GitHub Sponsors](https://github.com/sponsors/JuliusHenke).
 
 ## Credits
 
 TorMap is maintained by [Julius Henke](https://github.com/JuliusHenke). Tim Kilb and Julius Henke initially developed
 it at the [Technical University of Darmstadt](https://www.tu-darmstadt.de/) as part of the
-[PANDA project](https://panda-projekt.de/), and Felix Krauspe hosts and administers the servers.
+[PANDA project](https://panda-projekt.de/). Felix Krauspe provides hosting.
 
 It uses relay descriptors and user estimates from the [Tor Project](https://metrics.torproject.org/), IP geolocation
 data by [DB-IP](https://db-ip.com), autonomous system data by [MaxMind](https://www.maxmind.com/), map tiles by
