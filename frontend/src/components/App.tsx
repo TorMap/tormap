@@ -10,6 +10,7 @@ import {isOffline, offlineSnackbarKey, onceOnline} from "../util/online";
 import {backend} from "../util/util";
 import {InstallAppButton} from "./buttons/InstallAppButton";
 import {AboutInformation} from "./dialogs/AboutInformation";
+import {KeyboardShortcuts} from "./keyboard/KeyboardShortcuts";
 import {LeafletWorldMap} from "./leaflet/LeafletWorldMap";
 import {ExternalLink} from "./link/ExternalLink";
 import {LoadingAnimation} from "./loading/LoadingAnimation";
@@ -106,6 +107,7 @@ export const App: FunctionComponent = () => {
                 </Box>
                 <AboutInformation/>
                 <InstallAppButton/>
+                <KeyboardShortcuts/>
             </React.StrictMode>
         </>
     )

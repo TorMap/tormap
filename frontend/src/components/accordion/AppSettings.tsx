@@ -27,15 +27,11 @@ import {
     topRelayCountOptions
 } from "../../types/settings";
 import {usageColorGradient} from "../../util/country-usage";
+import {searchShortcut} from "../../util/keyboard";
 import {nameOfFactory} from "../../util/util";
 import {ExternalLink} from "../link/ExternalLink";
-import {useAtom} from "jotai";
-import {
-    relayDetailsDialogSearchAtom,
-    relaysForDetailsDialogAtom,
-    relaySearchOnMapAtom,
-    showRelayDetailsDialogAtom
-} from "../dialogs/relay/relay-details-atoms";
+import {useAtom, useSetAtom} from "jotai";
+import {openRelaySearchAtom, relaySearchOnMapAtom} from "../dialogs/relay/relay-details-atoms";
 import {countryUsageAtom} from "../leaflet/country-usage-atoms";
 import {filteredRelaysAtom, shownRelayCountAtom} from "../leaflet/LeafletLayers";
 import {RelayTypeColorInput} from "./RelayTypeColorInput";
@@ -90,9 +86,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     const {settings, changeSettings, setSettings, resetSettings, isDefaultSettings} = useSettings()
 
     // Atom state
-    const [, setShowRelayDetailsDialog] = useAtom(showRelayDetailsDialogAtom)
-    const [, setRelaysForDetailsDialog] = useAtom(relaysForDetailsDialogAtom)
-    const [, setRelayDetailsDialogSearch] = useAtom(relayDetailsDialogSearchAtom)
+    const openRelaySearch = useSetAtom(openRelaySearchAtom)
     const [filteredRelays] = useAtom(filteredRelaysAtom)
     const [relaySearchOnMap, setRelaySearchOnMap] = useAtom(relaySearchOnMapAtom)
     const [countryUsage] = useAtom(countryUsageAtom)
@@ -100,6 +94,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
 
     // Util
     const nameOfSetting = nameOfFactory<Settings>()
+    const {ariaKeyShortcuts, label: shortcutLabel} = searchShortcut()
     const relayTypes = [RelayType.Exit, RelayType.Guard, RelayType.Other]
     // Days that were not reprocessed yet have no weights, then the weight settings would do nothing
     const weightsAvailable = filteredRelays.some(relay => relay.consensusWeight != null)
@@ -114,12 +109,29 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
 
     return (
         <>
-            <Button variant="contained" startIcon={<SearchIcon />} fullWidth={true} sx={{mb: "16px"}} onClick={() => {
-                setRelaysForDetailsDialog(filteredRelays)
-                setShowRelayDetailsDialog(true)
-                setRelayDetailsDialogSearch("")
-            }}>
+            <Button
+                variant="contained"
+                startIcon={<SearchIcon/>}
+                fullWidth={true}
+                sx={{mb: "16px"}}
+                aria-keyshortcuts={ariaKeyShortcuts}
+                onClick={() => openRelaySearch({relays: filteredRelays})}
+            >
                 Search {filteredRelays.length} relays
+                {/* Only hinted where a mouse is used, since devices with a touch screen rarely have a keyboard */}
+                <Box component="kbd" aria-hidden sx={{
+                    display: "none",
+                    "@media (pointer: fine)": {display: "inline"},
+                    ml: 1,
+                    px: 0.5,
+                    fontFamily: "inherit",
+                    fontSize: "0.75em",
+                    border: "1px solid",
+                    borderRadius: 1,
+                    opacity: 0.8,
+                }}>
+                    {shortcutLabel}
+                </Box>
             </Button>
             {relaySearchOnMap &&
                 <RelayLimitInfo onShowAll={() => setRelaySearchOnMap(undefined)}>
