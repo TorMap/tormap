@@ -60,6 +60,24 @@ class RelayDetailsRepositoryTest(
         months shouldBe setOf(relay1.month, relay2.month)
     }
 
+    "findAutonomousSystemsByMonth" {
+        relay1.month = "2023-01"
+        relay1.autonomousSystemNumber = 24940
+        relay1.autonomousSystemName = "Hetzner Online GmbH"
+        relay2.month = "2023-01"
+        relay2.autonomousSystemNumber = 24940
+        relay2.autonomousSystemName = "Hetzner Online GmbH"
+        relay3.month = "2023-02"
+        relay3.autonomousSystemNumber = 16276
+        relay3.autonomousSystemName = "OVH SAS"
+        val relayWithoutAutonomousSystem = mockRelayDetails('D').apply { month = "2023-01" }
+
+        relayDetailsRepository.saveAll(listOf(relay1, relay2, relay3, relayWithoutAutonomousSystem))
+        val autonomousSystems = relayDetailsRepository.findAutonomousSystemsByMonth("2023-01")
+
+        autonomousSystems.map { it.number to it.name } shouldBe listOf(24940 to "Hetzner Online GmbH")
+    }
+
     "findRelayIdentifiers" {
         val savedRelay1 = relayDetailsRepository.save(relay1)
         val savedRelay2 = relayDetailsRepository.save(relay2)

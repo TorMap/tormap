@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.tormap.database.entity.TorRelayFlag
+import org.tormap.mockRelayDetails
 import org.tormap.mockRelayLocation
 import java.time.LocalDate
 
@@ -12,9 +13,11 @@ import java.time.LocalDate
 @ActiveProfiles("test")
 class RelayLocationRepositoryTest(
     private val relayLocationRepository: RelayLocationRepositoryImpl,
+    private val relayDetailsRepository: RelayDetailsRepositoryImpl,
 ) : StringSpec({
     beforeEach {
         relayLocationRepository.deleteAll()
+        relayDetailsRepository.deleteAll()
     }
 
     val firstDayOfYear = LocalDate.ofYearDay(2023, 1)
@@ -123,5 +126,14 @@ class RelayLocationRepositoryTest(
             )
         )
         relayLocationRepository.findAllUsingDay(firstDayOfYear).size shouldBe 1
+    }
+
+    "findAllUsingDay includes the autonomous system of the relay details of the month" {
+        relayLocationRepository.save(mockRelayLocation(firstDayOfYear, 'A'))
+        relayDetailsRepository.save(mockRelayDetails('A').apply {
+            month = "2023-01"
+            autonomousSystemNumber = 24940
+        })
+        relayLocationRepository.findAllUsingDay(firstDayOfYear).single().asNumber shouldBe 24940
     }
 })

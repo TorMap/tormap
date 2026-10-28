@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -75,4 +76,13 @@ class RelayDetailsControllerValidationTest(
             .andExpect(content().string(containsString("size must be between 1 and ${RelayDetailsController.MAXIMUM_EXPECTED_RELAYS_PER_DAY}")))
     }
 
+    "autonomous systems - valid month returns 200" {
+        mockMvc.perform(get("/relay/details/autonomous-systems/2023-01"))
+            .andExpect(status().isOk)
+    }
+
+    "autonomous systems - malformed month returns 400" {
+        mockMvc.perform(get("/relay/details/autonomous-systems/2023-13"))
+            .andExpect(status().isBadRequest)
+    }
 })

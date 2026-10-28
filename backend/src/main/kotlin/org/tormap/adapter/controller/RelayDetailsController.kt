@@ -1,11 +1,16 @@
 package org.tormap.adapter.controller
 
 import io.swagger.v3.oas.annotations.Operation
+import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
+import org.tormap.adapter.dto.AutonomousSystemDto
 import org.tormap.database.repository.RelayDetailsRepositoryImpl
 import org.tormap.service.RelayDetailsQueryService
 import jakarta.validation.constraints.Size
+import java.time.YearMonth
+import java.time.format.DateTimeParseException
 
 @RestController
 @RequestMapping("relay/details/")
@@ -35,4 +40,16 @@ class RelayDetailsController(
     @PostMapping("family/identifiers")
     fun getFamilyIdentifiers(@RequestBody @Size(min = 1, max = MAXIMUM_EXPECTED_FAMILIES_PER_MONTH) familyIds: List<Long>) =
         relayDetailsRepositoryImpl.findFamilyIdentifiers(familyIds.distinct())
+
+    @Operation(summary = "Returns the number and name of all autonomous systems that relays of a given month are located in.")
+    @GetMapping("autonomous-systems/{month}")
+    fun getAutonomousSystems(@PathVariable month: String): List<AutonomousSystemDto> {
+        // The path variable is untrusted: a malformed month is a client error, not a server error
+        val yearMonth = try {
+            YearMonth.parse(month)
+        } catch (_: DateTimeParseException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The month must be like 2024-05.")
+        }
+        return relayDetailsRepositoryImpl.findAutonomousSystemsByMonth(yearMonth.toString())
+    }
 }
