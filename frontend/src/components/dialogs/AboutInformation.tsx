@@ -1,4 +1,11 @@
-import {Close as CloseIcon, Email as EmailIcon, GitHub as GitHubIcon, Info as InfoIcon, Twitter as TwitterIcon} from "@mui/icons-material";
+import {
+    Close as CloseIcon,
+    Email as EmailIcon,
+    FavoriteBorder as FavoriteBorderIcon,
+    GitHub as GitHubIcon,
+    Info as InfoIcon,
+    Twitter as TwitterIcon
+} from "@mui/icons-material";
 import {
     Avatar,
     Box,
@@ -10,7 +17,6 @@ import {
     Divider,
     Grid,
     IconButton,
-    Stack,
     Typography,
     useMediaQuery,
     useTheme
@@ -18,9 +24,7 @@ import {
 import {atom, useAtom} from "jotai";
 import React from "react";
 
-import {ContributorCard} from "../card/ContributorCard";
 import {ExternalLink} from "../link/ExternalLink";
-import BitcoinCard from "../card/BitcoinCard";
 import {isFullscreenSupported} from "../../util/fullscreen";
 import {searchShortcut} from "../../util/keyboard";
 
@@ -39,7 +43,6 @@ const keyboardShortcuts = (): [string, string][] => [
     ["Home / End", "First or latest day"],
     ["Esc", "Leave the map, so the arrow keys select days instead of moving the map"],
     ...(isFullscreenSupported() ? [["F", "Full screen showing only the map, or back"] as [string, string]] : []),
-    ["?", "Show this information"],
 ]
 
 /**
@@ -102,64 +105,69 @@ export const AboutInformation: React.FunctionComponent = () => {
                 >
                     <h2>What is TorMap?</h2>
                     <Typography variant={"body1"} gutterBottom>
-                        TorMap is a world map displaying approximate locations where Tor relays are being hosted.
-                        You can group, filter and analyze thousands of Tor relays, which route anonymous internet
-                        traffic daily. The historic state of the network can be viewed for any day between October 2007
-                        and today.<br/> Initially TorMap was developed by us at the <ExternalLink
-                        href={"https://www.tu-darmstadt.de/"} label={"Technical University of Darmstadt"}/> as part of
-                        the <ExternalLink href={"https://panda-projekt.de/"} label={"PANDA project"}/>. The project was
-                        supervised
-                        by <ExternalLink href={"mailto:florian.platzer@sit.fraunhofer.de"}
-                                         label={"Florian Platzer"}/> from <ExternalLink
-                        href={"https://www.sit.fraunhofer.de/"} label={"Frauenhofer SIT"}/>.
+                        TorMap shows the approximate locations of the thousands of Tor relays, which route anonymous
+                        internet traffic. You can view the network for any day since October 2007 and group the
+                        relays by family, autonomous system or country, filter them and look up the details of each
+                        relay.
                     </Typography>
-                    <h2>How do we get our data?</h2>
+                    <h2>Where does the data come from?</h2>
                     <Typography variant={"body1"} gutterBottom>
-                        The nonprofit organization <ExternalLink href={"https://www.torproject.org/"}
-                                                                 label={"TorProject"}/> already provides a
-                        large <ExternalLink href={"https://metrics.torproject.org/collector.html"}
-                                            label={"archive"}/> with raw historic data about the
-                        network. We regularly process these so called &quot;descriptors&quot; and lookup IPv4 addresses
-                        to get geo
-                        locations and autonomous systems. If you are interested in our implementation, check out the
-                        open source repository on <ExternalLink href={"https://github.com/TorMap/tormap"}
-                                                                label={"GitHub"}/>.<br/>
-                        The location and ownership of IP ranges can change over time. Since we
-                        only use current IP data, some relays might have been hosted somewhere else, than displayed on
-                        our world map. The location is also not accurate to the street level but rather an approximation
-                        of the city.
+                        The <ExternalLink href={"https://www.torproject.org/"} label={"Tor Project"}/> keeps
+                        an <ExternalLink href={"https://metrics.torproject.org/collector.html"} label={"archive"}/> of
+                        the descriptors that relays and directory authorities publish. TorMap regularly processes them
+                        and looks up the location and autonomous system of each IPv4 address.
+                        The <ExternalLink href={"https://github.com/TorMap/tormap"} label={"source code"}/> is open.
                     </Typography>
-                    <h2>Contributors</h2>
-                    <Stack
-                        direction={{sm: 'column', md: 'row'}}
-                        spacing={{xs: 3, sm: 3}}
-                        sx={{justifyContent: "flex-start", alignItems: "flex-start"}}
+                    <Typography variant={"body1"} gutterBottom>
+                        Locations are accurate to about the city, not the street. Since the lookups use current IP
+                        data, relays from past days might have been hosted somewhere else than shown.
+                    </Typography>
+                    <h2>Who is behind TorMap?</h2>
+                    <Box sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        py: 1,
+                        px: 1.5,
+                        mb: 1,
+                        border: 1,
+                        borderColor: "divider",
+                        borderRadius: 2,
+                    }}>
+                        <Avatar sx={{width: 40, height: 40}} alt={""}
+                                src={"https://avatars.githubusercontent.com/u/23460202?s=80&v=4"}/>
+                        <Box>
+                            <Typography variant={"body1"}>
+                                <ExternalLink href={"https://juliushenke.com"} label={"Julius Henke"}/>
+                            </Typography>
+                            <Typography variant={"body2"} color={"text.secondary"}>
+                                Active maintainer
+                            </Typography>
+                        </Box>
+                    </Box>
+                    <Typography variant={"body1"} gutterBottom>
+                        Tim Kilb and Julius Henke initially developed TorMap at the <ExternalLink
+                        href={"https://www.tu-darmstadt.de/"} label={"Technical University of Darmstadt"}/> as part
+                        of the <ExternalLink href={"https://panda-projekt.de/"} label={"PANDA project"}/>, supervised
+                        by Florian Platzer from <ExternalLink href={"https://www.sit.fraunhofer.de/"}
+                                                              label={"Fraunhofer SIT"}/>. Felix Krauspe provides
+                        hosting.
+                    </Typography>
+                    <h2>Support TorMap</h2>
+                    <Typography variant={"body1"} gutterBottom>
+                        TorMap is free, open source and has no ads. If it is useful to you, you can help cover costs
+                        via GitHub Sponsors.
+                    </Typography>
+                    <Button
+                        href={"https://github.com/sponsors/JuliusHenke"}
+                        target={"_blank"}
+                        rel={"noopener"}
+                        variant={"outlined"}
+                        startIcon={<FavoriteBorderIcon/>}
+                        sx={{mt: 1}}
                     >
-                        <ContributorCard
-                            avatar={<Avatar src={"https://avatars.githubusercontent.com/u/23460202?s=96&v=4"}/>}
-                            name={"Julius Henke"}
-                            website={"https://juliushenke.com"}
-                            roles={["Maintainer"]}
-                        />
-                        <ContributorCard
-                            avatar={<Avatar src={"https://avatars.githubusercontent.com/u/32802490?s=96&v=4"}/>}
-                            name={"Tim Kilb"}
-                            website={"https://github.com/TimKilb"}
-                            roles={["Developer"]}
-                        />
-                        <ContributorCard
-                            avatar={<Avatar src={"/felix-krauspe.jpeg"}/>}
-                            name={"Felix Krauspe"}
-                            website={"https://www.linkedin.com/in/felix-krauspe-202bb9218/"}
-                            roles={["Server Admin"]}
-                        />
-                    </Stack>
-                    <h2>Donations</h2>
-                    <Typography variant={"body1"} gutterBottom>
-                        If you like TorMap and want to support us, you can donate to us via Bitcoin or other
-                        cryptocurrencies. Your donation helps us to cover server costs and keep the project running ❤️
-                    </Typography>
-                    <BitcoinCard/>
+                        Sponsor on GitHub
+                    </Button>
                     <Divider sx={{my: 2}}/>
                     <Typography variant={"body2"} component={"h2"} sx={{fontWeight: "bold"}}>
                         Keyboard shortcuts
@@ -180,17 +188,13 @@ export const AboutInformation: React.FunctionComponent = () => {
                             </React.Fragment>
                         ))}
                     </Box>
-                    <Typography variant={"body2"} sx={{mb: 2}}>
-                        The day keys work while nothing else is selected.
-                    </Typography>
                     <Divider sx={{my: 2}}/>
                     <Typography variant={"body2"}>
-                        We use IP geolocation data by <ExternalLink href={"https://db-ip.com"}
-                                                                    label={"DB-IP"}/>{", "}
-                        Autonomous System data by <ExternalLink href={"https://www.maxmind.com/"}
-                                                                label={"MaxMind"}/>{" "}
-                        and GeoJSON data from <ExternalLink href={"https://geojson-maps.ash.ms/"}
-                                                            label={"https://geojson-maps.ash.ms/"}/>.
+                        IP geolocation data by <ExternalLink href={"https://db-ip.com"} label={"DB-IP"}/>,
+                        autonomous system data by <ExternalLink href={"https://www.maxmind.com/"} label={"MaxMind"}/>,
+                        Tor user estimates by <ExternalLink href={"https://metrics.torproject.org/"}
+                                                            label={"Tor Metrics"}/> and country borders
+                        from <ExternalLink href={"https://geojson-maps.ash.ms/"} label={"geojson-maps"}/>.
                     </Typography>
                     {APP_VERSION && <Typography variant={"body2"}>
                         This is TorMap version <ExternalLink href={"https://github.com/TorMap/tormap/releases"}
