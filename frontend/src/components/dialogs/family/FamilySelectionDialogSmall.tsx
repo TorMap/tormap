@@ -20,7 +20,7 @@ export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialog
                                                                                               shouldShowDialog,
                                                                                               closeDialog,
                                                                                               isLoading,
-                                                                                              familyIdentifiers,
+                                                                                              families,
                                                                                           }) => {
     return (
         <>
@@ -48,7 +48,7 @@ export const FamilySelectionDialogSmall: FunctionComponent<FamilySelectionDialog
                 <DialogContent
                     dividers
                 >
-                    {!isLoading ? <FamilySelectionTable familyIdentifiers={familyIdentifiers}
+                    {!isLoading ? <FamilySelectionTable families={families}
                                                         closeFamilySelectionDialog={closeDialog}/>
                         : <CircularProgress color={"inherit"} size={22.5} sx={{mt: 1}}/>}
                 </DialogContent>

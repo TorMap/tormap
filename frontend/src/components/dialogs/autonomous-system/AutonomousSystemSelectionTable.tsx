@@ -4,6 +4,7 @@ import {FunctionComponent, useMemo, useState} from "react";
 import {useSettings} from "../../../context/settings-context";
 import {AutonomousSystemRow} from "../../../util/autonomous-systems";
 import {formatWeightShare} from "../../../util/layer-construction";
+import {consensusWeightColumnTooltip} from "../../../util/relay-group-summary";
 
 interface Props {
     rows: AutonomousSystemRow[]
@@ -33,7 +34,7 @@ const columns: {
         label: "Consensus weight",
         firstDirection: "desc",
         numeric: true,
-        tooltip: "The share of the consensus weight of all relays on the map. It shows how likely Tor clients pick a relay of this autonomous system.",
+        tooltip: consensusWeightColumnTooltip("autonomous system"),
     },
     {key: "countryCount", label: "Countries", firstDirection: "desc", numeric: true},
 ]

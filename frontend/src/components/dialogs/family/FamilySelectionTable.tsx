@@ -2,13 +2,15 @@ import {Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel, TextFi
 import {FunctionComponent, useMemo, useState} from "react";
 
 import {useSettings} from "../../../context/settings-context";
-import {RelayFamilyIdentifier} from "../../../dto/relay";
+import {formatWeightShare} from "../../../util/layer-construction";
+import {consensusWeightColumnTooltip} from "../../../util/relay-group-summary";
+import {FamilyRow} from "./FamilySelectionDialog";
 
 interface Props {
     /**
-     * Family Identifiers
+     * The families to choose from
      */
-    familyIdentifiers?: RelayFamilyIdentifier[]
+    families?: FamilyRow[]
 
     /**
      * Callback for closing the dialog
@@ -16,43 +18,56 @@ interface Props {
     closeFamilySelectionDialog: () => void
 }
 
-type SortColumn = "nicknames" | "memberCount" | "autonomousSystems"
+type SortColumn = "nicknames" | "relayCount" | "exitCount" | "consensusWeight" | "countryCount" | "autonomousSystems"
 type SortDirection = "asc" | "desc"
 
-const columns: { key: SortColumn, label: string, firstDirection: SortDirection, minWidth?: string }[] = [
+const columns: {
+    key: SortColumn,
+    label: string,
+    firstDirection: SortDirection,
+    numeric?: boolean,
+    tooltip?: string,
+}[] = [
     {key: "nicknames", label: "Relay nicknames", firstDirection: "asc"},
-    {key: "memberCount", label: "Count", firstDirection: "desc", minWidth: "75px"},
+    {key: "relayCount", label: "Relays", firstDirection: "desc", numeric: true},
+    {key: "exitCount", label: "Exits", firstDirection: "desc", numeric: true},
+    {
+        key: "consensusWeight",
+        label: "Consensus weight",
+        firstDirection: "desc",
+        numeric: true,
+        tooltip: consensusWeightColumnTooltip("family"),
+    },
+    {key: "countryCount", label: "Countries", firstDirection: "desc", numeric: true},
     {key: "autonomousSystems", label: "Autonomous Systems", firstDirection: "asc"},
 ]
 
 const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: "base"})
 
 /**
- * Sort families by a column. Families without autonomous systems stay last in both directions.
+ * Sort families by a column. Values that are not known, e.g. missing autonomous systems, stay last in both directions.
  */
-export const sortFamilyIdentifiers = (
-    families: RelayFamilyIdentifier[],
+export const sortFamilies = (
+    families: FamilyRow[],
     column: SortColumn,
     direction: SortDirection,
-): RelayFamilyIdentifier[] => {
+): FamilyRow[] => {
     const sign = direction === "asc" ? 1 : -1
     return [...families].sort((a, b) => {
-        if (column === "memberCount") {
-            return sign * (a.memberCount - b.memberCount)
-        }
         const valueA = a[column]
         const valueB = b[column]
-        if (!valueA || !valueB) {
-            return (valueA ? 0 : 1) - (valueB ? 0 : 1)
+        if (valueA === undefined || valueA === "" || valueB === undefined || valueB === "") {
+            return (valueA === undefined || valueA === "" ? 1 : 0) - (valueB === undefined || valueB === "" ? 1 : 0)
         }
-        return sign * collator.compare(valueA, valueB)
+        if (typeof valueA === "string" && typeof valueB === "string") return sign * collator.compare(valueA, valueB)
+        return sign * ((valueA as number) - (valueB as number))
     })
 }
 
 /**
  * Whether a family matches a search for one of its nicknames or autonomous systems
  */
-export const familyMatches = (family: RelayFamilyIdentifier, search: string): boolean => {
+export const familyMatches = (family: FamilyRow, search: string): boolean => {
     const term = search.trim().toLowerCase()
     return !term || [family.nicknames, family.autonomousSystems].some(value => value?.toLowerCase().includes(term))
 }
@@ -61,37 +76,37 @@ export const familyMatches = (family: RelayFamilyIdentifier, search: string): bo
  * A Component to show a Table with Families to select one
  */
 export const FamilySelectionTable: FunctionComponent<Props> = ({
-                                                                   familyIdentifiers,
+                                                                   families,
                                                                    closeFamilySelectionDialog,
                                                                }) => {
     // App context
     const {settings, setSettings} = useSettings()
 
     // Component state
-    const [sortColumn, setSortColumn] = useState<SortColumn>("memberCount")
-    const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
+    const hasWeights = families?.some(family => family.consensusWeight !== undefined) ?? false
+    const [sort, setSort] = useState<{ column: SortColumn, direction: SortDirection }>()
+    // Without a choice of the user, the heaviest families come first, or the largest on days without weights
+    const sortColumn = sort?.column ?? (hasWeights ? "consensusWeight" : "relayCount")
+    const sortDirection = sort?.direction ?? "desc"
     const [search, setSearch] = useState("")
 
-    const sortedFamilyIdentifiers = useMemo(
-        () => familyIdentifiers && sortFamilyIdentifiers(
-            familyIdentifiers.filter(family => familyMatches(family, search)), sortColumn, sortDirection
-        ),
-        [familyIdentifiers, search, sortColumn, sortDirection]
+    const sortedFamilies = useMemo(
+        () => families && sortFamilies(families.filter(family => familyMatches(family, search)), sortColumn, sortDirection),
+        [families, search, sortColumn, sortDirection]
     )
 
     const changeSort = (column: SortColumn, firstDirection: SortDirection) => {
         if (column === sortColumn) {
-            setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+            setSort({column, direction: sortDirection === "asc" ? "desc" : "asc"})
         } else {
-            setSortColumn(column)
-            setSortDirection(firstDirection)
+            setSort({column, direction: firstDirection})
         }
     }
 
     return (
         <>
             {/* Only worth it for longer lists, e.g. all families of the map */}
-            {familyIdentifiers && familyIdentifiers.length > 5 &&
+            {families && families.length > 5 &&
                 <TextField
                     label="Search by nickname or autonomous system"
                     size="small"
@@ -100,13 +115,14 @@ export const FamilySelectionTable: FunctionComponent<Props> = ({
                     onChange={event => setSearch(event.target.value)}
                     sx={{mb: 1}}
                 />}
-            {sortedFamilyIdentifiers ? <Table size={"small"}>
+            {sortedFamilies ? <Table size={"small"}>
                     <TableHead>
                         <TableRow>
-                            {columns.map(({key, label, firstDirection, minWidth}) =>
+                            {columns.map(({key, label, firstDirection, numeric, tooltip}) =>
                                 <TableCell
                                     key={key}
-                                    sx={minWidth ? {minWidth} : undefined}
+                                    align={numeric ? "right" : "left"}
+                                    title={tooltip}
                                     sortDirection={sortColumn === key ? sortDirection : false}
                                 >
                                     <TableSortLabel
@@ -121,7 +137,7 @@ export const FamilySelectionTable: FunctionComponent<Props> = ({
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {sortedFamilyIdentifiers.map((family) =>
+                        {sortedFamilies.map((family) =>
                             <TableRow
                                 key={family.id}
                                 onClick={() => {
@@ -138,8 +154,19 @@ export const FamilySelectionTable: FunctionComponent<Props> = ({
                                 <TableCell scope="row">
                                     <Typography>{family.nicknames}</Typography>
                                 </TableCell>
-                                <TableCell scope="row" sx={{minWidth: "75px",}}>
-                                    <Typography>{family.memberCount}</Typography>
+                                <TableCell align="right">
+                                    <Typography>{family.relayCount}</Typography>
+                                </TableCell>
+                                <TableCell align="right">
+                                    <Typography>{family.exitCount}</Typography>
+                                </TableCell>
+                                <TableCell align="right">
+                                    <Typography>
+                                        {family.consensusWeightShare !== undefined ? formatWeightShare(family.consensusWeightShare) : "-"}
+                                    </Typography>
+                                </TableCell>
+                                <TableCell align="right">
+                                    <Typography>{family.countryCount}</Typography>
                                 </TableCell>
                                 <TableCell scope="row">
                                     <Typography>

@@ -230,6 +230,12 @@ describe("LeafletLayers", () => {
             makeRelay({lat: 2, long: 2, asNumber: 16276, detailsId: 22}),
         ]
 
+        it("warns when there is no AS data", async () => {
+            await renderLayers(relays, {sortAutonomousSystem: true})
+
+            await expect.element(page.getByText(SnackbarMessage.NoAutonomousSystemData)).toBeVisible()
+        })
+
         it("draws a circle per autonomous system and location", async () => {
             await renderLayers(asRelays, {sortAutonomousSystem: true})
             await expectState(/"filtered":4/)

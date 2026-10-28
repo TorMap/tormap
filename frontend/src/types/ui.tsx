@@ -9,6 +9,7 @@ export enum SnackbarMessage {
     UpdateAvailable = "A new version of TorMap is available.",
     NoRelaysWithFlags = "There are no relays for the current settings!",
     NoFamilyData = "Currently we have no family information for this date!",
+    NoAutonomousSystemData = "Currently we have no AS information for this date!",
     UpdatedData = "New data needed to be displayed. Please try again now.",
     NoRelayDetails = "Currently we have no details about this relay for this month.",
     HistoricDataProcessing = "Currently historic data is being processed.",

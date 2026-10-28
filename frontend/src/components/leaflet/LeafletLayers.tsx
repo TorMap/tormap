@@ -313,6 +313,14 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
                 if (settings.selectedAutonomousSystem) leafletMarkerLayers.addLayer(relaySelectedAutonomousSystemLayer)
                 else leafletMarkerLayers.addLayer(relayAutonomousSystemCoordinatesLayer)
             }
+            if (settings.sortAutonomousSystem && relayAutonomousSystemMap.size === 0) {
+                enqueueSnackbar(SnackbarMessage.NoAutonomousSystemData, {
+                    variant: "warning",
+                    key: SnackbarMessage.NoAutonomousSystemData
+                })
+            } else {
+                closeSnackbar(SnackbarMessage.NoAutonomousSystemData)
+            }
             if (settings.sortFamily && relayFamilyMap.size === 0) {
                 enqueueSnackbar(SnackbarMessage.NoFamilyData, {variant: "warning", key: SnackbarMessage.NoFamilyData})
             } else {
@@ -338,6 +346,8 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
                 closeDialog={closeFamilySelectionDialog}
                 reloadSelectedDay={reloadSelectedDay}
                 familyIds={familySelection.ids}
+                relayFamilyMap={relayFamilyMap}
+                totalConsensusWeight={totalConsensusWeight}
             /> : null}
             {hasOpenedAutonomousSystemSelectionDialog ? <AutonomousSystemSelectionDialog
                 shouldShowDialog={autonomousSystemSelection.show}
