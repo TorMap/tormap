@@ -30,3 +30,21 @@ export const relaySearchOnMapAtom = atom<RelaySearchOnMap | undefined>(undefined
 
 export const relayDetailsDialogSearchAtom = atom("");
 export const relayDetailsDialogOrderAtom = atom<keyof RelayIdentifierMatch>("nickname");
+
+/**
+ * If set, the search field of the relay details dialog takes the focus as soon as it is shown
+ */
+export const focusRelaySearchAtom = atom(false);
+
+/**
+ * Opens the relay details dialog to search the given relays, starting with an empty search
+ */
+export const openRelaySearchAtom = atom(null, (_get, set, {relays, focusSearch = false}: {
+    relays: RelayLocationDto[],
+    focusSearch?: boolean
+}) => {
+    set(relaysForDetailsDialogAtom, relays)
+    set(showRelayDetailsDialogAtom, true)
+    set(relayDetailsDialogSearchAtom, "")
+    set(focusRelaySearchAtom, focusSearch)
+});
