@@ -57,7 +57,7 @@ export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation})
         },
         {icon: RelayFamilyIcon, title: "Families", value: statistics.familyCount},
         {icon: EarthIcon, title: "Countries", value: statistics.countryCount},
-        {icon: AutonomousSystemIcon, title: "Autonomous systems", value: statistics.autonomousSystemCount},
+        {icon: AutonomousSystemIcon, title: "AS", value: statistics.autonomousSystemCount},
     ]
 
     return (

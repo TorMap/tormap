@@ -134,11 +134,11 @@ describe("AppSettings group search buttons", () => {
     it("only shows the buttons while the grouping is on", async () => {
         const screen = await renderWithProviders(<><AppSettings elevation={0}/><Groups/></>)
         await expect.element(screen.getByRole("button", {name: /Search \d+ families/})).not.toBeInTheDocument()
-        await expect.element(screen.getByRole("button", {name: /autonomous systems/})).not.toBeInTheDocument()
+        await expect.element(screen.getByRole("button", {name: /Search \d+ AS/})).not.toBeInTheDocument()
 
         await screen.getByRole("switch", {name: "Autonomous system"}).click()
-        await expect.element(screen.getByRole("button", {name: "Search 3 autonomous systems"})).toBeVisible()
-        await screen.getByText("Family", {exact: true}).click()
+        await expect.element(screen.getByRole("button", {name: "Search 3 AS"})).toBeVisible()
+        await screen.getByRole("switch", {name: "Family"}).click()
         await expect.element(screen.getByRole("button", {name: "Search 2 families"})).toBeVisible()
     })
 
@@ -147,7 +147,7 @@ describe("AppSettings group search buttons", () => {
             <><AppSettings elevation={0}/><Groups/></>,
             {settings: {sortFamily: true, sortAutonomousSystem: true}}
         )
-        await screen.getByRole("button", {name: "Search 3 autonomous systems"}).click()
+        await screen.getByRole("button", {name: "Search 3 AS"}).click()
         expect(selections().autonomousSystemSelection).toEqual({show: true, ids: [24940, 16276, 3320]})
         await screen.getByRole("button", {name: "Search 2 families"}).click()
         expect(selections().familySelection).toEqual({show: true, ids: [1, 2]})

@@ -18,7 +18,7 @@ import {FunctionComponent, ReactNode} from "react";
 
 import {defaultSettings, tooltipTimeDelay} from "../../config";
 import {useSettings} from "../../context/settings-context";
-import {AutonomousSystemIcon, RelayFamilyIcon} from "../../types/icons";
+import {AutonomousSystemIcon, CoordinatesIcon, EarthIcon, HeatmapIcon, RelayFamilyIcon} from "../../types/icons";
 import {RelayFlagLabel, RelayType, RelayTypeLabel, RelayTypeTooltip} from "../../types/relay";
 import {
     relayMustIncludeFlagOptions,
@@ -80,6 +80,41 @@ const RelayLimitInfo: FunctionComponent<{ onShowAll: () => void, children: React
         />
     </Box>
 )
+
+/**
+ * The switches of the "Group relays by" section
+ */
+const groupingOptions: {
+    setting: "sortFamily" | "sortAutonomousSystem" | "sortCountry" | "aggregateCoordinates" | "heatMap",
+    label: string,
+    tooltip: string,
+    icon: ReactNode,
+}[] = [{
+    setting: "sortFamily",
+    label: "Family",
+    tooltip: "Every verified relay family gets a somewhat unique looking color assigned. A circle's size is relative to the amount of relays located at it's center. Click a circle, to see details.",
+    icon: RelayFamilyIcon,
+}, {
+    setting: "sortAutonomousSystem",
+    label: "Autonomous system",
+    tooltip: "Every autonomous system (AS, the network of a hosting provider or ISP) gets a somewhat unique looking color assigned. A circle's size is relative to the amount of relays located at it's center. Click a circle, to select an AS.",
+    icon: AutonomousSystemIcon,
+}, {
+    setting: "sortCountry",
+    label: "Country",
+    tooltip: "Relays, which are located in the same country, will be painted in the same color. Select a country, to see specific stats for it.",
+    icon: EarthIcon,
+}, {
+    setting: "aggregateCoordinates",
+    label: "Coordinates",
+    tooltip: "A circle is placed on the map when multiple relays are located at the same coordinates. A circle's size is relative to the amount of relays located at it's center. Click a circle, to see details.",
+    icon: CoordinatesIcon,
+}, {
+    setting: "heatMap",
+    label: "Density heatmap",
+    tooltip: "This heatmap visualizes how many relays are present in an area relative to others.",
+    icon: HeatmapIcon,
+}]
 
 /**
  * A component for changing the app settings
@@ -169,11 +204,10 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                     variant="outlined"
                     startIcon={AutonomousSystemIcon}
                     fullWidth={true}
-                    // Left aligned like the relay search, the longer label wraps on narrow panels
-                    sx={{mb: "16px", justifyContent: "flex-start", textAlign: "left"}}
+                    sx={{mb: "16px", justifyContent: "flex-start"}}
                     onClick={() => setAutonomousSystemSelection({show: true, ids: groupsOnMap.asNumbers})}
                 >
-                    Search {groupsOnMap.asNumbers.length} autonomous systems
+                    Search {groupsOnMap.asNumbers.length} AS
                 </Button>}
             {relaySearchOnMap &&
                 <RelayLimitInfo onShowAll={() => setRelaySearchOnMap(undefined)}>
@@ -201,72 +235,23 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                 </AccordionSummary>
                 <AccordionDetails sx={detailsSx}>
                     <FormGroup>
-                        <Tooltip
-                            key={"Family"}
-                            title={"Every verified relay family gets a somewhat unique looking color assigned. A circle's size is relative to the amount of relays located at it's center. Click a circle, to see details."}
-                            placement={"left"}
-                            enterDelay={tooltipTimeDelay}
-                        >
-                            <FormControlLabel
-                                key={"Family"}
-                                control={<Switch checked={settings.sortFamily} onChange={changeSettings}/>}
-                                label={"Family"}
-                                name={nameOfSetting("sortFamily")}
-                            />
-                        </Tooltip>
-                        <Tooltip
-                            key={"Autonomous system"}
-                            title={"Every autonomous system (the network of a hosting provider or ISP) gets a somewhat unique looking color assigned. A circle's size is relative to the amount of relays located at it's center. Click a circle, to select an autonomous system."}
-                            placement={"left"}
-                            enterDelay={tooltipTimeDelay}
-                            describeChild
-                        >
-                            <FormControlLabel
-                                key={"Autonomous system"}
-                                control={<Switch checked={settings.sortAutonomousSystem} onChange={changeSettings}/>}
-                                label={"Autonomous system"}
-                                name={nameOfSetting("sortAutonomousSystem")}
-                            />
-                        </Tooltip>
-                        <Tooltip
-                            key={"Country"}
-                            title={"Relays, which are located in the same country, will be painted in the same color. Select a country, to see specific stats for it."}
-                            placement={"left"}
-                            enterDelay={tooltipTimeDelay}
-                        >
-                            <FormControlLabel
-                                key={"Country"}
-                                control={<Switch checked={settings.sortCountry} onChange={changeSettings}/>}
-                                label={"Country"}
-                                name={nameOfSetting("sortCountry")}
-                            />
-                        </Tooltip>
-                        <Tooltip
-                            key={"Coordinates"}
-                            title={"A circle is placed on the map when multiple relays are located at the same coordinates. A circle's size is relative to the amount of relays located at it's center. Click a circle, to see details."}
-                            placement={"left"}
-                            enterDelay={tooltipTimeDelay}
-                        >
-                            <FormControlLabel
-                                key={"Coordinates"}
-                                control={<Switch checked={settings.aggregateCoordinates} onChange={changeSettings}/>}
-                                label={"Coordinates"}
-                                name={nameOfSetting("aggregateCoordinates")}
-                            />
-                        </Tooltip>
-                        <Tooltip
-                            key={"Density heatmap"}
-                            title={"This heatmap visualizes how many relays are present in an area relative to others."}
-                            placement={"left"}
-                            enterDelay={tooltipTimeDelay}
-                        >
-                            <FormControlLabel
-                                key={"Density heatmap"}
-                                control={<Switch checked={settings.heatMap} onChange={changeSettings}/>}
-                                label={"Density heatmap"}
-                                name={nameOfSetting("heatMap")}
-                            />
-                        </Tooltip>
+                        {groupingOptions.map(({setting, label, tooltip, icon}) =>
+                            <Box key={setting} sx={{display: "flex", alignItems: "center", justifyContent: "space-between"}}>
+                                <Tooltip
+                                    title={tooltip}
+                                    placement={"left"}
+                                    enterDelay={tooltipTimeDelay}
+                                    describeChild
+                                >
+                                    <FormControlLabel
+                                        control={<Switch checked={settings[setting]} onChange={changeSettings}/>}
+                                        label={label}
+                                        name={nameOfSetting(setting)}
+                                    />
+                                </Tooltip>
+                                <Box aria-hidden sx={{display: "flex", color: "text.secondary"}}>{icon}</Box>
+                            </Box>
+                        )}
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>
