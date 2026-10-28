@@ -1,8 +1,8 @@
 import {Dialog, DialogContent} from "@mui/material";
 import {expect, it} from "vitest";
 import {page} from "vitest/browser";
-import {MapContainer} from "react-leaflet";
 
+import {MapContainer} from "../components/leaflet/map";
 import {useDate} from "../context/date-context";
 import {useSettings} from "../context/settings-context";
 import {useStatistics} from "../context/statistics-context";

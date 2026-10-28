@@ -8,8 +8,8 @@ import {SnackbarMessage} from "../types/ui";
 import {App} from "./App";
 
 // Tiles are plain image requests to a CDN, which tests must not hit
-vi.mock("react-leaflet", async (importOriginal) => ({
-    ...(await importOriginal<typeof import("react-leaflet")>()),
+vi.mock("./leaflet/map", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("./leaflet/map")>()),
     TileLayer: () => null,
 }))
 

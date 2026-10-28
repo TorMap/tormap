@@ -1,7 +1,6 @@
 import {CircleMarker, GeoJSON, Layer, Map as LeafletMap, Path} from "leaflet";
 import {useAtomValue, useSetAtom} from "jotai";
 import {ReactNode, useEffect} from "react";
-import {MapContainer, useMap} from "react-leaflet";
 import {describe, expect, it, vi} from "vitest";
 import {page} from "vitest/browser";
 
@@ -18,6 +17,7 @@ import {HeatLayer} from "../../util/heat-layer";
 import {AppSettings} from "../accordion/AppSettings";
 import {RelaySearchOnMap, relaySearchOnMapAtom} from "../dialogs/relay/relay-details-atoms";
 import {filteredRelaysAtom, LeafletLayers} from "./LeafletLayers";
+import {MapContainer, useMap} from "./map";
 
 let leafletMap: LeafletMap
 
