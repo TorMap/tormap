@@ -18,10 +18,12 @@ class RelayLocationDto(
     val familyId: Long?,
     val nickname: String?,
     val consensusWeight: Long?,
+    autonomousSystemNumber: Int?,
 ) {
     val lat = latitude
     val long = longitude
     val country = countryCode
+    val asNumber = autonomousSystemNumber
     val flags = try {
         flags?.commaSeparatedToList()?.map { it.toInt() }
     } catch (exception: Exception) {

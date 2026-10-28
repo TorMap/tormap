@@ -16,7 +16,7 @@ interface RelayLocationRepositoryImpl : RelayLocationRepository {
     fun findDistinctDays(): Set<LocalDate>
 
     @Query(
-        "SELECT new org.tormap.adapter.dto.RelayLocationDto(g.latitude, g.longitude, g.countryCode, g.flags, n.id, n.familyId, n.nickname, g.consensusWeight) FROM RelayLocation g " +
+        "SELECT new org.tormap.adapter.dto.RelayLocationDto(g.latitude, g.longitude, g.countryCode, g.flags, n.id, n.familyId, n.nickname, g.consensusWeight, n.autonomousSystemNumber) FROM RelayLocation g " +
                 "LEFT JOIN FETCH RelayDetails n " +
                 "ON g.fingerprint = n.fingerprint " +
                 "AND function('TO_CHAR', g.day, 'YYYY-MM') = n.month " +

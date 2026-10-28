@@ -25,14 +25,14 @@ class RelayLocationTest : StringSpec({
     "flags unknown to TorMap are skipped instead of dropping all flags" {
         val location = relayLocation(setOf("MiddleOnly", "Running", "Valid"))
         location.flags shouldBe "3, 0"
-        RelayLocationDto(BigDecimal.ONE, BigDecimal.ONE, "DE", location.flags, null, null, null, null)
+        RelayLocationDto(BigDecimal.ONE, BigDecimal.ONE, "DE", location.flags, null, null, null, null, null)
             .flags shouldBe listOf(3, 0)
     }
 
     "a relay without flags has none" {
         val location = relayLocation(emptySet())
         location.flags shouldBe ""
-        RelayLocationDto(BigDecimal.ONE, BigDecimal.ONE, "DE", location.flags, null, null, null, null)
+        RelayLocationDto(BigDecimal.ONE, BigDecimal.ONE, "DE", location.flags, null, null, null, null, null)
             .flags shouldBe null
     }
 

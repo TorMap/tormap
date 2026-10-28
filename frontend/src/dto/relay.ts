@@ -13,6 +13,16 @@ export interface RelayLocationDto {
      * The weight clients use for path selection. Not a measured bandwidth. Missing until the day got reprocessed.
      */
     consensusWeight?: number | null
+
+    /**
+     * The number of the autonomous system the relay is located in. Missing for unknown systems and older responses.
+     */
+    asNumber?: number | null
+}
+
+export interface AutonomousSystemDto {
+    number: number
+    name?: string | null
 }
 
 export interface CountryUsageDto {
