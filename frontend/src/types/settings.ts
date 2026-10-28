@@ -6,6 +6,8 @@ export interface Settings {
     selectedCountry: string | undefined
     sortFamily: boolean
     selectedFamily: number | undefined
+    sortAutonomousSystem: boolean
+    selectedAutonomousSystem: number | undefined
     aggregateCoordinates: boolean
     heatMap: boolean
 

@@ -16,8 +16,8 @@ import {
     buildRelayCoordinatesMap,
     createLatLonKey,
     getRelayType,
-    RelayFamilyLocation,
-    sortFamilyCoordinatesMap
+    RelayGroupLocation,
+    sortGroupCoordinatesMap
 } from "./aggregate-relays";
 import {CountryFeature, getUniqueCountryColor} from "./geojson";
 import {HeatLatLngTuple, HeatLayer, heatLayer} from "./heat-layer";
@@ -165,106 +165,108 @@ function addRelayNicknameTooltip(relays: RelayLocationDto[], mostImportantRelay:
 }
 
 /**
- * Returns a Layer with circles only for the selected family
- * @param familyMap - The FamilyMap
- * @param settings - The app settings
- * @param setSettingsCallback - The callback for changing settings
+ * How the relays of a grouping (e.g. families or autonomous systems) are drawn and selected on the map
  */
-export const buildSelectedFamilyLayer = (
-    familyMap: Map<number, RelayLocationDto[]>,
-    settings: Settings,
-    setSettingsCallback: (s: Settings) => void,
-): LayerGroup => {
-    const familyLayer: LayerGroup = new LayerGroup()
-    familyMap.forEach((family, familyId) => {
-        if (familyId !== settings.selectedFamily) return
-        const latLonMap: Map<string, RelayLocationDto[]> = buildRelayCoordinatesMap(family)
-        latLonMap.forEach((relays, key) => {
-            const coordinates = key.split(",")
-            circleMarker(
-                [+coordinates[0], +coordinates[1]],
-                {
-                    color: calculateFamilyColor(familyId),
-                    radius: calcRadiusForValue(relays.length),
-                    fillOpacity: .2,
-                    weight: 1,
-                },
-            )
-                .on("click", () => {
-                    if (familyId === settings.selectedFamily) {
-                        setSettingsCallback({...settings, selectedFamily: undefined})
-                    } else {
-                        setSettingsCallback({...settings, selectedFamily: familyId})
-                    }
-                })
-                .addTo(familyLayer)
-        })
-    })
-    return familyLayer
+export interface RelayGrouping {
+    /**
+     * The ID of the selected group, undefined if none is selected
+     */
+    selectedId: number | undefined
+
+    /**
+     * The color of the circles of a group
+     */
+    color: (groupId: number) => string
+
+    /**
+     * Selects a group, undefined clears the selection
+     */
+    select: (groupId: number | undefined) => void
+
+    /**
+     * Lets the user choose between several groups at a coordinate
+     */
+    openSelectionDialog: (groupIds: number[]) => void
 }
 
 /**
- * Returns a Layer with markers for families with size relative to number of relays in given family on a coordinate. And scales families size so there are no markers with same size
- * @param famCordMap - The famCordMap
- * @param settings - The app settings
- * @param setSettings - The callback for changing settings
- * @param setFamiliesForSelectionDialog
- * @param setShowFamilySelectionDialog
+ * Returns a Layer with circles only for the selected group
+ * @param groupMap - The relays of each group, e.g. a FamilyMap
+ * @param grouping - How the groups are drawn and selected
  */
-export const buildFamilyCoordinatesLayer = (
-    famCordMap: Map<string, Map<number, RelayLocationDto[]>>,
-    settings: Settings,
-    setSettings: (s: Settings) => void,
-    setFamiliesForSelectionDialog: (f: number[]) => void,
-    setShowFamilySelectionDialog: (b: boolean) => void,
+export const buildSelectedGroupLayer = (
+    groupMap: Map<number, RelayLocationDto[]>,
+    grouping: RelayGrouping,
 ): LayerGroup => {
-    const familyLayer: LayerGroup = new LayerGroup()
-    const sortedFamilyCoordinatesMap: Map<string, RelayFamilyLocation[]> = sortFamilyCoordinatesMap(famCordMap)
-    sortedFamilyCoordinatesMap.forEach((familiesAtLocation, location) => {
+    const groupLayer: LayerGroup = new LayerGroup()
+    const selectedId = grouping.selectedId
+    const group = selectedId !== undefined ? groupMap.get(selectedId) : undefined
+    if (selectedId === undefined || !group) return groupLayer
+    const latLonMap: Map<string, RelayLocationDto[]> = buildRelayCoordinatesMap(group)
+    latLonMap.forEach((relays, key) => {
+        const coordinates = key.split(",")
+        circleMarker(
+            [+coordinates[0], +coordinates[1]],
+            {
+                color: grouping.color(selectedId),
+                radius: calcRadiusForValue(relays.length),
+                fillOpacity: .2,
+                weight: 1,
+            },
+        )
+            .on("click", () => grouping.select(undefined))
+            .addTo(groupLayer)
+    })
+    return groupLayer
+}
+
+/**
+ * Returns a Layer with markers for groups with size relative to number of relays in given group on a coordinate. And scales groups size so there are no markers with same size
+ * @param groupCoordinatesMap - The relays of each group at each coordinate, as built by buildGroupCoordinatesMap
+ * @param grouping - How the groups are drawn and selected
+ */
+export const buildGroupCoordinatesLayer = (
+    groupCoordinatesMap: Map<string, Map<number, RelayLocationDto[]>>,
+    grouping: RelayGrouping,
+): LayerGroup => {
+    const groupLayer: LayerGroup = new LayerGroup()
+    const sortedGroupCoordinatesMap: Map<string, RelayGroupLocation[]> = sortGroupCoordinatesMap(groupCoordinatesMap)
+    sortedGroupCoordinatesMap.forEach((groupsAtLocation, location) => {
         const coordinates = location.split(",")
         const latLng: L.LatLngExpression = [+coordinates[0], +coordinates[1]]
-        familiesAtLocation.forEach((familyLocation) => {
-            const radius = calcRadiusForValue(familyLocation.relays.length + familyLocation.padding)
+        groupsAtLocation.forEach((groupLocation) => {
+            const radius = calcRadiusForValue(groupLocation.relays.length + groupLocation.padding)
             let fillOpacity = .2
 
             // not selected
-            if (settings.selectedFamily !== undefined && settings.selectedFamily !== familyLocation.familyId) {
+            if (grouping.selectedId !== undefined && grouping.selectedId !== groupLocation.groupId) {
                 fillOpacity = 0
             }
 
             circleMarker(
                 latLng,
                 {
-                    color: calculateFamilyColor(familyLocation.familyId),
+                    color: grouping.color(groupLocation.groupId),
                     radius: radius,
                     fillOpacity: fillOpacity,
                     weight: 1,
                     className: location,
                 }
             )
-                .on("click", () =>
-                    onMultiFamilyCircleClick(settings, setSettings, familiesAtLocation, setFamiliesForSelectionDialog, setShowFamilySelectionDialog)
-                )
-                .addTo(familyLayer)
+                .on("click", () => onMultiGroupCircleClick(grouping, groupsAtLocation))
+                .addTo(groupLayer)
         })
     })
-    return familyLayer
+    return groupLayer
 }
 
-const onMultiFamilyCircleClick = (
-    settings: Settings,
-    setSettings: (s: Settings) => void,
-    familiesAtLocation: RelayFamilyLocation[],
-    setFamiliesForSelectionDialog: (f: number[]) => void,
-    setShowFamilySelectionDialog: (b: boolean) => void,
-) => {
-    if (settings.selectedFamily) {
-        setSettings({...settings, selectedFamily: undefined})
-    } else if (familiesAtLocation.length === 1) {
-        setSettings({...settings, selectedFamily: familiesAtLocation[0].familyId})
+const onMultiGroupCircleClick = (grouping: RelayGrouping, groupsAtLocation: RelayGroupLocation[]) => {
+    if (grouping.selectedId) {
+        grouping.select(undefined)
+    } else if (groupsAtLocation.length === 1) {
+        grouping.select(groupsAtLocation[0].groupId)
     } else {
-        setFamiliesForSelectionDialog(familiesAtLocation.map(family => family.familyId))
-        setShowFamilySelectionDialog(true)
+        grouping.openSelectionDialog(groupsAtLocation.map(group => group.groupId))
     }
 }
 
@@ -272,6 +274,14 @@ export const calculateFamilyColor = (familyId: number) => {
     const hue = (familyId % 8) * (360 / 8)
     const sat = "90%"
     return `hsl(${hue},${sat},60%)`
+}
+
+/**
+ * There are many more autonomous systems than families at a coordinate, so they get more hues
+ */
+export const calculateAutonomousSystemColor = (asNumber: number) => {
+    const hue = (asNumber % 12) * (360 / 12)
+    return `hsl(${hue},75%,55%)`
 }
 
 export const buildRelayHeatmapLayer = (relays: RelayLocationDto[]): HeatLayer => {

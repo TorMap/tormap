@@ -65,56 +65,77 @@ export const buildRelayCoordinatesMap = (relays: RelayLocationDto[]): Map<string
 export const createLatLonKey = (relay: RelayLocationDto) => `${relay.lat},${relay.long}`
 
 /**
- * Returns a Key-Value-Map where Key is the Family ID and Value is a GeoRelayView[] with all Relays that are part of this Family
+ * Returns a Key-Value-Map where Key is the ID of a group (e.g. a family) and Value is a GeoRelayView[] with all Relays
+ * that are part of this group. Relays without a group are left out.
  * @param relays - The relays
+ * @param groupOf - The ID of the group a relay is part of
  */
-export const buildRelayFamilyMap = (relays: RelayLocationDto[]): Map<number, RelayLocationDto[]> => {
-    const familyMap: Map<number, RelayLocationDto[]> = new Map<number, RelayLocationDto[]>()
+export const buildRelayGroupMap = (
+    relays: RelayLocationDto[],
+    groupOf: (relay: RelayLocationDto) => number | null | undefined,
+): Map<number, RelayLocationDto[]> => {
+    const groupMap: Map<number, RelayLocationDto[]> = new Map<number, RelayLocationDto[]>()
     relays.forEach(relay => {
-        if (relay.familyId !== null) {
-            const key = relay.familyId
-            if (key) {
-                const old = familyMap.get(key)
-                if (old) {
-                    old.push(relay)
-                    familyMap.set(key, old)
-                } else {
-                    familyMap.set(key, [relay])
-                }
+        const key = groupOf(relay)
+        if (key) {
+            const old = groupMap.get(key)
+            if (old) {
+                old.push(relay)
+            } else {
+                groupMap.set(key, [relay])
             }
         }
     })
-    return familyMap
+    return groupMap
 }
 
 /**
- * Returns a Key-Value-Map where Key is the coordinate pair as string and Value is also a Key-Value-Map where Key is the family ID and value is GeoRelayView[] with all Relays that are part of this Family
- * @param latLonMap - A LatLonMap to build the famCordMap on
+ * Returns a Key-Value-Map where Key is the Family ID and Value is a GeoRelayView[] with all Relays that are part of this Family
+ * @param relays - The relays
  */
-export const buildFamilyCoordinatesMap = (latLonMap: Map<string, RelayLocationDto[]>): Map<string, Map<number, RelayLocationDto[]>> => {
-    const famCordMap: Map<string, Map<number, RelayLocationDto[]>> = new Map<string, Map<number, RelayLocationDto[]>>()
+export const buildRelayFamilyMap = (relays: RelayLocationDto[]): Map<number, RelayLocationDto[]> =>
+    buildRelayGroupMap(relays, relay => relay.familyId)
+
+/**
+ * Returns a Key-Value-Map where Key is the number of an autonomous system and Value is a GeoRelayView[] with all Relays
+ * located in it
+ * @param relays - The relays
+ */
+export const buildRelayAutonomousSystemMap = (relays: RelayLocationDto[]): Map<number, RelayLocationDto[]> =>
+    buildRelayGroupMap(relays, relay => relay.asNumber)
+
+/**
+ * Returns a Key-Value-Map where Key is the coordinate pair as string and Value is also a Key-Value-Map where Key is the group ID and value is GeoRelayView[] with all Relays that are part of this group
+ * @param latLonMap - A LatLonMap to build the map on
+ * @param buildGroupMap - Groups the relays at a coordinate, e.g. buildRelayFamilyMap
+ */
+export const buildGroupCoordinatesMap = (
+    latLonMap: Map<string, RelayLocationDto[]>,
+    buildGroupMap: (relays: RelayLocationDto[]) => Map<number, RelayLocationDto[]>,
+): Map<string, Map<number, RelayLocationDto[]>> => {
+    const groupCoordinatesMap: Map<string, Map<number, RelayLocationDto[]>> = new Map<string, Map<number, RelayLocationDto[]>>()
     latLonMap.forEach((relaysOnLocation, location) => {
-        famCordMap.set(location, buildRelayFamilyMap(relaysOnLocation))
+        groupCoordinatesMap.set(location, buildGroupMap(relaysOnLocation))
     })
-    return famCordMap
+    return groupCoordinatesMap
 }
 
 /**
- * Returns a Key-Value-Map where Key is the coordinate pair as string and Value is an Array of famCordArr-Objects that are sorted for family size
- * The largest Family on this coordinate is first
- * @param famCordMap - The famCordMap-Object to sort
+ * Returns a Key-Value-Map where Key is the coordinate pair as string and Value is an Array of RelayGroupLocations that are sorted for group size
+ * The largest group on this coordinate is first
+ * @param groupCoordinatesMap - The map to sort, as built by buildGroupCoordinatesMap
  */
-export const sortFamilyCoordinatesMap = (famCordMap: Map<string, Map<number, RelayLocationDto[]>>): Map<string, RelayFamilyLocation[]> => {
-    const output: Map<string, RelayFamilyLocation[]> = new Map<string, RelayFamilyLocation[]>()
+export const sortGroupCoordinatesMap = (groupCoordinatesMap: Map<string, Map<number, RelayLocationDto[]>>): Map<string, RelayGroupLocation[]> => {
+    const output: Map<string, RelayGroupLocation[]> = new Map<string, RelayGroupLocation[]>()
     // For each coordinate
-    famCordMap.forEach((famMapForLocation, coordinateKey) => {
-        const sorted: RelayFamilyLocation[] = []
-        // For each family at coordinate
-        while (famMapForLocation.size > 0) {
-            let largest: RelayFamilyLocation = {relays: [], familyId: 0, padding: 0}
+    groupCoordinatesMap.forEach((groupMapForLocation, coordinateKey) => {
+        const sorted: RelayGroupLocation[] = []
+        // For each group at coordinate
+        while (groupMapForLocation.size > 0) {
+            let largest: RelayGroupLocation = {relays: [], groupId: 0, padding: 0}
             // Find largest
-            famMapForLocation.forEach((relays, famID) => {
-                if (relays.length > largest.relays.length) largest = {relays: relays, familyId: famID, padding: 0}
+            groupMapForLocation.forEach((relays, groupId) => {
+                if (relays.length > largest.relays.length) largest = {relays: relays, groupId: groupId, padding: 0}
             })
             // Add padding to all larger ones (so there are no markers with same size on same coordinate)
             if (sorted.length > 0) {
@@ -122,16 +143,16 @@ export const sortFamilyCoordinatesMap = (famCordMap: Map<string, Map<number, Rel
             }
             // Cleanup for next iteration
             sorted.push(largest)
-            famMapForLocation.delete(largest.familyId)
-            largest = {relays: [], familyId: 0, padding: 0}
+            groupMapForLocation.delete(largest.groupId)
+            largest = {relays: [], groupId: 0, padding: 0}
         }
         output.set(coordinateKey, sorted)
     })
     return output
 }
 
-export type RelayFamilyLocation = {
-    familyId: number,
+export type RelayGroupLocation = {
+    groupId: number,
     relays: RelayLocationDto[],
     padding: number
 }
@@ -162,6 +183,20 @@ export const buildFilteredRelays = (
     relayCountryMap: Map<string, RelayLocationDto[]>,
     relayFamilyMap: Map<number, RelayLocationDto[]>,
     settings: Settings,
+    relayAutonomousSystemMap: Map<number, RelayLocationDto[]> = new Map(),
+): RelayLocationDto[] => {
+    const relays = filterByCountryAndFamily(filteredRelaysByFlags, relayCountryMap, relayFamilyMap, settings)
+    const selectedAutonomousSystem = settings.selectedAutonomousSystem
+    if (!selectedAutonomousSystem || !relayAutonomousSystemMap.has(selectedAutonomousSystem)) return relays
+    if (relays === filteredRelaysByFlags) return relayAutonomousSystemMap.get(selectedAutonomousSystem) ?? []
+    return relays.filter(relay => relay.asNumber === selectedAutonomousSystem)
+}
+
+const filterByCountryAndFamily = (
+    filteredRelaysByFlags: RelayLocationDto[],
+    relayCountryMap: Map<string, RelayLocationDto[]>,
+    relayFamilyMap: Map<number, RelayLocationDto[]>,
+    settings: Settings,
 ): RelayLocationDto[] => {
     if (settings.selectedCountry && settings.selectedFamily) {
         return relayCountryMap.get(settings.selectedCountry)?.filter(
@@ -180,6 +215,7 @@ export const buildStatistics = (
     relayCountryMap: Map<string, RelayLocationDto[]>,
     relayFamilyMap: Map<number, RelayLocationDto[]>,
     settings: Settings,
+    relayAutonomousSystemMap: Map<number, RelayLocationDto[]> = new Map(),
 ): Statistics => {
     let countryCount = relayCountryMap.size
     let familyCount = relayFamilyMap.size
@@ -194,6 +230,11 @@ export const buildStatistics = (
         familyCount = 1
         countryCount = new Set(filteredRelays.map(relay => relay.country)).size
     }
+    // The relays of a selected autonomous system are only a part of the countries and families above
+    if (settings.selectedAutonomousSystem && relayAutonomousSystemMap.has(settings.selectedAutonomousSystem)) {
+        countryCount = new Set(filteredRelays.map(relay => relay.country)).size
+        familyCount = buildRelayFamilyMap(filteredRelays).size
+    }
 
     const stats: Statistics = {
         relayGuardCount: 0,
@@ -201,6 +242,7 @@ export const buildStatistics = (
         relayOtherCount: 0,
         countryCount,
         familyCount,
+        autonomousSystemCount: buildRelayAutonomousSystemMap(filteredRelays).size,
     }
 
     filteredRelays.forEach(relay => {

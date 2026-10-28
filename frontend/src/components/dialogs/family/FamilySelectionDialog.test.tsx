@@ -2,10 +2,13 @@ import {describe, expect, it, vi} from "vitest";
 import {page} from "vitest/browser";
 
 import {useSettings} from "../../../context/settings-context";
-import {makeFamilyIdentifier} from "../../../test/fixtures";
+import {RelayLocationDto} from "../../../dto/relay";
+import {makeFamilyIdentifier, makeRelay} from "../../../test/fixtures";
 import {mockBackend, networkError} from "../../../test/mock-backend";
 import {renderWithProviders} from "../../../test/render";
+import {RelayFlag} from "../../../types/relay";
 import {SnackbarMessage} from "../../../types/ui";
+import {buildRelayFamilyMap} from "../../../util/aggregate-relays";
 import {FamilySelectionDialog} from "./FamilySelectionDialog";
 
 const SelectedFamily = () => {
@@ -19,7 +22,11 @@ describe.each([
     ["large", 1400, 900, "Select a family"],
     ["small", 500, 800, "Families"],
 ])("FamilySelectionDialog on a %s screen", (_name, width, height, title) => {
-    const open = async (props: { familyIds?: number[] } = {}) => {
+    const open = async (props: {
+        familyIds?: number[],
+        relayFamilyMap?: Map<number, RelayLocationDto[]>,
+        totalConsensusWeight?: number,
+    } = {}) => {
         await page.viewport(width, height)
         const closeDialog = vi.fn()
         const reloadSelectedDay = vi.fn()
@@ -30,6 +37,8 @@ describe.each([
                     closeDialog={closeDialog}
                     reloadSelectedDay={reloadSelectedDay}
                     familyIds={props.familyIds ?? familyIds}
+                    relayFamilyMap={props.relayFamilyMap}
+                    totalConsensusWeight={props.totalConsensusWeight}
                 />
                 <SelectedFamily/>
             </>,
@@ -72,6 +81,26 @@ describe.each([
         expect(closeDialog).toHaveBeenCalledOnce()
     })
 
+    it("shows the relays, exits, consensus weight and countries of the families on the map, heaviest first", async () => {
+        mockBackend.onPost("/relay/details/family/identifiers", [
+            makeFamilyIdentifier({id: 3, nicknames: "alpha, bravo", memberCount: 2}),
+            makeFamilyIdentifier({id: 4, nicknames: "charlie", memberCount: 1}),
+        ])
+        const relayFamilyMap = buildRelayFamilyMap([
+            makeRelay({familyId: 3, country: "DE", consensusWeight: 10, flags: [RelayFlag.Exit]}),
+            makeRelay({familyId: 3, country: "FR", consensusWeight: 10}),
+            makeRelay({familyId: 4, country: "DE", consensusWeight: 30}),
+        ])
+        await open({relayFamilyMap, totalConsensusWeight: 100})
+        const cells = () => Array.from(document.querySelectorAll("tbody tr"))
+            .map(row => Array.from(row.querySelectorAll("td")).slice(0, 5).map(cell => cell.textContent))
+
+        await expect.poll(cells).toEqual([
+            ["charlie", "1", "0", "30.00%", "1"],
+            ["alpha, bravo", "2", "1", "20.00%", "2"],
+        ])
+    })
+
     it("sorts the families by the clicked column", async () => {
         mockBackend.onPost("/relay/details/family/identifiers", [
             makeFamilyIdentifier({id: 3, nicknames: "bravo", memberCount: 2, autonomousSystems: "AS10"}),
@@ -96,8 +125,28 @@ describe.each([
         await page.getByRole("button", {name: "Autonomous Systems"}).click()
         await expect.poll(nicknames).toEqual(["bravo", "charlie", "alpha"])
 
-        await page.getByRole("button", {name: "Count"}).click()
+        await page.getByRole("button", {name: "Relays"}).click()
         await expect.poll(nicknames).toEqual(["alpha", "charlie", "bravo"])
+    })
+
+    it("filters a long list by nickname or autonomous system", async () => {
+        mockBackend.onPost("/relay/details/family/identifiers", [
+            makeFamilyIdentifier({id: 3, nicknames: "alpha", autonomousSystems: "Hetzner Online GmbH"}),
+            makeFamilyIdentifier({id: 4, nicknames: "bravo", autonomousSystems: "OVH SAS"}),
+            makeFamilyIdentifier({id: 5, nicknames: "charlie"}),
+            makeFamilyIdentifier({id: 6, nicknames: "delta"}),
+            makeFamilyIdentifier({id: 7, nicknames: "echo"}),
+            makeFamilyIdentifier({id: 8, nicknames: "foxtrot"}),
+        ])
+        await open({familyIds: [3, 4, 5, 6, 7, 8]})
+        const nicknames = () => Array.from(document.querySelectorAll("tbody tr"))
+            .map(row => row.querySelector("td")?.textContent)
+        await expect.poll(nicknames).toHaveLength(6)
+
+        await page.getByLabelText("Search by nickname or autonomous system").fill("ovh")
+        await expect.poll(nicknames).toEqual(["bravo"])
+        await page.getByLabelText("Search by nickname or autonomous system").fill("ECHO")
+        await expect.poll(nicknames).toEqual(["echo"])
     })
 
     it("reloads the day when the families are outdated", async () => {

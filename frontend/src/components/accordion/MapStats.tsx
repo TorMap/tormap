@@ -15,6 +15,7 @@ import {FunctionComponent, ReactElement} from "react";
 import {useSettings} from "../../context/settings-context";
 import {useStatistics} from "../../context/statistics-context";
 import {
+    AutonomousSystemIcon,
     EarthIcon,
     RelayFamilyIcon,
     RelayTypeIcon,
@@ -56,6 +57,7 @@ export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation})
         },
         {icon: RelayFamilyIcon, title: "Families", value: statistics.familyCount},
         {icon: EarthIcon, title: "Countries", value: statistics.countryCount},
+        {icon: AutonomousSystemIcon, title: "AS", value: statistics.autonomousSystemCount},
     ]
 
     return (
@@ -68,6 +70,7 @@ export const MapStats: FunctionComponent<Props> = ({defaultExpanded, elevation})
                 >
                     <Typography className={"heading"}>
                         Stats{settings.selectedFamily ? " for family" : null}
+                        {settings.selectedAutonomousSystem ? ` for AS${settings.selectedAutonomousSystem}` : null}
                         {settings.selectedCountry ? " in " + getFullCountryName(settings.selectedCountry) : null}
                     </Typography>
                 </AccordionSummary>

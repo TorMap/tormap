@@ -21,6 +21,7 @@ describe("parseStoredSettings", () => {
             sortCountry: true,
             selectedCountry: "DE",
             sortFamily: true,
+            sortAutonomousSystem: true,
             aggregateCoordinates: true,
             heatMap: true,
             showRelayTypes: {[RelayType.Exit]: false, [RelayType.Guard]: true, [RelayType.Other]: false},
@@ -34,6 +35,12 @@ describe("parseStoredSettings", () => {
         const parsed = parseStoredSettings(JSON.stringify({sortFamily: true, selectedFamily: 42}), defaults)
         expect(parsed.sortFamily).toBe(true)
         expect(parsed.selectedFamily).toBeUndefined()
+    })
+
+    it("restores the autonomous system grouping, but not a selected autonomous system", () => {
+        const parsed = parseStoredSettings(JSON.stringify({sortAutonomousSystem: true, selectedAutonomousSystem: 24940}), defaults)
+        expect(parsed.sortAutonomousSystem).toBe(true)
+        expect(parsed.selectedAutonomousSystem).toBeUndefined()
     })
 
     it("keeps defaults for missing settings", () => {

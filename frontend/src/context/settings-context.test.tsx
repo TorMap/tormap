@@ -78,16 +78,19 @@ describe("SettingsProvider", () => {
             expect(stored()).toMatchObject({heatMap: true})
         })
 
-        it("stores the selected country but not the selected family", async () => {
+        it("stores the selected country but not the selected family or autonomous system", async () => {
             const {result, act} = await render()
             await act(() => result.current.setSettings(makeSettings({
                 sortCountry: true,
                 selectedCountry: "DE",
                 sortFamily: true,
                 selectedFamily: 3,
+                sortAutonomousSystem: true,
+                selectedAutonomousSystem: 24940,
             })))
-            expect(stored()).toMatchObject({sortCountry: true, selectedCountry: "DE", sortFamily: true})
+            expect(stored()).toMatchObject({sortCountry: true, selectedCountry: "DE", sortFamily: true, sortAutonomousSystem: true})
             expect(stored()).not.toHaveProperty("selectedFamily")
+            expect(stored()).not.toHaveProperty("selectedAutonomousSystem")
         })
 
         it("falls back to the defaults for broken storage", async () => {
@@ -158,6 +161,11 @@ describe("SettingsProvider", () => {
         it("clears the selected family when family grouping is off", async () => {
             const {result} = await render(makeSettings({sortFamily: false, selectedFamily: 3}))
             expect(result.current.settings.selectedFamily).toBeUndefined()
+        })
+
+        it("clears the selected autonomous system when its grouping is off", async () => {
+            const {result} = await render(makeSettings({sortAutonomousSystem: false, selectedAutonomousSystem: 24940}))
+            expect(result.current.settings.selectedAutonomousSystem).toBeUndefined()
         })
 
         it("keeps selections while grouping is on", async () => {

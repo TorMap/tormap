@@ -26,6 +26,7 @@ export const StatisticsProvider: FunctionComponent<StatisticsProviderProps> = ({
         relayOtherCount: 0,
         countryCount: 0,
         familyCount: 0,
+        autonomousSystemCount: 0,
     })
     return (
         <StatisticsContext.Provider

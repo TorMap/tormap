@@ -4,20 +4,22 @@ import {beforeAll, describe, expect, it, vi} from "vitest";
 import {RelayLocationDto} from "../dto/relay";
 import {makeRelay, makeRelays, makeSettings} from "../test/fixtures";
 import {RelayFlag, RelayType} from "../types/relay";
-import {buildFamilyCoordinatesMap, buildRelayCoordinatesMap, buildRelayCountryMap, buildRelayFamilyMap} from "./aggregate-relays";
+import {buildGroupCoordinatesMap, buildRelayCoordinatesMap, buildRelayCountryMap, buildRelayFamilyMap} from "./aggregate-relays";
 import {CountryFeature, getUniqueCountryColor, loadWorldFeatures} from "./geojson";
 import {HeatLayer} from "./heat-layer";
 import {
     buildAggregatedCoordinatesLayer,
     buildCountryLayer,
-    buildFamilyCoordinatesLayer,
+    buildGroupCoordinatesLayer,
     buildRelayCountryLayer,
     buildRelayHeatmapLayer,
     buildRelayLayer,
-    buildSelectedFamilyLayer,
+    buildSelectedGroupLayer,
     calcRadiusForWeight,
+    calculateAutonomousSystemColor,
     calculateFamilyColor,
     formatWeightShare,
+    RelayGrouping,
 } from "./layer-construction";
 
 const markers = (layer: LayerGroup) => layer.getLayers() as CircleMarker[]
@@ -153,45 +155,52 @@ describe("buildRelayLayer", () => {
     })
 })
 
-describe("buildSelectedFamilyLayer", () => {
+const makeGrouping = (selectedId?: number): RelayGrouping => ({
+    selectedId,
+    color: calculateFamilyColor,
+    select: vi.fn(),
+    openSelectionDialog: vi.fn(),
+})
+
+describe("buildSelectedGroupLayer", () => {
     const family1 = [makeRelay({lat: 1, long: 1, familyId: 1}), makeRelay({lat: 2, long: 2, familyId: 1})]
     const family2 = [makeRelay({lat: 3, long: 3, familyId: 2})]
     const familyMap = buildRelayFamilyMap([...family1, ...family2])
 
-    it("draws only the selected family", () => {
-        const layer = markers(buildSelectedFamilyLayer(familyMap, makeSettings({selectedFamily: 1}), vi.fn()))
+    it("draws only the selected group", () => {
+        const layer = markers(buildSelectedGroupLayer(familyMap, makeGrouping(1)))
         expect(layer).toHaveLength(2)
         expect(layer[0].options.color).toBe(calculateFamilyColor(1))
     })
 
     it("draws nothing without a selection", () => {
-        expect(buildSelectedFamilyLayer(familyMap, makeSettings(), vi.fn()).getLayers()).toHaveLength(0)
+        expect(buildSelectedGroupLayer(familyMap, makeGrouping()).getLayers()).toHaveLength(0)
     })
 
-    it("deselects the family on click", () => {
-        const settings = makeSettings({selectedFamily: 1})
-        const setSettings = vi.fn()
-        markers(buildSelectedFamilyLayer(familyMap, settings, setSettings))[0].fire("click")
-        expect(setSettings).toHaveBeenCalledWith({...settings, selectedFamily: undefined})
+    it("draws nothing for a selection that is not on the map", () => {
+        expect(buildSelectedGroupLayer(familyMap, makeGrouping(99)).getLayers()).toHaveLength(0)
+    })
+
+    it("deselects the group on click", () => {
+        const grouping = makeGrouping(1)
+        markers(buildSelectedGroupLayer(familyMap, grouping))[0].fire("click")
+        expect(grouping.select).toHaveBeenCalledWith(undefined)
     })
 })
 
-describe("buildFamilyCoordinatesLayer", () => {
-    const build = (relays: RelayLocationDto[], selectedFamily?: number) => {
-        const settings = makeSettings({selectedFamily})
-        const callbacks = {setSettings: vi.fn(), setFamilies: vi.fn(), setShowDialog: vi.fn()}
-        const famCordMap = buildFamilyCoordinatesMap(buildRelayCoordinatesMap(relays))
-        const layer = markers(buildFamilyCoordinatesLayer(
-            famCordMap, settings, callbacks.setSettings, callbacks.setFamilies, callbacks.setShowDialog
-        ))
-        return {layer, settings, ...callbacks}
+describe("buildGroupCoordinatesLayer", () => {
+    const build = (relays: RelayLocationDto[], selectedId?: number) => {
+        const grouping = makeGrouping(selectedId)
+        const groupCoordinatesMap = buildGroupCoordinatesMap(buildRelayCoordinatesMap(relays), buildRelayFamilyMap)
+        const layer = markers(buildGroupCoordinatesLayer(groupCoordinatesMap, grouping))
+        return {layer, grouping}
     }
     const twoFamiliesAtOnePlace = [
         ...makeRelays(3, {lat: 1, long: 1, familyId: 1}),
         ...makeRelays(1, {lat: 1, long: 1, familyId: 2}),
     ]
 
-    it("draws one circle per family at a coordinate, largest first", () => {
+    it("draws one circle per group at a coordinate, largest first", () => {
         const {layer} = build(twoFamiliesAtOnePlace)
         expect(layer).toHaveLength(2)
         expect(layer[0].options.color).toBe(calculateFamilyColor(1))
@@ -200,31 +209,30 @@ describe("buildFamilyCoordinatesLayer", () => {
         expect(layer.every(circle => circle.options.fillOpacity === 0.2)).toBe(true)
     })
 
-    it("hides families that are not selected", () => {
+    it("hides groups that are not selected", () => {
         const {layer} = build(twoFamiliesAtOnePlace, 1)
         expect(layer[0].options.fillOpacity).toBe(0.2)
         expect(layer[1].options.fillOpacity).toBe(0)
     })
 
-    it("opens the selection dialog when several families share a coordinate", () => {
-        const {layer, setFamilies, setShowDialog, setSettings} = build(twoFamiliesAtOnePlace)
+    it("opens the selection dialog when several groups share a coordinate", () => {
+        const {layer, grouping} = build(twoFamiliesAtOnePlace)
         layer[0].fire("click")
-        expect(setFamilies).toHaveBeenCalledWith([1, 2])
-        expect(setShowDialog).toHaveBeenCalledWith(true)
-        expect(setSettings).not.toHaveBeenCalled()
+        expect(grouping.openSelectionDialog).toHaveBeenCalledWith([1, 2])
+        expect(grouping.select).not.toHaveBeenCalled()
     })
 
-    it("selects the family directly when it is the only one at the coordinate", () => {
-        const {layer, settings, setSettings, setShowDialog} = build(makeRelays(2, {familyId: 5}))
+    it("selects the group directly when it is the only one at the coordinate", () => {
+        const {layer, grouping} = build(makeRelays(2, {familyId: 5}))
         layer[0].fire("click")
-        expect(setSettings).toHaveBeenCalledWith({...settings, selectedFamily: 5})
-        expect(setShowDialog).not.toHaveBeenCalled()
+        expect(grouping.select).toHaveBeenCalledWith(5)
+        expect(grouping.openSelectionDialog).not.toHaveBeenCalled()
     })
 
-    it("clears the selection when a family is already selected", () => {
-        const {layer, settings, setSettings} = build(makeRelays(2, {familyId: 5}), 5)
+    it("clears the selection when a group is already selected", () => {
+        const {layer, grouping} = build(makeRelays(2, {familyId: 5}), 5)
         layer[0].fire("click")
-        expect(setSettings).toHaveBeenCalledWith({...settings, selectedFamily: undefined})
+        expect(grouping.select).toHaveBeenCalledWith(undefined)
     })
 })
 
@@ -234,6 +242,13 @@ describe("calculateFamilyColor", () => {
         expect(calculateFamilyColor(1)).toBe("hsl(45,90%,60%)")
         expect(calculateFamilyColor(7)).toBe("hsl(315,90%,60%)")
         expect(calculateFamilyColor(8)).toBe(calculateFamilyColor(0))
+    })
+})
+
+describe("calculateAutonomousSystemColor", () => {
+    it("derives the hue from the number in 12 steps", () => {
+        expect(calculateAutonomousSystemColor(24940)).toBe("hsl(120,75%,55%)")
+        expect(calculateAutonomousSystemColor(12)).toBe(calculateAutonomousSystemColor(0))
     })
 })
 

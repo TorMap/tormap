@@ -1,10 +1,13 @@
 import {
+    BubbleChart as BubbleChartIcon,
     DirectionsRun as DirectionsRunIcon,
     Functions as FunctionsIcon,
     Group as GroupIcon,
+    Lan as LanIcon,
     Public as PublicIcon,
     Security as SecurityIcon,
     Timeline as TimelineIcon,
+    Whatshot as WhatshotIcon,
 } from "@mui/icons-material";
 import {FunctionComponent} from "react";
 
@@ -30,4 +33,7 @@ export const RelayTypeIcon: FunctionComponent<{ relayType: RelayType, color?: st
 
 export const TotalRelaysIcon = <FunctionsIcon/>
 export const RelayFamilyIcon = <GroupIcon/>
+export const AutonomousSystemIcon = <LanIcon/>
 export const EarthIcon = <PublicIcon/>
+export const CoordinatesIcon = <BubbleChartIcon/>
+export const HeatmapIcon = <WhatshotIcon/>

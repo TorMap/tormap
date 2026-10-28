@@ -1,6 +1,7 @@
 import {LayerGroup, latLngBounds, LeafletMouseEvent} from "leaflet";
 import React, {FunctionComponent, Suspense, useCallback, useEffect, useMemo, useState} from "react";
 
+import {useDate} from "../../context/date-context";
 import {useSettings} from "../../context/settings-context";
 import {useSnackbar} from "../../context/snackbar-context";
 import {useStatistics} from "../../context/statistics-context";
@@ -8,7 +9,8 @@ import {RelayLocationDto} from "../../dto/relay";
 import {SnackbarMessage} from "../../types/ui";
 import {
     filterRelaysByFlags,
-    buildFamilyCoordinatesMap,
+    buildGroupCoordinatesMap,
+    buildRelayAutonomousSystemMap,
     buildRelayCoordinatesMap,
     buildRelayCountryMap,
     buildRelayFamilyMap,
@@ -18,11 +20,14 @@ import {CountryFeature, loadWorldFeatures} from "../../util/geojson";
 import {
     buildAggregatedCoordinatesLayer,
     buildCountryLayer,
-    buildFamilyCoordinatesLayer,
+    buildGroupCoordinatesLayer,
     buildRelayCountryLayer,
     buildRelayHeatmapLayer,
     buildRelayLayer,
-    buildSelectedFamilyLayer
+    buildSelectedGroupLayer,
+    calculateAutonomousSystemColor,
+    calculateFamilyColor,
+    RelayGrouping
 } from "../../util/layer-construction";
 import {LoadingAnimation} from "../loading/LoadingAnimation";
 import {atom, useAtom} from "jotai";
@@ -32,11 +37,13 @@ import {
     relaySearchOnMapAtom,
     showRelayDetailsDialogAtom
 } from "../dialogs/relay/relay-details-atoms";
+import {autonomousSystemSelectionAtom, familySelectionAtom, groupsOnMapAtom} from "../dialogs/group-selection-atoms";
 import {useMap} from "./map";
 
 // Lazy loaded components
 const ResponsiveRelayDetailsDialog = React.lazy(() => import('../dialogs/relay/ResponsiveRelayDetailsDialog'));
 const FamilySelectionDialog = React.lazy(() => import('../dialogs/family/FamilySelectionDialog'));
+const AutonomousSystemSelectionDialog = React.lazy(() => import('../dialogs/autonomous-system/AutonomousSystemSelectionDialog'));
 
 interface Props {
     /**
@@ -59,12 +66,11 @@ export const shownRelayCountAtom = atom<{ shown: number, total: number }>({shown
 
 export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedDay}) => {
     // Component state
-    const [showFamilySelectionDialog, setShowFamilySelectionDialog] = useState(false)
-    const [familiesForSelectionDialog, setFamiliesForSelectionDialog] = useState<number[]>([])
     // The dialogs are separate chunks and are only loaded when they are opened for the first time. They stay mounted
     // afterwards, so they can close with their transition.
     const [hasOpenedRelayDetailsDialog, setHasOpenedRelayDetailsDialog] = useState(false)
     const [hasOpenedFamilySelectionDialog, setHasOpenedFamilySelectionDialog] = useState(false)
+    const [hasOpenedAutonomousSystemSelectionDialog, setHasOpenedAutonomousSystemSelectionDialog] = useState(false)
     const [leafletMarkerLayers] = useState<LayerGroup>(new LayerGroup())
     // The country borders are a separate chunk, which is only loaded once the countries are shown
     const [worldFeatures, setWorldFeatures] = useState<CountryFeature[]>()
@@ -76,14 +82,19 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
     const [, setFilteredRelays] = useAtom(filteredRelaysAtom)
     const [, setShownRelayCount] = useAtom(shownRelayCountAtom)
     const [relaySearchOnMap, setRelaySearchOnMap] = useAtom(relaySearchOnMapAtom)
+    const [familySelection, setFamilySelection] = useAtom(familySelectionAtom)
+    const [autonomousSystemSelection, setAutonomousSystemSelection] = useAtom(autonomousSystemSelectionAtom)
+    const [, setGroupsOnMap] = useAtom(groupsOnMapAtom)
     if (showRelayDetailsDialog && !hasOpenedRelayDetailsDialog) setHasOpenedRelayDetailsDialog(true)
-    if (showFamilySelectionDialog && !hasOpenedFamilySelectionDialog) setHasOpenedFamilySelectionDialog(true)
+    if (familySelection.show && !hasOpenedFamilySelectionDialog) setHasOpenedFamilySelectionDialog(true)
+    if (autonomousSystemSelection.show && !hasOpenedAutonomousSystemSelectionDialog) setHasOpenedAutonomousSystemSelectionDialog(true)
 
     // App context
     const leafletMap = useMap()
     const {settings, setSettings} = useSettings()
     const {setStatistics} = useStatistics()
     const {enqueueSnackbar, closeSnackbar} = useSnackbar();
+    const {selectedDate} = useDate()
 
     // Only the relays found by a search, as long as the selected day still has some of them
     const searchedRelays = useMemo(
@@ -112,12 +123,24 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
         [filteredRelaysByFlags]
     )
     const relayFamilyCoordinatesMap = useMemo(
-        () => buildFamilyCoordinatesMap(relayCoordinatesMap),
+        () => buildGroupCoordinatesMap(relayCoordinatesMap, buildRelayFamilyMap),
         [relayCoordinatesMap]
     )
+    const relayAutonomousSystemMap = useMemo(
+        () => buildRelayAutonomousSystemMap(filteredRelaysByFlags),
+        [filteredRelaysByFlags]
+    )
+    const relayAutonomousSystemCoordinatesMap = useMemo(
+        () => buildGroupCoordinatesMap(relayCoordinatesMap, buildRelayAutonomousSystemMap),
+        [relayCoordinatesMap]
+    )
+    const totalConsensusWeight = useMemo(
+        () => filteredRelaysByFlags.reduce((sum, relay) => sum + (relay.consensusWeight ?? 0), 0),
+        [filteredRelaysByFlags]
+    )
     const filteredRelays = useMemo(
-        () => buildFilteredRelays(filteredRelaysByFlags, relayCountryMap, relayFamilyMap, settings),
-        [filteredRelaysByFlags, relayCountryMap, relayFamilyMap, settings]
+        () => buildFilteredRelays(filteredRelaysByFlags, relayCountryMap, relayFamilyMap, settings, relayAutonomousSystemMap),
+        [filteredRelaysByFlags, relayCountryMap, relayFamilyMap, settings, relayAutonomousSystemMap]
     )
 
     /**
@@ -134,8 +157,8 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
     }, [relayCoordinatesMap, relays, setRelaysForDetailsDialog, setShowRelayDetailsDialog, setRelayDetailsDialogSearch])
 
     const relayLayer = useMemo(
-        () => buildRelayLayer(relayCoordinatesMap, settings.sortFamily, settings.relayTypeColors, openRelayDetailsDialog, settings.sizeByWeight, settings.sizeByWeight ? settings.topRelayCount : undefined),
-        [openRelayDetailsDialog, relayCoordinatesMap, settings.sortFamily, settings.relayTypeColors, settings.sizeByWeight, settings.topRelayCount]
+        () => buildRelayLayer(relayCoordinatesMap, settings.sortFamily || settings.sortAutonomousSystem, settings.relayTypeColors, openRelayDetailsDialog, settings.sizeByWeight, settings.sizeByWeight ? settings.topRelayCount : undefined),
+        [openRelayDetailsDialog, relayCoordinatesMap, settings.sortFamily, settings.sortAutonomousSystem, settings.relayTypeColors, settings.sizeByWeight, settings.topRelayCount]
     )
     const relayCountryLayer = useMemo(
         () => buildRelayCountryLayer(relayCountryMap, settings, openRelayDetailsDialog),
@@ -153,18 +176,45 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
         () => buildAggregatedCoordinatesLayer(relayCoordinatesMap, openRelayDetailsDialog),
         [openRelayDetailsDialog, relayCoordinatesMap]
     )
+    const familyGrouping = useMemo((): RelayGrouping => ({
+        selectedId: settings.selectedFamily,
+        color: calculateFamilyColor,
+        select: familyId => setSettings({...settings, selectedFamily: familyId}),
+        openSelectionDialog: familyIds => setFamilySelection({show: true, ids: familyIds}),
+    }), [settings, setSettings, setFamilySelection])
+    const autonomousSystemGrouping = useMemo((): RelayGrouping => ({
+        selectedId: settings.selectedAutonomousSystem,
+        color: calculateAutonomousSystemColor,
+        select: asNumber => setSettings({...settings, selectedAutonomousSystem: asNumber}),
+        openSelectionDialog: asNumbers => setAutonomousSystemSelection({show: true, ids: asNumbers}),
+    }), [settings, setSettings, setAutonomousSystemSelection])
     const relaySelectedFamilyLayer = useMemo(
-        () => buildSelectedFamilyLayer(relayFamilyMap, settings, setSettings),
-        [relayFamilyMap, setSettings, settings]
+        () => buildSelectedGroupLayer(relayFamilyMap, familyGrouping),
+        [relayFamilyMap, familyGrouping]
     )
     const relayFamilyCoordinatesLayer = useMemo(
-        () => buildFamilyCoordinatesLayer(relayFamilyCoordinatesMap, settings, setSettings, setFamiliesForSelectionDialog, setShowFamilySelectionDialog),
-        [relayFamilyCoordinatesMap, settings, setSettings, setFamiliesForSelectionDialog, setShowFamilySelectionDialog]
+        () => buildGroupCoordinatesLayer(relayFamilyCoordinatesMap, familyGrouping),
+        [relayFamilyCoordinatesMap, familyGrouping]
+    )
+    const relaySelectedAutonomousSystemLayer = useMemo(
+        () => buildSelectedGroupLayer(relayAutonomousSystemMap, autonomousSystemGrouping),
+        [relayAutonomousSystemMap, autonomousSystemGrouping]
+    )
+    const relayAutonomousSystemCoordinatesLayer = useMemo(
+        () => buildGroupCoordinatesLayer(relayAutonomousSystemCoordinatesMap, autonomousSystemGrouping),
+        [relayAutonomousSystemCoordinatesMap, autonomousSystemGrouping]
     )
     const statistics = useMemo(
-        () => buildStatistics(filteredRelays, relayCountryMap, relayFamilyMap, settings),
-        [filteredRelays, relayCountryMap, relayFamilyMap, settings]
+        () => buildStatistics(filteredRelays, relayCountryMap, relayFamilyMap, settings, relayAutonomousSystemMap),
+        [filteredRelays, relayCountryMap, relayFamilyMap, settings, relayAutonomousSystemMap]
     )
+
+    /**
+     * Tell the search buttons which families and autonomous systems the map shows
+     */
+    useEffect(() => {
+        setGroupsOnMap({familyIds: [...relayFamilyMap.keys()], asNumbers: [...relayAutonomousSystemMap.keys()]})
+    }, [relayFamilyMap, relayAutonomousSystemMap, setGroupsOnMap])
 
     /**
      * Forget the search once the selected day has none of the searched relays, e.g. in another month
@@ -230,6 +280,9 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
             if (settings.selectedFamily && !relayFamilyMap.has(settings.selectedFamily)) {
                 setSettings({...settings, selectedFamily: undefined})
             }
+            if (settings.selectedAutonomousSystem && !relayAutonomousSystemMap.has(settings.selectedAutonomousSystem)) {
+                setSettings({...settings, selectedAutonomousSystem: undefined})
+            }
 
             if (settings.heatMap) {
                 leafletMarkerLayers.addLayer(relayLocationHeatmapLayer)
@@ -256,24 +309,53 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
                 if (settings.selectedFamily) leafletMarkerLayers.addLayer(relaySelectedFamilyLayer)
                 else leafletMarkerLayers.addLayer(relayFamilyCoordinatesLayer)
             }
+            if (settings.sortAutonomousSystem) {
+                if (settings.selectedAutonomousSystem) leafletMarkerLayers.addLayer(relaySelectedAutonomousSystemLayer)
+                else leafletMarkerLayers.addLayer(relayAutonomousSystemCoordinatesLayer)
+            }
+            if (settings.sortAutonomousSystem && relayAutonomousSystemMap.size === 0) {
+                enqueueSnackbar(SnackbarMessage.NoAutonomousSystemData, {
+                    variant: "warning",
+                    key: SnackbarMessage.NoAutonomousSystemData
+                })
+            } else {
+                closeSnackbar(SnackbarMessage.NoAutonomousSystemData)
+            }
             if (settings.sortFamily && relayFamilyMap.size === 0) {
                 enqueueSnackbar(SnackbarMessage.NoFamilyData, {variant: "warning", key: SnackbarMessage.NoFamilyData})
             } else {
                 closeSnackbar(SnackbarMessage.NoFamilyData)
             }
         }
-    }, [filteredRelays, setFilteredRelays, setShownRelayCount, leafletMarkerLayers, relays, statistics, setStatistics, filteredRelaysByFlags.length, settings, relayFamilyMap, leafletMap, relayCountryMap, closeSnackbar, enqueueSnackbar, setSettings, relayLocationHeatmapLayer, countryBordersLayer, aggregatedCoordinatesLayer, relayCountryLayer, relayLayer, relaySelectedFamilyLayer, relayFamilyCoordinatesLayer])
+    }, [filteredRelays, setFilteredRelays, setShownRelayCount, leafletMarkerLayers, relays, statistics, setStatistics, filteredRelaysByFlags.length, settings, relayFamilyMap, leafletMap, relayCountryMap, closeSnackbar, enqueueSnackbar, setSettings, relayLocationHeatmapLayer, countryBordersLayer, aggregatedCoordinatesLayer, relayCountryLayer, relayLayer, relaySelectedFamilyLayer, relayFamilyCoordinatesLayer, relayAutonomousSystemMap, relaySelectedAutonomousSystemLayer, relayAutonomousSystemCoordinatesLayer])
 
-    const closeFamilySelectionDialog = useCallback(() => setShowFamilySelectionDialog(false), [])
+    const closeFamilySelectionDialog = useCallback(
+        () => setFamilySelection(selection => ({...selection, show: false})),
+        [setFamilySelection]
+    )
+    const closeAutonomousSystemSelectionDialog = useCallback(
+        () => setAutonomousSystemSelection(selection => ({...selection, show: false})),
+        [setAutonomousSystemSelection]
+    )
 
     return (
         <Suspense fallback={<LoadingAnimation/>}>
             {hasOpenedRelayDetailsDialog ? <ResponsiveRelayDetailsDialog/> : null}
             {hasOpenedFamilySelectionDialog ? <FamilySelectionDialog
-                shouldShowDialog={showFamilySelectionDialog}
+                shouldShowDialog={familySelection.show}
                 closeDialog={closeFamilySelectionDialog}
                 reloadSelectedDay={reloadSelectedDay}
-                familyIds={familiesForSelectionDialog}
+                familyIds={familySelection.ids}
+                relayFamilyMap={relayFamilyMap}
+                totalConsensusWeight={totalConsensusWeight}
+            /> : null}
+            {hasOpenedAutonomousSystemSelectionDialog ? <AutonomousSystemSelectionDialog
+                shouldShowDialog={autonomousSystemSelection.show}
+                closeDialog={closeAutonomousSystemSelectionDialog}
+                asNumbers={autonomousSystemSelection.ids}
+                relayAutonomousSystemMap={relayAutonomousSystemMap}
+                totalConsensusWeight={totalConsensusWeight}
+                month={selectedDate?.slice(0, 7)}
             /> : null}
         </Suspense>
     );

@@ -40,7 +40,7 @@ export function parseStoredSettings(json: string | null, defaults: Settings): Se
     }
     if (!isObject(stored)) return defaults
 
-    const booleanSetting = (key: "sortCountry" | "sortFamily" | "aggregateCoordinates" | "heatMap" | "sizeByWeight" | "showCountryUsage") =>
+    const booleanSetting = (key: "sortCountry" | "sortFamily" | "sortAutonomousSystem" | "aggregateCoordinates" | "heatMap" | "sizeByWeight" | "showCountryUsage") =>
         isBoolean(stored[key]) ? stored[key] : defaults[key]
 
     return {
@@ -49,6 +49,9 @@ export function parseStoredSettings(json: string | null, defaults: Settings): Se
         sortFamily: booleanSetting("sortFamily"),
         // Family IDs differ between dates, so a selected family is never stored
         selectedFamily: defaults.selectedFamily,
+        sortAutonomousSystem: booleanSetting("sortAutonomousSystem"),
+        // Like a family, a selected autonomous system belongs to the relays of one day
+        selectedAutonomousSystem: defaults.selectedAutonomousSystem,
         aggregateCoordinates: booleanSetting("aggregateCoordinates"),
         heatMap: booleanSetting("heatMap"),
         sizeByWeight: booleanSetting("sizeByWeight"),
@@ -78,7 +81,7 @@ export function loadSettings(defaults: Settings): Settings {
  */
 export function saveSettings(settings: Settings) {
     try {
-        window.localStorage.setItem(settingsStorageKey, JSON.stringify({...settings, selectedFamily: undefined}))
+        window.localStorage.setItem(settingsStorageKey, JSON.stringify({...settings, selectedFamily: undefined, selectedAutonomousSystem: undefined}))
     } catch {
         // Settings are then only kept until the page is reloaded
     }

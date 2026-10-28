@@ -17,12 +17,13 @@ describe("StatisticsProvider", () => {
             relayOtherCount: 0,
             countryCount: 0,
             familyCount: 0,
+            autonomousSystemCount: 0,
         })
     })
 
     it("updates the statistics", async () => {
         const {result, act} = await render()
-        const next = {relayGuardCount: 1, relayExitCount: 2, relayOtherCount: 3, countryCount: 4, familyCount: 5}
+        const next = {relayGuardCount: 1, relayExitCount: 2, relayOtherCount: 3, countryCount: 4, familyCount: 5, autonomousSystemCount: 6}
         await act(() => result.current.setStatistics(next))
         expect(result.current.statistics).toEqual(next)
     })

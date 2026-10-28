@@ -55,7 +55,7 @@ interface DataIndex {
 }
 
 const datePathPattern = /^\/relay\/(?:location|country-usage)\/day\/(\d{4}-\d{2}-\d{2})$/
-const detailsPathPattern = /^\/relay\/details\/relay\/\d+$/
+const detailsPathPattern = /^\/relay\/details\/(?:relay\/\d+|autonomous-systems\/\d{4}-\d{2})$/
 const listPaths = ["/relay/location/days", "/relay/statistics/daily-counts"]
 
 /**

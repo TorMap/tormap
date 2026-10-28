@@ -1,9 +1,10 @@
 import {useMediaQuery, useTheme} from "@mui/material";
-import {FunctionComponent, useEffect, useState} from "react";
+import {FunctionComponent, useEffect, useMemo, useState} from "react";
 
 import {useSnackbar} from "../../../context/snackbar-context";
-import {RelayFamilyIdentifier} from "../../../dto/relay";
+import {RelayFamilyIdentifier, RelayLocationDto} from "../../../dto/relay";
 import {SnackbarMessage} from "../../../types/ui";
+import {RelayGroupSummary, summarizeRelays} from "../../../util/relay-group-summary";
 import {backend} from "../../../util/util";
 import {FamilySelectionDialogLarge} from "./FamilySelectionDialogLarge";
 import {FamilySelectionDialogSmall} from "./FamilySelectionDialogSmall";
@@ -28,20 +29,49 @@ interface FamilySelectionProps {
      * Families which the user can view detailed information about
      */
     familyIds: number[]
+
+    /**
+     * The relays of each family on the map
+     */
+    relayFamilyMap?: Map<number, RelayLocationDto[]>
+
+    /**
+     * The consensus weight of all relays on the map
+     */
+    totalConsensusWeight?: number
 }
+
+/**
+ * A family with what the map shows of it
+ */
+export type FamilyRow = RelayFamilyIdentifier & RelayGroupSummary
 
 export interface FamilySelectionDialogProps {
     shouldShowDialog: boolean
     closeDialog: () => void
     isLoading: boolean
-    familyIdentifiers?: RelayFamilyIdentifier[]
+    families?: FamilyRow[]
 }
+
+/**
+ * Adds what the map shows of each family. Families without relays on the map keep the member count of the backend.
+ */
+export const buildFamilyRows = (
+    familyIdentifiers: RelayFamilyIdentifier[],
+    relayFamilyMap: Map<number, RelayLocationDto[]>,
+    totalConsensusWeight: number,
+): FamilyRow[] => familyIdentifiers.map(family => {
+    const summary = summarizeRelays(relayFamilyMap.get(family.id) ?? [], totalConsensusWeight)
+    return {...family, ...summary, relayCount: summary.relayCount || family.memberCount}
+})
 
 export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
                                                                                    shouldShowDialog,
                                                                                    closeDialog,
                                                                                    reloadSelectedDay,
                                                                                    familyIds,
+                                                                                   relayFamilyMap,
+                                                                                   totalConsensusWeight = 0,
                                                                                }) => {
     // Component state
     const [isLoading, setIsLoading] = useState(true)
@@ -52,6 +82,11 @@ export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
 
     const theme = useTheme()
     const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
+
+    const families = useMemo(
+        () => buildFamilyRows(familyIdentifiers, relayFamilyMap ?? new Map(), totalConsensusWeight),
+        [familyIdentifiers, relayFamilyMap, totalConsensusWeight]
+    )
 
     // Discard the results of the previous families
     const [syncedFamilyIds, setSyncedFamilyIds] = useState(familyIds)
@@ -93,13 +128,13 @@ export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
                 shouldShowDialog={shouldShowDialog}
                 closeDialog={closeDialog}
                 isLoading={isLoading}
-                familyIdentifiers={familyIdentifiers}
+                families={families}
             />
             : <FamilySelectionDialogSmall
                 shouldShowDialog={shouldShowDialog}
                 closeDialog={closeDialog}
                 isLoading={isLoading}
-                familyIdentifiers={familyIdentifiers}
+                families={families}
             />
     )
 }
