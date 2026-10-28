@@ -1,86 +1,86 @@
 /*
- React bindings for the parts of Leaflet that TorMap uses, replacing react-leaflet 5.0.0. Same names and behavior:
- the map is created once when its container mounts, its children only render once the map exists, and it is removed
- on unmount. Props of MapContainer are only read on creation, like in react-leaflet.
+ Minimal React bindings for the Leaflet API that TorMap uses: a map container that provides its L.Map to the
+ components inside it, a hook to register map events, and a tile layer. Written against Leaflet's documented API
+ (https://leafletjs.com/reference.html).
  */
-import {LeafletEventHandlerFnMap, Map as LeafletMap, MapOptions, TileLayer as LeafletTileLayer, TileLayerOptions} from "leaflet";
-import {createContext, CSSProperties, ReactNode, use, useCallback, useEffect, useRef, useState} from "react";
+import L from "leaflet";
+import {createContext, CSSProperties, ReactNode, use, useEffect, useLayoutEffect, useRef, useState} from "react";
 
-const MapContext = createContext<LeafletMap | null>(null)
+const LeafletMapContext = createContext<L.Map | undefined>(undefined)
 
-interface MapContainerProps extends MapOptions {
+interface MapContainerProps extends L.MapOptions {
     children?: ReactNode
     style?: CSSProperties
 }
 
-export const MapContainer = ({children, style, center, zoom, ...options}: MapContainerProps) => {
-    const [map, setMap] = useState<LeafletMap | null>(null)
-    const mapRef = useRef<LeafletMap | null>(null)
-    // A callback ref instead of an effect, so the map exists before the effects of the children run
-    const containerRef = useCallback((node: HTMLDivElement | null) => {
-        if (node !== null && mapRef.current === null) {
-            const created = new LeafletMap(node, options)
-            if (center != null && zoom != null) {
-                created.setView(center, zoom)
-            }
-            mapRef.current = created
-            setMap(created)
+/**
+ * Renders a div with a Leaflet map and, once the map exists, the children, which can use it with useMap().
+ * The style and map options are taken from the first render. Leaflet changes the view itself afterwards.
+ */
+export const MapContainer = ({children, style, ...mapOptions}: MapContainerProps) => {
+    const element = useRef<HTMLDivElement>(null)
+    const [initial] = useState(() => ({style, mapOptions}))
+    const [leafletMap, setLeafletMap] = useState<L.Map>()
+
+    // A layout effect, so the map is attached before the browser paints the empty div.
+    // Leaflet sets the initial view itself when the options contain both center and zoom.
+    useLayoutEffect(() => {
+        const created = L.map(element.current!, initial.mapOptions)
+        setLeafletMap(created)
+        return () => {
+            setLeafletMap(undefined)
+            created.remove()
         }
-        // Only the initial props are used
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-    useEffect(() => () => {
-        map?.remove()
-    }, [map])
-    // Only the initial style is applied, Leaflet manages the container afterwards
-    const [initialStyle] = useState(style)
+    }, [initial])
+
     return (
-        <div ref={containerRef} style={initialStyle}>
-            {map && <MapContext value={map}>{children}</MapContext>}
+        <div ref={element} style={initial.style}>
+            {leafletMap && <LeafletMapContext value={leafletMap}>{children}</LeafletMapContext>}
         </div>
     )
 }
 
 /**
- * The Leaflet map of the enclosing MapContainer.
+ * The Leaflet map of the surrounding MapContainer.
  */
-export function useMap(): LeafletMap {
-    const map = use(MapContext)
-    if (map === null) {
+export function useMap(): L.Map {
+    const leafletMap = use(LeafletMapContext)
+    if (!leafletMap) {
         throw new Error("useMap() can only be used in a descendant of <MapContainer>")
     }
-    return map
+    return leafletMap
 }
 
 /**
- * Registers the handlers on the map while the component is mounted.
+ * Listens to the given map events while the calling component is mounted, and returns the map.
  */
-export function useMapEvents(handlers: LeafletEventHandlerFnMap): LeafletMap {
-    const map = useMap()
+export function useMapEvents(handlers: L.LeafletEventHandlerFnMap): L.Map {
+    const leafletMap = useMap()
     useEffect(() => {
-        map.on(handlers)
+        const entries = Object.entries(handlers)
+        for (const [type, handler] of entries) leafletMap.addEventListener(type, handler)
         return () => {
-            map.off(handlers)
+            for (const [type, handler] of entries) leafletMap.removeEventListener(type, handler)
         }
-    }, [map, handlers])
-    return map
+    }, [leafletMap, handlers])
+    return leafletMap
 }
 
-interface TileLayerProps extends TileLayerOptions {
+interface TileLayerProps extends L.TileLayerOptions {
     url: string
 }
 
 /**
- * Adds a tile layer to the map while mounted. The layer is created once; later prop changes are ignored.
+ * Shows a tile layer on the map while mounted. The url and options are taken from the first render.
  */
 export const TileLayer = ({url, ...options}: TileLayerProps) => {
-    const map = useMap()
-    const [initial] = useState({url, options})
+    const leafletMap = useMap()
+    const [initial] = useState(() => ({url, options}))
     useEffect(() => {
-        const layer = new LeafletTileLayer(initial.url, initial.options).addTo(map)
+        const layer = L.tileLayer(initial.url, initial.options).addTo(leafletMap)
         return () => {
             layer.remove()
         }
-    }, [map, initial])
+    }, [leafletMap, initial])
     return null
 }

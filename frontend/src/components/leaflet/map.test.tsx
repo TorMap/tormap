@@ -1,5 +1,5 @@
 import {LeafletEventHandlerFnMap, Map as LeafletMap, TileLayer as LeafletTileLayer} from "leaflet";
-import {FunctionComponent, ReactNode, useEffect, useState} from "react";
+import {FunctionComponent, ReactNode, StrictMode, useEffect, useState} from "react";
 import {describe, expect, it, vi} from "vitest";
 import {page} from "vitest/browser";
 
@@ -63,6 +63,23 @@ describe("MapContainer", () => {
         const remove = vi.spyOn(map, "remove")
         await screen.unmount()
         expect(remove).toHaveBeenCalledOnce()
+    })
+})
+
+describe("MapContainer in StrictMode", () => {
+    it("ends up with one working map", async () => {
+        probedMap = undefined
+        const screen = await page.render(
+            <StrictMode>
+                <MapContainer center={[30, 10]} zoom={4} style={{width: 400, height: 300}}>
+                    <MapProbe/>
+                </MapContainer>
+            </StrictMode>
+        )
+        await expect.element(screen.getByText("map ready")).toBeInTheDocument()
+        expect(screen.container.querySelectorAll(".leaflet-map-pane")).toHaveLength(1)
+        expect(probedMap!.getContainer().isConnected).toBe(true)
+        expect(probedMap!.getZoom()).toBe(4)
     })
 })
 
