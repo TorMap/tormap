@@ -30,7 +30,8 @@ self.addEventListener("activate", event => {
 })
 
 self.addEventListener("message", event => {
-    if (event.data === ("SKIP_WAITING" satisfies ServiceWorkerMessage)) {
+    // Browsers only deliver messages from pages of this origin, the check makes that explicit
+    if (event.origin === self.location.origin && event.data === ("SKIP_WAITING" satisfies ServiceWorkerMessage)) {
         void self.skipWaiting()
     }
 })
