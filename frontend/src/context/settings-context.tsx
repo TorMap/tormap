@@ -59,6 +59,9 @@ function withValidSelection(settings: Settings): Settings {
     if (!result.sortFamily && result.selectedFamily) {
         result = {...result, selectedFamily: undefined}
     }
+    if (!result.sortAutonomousSystem && result.selectedAutonomousSystem) {
+        result = {...result, selectedAutonomousSystem: undefined}
+    }
     return result
 }
 

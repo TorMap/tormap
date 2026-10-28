@@ -39,6 +39,7 @@ const State = () => {
         <output aria-label="state">{JSON.stringify({
             selectedCountry: settings.selectedCountry ?? null,
             selectedFamily: settings.selectedFamily ?? null,
+            selectedAutonomousSystem: settings.selectedAutonomousSystem ?? null,
             statistics,
             filtered: filtered.length,
             searchOnMap: searchOnMap?.search ?? null,
@@ -218,6 +219,51 @@ describe("LeafletLayers", () => {
             familyCircles()[0].fire("click")
 
             await expectState(/"selectedFamily":null/)
+        })
+    })
+
+    describe("grouping by autonomous system", () => {
+        const asRelays = [
+            makeRelay({lat: 1, long: 1, asNumber: 24940, detailsId: 11}),
+            makeRelay({lat: 1, long: 1, asNumber: 24940, detailsId: 12}),
+            makeRelay({lat: 2, long: 2, asNumber: 24940, detailsId: 21}),
+            makeRelay({lat: 2, long: 2, asNumber: 16276, detailsId: 22}),
+        ]
+
+        it("draws a circle per autonomous system and location", async () => {
+            await renderLayers(asRelays, {sortAutonomousSystem: true})
+            await expectState(/"filtered":4/)
+
+            expect(familyCircles()).toHaveLength(3)
+            await expectState(/"autonomousSystemCount":2/)
+        })
+
+        it("selects an autonomous system that is alone at its location and limits the relays to it", async () => {
+            await renderLayers(asRelays, {sortAutonomousSystem: true})
+            await expectState(/"filtered":4/)
+
+            familyCircles().find(circle => circle.options.className === "1,1")!.fire("click")
+
+            await expectState(/"selectedAutonomousSystem":24940/)
+            await expectState(/"filtered":3/)
+        })
+
+        it("lets the user pick between autonomous systems that share a location", async () => {
+            await renderLayers(asRelays, {sortAutonomousSystem: true})
+            await expectState(/"filtered":4/)
+
+            familyCircles().find(circle => circle.options.className === "2,2")!.fire("click")
+
+            await expect.element(page.getByText("AS16276")).toBeVisible()
+            await page.getByText("AS16276").click()
+            await expectState(/"selectedAutonomousSystem":16276/)
+            await expectState(/"filtered":1/)
+        })
+
+        it("forgets a selected autonomous system that has no relays", async () => {
+            await renderLayers(asRelays, {sortAutonomousSystem: true, selectedAutonomousSystem: 99})
+
+            await expectState(/"selectedAutonomousSystem":null/)
         })
     })
 

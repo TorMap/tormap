@@ -42,6 +42,7 @@ describe("matchDataRoute", () => {
         ["/relay/location/day/2026-09-01", {group: "date", date: "2026-09-01", strategy: "network-first"}],
         ["/relay/location/day/2026-10-28", {group: "date", date: "2026-10-28", strategy: "network-first"}],
         ["/relay/details/relay/42", {group: "details", strategy: "network-first"}],
+        ["/relay/details/autonomous-systems/2024-01", {group: "details", strategy: "network-first"}],
     ])("caches %s", (path, route) => {
         expect(matchDataRoute(api + path, api + "/", now)).toEqual(route)
     })
@@ -52,6 +53,7 @@ describe("matchDataRoute", () => {
         `${api}/relay/location/day/2024-01-01#x`,
         `${api}/relay/location/day/latest`,
         `${api}/relay/details/family/identifiers`,
+        `${api}/relay/details/autonomous-systems/latest`,
         `${api}/actuator/health`,
     ])("leaves %s alone", url => {
         expect(matchDataRoute(url, api, now)).toBeUndefined()

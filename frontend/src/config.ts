@@ -10,6 +10,8 @@ export const defaultSettings: Settings = {
     selectedCountry: undefined,
     sortFamily: false,
     selectedFamily: undefined,
+    sortAutonomousSystem: false,
+    selectedAutonomousSystem: undefined,
     aggregateCoordinates: false,
     heatMap: false,
 

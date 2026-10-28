@@ -100,6 +100,26 @@ describe.each([
         await expect.poll(nicknames).toEqual(["alpha", "charlie", "bravo"])
     })
 
+    it("filters a long list by nickname or autonomous system", async () => {
+        mockBackend.onPost("/relay/details/family/identifiers", [
+            makeFamilyIdentifier({id: 3, nicknames: "alpha", autonomousSystems: "Hetzner Online GmbH"}),
+            makeFamilyIdentifier({id: 4, nicknames: "bravo", autonomousSystems: "OVH SAS"}),
+            makeFamilyIdentifier({id: 5, nicknames: "charlie"}),
+            makeFamilyIdentifier({id: 6, nicknames: "delta"}),
+            makeFamilyIdentifier({id: 7, nicknames: "echo"}),
+            makeFamilyIdentifier({id: 8, nicknames: "foxtrot"}),
+        ])
+        await open({familyIds: [3, 4, 5, 6, 7, 8]})
+        const nicknames = () => Array.from(document.querySelectorAll("tbody tr"))
+            .map(row => row.querySelector("td")?.textContent)
+        await expect.poll(nicknames).toHaveLength(6)
+
+        await page.getByLabelText("Search by nickname or autonomous system").fill("ovh")
+        await expect.poll(nicknames).toEqual(["bravo"])
+        await page.getByLabelText("Search by nickname or autonomous system").fill("ECHO")
+        await expect.poll(nicknames).toEqual(["echo"])
+    })
+
     it("reloads the day when the families are outdated", async () => {
         mockBackend.onPost("/relay/details/family/identifiers", [])
         const {closeDialog, reloadSelectedDay} = await open()

@@ -2,9 +2,11 @@ import {describe, expect, it} from "vitest";
 
 import {makeRelay, makeRelays, makeSettings} from "../test/fixtures";
 import {RelayFlag, RelayType} from "../types/relay";
+import {Settings} from "../types/settings";
 import {
-    buildFamilyCoordinatesMap,
     buildFilteredRelays,
+    buildGroupCoordinatesMap,
+    buildRelayAutonomousSystemMap,
     buildRelayCoordinatesMap,
     buildRelayCountryMap,
     buildRelayFamilyMap,
@@ -14,7 +16,7 @@ import {
     findRelayLocationById,
     getRelayType,
     keepRelaysWithHighestWeight,
-    sortFamilyCoordinatesMap,
+    sortGroupCoordinatesMap,
 } from "./aggregate-relays";
 
 describe("getRelayType", () => {
@@ -108,20 +110,32 @@ describe("buildRelayFamilyMap", () => {
     })
 })
 
-describe("buildFamilyCoordinatesMap", () => {
+describe("buildRelayAutonomousSystemMap", () => {
+    it("groups relays by autonomous system and skips relays without one", () => {
+        const a1 = makeRelay({asNumber: 24940})
+        const a2 = makeRelay({asNumber: 24940})
+        const b = makeRelay({asNumber: 16276})
+        const map = buildRelayAutonomousSystemMap([a1, b, a2, makeRelay({asNumber: null}), makeRelay()])
+        expect(map.get(24940)).toEqual([a1, a2])
+        expect(map.get(16276)).toEqual([b])
+        expect(map.size).toBe(2)
+    })
+})
+
+describe("buildGroupCoordinatesMap", () => {
     it("builds a family map for every coordinate", () => {
         const relays = [
             makeRelay({lat: 1, long: 1, familyId: 1}),
             makeRelay({lat: 1, long: 1, familyId: 2}),
             makeRelay({lat: 2, long: 2, familyId: 1}),
         ]
-        const map = buildFamilyCoordinatesMap(buildRelayCoordinatesMap(relays))
+        const map = buildGroupCoordinatesMap(buildRelayCoordinatesMap(relays), buildRelayFamilyMap)
         expect([...map.get("1,1")!.keys()]).toEqual([1, 2])
         expect([...map.get("2,2")!.keys()]).toEqual([1])
     })
 })
 
-describe("sortFamilyCoordinatesMap", () => {
+describe("sortGroupCoordinatesMap", () => {
     const build = (sizes: Record<number, number>) => {
         const families = new Map(Object.entries(sizes).map(
             ([id, size]) => [Number(id), makeRelays(size, {familyId: Number(id)})]
@@ -130,32 +144,32 @@ describe("sortFamilyCoordinatesMap", () => {
     }
 
     it("sorts families by size, largest first, and pads larger ones", () => {
-        const sorted = sortFamilyCoordinatesMap(build({1: 1, 2: 3, 3: 2})).get("1,1")!
-        expect(sorted.map(f => f.familyId)).toEqual([2, 3, 1])
+        const sorted = sortGroupCoordinatesMap(build({1: 1, 2: 3, 3: 2})).get("1,1")!
+        expect(sorted.map(f => f.groupId)).toEqual([2, 3, 1])
         expect(sorted.map(f => f.relays.length)).toEqual([3, 2, 1])
         // padding keeps the displayed circle sizes of families at one location distinct
         expect(sorted.map(f => f.padding)).toEqual([5, 2, 0])
     })
 
     it("keeps insertion order for equal sizes", () => {
-        const sorted = sortFamilyCoordinatesMap(build({5: 2, 6: 2})).get("1,1")!
-        expect(sorted.map(f => f.familyId)).toEqual([5, 6])
+        const sorted = sortGroupCoordinatesMap(build({5: 2, 6: 2})).get("1,1")!
+        expect(sorted.map(f => f.groupId)).toEqual([5, 6])
     })
 
     it("handles a single family without padding", () => {
-        const sorted = sortFamilyCoordinatesMap(build({4: 2})).get("1,1")!
+        const sorted = sortGroupCoordinatesMap(build({4: 2})).get("1,1")!
         expect(sorted).toHaveLength(1)
         expect(sorted[0].padding).toBe(0)
     })
 
     it("handles coordinates without families", () => {
-        expect(sortFamilyCoordinatesMap(new Map([["1,1", new Map()]])).get("1,1")).toEqual([])
+        expect(sortGroupCoordinatesMap(new Map([["1,1", new Map()]])).get("1,1")).toEqual([])
     })
 
     // Documents current behavior: the input map is consumed while sorting.
     it("empties the family maps it is given", () => {
         const input = build({1: 1, 2: 2})
-        sortFamilyCoordinatesMap(input)
+        sortGroupCoordinatesMap(input)
         expect(input.get("1,1")!.size).toBe(0)
     })
 })
@@ -223,6 +237,30 @@ describe("buildFilteredRelays", () => {
         const settings = makeSettings({selectedFamily: 99})
         expect(buildFilteredRelays(flagFiltered, countryMap, familyMap, settings)).toBe(flagFiltered)
     })
+
+    describe("with autonomous systems", () => {
+        const deAs1 = makeRelay({country: "DE", familyId: 1, asNumber: 1})
+        const deAs2 = makeRelay({country: "DE", familyId: 2, asNumber: 2})
+        const frAs1 = makeRelay({country: "FR", familyId: 2, asNumber: 1})
+        const relays = [deAs1, deAs2, frAs1]
+        const build = (selection: Partial<Settings>) => buildFilteredRelays(
+            relays, buildRelayCountryMap(relays), buildRelayFamilyMap(relays), makeSettings(selection),
+            buildRelayAutonomousSystemMap(relays)
+        )
+
+        it("returns the relays of the selected autonomous system", () => {
+            expect(build({selectedAutonomousSystem: 1})).toEqual([deAs1, frAs1])
+        })
+
+        it("intersects with a selected country and family", () => {
+            expect(build({selectedAutonomousSystem: 1, selectedCountry: "FR"})).toEqual([frAs1])
+            expect(build({selectedAutonomousSystem: 1, selectedFamily: 2})).toEqual([frAs1])
+        })
+
+        it("ignores an unknown autonomous system", () => {
+            expect(build({selectedAutonomousSystem: 99})).toBe(relays)
+        })
+    })
 })
 
 describe("buildStatistics", () => {
@@ -241,6 +279,7 @@ describe("buildStatistics", () => {
             relayOtherCount: 2,
             countryCount: 3,
             familyCount: 2,
+            autonomousSystemCount: 0,
         })
     })
 
@@ -268,6 +307,17 @@ describe("buildStatistics", () => {
         expect(stats).toMatchObject({countryCount: 3, familyCount: 2})
     })
 
+    it("counts autonomous systems, and the countries and families of a selected one", () => {
+        const as1 = [makeRelay({country: "DE", familyId: 1, asNumber: 1}), makeRelay({country: "FR", familyId: null, asNumber: 1})]
+        const relays = [...as1, makeRelay({country: "US", familyId: 2, asNumber: 2}), makeRelay({country: "US"})]
+        const asMap = buildRelayAutonomousSystemMap(relays)
+        const overall = buildStatistics(relays, buildRelayCountryMap(relays), buildRelayFamilyMap(relays), makeSettings(), asMap)
+        expect(overall).toMatchObject({autonomousSystemCount: 2, countryCount: 3, familyCount: 2})
+        const settings = makeSettings({selectedAutonomousSystem: 1})
+        const selected = buildStatistics(as1, buildRelayCountryMap(relays), buildRelayFamilyMap(relays), settings, asMap)
+        expect(selected).toMatchObject({autonomousSystemCount: 1, countryCount: 2, familyCount: 1})
+    })
+
     it("returns zeros for no relays", () => {
         expect(buildStatistics([], new Map(), new Map(), makeSettings())).toEqual({
             relayExitCount: 0,
@@ -275,6 +325,7 @@ describe("buildStatistics", () => {
             relayOtherCount: 0,
             countryCount: 0,
             familyCount: 0,
+            autonomousSystemCount: 0,
         })
     })
 })

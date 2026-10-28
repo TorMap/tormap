@@ -4,4 +4,5 @@ export interface Statistics {
     relayOtherCount: number
     familyCount: number
     countryCount: number
+    autonomousSystemCount: number
 }

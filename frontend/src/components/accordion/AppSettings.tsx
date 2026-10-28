@@ -18,6 +18,7 @@ import {FunctionComponent, ReactNode} from "react";
 
 import {defaultSettings, tooltipTimeDelay} from "../../config";
 import {useSettings} from "../../context/settings-context";
+import {AutonomousSystemIcon, RelayFamilyIcon} from "../../types/icons";
 import {RelayFlagLabel, RelayType, RelayTypeLabel, RelayTypeTooltip} from "../../types/relay";
 import {
     relayMustIncludeFlagOptions,
@@ -31,6 +32,7 @@ import {searchShortcut} from "../../util/keyboard";
 import {nameOfFactory} from "../../util/util";
 import {ExternalLink} from "../link/ExternalLink";
 import {useAtom, useSetAtom} from "jotai";
+import {autonomousSystemSelectionAtom, familySelectionAtom, groupsOnMapAtom} from "../dialogs/group-selection-atoms";
 import {openRelaySearchAtom, relaySearchOnMapAtom} from "../dialogs/relay/relay-details-atoms";
 import {countryUsageAtom} from "../leaflet/country-usage-atoms";
 import {filteredRelaysAtom, shownRelayCountAtom} from "../leaflet/LeafletLayers";
@@ -92,6 +94,9 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
     const [relaySearchOnMap, setRelaySearchOnMap] = useAtom(relaySearchOnMapAtom)
     const [countryUsage] = useAtom(countryUsageAtom)
     const [shownRelayCount] = useAtom(shownRelayCountAtom)
+    const [groupsOnMap] = useAtom(groupsOnMapAtom)
+    const setFamilySelection = useSetAtom(familySelectionAtom)
+    const setAutonomousSystemSelection = useSetAtom(autonomousSystemSelectionAtom)
 
     // Util
     const nameOfSetting = nameOfFactory<Settings>()
@@ -149,6 +154,27 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                     )}
                 </Box>
             </Button>
+            {settings.sortFamily && groupsOnMap.familyIds.length > 0 &&
+                <Button
+                    variant="outlined"
+                    startIcon={RelayFamilyIcon}
+                    fullWidth={true}
+                    sx={{mb: "16px", justifyContent: "flex-start"}}
+                    onClick={() => setFamilySelection({show: true, ids: groupsOnMap.familyIds})}
+                >
+                    Search {groupsOnMap.familyIds.length} families
+                </Button>}
+            {settings.sortAutonomousSystem && groupsOnMap.asNumbers.length > 0 &&
+                <Button
+                    variant="outlined"
+                    startIcon={AutonomousSystemIcon}
+                    fullWidth={true}
+                    // Left aligned like the relay search, the longer label wraps on narrow panels
+                    sx={{mb: "16px", justifyContent: "flex-start", textAlign: "left"}}
+                    onClick={() => setAutonomousSystemSelection({show: true, ids: groupsOnMap.asNumbers})}
+                >
+                    Search {groupsOnMap.asNumbers.length} autonomous systems
+                </Button>}
             {relaySearchOnMap &&
                 <RelayLimitInfo onShowAll={() => setRelaySearchOnMap(undefined)}>
                     Matching &quot;{relaySearchOnMap.search}&quot;: {shownRelayCount.shown}/{shownRelayCount.total} relays
@@ -186,6 +212,20 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                                 control={<Switch checked={settings.sortFamily} onChange={changeSettings}/>}
                                 label={"Family"}
                                 name={nameOfSetting("sortFamily")}
+                            />
+                        </Tooltip>
+                        <Tooltip
+                            key={"Autonomous system"}
+                            title={"Every autonomous system (the network of a hosting provider or ISP) gets a somewhat unique looking color assigned. A circle's size is relative to the amount of relays located at it's center. Click a circle, to select an autonomous system."}
+                            placement={"left"}
+                            enterDelay={tooltipTimeDelay}
+                            describeChild
+                        >
+                            <FormControlLabel
+                                key={"Autonomous system"}
+                                control={<Switch checked={settings.sortAutonomousSystem} onChange={changeSettings}/>}
+                                label={"Autonomous system"}
+                                name={nameOfSetting("sortAutonomousSystem")}
                             />
                         </Tooltip>
                         <Tooltip

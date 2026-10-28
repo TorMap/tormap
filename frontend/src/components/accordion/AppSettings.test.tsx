@@ -9,6 +9,7 @@ import {RelayLocationDto} from "../../dto/relay";
 import {makeRelay} from "../../test/fixtures";
 import {renderWithProviders} from "../../test/render";
 import {RelayType} from "../../types/relay";
+import {autonomousSystemSelectionAtom, familySelectionAtom, groupsOnMapAtom} from "../dialogs/group-selection-atoms";
 import {relaySearchOnMapAtom} from "../dialogs/relay/relay-details-atoms";
 import {CountryUsage, countryUsageAtom} from "../leaflet/country-usage-atoms";
 import {filteredRelaysAtom} from "../leaflet/LeafletLayers";
@@ -116,6 +117,40 @@ describe("AppSettings relay search on map", () => {
         await expect.element(screen.getByRole("status", {name: "search"})).toHaveTextContent("none")
         await expect.element(screen.getByText(/Matching "relay"/)).not.toBeInTheDocument()
         await expect.element(screen.getByRole("button", restoreButton)).not.toBeInTheDocument()
+    })
+})
+
+describe("AppSettings group search buttons", () => {
+    const Groups = () => {
+        const [, setGroupsOnMap] = useAtom(groupsOnMapAtom)
+        const [familySelection] = useAtom(familySelectionAtom)
+        const [autonomousSystemSelection] = useAtom(autonomousSystemSelectionAtom)
+        useEffect(() => setGroupsOnMap({familyIds: [1, 2], asNumbers: [24940, 16276, 3320]}), [setGroupsOnMap])
+        return <output aria-label="selections">{JSON.stringify({familySelection, autonomousSystemSelection})}</output>
+    }
+    const selections = () =>
+        JSON.parse(page.getByRole("status", {name: "selections"}).element().textContent ?? "{}")
+
+    it("only shows the buttons while the grouping is on", async () => {
+        const screen = await renderWithProviders(<><AppSettings elevation={0}/><Groups/></>)
+        await expect.element(screen.getByRole("button", {name: /Search \d+ families/})).not.toBeInTheDocument()
+        await expect.element(screen.getByRole("button", {name: /autonomous systems/})).not.toBeInTheDocument()
+
+        await screen.getByRole("switch", {name: "Autonomous system"}).click()
+        await expect.element(screen.getByRole("button", {name: "Search 3 autonomous systems"})).toBeVisible()
+        await screen.getByText("Family", {exact: true}).click()
+        await expect.element(screen.getByRole("button", {name: "Search 2 families"})).toBeVisible()
+    })
+
+    it("opens the selection dialogs with all groups on the map", async () => {
+        const screen = await renderWithProviders(
+            <><AppSettings elevation={0}/><Groups/></>,
+            {settings: {sortFamily: true, sortAutonomousSystem: true}}
+        )
+        await screen.getByRole("button", {name: "Search 3 autonomous systems"}).click()
+        expect(selections().autonomousSystemSelection).toEqual({show: true, ids: [24940, 16276, 3320]})
+        await screen.getByRole("button", {name: "Search 2 families"}).click()
+        expect(selections().familySelection).toEqual({show: true, ids: [1, 2]})
     })
 })
 

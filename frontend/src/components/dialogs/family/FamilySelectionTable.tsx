@@ -1,4 +1,4 @@
-import {Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel, Typography} from "@mui/material";
+import {Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel, TextField, Typography} from "@mui/material";
 import {FunctionComponent, useMemo, useState} from "react";
 
 import {useSettings} from "../../../context/settings-context";
@@ -50,6 +50,14 @@ export const sortFamilyIdentifiers = (
 }
 
 /**
+ * Whether a family matches a search for one of its nicknames or autonomous systems
+ */
+export const familyMatches = (family: RelayFamilyIdentifier, search: string): boolean => {
+    const term = search.trim().toLowerCase()
+    return !term || [family.nicknames, family.autonomousSystems].some(value => value?.toLowerCase().includes(term))
+}
+
+/**
  * A Component to show a Table with Families to select one
  */
 export const FamilySelectionTable: FunctionComponent<Props> = ({
@@ -62,10 +70,13 @@ export const FamilySelectionTable: FunctionComponent<Props> = ({
     // Component state
     const [sortColumn, setSortColumn] = useState<SortColumn>("memberCount")
     const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
+    const [search, setSearch] = useState("")
 
     const sortedFamilyIdentifiers = useMemo(
-        () => familyIdentifiers && sortFamilyIdentifiers(familyIdentifiers, sortColumn, sortDirection),
-        [familyIdentifiers, sortColumn, sortDirection]
+        () => familyIdentifiers && sortFamilyIdentifiers(
+            familyIdentifiers.filter(family => familyMatches(family, search)), sortColumn, sortDirection
+        ),
+        [familyIdentifiers, search, sortColumn, sortDirection]
     )
 
     const changeSort = (column: SortColumn, firstDirection: SortDirection) => {
@@ -79,6 +90,16 @@ export const FamilySelectionTable: FunctionComponent<Props> = ({
 
     return (
         <>
+            {/* Only worth it for longer lists, e.g. all families of the map */}
+            {familyIdentifiers && familyIdentifiers.length > 5 &&
+                <TextField
+                    label="Search by nickname or autonomous system"
+                    size="small"
+                    fullWidth
+                    value={search}
+                    onChange={event => setSearch(event.target.value)}
+                    sx={{mb: 1}}
+                />}
             {sortedFamilyIdentifiers ? <Table size={"small"}>
                     <TableHead>
                         <TableRow>

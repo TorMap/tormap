@@ -2,6 +2,7 @@ import {
     DirectionsRun as DirectionsRunIcon,
     Functions as FunctionsIcon,
     Group as GroupIcon,
+    Lan as LanIcon,
     Public as PublicIcon,
     Security as SecurityIcon,
     Timeline as TimelineIcon,
@@ -30,4 +31,5 @@ export const RelayTypeIcon: FunctionComponent<{ relayType: RelayType, color?: st
 
 export const TotalRelaysIcon = <FunctionsIcon/>
 export const RelayFamilyIcon = <GroupIcon/>
+export const AutonomousSystemIcon = <LanIcon/>
 export const EarthIcon = <PublicIcon/>
