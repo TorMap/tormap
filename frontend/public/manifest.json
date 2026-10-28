@@ -1,7 +1,10 @@
 {
+    "id": "/",
     "name": "TorMap",
     "short_name": "TorMap",
-    "start_url": ".",
+    "description": "TorMap visualizes the location of Tor relays on a world map. View details about any relay since October 2007.",
+    "start_url": "/",
+    "scope": "/",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
@@ -12,9 +15,15 @@
             "src": "/android-chrome-512x512.png",
             "sizes": "512x512",
             "type": "image/png"
+        },
+        {
+            "src": "/maskable-icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
         }
     ],
     "theme_color": "#03a9f4",
-    "background_color": "#262626",
+    "background_color": "#2c353c",
     "display": "standalone"
 }

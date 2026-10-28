@@ -3,8 +3,12 @@ import React, {FunctionComponent, Suspense, useEffect, useState} from 'react';
 
 import {useDate} from "../context/date-context";
 import {useSnackbar} from "../context/snackbar-context";
+import {applyUpdate} from "../pwa/register";
+import {usePwaState} from "../pwa/pwa-state";
 import {SnackbarMessage} from "../types/ui";
+import {isOffline, offlineSnackbarKey, onceOnline} from "../util/online";
 import {backend} from "../util/util";
+import {InstallAppButton} from "./buttons/InstallAppButton";
 import {AboutInformation} from "./dialogs/AboutInformation";
 import {LeafletWorldMap} from "./leaflet/LeafletWorldMap";
 import {ExternalLink} from "./link/ExternalLink";
@@ -25,13 +29,27 @@ export const App: FunctionComponent = () => {
     const {setAvailableDays} = useDate()
     const theme = useTheme()
     const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
+    const {waitingWorker} = usePwaState()
 
     useEffect(() => {
         closeSnackbar()
+        // The request may fail after this effect was cleaned up, then it must not wait for going online anymore
+        let active = true
+        let cancelOnlineRetry: (() => void) | undefined
         backend.get<string[]>('/relay/location/days').then(response => {
             setAvailableDays(response.data)
             setIsLoading(false)
         }).catch(() => {
+            setIsLoading(false)
+            if (isOffline()) {
+                if (!active) return
+                enqueueSnackbar(SnackbarMessage.Offline, {key: offlineSnackbarKey, persist: true})
+                cancelOnlineRetry = onceOnline(() => {
+                    setIsLoading(true)
+                    setConnectionRetryCount(count => count + 1)
+                })
+                return
+            }
             enqueueSnackbar(SnackbarMessage.ConnectionFailed, {
                 variant: "error",
                 action: <Button onClick={() => {
@@ -41,9 +59,22 @@ export const App: FunctionComponent = () => {
                 persist: true,
                 preventDuplicate: false,
             })
-            setIsLoading(false)
         })
+        return () => {
+            active = false
+            cancelOnlineRetry?.()
+        }
     }, [connectionRetryCount, closeSnackbar, enqueueSnackbar, setAvailableDays])
+
+    useEffect(() => {
+        if (waitingWorker) {
+            enqueueSnackbar(SnackbarMessage.UpdateAvailable, {
+                key: "update",
+                persist: true,
+                action: <Button onClick={() => applyUpdate(waitingWorker)}>Reload</Button>,
+            })
+        }
+    }, [waitingWorker, enqueueSnackbar])
 
     return (
         <>
@@ -74,6 +105,7 @@ export const App: FunctionComponent = () => {
                     </span>
                 </Box>
                 <AboutInformation/>
+                <InstallAppButton/>
             </React.StrictMode>
         </>
     )

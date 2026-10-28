@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    // The worker has no DOM, and the DOM and WebWorker libraries cannot be combined
+    "lib": ["WebWorker", "ESNext"],
+    "jsx": "preserve"
+  },
+  "include": ["."],
+  "references": []
+}

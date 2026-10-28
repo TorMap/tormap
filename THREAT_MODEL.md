@@ -106,6 +106,9 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   threads are busy, the request gets no host names and the result is not cached.
 - Backend container runs as non-root `1000:1000` from a digest-pinned base image. The frontend image (static files only)
   is based on the digest-pinned `nginxinc/nginx-unprivileged`, runs as non-root `101` and listens on port 8080.
+- The frontend's service worker (`frontend/src/service-worker/`, served as `/sw.js`) is hand-written without third-party
+  code. It only answers same-origin GET requests for files of its own build, each checked against the SHA-256 that the
+  build recorded. Both hosts serve `sw.js` with `no-cache`, so a fixed version replaces a faulty one on the next visit.
 - Supply chain: Maven Central and npm registry only, Yarn install scripts disabled, 3-day npm age gate, Renovate with
   release age, actions pinned by SHA, Gradle wrapper validation, least-privilege workflow `permissions`, no
   `pull_request_target`, CodeQL weekly, Snyk PR checks, GitHub secret scanning with push protection. The vendored
@@ -154,5 +157,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 - New outbound call: set connect and read timeouts, cap response size, restrict schemes and hosts.
 - New relay-derived field: truncate before storing, render as text only in the frontend (no Leaflet string tooltips or
   popups, no `dangerouslySetInnerHTML`).
+- Service worker change: cache only GET responses with a bounded key space, entry count and age, never error responses,
+  and keep `sw.js` on `no-cache` in `frontend/firebase.json` and `frontend/nginx.conf`.
 - Deployment default change: keep the DB unexposed, the backend on localhost behind TLS, secure defaults in
   `application.yml` (development settings only in the `dev` profile) and the actuator off without a password.

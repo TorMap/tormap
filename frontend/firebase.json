@@ -22,7 +22,7 @@
         } ]
       },
       {
-        "source" : "**/*.@(css|js|woff2)",
+        "source" : "**/*.@(css|woff2)",
         "headers" : [ {
           "key" : "Cache-Control",
           "value" : "max-age=31536000, immutable"
@@ -50,7 +50,16 @@
         } ]
       },
       {
-        "source": "service-worker.js",
+        "source": "/sw.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/manifest.json",
         "headers": [
           {
             "key": "Cache-Control",
