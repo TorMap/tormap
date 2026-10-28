@@ -5,12 +5,13 @@ import {useSnackbar} from "../../context/snackbar-context";
 import {RelayLocationDto} from "../../dto/relay";
 import {SnackbarMessage} from "../../types/ui";
 import {startServiceWorker} from "../../pwa/register";
-import {isOffline, offlineSnackbarKey, onceOnline} from "../../util/online";
+import {isOffline, offlineSnackbarKey, onceOnline, useOffline} from "../../util/online";
 import {readPermalink, writePermalink} from "../../util/permalink";
 import {backend} from "../../util/util";
 import {CachedDataChip} from "./CachedDataChip";
 import {CountryUsageLayer} from "./CountryUsageLayer";
 import {LeafletLayers} from "./LeafletLayers";
+import {OfflineBasemap} from "./OfflineBasemap";
 import {MapContainer, TileLayer, useMapEvents} from "./map";
 
 import 'leaflet/dist/leaflet.css';
@@ -55,6 +56,7 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
     // App context
     const {enqueueSnackbar, closeSnackbar} = useSnackbar();
     const {selectedDate} = useDate()
+    const offline = useOffline()
 
     // The initial view is read once from the URL
     const [initialView] = useState(() => {
@@ -130,12 +132,16 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
                         relays={relays}
                         reloadSelectedDay={useCallback(() => setRefreshDayCount(prev => prev + 1), [])}
                     />
-                    {/* CARTO's documented endpoint, the legacy {s}.basemaps.cartocdn.com/dark_all URLs return tiles in mismatched styles */}
-                    <TileLayer
-                        maxZoom={19}
-                        url="https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png?key=cb1_2kmx_1_d709cb99db288b90b866bc72"
-                        noWrap={true}
-                    />
+                    {/* Offline, the tiles would only show what the browser still has cached, a patchwork */}
+                    {offline
+                        ? <OfflineBasemap/>
+                        // CARTO's documented endpoint, the legacy {s}.basemaps.cartocdn.com/dark_all URLs return tiles in mismatched styles
+                        : <TileLayer
+                            maxZoom={19}
+                            url="https://basemaps.cartocdn.com/rastertiles/dark_all/{z}/{x}/{y}{r}.png?key=cb1_2kmx_1_d709cb99db288b90b866bc72"
+                            noWrap={true}
+                        />
+                    }
                 </React.StrictMode>
             </MapContainer>
             <CachedDataChip cachedAt={relaysCachedAt}/>

@@ -19,7 +19,8 @@ visualize markers on a world map we use [Leaflet](https://leafletjs.com/).
 Run `yarn build`, to create a production ready build in `build` folder.
 
 The production build includes a service worker (`src/service-worker/`) that caches the app shell and the last 20
-viewed days, so the app starts without network access after one visit. The development server registers no worker. To try it, run `yarn build` and
+viewed days, so the app starts without network access after one visit. Offline, the map shows the bundled country
+borders instead of the map tiles. The development server registers no worker. To try it, run `yarn build` and
 `yarn preview`, `yarn smoke:pwa` checks the offline start and the update notice in Chromium. Hosting must serve
 `sw.js` with `Cache-Control: no-cache` (see `firebase.json` and `nginx.conf`).
 
