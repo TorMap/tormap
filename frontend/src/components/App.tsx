@@ -8,6 +8,7 @@ import {usePwaState} from "../pwa/pwa-state";
 import {SnackbarMessage} from "../types/ui";
 import {isOffline, offlineSnackbarKey, onceOnline} from "../util/online";
 import {backend} from "../util/util";
+import {FullscreenButton} from "./buttons/FullscreenButton";
 import {InstallAppButton} from "./buttons/InstallAppButton";
 import {AboutInformation} from "./dialogs/AboutInformation";
 import {KeyboardShortcuts} from "./keyboard/KeyboardShortcuts";
@@ -107,6 +108,7 @@ export const App: FunctionComponent = () => {
                 </Box>
                 <AboutInformation/>
                 <InstallAppButton/>
+                <FullscreenButton/>
                 <KeyboardShortcuts/>
             </React.StrictMode>
         </>
