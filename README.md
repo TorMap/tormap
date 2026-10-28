@@ -57,15 +57,15 @@ We use [Semantic Versioning](https://semver.org/) and keep the frontend, backend
 
 ## Support
 
-TorMap is run by volunteers. If it is useful to you, you can support the server costs via
-[GitHub Sponsors](https://github.com/sponsors/JuliusHenke) or with the crypto donation option on
-[tormap.org](https://tormap.org).
+TorMap is free, open source and has no ads. If it is useful to you, you can help cover the server costs via
+[GitHub Sponsors](https://github.com/sponsors/JuliusHenke).
 
 ## Credits
 
-TorMap started as a project at the [Technical University of Darmstadt](https://www.tu-darmstadt.de/) and is
-maintained by [Julius Henke](https://github.com/JuliusHenke), with [Tim Kilb](https://github.com/TimKilb) and Felix
-Krauspe.
+TorMap is maintained by [Julius Henke](https://github.com/JuliusHenke). Tim Kilb and Julius Henke initially developed
+it at the [Technical University of Darmstadt](https://www.tu-darmstadt.de/) as part of the
+[PANDA project](https://panda-projekt.de/), and Felix Krauspe hosts and administers the servers.
+
 It uses relay descriptors and user estimates from the [Tor Project](https://metrics.torproject.org/), IP geolocation
 data by [DB-IP](https://db-ip.com), autonomous system data by [MaxMind](https://www.maxmind.com/), map tiles by
 [CARTO](https://carto.com/) and [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, and country
