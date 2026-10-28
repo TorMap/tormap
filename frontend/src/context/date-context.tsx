@@ -1,9 +1,9 @@
 import {differenceInDays} from "date-fns";
-import {useSnackbar} from "notistack";
 import React, {FunctionComponent, useCallback, useContext, useEffect, useState} from "react";
 
 import {SnackbarMessage} from "../types/ui";
 import {readPermalink, writePermalink} from "../util/permalink";
+import {useSnackbar} from "./snackbar-context";
 
 interface DateInterface {
     /**

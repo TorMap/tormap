@@ -3,9 +3,9 @@
  * @param bandwidthInBytes - number to be formatted
  */
 import {useMediaQuery, useTheme} from "@mui/material";
-import {useSnackbar} from "notistack";
 import {FunctionComponent, useEffect, useMemo, useState} from "react";
 
+import {useSnackbar} from "../../../context/snackbar-context";
 import {RelayDetailsDto, RelayIdentifierDto, RelayLocationDto} from "../../../dto/relay";
 import {RelayDetailsMatch, RelayIdentifierMatch} from "../../../types/relay";
 import {SnackbarMessage} from "../../../types/ui";

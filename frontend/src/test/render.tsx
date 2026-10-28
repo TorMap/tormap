@@ -1,11 +1,11 @@
 import {createTheme, ThemeProvider} from "@mui/material";
 import {createStore, Provider as JotaiProvider} from "jotai";
-import {SnackbarProvider} from "notistack";
 import React from "react";
 import {page} from "vitest/browser";
 
 import {DateProvider} from "../context/date-context";
 import {SettingsProvider} from "../context/settings-context";
+import {SnackbarProvider} from "../context/snackbar-context";
 import {StatisticsProvider} from "../context/statistics-context";
 import {Settings} from "../types/settings";
 import {TorMapTheme} from "../types/TorMapTheme";

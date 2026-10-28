@@ -1,7 +1,7 @@
 import {useMediaQuery, useTheme} from "@mui/material";
-import {useSnackbar} from "notistack";
 import {FunctionComponent, useEffect, useState} from "react";
 
+import {useSnackbar} from "../../../context/snackbar-context";
 import {RelayFamilyIdentifier} from "../../../dto/relay";
 import {SnackbarMessage} from "../../../types/ui";
 import {backend} from "../../../util/util";

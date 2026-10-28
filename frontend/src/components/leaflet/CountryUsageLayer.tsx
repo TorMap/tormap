@@ -1,9 +1,9 @@
 import {useAtom} from "jotai";
-import {useSnackbar} from "notistack";
 import {FunctionComponent, useEffect, useState} from "react";
 
 import {useDate} from "../../context/date-context";
 import {useSettings} from "../../context/settings-context";
+import {useSnackbar} from "../../context/snackbar-context";
 import {CountryUsageDto} from "../../dto/relay";
 import {SnackbarMessage} from "../../types/ui";
 import {buildCountryUsageLayer, countryUsagePane, countryUsagePaneZIndex} from "../../util/country-usage";

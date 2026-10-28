@@ -28,7 +28,6 @@
     "date-fns": "4.4.0",
     "jotai": "2.20.3",
     "leaflet": "1.9.4",
-    "notistack": "3.0.2",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
