@@ -15,18 +15,37 @@ import {
     useMediaQuery,
     useTheme
 } from "@mui/material";
-import React, {useState} from "react";
+import {atom, useAtom} from "jotai";
+import React from "react";
 
 import {ContributorCard} from "../card/ContributorCard";
 import {ExternalLink} from "../link/ExternalLink";
 import BitcoinCard from "../card/BitcoinCard";
+import {searchShortcut} from "../../util/keyboard";
+
+/**
+ * Whether the about dialog is shown. It can also be opened with the "?" key.
+ */
+export const showAboutDialogAtom = atom(false)
+
+/**
+ * Pairs of keys and what they do, for the list of keyboard shortcuts
+ */
+const keyboardShortcuts = (): [string, string][] => [
+    [`${searchShortcut().label} or /`, "Search relays"],
+    ["← / →", "Previous or next day"],
+    ["Page Down / Page Up", "One month back or forward"],
+    ["Home / End", "First or latest day"],
+    ["Esc", "Leave the map, so the arrow keys select days instead of moving the map"],
+    ["?", "Show this information"],
+]
 
 /**
  * A component for displaying information about TorMap
  */
 export const AboutInformation: React.FunctionComponent = () => {
     // Component state
-    const [showDialog, setShowDialog] = useState(false)
+    const [showDialog, setShowDialog] = useAtom(showAboutDialogAtom)
 
     // App context
     const theme = useTheme()
@@ -139,6 +158,29 @@ export const AboutInformation: React.FunctionComponent = () => {
                         cryptocurrencies. Your donation helps us to cover server costs and keep the project running ❤️
                     </Typography>
                     <BitcoinCard/>
+                    <Divider sx={{my: 2}}/>
+                    <Typography variant={"body2"} component={"h2"} sx={{fontWeight: "bold"}}>
+                        Keyboard shortcuts
+                    </Typography>
+                    <Box component={"dl"} sx={{
+                        display: "grid",
+                        gridTemplateColumns: "max-content 1fr",
+                        columnGap: 2,
+                        rowGap: 0.5,
+                        mt: 1,
+                        typography: "body2",
+                        "& dd": {m: 0},
+                    }}>
+                        {keyboardShortcuts().map(([keys, action]) => (
+                            <React.Fragment key={keys}>
+                                <dt><kbd>{keys}</kbd></dt>
+                                <dd>{action}</dd>
+                            </React.Fragment>
+                        ))}
+                    </Box>
+                    <Typography variant={"body2"} sx={{mb: 2}}>
+                        The day keys work while nothing else is selected.
+                    </Typography>
                     <Divider sx={{my: 2}}/>
                     <Typography variant={"body2"}>
                         We use IP geolocation data by <ExternalLink href={"https://db-ip.com"}

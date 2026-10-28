@@ -31,3 +31,10 @@ export const isNothingFocused = (): boolean => {
     const active = document.activeElement
     return !active || active === document.body || active === document.documentElement
 }
+
+/**
+ * Whether typing into the element enters text, so a printable key must not trigger a shortcut there
+ */
+export const isEditable = (target: EventTarget | null): boolean =>
+    target instanceof HTMLElement &&
+    (target.isContentEditable || target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT")

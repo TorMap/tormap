@@ -114,7 +114,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                 startIcon={<SearchIcon/>}
                 fullWidth={true}
                 sx={{mb: "16px"}}
-                aria-keyshortcuts={ariaKeyShortcuts}
+                aria-keyshortcuts={`${ariaKeyShortcuts} /`}
                 onClick={() => openRelaySearch({relays: filteredRelays})}
             >
                 Search {filteredRelays.length} relays
