@@ -89,6 +89,23 @@ describe("LeafletWorldMap", () => {
         onLine.mockRestore()
     })
 
+    it("shows the country borders instead of the map tiles while offline", async () => {
+        const onLine = vi.spyOn(Navigator.prototype, "onLine", "get").mockReturnValue(true)
+        await renderWithProviders(<Harness availableDays={[]} setIsLoading={vi.fn()}/>)
+        // The map prefers canvas, so the borders are drawn on a canvas in their own pane
+        const borders = () => document.querySelector(".leaflet-offlineBasemap-pane canvas") !== null
+        expect(borders()).toBe(false)
+
+        onLine.mockReturnValue(false)
+        window.dispatchEvent(new Event("offline"))
+        await expect.poll(borders, {timeout: 5000}).toBe(true)
+
+        onLine.mockReturnValue(true)
+        window.dispatchEvent(new Event("online"))
+        await expect.poll(borders).toBe(false)
+        onLine.mockRestore()
+    })
+
     it("ignores the answer of an outdated request", async () => {
         // The map identifies requests by timestamp, so the clock must advance between selections
         vi.useFakeTimers({toFake: ["Date"]})

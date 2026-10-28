@@ -1,5 +1,5 @@
-// Checks the service worker of the production build in Chromium: the app starts offline with the last viewed day, and a
-// new version is offered instead of being activated. Run after `yarn build`: `yarn smoke:pwa`.
+// Checks the service worker of the production build in Chromium: the app starts offline with the last viewed day and
+// the country borders in place of the map tiles, and a new version is offered instead of being activated. Run after `yarn build`: `yarn smoke:pwa`.
 // The backend and map tiles are answered by the test, so no network access is needed.
 import {spawn} from "node:child_process";
 import {appendFileSync, cpSync, mkdtempSync, rmSync} from "node:fs";
@@ -71,6 +71,8 @@ try {
     await page.reload()
     await page.locator(".leaflet-container").waitFor()
     await page.getByText(offlineCopy).waitFor()
+    // The bundled country borders replace the map tiles
+    await page.locator(".leaflet-offlineBasemap-pane canvas").waitFor()
 
     step("a new version is offered, not activated")
     await context.setOffline(false)
