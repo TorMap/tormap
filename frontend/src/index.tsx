@@ -1,13 +1,13 @@
 import './index.css';
 
 import {createTheme, ThemeProvider} from "@mui/material";
-import {SnackbarProvider} from "notistack";
 import {createRoot} from "react-dom/client";
 
 import {App} from "./components/App";
 import {defaultSettings} from "./config";
 import {DateProvider} from "./context/date-context";
 import {SettingsProvider} from "./context/settings-context";
+import {SnackbarProvider} from "./context/snackbar-context";
 import {StatisticsProvider} from "./context/statistics-context";
 import {TorMapTheme} from "./types/TorMapTheme";
 

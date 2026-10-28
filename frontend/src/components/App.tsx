@@ -1,8 +1,8 @@
 import {Box, Button, useMediaQuery, useTheme} from "@mui/material";
-import {useSnackbar} from "notistack";
 import React, {FunctionComponent, Suspense, useEffect, useState} from 'react';
 
 import {useDate} from "../context/date-context";
+import {useSnackbar} from "../context/snackbar-context";
 import {SnackbarMessage} from "../types/ui";
 import {backend} from "../util/util";
 import {AboutInformation} from "./dialogs/AboutInformation";

@@ -2086,13 +2086,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"clsx@npm:^1.1.0":
-  version: 1.1.1
-  resolution: "clsx@npm:1.1.1"
-  checksum: 10/ff052650329773b9b245177305fc4c4dc3129f7b2be84af4f58dc5defa99538c61d4207be7419405a5f8f3d92007c954f4daba5a7b74e563d5de71c28c830063
-  languageName: node
-  linkType: hard
-
 "clsx@npm:^2.1.1":
   version: 2.1.1
   resolution: "clsx@npm:2.1.1"
@@ -2176,13 +2169,6 @@ __metadata:
     shebang-command: "npm:^2.0.0"
     which: "npm:^2.0.1"
   checksum: 10/0d52657d7ae36eb130999dffff1168ec348687b48dd38e2ff59992ed916c88d328cf1d07ff4a4a10bc78de5e1c23f04b306d569e42f7a2293915c081e4dfee86
-  languageName: node
-  linkType: hard
-
-"csstype@npm:^3.0.10":
-  version: 3.1.3
-  resolution: "csstype@npm:3.1.3"
-  checksum: 10/f593cce41ff5ade23f44e77521e3a1bcc2c64107041e1bf6c3c32adc5187d0d60983292fda326154d20b01079e24931aa5b08e4467cc488b60bb1e7f6d478ade
   languageName: node
   linkType: hard
 
@@ -3394,15 +3380,6 @@ __metadata:
     define-properties: "npm:^1.2.1"
     gopd: "npm:^1.0.1"
   checksum: 10/1f1fd078fb2f7296306ef9dd51019491044ccf17a59ed49d375b576ca108ff37e47f3d29aead7add40763574a992f16a5367dd1e2173b8634ef18556ab719ac4
-  languageName: node
-  linkType: hard
-
-"goober@npm:^2.0.33":
-  version: 2.1.13
-  resolution: "goober@npm:2.1.13"
-  peerDependencies:
-    csstype: ^3.0.10
-  checksum: 10/0f073d7271bf1b53ec0db3744a0596c40889b01cad2db0a73709d24e081d3f47585eb21e3f5dd873138c12c587469f9a73b25c94681d0a57533063e038bf00ed
   languageName: node
   linkType: hard
 
@@ -4751,19 +4728,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"notistack@npm:3.0.2":
-  version: 3.0.2
-  resolution: "notistack@npm:3.0.2"
-  dependencies:
-    clsx: "npm:^1.1.0"
-    goober: "npm:^2.0.33"
-  peerDependencies:
-    react: ^17.0.0 || ^18.0.0 || ^19.0.0
-    react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10/aa27fd7de830d0424c6a7b7966e00dee1e4a2a6894e30b17ead09c2f0f6fd51b96a6bc127985e8cc6d1c2b2d46461706f8cc33ad507dfd64a5058f2c73077d9e
-  languageName: node
-  linkType: hard
-
 "npmlog@npm:^6.0.0":
   version: 6.0.1
   resolution: "npmlog@npm:6.0.1"
@@ -6043,7 +6007,6 @@ __metadata:
     globals: "npm:17.13.0"
     jotai: "npm:2.20.3"
     leaflet: "npm:1.9.4"
-    notistack: "npm:3.0.2"
     playwright: "npm:1.64.1"
     react: "npm:19.3.0"
     react-dom: "npm:19.3.0"

@@ -1,8 +1,8 @@
 import {LayerGroup, latLngBounds, LeafletMouseEvent} from "leaflet";
-import {useSnackbar} from "notistack";
 import React, {FunctionComponent, Suspense, useCallback, useEffect, useMemo, useState} from "react";
 
 import {useSettings} from "../../context/settings-context";
+import {useSnackbar} from "../../context/snackbar-context";
 import {useStatistics} from "../../context/statistics-context";
 import {RelayLocationDto} from "../../dto/relay";
 import {SnackbarMessage} from "../../types/ui";

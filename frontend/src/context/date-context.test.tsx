@@ -1,11 +1,11 @@
 import {eachDayOfInterval, format} from "date-fns";
-import {SnackbarProvider} from "notistack";
 import {expect, describe, it} from "vitest";
 import {page} from "vitest/browser";
 import {renderHook} from "vitest-browser-react";
 
 import {SnackbarMessage} from "../types/ui";
 import {DateProvider, useDate} from "./date-context";
+import {SnackbarProvider} from "./snackbar-context";
 
 const render = () =>
     renderHook(() => useDate(), {

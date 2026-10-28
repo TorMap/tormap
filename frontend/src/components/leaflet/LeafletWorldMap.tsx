@@ -1,7 +1,7 @@
-import {useSnackbar} from "notistack";
 import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
 
 import {useDate} from "../../context/date-context";
+import {useSnackbar} from "../../context/snackbar-context";
 import {RelayLocationDto} from "../../dto/relay";
 import {SnackbarMessage} from "../../types/ui";
 import {readPermalink, writePermalink} from "../../util/permalink";
