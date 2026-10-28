@@ -3,6 +3,7 @@ import {useAtomValue, useSetAtom} from "jotai";
 import {FunctionComponent, useEffect} from "react";
 
 import {useDate} from "../../context/date-context";
+import {isFullscreenSupported, toggleFullscreen} from "../../util/fullscreen";
 import {hasModifier, isEditable, isNothingFocused, isSearchShortcut} from "../../util/keyboard";
 import {showAboutDialogAtom} from "../dialogs/AboutInformation";
 import {openRelaySearchAtom} from "../dialogs/relay/relay-details-atoms";
@@ -46,6 +47,7 @@ export const dayIndexForKey = (availableDays: string[], index: number, key: stri
  * Global keyboard shortcuts:
  * - Ctrl+K (Cmd+K on Apple devices) or / opens the relay search
  * - ? opens the about dialog, which lists the shortcuts
+ * - F toggles full screen, where the browser supports it
  * - The arrow keys, Home, End, Page Up and Page Down select another day, while nothing has the focus. Once the map has
  *   the focus, the arrow keys pan the map instead, until Escape leaves the map.
  */
@@ -69,6 +71,10 @@ export const KeyboardShortcuts: FunctionComponent = () => {
             } else if (event.key === "?" && isPlainKey && !isEditable(event.target)) {
                 event.preventDefault()
                 setShowAboutDialog(true)
+            } else if (event.key.toLowerCase() === "f" && !hasModifier(event) && !isEditable(event.target) &&
+                isFullscreenSupported()) {
+                event.preventDefault()
+                void toggleFullscreen()
             } else if (event.key === "Escape" && document.activeElement?.classList.contains("leaflet-container")) {
                 (document.activeElement as HTMLElement).blur()
             } else if (dayNavigationKeys.includes(event.key) && !hasModifier(event) && isNothingFocused()) {

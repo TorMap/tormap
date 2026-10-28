@@ -17,7 +17,8 @@ vi.mock("./leaflet/map", async (importOriginal) => ({
 const days = ["2024-01-01", "2024-01-02"]
 
 describe("App", () => {
-    afterEach(() => {
+    afterEach(async () => {
+        if (document.fullscreenElement) await document.exitFullscreen()
         vi.restoreAllMocks()
         setPwaState({waitingWorker: undefined})
     })
@@ -36,6 +37,21 @@ describe("App", () => {
             "GET /relay/location/days",
             "GET /relay/location/day/2024-01-02",
         ]))
+    })
+
+    it("shows only the map, the attribution and the full screen button in full screen", async () => {
+        mockBackend.onGet("/relay/location/days", days)
+        mockBackend.onGet("/relay/location/day/2024-01-02", [])
+        await renderWithProviders(<App/>)
+        await expect.element(page.getByRole("button", {name: "About TorMap"})).toBeVisible()
+
+        await page.getByRole("button", {name: "Full screen"}).click()
+        // Hidden elements have no role, while the overlays stay mounted
+        await expect.element(page.getByRole("button", {name: "About TorMap"})).not.toBeInTheDocument()
+        await expect.element(page.getByRole("link", {name: "OpenStreetMap"})).toBeVisible()
+
+        await page.getByRole("button", {name: "Exit full screen"}).click()
+        await expect.element(page.getByRole("button", {name: "About TorMap"})).toBeVisible()
     })
 
     it("shows a loading animation until the days are available", async () => {
