@@ -9,7 +9,10 @@ import {DateProvider} from "./context/date-context";
 import {SettingsProvider} from "./context/settings-context";
 import {SnackbarProvider} from "./context/snackbar-context";
 import {StatisticsProvider} from "./context/statistics-context";
+import {listenForInstallPrompt} from "./pwa/install";
 import {TorMapTheme} from "./types/TorMapTheme";
+
+listenForInstallPrompt()
 
 const theme = createTheme(TorMapTheme)
 const root = document.getElementById('root');

@@ -38,6 +38,7 @@ import {
 } from "../dialogs/relay/relay-details-atoms";
 import {countryUsageAtom} from "../leaflet/country-usage-atoms";
 import {filteredRelaysAtom, shownRelayCountAtom} from "../leaflet/LeafletLayers";
+import {AppInstallSettings} from "./AppInstallSettings";
 import {RelayTypeColorInput} from "./RelayTypeColorInput";
 
 interface Props {
@@ -391,6 +392,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                     </Box>
                 </AccordionDetails>
             </Accordion>
+            <AppInstallSettings elevation={elevation}/>
             {(!isDefaultSettings || relaySearchOnMap) &&
                 <Button
                     variant="outlined"

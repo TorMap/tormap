@@ -4,6 +4,8 @@ import {useDate} from "../../context/date-context";
 import {useSnackbar} from "../../context/snackbar-context";
 import {RelayLocationDto} from "../../dto/relay";
 import {SnackbarMessage} from "../../types/ui";
+import {startServiceWorker} from "../../pwa/register";
+import {isOffline, offlineSnackbarKey, onceOnline} from "../../util/online";
 import {readPermalink, writePermalink} from "../../util/permalink";
 import {backend} from "../../util/util";
 import {CountryUsageLayer} from "./CountryUsageLayer";
@@ -49,7 +51,7 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
     const [refreshDayCount, setRefreshDayCount] = useState<number>(0)
 
     // App context
-    const {enqueueSnackbar} = useSnackbar();
+    const {enqueueSnackbar, closeSnackbar} = useSnackbar();
     const {selectedDate} = useDate()
 
     // The initial view is read once from the URL
@@ -65,21 +67,36 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
      * Query all relays for the selected date whenever a new date is selected
      */
     useEffect(() => {
-        if (selectedDate) {
-            const currentTimeStamp = Date.now()
-            setIsLoading(true)
-            backend.get<RelayLocationDto[]>(`/relay/location/day/${selectedDate}`).then(response => {
-                setIsLoading(false)
-                if (currentTimeStamp === latestRequestTimestamp) {
-                    setRelays(response.data)
-                }
-            }).catch(() => {
-                setIsLoading(false)
-                enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
-            })
-            latestRequestTimestamp = currentTimeStamp
+        if (!selectedDate) return
+        const currentTimeStamp = Date.now()
+        // The request may fail after this effect was cleaned up, then it must not wait for going online anymore
+        let active = true
+        let cancelOnlineRetry: (() => void) | undefined
+        setIsLoading(true)
+        backend.get<RelayLocationDto[]>(`/relay/location/day/${selectedDate}`).then(response => {
+            setIsLoading(false)
+            if (currentTimeStamp === latestRequestTimestamp) {
+                setRelays(response.data)
+            }
+        }).catch(() => {
+            setIsLoading(false)
+            if (isOffline()) {
+                if (!active) return
+                enqueueSnackbar(SnackbarMessage.Offline, {key: offlineSnackbarKey, persist: true})
+                cancelOnlineRetry = onceOnline(() => {
+                    closeSnackbar(offlineSnackbarKey)
+                    setRefreshDayCount(prev => prev + 1)
+                })
+                return
+            }
+            enqueueSnackbar(SnackbarMessage.ConnectionFailed, {variant: "error"})
+        }).finally(startServiceWorker)
+        latestRequestTimestamp = currentTimeStamp
+        return () => {
+            active = false
+            cancelOnlineRetry?.()
         }
-    }, [selectedDate, enqueueSnackbar, setIsLoading, refreshDayCount])
+    }, [selectedDate, enqueueSnackbar, closeSnackbar, setIsLoading, refreshDayCount])
 
     return (
         <MapContainer

@@ -1,8 +1,9 @@
-import {beforeEach, describe, expect, it, vi} from "vitest";
+import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 import {page} from "vitest/browser";
 
 import {makeRelays} from "../test/fixtures";
 import {deferred, mockBackend, networkError} from "../test/mock-backend";
+import {setPwaState} from "../pwa/pwa-state";
 import {renderWithProviders} from "../test/render";
 import {SnackbarMessage} from "../types/ui";
 import {App} from "./App";
@@ -16,6 +17,11 @@ vi.mock("./leaflet/map", async (importOriginal) => ({
 const days = ["2024-01-01", "2024-01-02"]
 
 describe("App", () => {
+    afterEach(() => {
+        vi.restoreAllMocks()
+        setPwaState({waitingWorker: undefined})
+    })
+
     beforeEach(() => {
         // Requested by the timeline of the large overlay
         mockBackend.onGet("/relay/statistics/daily-counts", [])
@@ -55,6 +61,37 @@ describe("App", () => {
         await expect.element(page.getByText(SnackbarMessage.ConnectionFailed)).not.toBeInTheDocument()
         await vi.waitFor(() => expect(mockBackend.requested).toContain("GET /relay/location/day/2024-01-02"))
         expect(attempts).toBe(2)
+    })
+
+    it("waits until the browser is online again instead of offering a retry", async () => {
+        const onLine = vi.spyOn(Navigator.prototype, "onLine", "get").mockReturnValue(false)
+        let attempts = 0
+        mockBackend.onGet("/relay/location/days", () => ++attempts === 1 ? networkError() : days)
+        mockBackend.onGet("/relay/location/day/2024-01-02", [])
+        await renderWithProviders(<App/>)
+
+        await expect.element(page.getByText(SnackbarMessage.Offline)).toBeVisible()
+        expect(page.getByRole("button", {name: "Retry"}).query()).toBeNull()
+        expect(attempts).toBe(1)
+
+        onLine.mockReturnValue(true)
+        window.dispatchEvent(new Event("online"))
+
+        await expect.element(page.getByText(SnackbarMessage.Offline)).not.toBeInTheDocument()
+        await vi.waitFor(() => expect(mockBackend.requested).toContain("GET /relay/location/day/2024-01-02"))
+        expect(attempts).toBe(2)
+    })
+
+    it("offers a new version until the user reloads", async () => {
+        mockBackend.onGet("/relay/location/days", [])
+        const worker = {postMessage: vi.fn()} as unknown as ServiceWorker
+        await renderWithProviders(<App/>)
+
+        setPwaState({waitingWorker: worker})
+        await expect.element(page.getByText(SnackbarMessage.UpdateAvailable)).toBeVisible()
+        await page.getByRole("button", {name: "Reload"}).click()
+
+        expect(worker.postMessage).toHaveBeenCalledWith("SKIP_WAITING")
     })
 
     it("credits the map sources", async () => {

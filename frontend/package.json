@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "vite --port 3000",
-    "build": "tsc && vite build",
+    "build": "tsc && tsc -p src/service-worker && vite build",
     "preview": "vite preview --port 3000",
     "lint": "eslint ./src --fix",
     "test": "vitest",
@@ -14,7 +14,8 @@
     "snyk:test": "snyk test --severity-threshold=high",
     "snyk:code": "snyk code test --severity-threshold=high",
     "smoke:load": "bash ./scripts/smoke-load.sh",
-    "smoke:load:ci": "bash ./scripts/smoke-load.sh --skip-build"
+    "smoke:load:ci": "bash ./scripts/smoke-load.sh --skip-build",
+    "smoke:pwa": "node ./scripts/smoke-pwa.mjs"
   },
   "engines": {
     "node": "^24.0.0"

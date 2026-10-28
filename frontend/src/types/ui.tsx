@@ -5,6 +5,8 @@ import React from "react";
 
 export enum SnackbarMessage {
     ConnectionFailed = "Connection failed! Maybe the server is being upgraded.",
+    Offline = "You are offline. The map loads once you are back online.",
+    UpdateAvailable = "A new version of TorMap is available.",
     NoRelaysWithFlags = "There are no relays for the current settings!",
     NoFamilyData = "Currently we have no family information for this date!",
     UpdatedData = "New data needed to be displayed. Please try again now.",

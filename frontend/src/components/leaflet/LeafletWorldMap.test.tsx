@@ -71,6 +71,24 @@ describe("LeafletWorldMap", () => {
         expect(setIsLoading).toHaveBeenLastCalledWith(false)
     })
 
+    it("loads the day once the browser is online again", async () => {
+        const onLine = vi.spyOn(Navigator.prototype, "onLine", "get").mockReturnValue(false)
+        let attempts = 0
+        mockBackend.onGet("/relay/location/day/2024-01-02", () => ++attempts === 1 ? networkError() : makeRelays(2))
+        const screen = await renderWithProviders(<Harness availableDays={days} setIsLoading={vi.fn()}/>)
+
+        await expect.element(page.getByText(SnackbarMessage.Offline)).toBeVisible()
+        expect(page.getByText(SnackbarMessage.ConnectionFailed).query()).toBeNull()
+
+        onLine.mockReturnValue(true)
+        window.dispatchEvent(new Event("online"))
+
+        await expect.element(screen.getByText("shown=2")).toBeVisible()
+        await expect.element(page.getByText(SnackbarMessage.Offline)).not.toBeInTheDocument()
+        expect(attempts).toBe(2)
+        onLine.mockRestore()
+    })
+
     it("ignores the answer of an outdated request", async () => {
         // The map identifies requests by timestamp, so the clock must advance between selections
         vi.useFakeTimers({toFake: ["Date"]})

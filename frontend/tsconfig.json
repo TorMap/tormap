@@ -17,5 +17,7 @@
     "jsx": "react-jsx"
   },
   "include": ["src"],
+  // Type checked with its own configuration, see src/service-worker/tsconfig.json
+  "exclude": ["src/service-worker"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
