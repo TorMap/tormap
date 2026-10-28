@@ -6,6 +6,7 @@ import {useSnackbar} from "../context/snackbar-context";
 import {applyUpdate} from "../pwa/register";
 import {usePwaState} from "../pwa/pwa-state";
 import {SnackbarMessage} from "../types/ui";
+import {useIsFullscreen} from "../util/fullscreen";
 import {isOffline, offlineSnackbarKey, onceOnline} from "../util/online";
 import {backend} from "../util/util";
 import {FullscreenButton} from "./buttons/FullscreenButton";
@@ -32,6 +33,7 @@ export const App: FunctionComponent = () => {
     const theme = useTheme()
     const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"))
     const {waitingWorker} = usePwaState()
+    const isFullscreen = useIsFullscreen()
 
     useEffect(() => {
         closeSnackbar()
@@ -87,9 +89,14 @@ export const App: FunctionComponent = () => {
                 setIsLoading={setIsLoading}
             />
             <React.StrictMode>
-                <Suspense fallback={null}>
-                    {isLargeScreen ? <OverlayLarge/> : <OverlaySmall/>}
-                </Suspense>
+                {/* Full screen shows only the map. The overlays stay mounted, so they keep their state. */}
+                <Box sx={{display: isFullscreen ? "none" : "contents"}}>
+                    <Suspense fallback={null}>
+                        {isLargeScreen ? <OverlayLarge/> : <OverlaySmall/>}
+                    </Suspense>
+                    <AboutInformation/>
+                    <InstallAppButton/>
+                </Box>
                 <Box sx={{
                     color: "#b4b4b4",
                     background: "#262626",
@@ -106,8 +113,6 @@ export const App: FunctionComponent = () => {
                         <ExternalLink href="https://carto.com/attributions" label={"CARTO"}/>
                     </span>
                 </Box>
-                <AboutInformation/>
-                <InstallAppButton/>
                 <FullscreenButton/>
                 <KeyboardShortcuts/>
             </React.StrictMode>

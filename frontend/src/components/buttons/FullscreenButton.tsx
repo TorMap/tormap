@@ -7,8 +7,8 @@ import {usePwaState} from "../../pwa/pwa-state";
 import {isFullscreenSupported, toggleFullscreen, useIsFullscreen} from "../../util/fullscreen";
 
 /**
- * A subtle button below the about icon, and below the install button while that is shown, toggling full screen. The F
- * key does the same.
+ * A subtle button below the about icon, and below the install button while that is shown, toggling full screen. Full
+ * screen shows only the map, apart from this button. The F key does the same.
  */
 export const FullscreenButton: FunctionComponent = () => {
     const isFullscreen = useIsFullscreen()
@@ -16,8 +16,9 @@ export const FullscreenButton: FunctionComponent = () => {
     if (!isFullscreenSupported()) return null
 
     const label = isFullscreen ? "Exit full screen" : "Full screen"
+    const tooltip = isFullscreen ? "Exit full screen and show the controls again" : "Full screen, showing only the map"
     return (
-        <Tooltip title={`${label} (F)`} placement={"right"} enterDelay={tooltipTimeDelay}>
+        <Tooltip title={`${tooltip} (F)`} placement={"right"} enterDelay={tooltipTimeDelay}>
             <IconButton
                 aria-label={label}
                 aria-keyshortcuts={"F"}
