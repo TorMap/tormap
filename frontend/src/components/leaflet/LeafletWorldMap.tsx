@@ -87,7 +87,7 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
                 width: "100vw",
                 height: "100vh",
                 // Matches the water of the CARTO dark_all tiles, so the area around the tiles looks the same
-                backgroundColor: "#2e353b",
+                backgroundColor: "#2c353c",
                 position: "fixed",
             }}
             center={initialView.center}
