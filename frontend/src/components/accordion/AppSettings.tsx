@@ -94,7 +94,7 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
 
     // Util
     const nameOfSetting = nameOfFactory<Settings>()
-    const {ariaKeyShortcuts, label: shortcutLabel} = searchShortcut()
+    const {ariaKeyShortcuts, keys: shortcutKeys} = searchShortcut()
     const relayTypes = [RelayType.Exit, RelayType.Guard, RelayType.Other]
     // Days that were not reprocessed yet have no weights, then the weight settings would do nothing
     const weightsAvailable = filteredRelays.some(relay => relay.consensusWeight != null)
@@ -113,7 +113,8 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                 variant="contained"
                 startIcon={<SearchIcon/>}
                 fullWidth={true}
-                sx={{mb: "16px"}}
+                // Left aligned, so the shortcut hint can sit at the right edge like in a search field
+                sx={{mb: "16px", justifyContent: "flex-start"}}
                 aria-keyshortcuts={`${ariaKeyShortcuts} /`}
                 onClick={() => openRelaySearch({relays: filteredRelays})}
             >
@@ -121,16 +122,30 @@ export const AppSettings: FunctionComponent<Props> = ({elevation = 24}) => {
                 {/* Only hinted where a mouse is used, since devices with a touch screen rarely have a keyboard */}
                 <Box component="kbd" aria-hidden sx={{
                     display: "none",
-                    "@media (pointer: fine)": {display: "inline"},
-                    ml: 1,
-                    px: 0.5,
+                    "@media (pointer: fine)": {display: "flex"},
+                    gap: "4px",
+                    ml: "auto",
+                    pl: 1,
                     fontFamily: "inherit",
-                    fontSize: "0.75em",
-                    border: "1px solid",
-                    borderRadius: 1,
-                    opacity: 0.8,
                 }}>
-                    {shortcutLabel}
+                    {shortcutKeys.map(key =>
+                        <Box key={key} component="kbd" sx={{
+                            minWidth: "22px",
+                            height: "22px",
+                            px: "5px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            borderRadius: "5px",
+                            backgroundColor: "rgba(0, 0, 0, 0.2)",
+                            fontFamily: "inherit",
+                            fontSize: "0.75rem",
+                            lineHeight: 1,
+                            textTransform: "none",
+                        }}>
+                            {key}
+                        </Box>
+                    )}
                 </Box>
             </Button>
             {relaySearchOnMap &&

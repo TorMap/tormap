@@ -4,11 +4,11 @@
 export const isApplePlatform = (): boolean => /Mac|iPhone|iPad|iPod/.test(navigator.platform)
 
 /**
- * The shortcut opening the relay search, in the format of the aria-keyshortcuts attribute and for display
+ * The shortcut opening the relay search, in the format of the aria-keyshortcuts attribute, as text and as single keys
  */
 export const searchShortcut = () => isApplePlatform()
-    ? {ariaKeyShortcuts: "Meta+K", label: "⌘K"}
-    : {ariaKeyShortcuts: "Control+K", label: "Ctrl+K"}
+    ? {ariaKeyShortcuts: "Meta+K", label: "⌘K", keys: ["⌘", "K"]}
+    : {ariaKeyShortcuts: "Control+K", label: "Ctrl+K", keys: ["Ctrl", "K"]}
 
 /**
  * Whether the event is Ctrl+K, or Cmd+K on Apple devices. On macOS Ctrl+K deletes to the end of a line in text fields,
