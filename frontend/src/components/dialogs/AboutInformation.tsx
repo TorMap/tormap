@@ -21,6 +21,7 @@ import React from "react";
 import {ContributorCard} from "../card/ContributorCard";
 import {ExternalLink} from "../link/ExternalLink";
 import BitcoinCard from "../card/BitcoinCard";
+import {isFullscreenSupported} from "../../util/fullscreen";
 import {searchShortcut} from "../../util/keyboard";
 
 /**
@@ -37,6 +38,7 @@ const keyboardShortcuts = (): [string, string][] => [
     ["Page Down / Page Up", "One month back or forward"],
     ["Home / End", "First or latest day"],
     ["Esc", "Leave the map, so the arrow keys select days instead of moving the map"],
+    ...(isFullscreenSupported() ? [["F", "Full screen showing only the map, or back"] as [string, string]] : []),
     ["?", "Show this information"],
 ]
 
