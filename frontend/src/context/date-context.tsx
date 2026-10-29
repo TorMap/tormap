@@ -1,4 +1,4 @@
-import {differenceInDays} from "date-fns";
+import {differenceInDays, parseISO} from "date-fns";
 import React, {FunctionComponent, useCallback, useContext, useEffect, useState} from "react";
 
 import {SnackbarMessage} from "../types/ui";
@@ -29,6 +29,27 @@ interface DateInterface {
     setAvailableDays: (arr: string[]) => void
 }
 
+// The first day with a consensus in the archive of the Tor Project
+const oldestConsensusDay = "2007-10-27"
+
+// The backend processes the archive month by month, so unprocessed history shows up as a gap longer than a month.
+// Shorter gaps also exist in the archive itself (e.g. 2007-11-09 to 2007-11-11) and are not worth a notice.
+const maxDaysWithoutConsensus = 31
+
+/**
+ * Whether the days between the oldest consensus and the latest available day have a gap of more than a month
+ * @param days Available days in ascending order
+ */
+export function hasMissingHistoricMonth(days: string[]): boolean {
+    let previousDay = parseISO(oldestConsensusDay)
+    for (const day of days) {
+        const currentDay = parseISO(day)
+        if (differenceInDays(currentDay, previousDay) > maxDaysWithoutConsensus) return true
+        previousDay = currentDay
+    }
+    return false
+}
+
 const DateContext = React.createContext<DateInterface | null>(null)
 
 export function useDate() {
@@ -57,9 +78,7 @@ export const DateProvider: FunctionComponent<DateProviderProps> = ({children}) =
         if (days.length > 0) {
             const permalinkDay = readPermalink().day
             setSelectedDate(permalinkDay && days.includes(permalinkDay) ? permalinkDay : days[days.length - 1])
-            const oldestConsensusDateAvailable = new Date("2007-10-27")
-            const minExpectedNumberOfDays = Math.abs(differenceInDays(oldestConsensusDateAvailable, new Date())) - 5
-            if (days.length < minExpectedNumberOfDays) {
+            if (hasMissingHistoricMonth(days)) {
                 enqueueSnackbar(SnackbarMessage.HistoricDataProcessing, {variant: "info"})
             }
         }

@@ -4,7 +4,7 @@ import {page} from "vitest/browser";
 import {renderHook} from "vitest-browser-react";
 
 import {SnackbarMessage} from "../types/ui";
-import {DateProvider, useDate} from "./date-context";
+import {DateProvider, hasMissingHistoricMonth, useDate} from "./date-context";
 import {SnackbarProvider} from "./snackbar-context";
 
 const render = () =>
@@ -77,10 +77,35 @@ describe("DateProvider", () => {
         await expect.element(historicMessage()).not.toBeInTheDocument()
     })
 
+    it("stays quiet when the history only has gaps shorter than a month", async () => {
+        const {result, act} = await render()
+        // Like the live data: the archive misses a few days in 2007 and 2008 and 18 days in April 2026
+        const days = allDaysSince2007().filter(day =>
+            !(day >= "2007-11-09" && day <= "2007-11-11") && !(day >= "2026-04-03" && day <= "2026-04-20"))
+        await act(() => result.current.setAvailableDays(days))
+        await expect.element(historicMessage()).not.toBeInTheDocument()
+    })
+
     it("does nothing for an empty list of days", async () => {
         const {result, act} = await render()
         await act(() => result.current.setAvailableDays([]))
         expect(result.current.selectedDate).toBeUndefined()
         await expect.element(historicMessage()).not.toBeInTheDocument()
+    })
+})
+
+describe("hasMissingHistoricMonth", () => {
+    it("finds a gap of more than a month in the middle of the history", () => {
+        const days = allDaysSince2007().filter(day => !(day >= "2015-01-01" && day <= "2015-02-15"))
+        expect(hasMissingHistoricMonth(days)).toBe(true)
+    })
+
+    it("finds missing months at the start of the history", () => {
+        expect(hasMissingHistoricMonth(["2008-01-01", "2008-01-02"])).toBe(true)
+    })
+
+    it("accepts gaps of up to a month", () => {
+        const days = allDaysSince2007().filter(day => !(day >= "2015-01-01" && day <= "2015-01-30"))
+        expect(hasMissingHistoricMonth(days)).toBe(false)
     })
 })
