@@ -110,6 +110,19 @@ describe("App", () => {
         expect(worker.postMessage).toHaveBeenCalledWith("SKIP_WAITING")
     })
 
+    it("lets the user dismiss the new version notice", async () => {
+        mockBackend.onGet("/relay/location/days", [])
+        const worker = {postMessage: vi.fn()} as unknown as ServiceWorker
+        await renderWithProviders(<App/>)
+
+        setPwaState({waitingWorker: worker})
+        await expect.element(page.getByText(SnackbarMessage.UpdateAvailable)).toBeVisible()
+        await page.getByRole("button", {name: "Dismiss"}).click()
+
+        await expect.element(page.getByText(SnackbarMessage.UpdateAvailable)).not.toBeInTheDocument()
+        expect(worker.postMessage).not.toHaveBeenCalled()
+    })
+
     it("credits the map sources", async () => {
         mockBackend.onGet("/relay/location/days", [])
         await renderWithProviders(<App/>)
