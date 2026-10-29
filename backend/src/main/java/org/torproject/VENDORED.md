@@ -30,6 +30,9 @@ Keep this list current. Re-apply each patch after copying a new upstream release
 3. `impl/ServerDescriptorImpl`: allow multiple `family-cert` lines (one per family) and keep the first one for
    `getFamilyCert()`. Upstream 2.28.0 allows it at most once and rejects such descriptors. See
    `ServerDescriptorFamilyCertTest`.
+4. `index/DescriptorIndexCollector`: delete the temporary `.<filename>` download when its size does not match the index
+   or the download fails. Upstream leaves it behind, and `DescriptorReaderImpl` then reads it like any other file on
+   every run. See `DescriptorIndexCollectorTest`.
 
 ## Upgrading
 
