@@ -3,6 +3,8 @@
 FROM --platform=$BUILDPLATFORM node:26-slim@sha256:e4db4c914bf8ad241bd24804fc25d272d89bad97e68cdc8a1414862790a02c39 AS builder
 WORKDIR /app
 COPY . .
+# Node 26 images no longer ship Yarn (or Corepack), so expose the Yarn release vendored in the repo (yarnPath) as `yarn`.
+RUN chmod +x .yarn/releases/yarn-*.cjs && ln -s "$(ls /app/.yarn/releases/yarn-*.cjs)" /usr/local/bin/yarn && yarn --version
 RUN yarn install --immutable
 RUN yarn run build
 
