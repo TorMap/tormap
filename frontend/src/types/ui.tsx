@@ -12,7 +12,7 @@ export enum SnackbarMessage {
     NoAutonomousSystemData = "Currently we have no AS information for this date!",
     UpdatedData = "New data needed to be displayed. Please try again now.",
     NoRelayDetails = "Currently we have no details about this relay for this month.",
-    HistoricDataProcessing = "Currently historic data is being processed.",
+    HistoricDataProcessing = "Older days are still being imported.",
     CountryUsageUnavailable = "The estimated number of users per country is currently not available.",
     CountryBordersFailed = "Could not load the country borders. Please try again.",
 }
