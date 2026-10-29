@@ -80,4 +80,54 @@ class DescriptorIndexCollectorTest {
     assertFalse(Files.exists(outsideDir.resolve("escape.txt")));
     assertFalse(Files.exists(localDir.resolve("recent").resolve("escape.txt")));
   }
+
+  private Path writeRemoteFile(Path remoteDir, byte[] contents) throws IOException {
+    Files.createDirectories(remoteDir.resolve("archive"));
+    return Files.write(remoteDir.resolve("archive").resolve("big.tar.xz"), contents);
+  }
+
+  private boolean fetchBigFile(Path remoteDir, Path localDir, long indexSize,
+      long warnBytes, long maxBytes) throws IOException {
+    Files.createDirectories(localDir);
+    SortedMap<String, FileNode> remotes = new TreeMap<>();
+    remotes.put("archive/big.tar.xz", new FileNode("big.tar.xz", indexSize, LAST_MODIFIED));
+    return new DescriptorIndexCollector(warnBytes, maxBytes).fetchRemoteFiles(
+        remoteDir.toUri().toString(), remotes, 0L, localDir.toFile(), new TreeMap<>());
+  }
+
+  @Test
+  void fetchRemoteFilesStoresFileAboveWarningSize() throws IOException {
+    Path remoteDir = tempDir.resolve("remote");
+    Path localDir = tempDir.resolve("local");
+    byte[] contents = new byte[200];
+    writeRemoteFile(remoteDir, contents);
+
+    assertTrue(fetchBigFile(remoteDir, localDir, contents.length, 100, 1000));
+
+    assertArrayEquals(contents, Files.readAllBytes(localDir.resolve("archive").resolve("big.tar.xz")));
+  }
+
+  @Test
+  void fetchRemoteFilesSkipsFileWhoseIndexSizeExceedsLimit() throws IOException {
+    Path remoteDir = tempDir.resolve("remote");
+    Path localDir = tempDir.resolve("local");
+    writeRemoteFile(remoteDir, new byte[2000]);
+
+    assertTrue(fetchBigFile(remoteDir, localDir, 2000, 100, 1000));
+
+    assertFalse(Files.exists(localDir.resolve("archive")));
+  }
+
+  @Test
+  void fetchRemoteFilesStopsDownloadThatExceedsLimitDespiteSmallIndexSize() throws IOException {
+    Path remoteDir = tempDir.resolve("remote");
+    Path localDir = tempDir.resolve("local");
+    writeRemoteFile(remoteDir, new byte[200_000]);
+
+    assertTrue(fetchBigFile(remoteDir, localDir, 500, 100, 1000));
+
+    Path archiveDir = localDir.resolve("archive");
+    assertFalse(Files.exists(archiveDir.resolve("big.tar.xz")));
+    assertFalse(Files.exists(archiveDir.resolve(".big.tar.xz")));
+  }
 }
