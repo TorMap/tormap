@@ -33,6 +33,9 @@ Keep this list current. Re-apply each patch after copying a new upstream release
 4. `index/DescriptorIndexCollector`: delete the temporary `.<filename>` download when its size does not match the index
    or the download fails. Upstream leaves it behind, and `DescriptorReaderImpl` then reads it like any other file on
    every run. See `DescriptorIndexCollectorTest`.
+5. `impl/DescriptorReaderImpl`: split tarball entries larger than 64 MiB into chunks at `@type ` lines instead of
+   reading them into one byte array. CollecTor's `server-descriptors-2026-04.tar.xz` holds one 2 GB entry with about
+   320,000 descriptors, which upstream fails to read with an `OutOfMemoryError`. See `DescriptorReaderLargeEntryTest`.
 
 ## Upgrading
 
