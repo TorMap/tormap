@@ -1,4 +1,5 @@
-import {Box, Button, useMediaQuery, useTheme} from "@mui/material";
+import {Close as CloseIcon} from "@mui/icons-material";
+import {Box, Button, IconButton, useMediaQuery, useTheme} from "@mui/material";
 import React, {FunctionComponent, Suspense, useEffect, useState} from 'react';
 
 import {useDate} from "../context/date-context";
@@ -21,6 +22,8 @@ import {LoadingAnimation} from "./loading/LoadingAnimation";
 // the entry script instead of after it. The overlay has its own Suspense boundary, so the map does not wait for it.
 const OverlayLarge = React.lazy(() => import('./overlay/OverlayLarge'));
 const OverlaySmall = React.lazy(() => import('./overlay/OverlaySmall'));
+
+const updateSnackbarKey = "update"
 
 export const App: FunctionComponent = () => {
     // Component state
@@ -71,14 +74,26 @@ export const App: FunctionComponent = () => {
     }, [connectionRetryCount, closeSnackbar, enqueueSnackbar, setAvailableDays])
 
     useEffect(() => {
+        // The notice stays until the user reloads or dismisses it. A dismissed update activates once all TorMap tabs
+        // are closed, so the notice only returns on the next visit if that has not happened yet.
         if (waitingWorker) {
             enqueueSnackbar(SnackbarMessage.UpdateAvailable, {
-                key: "update",
+                key: updateSnackbarKey,
                 persist: true,
-                action: <Button onClick={() => applyUpdate(waitingWorker)}>Reload</Button>,
+                action: <>
+                    <Button onClick={() => applyUpdate(waitingWorker)}>Reload</Button>
+                    <IconButton
+                        aria-label={"Dismiss"}
+                        size={"small"}
+                        color={"inherit"}
+                        onClick={() => closeSnackbar(updateSnackbarKey)}
+                    >
+                        <CloseIcon fontSize={"small"}/>
+                    </IconButton>
+                </>,
             })
         }
-    }, [waitingWorker, enqueueSnackbar])
+    }, [waitingWorker, enqueueSnackbar, closeSnackbar])
 
     return (
         <>
