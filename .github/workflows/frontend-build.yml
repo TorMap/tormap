@@ -2,6 +2,11 @@ name: Frontend Build (reusable)
 
 on:
   workflow_call:  # makes this callable from other workflows
+    inputs:
+      run:
+        description: Set to false to skip the build, which still reports the job as a passed (skipped) check
+        type: boolean
+        default: true
     secrets:
       # Reusable workflows only see secrets the caller passes explicitly
       OSM_TOKEN:
@@ -9,6 +14,7 @@ on:
 
 jobs:
   frontend_build:
+    if: inputs.run
     runs-on: ubuntu-latest
     permissions:
       contents: read

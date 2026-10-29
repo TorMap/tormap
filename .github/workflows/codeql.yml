@@ -36,27 +36,7 @@ jobs:
 
       - name: Detect changed languages
         id: filter
-        run: |
-          all=false
-          if [ "$GITHUB_EVENT_NAME" != "pull_request" ]; then
-            all=true
-          fi
-          files=$(git diff --name-only HEAD^1 HEAD || true)
-          if [ -z "$files" ]; then
-            all=true # could not determine the changes, analyze everything
-          fi
-          if grep -qx '.github/workflows/codeql.yml' <<< "$files"; then
-            all=true
-          fi
-          matches() { [ "$all" = true ] || grep -qE "$1" <<< "$files"; }
-          for entry in "backend:^backend/" "frontend:^frontend/" "workflows:^\.github/"; do
-            name="${entry%%:*}"
-            if matches "${entry#*:}"; then
-              echo "$name=true" >> "$GITHUB_OUTPUT"
-            else
-              echo "$name=false" >> "$GITHUB_OUTPUT"
-            fi
-          done
+        uses: ./.github/actions/changes
 
   java_kotlin:
     needs: changes

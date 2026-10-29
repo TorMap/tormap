@@ -1,23 +1,42 @@
 name: backend_test
 
+# Pull requests always run this workflow and skip the test job when the backend is untouched, because a skipped
+# job counts as passed for required status checks, while a workflow skipped by `paths:` never reports.
 on:
   push:
+    branches:
+      - master
+      - dev
     paths:
       - 'backend/**'
       - '.github/workflows/backend*'
       - '.github/scripts/osm-check.py'
   pull_request:
-    paths:
-      - 'backend/**'
-      - '.github/workflows/backend*'
-      - '.github/scripts/osm-check.py'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 2 # pull_request checks out a merge commit, its first parent is the base
+
+      - name: Detect changes
+        id: filter
+        uses: ./.github/actions/changes
+
   backend_test:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read

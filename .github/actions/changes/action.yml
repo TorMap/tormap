@@ -1,0 +1,52 @@
+name: Detect changes
+description: >
+  Reports which parts of the repository a pull request changes, so jobs can skip themselves with `if:`.
+  A skipped job counts as passed for required status checks, unlike a workflow skipped by `paths:`.
+  Everything counts as changed on events other than pull_request, when the changed files cannot be
+  determined, and when the calling workflow or this action changed.
+  Needs a checkout with fetch-depth 2: pull_request checks out a merge commit, its first parent is the base.
+
+outputs:
+  backend:
+    description: "'true' if backend code or its CI changed"
+    value: ${{ steps.filter.outputs.backend }}
+  frontend:
+    description: "'true' if frontend code or its CI changed"
+    value: ${{ steps.filter.outputs.frontend }}
+  workflows:
+    description: "'true' if anything under .github changed"
+    value: ${{ steps.filter.outputs.workflows }}
+
+runs:
+  using: composite
+  steps:
+    - name: Detect changes
+      id: filter
+      shell: bash
+      run: |
+        all=false
+        if [ "$GITHUB_EVENT_NAME" != "pull_request" ]; then
+          all=true
+        fi
+        files=$(git diff --name-only HEAD^1 HEAD || true)
+        if [ -z "$files" ]; then
+          all=true # could not determine the changes, check everything
+        fi
+        # GITHUB_WORKFLOW_REF looks like owner/repo/.github/workflows/name.yml@refs/...
+        workflow="${GITHUB_WORKFLOW_REF#"$GITHUB_REPOSITORY"/}"
+        workflow="${workflow%%@*}"
+        if grep -qxF "$workflow" <<< "$files" || grep -q '^\.github/actions/changes/' <<< "$files"; then
+          all=true
+        fi
+        matches() { [ "$all" = true ] || grep -qE "$1" <<< "$files"; }
+        for entry in \
+          'backend:^backend/|^\.github/workflows/backend|^\.github/scripts/osm-check\.py$' \
+          'frontend:^frontend/|^\.github/workflows/frontend|^\.github/scripts/osm-check\.py$' \
+          'workflows:^\.github/'; do
+          name="${entry%%:*}"
+          if matches "${entry#*:}"; then
+            echo "$name=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "$name=false" >> "$GITHUB_OUTPUT"
+          fi
+        done

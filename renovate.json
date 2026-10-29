@@ -3,6 +3,7 @@
   "extends": [
     "github>juliushenke/renovate-preset#v3.1.0"
   ],
+  "internalChecksAsSuccess": true,
   "schedule": [
     "at any time"
   ],
