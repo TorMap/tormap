@@ -29,8 +29,8 @@
     "date-fns": "4.4.0",
     "jotai": "2.20.3",
     "leaflet": "1.9.4",
-    "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
