@@ -1,11 +1,9 @@
 name: Frontend Pull Request
 
+# Runs on every pull request and skips the build when the frontend is untouched, because a skipped job counts as
+# passed for required status checks, while a workflow skipped by `paths:` never reports.
 on:
   pull_request:
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend*'
-      - '.github/scripts/osm-check.py'
 
 permissions:
   contents: read
@@ -16,14 +14,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 2 # pull_request checks out a merge commit, its first parent is the base
+
+      - name: Detect changes
+        id: filter
+        uses: ./.github/actions/changes
+
   frontend_build:
+    needs: changes
     uses: ./.github/workflows/frontend-build.yml
+    with:
+      # Skipped inside the reusable workflow, so the required check "frontend_build / frontend_build" still reports
+      run: ${{ needs.changes.outputs.frontend == 'true' }}
     secrets:
       OSM_TOKEN: ${{ secrets.OSM_TOKEN }}
 
   frontend_build_deploy:
     runs-on: ubuntu-latest
-    needs: frontend_build
+    needs: [changes, frontend_build]
+    if: needs.changes.outputs.frontend == 'true'
     permissions:
       contents: read
       deployments: write
