@@ -195,10 +195,12 @@ public class DescriptorIndexCollector implements DescriptorCollector {
               + "this file.",
               filename, baseUrl, tempDestinationFile.length(),
               entry.getValue().size);
+          tempDestinationFile.delete();
         }
       } catch (IOException e) {
         logger.warn("Cannot fetch remote file {} from {}.  Skipping that file.",
             filename, baseUrl, e);
+        tempDestinationFile.delete();
       }
     }
     return true;

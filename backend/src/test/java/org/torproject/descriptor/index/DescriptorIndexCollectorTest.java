@@ -48,6 +48,32 @@ class DescriptorIndexCollectorTest {
   }
 
   @Test
+  void fetchRemoteFilesDeletesTemporaryFileWhenSizeDiffersFromIndex()
+      throws IOException {
+    Path localDir = tempDir.resolve("local");
+    Path remoteDir = tempDir.resolve("remote");
+    Files.createDirectories(localDir);
+    Files.createDirectories(remoteDir.resolve("archive"));
+    byte[] contents = "descriptor".getBytes(StandardCharsets.UTF_8);
+    Files.write(remoteDir.resolve("archive").resolve("relay.tar.xz"), contents);
+
+    SortedMap<String, FileNode> remotes = new TreeMap<>();
+    remotes.put("archive/relay.tar.xz",
+        new FileNode("relay.tar.xz", contents.length + 1, LAST_MODIFIED));
+
+    boolean fetched = new DescriptorIndexCollector().fetchRemoteFiles(
+        remoteDir.toUri().toString(),
+        remotes,
+        0L,
+        localDir.toFile(),
+        new TreeMap<>());
+
+    assertTrue(fetched);
+    assertFalse(Files.exists(localDir.resolve("archive").resolve("relay.tar.xz")));
+    assertFalse(Files.exists(localDir.resolve("archive").resolve(".relay.tar.xz")));
+  }
+
+  @Test
   void fetchRemoteFilesSkipsFilesResolvingOutsideLocalDirectoryViaSymlink()
       throws IOException {
     Path localDir = tempDir.resolve("local");
