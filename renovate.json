@@ -1,17 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "github>juliushenke/renovate-preset#v3.0.1"
+    "github>juliushenke/renovate-preset#v3.1.0"
   ],
   "schedule": [
     "at any time"
   ],
-  "assignees": [
-    "JuliusHenke"
-  ],
-  "lockFileMaintenance": {
-    "enabled": true
-  },
   "packageRules": [
     {
       "description": "Ignore outdated dependencies required by TorProject descriptor library",
