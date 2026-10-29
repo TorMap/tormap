@@ -132,12 +132,14 @@ describe("SnackbarProvider", () => {
     })
 
     it("pauses auto hiding while the pointer is on the snackbar", async () => {
-        const {result, act} = await render({autoHideDuration: 400})
+        // Long enough that the hover lands before the snackbar would hide, also on a slow CI runner where the hover
+        // waits for the appear transition. The wait then outlasts the whole duration, so only the pause keeps it shown.
+        const {result, act} = await render({autoHideDuration: 2000})
         await act(() => {
             result.current.enqueueSnackbar("hovered")
         })
         await page.getByRole("alert").hover()
-        await new Promise(resolve => setTimeout(resolve, 800))
+        await new Promise(resolve => setTimeout(resolve, 2500))
         expect(alerts()).toEqual(["hovered"])
         // Resumes with half of autoHideDuration
         await page.getByRole("alert").unhover()
