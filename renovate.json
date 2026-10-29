@@ -3,6 +3,9 @@
   "extends": [
     "github>juliushenke/renovate-preset#v3.0.1"
   ],
+  "schedule": [
+    "at any time"
+  ],
   "assignees": [
     "JuliusHenke"
   ],
