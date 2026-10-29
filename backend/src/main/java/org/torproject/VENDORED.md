@@ -30,6 +30,9 @@ Keep this list current. Re-apply each patch after copying a new upstream release
 3. `impl/ServerDescriptorImpl`: allow multiple `family-cert` lines (one per family) and keep the first one for
    `getFamilyCert()`. Upstream 2.28.0 allows it at most once and rejects such descriptors. See
    `ServerDescriptorFamilyCertTest`.
+4. `impl/DescriptorReaderImpl`: split tarball entries larger than 64 MiB into chunks at `@type ` lines instead of
+   reading them into one byte array. CollecTor's `server-descriptors-2026-04.tar.xz` holds one 2 GB entry with about
+   320,000 descriptors, which upstream fails to read with an `OutOfMemoryError`. See `DescriptorReaderLargeEntryTest`.
 
 ## Upgrading
 

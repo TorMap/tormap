@@ -33,11 +33,20 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.Stack;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 public class DescriptorReaderImpl implements DescriptorReader {
 
   private static final Logger logger = LoggerFactory.getLogger(
       DescriptorReaderImpl.class);
+
+  /* Tarball entries larger than this are not read into memory at once, but
+   * split into chunks at "@type " annotation lines (local TorMap patch).
+   * Also the maximum size of one such chunk. */
+  static final int MAX_CHUNK_BYTES = 64 * 1024 * 1024;
+
+  /* Target size of the chunks that a large tarball entry is split into. */
+  static final int TARGET_CHUNK_BYTES = 1024 * 1024;
 
   private boolean hasStartedReading = false;
 
@@ -302,6 +311,21 @@ public class DescriptorReaderImpl implements DescriptorReader {
             if (tae.isDirectory()) {
               continue;
             }
+            String entryFileName = tae.getName().substring(
+                tae.getName().lastIndexOf("/") + 1);
+            if (tae.getSize() > MAX_CHUNK_BYTES) {
+              logger.info("Splitting large entry {} ({} bytes) of tarball {} "
+                  + "into chunks.", tae.getName(), tae.getSize(), file);
+              long discardedBytes = splitAtTypeAnnotations(bis,
+                  TARGET_CHUNK_BYTES, MAX_CHUNK_BYTES,
+                  chunk -> this.parseAndQueue(chunk, file, entryFileName));
+              if (discardedBytes > 0) {
+                logger.warn("Discarded {} bytes of entry {} in tarball {} "
+                    + "without an \"@type \" line for more than {} bytes.",
+                    discardedBytes, tae.getName(), file, MAX_CHUNK_BYTES);
+              }
+              continue;
+            }
             try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
               int len;
               byte[] data = new byte[1024];
@@ -312,16 +336,18 @@ public class DescriptorReaderImpl implements DescriptorReader {
               if (rawDescriptorBytes.length < 1) {
                 continue;
               }
-              String fileName = tae.getName().substring(
-                      tae.getName().lastIndexOf("/") + 1);
-              for (Descriptor descriptor :
-                      this.descriptorParser.parseDescriptors(
-                      rawDescriptorBytes, file, fileName)) {
-                this.descriptorQueue.add(descriptor);
-              }
+              this.parseAndQueue(rawDescriptorBytes, file, entryFileName);
             }
           }
         }
+      }
+    }
+
+    private void parseAndQueue(byte[] rawDescriptorBytes, File file,
+        String fileName) {
+      for (Descriptor descriptor : this.descriptorParser.parseDescriptors(
+          rawDescriptorBytes, file, fileName)) {
+        this.descriptorQueue.add(descriptor);
       }
     }
 
@@ -339,6 +365,81 @@ public class DescriptorReaderImpl implements DescriptorReader {
           }
         }
       }
+    }
+  }
+
+  private static final byte[] TYPE_ANNOTATION =
+      "@type ".getBytes(StandardCharsets.US_ASCII);
+
+  /**
+   * Reads descriptors from {@code in} and passes them to {@code chunkConsumer}
+   * in chunks that start at an "@type " line and hold at least
+   * {@code targetChunkBytes} (except the last). A chunk that would grow past
+   * {@code maxChunkBytes} without reaching another "@type " line is
+   * discarded up to the next such line, so memory use stays bounded.
+   *
+   * @return the number of discarded bytes
+   */
+  static long splitAtTypeAnnotations(InputStream in, int targetChunkBytes,
+      int maxChunkBytes, Consumer<byte[]> chunkConsumer) throws IOException {
+    ChunkBuffer chunk = new ChunkBuffer();
+    byte[] lineHead = new byte[TYPE_ANNOTATION.length];
+    int column = 0;
+    int lineStart = 0;
+    boolean discarding = false;
+    long discardedBytes = 0L;
+    byte[] data = new byte[64 * 1024];
+    int len;
+    while ((len = in.read(data, 0, data.length)) >= 0) {
+      for (int i = 0; i < len; i++) {
+        byte b = data[i];
+        if (column < lineHead.length) {
+          lineHead[column] = b;
+        }
+        column++;
+        if (discarding) {
+          discardedBytes++;
+        } else {
+          chunk.write(b);
+        }
+        if (column == lineHead.length
+            && Arrays.equals(lineHead, TYPE_ANNOTATION)) {
+          if (discarding) {
+            discarding = false;
+            discardedBytes -= lineHead.length;
+            chunk.write(lineHead, 0, lineHead.length);
+            lineStart = 0;
+          } else if (lineStart >= targetChunkBytes) {
+            chunkConsumer.accept(chunk.takeUntil(lineStart));
+            lineStart = 0;
+          }
+        }
+        if (b == '\n') {
+          column = 0;
+          lineStart = chunk.size();
+        }
+        if (!discarding && chunk.size() > maxChunkBytes) {
+          discarding = true;
+          discardedBytes += chunk.size();
+          chunk.reset();
+          lineStart = 0;
+        }
+      }
+    }
+    if (chunk.size() > 0) {
+      chunkConsumer.accept(chunk.toByteArray());
+    }
+    return discardedBytes;
+  }
+
+  private static class ChunkBuffer extends ByteArrayOutputStream {
+
+    /* Returns the first {@code length} bytes and keeps the rest. */
+    byte[] takeUntil(int length) {
+      byte[] taken = Arrays.copyOf(this.buf, length);
+      System.arraycopy(this.buf, length, this.buf, 0, this.count - length);
+      this.count -= length;
+      return taken;
     }
   }
 }
