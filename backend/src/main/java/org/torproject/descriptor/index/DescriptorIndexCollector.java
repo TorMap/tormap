@@ -11,12 +11,12 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
 import java.util.SortedMap;
@@ -32,6 +32,27 @@ public class DescriptorIndexCollector implements DescriptorCollector {
 
   private static final Logger logger = LoggerFactory
       .getLogger(DescriptorIndexCollector.class);
+
+  /* Local TorMap patch: fetched files above this size are logged as unusually
+   * large. CollecTor's largest monthly archives are below 1 GB. */
+  static final long DEFAULT_WARN_FILE_BYTES = 2L * 1024 * 1024 * 1024;
+
+  /* Local TorMap patch: fetched files above this size are not stored, so a
+   * broken or malicious remote cannot fill the local disk. */
+  static final long DEFAULT_MAX_FILE_BYTES = 10L * 1024 * 1024 * 1024;
+
+  private final long warnFileBytes;
+
+  private final long maxFileBytes;
+
+  public DescriptorIndexCollector() {
+    this(DEFAULT_WARN_FILE_BYTES, DEFAULT_MAX_FILE_BYTES);
+  }
+
+  DescriptorIndexCollector(long warnFileBytes, long maxFileBytes) {
+    this.warnFileBytes = warnFileBytes;
+    this.maxFileBytes = maxFileBytes;
+  }
 
   /**
    * If {@code collecTorIndexUrlString} contains just the
@@ -107,6 +128,12 @@ public class DescriptorIndexCollector implements DescriptorCollector {
             filepathname, filename);
         continue;
       }
+      if (entry.getValue().size > this.maxFileBytes) {
+        logger.warn("Remote file {} has a size of {} bytes which exceeds the "
+            + "limit of {} bytes. Skipping that file.", filepathname,
+            entry.getValue().size, this.maxFileBytes);
+        continue;
+      }
       File filepath = new File(localDir,
           filepathname.replace(filename, ""));
       long lastModifiedMillis = entry.getValue().lastModifiedMillis();
@@ -147,8 +174,18 @@ public class DescriptorIndexCollector implements DescriptorCollector {
           destinationFile.getAbsolutePath());
       try (InputStream is = new URL(baseUrl + "/" + filepathname)
           .openStream()) {
-        Files.copy(is, tempDestinationFile.toPath(),
-            StandardCopyOption.REPLACE_EXISTING);
+        if (!copyAtMost(is, tempDestinationFile.toPath(), this.maxFileBytes)) {
+          Files.deleteIfExists(tempDestinationFile.toPath());
+          logger.warn("Fetched remote file {} from {} exceeds the limit of {} "
+              + "bytes. Not storing this file.", filename, baseUrl,
+              this.maxFileBytes);
+          continue;
+        }
+        if (tempDestinationFile.length() > this.warnFileBytes) {
+          logger.warn("Fetched remote file {} from {} has an unusually large "
+              + "size of {} bytes (warning above {} bytes).", filename, baseUrl,
+              tempDestinationFile.length(), this.warnFileBytes);
+        }
         if (tempDestinationFile.length() == entry.getValue().size) {
           tempDestinationFile.renameTo(destinationFile);
           destinationFile.setLastModified(lastModifiedMillis);
@@ -164,6 +201,25 @@ public class DescriptorIndexCollector implements DescriptorCollector {
         logger.warn("Cannot fetch remote file {} from {}.  Skipping that file.",
             filename, baseUrl, e);
         tempDestinationFile.delete();
+      }
+    }
+    return true;
+  }
+
+  /* Copies at most maxBytes from in to target and returns false if in holds
+   * more than that. */
+  static boolean copyAtMost(InputStream in, Path target, long maxBytes)
+      throws IOException {
+    long total = 0L;
+    byte[] buffer = new byte[64 * 1024];
+    try (OutputStream out = Files.newOutputStream(target)) {
+      int len;
+      while ((len = in.read(buffer)) >= 0) {
+        total += len;
+        if (total > maxBytes) {
+          return false;
+        }
+        out.write(buffer, 0, len);
       }
     }
     return true;

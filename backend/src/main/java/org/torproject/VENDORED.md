@@ -36,6 +36,8 @@ Keep this list current. Re-apply each patch after copying a new upstream release
 5. `impl/DescriptorReaderImpl`: split tarball entries larger than 64 MiB into chunks at `@type ` lines instead of
    reading them into one byte array. CollecTor's `server-descriptors-2026-04.tar.xz` holds one 2 GB entry with about
    320,000 descriptors, which upstream fails to read with an `OutOfMemoryError`. See `DescriptorReaderLargeEntryTest`.
+6. `index/DescriptorIndexCollector`: log a warning for fetched files above 2 GiB and do not store files above 10 GiB,
+   checked against both the index size and the bytes actually received. See `DescriptorIndexCollectorTest`.
 
 ## Upgrading
 
