@@ -25,7 +25,7 @@
     "@emotion/styled": "11.14.1",
     "@mui/icons-material": "9.5.0",
     "@mui/material": "9.5.0",
-    "@mui/x-date-pickers": "9.15.0",
+    "@mui/x-date-pickers": "9.16.0",
     "date-fns": "4.4.0",
     "jotai": "2.20.3",
     "leaflet": "1.9.4",
