@@ -135,8 +135,7 @@ class SecurityConfig(
     fun liteFilterChain(http: HttpSecurity): SecurityFilterChain {
         applyCommonConfig(http, LITE_CONTENT_SECURITY_POLICY)
             .securityMatcher("/lite", "/lite/**")
-            // No authentication, sessions or cookies on this chain, and only GET is allowed
-            .csrf { it.disable() }
+            // CSRF protection stays on: it only checks unsafe methods, which this chain denies anyway
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers(HttpMethod.GET, "/lite", "/lite/**").permitAll()

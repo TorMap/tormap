@@ -80,6 +80,8 @@ class SecurityRulesTest(
             response.status shouldNotBe 401
             response.status shouldNotBe 403
             response.getHeader("Content-Security-Policy") shouldBe SecurityConfig.LITE_CONTENT_SECURITY_POLICY
+            // No session or CSRF cookie, so responses stay cacheable and anonymous
+            response.getHeader("Set-Cookie") shouldBe null
         }
         SecurityConfig.LITE_CONTENT_SECURITY_POLICY shouldStartWith "default-src 'none';"
         (SecurityConfig.LITE_CONTENT_SECURITY_POLICY.contains("script-src")) shouldBe false
