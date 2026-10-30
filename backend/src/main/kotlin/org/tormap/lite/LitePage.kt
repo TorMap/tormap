@@ -1,5 +1,6 @@
 package org.tormap.lite
 
+import org.tormap.adapter.dto.RelayLocationDto
 import org.tormap.database.entity.TorRelayFlag
 import java.time.LocalDate
 
@@ -16,6 +17,8 @@ class LitePageModel(
     val totalRelayCount: Int,
     val notice: String?,
     val fullVersionUrl: String,
+    /** The relays around the clicked point of the map, null if nothing was clicked */
+    val pickedRelays: List<RelayLocationDto>? = null,
 )
 
 /**
@@ -24,42 +27,64 @@ class LitePageModel(
 object LitePage {
     const val PATH = "/lite/"
     const val MAP_PATH = "/lite/map.png"
+    const val RELAY_PATH = "/lite/relay/"
+    const val FAMILY_PATH = "/lite/family/"
+    const val AUTONOMOUS_SYSTEM_PATH = "/lite/as/"
+    const val SEARCH_PATH = "/lite/search"
     private const val STYLESHEET_PATH = "/static/lite/lite.css"
 
-    fun render(model: LitePageModel): String = Html.document {
+    fun render(model: LitePageModel): String {
         val view = model.view
+        return layout("TorMap Lite" + (view.day?.let { " - $it" } ?: ""), view, model.fullVersionUrl) {
+            model.notice?.let { tag("p", it, "class" to "notice", "role" to "status") }
+            tag("form", "method" to "get", "action" to PATH) {
+                dayControls(model)
+                hiddenInput("lat", view.latitudeParameter)
+                hiddenInput("lng", view.longitudeParameter)
+                hiddenInput("zoom", view.zoom.toString())
+                mapControls(view)
+                map(model)
+                settings(view)
+            }
+            model.pickedRelays?.let { relays ->
+                tag("section", "id" to "relays") {
+                    tag("h2", "Relays at the clicked point")
+                    if (relays.isEmpty()) {
+                        tag("p", "There are no relays shown there. Click closer to a marker or zoom in.")
+                    } else {
+                        relayTable(relays, view)
+                    }
+                }
+            }
+            searchForm(view, "")
+        }
+    }
+
+    /**
+     * The frame of every Lite page: header with the note about the JavaScript map, the content and the footer
+     */
+    fun layout(title: String, view: LiteView, fullVersionUrl: String, content: Html.() -> Unit): String = Html.document {
         tag("html", "lang" to "en") {
             tag("head") {
                 tag("meta", "charset" to "utf-8")
                 tag("meta", "name" to "viewport", "content" to "width=device-width, initial-scale=1")
-                tag("title", "TorMap Lite" + (view.day?.let { " - $it" } ?: ""))
+                tag("title", title)
                 tag("link", "rel" to "stylesheet", "href" to STYLESHEET_PATH)
                 tag("link", "rel" to "icon", "href" to "/favicon.ico")
             }
             tag("body") {
                 tag("header") {
                     tag("h1") {
-                        text("TorMap ")
+                        tag("a", "href" to "$PATH?${view.toQuery()}", "class" to "home") { text("TorMap ") }
                         tag("span", "Lite", "class" to "subtitle")
                     }
                     tag("p", "class" to "note") {
                         text("This version of TorMap works without JavaScript. With JavaScript enabled, ")
-                        tag("a", "the full map", "href" to "${model.fullVersionUrl}/#${view.toPermalinkHash()}")
+                        tag("a", "the full map", "href" to "$fullVersionUrl/#${view.toPermalinkHash()}")
                         text(" has more features.")
                     }
                 }
-                tag("main") {
-                    model.notice?.let { tag("p", it, "class" to "notice", "role" to "status") }
-                    tag("form", "method" to "get", "action" to PATH) {
-                        dayControls(model)
-                        hiddenInput("lat", view.latitudeParameter)
-                        hiddenInput("lng", view.longitudeParameter)
-                        hiddenInput("zoom", view.zoom.toString())
-                        mapControls(view)
-                        map(model)
-                        settings(view)
-                    }
-                }
+                tag("main") { content() }
                 tag("footer") {
                     tag("p") {
                         text("Relay data from ")
@@ -72,6 +97,75 @@ object LitePage {
             }
         }
     }
+
+    /**
+     * A table of relays of the view's day with links to their details, family and autonomous system
+     */
+    fun Html.relayTable(relays: List<RelayLocationDto>, view: LiteView) {
+        val query = view.toQuery()
+        val listed = relays.take(LiteRelays.MAX_LISTED_RELAYS)
+        tag("p", "class" to "summary") {
+            text(if (listed.size < relays.size) "The first ${listed.size} of ${relays.size} relays:" else "${relays.size} relays:")
+        }
+        tag("div", "class" to "table") {
+            tag("table") {
+                tag("thead") {
+                    tag("tr") {
+                        listOf("Nickname", "Type", "Country", "Family", "Autonomous system", "Flags").forEach {
+                            tag("th", it, "scope" to "col")
+                        }
+                    }
+                }
+                tag("tbody") {
+                    listed.forEach { relay ->
+                        val type = LiteRelayType.of(relay.flags)
+                        tag("tr") {
+                            tag("td") {
+                                val nickname = relay.nickname ?: "Unknown"
+                                if (relay.detailsId != null) tag("a", nickname, "href" to "$RELAY_PATH${relay.detailsId}?$query")
+                                else text(nickname)
+                            }
+                            tag("td") {
+                                tag("span", "class" to "swatch swatch-${type.parameter}", "aria-hidden" to "true")
+                                text(type.label)
+                            }
+                            tag("td", relay.country)
+                            tag("td") {
+                                relay.familyId?.let { tag("a", "Family", "href" to "$FAMILY_PATH$it?$query") }
+                            }
+                            tag("td") {
+                                relay.asNumber?.let { tag("a", "AS$it", "href" to "$AUTONOMOUS_SYSTEM_PATH$it?$query") }
+                            }
+                            tag("td", LiteRelays.flagNames(relay.flags).joinToString(", "), "class" to "flags")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * A form to search the relays of the view's day. It is separate from the map form, because forms can not be nested.
+     */
+    fun Html.searchForm(view: LiteView, query: String) {
+        tag("form", "method" to "get", "action" to SEARCH_PATH, "class" to "search", "role" to "search") {
+            view.queryParameters().forEach { (name, value) -> hiddenInput(name, value) }
+            tag("label", "Search relays of ${view.day ?: "the day"}", "for" to "q")
+            tag(
+                "input",
+                "type" to "search",
+                "id" to "q",
+                "name" to "q",
+                "value" to query,
+                "maxlength" to LiteRelays.MAX_QUERY_LENGTH,
+                "placeholder" to "Nickname or fingerprint",
+                "required" to true,
+            )
+            tag("button", "Search", "type" to "submit")
+        }
+    }
+
+    fun Html.backToMap(view: LiteView) = tag("p") { tag("a", "\u2190 Back to the map", "href" to "$PATH?${view.toQuery()}") }
 
     private fun Html.dayControls(model: LitePageModel) {
         tag("fieldset", "class" to "day") {
@@ -116,15 +210,20 @@ object LitePage {
                 "input",
                 "type" to "image",
                 "name" to "map",
-                "src" to "$MAP_PATH?${view.toQuery()}",
+                "src" to "$MAP_PATH?${view.toImageQuery()}",
                 "width" to view.size.width,
                 "height" to view.size.height,
-                "alt" to "Map of ${model.shownRelayCount} relays on $dayText. Click to zoom in.",
+                "alt" to "Map of ${model.shownRelayCount} relays on $dayText. ${clickHint(view)}",
             )
         }
         tag("p", "class" to "summary") {
-            text("Showing ${model.shownRelayCount} of ${model.totalRelayCount} relays on $dayText, zoom level ${view.zoom}. Click the map to zoom in.")
+            text("Showing ${model.shownRelayCount} of ${model.totalRelayCount} relays on $dayText, zoom level ${view.zoom}. ${clickHint(view)}")
         }
+    }
+
+    private fun clickHint(view: LiteView) = when (view.clickMode) {
+        ClickMode.List -> "Click the map to list the relays there."
+        ClickMode.Zoom -> "Click the map to zoom in."
     }
 
     private fun Html.settings(view: LiteView) {
@@ -143,6 +242,15 @@ object LitePage {
                 tag("legend", "Relays must have the flags")
                 TorRelayFlag.entries.forEach { flag ->
                     checkbox("flag", flag.name, flag in view.requiredFlags) { text(flag.name) }
+                }
+            }
+            tag("fieldset") {
+                tag("legend", "Click on the map")
+                ClickMode.entries.forEach { mode ->
+                    tag("label") {
+                        tag("input", "type" to "radio", "name" to "click", "value" to mode.parameter, "checked" to (mode == view.clickMode))
+                        text(" ${mode.label}")
+                    }
                 }
             }
             tag("fieldset") {
@@ -166,6 +274,6 @@ object LitePage {
         }
     }
 
-    private fun Html.hiddenInput(name: String, value: String) =
+    internal fun Html.hiddenInput(name: String, value: String) =
         tag("input", "type" to "hidden", "name" to name, "value" to value)
 }

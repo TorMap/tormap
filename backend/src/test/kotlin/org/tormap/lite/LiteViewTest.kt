@@ -3,6 +3,8 @@ package org.tormap.lite
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import org.tormap.database.entity.TorRelayFlag
 import java.time.LocalDate
 
@@ -38,6 +40,14 @@ class LiteViewTest : StringSpec({
         view.requiredFlags shouldBe setOf(TorRelayFlag.Stable, TorRelayFlag.Fast)
         view.latitude shouldBe (52.52 plusOrMinus 0.1)
         parse(view.toQuery()) shouldBe view
+    }
+
+    "the click mode is part of the page query but not of the image query" {
+        val view = parse("zoom=4&click=zoom")
+        view.clickMode shouldBe ClickMode.Zoom
+        view.toQuery() shouldContain "click=zoom"
+        view.toImageQuery() shouldNotContain "click"
+        parse("click=nonsense").clickMode shouldBe ClickMode.List
     }
 
     "unchecking all relay types is kept" {

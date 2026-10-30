@@ -10,15 +10,23 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.util.MultiValueMap
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
+import org.tormap.adapter.controller.exception.RelayNotFoundException
 import org.tormap.config.CacheConfig
+import org.tormap.database.repository.RelayDetailsRepository
+import org.tormap.lite.ClickMode
 import org.tormap.lite.LiteMapRenderer
 import org.tormap.lite.LitePage
 import org.tormap.lite.LitePageModel
+import org.tormap.lite.LiteRelayPages
+import org.tormap.lite.LiteRelays
 import org.tormap.lite.LiteView
+import org.tormap.service.RelayDetailsQueryService
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
@@ -26,10 +34,14 @@ import java.util.concurrent.TimeUnit
  * TorMap Lite: the map as server-rendered HTML and PNG for browsers without JavaScript (e.g. Tor Browser "Safest").
  * Every page is a GET form. Buttons and map clicks submit an action (`go`, `map.x`/`map.y`), which is applied and
  * answered with a redirect to the canonical URL of the resulting view, so the address bar always holds a clean link.
+ * A click lists the relays at that point (`x`/`y`) or zooms in, depending on the view's click mode. Relays, families
+ * and autonomous systems have their own pages, which keep the view's query so they can link back to the same map.
  */
 @Controller
 class LiteController(
     private val relayLocationController: RelayLocationController,
+    private val relayDetailsQueryService: RelayDetailsQueryService,
+    private val relayDetailsRepository: RelayDetailsRepository,
     private val liteMapRenderer: LiteMapRenderer,
     cacheManager: CacheManager,
     @param:Value("\${app.lite.full-version-url:https://tormap.org}")
@@ -65,12 +77,18 @@ class LiteController(
                 "south" -> view.panned(0.0, PAN_FRACTION)
                 "west" -> view.panned(-PAN_FRACTION, 0.0)
                 "east" -> view.panned(PAN_FRACTION, 0.0)
-                else -> if (mapX != null && mapY != null) view.zoomedInAt(mapX, mapY) else view
+                else -> if (mapX != null && mapY != null && view.clickMode == ClickMode.Zoom) view.zoomedInAt(mapX, mapY) else view
             }
-            return ResponseEntity.status(HttpStatus.SEE_OTHER)
-                .header(HttpHeaders.LOCATION, "${LitePage.PATH}?${next.toQuery()}")
-                .build()
+            // A click that lists relays keeps the view and adds the clicked pixel, the list follows below the map
+            val pick = if (action == null && mapX != null && mapY != null && view.clickMode == ClickMode.List) {
+                "&x=${mapX.coerceIn(0, view.size.width)}&y=${mapY.coerceIn(0, view.size.height)}#relays"
+            } else {
+                ""
+            }
+            return redirect("${LitePage.PATH}?${next.toQuery()}$pick")
         }
+        val pickX = parameters.getFirst("x")?.toIntOrNull()?.takeIf { it in 0..view.size.width }
+        val pickY = parameters.getFirst("y")?.toIntOrNull()?.takeIf { it in 0..view.size.height }
 
         val relays = relaysOf(day)
         val notice = when {
@@ -87,11 +105,60 @@ class LiteController(
             shownRelayCount = liteMapRenderer.filterRelays(relays, view).size,
             totalRelayCount = relays.size,
             notice = notice,
-            fullVersionUrl = fullVersionUrl.trimEnd('/'),
+            fullVersionUrl = fullVersionUrl(),
+            pickedRelays = if (pickX != null && pickY != null) {
+                LiteRelays.near(liteMapRenderer.filterRelays(relays, view), view, pickX, pickY)
+            } else {
+                null
+            },
         )
-        return ResponseEntity.ok()
-            .contentType(MediaType(MediaType.TEXT_HTML, StandardCharsets.UTF_8))
-            .body(LitePage.render(model))
+        return html(LitePage.render(model))
+    }
+
+    @GetMapping("${LitePage.RELAY_PATH}{id}")
+    fun relay(@PathVariable id: Long, @RequestParam parameters: MultiValueMap<String, String>): ResponseEntity<String> {
+        val view = resolvedView(parameters)
+        val details = try {
+            relayDetailsQueryService.getRelay(id)
+        } catch (_: RelayNotFoundException) {
+            return notFound("There is no relay with the ID $id.", view)
+        }
+        val location = relaysOf(view.day).find { it.detailsId == id }
+        return html(LiteRelayPages.renderRelay(details, location, view, fullVersionUrl()))
+    }
+
+    @GetMapping("${LitePage.FAMILY_PATH}{id}")
+    fun family(@PathVariable id: Long, @RequestParam parameters: MultiValueMap<String, String>): ResponseEntity<String> {
+        val view = resolvedView(parameters)
+        val members = relayDetailsRepository.findAllByFamilyId(id)
+        if (members.isEmpty()) return notFound("There is no family with the ID $id.", view)
+        return html(LiteRelayPages.renderFamily(id, members, view, fullVersionUrl()))
+    }
+
+    @GetMapping("${LitePage.AUTONOMOUS_SYSTEM_PATH}{number}")
+    fun autonomousSystem(@PathVariable number: Int, @RequestParam parameters: MultiValueMap<String, String>): ResponseEntity<String> {
+        val view = resolvedView(parameters)
+        val relays = liteMapRenderer.filterRelays(relaysOf(view.day), view).filter { it.asNumber == number }
+        // The name is taken from the details of one relay instead of grouping all relays of the month
+        val name = relays.firstNotNullOfOrNull { it.detailsId }
+            ?.let { relayDetailsRepository.findById(it).orElse(null)?.autonomousSystemName }
+        return html(LiteRelayPages.renderAutonomousSystem(number, name, relays, view, fullVersionUrl()))
+    }
+
+    @GetMapping(LitePage.SEARCH_PATH)
+    fun search(@RequestParam parameters: MultiValueMap<String, String>): ResponseEntity<String> {
+        val view = resolvedView(parameters)
+        val query = parameters.getFirst("q")?.trim()?.take(LiteRelays.MAX_QUERY_LENGTH).orEmpty()
+        if (query.isEmpty()) return redirect("${LitePage.PATH}?${view.toQuery()}")
+        val day = view.day
+        // A fingerprint is looked up once in the relay details of the day's month
+        val detailsIds = if (day != null && LiteRelays.isFingerprint(query)) {
+            setOfNotNull(relayDetailsRepository.findByMonthAndFingerprint(YearMonth.from(day).toString(), query.uppercase())?.id)
+        } else {
+            emptySet()
+        }
+        val relays = LiteRelays.search(liteMapRenderer.filterRelays(relaysOf(day), view), query, detailsIds)
+        return html(LiteRelayPages.renderSearch(query, relays, view, fullVersionUrl()))
     }
 
     @GetMapping(LitePage.MAP_PATH)
@@ -100,7 +167,7 @@ class LiteController(
         // Only days with data are looked up, so arbitrary days do not reach the database or evict cached days
         val view = parsed.withDay(parsed.day?.takeIf { it in relayLocationController.getDays() })
         val image = try {
-            mapImageCache.get(view.toQuery()) { render(view) }
+            mapImageCache.get(view.toImageQuery()) { render(view) }
         } catch (exception: Cache.ValueRetrievalException) {
             throw exception.cause as? ResponseStatusException ?: exception
         }
@@ -119,6 +186,24 @@ class LiteController(
     }
 
     private fun availableDays(): List<LocalDate> = relayLocationController.getDays().sorted()
+
+    /** The view of the query with a day that has data */
+    private fun resolvedView(parameters: MultiValueMap<String, String>): LiteView {
+        val parsed = LiteView.parse(parameters)
+        return parsed.withDay(resolveDay(availableDays(), parsed.day))
+    }
+
+    private fun fullVersionUrl() = fullVersionUrl.trimEnd('/')
+
+    private fun html(body: String, status: HttpStatus = HttpStatus.OK): ResponseEntity<String> = ResponseEntity.status(status)
+        .contentType(MediaType(MediaType.TEXT_HTML, StandardCharsets.UTF_8))
+        .body(body)
+
+    private fun notFound(message: String, view: LiteView) =
+        html(LiteRelayPages.renderNotFound(message, view, fullVersionUrl()), HttpStatus.NOT_FOUND)
+
+    private fun redirect(location: String): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.SEE_OTHER).header(HttpHeaders.LOCATION, location).build()
 
     private fun relaysOf(day: LocalDate?) = day?.let { relayLocationController.getDay(it.toString()) } ?: emptyList()
 
