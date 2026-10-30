@@ -1,24 +1,28 @@
 package org.tormap.lite
 
 import org.springframework.stereotype.Component
+import org.tormap.adapter.dto.CountryUsageDto
 import org.tormap.adapter.dto.RelayLocationDto
 import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.RenderingHints
+import java.awt.Shape
 import java.awt.geom.AffineTransform
 import java.awt.geom.Ellipse2D
 import java.awt.geom.Rectangle2D
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
+import kotlin.math.log10
 import kotlin.math.min
 import kotlin.math.sqrt
 
 /**
  * Draws the Lite map as PNG with the layers of the JavaScript map (frontend `util/layer-construction.ts`), in the
- * same order: country borders, highlighted countries, relay counts per location, relay markers, family and
- * autonomous system circles. Uses only Java2D shapes and no text, so no fonts are needed on the server.
+ * same order: country borders, country usage, heatmap, highlighted countries, relay counts per location, relay
+ * markers, family and autonomous system circles. Uses only Java2D shapes and no text, so no fonts are needed on the
+ * server.
  */
 @Component
 class LiteMapRenderer(
@@ -65,6 +69,25 @@ class LiteMapRenderer(
             }
         }
 
+        private const val USAGE_FILL_ALPHA = .6f
+        private val USAGE_LOW = Triple(250.0, .60, .30)
+        private val USAGE_HIGH = Triple(50.0, .95, .58)
+
+        /**
+         * The color for a number of users on a logarithmic scale, like usageColor() of the frontend
+         */
+        fun usageColor(users: Int, maxUsers: Int): Color {
+            val share = if (maxUsers > 0) log10(maxOf(users, 0) + 1.0) / log10(maxUsers + 1.0) else 0.0
+            val t = share.coerceIn(0.0, 1.0)
+            // The frontend rounds hue, saturation and lightness to whole numbers
+            fun mix(low: Double, high: Double) = Math.round(low + (high - low) * t).toDouble()
+            return hsl(
+                mix(USAGE_LOW.first, USAGE_HIGH.first),
+                mix(USAGE_LOW.second * 100, USAGE_HIGH.second * 100) / 100,
+                mix(USAGE_LOW.third * 100, USAGE_HIGH.third * 100) / 100,
+            )
+        }
+
         fun familyColor(familyId: Long): Color = hsl((familyId % 8) * (360.0 / 8), .9, .6)
 
         fun autonomousSystemColor(asNumber: Long): Color = hsl((asNumber % 12) * (360.0 / 12), .75, .55)
@@ -83,8 +106,9 @@ class LiteMapRenderer(
     /**
      * Draws the relays of the view
      * @param relays - all relays of the view's day, they are filtered here
+     * @param usage - the estimated Tor users per country of the view's day, only drawn if the view shows them
      */
-    fun render(view: LiteView, relays: List<RelayLocationDto>): ByteArray {
+    fun render(view: LiteView, relays: List<RelayLocationDto>, usage: List<CountryUsageDto> = emptyList()): ByteArray {
         val filtered = LiteAggregation.filterRelays(relays, view)
         val image = BufferedImage(view.size.width, view.size.height, BufferedImage.TYPE_INT_RGB)
         val graphics = image.createGraphics()
@@ -93,7 +117,9 @@ class LiteMapRenderer(
             graphics.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE)
             graphics.color = WATER
             graphics.fillRect(0, 0, view.size.width, view.size.height)
-            drawCountries(graphics, view, filtered)
+            drawCountries(graphics, view, if (view.countryUsage) usage else emptyList())
+            if (view.heatMap) graphics.drawImage(LiteHeatmap.render(view, filtered), 0, 0, null)
+            drawCountriesWithRelays(graphics, view, filtered)
             if (Grouping.Coordinates in view.groupings) drawRelayCounts(graphics, view, filtered)
             if (Grouping.Country in view.groupings) drawCountryMarkers(graphics, view, filtered) else drawRelayMarkers(graphics, view, filtered)
             if (Grouping.Family in view.groupings) {
@@ -112,31 +138,54 @@ class LiteMapRenderer(
     }
 
     /**
-     * The land, and with the country grouping a highlight of each country that has relays, like buildCountryLayer()
+     * The land, and the estimated Tor users per country like buildCountryUsageLayer()
      */
-    private fun drawCountries(graphics: Graphics2D, view: LiteView, relays: List<RelayLocationDto>) {
-        // World pixels of zoom level 0 to pixels of the image
-        val scale = WebMercator.worldSize(view.zoom) / WebMercator.worldSize(0)
-        val transform = AffineTransform.getTranslateInstance(-view.left, -view.top).apply { scale(scale, scale) }
-        val visible = Rectangle2D.Double(0.0, 0.0, view.size.width.toDouble(), view.size.height.toDouble())
-        val countriesWithRelays = if (Grouping.Country in view.groupings) relays.map { it.country }.toSet() else emptySet()
-        for (country in worldBorders.countries) {
-            if (!transform.createTransformedShape(country.bounds).intersects(visible)) continue
-            val shape = transform.createTransformedShape(country.path)
+    private fun drawCountries(graphics: Graphics2D, view: LiteView, usage: List<CountryUsageDto>) {
+        val usageByCountry = usage.associateBy { it.country }
+        val maxUsers = usage.maxOfOrNull { it.users } ?: 0
+        visibleCountries(view).forEach { (country, shape) ->
             graphics.color = LAND
             graphics.fill(shape)
             graphics.stroke = BasicStroke(0.7f)
             graphics.color = BORDER
             graphics.draw(shape)
-            if (country.isoCode in countriesWithRelays) {
-                val alpha = if (country.isoCode == view.selectedCountry) .7f else .3f
-                graphics.color = Color(1f, 1f, 1f, alpha)
-                graphics.fill(shape)
-                graphics.stroke = BasicStroke(0.5f)
-                graphics.color = LEAFLET_BLUE
-                graphics.draw(shape)
-            }
+            val users = country.isoCode?.let { usageByCountry[it] }?.users ?: return@forEach
+            val color = usageColor(users, maxUsers)
+            graphics.color = Color(color.red, color.green, color.blue, (USAGE_FILL_ALPHA * 255).toInt())
+            graphics.fill(shape)
+            graphics.stroke = BasicStroke(0.5f)
+            graphics.color = Color.WHITE
+            graphics.draw(shape)
         }
+    }
+
+    /**
+     * With the country grouping, a highlight of each country that has relays, like buildCountryLayer()
+     */
+    private fun drawCountriesWithRelays(graphics: Graphics2D, view: LiteView, relays: List<RelayLocationDto>) {
+        if (Grouping.Country !in view.groupings) return
+        val countriesWithRelays = relays.map { it.country }.toSet()
+        visibleCountries(view).filter { (country, _) -> country.isoCode in countriesWithRelays }.forEach { (country, shape) ->
+            val alpha = if (country.isoCode == view.selectedCountry) .7f else .3f
+            graphics.color = Color(1f, 1f, 1f, alpha)
+            graphics.fill(shape)
+            graphics.stroke = BasicStroke(0.5f)
+            graphics.color = LEAFLET_BLUE
+            graphics.draw(shape)
+        }
+    }
+
+    /**
+     * The countries within the image, with their borders in pixels of the image
+     */
+    private fun visibleCountries(view: LiteView): List<Pair<WorldBorders.Country, Shape>> {
+        // World pixels of zoom level 0 to pixels of the image
+        val scale = WebMercator.worldSize(view.zoom) / WebMercator.worldSize(0)
+        val transform = AffineTransform.getTranslateInstance(-view.left, -view.top).apply { scale(scale, scale) }
+        val visible = Rectangle2D.Double(0.0, 0.0, view.size.width.toDouble(), view.size.height.toDouble())
+        return worldBorders.countries
+            .filter { transform.createTransformedShape(it.bounds).intersects(visible) }
+            .map { it to transform.createTransformedShape(it.path) }
     }
 
     /**

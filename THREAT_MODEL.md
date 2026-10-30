@@ -51,7 +51,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 | 9 | Deployment configuration          | Env vars, Spring profile, compose port mappings (operator)                               | Exposed DB, Swagger on, no TLS, default credentials            | `docker-compose*.yml`, `application*.yml`, `build.gradle.kts` (Jib) |
 | 10| CI/CD and supply chain            | Dependencies, actions, Renovate PRs, AI agent instructions (developer / upstream)         | Malicious package, secret theft, prompt injection via changelogs | `.github/`, `renovate.json`, `frontend/.yarnrc.yml`, `AGENTS.md` |
 | 11| Tor Metrics CSV download         | `userstats-relay-country.csv` (HTTPS, trusted host, content untrusted): dates, country codes, numbers | Oversized or endless response, malformed or poisoned rows, redirect to another host | `service/CountryUsageService.kt`, `util/UserStatsCsvParser.kt`, `config/value/UsageStatisticsConfig.kt` |
-| 12| TorMap Lite `/lite/**`           | Query parameters (day, position, zoom, filters, clicked pixel, search text), relay/family/AS IDs, direct; relay-derived strings in HTML (indirect) | CPU exhaustion by rendering many distinct map images, XSS in server-rendered HTML, open redirects | `adapter/controller/LiteController.kt`, `lite/` |
+| 12| TorMap Lite `/lite/**`           | Query parameters (day, position, zoom, filters, layers, clicked map or timeline pixel, search text), relay/family/AS IDs, direct; relay-derived strings in HTML (indirect) | CPU exhaustion by rendering many distinct map images, XSS in server-rendered HTML, open redirects | `adapter/controller/LiteController.kt`, `lite/` |
 
 ## Assumptions
 
@@ -96,7 +96,8 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   redirects only go to `/lite/` with a query built from parsed values. Map images have two fixed sizes, zoom levels 2
   to 10 and a center snapped to a 32 pixel grid. Groupings, the weight setting and the top relay count only take values
   from fixed lists, and a selected family, autonomous system or country is dropped unless the day has relays of it, so
-  the number of distinct images stays bounded by the data. Images are cached (100 images, 1 hour), only days that have data are
+  the number of distinct images stays bounded by the data. The heatmap and country usage settings are booleans. The
+  timeline image (`/lite/timeline.png`) depends only on a day that has data and the map size. Images are cached (100 images, 1 hour), only days that have data are
   looked up, and at most half the CPU cores render at once (other requests wait up to 5 s, then get `503`).
 - Input validation: `@Size` limits on POST ID lists, typed `Long` path variables, strict `LocalDate.parse`. Request
   bodies are limited to `app.http.request.max-body-bytes` (1 MiB, `RequestBodyLimitConfig`: `413` on a larger

@@ -28,6 +28,7 @@ import org.tormap.lite.LitePage
 import org.tormap.lite.LitePageModel
 import org.tormap.lite.LiteRelayPages
 import org.tormap.lite.LiteRelays
+import org.tormap.lite.LiteTimeline
 import org.tormap.lite.LiteView
 import org.tormap.service.RelayDetailsQueryService
 import java.nio.charset.StandardCharsets
@@ -40,8 +41,9 @@ import java.util.concurrent.TimeUnit
  * TorMap Lite: the map as server-rendered HTML and PNG for browsers without JavaScript (e.g. Tor Browser "Safest").
  * Every page is a GET form. Buttons and map clicks submit an action (`go`, `map.x`/`map.y`), which is applied and
  * answered with a redirect to the canonical URL of the resulting view, so the address bar always holds a clean link.
- * A click lists the relays at that point (`x`/`y`) or zooms in, depending on the view's click mode. Relays, families
- * and autonomous systems have their own pages, which keep the view's query so they can link back to the same map.
+ * A click lists the relays at that point (`x`/`y`) or zooms in, depending on the view's click mode, and a click on the
+ * timeline (`timeline.x`) shows the day at that position. Relays, families and autonomous systems have their own
+ * pages, which keep the view's query so they can link back to the same map.
  */
 @Controller
 class LiteController(
@@ -50,6 +52,8 @@ class LiteController(
     private val relayDetailsRepository: RelayDetailsRepository,
     private val liteMapRenderer: LiteMapRenderer,
     private val countryMeta: CountryMeta,
+    private val relayStatisticsController: RelayStatisticsController,
+    private val countryUsageController: CountryUsageController,
     cacheManager: CacheManager,
     @param:Value("\${app.lite.full-version-url:https://tormap.org}")
     private val fullVersionUrl: String,
@@ -73,6 +77,10 @@ class LiteController(
         val action = parameters.getFirst("go")
         val mapX = parameters.getFirst("map.x")?.toIntOrNull()
         val mapY = parameters.getFirst("map.y")?.toIntOrNull()
+        val timelineX = parameters.getFirst("timeline.x")?.toIntOrNull()
+        if (action == null && timelineX != null) {
+            return redirect("${LitePage.PATH}?${view.withDay(timeline(days).dayAt(timelineX, view.size.width) ?: day).toQuery()}")
+        }
         if (action != null || (mapX != null && mapY != null)) {
             val next = when (action) {
                 "previous" -> view.withDay(day?.let { current -> days.lastOrNull { it < current } } ?: day)
@@ -118,6 +126,9 @@ class LiteController(
             pickedRelays = if (pickX != null && pickY != null) LiteRelays.near(filtered, shownView, pickX, pickY) else null,
             statistics = LiteAggregation.statistics(filtered, shownView),
             rankings = rankings(filtered, shownView),
+            timeline = timeline(days),
+            countryUsage = if (shownView.countryUsage) usageOf(day) else null,
+            countryName = countryMeta::name,
         )
         return html(LitePage.render(model))
     }
@@ -175,24 +186,44 @@ class LiteController(
         val day = parsed.day?.takeIf { it in relayLocationController.getDays() }
         // Selections of groups without relays are dropped, so made-up IDs do not create more distinct images
         val view = LiteAggregation.normalized(parsed.withDay(day), LiteAggregation.filterRelays(relaysOf(day), parsed))
-        val image = try {
-            mapImageCache.get(view.toImageQuery()) { render(view) }
-        } catch (exception: Cache.ValueRetrievalException) {
-            throw exception.cause as? ResponseStatusException ?: exception
+        val image = cachedImage(view.toImageQuery()) {
+            liteMapRenderer.render(view, relaysOf(view.day), if (view.countryUsage) usageOf(view.day) else emptyList())
         }
         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(image)
     }
 
-    private fun render(view: LiteView): ByteArray {
+    @GetMapping(LitePage.TIMELINE_PATH)
+    fun timelineImage(@RequestParam parameters: MultiValueMap<String, String>): ResponseEntity<ByteArray> {
+        val days = availableDays()
+        val parsed = LiteView.parse(parameters)
+        // Only the day and the width matter, and only days with data are used, so there are few distinct images
+        val view = parsed.withDay(parsed.day?.takeIf { it in days })
+        val image = cachedImage("timeline?${LitePage.timelineQuery(view)}") {
+            timeline(days).render(view.size.width, view.day)
+        }
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(image)
+    }
+
+    private fun cachedImage(key: String, render: () -> ByteArray): ByteArray = try {
+        mapImageCache.get(key) { withRenderPermit(render) }!!
+    } catch (exception: Cache.ValueRetrievalException) {
+        throw exception.cause as? ResponseStatusException ?: exception
+    }
+
+    private fun <T> withRenderPermit(render: () -> T): T {
         if (!renderPermits.tryAcquire(RENDER_WAIT_SECONDS, TimeUnit.SECONDS)) {
             throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Too many map images are being drawn. Please try again.")
         }
         try {
-            return liteMapRenderer.render(view, relaysOf(view.day))
+            return render()
         } finally {
             renderPermits.release()
         }
     }
+
+    private fun timeline(days: List<LocalDate>) = LiteTimeline(days, relayStatisticsController.getDailyCounts())
+
+    private fun usageOf(day: LocalDate?) = day?.let { countryUsageController.getDay(it) } ?: emptyList()
 
     private fun availableDays(): List<LocalDate> = relayLocationController.getDays().sorted()
 

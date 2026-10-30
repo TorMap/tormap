@@ -136,6 +136,35 @@ class LiteControllerTest(
         ImageIO.read(ByteArrayInputStream(response.contentAsByteArray)).width shouldBe 1024
     }
 
+    "the timeline is a PNG as wide as the map" {
+        val response = mockMvc.perform(get("/lite/timeline.png?size=small&day=2001-01-01")).andReturn().response
+        response.status shouldBe 200
+        response.contentType shouldBe "image/png"
+        val image = ImageIO.read(ByteArrayInputStream(response.contentAsByteArray))
+        image.width shouldBe 640
+        image.height shouldBe 64
+    }
+
+    "a click on the timeline redirects to the canonical URL" {
+        val response = mockMvc.perform(get("/lite/?lat=0&lng=0&zoom=3&timeline.x=100&timeline.y=10")).andReturn().response
+        response.status shouldBe 303
+        response.getHeader("Location") shouldBe "/lite/?lat=0.0000&lng=0.0000&zoom=3"
+    }
+
+    "the page shows the country usage and the layer settings" {
+        val html = mockMvc.perform(get("/lite/?usage=1&heat=1")).andReturn().response.contentAsString
+        html shouldContain "Countries with the most Tor users"
+        html shouldContain "name=\"heat\" value=\"1\" checked"
+        html shouldContain "name=\"usage\" value=\"1\" checked"
+        mockMvc.perform(get("/lite/")).andReturn().response.contentAsString shouldNotContain "Countries with the most Tor users"
+    }
+
+    "the map is drawn with the heatmap and the country usage" {
+        val response = mockMvc.perform(get("/lite/map.png?heat=1&usage=1")).andReturn().response
+        response.status shouldBe 200
+        ImageIO.read(ByteArrayInputStream(response.contentAsByteArray)).width shouldBe 1024
+    }
+
     "days without data resolve to the closest earlier day" {
         val days = listOf(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 5))
         LiteController.resolveDay(days, null) shouldBe LocalDate.of(2024, 1, 5)

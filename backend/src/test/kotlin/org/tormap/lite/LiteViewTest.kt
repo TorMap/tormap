@@ -62,6 +62,15 @@ class LiteViewTest : StringSpec({
         view.toImageQuery() shouldContain "group=family"
     }
 
+    "the heatmap and the country usage are part of the query" {
+        val view = parse("heat=1&usage=1")
+        view.heatMap shouldBe true
+        view.countryUsage shouldBe true
+        parse(view.toQuery()) shouldBe view
+        view.toImageQuery() shouldContain "heat=1&usage=1"
+        parse("heat=yes&usage=0") shouldBe parse("")
+    }
+
     "invalid group settings are ignored" {
         parse("group=evil&family=-1&as=x&country=de&top=100") shouldBe parse("")
         parse("weight=1&top=7").topRelayCount shouldBe null

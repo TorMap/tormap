@@ -75,6 +75,10 @@ data class LiteView(
     val sizeByWeight: Boolean = false,
     /** Only the relays with the highest consensus weight, one of [TOP_RELAY_COUNTS], only used with [sizeByWeight] */
     val topRelayCount: Int? = null,
+    /** A heatmap of the relays below the markers */
+    val heatMap: Boolean = false,
+    /** Countries colored by the estimated number of Tor users of the day */
+    val countryUsage: Boolean = false,
 ) {
     val latitude get() = WebMercator.latitude(centerY, zoom)
     val longitude get() = WebMercator.longitude(centerX, zoom)
@@ -151,6 +155,8 @@ data class LiteView(
         selectedCountry?.let { parameters += "country" to it }
         if (sizeByWeight) parameters += "weight" to "1"
         topRelayCount?.let { parameters += "top" to it.toString() }
+        if (heatMap) parameters += "heat" to "1"
+        if (countryUsage) parameters += "usage" to "1"
         if (clickMode != ClickMode.List) parameters += "click" to clickMode.parameter
         return parameters
     }
@@ -231,6 +237,8 @@ data class LiteView(
                 selectedCountry = first("country")?.takeIf(countryPattern::matches),
                 sizeByWeight = sizeByWeight,
                 topRelayCount = topRelayCount,
+                heatMap = first("heat") == "1",
+                countryUsage = first("usage") == "1",
             )
                 .centered(zoom, WebMercator.x(centerLongitude, zoom), WebMercator.y(centerLatitude, zoom))
         }
