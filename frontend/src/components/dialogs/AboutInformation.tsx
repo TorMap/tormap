@@ -24,6 +24,7 @@ import {
 import {atom, useAtom} from "jotai";
 import React from "react";
 
+import {backendApiUrl, liteEnabled} from "../../config";
 import {ExternalLink} from "../link/ExternalLink";
 import {isFullscreenSupported} from "../../util/fullscreen";
 import {searchShortcut} from "../../util/keyboard";
@@ -110,6 +111,10 @@ export const AboutInformation: React.FunctionComponent = () => {
                         relays by family, autonomous system or country, filter them and look up the details of each
                         relay.
                     </Typography>
+                    {liteEnabled && backendApiUrl && <Typography variant={"body1"} gutterBottom>
+                        Without JavaScript, e.g. in Tor Browser at the “Safest” security level, you can
+                        use <ExternalLink href={`${backendApiUrl.replace(/\/+$/, "")}/lite/`} label={"TorMap Lite"}/>.
+                    </Typography>}
                     <h2>Where does the data come from?</h2>
                     <Typography variant={"body1"} gutterBottom>
                         The <ExternalLink href={"https://www.torproject.org/"} label={"Tor Project"}/> keeps

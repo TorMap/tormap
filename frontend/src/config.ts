@@ -3,6 +3,10 @@ import {Settings} from "./types/settings";
 
 export const backendApiUrl = import.meta.env.VITE_BACKEND_API_URL?.toString()
 
+// Links to TorMap Lite and sends browsers without JavaScript there (see plugins/lite-redirect.ts). Off by default,
+// because the backend has to serve /lite/ first.
+export const liteEnabled = import.meta.env.VITE_LITE_ENABLED === "true"
+
 // Default settings, that are selected on page load
 export const defaultSettings: Settings = {
     // Group relays by settings
