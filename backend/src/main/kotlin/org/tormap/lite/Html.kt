@@ -1,21 +1,14 @@
 package org.tormap.lite
 
+import org.springframework.web.util.HtmlUtils
+import java.nio.charset.StandardCharsets
+
 /**
- * Escapes a value for HTML text and double-quoted attribute values.
+ * Escapes a value for HTML text and double-quoted attribute values with Spring's [HtmlUtils] (`&`, `<`, `>`, `"`, `'`).
  * Relay data (nicknames, contact info, platforms) is published by relay operators and must always pass through here.
+ * It is not safe for other contexts such as URLs in `href`, scripts or styles, so untrusted data must never go there.
  */
-fun escapeHtml(value: String): String = buildString(value.length) {
-    for (char in value) {
-        when (char) {
-            '&' -> append("&amp;")
-            '<' -> append("&lt;")
-            '>' -> append("&gt;")
-            '"' -> append("&quot;")
-            '\'' -> append("&#39;")
-            else -> append(char)
-        }
-    }
-}
+fun escapeHtml(value: String): String = HtmlUtils.htmlEscape(value, StandardCharsets.UTF_8.name())
 
 private val namePattern = Regex("^[a-z][a-z0-9-]*$")
 private val voidElements = setOf("br", "img", "input", "link", "meta")
