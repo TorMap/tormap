@@ -39,7 +39,9 @@ less reliable.
 `/lite/` serves the map for browsers without JavaScript, e.g. Tor Browser with the "Safest" security level. The backend
 renders the HTML and the map image (`/lite/map.png`, country borders and relay markers drawn with Java2D, no map tiles
 and no fonts needed). The page is one `GET` form: the day, zoom and move buttons, the filters and clicks on the map
-submit it, so every view is a link. It links to the JavaScript frontend at `app.lite.full-version-url` (default
+submit it, so every view is a link. A click lists the relays at that point (or zooms in), with pages for each relay
+(`/lite/relay/{id}`), family (`/lite/family/{id}`) and autonomous system (`/lite/as/{number}`) and a search by
+nickname or fingerprint (`/lite/search`). It links to the JavaScript frontend at `app.lite.full-version-url` (default
 `https://tormap.org`). The reverse proxy must forward `/lite` and `/static/` to the backend as well.
 
 ## Requirements

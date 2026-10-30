@@ -35,6 +35,14 @@ enum class MapSize(val parameter: String, val label: String, val width: Int, val
 }
 
 /**
+ * What a click on the map does: list the relays around the clicked point or zoom in there
+ */
+enum class ClickMode(val parameter: String, val label: String) {
+    List("list", "Show relays"),
+    Zoom("zoom", "Zoom in"),
+}
+
+/**
  * Everything that is shown on a Lite page. All values come from the query string, so every view is a link.
  * The map center is stored in pixels of the given zoom level, snapped to a grid and kept inside the world.
  * This keeps the number of distinct map images small, which matters because they are rendered on the server.
@@ -47,6 +55,7 @@ data class LiteView(
     val size: MapSize,
     val relayTypes: Set<LiteRelayType>,
     val requiredFlags: Set<TorRelayFlag>,
+    val clickMode: ClickMode = ClickMode.List,
 ) {
     val latitude get() = WebMercator.latitude(centerY, zoom)
     val longitude get() = WebMercator.longitude(centerX, zoom)
@@ -90,9 +99,20 @@ data class LiteView(
     )
 
     /**
-     * The canonical query string of this view. It is also the cache key of the map image.
+     * The canonical query string of this view
      */
-    fun toQuery(): String {
+    fun toQuery(): String = format(queryParameters())
+
+    /**
+     * The canonical query string of the map image, which is also its cache key. It leaves out what the image does not
+     * depend on, so more pages share an image.
+     */
+    fun toImageQuery(): String = format(queryParameters().filter { (name, _) -> name != "click" })
+
+    /**
+     * The parameters of [toQuery], e.g. for hidden fields of a form
+     */
+    fun queryParameters(): List<Pair<String, String>> {
         val parameters = mutableListOf<Pair<String, String>>()
         day?.let { parameters += "day" to it.toString() }
         parameters += "lat" to latitudeParameter
@@ -104,9 +124,12 @@ data class LiteView(
             LiteRelayType.entries.filter { it in relayTypes }.forEach { parameters += "type" to it.parameter }
         }
         TorRelayFlag.entries.filter { it in requiredFlags }.forEach { parameters += "flag" to it.name }
-        // All names and values are dates, numbers or enum names, so they need no URL encoding
-        return parameters.joinToString("&") { (name, value) -> "$name=$value" }
+        if (clickMode != ClickMode.List) parameters += "click" to clickMode.parameter
+        return parameters
     }
+
+    // All names and values are dates, numbers or enum names, so they need no URL encoding
+    private fun format(parameters: List<Pair<String, String>>) = parameters.joinToString("&") { (name, value) -> "$name=$value" }
 
     /**
      * The same view in the JavaScript map, which keeps its permalink in the URL hash
@@ -139,6 +162,7 @@ data class LiteView(
             val latitude = number("lat", -90.0, 90.0)
             val longitude = number("lng", -180.0, 180.0)
             val size = MapSize.entries.find { it.parameter == first("size") } ?: MapSize.Large
+            val clickMode = ClickMode.entries.find { it.parameter == first("click") } ?: ClickMode.List
             // Unchecked checkboxes are not submitted, so the form sends f=1 to tell "none checked" from "not sent"
             val relayTypes = if (first("f") != null) {
                 val values = parameters["type"].orEmpty().toSet()
@@ -158,7 +182,7 @@ data class LiteView(
             // Latitude and longitude are only used as a pair
             val (centerLatitude, centerLongitude) =
                 if (latitude != null && longitude != null) latitude to longitude else DEFAULT_LATITUDE to DEFAULT_LONGITUDE
-            return LiteView(day, zoom, 0.0, 0.0, size, relayTypes, requiredFlags)
+            return LiteView(day, zoom, 0.0, 0.0, size, relayTypes, requiredFlags, clickMode)
                 .centered(zoom, WebMercator.x(centerLongitude, zoom), WebMercator.y(centerLatitude, zoom))
         }
 
