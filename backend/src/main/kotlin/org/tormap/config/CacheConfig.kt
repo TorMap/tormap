@@ -20,6 +20,7 @@ class CacheConfig {
         const val COUNTRY_USAGE_PER_DAY = "COUNTRY_USAGE_PER_DAY"
         const val REVERSE_DNS_LOOKUPS = "REVERSE_DNS_LOOKUPS"
         const val LITE_MAP_IMAGES = "LITE_MAP_IMAGES"
+        const val AUTONOMOUS_SYSTEMS_PER_MONTH = "AUTONOMOUS_SYSTEMS_PER_MONTH"
     }
 
     @Bean
@@ -53,6 +54,16 @@ class CacheConfig {
                 .maximumSize(10_000)
                 // 6h TTL balances DNS freshness for relay monitoring with cache efficiency
                 .expireAfterWrite(Duration.ofHours(6))
+                .recordStats()
+                .build()
+        )
+        registerCustomCache(
+            AUTONOMOUS_SYSTEMS_PER_MONTH,
+            Caffeine.newBuilder()
+                // 1 entry ~= 100 KB for ~2,500 autonomous systems -> 24 entries ~= 2.4 MB of memory
+                .maximumSize(24)
+                // New relays get their autonomous system in the background, so the list is refreshed after a while
+                .expireAfterWrite(Duration.ofHours(1))
                 .recordStats()
                 .build()
         )

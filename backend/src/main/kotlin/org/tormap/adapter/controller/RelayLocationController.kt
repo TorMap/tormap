@@ -24,7 +24,8 @@ class RelayLocationController(
     @GetMapping("days")
     fun getDays(): Set<LocalDate> = relayLocationRepositoryImpl.findDistinctDays()
 
-    @Cacheable(CacheConfig.RELAY_LOCATIONS_PER_DAY, key = "#day")
+    // Days without relays are not cached, so requests for made-up days can not evict the days that have data
+    @Cacheable(CacheConfig.RELAY_LOCATIONS_PER_DAY, key = "#day", unless = "#result.isEmpty()")
     @Operation(summary = "Returns all relay locations for a given day. In Swagger UI, the large result might freeze your browser tab!")
     @GetMapping("day/{day}")
     fun getDay(@PathVariable day: String): List<RelayLocationDto> {
@@ -34,6 +35,8 @@ class RelayLocationController(
         } catch (_: DateTimeParseException) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The day must be a date like 2024-05-01.")
         }
+        // The day is the cache key. Padded years like +0002024-05-01 parse to the same date, but would fill the cache with copies.
+        if (date.toString() != day) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The day must be a date like 2024-05-01.")
         return relayLocationRepositoryImpl.findAllUsingDay(date)
     }
 }

@@ -45,6 +45,7 @@ class CacheConfigTest(
             CacheConfig.RELAY_DAILY_COUNTS to 1L,
             CacheConfig.RELAY_LOCATIONS_PER_DAY to 40L,
             CacheConfig.COUNTRY_USAGE_PER_DAY to 400L,
+            CacheConfig.AUTONOMOUS_SYSTEMS_PER_MONTH to 24L,
             CacheConfig.REVERSE_DNS_LOOKUPS to 10_000L,
         ).forEach { (name, maximumSize) ->
             nativeCache(name).policy().eviction().get().maximum shouldBe maximumSize
@@ -53,6 +54,11 @@ class CacheConfigTest(
         repeat(100) { perDay.put("day-$it", it) }
         perDay.cleanUp()
         perDay.estimatedSize() shouldBeLessThanOrEqual 40L
+    }
+
+    "autonomous systems expire after 1 hour" {
+        nativeCache(CacheConfig.AUTONOMOUS_SYSTEMS_PER_MONTH).policy().expireAfterWrite().get().expiresAfter shouldBe
+            Duration.ofHours(1)
     }
 
     "reverse DNS lookups expire after 6 hours" {

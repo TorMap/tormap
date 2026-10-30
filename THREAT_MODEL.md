@@ -106,7 +106,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   fully deserialized.
 - Persistence uses Spring Data derived queries and bound parameters only, no string-built SQL/JPQL. Flyway migrations
   with `ddl-auto: validate`.
-- Caches with bounded entry counts (Caffeine `maximumSize`, unknown cache names rejected). Shallow ETags only on small endpoints. `CoalesceService`
+- Caches with bounded entry counts (Caffeine `maximumSize`, unknown cache names rejected). Cache keys built from path variables (day, month) must be canonical: the controllers reject padded forms such as `+0002024-05-01`, and empty results are not cached, so made-up values can not fill or evict a cache. Shallow ETags only on small endpoints. `CoalesceService`
   bounds concurrent background recomputation per key.
 - Ingestion: remote file names must not contain `/`, `\`, `.` or `..`, and target directories must resolve inside the
   download directory (real-path check). Downloads are written to a temp file and kept only if the size matches the
