@@ -85,4 +85,14 @@ class RelayDetailsControllerValidationTest(
         mockMvc.perform(get("/relay/details/autonomous-systems/2023-13"))
             .andExpect(status().isBadRequest)
     }
+
+    "autonomous systems - a padded month is a bad request, so it can not fill the cache with copies" {
+        mockMvc.perform(get("/relay/details/autonomous-systems/+002024-05")).andExpect(status().isBadRequest)
+    }
+
+    "autonomous systems - a month without autonomous systems returns an empty list" {
+        mockMvc.perform(get("/relay/details/autonomous-systems/2001-01"))
+            .andExpect(status().isOk)
+            .andExpect(content().json("[]"))
+    }
 })
