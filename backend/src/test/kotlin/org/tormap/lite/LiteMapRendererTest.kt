@@ -3,6 +3,7 @@ package org.tormap.lite
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import org.tormap.adapter.dto.CountryUsageDto
 import org.tormap.adapter.dto.RelayLocationDto
 import org.tormap.database.entity.TorRelayFlag
 import tools.jackson.databind.json.JsonMapper
@@ -72,5 +73,35 @@ class LiteMapRendererTest : StringSpec({
         LiteMapRenderer.radiusForCount(1000) shouldBe 100.0
         LiteMapRenderer.radiusForWeight(0, 0) shouldBe 2.0
         LiteMapRenderer.radiusForWeight(100, 100) shouldBe 20.0
+    }
+
+    "colors countries by their estimated Tor users" {
+        val usageView = view.copy(countryUsage = true)
+        val usage = listOf(CountryUsageDto("DE", 1000, null, null, 100), CountryUsageDto("US", 100000, null, null, 100))
+        val plain = pixel(renderer.render(usageView, emptyList()), usageView, berlin.first, berlin.second)
+        val colored = pixel(renderer.render(usageView, emptyList(), usage), usageView, berlin.first, berlin.second)
+        colored shouldNotBe plain
+        // Without the setting, the estimates are not drawn
+        pixel(renderer.render(view, emptyList(), usage), view, berlin.first, berlin.second) shouldBe plain
+    }
+
+    "uses the color scale of the frontend and its legend" {
+        LiteMapRenderer.usageColor(1, 1_000_000) shouldBe LiteMapRenderer.hsl(240.0, .62, .31)
+        LiteMapRenderer.usageColor(1000, 1_000_000) shouldBe LiteMapRenderer.hsl(150.0, .78, .44)
+        LiteMapRenderer.usageColor(1_000_000, 1_000_000) shouldBe LiteMapRenderer.hsl(50.0, .95, .58)
+        LiteMapRenderer.usageColor(0, 0) shouldBe LiteMapRenderer.hsl(250.0, .60, .30)
+    }
+
+    "draws a heatmap around relays" {
+        val heatView = view.copy(heatMap = true)
+        val relays = listOf(relay(berlin.first, berlin.second, TorRelayFlag.Guard))
+        val heat = ImageIO.read(ByteArrayInputStream(renderer.render(heatView, relays)))
+        val plain = ImageIO.read(ByteArrayInputStream(renderer.render(view, relays)))
+        // Next to the marker, where only the heatmap reaches
+        val x = (WebMercator.x(berlin.second, view.zoom) - view.left).toInt() + 20
+        val y = (WebMercator.y(berlin.first, view.zoom) - view.top).toInt()
+        heat.getRGB(x, y) shouldNotBe plain.getRGB(x, y)
+        // Far away, nothing changes
+        heat.getRGB(5, 5) shouldBe plain.getRGB(5, 5)
     }
 })

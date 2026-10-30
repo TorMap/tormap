@@ -1,8 +1,10 @@
 package org.tormap.lite
 
+import org.tormap.adapter.dto.CountryUsageDto
 import org.tormap.adapter.dto.RelayLocationDto
 import org.tormap.database.entity.TorRelayFlag
 import java.time.LocalDate
+import java.util.Locale
 
 /**
  * The data shown on a Lite page besides the [LiteView] itself
@@ -21,6 +23,12 @@ class LitePageModel(
     val pickedRelays: List<RelayLocationDto>? = null,
     val statistics: LiteStatistics? = null,
     val rankings: List<Ranking> = emptyList(),
+    /** The relays per day, null if there are not enough days */
+    val timeline: LiteTimeline? = null,
+    /** The estimated Tor users per country of the day, null if the view does not show them */
+    val countryUsage: List<CountryUsageDto>? = null,
+    /** The name of a country code */
+    val countryName: (String) -> String = { it },
 )
 
 /** The largest groups of a grouping, e.g. families */
@@ -37,11 +45,15 @@ class RankingRow(val label: String, val relayCount: Int, val selectView: LiteVie
 object LitePage {
     const val PATH = "/lite/"
     const val MAP_PATH = "/lite/map.png"
+    const val TIMELINE_PATH = "/lite/timeline.png"
     const val RELAY_PATH = "/lite/relay/"
     const val FAMILY_PATH = "/lite/family/"
     const val AUTONOMOUS_SYSTEM_PATH = "/lite/as/"
     const val SEARCH_PATH = "/lite/search"
     private const val STYLESHEET_PATH = "/static/lite/lite.css"
+    private const val USAGE_RANKING_SIZE = 10
+    // Like the frontend, estimates based on fewer relays get a note
+    private const val LOW_ESTIMATE_FRACTION = 30
 
     fun render(model: LitePageModel): String {
         val view = model.view
@@ -49,6 +61,7 @@ object LitePage {
             model.notice?.let { tag("p", it, "class" to "notice", "role" to "status") }
             tag("form", "method" to "get", "action" to PATH) {
                 dayControls(model)
+                model.timeline?.takeIf { it.isShown }?.let { timeline(it, view) }
                 hiddenInput("lat", view.latitudeParameter)
                 hiddenInput("lng", view.longitudeParameter)
                 hiddenInput("zoom", view.zoom.toString())
@@ -62,6 +75,7 @@ object LitePage {
                 model.statistics?.let { statistics(it) }
                 settings(view)
             }
+            model.countryUsage?.let { countryUsage(it, model.countryName) }
             model.rankings.forEach { ranking(it, view) }
             model.pickedRelays?.let { relays ->
                 tag("section", "id" to "relays") {
@@ -204,6 +218,43 @@ object LitePage {
         }
     }
 
+    /**
+     * The relays per day as an image input: a click submits timeline.x, which selects the day at that position
+     */
+    private fun Html.timeline(timeline: LiteTimeline, view: LiteView) {
+        tag("div", "class" to "timeline") {
+            tag(
+                "input",
+                "type" to "image",
+                "name" to "timeline",
+                "src" to "$TIMELINE_PATH?${timelineQuery(view)}",
+                "width" to view.size.width,
+                "height" to LiteTimeline.HEIGHT,
+                "alt" to "Relays per day from ${timeline.days.first()} to ${timeline.days.last()}, between " +
+                    "${timeline.minCount} and ${timeline.maxCount} relays. Click a position to show that day.",
+            )
+        }
+        if (timeline.outliers.isEmpty()) return
+        tag("details", "class" to "outliers") {
+            tag("summary", "${timeline.outliers.size} days with an unusual number of relays")
+            tag("ul") {
+                timeline.outliers.asReversed().forEach { outlier ->
+                    tag("li") {
+                        tag("a", outlier.day.toString(), "href" to "$PATH?${view.withDay(outlier.day).toQuery()}")
+                        val change = if (outlier.changePercent > 0) "+${outlier.changePercent}" else outlier.changePercent.toString()
+                        text(": ${outlier.relayCount} relays ($change% compared to the surrounding days)")
+                    }
+                }
+            }
+        }
+    }
+
+    /** The timeline only depends on the selected day and the width */
+    fun timelineQuery(view: LiteView) = buildString {
+        view.day?.let { append("day=").append(it).append('&') }
+        append("size=").append(view.size.parameter)
+    }
+
     private fun Html.mapControls(view: LiteView) {
         tag("div", "class" to "map-controls", "role" to "group", "aria-label" to "Map controls") {
             mapButton("in", "+", "Zoom in", !view.canZoomIn)
@@ -309,6 +360,48 @@ object LitePage {
         }
     }
 
+    /**
+     * The countries with the most estimated Tor users and the color scale of the map, like the legend of the
+     * JavaScript map's country usage setting
+     */
+    private fun Html.countryUsage(usage: List<CountryUsageDto>, countryNames: (String) -> String) {
+        tag("section", "id" to "usage") {
+            tag("h2", "Countries with the most Tor users")
+            if (usage.isEmpty()) {
+                tag("p", "Tor Metrics has no user estimates for this day. They exist from March 2011 on.")
+                return@tag
+            }
+            tag("p", "class" to "usage-legend") {
+                text("Few users ")
+                tag("span", "class" to "usage-scale", "aria-hidden" to "true")
+                text(" Many users")
+            }
+            val frac = usage.first().frac
+            tag("p", "class" to "summary") {
+                text("Estimates of Tor Metrics, based on $frac% of relays.")
+                if (frac < LOW_ESTIMATE_FRACTION) text(" Early estimates are less reliable.")
+            }
+            tag("div", "class" to "table") {
+                tag("table") {
+                    tag("thead") {
+                        tag("tr") { listOf("Country", "Estimated users", "Probably between").forEach { tag("th", it, "scope" to "col") } }
+                    }
+                    tag("tbody") {
+                        usage.sortedByDescending { it.users }.take(USAGE_RANKING_SIZE).forEach { entry ->
+                            tag("tr") {
+                                tag("td", countryNames(entry.country))
+                                tag("td", formatNumber(entry.users))
+                                tag("td", if (entry.lower != null && entry.upper != null) "${formatNumber(entry.lower)} and ${formatNumber(entry.upper)}" else "")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun formatNumber(value: Int) = String.format(Locale.US, "%,d", value)
+
     private fun clickHint(view: LiteView) = when (view.clickMode) {
         ClickMode.List -> "Click the map to list the relays there."
         ClickMode.Zoom -> "Click the map to zoom in."
@@ -331,6 +424,11 @@ object LitePage {
                 Grouping.entries.forEach { grouping ->
                     checkbox("group", grouping.parameter, grouping in view.groupings) { text(grouping.label) }
                 }
+            }
+            tag("fieldset") {
+                tag("legend", "Layers")
+                checkbox("heat", "1", view.heatMap) { text("Heatmap of relays") }
+                checkbox("usage", "1", view.countryUsage) { text("Color countries by estimated Tor users") }
             }
             tag("fieldset") {
                 tag("legend", "Consensus weight")

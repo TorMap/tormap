@@ -44,7 +44,9 @@ submit it, so every view is a link. A click lists the relays at that point (or z
 nickname or fingerprint (`/lite/search`). Like the JavaScript map it groups relays by family, autonomous system,
 country or coordinates, sizes markers by consensus weight (optionally only the top relays) and shows the statistics
 and largest groups of the shown relays below the map; the filtering and grouping in `lite/LiteAggregation.kt` follow
-the frontend's `util/aggregate-relays.ts`. It links to the JavaScript frontend at `app.lite.full-version-url` (default
+the frontend's `util/aggregate-relays.ts`. A heatmap and countries colored by estimated Tor users can be added to the
+map, and a timeline of relays per day (`/lite/timeline.png`) selects a day on click and lists days with an unusual
+number of relays. It links to the JavaScript frontend at `app.lite.full-version-url` (default
 `https://tormap.org`). The reverse proxy must forward `/lite` and `/static/` to the backend as well.
 With `VITE_LITE_ENABLED=true` (off by default), the frontend build sends browsers without JavaScript to
 `${VITE_BACKEND_API_URL}/lite/` (a `<noscript>` refresh added by `frontend/plugins/lite-redirect.ts`) and links to

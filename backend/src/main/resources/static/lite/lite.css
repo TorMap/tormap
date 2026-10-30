@@ -224,3 +224,29 @@ ul.plain {
     padding: 0;
     list-style: none;
 }
+
+/* Relays per day, a click picks the day */
+.timeline {
+    overflow-x: auto;
+    margin: .5rem 0;
+}
+
+.timeline input {
+    display: block;
+    border: 1px solid var(--border);
+}
+
+.outliers {
+    margin: 0 0 .5rem;
+    color: var(--muted);
+}
+
+/* The colors of usageColor() for 1, 1,000 and 1,000,000 of 1,000,000 users */
+.usage-scale {
+    display: inline-block;
+    width: 8rem;
+    height: .8rem;
+    vertical-align: middle;
+    border-radius: 2px;
+    background: linear-gradient(to right, hsl(240, 62%, 31%), hsl(150, 78%, 44%), hsl(50, 95%, 58%));
+}
