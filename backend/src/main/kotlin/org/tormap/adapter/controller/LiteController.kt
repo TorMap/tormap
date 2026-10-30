@@ -16,7 +16,13 @@ import org.springframework.web.server.ResponseStatusException
 import org.tormap.adapter.controller.exception.RelayNotFoundException
 import org.tormap.config.CacheConfig
 import org.tormap.database.repository.RelayDetailsRepository
+import org.tormap.adapter.dto.RelayLocationDto
 import org.tormap.lite.ClickMode
+import org.tormap.lite.CountryMeta
+import org.tormap.lite.Grouping
+import org.tormap.lite.LiteAggregation
+import org.tormap.lite.Ranking
+import org.tormap.lite.RankingRow
 import org.tormap.lite.LiteMapRenderer
 import org.tormap.lite.LitePage
 import org.tormap.lite.LitePageModel
@@ -43,6 +49,7 @@ class LiteController(
     private val relayDetailsQueryService: RelayDetailsQueryService,
     private val relayDetailsRepository: RelayDetailsRepository,
     private val liteMapRenderer: LiteMapRenderer,
+    private val countryMeta: CountryMeta,
     cacheManager: CacheManager,
     @param:Value("\${app.lite.full-version-url:https://tormap.org}")
     private val fullVersionUrl: String,
@@ -91,26 +98,26 @@ class LiteController(
         val pickY = parameters.getFirst("y")?.toIntOrNull()?.takeIf { it in 0..view.size.height }
 
         val relays = relaysOf(day)
+        val filtered = LiteAggregation.filterRelays(relays, view)
+        val shownView = LiteAggregation.normalized(view, filtered)
         val notice = when {
             days.isEmpty() -> "No relay data has been imported yet."
             parsed.day != null && parsed.day != day -> "There is no relay data for ${parsed.day}, showing $day instead."
             else -> null
         }
         val model = LitePageModel(
-            view = view,
+            view = shownView,
             firstDay = days.firstOrNull(),
             lastDay = days.lastOrNull(),
             hasPreviousDay = day != null && day > days.first(),
             hasNextDay = day != null && day < days.last(),
-            shownRelayCount = liteMapRenderer.filterRelays(relays, view).size,
+            shownRelayCount = filtered.size,
             totalRelayCount = relays.size,
             notice = notice,
             fullVersionUrl = fullVersionUrl(),
-            pickedRelays = if (pickX != null && pickY != null) {
-                LiteRelays.near(liteMapRenderer.filterRelays(relays, view), view, pickX, pickY)
-            } else {
-                null
-            },
+            pickedRelays = if (pickX != null && pickY != null) LiteRelays.near(filtered, shownView, pickX, pickY) else null,
+            statistics = LiteAggregation.statistics(filtered, shownView),
+            rankings = rankings(filtered, shownView),
         )
         return html(LitePage.render(model))
     }
@@ -138,7 +145,7 @@ class LiteController(
     @GetMapping("${LitePage.AUTONOMOUS_SYSTEM_PATH}{number}")
     fun autonomousSystem(@PathVariable number: Int, @RequestParam parameters: MultiValueMap<String, String>): ResponseEntity<String> {
         val view = resolvedView(parameters)
-        val relays = liteMapRenderer.filterRelays(relaysOf(view.day), view).filter { it.asNumber == number }
+        val relays = LiteAggregation.filterRelays(relaysOf(view.day), view).filter { it.asNumber == number }
         // The name is taken from the details of one relay instead of grouping all relays of the month
         val name = relays.firstNotNullOfOrNull { it.detailsId }
             ?.let { relayDetailsRepository.findById(it).orElse(null)?.autonomousSystemName }
@@ -157,7 +164,7 @@ class LiteController(
         } else {
             emptySet()
         }
-        val relays = LiteRelays.search(liteMapRenderer.filterRelays(relaysOf(day), view), query, detailsIds)
+        val relays = LiteRelays.search(LiteAggregation.filterRelays(relaysOf(day), view), query, detailsIds)
         return html(LiteRelayPages.renderSearch(query, relays, view, fullVersionUrl()))
     }
 
@@ -165,7 +172,9 @@ class LiteController(
     fun mapImage(@RequestParam parameters: MultiValueMap<String, String>): ResponseEntity<ByteArray> {
         val parsed = LiteView.parse(parameters)
         // Only days with data are looked up, so arbitrary days do not reach the database or evict cached days
-        val view = parsed.withDay(parsed.day?.takeIf { it in relayLocationController.getDays() })
+        val day = parsed.day?.takeIf { it in relayLocationController.getDays() }
+        // Selections of groups without relays are dropped, so made-up IDs do not create more distinct images
+        val view = LiteAggregation.normalized(parsed.withDay(day), LiteAggregation.filterRelays(relaysOf(day), parsed))
         val image = try {
             mapImageCache.get(view.toImageQuery()) { render(view) }
         } catch (exception: Cache.ValueRetrievalException) {
@@ -186,6 +195,30 @@ class LiteController(
     }
 
     private fun availableDays(): List<LocalDate> = relayLocationController.getDays().sorted()
+
+    /**
+     * The largest groups of each grouping that is shown, with links to select them on the map
+     */
+    private fun rankings(relays: List<RelayLocationDto>, view: LiteView): List<Ranking> {
+        val query = view.toQuery()
+        val rankings = mutableListOf<Ranking>()
+        if (Grouping.Family in view.groupings) {
+            rankings += Ranking("Largest families", LiteAggregation.largestGroups(relays, { it.familyId }, RANKING_SIZE).map { (id, count) ->
+                RankingRow("Family $id", count, view.copy(selectedFamily = id as Long), "${LitePage.FAMILY_PATH}$id?$query")
+            })
+        }
+        if (Grouping.AutonomousSystem in view.groupings) {
+            rankings += Ranking("Largest autonomous systems", LiteAggregation.largestGroups(relays, { it.asNumber }, RANKING_SIZE).map { (number, count) ->
+                RankingRow("AS$number", count, view.copy(selectedAutonomousSystem = number as Int), "${LitePage.AUTONOMOUS_SYSTEM_PATH}$number?$query")
+            })
+        }
+        if (Grouping.Country in view.groupings) {
+            rankings += Ranking("Countries with the most relays", LiteAggregation.largestGroups(relays, { it.country }, RANKING_SIZE).map { (country, count) ->
+                RankingRow(countryMeta.name(country as String), count, view.copy(selectedCountry = country), null)
+            })
+        }
+        return rankings
+    }
 
     /** The view of the query with a day that has data */
     private fun resolvedView(parameters: MultiValueMap<String, String>): LiteView {
@@ -209,6 +242,7 @@ class LiteController(
 
     companion object {
         private const val PAN_FRACTION = 0.5
+        private const val RANKING_SIZE = 10
         private const val RENDER_WAIT_SECONDS = 5L
 
         /**

@@ -115,6 +115,27 @@ class LiteControllerTest(
         image.height shouldBe 400
     }
 
+    "the page shows statistics and the grouping settings" {
+        val html = mockMvc.perform(get("/lite/?group=family&group=country&weight=1&top=50")).andReturn().response.contentAsString
+        html shouldContain "Shown relays"
+        html shouldContain "Group relays by"
+        html shouldContain "name=\"group\" value=\"family\" checked"
+        html shouldContain "group=family&amp;group=country&amp;weight=1&amp;top=50"
+    }
+
+    "selections of groups without relays on the day are dropped" {
+        val html = mockMvc.perform(get("/lite/?group=family&family=4711&country=DE&as=3320")).andReturn().response.contentAsString
+        html shouldNotContain "Selected:"
+        html shouldNotContain "family=4711"
+    }
+
+    "the map is drawn with all groupings" {
+        val response = mockMvc.perform(get("/lite/map.png?group=family&group=as&group=country&group=coordinates&weight=1&top=10&country=DE"))
+            .andReturn().response
+        response.status shouldBe 200
+        ImageIO.read(ByteArrayInputStream(response.contentAsByteArray)).width shouldBe 1024
+    }
+
     "days without data resolve to the closest earlier day" {
         val days = listOf(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 5))
         LiteController.resolveDay(days, null) shouldBe LocalDate.of(2024, 1, 5)

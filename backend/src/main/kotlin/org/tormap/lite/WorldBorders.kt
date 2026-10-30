@@ -12,14 +12,16 @@ import java.awt.geom.Rectangle2D
  */
 @Component
 class WorldBorders(objectMapper: ObjectMapper) {
-    class Country(val path: Path2D.Float, val bounds: Rectangle2D)
+    class Country(val isoCode: String?, val path: Path2D.Float, val bounds: Rectangle2D)
 
     val countries: List<Country> = WorldBorders::class.java.getResourceAsStream(RESOURCE)
         .let { requireNotNull(it) { "Missing resource $RESOURCE" } }
         .use { objectMapper.readTree(it) }
         .get("features")
-        .mapNotNull { feature -> feature.get("geometry")?.let(::toPath) }
-        .map { Country(it, it.bounds2D) }
+        .mapNotNull { feature ->
+            val path = feature.get("geometry")?.let(::toPath) ?: return@mapNotNull null
+            Country(feature.get("properties")?.get("iso_a2")?.asString(), path, path.bounds2D)
+        }
 
     private fun toPath(geometry: JsonNode): Path2D.Float? {
         val polygons = when (geometry.get("type")?.asString()) {

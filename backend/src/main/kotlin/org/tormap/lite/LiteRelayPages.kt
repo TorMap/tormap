@@ -53,7 +53,11 @@ object LiteRelayPages {
                                 tag("li") { tag("a", "${member.nickname} (${member.fingerprint})", "href" to "${LitePage.RELAY_PATH}${member.id}?$query") }
                             }
                         }
-                        details.familyId?.let { tag("a", "Show the whole family", "href" to "${LitePage.FAMILY_PATH}$it?$query") }
+                        details.familyId?.let { familyId ->
+                            tag("a", "Show the whole family", "href" to "${LitePage.FAMILY_PATH}$familyId?$query")
+                            text(" \u00b7 ")
+                            tag("a", "Show it on the map", "href" to "${LitePage.PATH}?${view.showGroup(Grouping.Family).copy(selectedFamily = familyId).toQuery()}")
+                        }
                     }
                 },
                 "Verified host names" to hostNames(details.verifiedHostNames),
@@ -78,6 +82,7 @@ object LiteRelayPages {
         LitePage.layout("Family - TorMap Lite", view, fullVersionUrl) {
             backToMap(view)
             tag("h2", "Family of ${members.size} relays")
+            tag("p") { tag("a", "Show this family on the map", "href" to "${LitePage.PATH}?${view.showGroup(Grouping.Family).copy(selectedFamily = familyId).toQuery()}") }
             tag("p", "class" to "summary") {
                 text("Relays that list each other as family members in ${members.firstOrNull()?.month ?: "this month"} (family $familyId).")
             }
@@ -109,6 +114,11 @@ object LiteRelayPages {
             backToMap(view)
             tag("h2", "${name ?: "Autonomous system"} (AS$number)")
             tag("p", "class" to "summary") { text("Relays in this autonomous system on ${view.day ?: "no day"}.") }
+            if (relays.isNotEmpty()) {
+                tag("p") {
+                    tag("a", "Show this autonomous system on the map", "href" to "${LitePage.PATH}?${view.showGroup(Grouping.AutonomousSystem).copy(selectedAutonomousSystem = number).toQuery()}")
+                }
+            }
             if (relays.isEmpty()) tag("p", "No relays of this autonomous system are shown on this day.")
             else relayTable(relays, view)
         }

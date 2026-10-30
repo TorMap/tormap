@@ -50,6 +50,23 @@ class LiteViewTest : StringSpec({
         parse("click=nonsense").clickMode shouldBe ClickMode.List
     }
 
+    "groupings, selections and the weight settings are part of the query" {
+        val view = parse("group=country&group=family&family=12&as=3320&country=DE&weight=1&top=100")
+        view.groupings shouldBe setOf(Grouping.Family, Grouping.Country)
+        view.selectedFamily shouldBe 12L
+        view.selectedAutonomousSystem shouldBe 3320
+        view.selectedCountry shouldBe "DE"
+        view.sizeByWeight shouldBe true
+        view.topRelayCount shouldBe 100
+        parse(view.toQuery()) shouldBe view
+        view.toImageQuery() shouldContain "group=family"
+    }
+
+    "invalid group settings are ignored" {
+        parse("group=evil&family=-1&as=x&country=de&top=100") shouldBe parse("")
+        parse("weight=1&top=7").topRelayCount shouldBe null
+    }
+
     "unchecking all relay types is kept" {
         parse("f=1").relayTypes shouldBe emptySet()
     }

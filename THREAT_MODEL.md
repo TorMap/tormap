@@ -94,7 +94,9 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   cached relays of one day (queries up to 100 characters, at most one indexed details lookup for a fingerprint) and
   lists at most 500 relays. Query parameters are parsed leniently (invalid values become defaults),
   redirects only go to `/lite/` with a query built from parsed values. Map images have two fixed sizes, zoom levels 2
-  to 10 and a center snapped to a 32 pixel grid; they are cached (100 images, 1 hour), only days that have data are
+  to 10 and a center snapped to a 32 pixel grid. Groupings, the weight setting and the top relay count only take values
+  from fixed lists, and a selected family, autonomous system or country is dropped unless the day has relays of it, so
+  the number of distinct images stays bounded by the data. Images are cached (100 images, 1 hour), only days that have data are
   looked up, and at most half the CPU cores render at once (other requests wait up to 5 s, then get `503`).
 - Input validation: `@Size` limits on POST ID lists, typed `Long` path variables, strict `LocalDate.parse`. Request
   bodies are limited to `app.http.request.max-body-bytes` (1 MiB, `RequestBodyLimitConfig`: `413` on a larger

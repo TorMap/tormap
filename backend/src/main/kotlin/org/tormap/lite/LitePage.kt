@@ -19,7 +19,17 @@ class LitePageModel(
     val fullVersionUrl: String,
     /** The relays around the clicked point of the map, null if nothing was clicked */
     val pickedRelays: List<RelayLocationDto>? = null,
+    val statistics: LiteStatistics? = null,
+    val rankings: List<Ranking> = emptyList(),
 )
+
+/** The largest groups of a grouping, e.g. families */
+class Ranking(val title: String, val rows: List<RankingRow>)
+
+/**
+ * A group with its number of relays, the view that selects it on the map and optionally a page about it
+ */
+class RankingRow(val label: String, val relayCount: Int, val selectView: LiteView, val detailsPath: String?)
 
 /**
  * Renders the Lite page: a single GET form, so every button, the map and the settings work without JavaScript.
@@ -42,10 +52,17 @@ object LitePage {
                 hiddenInput("lat", view.latitudeParameter)
                 hiddenInput("lng", view.longitudeParameter)
                 hiddenInput("zoom", view.zoom.toString())
+                // Selections are made with links below the map and kept when the form is submitted
+                view.selectedFamily?.let { hiddenInput("family", it.toString()) }
+                view.selectedAutonomousSystem?.let { hiddenInput("as", it.toString()) }
+                view.selectedCountry?.let { hiddenInput("country", it) }
                 mapControls(view)
                 map(model)
+                selection(view)
+                model.statistics?.let { statistics(it) }
                 settings(view)
             }
+            model.rankings.forEach { ranking(it, view) }
             model.pickedRelays?.let { relays ->
                 tag("section", "id" to "relays") {
                     tag("h2", "Relays at the clicked point")
@@ -221,6 +238,77 @@ object LitePage {
         }
     }
 
+    private fun Html.selection(view: LiteView) {
+        val selections = listOfNotNull(
+            view.selectedFamily?.let { "Family $it" to view.copy(selectedFamily = null) },
+            view.selectedAutonomousSystem?.let { "AS$it" to view.copy(selectedAutonomousSystem = null) },
+            view.selectedCountry?.let { it to view.copy(selectedCountry = null) },
+        )
+        if (selections.isEmpty()) return
+        tag("p", "class" to "selection") {
+            text("Selected: ")
+            selections.forEachIndexed { index, (label, cleared) ->
+                if (index > 0) text(", ")
+                text("$label (")
+                tag("a", "clear", "href" to "$PATH?${cleared.toQuery()}")
+                text(")")
+            }
+        }
+    }
+
+    private fun Html.statistics(statistics: LiteStatistics) {
+        tag("table", "class" to "statistics") {
+            tag("caption", "Shown relays")
+            tag("tbody") {
+                listOf(
+                    "Exit relays" to statistics.exitCount,
+                    "Guard relays" to statistics.guardCount,
+                    "Other relays" to statistics.otherCount,
+                    "Total relays" to statistics.totalCount,
+                    "Families" to statistics.familyCount,
+                    "Countries" to statistics.countryCount,
+                    "Autonomous systems" to statistics.autonomousSystemCount,
+                ).forEach { (label, count) ->
+                    tag("tr") {
+                        tag("th", label, "scope" to "row")
+                        tag("td", count.toString())
+                    }
+                }
+            }
+        }
+    }
+
+    private fun Html.ranking(ranking: Ranking, view: LiteView) {
+        tag("section") {
+            tag("h2", ranking.title)
+            if (ranking.rows.isEmpty()) {
+                tag("p", "None of the shown relays has this information.")
+                return@tag
+            }
+            tag("div", "class" to "table") {
+                tag("table") {
+                    tag("thead") {
+                        tag("tr") { listOf("Name", "Relays", "").forEach { tag("th", it, "scope" to "col") } }
+                    }
+                    tag("tbody") {
+                        ranking.rows.forEach { row ->
+                            tag("tr") {
+                                tag("td") {
+                                    if (row.detailsPath != null) tag("a", row.label, "href" to row.detailsPath) else text(row.label)
+                                }
+                                tag("td", row.relayCount.toString())
+                                tag("td") {
+                                    if (row.selectView != view) tag("a", "Select on map", "href" to "$PATH?${row.selectView.toQuery()}")
+                                    else text("Selected")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun clickHint(view: LiteView) = when (view.clickMode) {
         ClickMode.List -> "Click the map to list the relays there."
         ClickMode.Zoom -> "Click the map to zoom in."
@@ -235,6 +323,25 @@ object LitePage {
                     checkbox("type", type.parameter, type in view.relayTypes) {
                         tag("span", "class" to "swatch swatch-${type.parameter}", "aria-hidden" to "true")
                         text(type.label)
+                    }
+                }
+            }
+            tag("fieldset") {
+                tag("legend", "Group relays by")
+                Grouping.entries.forEach { grouping ->
+                    checkbox("group", grouping.parameter, grouping in view.groupings) { text(grouping.label) }
+                }
+            }
+            tag("fieldset") {
+                tag("legend", "Consensus weight")
+                checkbox("weight", "1", view.sizeByWeight) { text("Size relay markers by consensus weight") }
+                tag("label") {
+                    text("Show top ")
+                    tag("select", "name" to "top") {
+                        tag("option", "All relays", "value" to "", "selected" to (view.topRelayCount == null))
+                        LiteView.TOP_RELAY_COUNTS.forEach { count ->
+                            tag("option", "$count relays", "value" to count, "selected" to (view.topRelayCount == count))
+                        }
                     }
                 }
             }
