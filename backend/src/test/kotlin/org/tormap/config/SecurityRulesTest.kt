@@ -74,6 +74,20 @@ class SecurityRulesTest(
         status shouldNotBe 401
     }
 
+    "Lite pages are public, GET only and forbid scripts" {
+        listOf("/lite", "/lite/", "/lite/map.png").forEach { path ->
+            val response = mockMvc.perform(get(path)).andReturn().response
+            response.status shouldNotBe 401
+            response.status shouldNotBe 403
+            response.getHeader("Content-Security-Policy") shouldBe SecurityConfig.LITE_CONTENT_SECURITY_POLICY
+            // No session or CSRF cookie, so responses stay cacheable and anonymous
+            response.getHeader("Set-Cookie") shouldBe null
+        }
+        SecurityConfig.LITE_CONTENT_SECURITY_POLICY shouldStartWith "default-src 'none';"
+        (SecurityConfig.LITE_CONTENT_SECURITY_POLICY.contains("script-src")) shouldBe false
+        mockMvc.perform(post("/lite/")).andReturn().response.status shouldBe 403
+    }
+
     "other paths are denied" {
         statusOf("/not-a-public-path") shouldBe 403
     }

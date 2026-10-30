@@ -10,6 +10,9 @@ app:
         cors:
             # Development uses http://localhost:3000 (application-dev.yml)
             allowed-origins: https://tormap.org,https://www.tormap.org,https://tormap-*.web.app
+    lite:
+        # The JavaScript frontend, linked from the Lite pages (/lite/) for browsers with JavaScript
+        full-version-url: https://tormap.org
 descriptor:
     apiBaseURL: https://collector.torproject.org
     localDownloadDirectory: tormap-data/descriptors

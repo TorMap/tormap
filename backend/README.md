@@ -34,6 +34,14 @@ revises recent estimates. The source can be changed with the `usage-statistics.*
 on the directory requests that relays report. Early days are based on very few relays (`frac`), so their numbers are
 less reliable.
 
+### TorMap Lite
+
+`/lite/` serves the map for browsers without JavaScript, e.g. Tor Browser with the "Safest" security level. The backend
+renders the HTML and the map image (`/lite/map.png`, country borders and relay markers drawn with Java2D, no map tiles
+and no fonts needed). The page is one `GET` form: the day, zoom and move buttons, the filters and clicks on the map
+submit it, so every view is a link. It links to the JavaScript frontend at `app.lite.full-version-url` (default
+`https://tormap.org`). The reverse proxy must forward `/lite` and `/static/` to the backend as well.
+
 ## Requirements
 
 - At least 50 GB of free disk space (for downloaded archives)
@@ -202,9 +210,10 @@ The backend enables CORS so specific frontend browser origins can call the publi
 
 #### HTTP caching
 
-Public `GET` endpoints under `/relay/**` can return `Cache-Control` headers to allow browser and CDN/proxy caching.
+Public `GET` endpoints under `/relay/**` and `/lite/**` can return `Cache-Control` headers to allow browser and
+CDN/proxy caching.
 
-- Default: `app.http.cache.public.max-age-seconds: 300`, so `/relay/**` responses include
+- Default: `app.http.cache.public.max-age-seconds: 300`, so `/relay/**` and `/lite/**` responses include
   `Cache-Control: public, max-age=300`.
 - Dev: `application-dev.yml` sets it to `0`, which disables the caching headers. Responses are then typically not
   cached unless a controller explicitly sets caching headers.

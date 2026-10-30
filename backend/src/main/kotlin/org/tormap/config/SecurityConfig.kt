@@ -46,6 +46,9 @@ class SecurityConfig(
         private const val ENV_ADMIN_PASSWORD = "TORMAP_ADMIN_PASSWORD"
         private const val ENV_REMOVED_ADMIN_PASSWORD_BCRYPT = "TORMAP_ADMIN_PASSWORD_BCRYPT"
         private const val MIN_ADMIN_PASSWORD_LENGTH = 16
+        private const val DEFAULT_CONTENT_SECURITY_POLICY = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+        internal const val LITE_CONTENT_SECURITY_POLICY =
+            "default-src 'none'; img-src 'self'; style-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"
     }
 
     @Bean
@@ -123,9 +126,27 @@ class SecurityConfig(
         return http.build()
     }
 
-    /** Everything else: public paths without authentication, all other paths denied. */
+    /**
+     * TorMap Lite: server-rendered pages and map images for browsers without JavaScript. GET only, same origin only.
+     * Its content security policy allows the page's own stylesheet, images and form, but no scripts at all.
+     */
     @Bean
     @Order(2)
+    fun liteFilterChain(http: HttpSecurity): SecurityFilterChain {
+        applyCommonConfig(http, LITE_CONTENT_SECURITY_POLICY)
+            .securityMatcher("/lite", "/lite/**")
+            // CSRF protection stays on: it only checks unsafe methods, which this chain denies anyway
+            .authorizeHttpRequests { auth ->
+                auth
+                    .requestMatchers(HttpMethod.GET, "/lite", "/lite/**").permitAll()
+                    .anyRequest().denyAll()
+            }
+        return http.build()
+    }
+
+    /** Everything else: public paths without authentication, all other paths denied. */
+    @Bean
+    @Order(3)
     fun publicFilterChain(http: HttpSecurity): SecurityFilterChain {
         applyCommonConfig(http)
             // The frontend calls the public API from other origins
@@ -156,7 +177,11 @@ class SecurityConfig(
         return http.build()
     }
 
-    private fun applyCommonConfig(http: HttpSecurity): HttpSecurity =
+    private fun applyCommonConfig(
+        http: HttpSecurity,
+        // Swagger UI needs scripts, so the default policy is only sent while it is disabled
+        contentSecurityPolicy: String? = if (swaggerEnabled) null else DEFAULT_CONTENT_SECURITY_POLICY,
+    ): HttpSecurity =
         http
             // Fully stateless sessions
             .sessionManagement { sessions ->
@@ -169,8 +194,8 @@ class SecurityConfig(
                 headers.contentTypeOptions(Customizer.withDefaults())
                 headers.frameOptions { it.deny() }
                 headers.referrerPolicy { it.policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER) }
-                if (!swaggerEnabled) {
-                    headers.contentSecurityPolicy { it.policyDirectives("default-src 'none'; frame-ancestors 'none'; base-uri 'none'") }
+                if (contentSecurityPolicy != null) {
+                    headers.contentSecurityPolicy { it.policyDirectives(contentSecurityPolicy) }
                 }
             }
 }
