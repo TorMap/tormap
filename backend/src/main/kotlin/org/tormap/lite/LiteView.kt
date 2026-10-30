@@ -43,6 +43,16 @@ enum class ClickMode(val parameter: String, val label: String) {
 }
 
 /**
+ * How relays are grouped on the map, like the "Group relays by" switches of the JavaScript map
+ */
+enum class Grouping(val parameter: String, val label: String) {
+    Family("family", "Family"),
+    AutonomousSystem("as", "Autonomous system"),
+    Country("country", "Country"),
+    Coordinates("coordinates", "Coordinates"),
+}
+
+/**
  * Everything that is shown on a Lite page. All values come from the query string, so every view is a link.
  * The map center is stored in pixels of the given zoom level, snapped to a grid and kept inside the world.
  * This keeps the number of distinct map images small, which matters because they are rendered on the server.
@@ -56,6 +66,15 @@ data class LiteView(
     val relayTypes: Set<LiteRelayType>,
     val requiredFlags: Set<TorRelayFlag>,
     val clickMode: ClickMode = ClickMode.List,
+    val groupings: Set<Grouping> = emptySet(),
+    val selectedFamily: Long? = null,
+    val selectedAutonomousSystem: Int? = null,
+    /** ISO 3166 alpha-2 code */
+    val selectedCountry: String? = null,
+    /** Marker size relative to the consensus weight of the relays at a location */
+    val sizeByWeight: Boolean = false,
+    /** Only the relays with the highest consensus weight, one of [TOP_RELAY_COUNTS], only used with [sizeByWeight] */
+    val topRelayCount: Int? = null,
 ) {
     val latitude get() = WebMercator.latitude(centerY, zoom)
     val longitude get() = WebMercator.longitude(centerX, zoom)
@@ -70,6 +89,8 @@ data class LiteView(
     val canZoomOut get() = zoom > MIN_ZOOM
 
     fun withDay(day: LocalDate?) = copy(day = day)
+
+    fun showGroup(grouping: Grouping) = copy(groupings = groupings + grouping)
 
     fun zoomedBy(delta: Int): LiteView {
         val newZoom = (zoom + delta).coerceIn(MIN_ZOOM, MAX_ZOOM)
@@ -124,6 +145,12 @@ data class LiteView(
             LiteRelayType.entries.filter { it in relayTypes }.forEach { parameters += "type" to it.parameter }
         }
         TorRelayFlag.entries.filter { it in requiredFlags }.forEach { parameters += "flag" to it.name }
+        Grouping.entries.filter { it in groupings }.forEach { parameters += "group" to it.parameter }
+        selectedFamily?.let { parameters += "family" to it.toString() }
+        selectedAutonomousSystem?.let { parameters += "as" to it.toString() }
+        selectedCountry?.let { parameters += "country" to it }
+        if (sizeByWeight) parameters += "weight" to "1"
+        topRelayCount?.let { parameters += "top" to it.toString() }
         if (clickMode != ClickMode.List) parameters += "click" to clickMode.parameter
         return parameters
     }
@@ -148,6 +175,8 @@ data class LiteView(
         private const val DEFAULT_LATITUDE = 30.0
         private const val DEFAULT_LONGITUDE = 0.0
         private const val GRID_PIXELS = 32.0
+        val TOP_RELAY_COUNTS = listOf(10, 50, 100, 500, 1000)
+        private val countryPattern = Regex("^[A-Z]{2}$")
 
         /**
          * Builds a view from untrusted query parameters. Invalid values are replaced by defaults instead of failing,
@@ -179,10 +208,30 @@ data class LiteView(
                     null
                 }
             }
+            val groupingNames = parameters["group"].orEmpty().toSet()
+            val groupings = Grouping.entries.filter { it.parameter in groupingNames }.toSet()
+            val sizeByWeight = first("weight") == "1"
+            // Only a few fixed values, so they do not multiply the number of distinct map images
+            val topRelayCount = first("top")?.toIntOrNull()?.takeIf { sizeByWeight && it in TOP_RELAY_COUNTS }
             // Latitude and longitude are only used as a pair
             val (centerLatitude, centerLongitude) =
                 if (latitude != null && longitude != null) latitude to longitude else DEFAULT_LATITUDE to DEFAULT_LONGITUDE
-            return LiteView(day, zoom, 0.0, 0.0, size, relayTypes, requiredFlags, clickMode)
+            return LiteView(
+                day = day,
+                zoom = zoom,
+                centerX = 0.0,
+                centerY = 0.0,
+                size = size,
+                relayTypes = relayTypes,
+                requiredFlags = requiredFlags,
+                clickMode = clickMode,
+                groupings = groupings,
+                selectedFamily = first("family")?.toLongOrNull()?.takeIf { it > 0 },
+                selectedAutonomousSystem = first("as")?.toIntOrNull()?.takeIf { it > 0 },
+                selectedCountry = first("country")?.takeIf(countryPattern::matches),
+                sizeByWeight = sizeByWeight,
+                topRelayCount = topRelayCount,
+            )
                 .centered(zoom, WebMercator.x(centerLongitude, zoom), WebMercator.y(centerLatitude, zoom))
         }
 

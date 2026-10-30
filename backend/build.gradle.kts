@@ -146,8 +146,8 @@ sourceSets.main {
     resources.srcDir(files(ipLookupResources).builtBy(unpackIpLookupDatabases))
 }
 tasks.processResources {
-    // The Lite map draws the same country borders as the frontend, so the file is shared instead of copied
-    from("../frontend/src/resources/world.geo.json") { into("lite") }
+    // The Lite map draws the same country borders and colors as the frontend, so the files are shared instead of copied
+    from(files("../frontend/src/resources/world.geo.json", "../frontend/src/resources/country-meta.json")) { into("lite") }
     // Earlier builds extracted the databases into src/main/resources, which would now collide with the generated ones
     val legacyIpLookupDir = file("src/main/resources/ip-lookup")
     doFirst {

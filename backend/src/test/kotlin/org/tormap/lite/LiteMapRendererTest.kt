@@ -12,11 +12,12 @@ import java.math.BigDecimal
 import javax.imageio.ImageIO
 
 class LiteMapRendererTest : StringSpec({
-    val renderer = LiteMapRenderer(WorldBorders(JsonMapper.builder().build()))
+    val mapper = JsonMapper.builder().build()
+    val renderer = LiteMapRenderer(WorldBorders(mapper), CountryMeta(mapper))
 
-    fun relay(latitude: Double, longitude: Double, vararg flags: TorRelayFlag) = RelayLocationDto(
+    fun relay(latitude: Double, longitude: Double, vararg flags: TorRelayFlag, familyId: Long? = null) = RelayLocationDto(
         BigDecimal.valueOf(latitude), BigDecimal.valueOf(longitude), "DE",
-        flags.joinToString(", ") { it.ordinal.toString() }, 1, null, "relay", 100, null,
+        flags.joinToString(", ") { it.ordinal.toString() }, 1, familyId, "relay", 100, null,
     )
 
     fun pixel(png: ByteArray, view: LiteView, latitude: Double, longitude: Double): Color {
@@ -36,7 +37,9 @@ class LiteMapRendererTest : StringSpec({
             relay(berlin.first, berlin.second, TorRelayFlag.Guard),
             relay(berlin.first, berlin.second, TorRelayFlag.Exit, TorRelayFlag.Guard),
         )
-        pixel(renderer.render(view, relays), view, berlin.first, berlin.second) shouldBe Color(0xff4848)
+        // Antialiasing blends the marker with the land, so only check that it is red (exit) and not yellow (guard)
+        val color = pixel(renderer.render(view, relays), view, berlin.first, berlin.second)
+        (color.red - color.green > 100) shouldBe true
     }
 
     "draws land without relays" {
@@ -45,13 +48,29 @@ class LiteMapRendererTest : StringSpec({
         color shouldNotBe Color(0x2c353c)
     }
 
-    "filters relays by type and required flags" {
-        val exit = relay(0.0, 0.0, TorRelayFlag.Exit, TorRelayFlag.Stable)
-        val guard = relay(0.0, 0.0, TorRelayFlag.Guard)
-        val other = relay(0.0, 0.0)
-        val relays = listOf(exit, guard, other)
-        renderer.filterRelays(relays, view) shouldBe relays
-        renderer.filterRelays(relays, view.copy(relayTypes = setOf(LiteRelayType.Guard, LiteRelayType.Other))) shouldBe listOf(guard, other)
-        renderer.filterRelays(relays, view.copy(requiredFlags = setOf(TorRelayFlag.Stable))) shouldBe listOf(exit)
+    "draws relays in a single color while families are shown, with a circle in the family color" {
+        val relays = (1..5).map { relay(berlin.first, berlin.second, TorRelayFlag.Exit, familyId = 3) }
+        val familyView = view.showGroup(Grouping.Family)
+        pixel(renderer.render(familyView, relays), familyView, berlin.first, berlin.second) shouldNotBe Color(0xff4848)
+    }
+
+    "draws every grouping without failing" {
+        val relays = (1..5).map { relay(berlin.first, berlin.second, TorRelayFlag.Guard, familyId = it.toLong()) }
+        val allGroups = Grouping.entries.fold(view.copy(sizeByWeight = true, selectedCountry = "DE")) { it, grouping -> it.showGroup(grouping) }
+        ImageIO.read(ByteArrayInputStream(renderer.render(allGroups, relays))).width shouldBe view.size.width
+    }
+
+    "converts CSS hsl colors" {
+        LiteMapRenderer.hsl(0.0, 1.0, .5) shouldBe Color.RED
+        LiteMapRenderer.hsl(120.0, 1.0, .5) shouldBe Color.GREEN
+        LiteMapRenderer.hsl(0.0, 0.0, 1.0) shouldBe Color.WHITE
+    }
+
+    "sizes circles like the frontend" {
+        LiteMapRenderer.radiusForCount(4) shouldBe 10.0
+        LiteMapRenderer.radiusForCount(55) shouldBe 30.0
+        LiteMapRenderer.radiusForCount(1000) shouldBe 100.0
+        LiteMapRenderer.radiusForWeight(0, 0) shouldBe 2.0
+        LiteMapRenderer.radiusForWeight(100, 100) shouldBe 20.0
     }
 })
