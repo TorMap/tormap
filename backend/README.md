@@ -46,6 +46,8 @@ country or coordinates, sizes markers by consensus weight (optionally only the t
 and largest groups of the shown relays below the map; the filtering and grouping in `lite/LiteAggregation.kt` follow
 the frontend's `util/aggregate-relays.ts`. It links to the JavaScript frontend at `app.lite.full-version-url` (default
 `https://tormap.org`). The reverse proxy must forward `/lite` and `/static/` to the backend as well.
+The frontend sends browsers without JavaScript to `${VITE_BACKEND_API_URL}/lite/` (a `<noscript>` refresh in
+`frontend/index.html`) and links to Lite from its About dialog.
 
 ## Requirements
 
