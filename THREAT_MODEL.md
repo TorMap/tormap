@@ -10,7 +10,8 @@ TorMap is a public, read-only data platform. The Spring Boot backend periodicall
 Tor Project Collector, parses them with a vendored copy of metrics-lib, enriches them with offline GeoIP/ASN databases,
 stores them in PostgreSQL and serves them as JSON. It also imports the estimated number of relay users per country from
 the Tor Metrics CSV `userstats-relay-country.csv`. The React frontend (static files on Firebase Hosting or nginx) renders
-the data on a map. There are no user accounts. The only privileged role is the actuator admin.
+the data on a map. For browsers without JavaScript, the backend also serves TorMap Lite (`/lite/**`): HTML pages and
+map images it renders itself. There are no user accounts. The only privileged role is the actuator admin.
 
 ```
 Browser ──HTTPS──> Frontend (static)            Tor Collector (HTTPS, index.json + tarballs),
@@ -50,6 +51,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 | 9 | Deployment configuration          | Env vars, Spring profile, compose port mappings (operator)                               | Exposed DB, Swagger on, no TLS, default credentials            | `docker-compose*.yml`, `application*.yml`, `build.gradle.kts` (Jib) |
 | 10| CI/CD and supply chain            | Dependencies, actions, Renovate PRs, AI agent instructions (developer / upstream)         | Malicious package, secret theft, prompt injection via changelogs | `.github/`, `renovate.json`, `frontend/.yarnrc.yml`, `AGENTS.md` |
 | 11| Tor Metrics CSV download         | `userstats-relay-country.csv` (HTTPS, trusted host, content untrusted): dates, country codes, numbers | Oversized or endless response, malformed or poisoned rows, redirect to another host | `service/CountryUsageService.kt`, `util/UserStatsCsvParser.kt`, `config/value/UsageStatisticsConfig.kt` |
+| 12| TorMap Lite `/lite/**`           | Query parameters (day, position, zoom, filters, clicked pixel), direct; relay-derived strings in HTML (indirect) | CPU exhaustion by rendering many distinct map images, XSS in server-rendered HTML, open redirects | `adapter/controller/LiteController.kt`, `lite/` |
 
 ## Assumptions
 
@@ -72,7 +74,8 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 
 ## Existing controls
 
-- `SecurityConfig`: two filter chains. The actuator chain requires role `ADMIN` via HTTP Basic. The public chain has no
+- `SecurityConfig`: three filter chains. The actuator chain requires role `ADMIN` via HTTP Basic. The Lite chain allows
+  only GET on `/lite` and `/lite/**`. The public chain has no
   authentication: only `/`, `/error`, `/relay/**` and static files are allowed, everything else is denied, and
   `Authorization` headers are ignored. With no admin password configured, no user exists and the actuator is
   unreachable. Swagger is public only when enabled. Stateless sessions, no form login. CSRF (double-submit cookie) for
@@ -83,7 +86,13 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   `-Proto` and `-Host` only for connections from `server.tomcat.remoteip.internal-proxies` (loopback and private
   networks). There is no application filter that trusts these headers from any client.
 - Security headers: `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, CSP `default-src 'none'` when
-  Swagger is off.
+  Swagger is off. Lite pages always get a CSP that allows only same-origin images, stylesheets and form targets and no
+  scripts at all.
+- TorMap Lite: HTML is written only through `lite/Html.kt`, which escapes every text and attribute value and accepts
+  only literal element and attribute names. Query parameters are parsed leniently (invalid values become defaults),
+  redirects only go to `/lite/` with a query built from parsed values. Map images have two fixed sizes, zoom levels 2
+  to 10 and a center snapped to a 32 pixel grid; they are cached (100 images, 1 hour), only days that have data are
+  looked up, and at most half the CPU cores render at once (other requests wait up to 5 s, then get `503`).
 - Input validation: `@Size` limits on POST ID lists, typed `Long` path variables, strict `LocalDate.parse`. Request
   bodies are limited to `app.http.request.max-body-bytes` (1 MiB, `RequestBodyLimitConfig`: `413` on a larger
   `Content-Length`, chunked bodies cut off at the same size). Jackson limits the document length to the same size and
@@ -159,7 +168,9 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   is limited globally, keep new JSON bodies within `app.http.request.max-body-bytes` and the Jackson token limit), and keep heavy work behind a cache with a bounded key space.
 - New outbound call: set connect and read timeouts, cap response size, restrict schemes and hosts.
 - New relay-derived field: truncate before storing, render as text only in the frontend (no Leaflet string tooltips or
-  popups, no `dangerouslySetInnerHTML`).
+  popups, no `dangerouslySetInnerHTML`) and only through `Html` in the Lite pages.
+- Lite change: keep pages GET only, scripts blocked by the Lite CSP, and new image parameters within a small, fixed set
+  of values, so new options multiply the number of distinct images as little as possible.
 - Service worker change: cache only GET responses with a bounded key space, entry count and age, never error responses,
   and keep `sw.js` on `no-cache` in `frontend/firebase.json` and `frontend/nginx.conf`.
 - Deployment default change: keep the DB unexposed, the backend on localhost behind TLS, secure defaults in

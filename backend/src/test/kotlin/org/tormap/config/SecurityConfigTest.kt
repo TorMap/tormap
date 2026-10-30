@@ -31,7 +31,7 @@ class SecurityConfigTest(
         passwordEncoder shouldNotBe null
         userDetailsService shouldNotBe null
         corsConfigurationSource shouldNotBe null
-        applicationContext.getBeansOfType(SecurityFilterChain::class.java).size shouldBe 2
+        applicationContext.getBeansOfType(SecurityFilterChain::class.java).size shouldBe 3
     }
 
     "forwarded headers are only applied by Tomcat for trusted proxies" {

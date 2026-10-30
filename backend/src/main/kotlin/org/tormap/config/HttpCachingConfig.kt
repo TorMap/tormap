@@ -25,9 +25,9 @@ class HttpCachingConfig(
 
                 val path = request.requestURI ?: return true
 
-                // Only cache public JSON API endpoints. Do NOT add caching headers for actuator or docs.
+                // Only cache the public JSON API and the Lite pages. Do NOT add caching headers for actuator or docs.
                 // Root endpoint ("/") intentionally uses Cache-Control: no-store.
-                val isPublicApi = path.startsWith("/relay/")
+                val isPublicApi = path.startsWith("/relay/") || path.startsWith("/lite/")
                 val isActuator = path.startsWith("/actuator")
                 val isDocs = path.startsWith("/openapi") || path.startsWith("/v3/api-docs") || path.startsWith("/swagger")
 

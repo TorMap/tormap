@@ -56,6 +56,15 @@ class HttpCachingConfigTest(
             .andExpect(header().string("Cache-Control", containsString("max-age=300")))
     }
 
+    "Lite pages and map images include Cache-Control public max-age" {
+        listOf("/lite/", "/lite/map.png").forEach { path ->
+            mockMvc.perform(get(path))
+                .andExpect(status().isOk)
+                .andExpect(header().string("Cache-Control", containsString("public")))
+                .andExpect(header().string("Cache-Control", containsString("max-age=300")))
+        }
+    }
+
     "GET / contains no-store (controller override wins)" {
         mockMvc.perform(get("/"))
             .andExpect(status().isOk)
