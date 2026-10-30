@@ -66,6 +66,8 @@ object LiteOutliers {
         val position = (sorted.size - 1) * q
         val lower = floor(position).toInt()
         val upper = ceil(position).toInt()
-        return sorted[lower] + (sorted[upper] - sorted[lower]) * (position - lower)
+        val step = sorted[upper] - sorted[lower]
+        val fraction = position - lower
+        return sorted[lower] + step * fraction
     }
 }
