@@ -27,6 +27,9 @@ borders instead of the map tiles. The development server registers no worker. To
 If you want to test the frontend against a local backend, you can change the environment variable `VITE_BACKEND_API_URL`
 in the `.env` file.
 
+`VITE_LITE_ENABLED=true` sends browsers without JavaScript to TorMap Lite (`/lite/` on the backend) and links to it
+from the About dialog. It is off by default, because the backend has to be deployed with Lite first.
+
 ## Config
 
 The main `frontend` config is located at `frontend/src/config.ts`. Further environment options like enable/disable

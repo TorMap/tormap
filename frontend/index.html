@@ -50,20 +50,9 @@
             letter-spacing: .3em;
         }
     </style>
-    <!-- Browsers without JavaScript (e.g. Tor Browser at the "Safest" security level) open TorMap Lite instead.
-         After the splash style, so that hiding the splash screen wins. -->
-    <noscript>
-        <meta http-equiv="refresh" content="0; url=%VITE_BACKEND_API_URL%/lite/">
-        <style>#splash { display: none; }</style>
-    </noscript>
 </head>
 <body>
-    <noscript>
-        <p>
-            This map needs JavaScript.
-            <a href="%VITE_BACKEND_API_URL%/lite/">TorMap Lite</a> works without it.
-        </p>
-    </noscript>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"><div id="splash" role="status">TorMap</div></div>
     <script type="module" src="./src/index.tsx"></script>
 </body>

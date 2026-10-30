@@ -27,12 +27,13 @@ describe("AboutInformation", () => {
         expect(page.getByText("Bitcoin").elements()).toHaveLength(0)
     })
 
-    it("links to TorMap Lite for browsers without JavaScript", async () => {
+    it("does not link to TorMap Lite while the feature flag is off", async () => {
         await page.viewport(1400, 900)
         const screen = await renderWithProviders(<AboutInformation/>)
 
         await screen.getByRole("button", {name: "About TorMap"}).click()
 
-        await expect.element(page.getByRole("link", {name: "TorMap Lite"})).toHaveAttribute("href", expect.stringMatching(/\/lite\/$/))
+        await expect.element(page.getByRole("link", {name: "Sponsor on GitHub"})).toBeVisible()
+        expect(page.getByRole("link", {name: "TorMap Lite"}).elements()).toHaveLength(0)
     })
 })
