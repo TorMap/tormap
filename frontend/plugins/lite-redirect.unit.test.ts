@@ -25,7 +25,6 @@ describe("liteRedirect", () => {
             injectTo: "head",
             children: [
                 {tag: "meta", attrs: {"http-equiv": "refresh", content: "0; url=https://api.tormap.org/lite/"}},
-                {tag: "style", children: "#splash { display: none; }"},
             ],
         })])
     })
