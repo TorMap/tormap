@@ -24,14 +24,13 @@ export function liteRedirect(liteUrl: string | undefined): Plugin {
                     defaultNoscript,
                     `<noscript><p>This map needs JavaScript. <a href="${liteUrl}">TorMap Lite</a> works without it.</p></noscript>`,
                 ),
+                // index.html hides the splash screen without JavaScript, so the link stays visible if the browser
+                // blocks the refresh
                 tags: [{
                     tag: "noscript",
-                    // At the end of the head, after the splash style, so that hiding the splash screen wins and the
-                    // link stays visible if the browser blocks the refresh
                     injectTo: "head",
                     children: [
                         {tag: "meta", attrs: {"http-equiv": "refresh", content: `0; url=${liteUrl}`}},
-                        {tag: "style", children: "#splash { display: none; }"},
                     ],
                 }],
             }
