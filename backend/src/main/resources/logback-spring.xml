@@ -22,9 +22,13 @@
 
         <rollingPolicy
             class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <!-- rollover daily and when the file reaches 10 MegaBytes -->
-            <fileNamePattern>${LOGS}/archived/spring-boot-logger-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- Roll over weekly and when the file reaches 10 MB, so /actuator/logfile shows up to a week.
+                 YYYY is the week-based year: yyyy-ww would name the last days of December after week 01 of the wrong year. -->
+            <fileNamePattern>${LOGS}/archived/spring-boot-logger-%d{YYYY-ww}.%i.log</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
+            <!-- maxHistory counts rollover periods (weeks here): 13 weeks is about 90 days. -->
+            <maxHistory>13</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
     </appender>
 
