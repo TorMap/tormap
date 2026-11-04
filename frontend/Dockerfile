@@ -3,8 +3,10 @@
 FROM --platform=$BUILDPLATFORM node:26-slim@sha256:e4db4c914bf8ad241bd24804fc25d272d89bad97e68cdc8a1414862790a02c39 AS builder
 WORKDIR /app
 COPY . .
-RUN yarn install --immutable
-RUN yarn run build
+# Node 25+ images no longer ship Yarn, so run the release that .yarnrc.yml pins (yarnPath, kept up to date by Renovate)
+RUN YARN="node $(sed -n 's/^yarnPath: *//p' .yarnrc.yml)" \
+    && $YARN install --immutable \
+    && $YARN run build
 
 # Bundle static assets with nginx. The unprivileged image runs as a non-root user (101) and therefore listens on 8080.
 FROM nginxinc/nginx-unprivileged:1.31.7-alpine@sha256:b5047b9b76845eac124358373c6852377c52e4b05834a47647e955dd91cb8f1e AS production
