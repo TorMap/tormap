@@ -9,11 +9,31 @@
     ],
     "ignore": [
       "firebase.json",
-      "**/.*",
       "**/node_modules/**",
       "**/.yarn/**"
     ],
     "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {
+            "key": "Content-Security-Policy",
+            "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://basemaps.cartocdn.com https://avatars.githubusercontent.com; font-src 'self'; connect-src 'self' https://api.tormap.org; worker-src 'self'; manifest-src 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+          },
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          },
+          {
+            "key": "X-Frame-Options",
+            "value": "DENY"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "no-referrer"
+          }
+        ]
+      },
       {
         "source" : "**/*.@(jpg|jpeg|gif|png|svg|ico)",
         "headers" : [ {

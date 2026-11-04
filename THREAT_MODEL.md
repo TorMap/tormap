@@ -87,7 +87,12 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   networks). There is no application filter that trusts these headers from any client.
 - Security headers: `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, CSP `default-src 'none'` when
   Swagger is off. Lite pages always get a CSP that allows only same-origin images, stylesheets and form targets and no
-  scripts at all.
+  scripts at all. `/.well-known/security.txt` (RFC 9116, GET only) points to the GitHub advisory form.
+- Frontend hosts (`frontend/firebase.json`, `frontend/nginx.conf` with `frontend/security-headers.conf`) send the same
+  headers with a CSP that allows scripts only from the own origin, images from the own origin, `data:`, the CARTO tile
+  host and GitHub avatars, and requests only to the own origin and `api.tormap.org`. Styles need `'unsafe-inline'`,
+  because MUI (Emotion) inserts `<style>` elements at runtime and static hosting cannot add per-request nonces. Keep
+  both files in sync when the app needs a new host or a different backend URL.
 - TorMap Lite: HTML is written only through `lite/Html.kt`, which escapes every text and attribute value and accepts
   only literal element and attribute names. Relay-derived values never become a link target unless they match a strict
   format first (fingerprint: 40 hex characters, IP address: hex digits, `:` and `.`). Relay search scans only the
@@ -177,6 +182,8 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   popups, no `dangerouslySetInnerHTML`) and only through `Html` in the Lite pages.
 - Lite change: keep pages GET only, scripts blocked by the Lite CSP, and new image parameters within a small, fixed set
   of values, so new options multiply the number of distinct images as little as possible.
+- New external host in the frontend (tiles, images, API): add it to the CSP in `frontend/firebase.json` and
+  `frontend/security-headers.conf`, as narrowly as possible.
 - Service worker change: cache only GET responses with a bounded key space, entry count and age, never error responses,
   and keep `sw.js` on `no-cache` in `frontend/firebase.json` and `frontend/nginx.conf`.
 - Deployment default change: keep the DB unexposed, the backend on localhost behind TLS, secure defaults in

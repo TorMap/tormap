@@ -21,6 +21,7 @@ import org.springframework.security.web.header.writers.XXssProtectionHeaderWrite
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import org.tormap.adapter.controller.SecurityTxtController
 import org.tormap.util.logger
 
 @Configuration
@@ -46,7 +47,7 @@ class SecurityConfig(
         private const val ENV_ADMIN_PASSWORD = "TORMAP_ADMIN_PASSWORD"
         private const val ENV_REMOVED_ADMIN_PASSWORD_BCRYPT = "TORMAP_ADMIN_PASSWORD_BCRYPT"
         private const val MIN_ADMIN_PASSWORD_LENGTH = 16
-        private const val DEFAULT_CONTENT_SECURITY_POLICY = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+        internal const val DEFAULT_CONTENT_SECURITY_POLICY = "default-src 'none'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'"
         internal const val LITE_CONTENT_SECURITY_POLICY =
             "default-src 'none'; img-src 'self'; style-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"
     }
@@ -159,6 +160,8 @@ class SecurityConfig(
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     // Public API and static resources
                     .requestMatchers("/", "/error", "/relay/**", "/favicon.ico", "/robots.txt", "/static/**").permitAll()
+                    // How to report vulnerabilities (RFC 9116)
+                    .requestMatchers(HttpMethod.GET, SecurityTxtController.PATH).permitAll()
                     // Allow OpenAPI/Swagger only when enabled
                     .apply {
                         if (swaggerEnabled) {
