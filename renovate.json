@@ -7,6 +7,21 @@
   "schedule": [
     "at any time"
   ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "IP lookup databases, released monthly in TorMap/ip-lookup-data and downloaded by the backend build",
+      "managerFilePatterns": [
+        "/^backend/gradle\\.properties$/"
+      ],
+      "matchStrings": [
+        "ipLookupDataVersion=(?<currentValue>\\d{4}-\\d{2})"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "TorMap/ip-lookup-data",
+      "versioningTemplate": "regex:^(?<major>\\d{4})-(?<minor>\\d{2})$"
+    }
+  ],
   "packageRules": [
     {
       "description": "Ignore outdated dependencies required by TorProject descriptor library",
@@ -58,6 +73,13 @@
         "@types/react",
         "@types/react-dom"
       ]
+    },
+    {
+      "description": "Update the IP lookup databases as soon as a monthly release exists (releases are immutable)",
+      "matchDepNames": [
+        "TorMap/ip-lookup-data"
+      ],
+      "minimumReleaseAge": "0 days"
     }
   ]
 }

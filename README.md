@@ -67,7 +67,7 @@ it at the [Technical University of Darmstadt](https://www.tu-darmstadt.de/) as p
 [PANDA project](https://panda-projekt.de/). Felix Krauspe provides hosting.
 
 It uses relay descriptors and user estimates from the [Tor Project](https://metrics.torproject.org/), IP geolocation
-data by [DB-IP](https://db-ip.com), autonomous system data by [MaxMind](https://www.maxmind.com/), map tiles by
+and autonomous system data by [DB-IP](https://db-ip.com), map tiles by
 [CARTO](https://carto.com/) and [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, and country
 borders from [geojson-maps](https://geojson-maps.ash.ms/).
 

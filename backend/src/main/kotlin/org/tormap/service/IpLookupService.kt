@@ -22,7 +22,7 @@ class IpLookupService(
             javaClass.getResource(ipLookupConfig.locationDatabaseFile)!!.path,
             ipLookupConfig.shouldCache
         )
-    private var maxmindAutonomousSystemDB =
+    private var autonomousSystemDB =
         maxmindTypeDatabaseReader(
             javaClass.getResource(ipLookupConfig.autonomousSystemDatabaseFile)!!.path,
             ipLookupConfig.shouldCache
@@ -39,7 +39,7 @@ class IpLookupService(
 
     fun lookupAutonomousSystem(ipAddress: String): AsnResponse? = try {
         if (isValidPublicIPAddress(ipAddress)) {
-            maxmindAutonomousSystemDB.asn(InetAddress.getByName(ipAddress))
+            autonomousSystemDB.asn(InetAddress.getByName(ipAddress))
         } else null
     } catch (exception: Exception) {
         logger.debug(

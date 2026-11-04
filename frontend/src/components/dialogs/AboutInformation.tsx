@@ -195,8 +195,8 @@ export const AboutInformation: React.FunctionComponent = () => {
                     </Box>
                     <Divider sx={{my: 2}}/>
                     <Typography variant={"body2"}>
-                        IP geolocation data by <ExternalLink href={"https://db-ip.com"} label={"DB-IP"}/>,
-                        autonomous system data by <ExternalLink href={"https://www.maxmind.com/"} label={"MaxMind"}/>,
+                        IP geolocation and autonomous system data
+                        by <ExternalLink href={"https://db-ip.com"} label={"DB-IP"}/>,
                         Tor user estimates by <ExternalLink href={"https://metrics.torproject.org/"}
                                                             label={"Tor Metrics"}/> and country borders
                         from <ExternalLink href={"https://geojson-maps.ash.ms/"} label={"geojson-maps"}/>.

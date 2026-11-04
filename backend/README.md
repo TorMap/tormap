@@ -133,26 +133,21 @@ It is recommended to set following production environment variables via a secret
 
 ### IP lookups
 
-TorMap uses DB files in [MaxMind DB file format](https://maxmind.github.io/MaxMind-DB/) (
-.mmdb) to map IPv4 addresses of Tor relays to geolocations and autonomous systems. The mapping is applied when
-descriptors are being processed and missing autonomous systems info is also updated regularly.
+TorMap uses the free [DB-IP](https://db-ip.com) Lite databases (CC BY 4.0) in
+[MaxMind DB file format](https://maxmind.github.io/MaxMind-DB/) (.mmdb) to map IPv4 addresses of Tor relays to
+geolocations and autonomous systems. The mapping is applied when descriptors are being processed and missing autonomous
+systems info is also updated regularly. Stored mappings are not recomputed, so each relay keeps the location and
+autonomous system from the database that was current when it was imported.
 
-IP ranges and their geographic location changes over time. We only use the current IP to location data although the
-location of some relays in the past might have been different. If desired, the `.mmdb` DB files can be updated every few
-months, to keep the IP ranges up to date.
+The databases are not stored in this repository. A workflow in
+[TorMap/ip-lookup-data](https://github.com/TorMap/ip-lookup-data) publishes each monthly DB-IP edition as an immutable
+release (e.g. `2026-11`). The Gradle task `downloadIpLookupDatabases` downloads the release set by `ipLookupDataVersion`
+in `gradle.properties`, verifies it against the release's `SHA256SUMS` and unpacks it into
+`build/generated/ip-lookup-resources/ip-lookup/` (as `location.mmdb` and `autonomous-system.mmdb`), so the files end up
+in the JAR and the Docker image. The first build therefore needs access to github.com.
 
-The zip archives in `backend/ip-lookup/` are the source. The Gradle task `unpackIpLookupDatabases` extracts them into
-`build/generated/ip-lookup-resources/ip-lookup/` (as `location.mmdb` and `autonomous-system.mmdb`) whenever resources
-are built, so they end up in the JAR and the Docker image.
-
-Replacing existing DB files:
-
-1. Download latest MMDB file from https://db-ip.com/db/download/ip-to-city-lite
-2. Replace zip archive `backend/ip-lookup/dbip-city-lite-<DATE>.mmdb.zip`
-3. Create account and download latest GeoLite2 ASN MMDB file from https://www.maxmind.com/
-4. Replace zip archive `backend/ip-lookup/GeoLite2-ASN_<DATE>.zip`
-
-Keep the `dbip-city-lite` and `GeoLite2-ASN` parts of the file names: the build uses them to rename the databases.
+Renovate opens a PR when a new release exists. To build without network access, put a release's files into
+`<dir>/<version>/` and run Gradle with `-PipLookupDataUrl=file:///<dir>`.
 
 ## Deploy
 
