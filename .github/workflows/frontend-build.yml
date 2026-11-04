@@ -54,5 +54,7 @@ jobs:
         with:
           name: frontend-build
           path: frontend/build
+          # Keeps .well-known/ (security.txt), which upload-artifact leaves out by default
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 1
