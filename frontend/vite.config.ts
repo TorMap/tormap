@@ -1,7 +1,7 @@
 import {defineConfig, loadEnv} from 'vite'
 import viteReact from "@vitejs/plugin-react";
 
-import {liteRedirect} from "./plugins/lite-redirect";
+import {liteLink} from "./plugins/lite-link";
 import {securityTxtFile} from "./plugins/security-txt";
 import {serviceWorker} from "./plugins/service-worker";
 
@@ -30,7 +30,7 @@ export default defineConfig(({mode}) => {
             }),
             securityTxtFile(),
             // Off unless VITE_LITE_ENABLED is "true", because the backend has to serve /lite/ first
-            liteRedirect(env.VITE_LITE_ENABLED === "true" && env.VITE_BACKEND_API_URL
+            liteLink(env.VITE_LITE_ENABLED === "true" && env.VITE_BACKEND_API_URL
                 ? `${env.VITE_BACKEND_API_URL.replace(/\/+$/, "")}/lite/`
                 : undefined),
         ],
