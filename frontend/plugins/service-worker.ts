@@ -49,7 +49,9 @@ export function serviceWorker(options: Options): Plugin {
                 }
 
                 const entries = Object.values(bundle)
-                    .filter(file => file.fileName !== workerFileName && !file.fileName.endsWith(".map"))
+                    // Well-known files like security.txt are for other clients, not for the app
+                    .filter(file => file.fileName !== workerFileName && !file.fileName.endsWith(".map")
+                        && !file.fileName.startsWith(".well-known/"))
                     .map(file => ({
                         url: config.base + file.fileName,
                         revision: sha256Hex(file.type === "chunk" ? file.code : file.source),

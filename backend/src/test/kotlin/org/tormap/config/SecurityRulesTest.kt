@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import jakarta.servlet.http.Cookie
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldStartWith
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
@@ -31,7 +32,7 @@ class SecurityRulesTest(
     fun statusOf(path: String) = mockMvc.perform(get(path)).andReturn().response.status
 
     "public paths are not rejected by security" {
-        listOf("/", "/error", "/favicon.ico", "/robots.txt", "/static/missing.txt", "/relay/missing", "/relay/country-usage/day/2024-01-01").forEach { path ->
+        listOf("/", "/error", "/favicon.ico", "/robots.txt", "/.well-known/security.txt", "/static/missing.txt", "/relay/missing", "/relay/country-usage/day/2024-01-01").forEach { path ->
             statusOf(path) shouldNotBe 401
             statusOf(path) shouldNotBe 403
         }
@@ -93,7 +94,17 @@ class SecurityRulesTest(
     }
 
     "content security policy is sent by default" {
-        mockMvc.perform(get("/")).andReturn().response.getHeader("Content-Security-Policy") shouldStartWith "default-src 'none'"
+        mockMvc.perform(get("/")).andReturn().response.getHeader("Content-Security-Policy") shouldBe SecurityConfig.DEFAULT_CONTENT_SECURITY_POLICY
+        SecurityConfig.DEFAULT_CONTENT_SECURITY_POLICY shouldStartWith "default-src 'none';"
+        SecurityConfig.DEFAULT_CONTENT_SECURITY_POLICY shouldContain "form-action 'none'"
+    }
+
+    "security.txt is public and plain text" {
+        val response = mockMvc.perform(get("/.well-known/security.txt")).andReturn().response
+        response.status shouldBe 200
+        response.contentType shouldBe "text/plain;charset=UTF-8"
+        response.contentAsString shouldContain "Contact: https://github.com/TorMap/tormap/security/advisories/new"
+        mockMvc.perform(post("/.well-known/security.txt")).andReturn().response.status shouldBe 403
     }
 
     "swagger and openapi are not public by default" {
