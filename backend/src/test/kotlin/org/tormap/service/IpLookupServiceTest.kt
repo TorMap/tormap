@@ -3,14 +3,17 @@ package org.tormap.service
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
+import org.tormap.config.value.IpLookupConfig
 
-@SpringBootTest
-@ActiveProfiles("test")
-class IpLookupServiceTest(
-    private val ipLookupService: IpLookupService
-) : StringSpec({
+// Reads the databases that the build downloads into the resources, so no Spring context or database is needed
+class IpLookupServiceTest : StringSpec({
+    val ipLookupService = IpLookupService(
+        IpLookupConfig(
+            shouldCache = true,
+            locationDatabaseFile = "/ip-lookup/location.mmdb",
+            autonomousSystemDatabaseFile = "/ip-lookup/autonomous-system.mmdb",
+        )
+    )
     val hetznerIPAddress = "94.130.58.99"
     val hetznerAutonomousSystemNumber = 24940
     val germanyIsoCountryCode = "DE"
@@ -20,7 +23,9 @@ class IpLookupServiceTest(
     }
 
     "lookupAutonomousSystem" {
-        ipLookupService.lookupAutonomousSystem(hetznerIPAddress)?.autonomousSystemNumber() shouldBe hetznerAutonomousSystemNumber
+        val autonomousSystem = ipLookupService.lookupAutonomousSystem(hetznerIPAddress).shouldNotBeNull()
+        autonomousSystem.autonomousSystemNumber() shouldBe hetznerAutonomousSystemNumber
+        autonomousSystem.autonomousSystemOrganization().shouldNotBeNull()
     }
 
     "returns null for invalid IP address" {

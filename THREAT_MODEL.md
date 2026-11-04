@@ -136,7 +136,9 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   release age, actions pinned by SHA, Gradle wrapper validation, least-privilege workflow `permissions`, no
   `pull_request_target`, CodeQL weekly, Snyk PR checks, GitHub secret scanning with push protection. The vendored
   metrics-lib is copied from an upstream release tarball. Its checksum and local patches are listed in
-  `backend/src/main/java/org/torproject/VENDORED.md`.
+  `backend/src/main/java/org/torproject/VENDORED.md`. The IP lookup databases are downloaded at build time from the
+  immutable release pinned by `ipLookupDataVersion` in `backend/gradle.properties` (TorMap/ip-lookup-data, a mirror of
+  DB-IP Lite) and checked against that release's `SHA256SUMS`.
 
 ## Threat scenarios
 

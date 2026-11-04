@@ -1,5 +1,9 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.IOException
+import java.net.URI
+import java.security.MessageDigest
+import java.util.zip.GZIPInputStream
 
 group = "org.tormap"
 version = "4.0.0"
@@ -65,7 +69,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.flywaydb:flyway-database-postgresql")
 
-    // Read .mmdb (MaxMind) DB files for IP lookups https://maxmind.github.io/MaxMind-DB/
+    // Read .mmdb (MaxMind DB format) files for IP lookups https://maxmind.github.io/MaxMind-DB/
     implementation("com.maxmind.geoip2:geoip2:5.2.0")
 
     // Export metrics to New Relic via OTLP (https://micrometer.io/)
@@ -120,30 +124,65 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-// Extract the IP lookup databases from the zip archives in ip-lookup/ when the resources are built.
-// The archives are only opened at execution time, and the result is a generated resource directory.
-val ipLookupResources = layout.buildDirectory.dir("generated/ip-lookup-resources")
-interface InjectedArchiveOperations {
-    @get:Inject
-    val archiveOperations: ArchiveOperations
-}
-val unpackIpLookupDatabases = tasks.register<Sync>("unpackIpLookupDatabases") {
-    // A service instead of Project.zipTree, so the task does not reference the build script (configuration cache)
-    val archiveOperations = objects.newInstance<InjectedArchiveOperations>().archiveOperations
-    val archives = fileTree("ip-lookup") { include("*.zip") }
-    from(archives.elements.map { zips -> zips.map { archiveOperations.zipTree(it) } }) {
-        exclude("__MACOSX/**")
-        include("**/*.mmdb", "**/COPYRIGHT.txt", "**/LICENSE.txt")
-        // Flatten the directories inside the archives
-        eachFile { path = name }
-        rename(".*GeoLite2-ASN.*\\.mmdb", "autonomous-system.mmdb")
-        rename(".*dbip-city-lite.*\\.mmdb", "location.mmdb")
+// The IP lookup databases (DB-IP Lite, CC BY 4.0) are not stored in this repository. They are published monthly as
+// immutable releases of https://github.com/TorMap/ip-lookup-data and downloaded when the resources are built.
+// The release is pinned by ipLookupDataVersion in gradle.properties (updated by Renovate) and checked against its
+// SHA256SUMS. Override the source with -PipLookupDataUrl=<base URL> (e.g. a file: URL to build offline).
+abstract class DownloadIpLookupDatabases : DefaultTask() {
+    @get:Input
+    abstract val releaseVersion: Property<String>
+
+    @get:Input
+    abstract val baseUrl: Property<String>
+
+    @get:OutputDirectory
+    abstract val outputDirectory: DirectoryProperty
+
+    @TaskAction
+    fun download() {
+        val version = releaseVersion.get()
+        require(Regex("""\d{4}-\d{2}""").matches(version)) { "Invalid ipLookupDataVersion '$version'" }
+        val releaseUrl = "${baseUrl.get().trimEnd('/')}/$version"
+        val checksums = fetch("$releaseUrl/SHA256SUMS").decodeToString().lines()
+            .filter { it.isNotBlank() }
+            .associate { line -> line.trim().split(Regex("""\s+\*?""")).let { it[1] to it[0].lowercase() } }
+        val outputDir = outputDirectory.get().asFile
+        outputDir.deleteRecursively()
+        val targetDir = outputDir.resolve("ip-lookup").apply { mkdirs() }
+        mapOf(
+            "dbip-city-lite.mmdb.gz" to "location.mmdb",
+            "dbip-asn-lite.mmdb.gz" to "autonomous-system.mmdb",
+        ).forEach { (asset, target) ->
+            val bytes = fetch("$releaseUrl/$asset")
+            val expected = checksums[asset] ?: throw GradleException("$asset is missing in $releaseUrl/SHA256SUMS")
+            val actual = MessageDigest.getInstance("SHA-256").digest(bytes)
+                .joinToString("") { "%02x".format(it) }
+            if (actual != expected) throw GradleException("SHA-256 mismatch for $releaseUrl/$asset")
+            GZIPInputStream(bytes.inputStream()).use { input ->
+                targetDir.resolve(target).outputStream().use { input.copyTo(it) }
+            }
+        }
     }
-    includeEmptyDirs = false
-    into(ipLookupResources.map { it.dir("ip-lookup") })
+
+    // URLConnection follows the redirect to GitHub's asset storage and uses the JVM proxy settings
+    private fun fetch(url: String): ByteArray = try {
+        val connection = URI(url).toURL().openConnection()
+        connection.connectTimeout = 30_000
+        connection.readTimeout = 120_000
+        connection.getInputStream().use { it.readBytes() }
+    } catch (exception: IOException) {
+        throw GradleException("Could not download $url (IP lookup databases need network access once): $exception")
+    }
+}
+val ipLookupResources = layout.buildDirectory.dir("generated/ip-lookup-resources")
+val downloadIpLookupDatabases = tasks.register<DownloadIpLookupDatabases>("downloadIpLookupDatabases") {
+    releaseVersion = providers.gradleProperty("ipLookupDataVersion")
+    baseUrl = providers.gradleProperty("ipLookupDataUrl")
+        .orElse("https://github.com/TorMap/ip-lookup-data/releases/download")
+    outputDirectory = ipLookupResources
 }
 sourceSets.main {
-    resources.srcDir(files(ipLookupResources).builtBy(unpackIpLookupDatabases))
+    resources.srcDir(downloadIpLookupDatabases)
 }
 tasks.processResources {
     // The Lite map draws the same country borders and colors as the frontend, so the files are shared instead of copied
@@ -152,7 +191,7 @@ tasks.processResources {
     val legacyIpLookupDir = file("src/main/resources/ip-lookup")
     doFirst {
         check(!legacyIpLookupDir.exists()) {
-            "Delete $legacyIpLookupDir: the IP lookup databases are now extracted into the build directory."
+            "Delete $legacyIpLookupDir: the IP lookup databases are now downloaded into the build directory."
         }
     }
 }
