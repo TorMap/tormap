@@ -203,7 +203,7 @@ tasks.withType<Test> {
 
 jacoco {
     // Java 25 class files need JaCoCo 0.8.14 or later
-    toolVersion = "0.8.15"
+    toolVersion = "0.8.16"
 }
 
 // Writes build/reports/jacoco/test/html/index.html and an XML report for tools
