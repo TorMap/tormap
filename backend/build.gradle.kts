@@ -79,7 +79,7 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-otlp")
 
     // Reverse DNS lookups with dnsjava
-    implementation("dnsjava:dnsjava:3.7.0")
+    implementation("dnsjava:dnsjava:3.7.1")
 
     // Packages required by the vendored metrics-lib (org.torproject.descriptor in java module, see src/main/java/org/torproject/VENDORED.md)
     implementation("commons-codec:commons-codec:1.23.0")
