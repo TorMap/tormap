@@ -29,7 +29,7 @@ export default defineConfig(({mode}) => {
                 ],
             }),
             securityTxtFile(),
-            // Off unless VITE_LITE_ENABLED is "true", because the backend has to serve /lite/ first
+            // Off unless VITE_LITE_ENABLED is "true" (the default in .env), for backends that do not serve /lite/
             liteLink(env.VITE_LITE_ENABLED === "true" && env.VITE_BACKEND_API_URL
                 ? `${env.VITE_BACKEND_API_URL.replace(/\/+$/, "")}/lite/`
                 : undefined),

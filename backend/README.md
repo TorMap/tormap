@@ -48,9 +48,9 @@ the frontend's `util/aggregate-relays.ts`. A heatmap and countries colored by es
 map, and a timeline of relays per day (`/lite/timeline.png`) selects a day on click and lists days with an unusual
 number of relays. It links to the JavaScript frontend at `app.lite.full-version-url` (default
 `https://tormap.org`). The reverse proxy must forward `/lite` and `/static/` to the backend as well.
-With `VITE_LITE_ENABLED=true` (off by default), the frontend build links browsers without JavaScript to
+With `VITE_LITE_ENABLED=true` (the default), the frontend build links browsers without JavaScript to
 `${VITE_BACKEND_API_URL}/lite/` (a `<noscript>` link added by `frontend/plugins/lite-link.ts`, no automatic redirect)
-and links to Lite from its About dialog. Enable it only once the deployed backend serves `/lite/`.
+and links to Lite from its About dialog. Set it to `false` for a backend that does not serve `/lite/`.
 
 ## Requirements
 
