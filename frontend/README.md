@@ -28,10 +28,10 @@ If you want to test the frontend against a local backend, you can change the env
 in the `.env` file.
 
 `VITE_LITE_ENABLED=true` links to TorMap Lite (`/lite/` on the backend) from the About dialog and, for browsers without
-JavaScript, from the notice shown instead of the map. There is no automatic redirect. It is off by default, because the
-backend has to be deployed with Lite first. Without it, browsers without JavaScript only see a short notice. To try Lite locally, start the backend with `./gradlew bootRun`
+JavaScript, from the notice shown instead of the map. There is no automatic redirect. It is on by default; set it to
+`false` if your backend does not serve `/lite/` (backends before 4.1.0). Without it, browsers without JavaScript only see a short notice. To try Lite locally, start the backend with `./gradlew bootRun`
 and open `http://localhost:8080/lite/`. To also test the link, create `frontend/.env.local` with
-`VITE_BACKEND_API_URL=http://localhost:8080` and `VITE_LITE_ENABLED=true`, run `yarn start` and open
+`VITE_BACKEND_API_URL=http://localhost:8080`, run `yarn start` and open
 `http://localhost:3000` with JavaScript disabled.
 
 ## Config
