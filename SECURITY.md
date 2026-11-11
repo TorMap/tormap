@@ -36,7 +36,7 @@ the repository's Code scanning alerts:
 - [CodeQL](https://codeql.github.com/) (`.github/workflows/codeql.yml`): `security-and-quality` queries for
   Kotlin, TypeScript and GitHub Actions.
 - [Semgrep Community Edition](https://semgrep.dev/) (`.github/workflows/semgrep.yml`): Semgrep Registry rules for
-  Kotlin, TypeScript/React, GitHub Actions and Dockerfiles. Findings are also listed in the job summary and the
+  Kotlin, TypeScript/React, GitHub Actions and Dockerfiles. Findings are also listed in the job log and the
   `semgrep-results` artifact.
 
 [Snyk](https://snyk.io/) is used for dependency scanning (SCA). Pull requests are checked by the Snyk GitHub
