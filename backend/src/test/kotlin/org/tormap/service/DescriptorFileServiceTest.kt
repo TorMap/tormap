@@ -62,6 +62,16 @@ class DescriptorFileServiceTest(
         descriptorFileNames() shouldBe listOf(file.name)
     }
 
+    "skips a changed file again once it was processed again" {
+        // CollecTor keeps updating the archive tarball of the current month until the month is over
+        val file = writeDescriptorFile("server-descriptors-2024-03.tar")
+        service.saveProcessedFileReference(file, DescriptorType.ARCHIVE_RELAY_SERVER)
+        file.setLastModified(file.lastModified() + 60_000)
+        service.saveProcessedFileReference(file, DescriptorType.ARCHIVE_RELAY_SERVER)
+
+        processedFileRepository.findAll().single().lastModified shouldBe file.lastModified()
+    }
+
     "saving a processed file again updates its reference" {
         val file = writeDescriptorFile("2024-03-05-00-00-00-server-descriptors")
         service.saveProcessedFileReference(file, DescriptorType.ARCHIVE_RELAY_SERVER)
