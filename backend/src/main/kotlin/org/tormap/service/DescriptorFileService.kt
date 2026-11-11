@@ -51,12 +51,13 @@ class DescriptorFileService(
      */
     fun saveProcessedFileReference(descriptorFile: File, descriptorType: DescriptorType) {
         val descriptorsDescriptorFileId = DescriptorFileId(descriptorType, descriptorFile.name)
+        val lastModified = descriptorFile.lastModified()
         val descriptorsFile = processedFileRepository.findById(descriptorsDescriptorFileId).orElseGet {
-            ProcessedFile(
-                descriptorsDescriptorFileId,
-                descriptorFile.lastModified(),
-            )
+            ProcessedFile(descriptorsDescriptorFileId, lastModified)
         }
+        // A file that was processed before has changed since (e.g. the archive of the current month),
+        // so the new version must be stored or the file would be read again on every run
+        descriptorsFile.lastModified = lastModified
         descriptorsFile.processedAt = LocalDateTime.now()
         processedFileRepository.saveAndFlush(descriptorsFile)
     }
