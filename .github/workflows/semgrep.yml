@@ -2,8 +2,8 @@ name: semgrep
 
 # Semgrep Community Edition as a second SAST engine next to CodeQL: fast pattern rules for Kotlin, TypeScript/React,
 # GitHub Actions and Dockerfiles. Free, no login and no quota. Results go to Code scanning (SARIF, category
-# "semgrep"), to the job summary and log, and to the "semgrep-results" artifact, so agents without Code scanning
-# API access can read them too.
+# "semgrep"), to the job log (one line per finding) and to the "semgrep-results" artifact, so agents without Code
+# scanning API access can read them too.
 
 on:
   push:
@@ -38,6 +38,8 @@ jobs:
 
       # Rules come from the Semgrep Registry at scan time (Semgrep Rules License, so they are not vendored here).
       # Usage metrics are off. Findings don't fail the job: Code scanning shows new alerts on the pull request.
+      # --emacs prints one line per finding to the log (path:line:col:severity(rule):code:message), which is compact
+      # to read for agents without Code scanning access.
       - name: Scan
         run: >
           semgrep scan
@@ -48,12 +50,9 @@ jobs:
           --config p/react
           --config p/github-actions
           --config p/dockerfile
+          --emacs
           --sarif-output=semgrep.sarif
           --json-output=semgrep.json
-
-      - name: Summarize findings
-        if: ${{ !cancelled() && hashFiles('semgrep.json') != '' }}
-        run: python3 .github/scripts/semgrep-summary.py semgrep.json
 
       - name: Upload results artifact
         if: ${{ !cancelled() && hashFiles('semgrep.sarif') != '' }}
