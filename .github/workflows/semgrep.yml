@@ -1,0 +1,76 @@
+name: semgrep
+
+# Semgrep Community Edition as a second SAST engine next to CodeQL: fast pattern rules for Kotlin, TypeScript/React,
+# GitHub Actions and Dockerfiles. Free, no login and no quota. Results go to Code scanning (SARIF, category
+# "semgrep"), to the job summary and log, and to the "semgrep-results" artifact, so agents without Code scanning
+# API access can read them too.
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: '30 5 * * 1' # weekly, rule updates appear without code changes
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    container:
+      image: semgrep/semgrep:1.184.0@sha256:cc1b68266f267878b39739373ea9985b9a78e5d64497dd875c8de100b22695ed
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      # Rules come from the Semgrep Registry at scan time (Semgrep Rules License, so they are not vendored here).
+      # Usage metrics are off. Findings don't fail the job: Code scanning shows new alerts on the pull request.
+      - name: Scan
+        run: >
+          semgrep scan
+          --metrics=off
+          --config p/default
+          --config p/kotlin
+          --config p/typescript
+          --config p/react
+          --config p/github-actions
+          --config p/dockerfile
+          --sarif-output=semgrep.sarif
+          --json-output=semgrep.json
+
+      - name: Summarize findings
+        if: ${{ !cancelled() && hashFiles('semgrep.json') != '' }}
+        run: python3 .github/scripts/semgrep-summary.py semgrep.json
+
+      - name: Upload results artifact
+        if: ${{ !cancelled() && hashFiles('semgrep.sarif') != '' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: semgrep-results
+          path: |
+            semgrep.sarif
+            semgrep.json
+          retention-days: 30
+
+      # Pull requests from forks get a read-only token, their findings are in the summary and artifact
+      - name: Upload to Code scanning
+        if: >
+          !cancelled() && hashFiles('semgrep.sarif') != '' &&
+          (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep

@@ -1,0 +1,15 @@
+# Paths Semgrep skips. Only git-tracked files are scanned. This file replaces Semgrep's default ignore list.
+:include .gitignore
+
+# Vendored Tor metrics-lib (org.torproject.descriptor), not our code. CodeQL skips it too.
+backend/src/main/java/org/torproject/
+backend/src/test/java/org/torproject/
+
+# Gradle wrapper and Yarn release binaries
+backend/gradle/wrapper/
+frontend/.yarn/
+
+# Generated or minified files
+*.min.js
+*.map
+frontend/yarn.lock
