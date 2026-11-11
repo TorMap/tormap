@@ -39,8 +39,15 @@ def main() -> None:
     else:
         print("No Semgrep findings")
     if errors:
-        lines += ["", f"{len(errors)} scan error(s), see the job log."]
-        print(f"{len(errors)} scan error(s)")
+        lines += ["", f"{len(errors)} scan error(s), usually files that could not be fully parsed:", ""]
+        print(f"{len(errors)} scan error(s):")
+        for error in errors:
+            error_type = error.get("type")
+            if isinstance(error_type, list):  # e.g. ["PartialParsing", [locations]]
+                error_type = error_type[0]
+            text = f"{error.get('level', '')} {error_type} {error.get('path', '')}: {cell(error.get('message', ''))[:300]}"
+            lines.append(f"- {text}")
+            print(text)
 
     summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary_path:
