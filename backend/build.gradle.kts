@@ -224,16 +224,14 @@ tasks.bootRun {
     }
 }
 
-// Security scans with the Snyk CLI (needs `snyk` on PATH and a prior `snyk auth` or SNYK_TOKEN).
+// Dependency scan (SCA) with the Snyk CLI (needs `snyk` on PATH and a prior `snyk auth` or SNYK_TOKEN).
 // Extra CLI arguments can be passed with e.g. -PsnykArgs="--json".
-fun registerSnykTask(taskName: String, vararg snykCommand: String) = tasks.register<Exec>(taskName) {
+tasks.register<Exec>("snykTest") {
     group = "verification"
     workingDir = projectDir
     val extraArgs = providers.gradleProperty("snykArgs").map { it.split(" ").filter(String::isNotBlank) }.orElse(emptyList())
-    commandLine(listOf("snyk") + snykCommand + "--severity-threshold=high" + extraArgs.get())
+    commandLine(listOf("snyk", "test", "--severity-threshold=high") + extraArgs.get())
 }
-registerSnykTask("snykTest", "test")
-registerSnykTask("snykCode", "code", "test")
 
 // Mount point for the downloaded descriptors. Jib cannot set file ownership, so the empty directory is world-writable:
 // a fresh (named or anonymous) volume mounted there inherits this, and the non-root container user can write to it.

@@ -40,21 +40,19 @@ the repository's Code scanning alerts:
   `semgrep-results` artifact.
 
 [Snyk](https://snyk.io/) is used for dependency scanning (SCA). Pull requests are checked by the Snyk GitHub
-integration (PR status checks, configured in Snyk, no CI workflow involved). Snyk Code (SAST) is not used on pull
-requests because the free plan's monthly test quota is too small. Run the scans locally before opening a PR:
+integration (PR status checks, configured in Snyk, no CI workflow involved). Snyk Code (SAST) is not used, because the
+free plan's monthly test quota is too small for the number of pull requests. Run the dependency scan locally when
+dependencies change:
 
-| Part     | SCA (`snyk test`)                         | SAST (`snyk code test`)                  |
-|----------|-------------------------------------------|------------------------------------------|
-| Backend  | `cd backend && ./gradlew snykTest`        | `cd backend && ./gradlew snykCode`       |
-| Frontend | `cd frontend && yarn snyk:test`           | `cd frontend && yarn snyk:code`          |
+- Backend: `cd backend && ./gradlew snykTest`
+- Frontend: `cd frontend && yarn snyk:test`
 
 - Prerequisite: [install the Snyk CLI](https://docs.snyk.io/snyk-cli/install-or-update-the-snyk-cli) and run
   `snyk auth` once.
 - Findings of severity `high` or above fail the command. Unlike the PR checks, which only report issues introduced by
   the PR, the local commands report all issues. Extra CLI options can be appended:
   `yarn snyk:test --json` or `./gradlew snykTest -PsnykArgs="--json"`.
-- Run SCA whenever dependencies change. Snyk uploads dependency and source information to snyk.io. Local SAST runs
-  count against the same Snyk Code quota, so use them sparingly.
+- Run SCA whenever dependencies change. Snyk uploads dependency information to snyk.io.
 - For frontend dependency changes, also run `cd frontend && yarn npm audit --severity high` (add
   `--environment production` for runtime dependencies only).
 

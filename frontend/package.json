@@ -12,7 +12,6 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "snyk:test": "snyk test --severity-threshold=high",
-    "snyk:code": "snyk code test --severity-threshold=high",
     "smoke:load": "bash ./scripts/smoke-load.sh",
     "smoke:load:ci": "bash ./scripts/smoke-load.sh --skip-build",
     "smoke:pwa": "node ./scripts/smoke-pwa.mjs"
