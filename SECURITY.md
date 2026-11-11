@@ -30,9 +30,18 @@ Only the latest release receives security fixes. Releases and Docker images are 
 
 ## Security scanning
 
-[Snyk](https://snyk.io/) is used for dependency scanning (SCA) and static code analysis (SAST). Pull requests are
-checked by the Snyk GitHub integration (PR status checks, configured in Snyk, no CI workflow involved). Run the same
-scans locally before opening a PR:
+Static code analysis (SAST) runs in GitHub Actions on pull requests, pushes to `master` and weekly, with results in
+the repository's Code scanning alerts:
+
+- [CodeQL](https://codeql.github.com/) (`.github/workflows/codeql.yml`): `security-and-quality` queries for
+  Kotlin, TypeScript and GitHub Actions.
+- [Semgrep Community Edition](https://semgrep.dev/) (`.github/workflows/semgrep.yml`): Semgrep Registry rules for
+  Kotlin, TypeScript/React, GitHub Actions and Dockerfiles. Findings are also listed in the job summary and the
+  `semgrep-results` artifact.
+
+[Snyk](https://snyk.io/) is used for dependency scanning (SCA). Pull requests are checked by the Snyk GitHub
+integration (PR status checks, configured in Snyk, no CI workflow involved). Snyk Code (SAST) is not used on pull
+requests because the free plan's monthly test quota is too small. Run the scans locally before opening a PR:
 
 | Part     | SCA (`snyk test`)                         | SAST (`snyk code test`)                  |
 |----------|-------------------------------------------|------------------------------------------|
@@ -44,7 +53,8 @@ scans locally before opening a PR:
 - Findings of severity `high` or above fail the command. Unlike the PR checks, which only report issues introduced by
   the PR, the local commands report all issues. Extra CLI options can be appended:
   `yarn snyk:test --json` or `./gradlew snykTest -PsnykArgs="--json"`.
-- Run SCA whenever dependencies change. Snyk uploads dependency and source information to snyk.io.
+- Run SCA whenever dependencies change. Snyk uploads dependency and source information to snyk.io. Local SAST runs
+  count against the same Snyk Code quota, so use them sparingly.
 - For frontend dependency changes, also run `cd frontend && yarn npm audit --severity high` (add
   `--environment production` for runtime dependencies only).
 
