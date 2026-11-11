@@ -12,7 +12,6 @@ import org.tormap.util.logger
 import org.torproject.descriptor.DescriptorCollector
 import org.torproject.descriptor.index.DescriptorIndexCollector
 import java.io.File
-import java.util.concurrent.ConcurrentHashMap
 
 
 /**
@@ -31,15 +30,8 @@ class DescriptorCoordinationService(
 ) {
     private val logger = logger()
     private val descriptorCollector: DescriptorCollector = DescriptorIndexCollector()
-    private val runningApiPaths = ConcurrentHashMap.newKeySet<String>()
 
     fun collectAndProcessDescriptors(apiPath: String, descriptorType: DescriptorType) {
-        // The scheduled jobs are @Async, so a job starts again after its delay even if the previous run
-        // (e.g. a full archive import of more than 12 hours) is still going. A second run would repeat its work.
-        if (!runningApiPaths.add(apiPath)) {
-            logger.warn("Skipping descriptors from API path: {}, the previous run is still going", apiPath)
-            return
-        }
         try {
             logger.info("... Collecting descriptors from API path: $apiPath")
             collectDescriptorsFromRemoteServer(apiPath, descriptorType.isRecent())
@@ -50,8 +42,6 @@ class DescriptorCoordinationService(
             logger.info("Finished processing descriptors from API path: $apiPath")
         } catch (exception: Exception) {
             logger.error("Could not collect or process descriptors from API path: {}! {}", apiPath, exception.message)
-        } finally {
-            runningApiPaths.remove(apiPath)
         }
     }
 

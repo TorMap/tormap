@@ -12,8 +12,6 @@ import org.torproject.descriptor.Descriptor
 import java.io.File
 import java.nio.file.Files
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 class DescriptorCoordinationServiceTest : StringSpec({
     lateinit var relayDetailsUpdateService: RelayDetailsUpdateService
@@ -162,34 +160,6 @@ class DescriptorCoordinationServiceTest : StringSpec({
 
         verify { relayLocationRepository.flush() }
         verify { descriptorFileService.saveProcessedFileReference(file, DescriptorType.RECENT_RELAY_CONSENSUS) }
-    }
-
-    "collectAndProcessDescriptors skips a run while the previous run of the same path is still going" {
-        val started = CountDownLatch(1)
-        val release = CountDownLatch(1)
-        every { descriptorFileService.getDescriptorDiskReader("/archive", any()) } answers {
-            started.countDown()
-            release.await(10, TimeUnit.SECONDS)
-            mutableListOf()
-        }
-        every { descriptorFileService.getDescriptorDiskReader("/recent", any()) } returns mutableListOf()
-
-        val firstRun = CompletableFuture.runAsync {
-            service.collectAndProcessDescriptors("/archive", DescriptorType.ARCHIVE_RELAY_SERVER)
-        }
-        started.await(10, TimeUnit.SECONDS)
-        service.collectAndProcessDescriptors("/archive", DescriptorType.ARCHIVE_RELAY_SERVER)
-        // Other paths still run
-        service.collectAndProcessDescriptors("/recent", DescriptorType.RECENT_RELAY_SERVER)
-        release.countDown()
-        firstRun.get(10, TimeUnit.SECONDS)
-
-        verify(exactly = 1) { descriptorFileService.getDescriptorDiskReader("/archive", any()) }
-        verify(exactly = 1) { descriptorFileService.getDescriptorDiskReader("/recent", any()) }
-
-        // Once the first run is done, the next one runs again
-        service.collectAndProcessDescriptors("/archive", DescriptorType.ARCHIVE_RELAY_SERVER)
-        verify(exactly = 2) { descriptorFileService.getDescriptorDiskReader("/archive", any()) }
     }
 
     "collectAndProcessDescriptors does not throw if processing fails" {

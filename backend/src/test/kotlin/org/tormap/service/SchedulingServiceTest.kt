@@ -3,25 +3,36 @@ package org.tormap.service
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean
+import org.springframework.core.io.ClassPathResource
+import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.Scheduled
 import org.tormap.config.value.DescriptorConfig
 import org.tormap.database.entity.DescriptorType
-import java.util.concurrent.Future
 
 class SchedulingServiceTest : StringSpec({
-    // SchedulingService is annotated with @Async, which rejects other return types at runtime
-    "all scheduled methods return void or Future" {
+    // With @Async, fixedDelay would no longer wait for the previous run and long runs would overlap
+    "scheduled jobs are not async" {
         val scheduledMethods = SchedulingService::class.java.declaredMethods
             .filter { it.isAnnotationPresent(Scheduled::class.java) }
         scheduledMethods.shouldNotBeEmpty()
 
-        scheduledMethods
-            .filterNot { it.returnType == Void.TYPE || Future::class.java.isAssignableFrom(it.returnType) }
-            .map { "${it.name}: ${it.returnType}" }
-            .shouldBeEmpty()
+        SchedulingService::class.java.isAnnotationPresent(Async::class.java) shouldBe false
+        scheduledMethods.filter { it.isAnnotationPresent(Async::class.java) }.shouldBeEmpty()
+    }
+
+    "the scheduler has a thread for each job" {
+        val scheduledJobs = SchedulingService::class.java.declaredMethods
+            .count { it.isAnnotationPresent(Scheduled::class.java) }
+        val poolSize = YamlPropertiesFactoryBean().apply { setResources(ClassPathResource("application.yml")) }
+            .getObject()!!
+            .getProperty("spring.task.scheduling.pool.size")
+
+        poolSize!!.toInt() shouldBe scheduledJobs
     }
 
     "each scheduled method starts its job" {

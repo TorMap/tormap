@@ -101,6 +101,13 @@ server:
         max-http-form-post-size: 1048576 # 1 MiB
         max-swallow-size: 1048576       # 1 MiB
 spring:
+    task:
+        scheduling:
+            # One thread per @Scheduled job in SchedulingService, so the jobs run in parallel.
+            # Each job still waits for its own previous run to finish (fixedDelay).
+            pool:
+                size: 8
+            thread-name-prefix: scheduling-
     datasource:
         url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/postgres}
         username: ${SPRING_DATASOURCE_USERNAME:postgres}
