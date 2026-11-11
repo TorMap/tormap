@@ -1,6 +1,5 @@
 package org.tormap.service
 
-import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.tormap.config.value.DescriptorConfig
@@ -9,12 +8,12 @@ import java.util.concurrent.TimeUnit
 
 
 /**
- * This scheduler sets reoccurring events to collect and process data about Tor relays
- * With the @Async class annotation all methods run in parallel on separate threads if available.
- * Spring only allows void or Future return types for @Async methods, so don't return a delegate's result.
+ * This scheduler sets reoccurring events to collect and process data about Tor relays.
+ * The jobs run in parallel on the scheduler's thread pool (spring.task.scheduling.pool.size, one thread per job).
+ * Don't make the jobs @Async: fixedDelay then counts from the async hand-off instead of the end of a run,
+ * and a run that takes longer than its delay (e.g. a full archive import) gets a second, overlapping run.
  */
 @Service
-@Async
 class SchedulingService(
     private val descriptorConfig: DescriptorConfig,
     private val descriptorCoordinationService: DescriptorCoordinationService,
