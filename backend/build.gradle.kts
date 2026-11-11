@@ -84,9 +84,9 @@ dependencies {
     // Packages required by the vendored metrics-lib (org.torproject.descriptor in java module, see src/main/java/org/torproject/VENDORED.md)
     implementation("commons-codec:commons-codec:1.23.0")
     implementation("org.apache.commons:commons-compress:1.28.0")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.4")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.22.4")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.23")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.23.0")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.23.0")
     implementation("org.slf4j:slf4j-api") // SLF4J 2 (Boot-managed): required by Logback 1.5; compatible with metrics-lib
     implementation("org.tukaani:xz:1.12")
 
