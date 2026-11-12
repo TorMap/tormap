@@ -55,9 +55,13 @@ object LitePage {
     // Like the frontend, estimates based on fewer relays get a note
     private const val LOW_ESTIMATE_FRACTION = 30
 
-    fun render(model: LitePageModel): String {
+    fun render(model: LitePageModel, canonicalUrl: String? = null): String {
         val view = model.view
-        return layout("TorMap Lite" + (view.day?.let { " - $it" } ?: ""), view, model.fullVersionUrl) {
+        val description = view.day?.let {
+            "World map of the ${model.totalRelayCount} Tor relays on $it, grouped by family, autonomous system or " +
+                "country. TorMap Lite works without JavaScript and covers every day since ${model.firstDay ?: it}."
+        }
+        return layout("TorMap Lite" + (view.day?.let { " - $it" } ?: ""), view, model.fullVersionUrl, description, canonicalUrl) {
             model.notice?.let { tag("p", it, "class" to "notice", "role" to "status") }
             tag("form", "method" to "get", "action" to PATH) {
                 dayControls(model)
@@ -94,12 +98,22 @@ object LitePage {
     /**
      * The frame of every Lite page: header with the note about the JavaScript map, the content and the footer
      */
-    fun layout(title: String, view: LiteView, fullVersionUrl: String, content: Html.() -> Unit): String = Html.document {
+    fun layout(
+        title: String,
+        view: LiteView,
+        fullVersionUrl: String,
+        description: String? = null,
+        /** The absolute URL of an indexable page (see [LiteIndexing]), null for all other pages */
+        canonicalUrl: String? = null,
+        content: Html.() -> Unit,
+    ): String = Html.document {
         tag("html", "lang" to "en") {
             tag("head") {
                 tag("meta", "charset" to "utf-8")
                 tag("meta", "name" to "viewport", "content" to "width=device-width, initial-scale=1")
                 tag("title", title)
+                description?.let { tag("meta", "name" to "description", "content" to it) }
+                canonicalUrl?.let { tag("link", "rel" to "canonical", "href" to it) }
                 tag("link", "rel" to "stylesheet", "href" to STYLESHEET_PATH)
                 tag("link", "rel" to "icon", "href" to "/favicon.ico")
             }
