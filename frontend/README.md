@@ -34,6 +34,10 @@ and open `http://localhost:8080/lite/`. To also test the link, create `frontend/
 `VITE_BACKEND_API_URL=http://localhost:8080`, run `yarn start` and open
 `http://localhost:3000` with JavaScript disabled.
 
+`VITE_SITE_URL` is the public URL of the frontend (default `https://tormap.org`, no trailing slash). The build uses it
+for the canonical and social media links in `index.html` and generates `robots.txt`, `sitemap.xml` and `llms.txt` with
+it. Set it to your own URL if you self-host. The app has a single page, so unknown paths get `404.html` (status 404).
+
 ## Config
 
 The main `frontend` config is located at `frontend/src/config.ts`. Further environment options like enable/disable

@@ -8,34 +8,45 @@
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
-    <!--
-  manifest.json provides metadata used when your web app is installed on a
-  user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
--->
     <link rel="manifest" href="/manifest.json"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>TorMap: world map of Tor relays since 2007</title>
     <meta
             name="description"
-            content="TorMap visualizes the location of Tor relays on a world map. View details about any relay since October 2007."
+            content="TorMap shows where Tor relays are hosted on a world map, for any day since October 2007. Group relays by family, autonomous system or country and view details about any relay."
     />
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <meta property="og:title" content="TorMap"/>
+    <link rel="canonical" href="%VITE_SITE_URL%/"/>
+    <meta property="og:title" content="TorMap: world map of Tor relays since 2007"/>
     <meta property="og:type" content="website"/>
-    <meta property="og:url" content=""/>
-    <meta property="og:image" content="/og-image.png"/>
-    <meta property="og:description" content="TorMap visualizes the location of Tor relays on a world map. View details about any relay since October 2007." />
-    <!--
-      Notice the use of  in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
+    <meta property="og:site_name" content="TorMap"/>
+    <meta property="og:url" content="%VITE_SITE_URL%/"/>
+    <meta property="og:image" content="%VITE_SITE_URL%/og-image.png"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    <meta property="og:image:alt" content="Tor relays shown as colored dots on a dark world map"/>
+    <meta property="og:description" content="TorMap shows where Tor relays are hosted on a world map, for any day since October 2007."/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <!-- Structured data for search engines (https://schema.org). A data block, which browsers do not execute. -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "TorMap",
+            "url": "%VITE_SITE_URL%/",
+            "description": "TorMap shows where Tor relays are hosted on a world map, for any day since October 2007.",
+            "applicationCategory": "ReferenceApplication",
+            "operatingSystem": "Any",
+            "browserRequirements": "Requires JavaScript. TorMap Lite works without it.",
+            "isAccessibleForFree": true,
+            "image": "%VITE_SITE_URL%/og-image.png",
+            "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+            "author": {"@type": "Person", "name": "Julius Henke", "url": "https://github.com/JuliusHenke"},
+            "sameAs": ["https://github.com/TorMap/tormap"]
+        }
+    </script>
     <link rel="preconnect" href="https://basemaps.cartocdn.com">
     <link rel="preconnect" href="https://api.tormap.org">
 
-    <title>TorMap</title>
     <!-- Shown until the app has rendered, so there is something to see while the scripts load -->
     <style>
         #splash {
@@ -49,13 +60,51 @@
             font: 300 2rem/1 Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             letter-spacing: .3em;
         }
+        #about {
+            max-width: 46rem;
+            margin: 0 auto;
+            padding: 1rem;
+            font: 1rem/1.5 Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
     </style>
     <!-- Without JavaScript the splash screen would never go away and cover the message below -->
     <noscript><style>#splash { display: none; }</style></noscript>
 </head>
 <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"><div id="splash" role="status">TorMap</div></div>
+    <!-- React replaces everything in #root. Until then, and without JavaScript, the description below is the page's
+         content: search engines, AI crawlers (which do not run JavaScript) and visitors without JavaScript read it. -->
+    <div id="root">
+        <div id="splash" role="status">TorMap</div>
+        <main id="about">
+            <h1>TorMap: world map of Tor relays since 2007</h1>
+            <noscript>You need to enable JavaScript to run this app.</noscript>
+            <p>
+                TorMap shows where the public relays of the <a href="https://www.torproject.org/">Tor network</a> are
+                hosted, on a world map and for any day since October 2007. It is free, open source and has no ads.
+            </p>
+            <h2>What you can explore</h2>
+            <ul>
+                <li>The whole history: pick any day since October 2007, or follow the number of relays over time on the timeline.</li>
+                <li>Grouping: group relays by family, autonomous system (AS), country or coordinates, or show a density heatmap.</li>
+                <li>Filters: show exit, guard or other relays, require relay flags, or only show the relays with the highest consensus weight.</li>
+                <li>Tor users per country: color countries by the estimated number of Tor users on that day.</li>
+                <li>Relay details: search any relay by nickname or fingerprint and see its descriptor data, AS and confirmed family members.</li>
+            </ul>
+            <h2>Data sources</h2>
+            <p>
+                TorMap processes the relay descriptors from the Tor Project's
+                <a href="https://metrics.torproject.org/collector.html">CollecTor</a> archive and the user estimates
+                from <a href="https://metrics.torproject.org/">Tor Metrics</a>. Each relay's location and autonomous
+                system come from IP geolocation data by <a href="https://db-ip.com">DB-IP</a>. New data is added every
+                day.
+            </p>
+            <h2>More</h2>
+            <ul>
+                <li><a href="https://github.com/TorMap/tormap">Source code on GitHub</a> (GPL-3.0), with Docker images for self-hosting</li>
+                <li><a href="https://github.com/sponsors/JuliusHenke">Support TorMap via GitHub Sponsors</a></li>
+            </ul>
+        </main>
+    </div>
     <script type="module" src="./src/index.tsx"></script>
 </body>
 </html>
