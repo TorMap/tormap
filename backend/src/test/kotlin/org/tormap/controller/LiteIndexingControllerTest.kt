@@ -11,7 +11,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 
-@SpringBootTest(properties = ["app.lite.public-url=https://api.example.org/"])
+@SpringBootTest(properties = ["app.lite.search-indexing=true", "app.public-url=https://api.example.org/"])
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class LiteIndexingControllerTest(

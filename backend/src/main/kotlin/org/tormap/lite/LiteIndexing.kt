@@ -13,20 +13,26 @@ object LiteIndexing {
     private val plainUrl = Regex("^https?://[^\\s\"'<>]+$")
 
     /**
-     * Validates the configured public URL of the backend and removes a trailing slash.
-     * @return null if no URL is configured, which keeps the whole backend out of search engines
+     * The base URL of the indexable pages, from `app.lite.search-indexing` and `app.public-url`
+     * @return null if indexing is off, which keeps the whole backend out of search engines
+     * @throws IllegalStateException if indexing is on without a public URL, so a half-configured deployment fails
+     * at startup instead of silently staying out of search engines
+     * @throws IllegalArgumentException if the public URL is not a plain http(s) URL
      */
-    fun publicUrl(configured: String?): String? {
-        val url = configured?.trim()?.trimEnd('/')?.takeIf { it.isNotEmpty() } ?: return null
+    fun indexedUrl(searchIndexing: Boolean, publicUrl: String?): String? {
+        if (!searchIndexing) return null
+        val url = publicUrl?.trim()?.trimEnd('/')?.takeIf { it.isNotEmpty() }
+            ?: error("app.lite.search-indexing (TORMAP_LITE_SEARCH_INDEXING) needs app.public-url (TORMAP_PUBLIC_URL)")
         require(plainUrl.matches(url)) { "Invalid public URL: $url" }
         return url
     }
 
     /**
      * robots.txt (RFC 9309). The longest matching rule wins, so `/lite/as/123` is allowed and `/lite/as/123?day=…`
-     * is not. Without a public URL nothing may be crawled, e.g. on self-hosted instances.
+     * is not. Without indexing nothing may be crawled, e.g. on self-hosted instances.
+     * @param indexedUrl - See [indexedUrl]
      */
-    fun robotsTxt(publicUrl: String?): String = if (publicUrl == null) {
+    fun robotsTxt(indexedUrl: String?): String = if (indexedUrl == null) {
         "User-agent: *\nDisallow: /\n"
     } else {
         listOf(
@@ -37,7 +43,7 @@ object LiteIndexing {
             "Allow: $SITEMAP_PATH$",
             "Disallow: /",
             "",
-            "Sitemap: $publicUrl$SITEMAP_PATH",
+            "Sitemap: $indexedUrl$SITEMAP_PATH",
             "",
         ).joinToString("\n")
     }

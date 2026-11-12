@@ -7,11 +7,11 @@ import io.kotest.matchers.string.shouldContain
 import java.time.LocalDate
 
 class LiteIndexingTest : StringSpec({
-    "without a public URL nothing may be crawled" {
+    "without indexing nothing may be crawled" {
         LiteIndexing.robotsTxt(null) shouldBe "User-agent: *\nDisallow: /\n"
     }
 
-    "with a public URL only the start page, the autonomous system pages and the sitemap may be crawled" {
+    "with indexing only the start page, the autonomous system pages and the sitemap may be crawled" {
         LiteIndexing.robotsTxt("https://api.example.org") shouldBe """
             User-agent: *
             Allow: /lite/$
@@ -25,12 +25,14 @@ class LiteIndexingTest : StringSpec({
         """.trimIndent()
     }
 
-    "the public URL is validated and loses its trailing slash" {
-        LiteIndexing.publicUrl(" https://api.example.org/ ") shouldBe "https://api.example.org"
-        LiteIndexing.publicUrl("") shouldBe null
-        LiteIndexing.publicUrl(null) shouldBe null
-        shouldThrow<IllegalArgumentException> { LiteIndexing.publicUrl("https://api.example.org/\"><x") }
-        shouldThrow<IllegalArgumentException> { LiteIndexing.publicUrl("javascript:alert(1)") }
+    "indexing needs a valid public URL, which loses its trailing slash" {
+        LiteIndexing.indexedUrl(true, " https://api.example.org/ ") shouldBe "https://api.example.org"
+        LiteIndexing.indexedUrl(false, "https://api.example.org") shouldBe null
+        LiteIndexing.indexedUrl(false, "") shouldBe null
+        shouldThrow<IllegalStateException> { LiteIndexing.indexedUrl(true, "") }
+        shouldThrow<IllegalStateException> { LiteIndexing.indexedUrl(true, null) }
+        shouldThrow<IllegalArgumentException> { LiteIndexing.indexedUrl(true, "https://api.example.org/\"><x") }
+        shouldThrow<IllegalArgumentException> { LiteIndexing.indexedUrl(true, "javascript:alert(1)") }
     }
 
     "the sitemap lists the start page and each autonomous system once" {
