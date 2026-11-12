@@ -11,15 +11,17 @@ import java.nio.charset.StandardCharsets
 import java.time.Duration
 
 /**
- * Serves robots.txt. Crawlers may only index the Lite pages listed by [LiteIndexing], and only if a public URL is
- * configured. The JSON API is never crawled.
+ * Serves robots.txt. Crawlers may only index the Lite pages listed by [LiteIndexing], and only if
+ * `app.lite.search-indexing` is on. The JSON API is never crawled.
  */
 @RestController
 class RobotsTxtController(
-    @param:Value("\${app.lite.public-url:}")
+    @param:Value("\${app.lite.search-indexing:false}")
+    searchIndexing: Boolean,
+    @param:Value("\${app.public-url:}")
     publicUrl: String,
 ) {
-    private val body = LiteIndexing.robotsTxt(LiteIndexing.publicUrl(publicUrl))
+    private val body = LiteIndexing.robotsTxt(LiteIndexing.indexedUrl(searchIndexing, publicUrl))
 
     @GetMapping(path = ["/robots.txt"])
     fun robotsTxt(): ResponseEntity<String> =

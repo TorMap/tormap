@@ -1,4 +1,7 @@
 app:
+    # Where this backend is publicly reachable, without trailing slash, e.g. https://api.tormap.org. Used for absolute
+    # URLs such as the sitemap and canonical links.
+    public-url: ${TORMAP_PUBLIC_URL:}
     http:
         cache:
             public:
@@ -13,10 +16,10 @@ app:
     lite:
         # The JavaScript frontend, linked from the Lite pages (/lite/) for browsers with JavaScript
         full-version-url: https://tormap.org
-        # Public URL of this backend, e.g. https://api.tormap.org. If set, robots.txt lets search engines and AI crawlers
-        # index the Lite start page and the autonomous system pages, listed in /lite/sitemap.xml. Empty keeps the whole
-        # backend out of search engines, which suits most self-hosted instances.
-        public-url: ${TORMAP_LITE_PUBLIC_URL:}
+        # Lets search engines and AI crawlers index the Lite start page and the autonomous system pages, listed in
+        # /lite/sitemap.xml (see LiteIndexing). Off keeps the whole backend out of search engines, which suits most
+        # self-hosted instances. Needs app.public-url.
+        search-indexing: ${TORMAP_LITE_SEARCH_INDEXING:false}
 descriptor:
     apiBaseURL: https://collector.torproject.org
     localDownloadDirectory: tormap-data/descriptors
