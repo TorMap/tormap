@@ -48,6 +48,10 @@ the frontend's `util/aggregate-relays.ts`. A heatmap and countries colored by es
 map, and a timeline of relays per day (`/lite/timeline.png`) selects a day on click and lists days with an unusual
 number of relays. It links to the JavaScript frontend at `app.lite.full-version-url` (default
 `https://tormap.org`). The reverse proxy must forward `/lite` and `/static/` to the backend as well.
+`robots.txt` keeps crawlers away from the whole backend unless `TORMAP_LITE_PUBLIC_URL` (`app.lite.public-url`) is set
+to the backend's public URL. Then search engines and AI crawlers may index the Lite start page and the autonomous
+system pages without a query string, listed in `/lite/sitemap.xml` (see `lite/LiteIndexing.kt`); everything else
+stays disallowed so crawlers can't make the backend render every day and view.
 With `VITE_LITE_ENABLED=true` (the default), the frontend build links browsers without JavaScript to
 `${VITE_BACKEND_API_URL}/lite/` (a `<noscript>` link added by `frontend/plugins/lite-link.ts`, no automatic redirect)
 and links to Lite from its About dialog. Set it to `false` for a backend that does not serve `/lite/`.
@@ -129,6 +133,7 @@ It is recommended to set following production environment variables via a secret
 
 - `TORMAP_DATABASE_PASSWORD` - The database password (required, there is no default outside the `dev` profile)
 - `TORMAP_ADMIN_PASSWORD` - Optionally set admin password for accessing actuator endpoints
+- `TORMAP_LITE_PUBLIC_URL` - Public URL of the backend (e.g. `https://api.tormap.org`) to let search engines index the main Lite pages, unset by default
 - `NEW_RELIC_INGEST_KEY` - Export metrics to New Relic (EU region) via OTLP, see `management.otlp.metrics.export` in `application.yml`
 
 ### IP lookups

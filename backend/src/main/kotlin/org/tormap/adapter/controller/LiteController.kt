@@ -21,6 +21,7 @@ import org.tormap.lite.ClickMode
 import org.tormap.lite.CountryMeta
 import org.tormap.lite.Grouping
 import org.tormap.lite.LiteAggregation
+import org.tormap.lite.LiteIndexing
 import org.tormap.lite.Ranking
 import org.tormap.lite.RankingRow
 import org.tormap.lite.LiteMapRenderer
@@ -57,7 +58,12 @@ class LiteController(
     cacheManager: CacheManager,
     @param:Value("\${app.lite.full-version-url:https://tormap.org}")
     private val fullVersionUrl: String,
+    @param:Value("\${app.lite.public-url:}")
+    publicUrl: String,
 ) {
+    /** Set if search engines may index the pages listed by [LiteIndexing] */
+    private val publicUrl: String? = LiteIndexing.publicUrl(publicUrl)
+
     private val mapImageCache: Cache = requireNotNull(cacheManager.getCache(CacheConfig.LITE_MAP_IMAGES))
 
     // Rendering takes CPU time, so only a few images are rendered at once and further requests wait briefly
@@ -130,7 +136,8 @@ class LiteController(
             countryUsage = if (shownView.countryUsage) usageOf(day) else null,
             countryName = countryMeta::name,
         )
-        return html(LitePage.render(model))
+        val canonicalUrl = publicUrl?.takeIf { parameters.isEmpty() }?.let { it + LitePage.PATH }
+        return html(LitePage.render(model, canonicalUrl))
     }
 
     @GetMapping("${LitePage.RELAY_PATH}{id}")
@@ -160,7 +167,19 @@ class LiteController(
         // The name is taken from the details of one relay instead of grouping all relays of the month
         val name = relays.firstNotNullOfOrNull { it.detailsId }
             ?.let { relayDetailsRepository.findById(it).orElse(null)?.autonomousSystemName }
-        return html(LiteRelayPages.renderAutonomousSystem(number, name, relays, view, fullVersionUrl()))
+        val canonicalUrl = publicUrl?.takeIf { parameters.isEmpty() }?.let { "$it${LitePage.AUTONOMOUS_SYSTEM_PATH}$number" }
+        return html(LiteRelayPages.renderAutonomousSystem(number, name, relays, view, fullVersionUrl(), canonicalUrl))
+    }
+
+    /** The pages that search engines may index, only served if a public URL is configured */
+    @GetMapping(LiteIndexing.SITEMAP_PATH)
+    fun sitemap(): ResponseEntity<String> {
+        val url = publicUrl ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+        val day = availableDays().lastOrNull()
+        val autonomousSystems = relaysOf(day).mapNotNull { it.asNumber }
+        return ResponseEntity.ok()
+            .contentType(MediaType(MediaType.APPLICATION_XML, StandardCharsets.UTF_8))
+            .body(LiteIndexing.sitemapXml(url, day, autonomousSystems))
     }
 
     @GetMapping(LitePage.SEARCH_PATH)

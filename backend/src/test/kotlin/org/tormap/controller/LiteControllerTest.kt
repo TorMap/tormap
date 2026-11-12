@@ -37,6 +37,12 @@ class LiteControllerTest(
         html.contains("<script") shouldBe false
     }
 
+    "without a public URL nothing is indexed" {
+        mockMvc.perform(get("/robots.txt")).andReturn().response.contentAsString shouldBe "User-agent: *\nDisallow: /\n"
+        mockMvc.perform(get("/lite/sitemap.xml")).andReturn().response.status shouldBe 404
+        mockMvc.perform(get("/lite/")).andReturn().response.contentAsString shouldNotContain "rel=\"canonical\""
+    }
+
     "/lite redirects to /lite/" {
         val response = mockMvc.perform(get("/lite")).andReturn().response
         response.status shouldBe 301
