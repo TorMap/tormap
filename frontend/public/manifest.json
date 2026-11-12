@@ -2,7 +2,7 @@
     "id": "/",
     "name": "TorMap",
     "short_name": "TorMap",
-    "description": "TorMap visualizes the location of Tor relays on a world map. View details about any relay since October 2007.",
+    "description": "TorMap shows where Tor relays are hosted on a world map, for any day since October 2007.",
     "start_url": "/",
     "scope": "/",
     "icons": [
