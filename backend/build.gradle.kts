@@ -6,7 +6,7 @@ import java.security.MessageDigest
 import java.util.zip.GZIPInputStream
 
 group = "org.tormap"
-version = "4.1.0"
+version = "4.2.1"
 java.sourceCompatibility = JavaVersion.VERSION_25
 
 plugins {
