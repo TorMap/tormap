@@ -13,6 +13,8 @@ on:
 jobs:
   backend_docker:
     runs-on: ubuntu-latest
+    # Holds the Docker Hub secrets; its deployment rules allow only master and v* tags
+    environment: docker-hub
     permissions:
       contents: read
     steps:
@@ -21,18 +23,9 @@ jobs:
           persist-credentials: false
 
       - name: Check that the tag matches the project versions
-        # A v* tag pushes images named after the versions in build.gradle.kts (backend) and the tag (frontend).
-        # Stop before pushing anything if they differ, so a release tag never overwrites an older image.
+        # Stop before pushing anything if they differ, so a release tag never overwrites an older image
         if: github.ref_type == 'tag'
-        run: |
-          backend_version=$(sed -n 's/^version = "\(.*\)"$/\1/p' backend/build.gradle.kts)
-          frontend_version=$(jq -r .version frontend/package.json)
-          for v in "$backend_version" "$frontend_version"; do
-            if [[ "v$v" != "$GITHUB_REF_NAME" ]]; then
-              echo "::error::Tag $GITHUB_REF_NAME does not match backend version $backend_version (backend/build.gradle.kts) and frontend version $frontend_version (frontend/package.json). Bump both versions on master before tagging."
-              exit 1
-            fi
-          done
+        run: .github/scripts/check-release-version.sh "$GITHUB_REF_NAME"
 
       - name: Set up JDK 25
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
