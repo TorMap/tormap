@@ -30,7 +30,7 @@ Browser ──HTTPS──> Frontend (static)            Tor Collector (HTTPS, in
 | Service availability                 | The main security property: public API, scheduler, DB. Low-effort DoS matters.  |
 | Data integrity                       | Correct relay, family and location data. Users draw conclusions about Tor.      |
 | Actuator admin plane                 | Log file, thread dumps, recent HTTP exchanges, metrics, request mappings, cache eviction.             |
-| Secrets                              | `TORMAP_ADMIN_PASSWORD`, DB password, `NEW_RELIC_INGEST_KEY`, CI secrets (Docker Hub, Firebase). |
+| Secrets                              | `TORMAP_ADMIN_PASSWORD`, DB password, `NEW_RELIC_INGEST_KEY`, CI secrets (Docker Hub, Firebase, release deploy key). |
 | Host and volume                      | `/tormap-data` (tens of GB of descriptors), log directory.                       |
 | Release artifacts                    | `tormap/backend` and `tormap/frontend` images, tormap.org frontend.             |
 
@@ -139,6 +139,11 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   `backend/src/main/java/org/torproject/VENDORED.md`. The IP lookup databases are downloaded at build time from the
   immutable release pinned by `ipLookupDataVersion` in `backend/gradle.properties` (TorMap/ip-lookup-data, a mirror of
   DB-IP Lite) and checked against that release's `SHA256SUMS`.
+- Releases: only the Release workflow pushes `v*` tags and version bumps, with a deploy key kept in the `release`
+  environment (master only). Rulesets let only deploy keys create, move or delete `v*` tags. The Docker Hub secrets
+  live in the `docker-hub` environment (master and `v*` tags only), so a workflow on another branch can't read them.
+  The Docker workflows refuse a tag that doesn't match both project versions, and the frontend image carries build
+  provenance and an SBOM.
 
 ## Threat scenarios
 

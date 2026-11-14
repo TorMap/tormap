@@ -1,0 +1,108 @@
+name: Release
+
+# Releases master: Actions → Release → Run workflow (or `gh workflow run release.yml -f bump=auto -f dry_run=false`).
+# A dry run (the default) only writes the plan to the job summary: next version, PRs by category, CI status.
+# A real run bumps backend/build.gradle.kts and frontend/package.json, pushes that commit and the vX.Y.Z tag to master
+# with the release deploy key (which triggers the Docker workflows for the tag), and creates a draft GitHub release
+# with the generated notes. Publishing the draft stays manual.
+#
+# One-time setup (repository settings):
+# - Environment `release`: deployment branches "master" only. Secret RELEASE_DEPLOY_KEY: private key of a deploy key
+#   with write access. Optionally require a reviewer.
+# - Rulesets: only deploy keys may create, update or delete v* tags, and deploy keys may bypass the master rules.
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump. auto picks it from the PR labels (breaking → major, enhancement or deployment → minor, else patch)
+        type: choice
+        options: [auto, patch, minor, major]
+        default: auto
+      dry_run:
+        description: Only show the plan, change nothing
+        type: boolean
+        default: true
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: read
+      statuses: read
+      actions: read
+    outputs:
+      version: ${{ steps.plan.outputs.version }}
+      tag: ${{ steps.plan.outputs.tag }}
+      previous_tag: ${{ steps.plan.outputs.previous_tag }}
+      sha: ${{ steps.plan.outputs.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0 # tags and history since the last release
+          persist-credentials: false
+
+      - name: Plan the release
+        id: plan
+        run: python3 .github/scripts/release-plan.py
+        env:
+          BUMP: ${{ inputs.bump }}
+          GH_TOKEN: ${{ github.token }}
+
+  release:
+    needs: plan
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    # Holds RELEASE_DEPLOY_KEY and only allows master, so no other branch or workflow can push release tags
+    environment: release
+    permissions:
+      contents: write # create the draft release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.plan.outputs.sha }} # exactly the commit whose CI passed
+          ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
+
+      - name: Bump versions, commit and tag
+        env:
+          VERSION: ${{ needs.plan.outputs.version }}
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          sed -i "s/^version = \".*\"$/version = \"$VERSION\"/" backend/build.gradle.kts
+          sed -i "0,/\"version\": \"[^\"]*\"/s//\"version\": \"$VERSION\"/" frontend/package.json
+          .github/scripts/check-release-version.sh "$TAG"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
+            git commit -am "chore(release): bump version to $VERSION"
+          fi
+          git tag -a "$TAG" -m "TorMap $VERSION"
+          # Atomic and without force: if master moved since the plan, nothing is pushed
+          git push --atomic origin HEAD:refs/heads/master "refs/tags/$TAG"
+
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.plan.outputs.tag }}
+          PREVIOUS_TAG: ${{ needs.plan.outputs.previous_tag }}
+        run: |
+          gh release create "$TAG" --draft --verify-tag --title "$TAG" \
+            --notes-start-tag "$PREVIOUS_TAG" --generate-notes \
+            --notes "_Add the release description here._"
+          {
+            echo "## Next steps"
+            echo ""
+            echo "- The Docker workflows for $TAG are running: https://github.com/$GITHUB_REPOSITORY/actions?query=branch%3A$TAG"
+            echo "- Edit the draft release (description, deployment notes): https://github.com/$GITHUB_REPOSITORY/releases"
+            echo "- Publish security advisories fixed in this release together with it."
+            echo "- Publish the draft once both images are pushed."
+          } >> "$GITHUB_STEP_SUMMARY"

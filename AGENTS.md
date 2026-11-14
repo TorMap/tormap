@@ -5,7 +5,7 @@ Rules for AI coding agents (and a quick reference for humans) working in this re
 ## Layout
 - `backend/`: Kotlin, Spring Boot, Gradle (Kotlin DSL), image built with Jib. Dependency versions are inline in `backend/build.gradle.kts`.
 - `frontend/`: React, TypeScript, Vite, Yarn 4 with exact version pins.
-- The project version is duplicated in `backend/build.gradle.kts` and `frontend/package.json`.
+- The project version is duplicated in `backend/build.gradle.kts` and `frontend/package.json`. Only the Release workflow changes it.
 
 ## Build and test
 - Backend: `cd backend && ./gradlew test` (needs the JDK from `sourceCompatibility` in `backend/build.gradle.kts` and a running Docker daemon for Testcontainers). Add `jacocoTestReport` for coverage (`build/reports/jacoco/test/html/index.html`, vendored `org.torproject` code is excluded).
@@ -19,6 +19,11 @@ Rules for AI coding agents (and a quick reference for humans) working in this re
 - Set labels when opening the PR; they group the release notes: `breaking` (incompatible API or behavior), `deployment` (operators must act: env var, volume ownership, JDK or image change), `security` (fixes a vulnerability), `enhancement`, `bug`, `documentation`, plus `backend` and/or `frontend`.
 - If operators must act, add a short "Deployment notes" section to the description.
 - Keep PRs small: each one leaves the project working and mergeable on its own.
+
+## Releases
+- Releases are made with the Release workflow (`.github/workflows/release.yml`, started by hand): a dry run shows the next version from the PR labels, a real run bumps both versions, pushes the commit and the `vX.Y.Z` tag with the release deploy key and creates a draft release. The maintainer writes the description, publishes the draft and any security advisories fixed in it.
+- Never push `v*` tags or edit the versions by hand. The Docker workflows refuse a tag that doesn't match both versions (`.github/scripts/check-release-version.sh`), so an older image is never overwritten.
+- Don't put details of unpublished vulnerabilities in commits, PRs or workflow output; the dry-run summary is public.
 
 ## Dependencies
 - Before adding, upgrading, removing or overriding any dependency (Gradle, Yarn, lockfile, plugins), follow [`.claude/skills/dependencies/SKILL.md`](.claude/skills/dependencies/SKILL.md). Don't install, build or test with a new or changed dependency until the maintainer has approved its vetting report.
