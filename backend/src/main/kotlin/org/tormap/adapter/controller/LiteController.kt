@@ -169,7 +169,10 @@ class LiteController(
         // The name is taken from the details of one relay instead of grouping all relays of the month
         val name = relays.firstNotNullOfOrNull { it.detailsId }
             ?.let { relayDetailsRepository.findById(it).orElse(null)?.autonomousSystemName }
-        val canonicalUrl = indexedUrl?.takeIf { parameters.isEmpty() }?.let { "$it${LitePage.AUTONOMOUS_SYSTEM_PATH}$number" }
+        // Any number can be requested, so only autonomous systems with relays (as in the sitemap) are indexable.
+        // Otherwise every unknown number would be a page with a canonical link to itself.
+        val canonicalUrl = indexedUrl?.takeIf { parameters.isEmpty() && relays.isNotEmpty() }
+            ?.let { "$it${LitePage.AUTONOMOUS_SYSTEM_PATH}$number" }
         return html(LiteRelayPages.renderAutonomousSystem(number, name, relays, view, fullVersionUrl(), canonicalUrl))
     }
 
