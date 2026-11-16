@@ -837,13 +837,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/x-date-pickers@npm:9.17.0":
-  version: 9.17.0
-  resolution: "@mui/x-date-pickers@npm:9.17.0"
+"@mui/x-date-pickers@npm:9.18.0":
+  version: 9.18.0
+  resolution: "@mui/x-date-pickers@npm:9.18.0"
   dependencies:
     "@babel/runtime": "npm:^7.29.7 || ^8.0.0"
     "@mui/utils": "npm:^9.5.0"
-    "@mui/x-internals": "npm:9.17.0"
+    "@mui/x-internals": "npm:9.18.0"
     "@types/react-transition-group": "npm:^4.4.12"
     clsx: "npm:^2.1.1"
     prop-types: "npm:^15.8.1"
@@ -881,13 +881,13 @@ __metadata:
       optional: true
     moment-jalaali:
       optional: true
-  checksum: 10/1d06e5318ae81afc2869ce2e82161c320e4a55a44cf3b54242ad70057a49a06d58b821851e396d1e63a8e3e6f87bd723cd4c1019a580b06427e497fd1ae8fd87
+  checksum: 10/2eb0931ab2a5f0256da722cd56fa4d23913745f9b5672436b1b78c9bb5185c36482fc1631f3fb70857785dc41c195ae67d1aa1eb34ef8172f6cb376e2a0a6b78
   languageName: node
   linkType: hard
 
-"@mui/x-internals@npm:9.17.0":
-  version: 9.17.0
-  resolution: "@mui/x-internals@npm:9.17.0"
+"@mui/x-internals@npm:9.18.0":
+  version: 9.18.0
+  resolution: "@mui/x-internals@npm:9.18.0"
   dependencies:
     "@babel/runtime": "npm:^7.29.7 || ^8.0.0"
     "@base-ui/utils": "npm:^0.5.0"
@@ -895,7 +895,7 @@ __metadata:
   peerDependencies:
     react: ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10/d8a5e428bedef791f94127ea69dcd7d487f804869a96576806c8588967a8aa99776ee8834cd63eb318fd86ecdc7c17e3e502ad0124a3eceeabdcc85af8ad92d0
+  checksum: 10/7008b6ac3100892ec9a93a1c8d632544b0b98409306eb3532757a1958b42773dcf598361dabb1058820d832353bbc6f686bdc6bed772c4d12b43f3023932cac1
   languageName: node
   linkType: hard
 
@@ -5955,7 +5955,7 @@ __metadata:
     "@eslint/js": "npm:10.0.1"
     "@mui/icons-material": "npm:9.5.0"
     "@mui/material": "npm:9.5.0"
-    "@mui/x-date-pickers": "npm:9.17.0"
+    "@mui/x-date-pickers": "npm:9.18.0"
     "@types/geojson": "npm:7946.0.16"
     "@types/leaflet": "npm:1.9.22"
     "@types/node": "npm:26.6.6"
