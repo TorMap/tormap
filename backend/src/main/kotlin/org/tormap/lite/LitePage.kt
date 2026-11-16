@@ -105,6 +105,8 @@ object LitePage {
         description: String? = null,
         /** The absolute URL of an indexable page (see [LiteIndexing]), null for all other pages */
         canonicalUrl: String? = null,
+        /** Asks search engines not to index the page, e.g. an autonomous system without relays */
+        noIndex: Boolean = false,
         content: Html.() -> Unit,
     ): String = Html.document {
         tag("html", "lang" to "en") {
@@ -114,6 +116,7 @@ object LitePage {
                 tag("title", title)
                 description?.let { tag("meta", "name" to "description", "content" to it) }
                 canonicalUrl?.let { tag("link", "rel" to "canonical", "href" to it) }
+                if (noIndex) tag("meta", "name" to "robots", "content" to "noindex")
                 tag("link", "rel" to "stylesheet", "href" to STYLESHEET_PATH)
                 tag("link", "rel" to "icon", "href" to "/favicon.ico")
             }
