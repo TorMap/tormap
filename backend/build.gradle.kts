@@ -93,9 +93,9 @@ dependencies {
     // Testing JUnit and Kotest (https://kotest.io/)
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
-    testImplementation("io.kotest:kotest-runner-junit5:6.2.6")
-    testImplementation("io.kotest:kotest-assertions-core:6.2.6")
-    testImplementation("io.kotest:kotest-extensions-spring:6.2.6")
+    testImplementation("io.kotest:kotest-runner-junit5:6.2.7")
+    testImplementation("io.kotest:kotest-assertions-core:6.2.7")
+    testImplementation("io.kotest:kotest-extensions-spring:6.2.7")
 
     // Testcontainers to provide Postgres DB (https://testcontainers.org/)
     testImplementation("org.testcontainers:testcontainers-postgresql:2.0.5")
