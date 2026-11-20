@@ -8,14 +8,13 @@ import java.math.BigDecimal
 
 /**
  * A relay of a day in the public API v1. Field names and types are part of the API contract (see api/openapi-v1.json):
- * only add fields, never rename or remove them.
+ * only add fields, never rename or remove them. Relays are identified by fingerprint, not by internal database IDs.
  *
- * @param detailsId the ID of the relay details for `/v1/relays/{id}`, null while the descriptor is not processed yet
+ * @param familyId the family for `/v1/families/{id}`, null if the relay has no confirmed family
  * @param flags the names of the relay's flags, e.g. "Exit" or "Guard"
  */
 class RelayV1Dto(
     val fingerprint: String,
-    val detailsId: Long?,
     val nickname: String?,
     val country: String,
     latitude: BigDecimal,

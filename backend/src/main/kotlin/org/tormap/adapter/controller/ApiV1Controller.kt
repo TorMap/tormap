@@ -14,8 +14,8 @@ import org.tormap.adapter.controller.exception.RelayNotFoundException
 import org.tormap.adapter.dto.AutonomousSystemDto
 import org.tormap.adapter.dto.CountryUsageDto
 import org.tormap.adapter.dto.DailyRelayCountDto
-import org.tormap.adapter.dto.RelayDetailsDto
-import org.tormap.adapter.dto.RelayIdentifiersDto
+import org.tormap.adapter.dto.v1.RelayDetailsV1Dto
+import org.tormap.adapter.dto.v1.RelayIdentifiersV1Dto
 import org.tormap.adapter.dto.v1.RelayV1Dto
 import org.tormap.config.CacheConfig
 import org.tormap.database.repository.RelayDetailsRepositoryImpl
@@ -62,16 +62,14 @@ class ApiV1Controller(
     fun getRelaysOfDay(@PathVariable day: String): List<RelayV1Dto> =
         relayLocationRepositoryImpl.findAllV1UsingDay(parseDay(day))
 
-    @Operation(summary = "Returns the details of a relay by its details ID.")
-    @GetMapping("relays/{id}")
-    fun getRelay(@PathVariable id: Long): RelayDetailsDto = relayDetailsQueryService.getRelay(id)
-
-    @Operation(summary = "Returns the details of a relay by its fingerprint, for the given month or the latest month with data.")
-    @GetMapping("relays/by-fingerprint/{fingerprint}")
-    fun getRelayByFingerprint(
+    // The fingerprint is the relay's identity in Tor and stays the same across months, unlike the internal details ID.
+    // The lookup uses the unique (month, fingerprint) index, also when no month is given (see RelayDetailsIndexUsageTest).
+    @Operation(summary = "Returns the details of a relay by its fingerprint, for the given month (like 2024-05) or the latest month with data.")
+    @GetMapping("relays/{fingerprint}")
+    fun getRelay(
         @PathVariable fingerprint: String,
         @RequestParam(required = false) month: String?,
-    ): RelayDetailsDto {
+    ): RelayDetailsV1Dto {
         if (!FINGERPRINT.matches(fingerprint)) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The fingerprint must be 40 hexadecimal characters.")
         }
@@ -80,14 +78,14 @@ class ApiV1Controller(
             ?: throw RelayNotFoundException()
         val details = relayDetailsRepositoryImpl.findByMonthAndFingerprint(yearMonth.toString(), fingerprint.uppercase())
             ?: throw RelayNotFoundException()
-        return relayDetailsQueryService.getRelay(details.id!!)
+        return RelayDetailsV1Dto(relayDetailsQueryService.getRelay(details.id!!))
     }
 
-    @Operation(summary = "Returns the fingerprint, nickname and details ID of all relays in a family.")
+    @Operation(summary = "Returns the fingerprint and nickname of all relays in a family.")
     @GetMapping("families/{id}")
-    fun getFamily(@PathVariable id: Long): List<RelayIdentifiersDto> =
+    fun getFamily(@PathVariable id: Long): List<RelayIdentifiersV1Dto> =
         relayDetailsRepositoryImpl.findAllByFamilyId(id)
-            .map { RelayIdentifiersDto(it.id!!, it.fingerprint, it.nickname) }
+            .map { RelayIdentifiersV1Dto(it.fingerprint, it.nickname) }
             .sortedBy { it.nickname.lowercase() }
 
     @Operation(summary = "Returns the number and name of all autonomous systems with relays in a month (like 2024-05).")
