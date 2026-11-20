@@ -1,0 +1,67 @@
+name: cli_test
+
+# Pull requests always run this workflow and skip the test job when the CLI is untouched, because a skipped
+# job counts as passed for required status checks, while a workflow skipped by `paths:` never reports.
+on:
+  push:
+    branches:
+      - master
+      - dev
+    paths:
+      - 'cli/**'
+      - 'api/**'
+      - '.github/workflows/cli*'
+      - '.github/scripts/osm-check.py'
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      cli: ${{ steps.filter.outputs.cli }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 2 # pull_request checks out a merge commit, its first parent is the base
+
+      - name: Detect changes
+        id: filter
+        uses: ./.github/actions/changes
+
+  cli_test:
+    needs: changes
+    if: needs.changes.outputs.cli == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 2 # base commit is needed to find new or changed dependencies
+
+      # Only looks up coordinates that are new or changed in the Gradle build files, before Gradle resolves anything.
+      - name: Check dependencies against OpenSourceMalware
+        if: github.event_name == 'pull_request'
+        run: python3 .github/scripts/osm-check.py maven cli/build.gradle.kts cli/settings.gradle.kts
+        env:
+          OSM_TOKEN: ${{ secrets.OSM_TOKEN }}
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
+      - uses: gradle/actions/wrapper-validation@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
+
+      - name: Build and test
+        run: cd cli && ./gradlew test installDist

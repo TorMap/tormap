@@ -42,8 +42,9 @@ the first import. See the [backend deployment guide](backend/README.md#deploy) f
 
 ## Development
 
-The backend is written in Kotlin (Spring Boot, PostgreSQL), the frontend in TypeScript (React, Leaflet). Each part has
-its own setup guide: [backend](backend/README.md) and [frontend](frontend/README.md).
+The backend is written in Kotlin (Spring Boot, PostgreSQL), the frontend in TypeScript (React, Leaflet), the command
+line client in Kotlin. Each part has its own setup guide: [backend](backend/README.md), [frontend](frontend/README.md)
+and [CLI](cli/README.md).
 
 ## Contributing
 

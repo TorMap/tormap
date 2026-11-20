@@ -13,6 +13,9 @@ outputs:
   frontend:
     description: "'true' if frontend code or its CI changed"
     value: ${{ steps.filter.outputs.frontend }}
+  cli:
+    description: "'true' if CLI code, the API spec (api/) or its CI changed"
+    value: ${{ steps.filter.outputs.cli }}
   workflows:
     description: "'true' if anything under .github changed"
     value: ${{ steps.filter.outputs.workflows }}
@@ -42,6 +45,7 @@ runs:
         for entry in \
           'backend:^backend/|^api/|^\.github/workflows/backend|^\.github/scripts/osm-check\.py$' \
           'frontend:^frontend/|^\.github/workflows/frontend|^\.github/scripts/osm-check\.py$' \
+          'cli:^cli/|^api/|^\.github/workflows/cli|^\.github/scripts/osm-check\.py$' \
           'workflows:^\.github/'; do
           name="${entry%%:*}"
           if matches "${entry#*:}"; then
