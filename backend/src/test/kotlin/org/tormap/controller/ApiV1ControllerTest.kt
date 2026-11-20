@@ -65,13 +65,13 @@ class ApiV1ControllerTest(
             .andExpect(jsonPath("$[1]").value("2024-03-05"))
     }
 
-    "lists the relays of a day with fingerprint and flag names" {
-        val id = saveRelayA(familyId = 7)
+    "lists the relays of a day with fingerprint and flag names, without internal IDs" {
+        saveRelayA(familyId = 7)
         mockMvc.perform(get("/v1/days/2024-03-05/relays"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.length()").value(1))
             .andExpect(jsonPath("$[0].fingerprint").value(fingerprintA))
-            .andExpect(jsonPath("$[0].detailsId").value(id))
+            .andExpect(jsonPath("$[0].detailsId").doesNotExist())
             .andExpect(jsonPath("$[0].nickname").value("A"))
             .andExpect(jsonPath("$[0].country").value("DE"))
             .andExpect(jsonPath("$[0].flags.length()").value(2))
@@ -95,45 +95,46 @@ class ApiV1ControllerTest(
         cacheManager.getCache(CacheConfig.API_V1_RELAYS_PER_DAY)!!.get("2024-03-05") shouldNotBe null
     }
 
-    "returns relay details by id" {
-        val id = saveRelayA()
-        mockMvc.perform(get("/v1/relays/$id"))
+    "returns relay details by fingerprint in any case, for the latest month by default" {
+        saveRelayA(familyId = 7)
+        mockMvc.perform(get("/v1/relays/${fingerprintA.lowercase()}"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.fingerprint").value(fingerprintA))
+            .andExpect(jsonPath("$.month").value("2024-03"))
+            .andExpect(jsonPath("$.familyId").value(7))
+            .andExpect(jsonPath("$.id").doesNotExist())
+        mockMvc.perform(get("/v1/relays/$fingerprintA").param("month", "2024-03"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.fingerprint").value(fingerprintA))
     }
 
-    "returns relay details by fingerprint in any case, for the latest month by default" {
+    "an internal details ID is not a relay identifier" {
         val id = saveRelayA()
-        mockMvc.perform(get("/v1/relays/by-fingerprint/${fingerprintA.lowercase()}"))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(id))
-        mockMvc.perform(get("/v1/relays/by-fingerprint/$fingerprintA").param("month", "2024-03"))
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.id").value(id))
+        mockMvc.perform(get("/v1/relays/$id")).andExpect(status().isBadRequest)
     }
 
     "an unknown fingerprint or month is not found" {
         saveRelayA()
-        mockMvc.perform(get("/v1/relays/by-fingerprint/${"B".repeat(40)}")).andExpect(status().isNotFound)
-        mockMvc.perform(get("/v1/relays/by-fingerprint/$fingerprintA").param("month", "2024-02")).andExpect(status().isNotFound)
+        mockMvc.perform(get("/v1/relays/${"B".repeat(40)}")).andExpect(status().isNotFound)
+        mockMvc.perform(get("/v1/relays/$fingerprintA").param("month", "2024-02")).andExpect(status().isNotFound)
     }
 
     "a fingerprint lookup without any data is not found" {
-        mockMvc.perform(get("/v1/relays/by-fingerprint/$fingerprintA")).andExpect(status().isNotFound)
+        mockMvc.perform(get("/v1/relays/$fingerprintA")).andExpect(status().isNotFound)
     }
 
     listOf("abc", "A".repeat(39), "A".repeat(41), "G".repeat(40)).forEach { fingerprint ->
         "a malformed fingerprint '$fingerprint' is a bad request" {
-            mockMvc.perform(get("/v1/relays/by-fingerprint/$fingerprint")).andExpect(status().isBadRequest)
+            mockMvc.perform(get("/v1/relays/$fingerprint")).andExpect(status().isBadRequest)
         }
     }
 
-    "lists family members by identifiers only" {
-        val id = saveRelayA(familyId = 7)
+    "lists family members by fingerprint and nickname only" {
+        saveRelayA(familyId = 7)
         mockMvc.perform(get("/v1/families/7"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.length()").value(1))
-            .andExpect(jsonPath("$[0].id").value(id))
+            .andExpect(jsonPath("$[0].id").doesNotExist())
             .andExpect(jsonPath("$[0].fingerprint").value(fingerprintA))
             .andExpect(jsonPath("$[0].nickname").value("A"))
             .andExpect(jsonPath("$[0].address").doesNotExist())
@@ -178,7 +179,7 @@ class ApiV1ControllerTest(
     listOf("abc", "2024-13", "2024-5", "+002024-05").forEach { month ->
         "a malformed month '$month' is a bad request" {
             mockMvc.perform(get("/v1/autonomous-systems/$month")).andExpect(status().isBadRequest)
-            mockMvc.perform(get("/v1/relays/by-fingerprint/$fingerprintA").param("month", month)).andExpect(status().isBadRequest)
+            mockMvc.perform(get("/v1/relays/$fingerprintA").param("month", month)).andExpect(status().isBadRequest)
         }
     }
 

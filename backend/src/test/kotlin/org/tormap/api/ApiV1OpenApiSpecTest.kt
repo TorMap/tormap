@@ -9,11 +9,17 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.tormap.database.entity.TorRelayFlag
+import org.tormap.database.repository.RelayDetailsRepositoryImpl
+import org.tormap.database.repository.RelayLocationRepositoryImpl
+import org.tormap.mockRelayDetails
+import org.tormap.mockRelayLocation
 import tools.jackson.databind.SerializationFeature
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.databind.node.ObjectNode
 import java.nio.file.Files
 import java.nio.file.Path
+import java.time.LocalDate
 
 /**
  * Keeps the committed API v1 contract (api/openapi-v1.json in the repository root) in sync with the code.
@@ -36,6 +42,8 @@ import java.nio.file.Path
 @ActiveProfiles("test")
 class ApiV1OpenApiSpecTest(
     private val mockMvc: MockMvc,
+    private val relayLocationRepository: RelayLocationRepositoryImpl,
+    private val relayDetailsRepository: RelayDetailsRepositoryImpl,
 ) : StringSpec({
     val specFile = Path.of("..", "api", "openapi-v1.json")
     val mapper = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build()
@@ -53,6 +61,25 @@ class ApiV1OpenApiSpecTest(
         val paths = mapper.readTree(generatedSpec()).get("paths").propertyNames().toList()
         paths.shouldNotBeEmpty()
         paths.filterNot { it.startsWith("/v1/") } shouldBe emptyList()
+    }
+
+    // The spec's schemas come from springdoc, the responses from Jackson. Both must name the fields the same way.
+    "responses have exactly the fields the spec describes" {
+        val schemas = mapper.readTree(generatedSpec()).get("components").get("schemas")
+        fun specFields(schema: String) = schemas.get(schema).get("properties").propertyNames().toSet()
+        fun responseFields(path: String, node: (tools.jackson.databind.JsonNode) -> tools.jackson.databind.JsonNode) =
+            node(mapper.readTree(mockMvc.perform(get(path)).andReturn().response.contentAsString)).propertyNames().toSet()
+
+        relayDetailsRepository.deleteAll()
+        relayLocationRepository.deleteAll()
+        relayLocationRepository.save(mockRelayLocation(LocalDate.of(2024, 3, 5), 'A', setOf(TorRelayFlag.Exit)))
+        relayDetailsRepository.save(mockRelayDetails('A').apply { month = "2024-03"; address = "127.0.0.1"; familyId = 7 })
+
+        responseFields("/v1/days/2024-03-05/relays") { it.get(0) } shouldBe specFields("RelayV1Dto")
+        responseFields("/v1/relays/${"A".repeat(40)}?month=2024-03") { it } shouldBe specFields("RelayDetailsV1Dto")
+        responseFields("/v1/families/7") { it.get(0) } shouldBe specFields("RelayIdentifiersV1Dto")
+        relayDetailsRepository.deleteAll()
+        relayLocationRepository.deleteAll()
     }
 
     "the committed API v1 spec matches the code" {

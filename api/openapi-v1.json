@@ -193,7 +193,7 @@
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "$ref" : "#/components/schemas/RelayIdentifiersDto"
+                    "$ref" : "#/components/schemas/RelayIdentifiersV1Dto"
                   }
                 }
               }
@@ -214,13 +214,13 @@
             "description" : "Bad Request"
           }
         },
-        "summary" : "Returns the fingerprint, nickname and details ID of all relays in a family.",
+        "summary" : "Returns the fingerprint and nickname of all relays in a family.",
         "tags" : [ "API v1" ]
       }
     },
-    "/v1/relays/by-fingerprint/{fingerprint}" : {
+    "/v1/relays/{fingerprint}" : {
       "get" : {
-        "operationId" : "getRelayByFingerprint",
+        "operationId" : "getRelay",
         "parameters" : [ {
           "in" : "path",
           "name" : "fingerprint",
@@ -241,7 +241,7 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/RelayDetailsDto"
+                  "$ref" : "#/components/schemas/RelayDetailsV1Dto"
                 }
               }
             },
@@ -261,48 +261,7 @@
             "description" : "Bad Request"
           }
         },
-        "summary" : "Returns the details of a relay by its fingerprint, for the given month or the latest month with data.",
-        "tags" : [ "API v1" ]
-      }
-    },
-    "/v1/relays/{id}" : {
-      "get" : {
-        "operationId" : "getRelay",
-        "parameters" : [ {
-          "in" : "path",
-          "name" : "id",
-          "required" : true,
-          "schema" : {
-            "type" : "integer",
-            "format" : "int64"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/RelayDetailsDto"
-                }
-              }
-            },
-            "description" : "OK"
-          },
-          "400" : {
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "type" : "object",
-                  "additionalProperties" : {
-                    "type" : "string"
-                  }
-                }
-              }
-            },
-            "description" : "Bad Request"
-          }
-        },
-        "summary" : "Returns the details of a relay by its details ID.",
+        "summary" : "Returns the details of a relay by its fingerprint, for the given month (like 2024-05) or the latest month with data.",
         "tags" : [ "API v1" ]
       }
     },
@@ -420,7 +379,7 @@
           }
         }
       },
-      "RelayDetailsDto" : {
+      "RelayDetailsV1Dto" : {
         "type" : "object",
         "properties" : {
           "address" : {
@@ -457,7 +416,7 @@
           "confirmedFamilyMembers" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/RelayIdentifiersDto"
+              "$ref" : "#/components/schemas/RelayIdentifiersV1Dto"
             }
           },
           "contact" : {
@@ -482,10 +441,6 @@
           },
           "hiddenServiceDir" : {
             "type" : "boolean"
-          },
-          "id" : {
-            "type" : "integer",
-            "format" : "int64"
           },
           "linkProtocolVersions" : {
             "type" : [ "string", "null" ]
@@ -523,15 +478,11 @@
           }
         }
       },
-      "RelayIdentifiersDto" : {
+      "RelayIdentifiersV1Dto" : {
         "type" : "object",
         "properties" : {
           "fingerprint" : {
             "type" : "string"
-          },
-          "id" : {
-            "type" : "integer",
-            "format" : "int64"
           },
           "nickname" : {
             "type" : "string"
@@ -551,10 +502,6 @@
           },
           "country" : {
             "type" : "string"
-          },
-          "detailsId" : {
-            "type" : [ "integer", "null" ],
-            "format" : "int64"
           },
           "familyId" : {
             "type" : [ "integer", "null" ],
