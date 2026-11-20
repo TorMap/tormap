@@ -32,7 +32,7 @@ class AppConfig : WebMvcConfigurer {
      * Include a weak ETag hash only for small, bounded GET endpoints.
      *
      * Shallow ETags require Spring to buffer the full response body before it can be hashed.
-     * Keep this filter away from large public endpoints such as /relay/location/day/{day},
+     * Keep this filter away from large public endpoints such as /relay/location/day/{day} and /v1/days/{day}/relays,
      * where buffering an entire day's relay locations can amplify memory and CPU usage.
      */
     @Bean
@@ -45,6 +45,9 @@ class AppConfig : WebMvcConfigurer {
                 "/relay/location/days",
                 "/relay/details/relay/*",
                 "/relay/details/family/*",
+                "/v1/days",
+                "/v1/relays/*",
+                "/v1/families/*",
             )
         }
     }

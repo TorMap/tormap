@@ -89,6 +89,14 @@ class SecurityRulesTest(
         mockMvc.perform(post("/lite/")).andReturn().response.status shouldBe 403
     }
 
+    "API v1 is public and GET only" {
+        listOf("/v1/days", "/v1/missing").forEach { path ->
+            statusOf(path) shouldNotBe 401
+            statusOf(path) shouldNotBe 403
+        }
+        mockMvc.perform(post("/v1/days")).andReturn().response.status shouldBe 403
+    }
+
     "other paths are denied" {
         statusOf("/not-a-public-path") shouldBe 403
     }

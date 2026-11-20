@@ -86,4 +86,16 @@ class CacheServiceTest(
         relayLocationsPerDayCache?.get("2024-01-01") shouldBe null
         relayLocationsPerDayCache?.get("2024-02-01") shouldNotBe null
     }
+
+    "the API v1 cache is cleared for reprocessed and evicted days" {
+        val apiV1Cache = cacheManager.getCache(CacheConfig.API_V1_RELAYS_PER_DAY)!!
+        apiV1Cache.put("2024-01-01", listOf<Any>())
+        apiV1Cache.put("2024-02-01", listOf<Any>())
+        apiV1Cache.put("2024-03-01", listOf<Any>())
+        cacheService.cacheRelayLocationsPerDay(setOf("2024-01")).get()
+        cacheService.evictRelayLocationsPerDay(setOf("2024-02")).get()
+        apiV1Cache.get("2024-01-01") shouldBe null
+        apiV1Cache.get("2024-02-01") shouldBe null
+        apiV1Cache.get("2024-03-01") shouldNotBe null
+    }
 })

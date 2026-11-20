@@ -160,6 +160,8 @@ class SecurityConfig(
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     // Public API and static resources
                     .requestMatchers("/", "/error", "/relay/**", "/favicon.ico", "/robots.txt", "/static/**").permitAll()
+                    // Versioned public API for the CLI and other clients, read-only
+                    .requestMatchers(HttpMethod.GET, "/v1/**").permitAll()
                     // How to report vulnerabilities (RFC 9116)
                     .requestMatchers(HttpMethod.GET, SecurityTxtController.PATH).permitAll()
                     // Allow OpenAPI/Swagger only when enabled
