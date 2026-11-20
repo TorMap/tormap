@@ -1,0 +1,585 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "TorMap API",
+    "version" : "v1"
+  },
+  "tags" : [ {
+    "description" : "Stable public API, used by the TorMap CLI",
+    "name" : "API v1"
+  } ],
+  "paths" : {
+    "/v1/autonomous-systems/{month}" : {
+      "get" : {
+        "operationId" : "getAutonomousSystems",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "month",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/AutonomousSystemDto"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            },
+            "description" : "Bad Request"
+          }
+        },
+        "summary" : "Returns the number and name of all autonomous systems with relays in a month (like 2024-05).",
+        "tags" : [ "API v1" ]
+      }
+    },
+    "/v1/country-usage/{day}" : {
+      "get" : {
+        "operationId" : "getCountryUsage",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "day",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/CountryUsageDto"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            },
+            "description" : "Bad Request"
+          }
+        },
+        "summary" : "Returns the estimated number of Tor users per country for a day. Source: Tor Metrics.",
+        "tags" : [ "API v1" ]
+      }
+    },
+    "/v1/days" : {
+      "get" : {
+        "operationId" : "getDays",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string",
+                    "format" : "date"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            },
+            "description" : "Bad Request"
+          }
+        },
+        "summary" : "Returns all days with relay data, oldest first.",
+        "tags" : [ "API v1" ]
+      }
+    },
+    "/v1/days/{day}/relays" : {
+      "get" : {
+        "operationId" : "getRelaysOfDay",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "day",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RelayV1Dto"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            },
+            "description" : "Bad Request"
+          }
+        },
+        "summary" : "Returns all relays of a day with fingerprint, nickname, country, location, flags, consensus weight, autonomous system and family.",
+        "tags" : [ "API v1" ]
+      }
+    },
+    "/v1/families/{id}" : {
+      "get" : {
+        "operationId" : "getFamily",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RelayIdentifiersDto"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            },
+            "description" : "Bad Request"
+          }
+        },
+        "summary" : "Returns the fingerprint, nickname and details ID of all relays in a family.",
+        "tags" : [ "API v1" ]
+      }
+    },
+    "/v1/relays/by-fingerprint/{fingerprint}" : {
+      "get" : {
+        "operationId" : "getRelayByFingerprint",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "fingerprint",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "month",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RelayDetailsDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            },
+            "description" : "Bad Request"
+          }
+        },
+        "summary" : "Returns the details of a relay by its fingerprint, for the given month or the latest month with data.",
+        "tags" : [ "API v1" ]
+      }
+    },
+    "/v1/relays/{id}" : {
+      "get" : {
+        "operationId" : "getRelay",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RelayDetailsDto"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            },
+            "description" : "Bad Request"
+          }
+        },
+        "summary" : "Returns the details of a relay by its details ID.",
+        "tags" : [ "API v1" ]
+      }
+    },
+    "/v1/statistics/daily-counts" : {
+      "get" : {
+        "operationId" : "getDailyCounts",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "from",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/DailyRelayCountDto"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            },
+            "description" : "Bad Request"
+          }
+        },
+        "summary" : "Returns the number of relays (total, exit, guard, other) per day, optionally limited to a range of days.",
+        "tags" : [ "API v1" ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "AutonomousSystemDto" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : [ "string", "null" ]
+          },
+          "number" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "CountryUsageDto" : {
+        "type" : "object",
+        "properties" : {
+          "country" : {
+            "type" : "string"
+          },
+          "frac" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "lower" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "upper" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "users" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "DailyRelayCountDto" : {
+        "type" : "object",
+        "properties" : {
+          "day" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "exit" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "guard" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "other" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "RelayDetailsDto" : {
+        "type" : "object",
+        "properties" : {
+          "address" : {
+            "type" : "string"
+          },
+          "allowSingleHopExits" : {
+            "type" : "boolean"
+          },
+          "autonomousSystemName" : {
+            "type" : [ "string", "null" ]
+          },
+          "autonomousSystemNumber" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "bandwidthBurst" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "bandwidthObserved" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "bandwidthRate" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "cachesExtraInfo" : {
+            "type" : "boolean"
+          },
+          "circuitProtocolVersions" : {
+            "type" : [ "string", "null" ]
+          },
+          "confirmedFamilyMembers" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RelayIdentifiersDto"
+            }
+          },
+          "contact" : {
+            "type" : [ "string", "null" ]
+          },
+          "day" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "familyEntries" : {
+            "type" : [ "string", "null" ]
+          },
+          "familyId" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "fingerprint" : {
+            "type" : "string"
+          },
+          "hibernating" : {
+            "type" : "boolean"
+          },
+          "hiddenServiceDir" : {
+            "type" : "boolean"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "linkProtocolVersions" : {
+            "type" : [ "string", "null" ]
+          },
+          "month" : {
+            "type" : "string"
+          },
+          "nickname" : {
+            "type" : "string"
+          },
+          "platform" : {
+            "type" : [ "string", "null" ]
+          },
+          "protocols" : {
+            "type" : [ "string", "null" ]
+          },
+          "tunnelledDirServer" : {
+            "type" : "boolean"
+          },
+          "unverifiedHostNames" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "uptime" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "verifiedHostNames" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "RelayIdentifiersDto" : {
+        "type" : "object",
+        "properties" : {
+          "fingerprint" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "nickname" : {
+            "type" : "string"
+          }
+        }
+      },
+      "RelayV1Dto" : {
+        "type" : "object",
+        "properties" : {
+          "autonomousSystemNumber" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "consensusWeight" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "detailsId" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "familyId" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "fingerprint" : {
+            "type" : "string"
+          },
+          "flags" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "lat" : {
+            "type" : "number"
+          },
+          "long" : {
+            "type" : "number"
+          },
+          "nickname" : {
+            "type" : [ "string", "null" ]
+          }
+        }
+      }
+    }
+  }
+}

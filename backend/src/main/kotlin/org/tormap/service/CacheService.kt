@@ -46,6 +46,8 @@ class CacheService(
                 val yearMonth = YearMonth.parse(month)
                 yearMonth.atDay(1).datesUntil(yearMonth.plusMonths(1).atDay(1)).forEach {
                     val day = it.toString()
+                    // The API v1 cache is not warmed up, only filled on request, so it is cleared for the reprocessed day
+                    cacheManager.getCache(CacheConfig.API_V1_RELAYS_PER_DAY)?.evict(day)
                     val relayLocations = relayLocationRepositoryImpl.findAllUsingDay(LocalDate.parse(day))
                     if (relayLocations.isNotEmpty()) {
                         cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)?.put(
@@ -66,6 +68,7 @@ class CacheService(
             val yearMonth = YearMonth.parse(month)
             yearMonth.atDay(1).datesUntil(yearMonth.plusMonths(1).atDay(1)).forEach {
                 cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)?.evict(it.toString())
+                cacheManager.getCache(CacheConfig.API_V1_RELAYS_PER_DAY)?.evict(it.toString())
             }
         }
         return CompletableFuture.completedFuture(null)

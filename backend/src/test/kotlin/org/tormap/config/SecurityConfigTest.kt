@@ -45,6 +45,9 @@ class SecurityConfigTest(
             "/relay/location/days",
             "/relay/details/relay/*",
             "/relay/details/family/*",
+            "/v1/days",
+            "/v1/relays/*",
+            "/v1/families/*",
         )
     }
 

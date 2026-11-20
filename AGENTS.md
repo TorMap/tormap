@@ -6,6 +6,7 @@ Rules for AI coding agents (and a quick reference for humans) working in this re
 - `backend/`: Kotlin, Spring Boot, Gradle (Kotlin DSL), image built with Jib. Dependency versions are inline in `backend/build.gradle.kts`.
 - `frontend/`: React, TypeScript, Vite, Yarn 4 with exact version pins.
 - The project version is duplicated in `backend/build.gradle.kts` and `frontend/package.json`.
+- `api/openapi-v1.json`: the contract of the public API v1 (`/v1/**`, `ApiV1Controller`), for the CLI and other clients. Within v1 only add endpoints or fields; renaming or removing needs `/v2/` and the `breaking` label. After an intended change, regenerate it with `UPDATE_OPENAPI_SPEC=true ./gradlew test --tests 'org.tormap.api.ApiV1OpenApiSpecTest'`.
 
 ## Build and test
 - Backend: `cd backend && ./gradlew test` (needs the JDK from `sourceCompatibility` in `backend/build.gradle.kts` and a running Docker daemon for Testcontainers). Add `jacocoTestReport` for coverage (`build/reports/jacoco/test/html/index.html`, vendored `org.torproject` code is excluded).
