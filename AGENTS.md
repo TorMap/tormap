@@ -5,12 +5,14 @@ Rules for AI coding agents (and a quick reference for humans) working in this re
 ## Layout
 - `backend/`: Kotlin, Spring Boot, Gradle (Kotlin DSL), image built with Jib. Dependency versions are inline in `backend/build.gradle.kts`.
 - `frontend/`: React, TypeScript, Vite, Yarn 4 with exact version pins.
-- The project version is duplicated in `backend/build.gradle.kts` and `frontend/package.json`.
+- `cli/`: the `tormap` command line client, a separate Kotlin Gradle build (Clikt, kotlinx.serialization, JDK HTTP only), built against the API v1. Keep it free of further runtime dependencies where the JDK suffices.
+- The project version is duplicated in `backend/build.gradle.kts`, `frontend/package.json` and `cli/build.gradle.kts`.
 - `api/openapi-v1.json`: the contract of the public API v1 (`/v1/**`, `ApiV1Controller`), for the CLI and other clients. Within v1 only add endpoints or fields; renaming or removing needs `/v2/` and the `breaking` label. After an intended change, regenerate it with `UPDATE_OPENAPI_SPEC=true ./gradlew test --tests 'org.tormap.api.ApiV1OpenApiSpecTest'`.
 
 ## Build and test
 - Backend: `cd backend && ./gradlew test` (needs the JDK from `sourceCompatibility` in `backend/build.gradle.kts` and a running Docker daemon for Testcontainers). Add `jacocoTestReport` for coverage (`build/reports/jacoco/test/html/index.html`, vendored `org.torproject` code is excluded).
 - Local backend image: `./gradlew jibDockerBuild -Djib.to.image=tormap/backend:local -Djib.to.tags=local`.
+- CLI: `cd cli && ./gradlew test` (no Docker needed; the contract test reads `api/openapi-v1.json`). Run it locally with `./gradlew installDist && build/install/tormap/bin/tormap --help`.
 - Frontend: `cd frontend && yarn install --immutable && yarn build && yarn lint`.
 - Frontend tests: `cd frontend && yarn test:run` (Vitest; `yarn test` watches, `yarn test:coverage` adds coverage). `*.unit.test.ts` run in Node, all other `*.test.ts(x)` in headless Chromium, so run `yarn playwright install chromium` once.
 - Sandbox: run Chromium browser tests, `yarn npm audit` and signed `git commit` outside it (it blocks Chromium and the GPG agent, and Node ignores its proxy).

@@ -116,6 +116,11 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   nickname) run in the client over a whole cached day, so query parameters can not multiply server-side cache keys.
   The only query parameters (`month` on the fingerprint lookup, `from`/`to` on daily counts) are strictly parsed and
   are not cache keys. The fingerprint must be 40 hex characters. The relays of a day have their own cache of 10 days.
+- CLI (`cli/`): a read-only client of API v1, run by users. It treats API responses as untrusted: control characters
+  in relay-derived strings are replaced before they reach the terminal, CSV cells starting with `=`, `+`, `-` or `@`
+  are prefixed with `'` against spreadsheet formula injection, redirects are not followed, responses are capped at
+  64 MB, and path values are validated or URL-encoded. With `--proxy socks5h://…` the proxy resolves the API host, so
+  no DNS request leaves outside Tor. The cache holds only public API responses.
 - Caches with bounded entry counts (Caffeine `maximumSize`, unknown cache names rejected). Cache keys built from path variables (day, month) must be canonical: the controllers reject padded forms such as `+0002024-05-01`, and empty results are not cached, so made-up values can not fill or evict a cache. Shallow ETags only on small endpoints. `CoalesceService`
   bounds concurrent background recomputation per key.
 - Ingestion: remote file names must not contain `/`, `\`, `.` or `..`, and target directories must resolve inside the
