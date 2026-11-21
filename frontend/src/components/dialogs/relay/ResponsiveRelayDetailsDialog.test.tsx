@@ -3,9 +3,10 @@ import {useEffect, useState} from "react";
 import {describe, expect, it, vi} from "vitest";
 import {page} from "vitest/browser";
 
+import {useDate} from "../../../context/date-context";
 import {useSettings} from "../../../context/settings-context";
 import {RelayLocationDto} from "../../../dto/relay";
-import {makeRelay, makeRelayDetails, makeRelayIdentifier, makeSettings} from "../../../test/fixtures";
+import {fingerprintOf, makeRelay, makeRelayDetails, makeRelayIdentifier, makeSettings} from "../../../test/fixtures";
 import {mockBackend, networkError} from "../../../test/mock-backend";
 import {renderWithProviders} from "../../../test/render";
 import {RelayFlag, RelayType} from "../../../types/relay";
@@ -20,11 +21,13 @@ const Harness = ({relays}: { relays: RelayLocationDto[] }) => {
     const setRelays = useSetAtom(relaysForDetailsDialogAtom)
     const setShow = useSetAtom(showRelayDetailsDialogAtom)
     const {settings} = useSettings()
+    const {setSelectedDate} = useDate()
     const searchOnMap = useAtomValue(relaySearchOnMapAtom)
     useEffect(() => {
+        setSelectedDate(day)
         setRelays(relays)
         setShow(true)
-    }, [relays, setRelays, setShow])
+    }, [relays, setRelays, setSelectedDate, setShow])
     return (
         <>
             <ResponsiveRelayDetailsDialog/>
@@ -35,7 +38,7 @@ const Harness = ({relays}: { relays: RelayLocationDto[] }) => {
             })}</output>
             <output aria-label="search on map">{JSON.stringify(searchOnMap ? {
                 search: searchOnMap.search,
-                relayIds: searchOnMap.relays.map(relay => relay.detailsId),
+                fingerprints: searchOnMap.relays.map(relay => relay.fingerprint),
             } : null)}</output>
         </>
     )
@@ -61,20 +64,20 @@ const LazyHarness = ({relays}: { relays: RelayLocationDto[] }) => {
     )
 }
 
-const alpha = makeRelay({detailsId: 21, nickname: "alpha", flags: [RelayFlag.Exit], familyId: 7})
-const bravo = makeRelay({detailsId: 22, nickname: "bravo", flags: [RelayFlag.Guard]})
-const charlie = makeRelay({detailsId: 23, nickname: "charlie"})
+// The details of a relay are requested for the month of the selected day
+const day = "2024-01-02"
+const detailsPath = (n: number) => `/v1/relays/${fingerprintOf(n)}?month=2024-01`
+const detailsPathPattern = /^\/v1\/relays\/([0-9A-F]{40})\?month=2024-01$/
+
+const alpha = makeRelay({fingerprint: fingerprintOf(21), nickname: "alpha", flags: [RelayFlag.Exit], familyId: 7})
+const bravo = makeRelay({fingerprint: fingerprintOf(22), nickname: "bravo", flags: [RelayFlag.Guard]})
+const charlie = makeRelay({fingerprint: fingerprintOf(23), nickname: "charlie"})
 
 const mockLocationWithThreeRelays = () => {
-    mockBackend.onPost("/relay/details/relay/identifiers", [
-        makeRelayIdentifier({id: 21, nickname: "alpha", fingerprint: "AAAA"}),
-        makeRelayIdentifier({id: 22, nickname: "bravo", fingerprint: "BBBB"}),
-        makeRelayIdentifier({id: 23, nickname: "charlie", fingerprint: "CCCC"}),
-    ])
-    mockBackend.onGet(/^\/relay\/details\/relay\/(\d+)$/, ({match}) => {
-        const id = Number(match![1])
-        const nickname = {21: "alpha", 22: "bravo", 23: "charlie"}[id]
-        return makeRelayDetails({id, nickname, fingerprint: `FP${id}`, familyId: id === 21 ? 7 : null})
+    mockBackend.onGet(detailsPathPattern, ({match}) => {
+        const n = parseInt(match![1], 16)
+        const nickname = {21: "alpha", 22: "bravo", 23: "charlie"}[n]
+        return makeRelayDetails({nickname, fingerprint: match![1], familyId: n === 21 ? 7 : null})
     })
 }
 
@@ -90,22 +93,21 @@ describe.each([
     }
 
     it("shows the details of a single relay without a list", async () => {
-        mockBackend.onGet("/relay/details/relay/21", makeRelayDetails({
-            id: 21,
+        mockBackend.onGet(detailsPath(21), makeRelayDetails({
             nickname: "alpha",
-            fingerprint: "AAAA1111",
+            fingerprint: fingerprintOf(21),
             address: "198.51.100.7",
             familyId: 7,
-            confirmedFamilyMembers: [makeRelayIdentifier({id: 5, nickname: "sibling", fingerprint: "SIB1"})],
+            confirmedFamilyMembers: [makeRelayIdentifier({nickname: "sibling", fingerprint: "SIB1"})],
         }))
         await open([alpha])
 
         await expect.element(page.getByRole("heading", {name: "Relay's nickname"})).toHaveTextContent("alpha")
-        await expect.element(page.getByRole("link", {name: "AAAA1111"})).toBeVisible()
+        await expect.element(page.getByRole("link", {name: fingerprintOf(21)})).toBeVisible()
         await expect.element(page.getByRole("link", {name: "198.51.100.7"})).toBeVisible()
         await expect.element(page.getByRole("link", {name: "sibling (SIB1)"})).toBeVisible()
         await expect.element(page.getByLabelText("Nickname or fingerprint")).not.toBeInTheDocument()
-        expect(mockBackend.requested).toEqual(["GET /relay/details/relay/21"])
+        expect(mockBackend.requested).toEqual([`GET ${detailsPath(21)}`])
     })
 
     it("has an accessible name for the dialog", async () => {
@@ -116,14 +118,13 @@ describe.each([
     })
 
     it("formats the relay's numbers and flags", async () => {
-        mockBackend.onGet("/relay/details/relay/21", makeRelayDetails({
-            id: 21,
+        mockBackend.onGet(detailsPath(21), makeRelayDetails({
             nickname: "alpha",
             uptime: 7200,
             bandwidthRate: 2_000_000,
-            isHibernating: true,
+            hibernating: true,
         }))
-        await open([makeRelay({detailsId: 21, nickname: "alpha", flags: [RelayFlag.Exit, RelayFlag.Fast]})])
+        await open([makeRelay({fingerprint: fingerprintOf(21), nickname: "alpha", flags: [RelayFlag.Exit, RelayFlag.Fast]})])
 
         await expect.element(page.getByText("2.00 hours")).toBeVisible()
         await expect.element(page.getByText("2.00 MB/s")).toBeVisible()
@@ -132,12 +133,11 @@ describe.each([
     })
 
     it("lists the families the relay certified", async () => {
-        mockBackend.onGet("/relay/details/relay/21", makeRelayDetails({
-            id: 21,
+        mockBackend.onGet(detailsPath(21), makeRelayDetails({
             nickname: "alpha",
             familyKeys: ["ed25519:one", "ed25519:two"],
         }))
-        await open([makeRelay({detailsId: 21, nickname: "alpha"})])
+        await open([makeRelay({fingerprint: fingerprintOf(21), nickname: "alpha"})])
 
         await expect.element(page.getByText("Certified families")).toBeVisible()
         await expect.element(page.getByText("ed25519:one")).toBeVisible()
@@ -151,10 +151,11 @@ describe.each([
         await expect.element(page.getByRole("button", {name: "alpha"})).toBeVisible()
         await expect.element(page.getByRole("button", {name: "bravo"})).toBeVisible()
         await expect.element(page.getByRole("button", {name: "charlie"})).toBeVisible()
-        expect(mockBackend.requests.find(r => r.url.endsWith("/identifiers"))?.data).toEqual([23, 21, 22])
+        // The relays of the day carry fingerprint and nickname, so the list needs no request
+        expect(mockBackend.requested.filter(request => !request.startsWith("GET /v1/relays/"))).toEqual([])
 
         await page.getByRole("button", {name: "bravo"}).click()
-        await expect.element(page.getByRole("link", {name: "FP22"})).toBeVisible()
+        await expect.element(page.getByRole("link", {name: fingerprintOf(22)})).toBeVisible()
     })
 
     it("narrows the list by search and opens a single match", async () => {
@@ -185,7 +186,7 @@ describe.each([
 
         await expect.element(page.getByRole("dialog")).not.toBeInTheDocument()
         await expect.element(page.getByRole("status", {name: "search on map"}))
-            .toHaveTextContent(JSON.stringify({search: "a", relayIds: [21, 22, 23]}))
+            .toHaveTextContent(JSON.stringify({search: "a", fingerprints: [21, 22, 23].map(fingerprintOf)}))
     })
 
     it("shows a message when nothing matches the search", async () => {
@@ -198,7 +199,7 @@ describe.each([
     })
 
     it("restricts the map to the relay's type", async () => {
-        mockBackend.onGet("/relay/details/relay/21", makeRelayDetails({id: 21, nickname: "alpha"}))
+        mockBackend.onGet(detailsPath(21), makeRelayDetails({nickname: "alpha"}))
         await open([alpha])
         await page.getByRole("button", {name: "select relay type"}).click()
 
@@ -212,7 +213,7 @@ describe.each([
     })
 
     it("selects the relay's family on the map", async () => {
-        mockBackend.onGet("/relay/details/relay/21", makeRelayDetails({id: 21, nickname: "alpha", familyId: 7}))
+        mockBackend.onGet(detailsPath(21), makeRelayDetails({nickname: "alpha", familyId: 7}))
         await open([alpha])
         await page.getByRole("button", {name: "select family"}).first().click()
 
@@ -220,7 +221,7 @@ describe.each([
     })
 
     it("warns when the relays have no details", async () => {
-        await open([makeRelay({detailsId: null}), makeRelay({detailsId: undefined})])
+        await open([makeRelay({hasDetails: false}), makeRelay({hasDetails: false})])
 
         await expect.element(page.getByText(SnackbarMessage.NoRelayDetails)).toBeVisible()
         expect(mockBackend.requested).toEqual([])
@@ -228,7 +229,7 @@ describe.each([
 
     it("does not block the page when the relays have no details", async () => {
         // The app mounts the dialog the first time it is opened (see LeafletLayers), so it is mounted already open
-        await renderWithProviders(<LazyHarness relays={[makeRelay({detailsId: null})]}/>)
+        await renderWithProviders(<LazyHarness relays={[makeRelay({hasDetails: false})]}/>)
         await page.getByRole("button", {name: "Open"}).click()
         await expect.element(page.getByText(SnackbarMessage.NoRelayDetails)).toBeVisible()
 
@@ -237,16 +238,8 @@ describe.each([
         expect(document.body.style.overflow).not.toBe("hidden")
     })
 
-    it("reports a failed list lookup and closes", async () => {
-        mockBackend.onPost("/relay/details/relay/identifiers", () => networkError())
-        await open([alpha, bravo])
-
-        await expect.element(page.getByText(SnackbarMessage.ConnectionFailed)).toBeVisible()
-        await expect.element(page.getByRole("dialog")).not.toBeInTheDocument()
-    })
-
     it("reports failed details", async () => {
-        mockBackend.onGet("/relay/details/relay/21", () => networkError())
+        mockBackend.onGet(detailsPath(21), () => networkError())
         await open([alpha])
 
         await expect.element(page.getByText(SnackbarMessage.ConnectionFailed)).toBeVisible()
@@ -260,11 +253,11 @@ describe("ResponsiveRelayDetailsDialog on a small screen", () => {
         await renderWithProviders(<Harness relays={[alpha, bravo, charlie]}/>)
 
         await page.getByRole("button", {name: "bravo"}).click()
-        await expect.element(page.getByRole("link", {name: "FP22"})).toBeVisible()
+        await expect.element(page.getByRole("link", {name: fingerprintOf(22)})).toBeVisible()
 
         await page.getByRole("button", {name: "Back"}).click()
         await expect.element(page.getByRole("button", {name: "charlie"})).toBeVisible()
-        await expect.element(page.getByRole("link", {name: "FP22"})).not.toBeInTheDocument()
+        await expect.element(page.getByRole("link", {name: fingerprintOf(22)})).not.toBeInTheDocument()
     })
 
     it("closes the dialog with Back from the list", async () => {
@@ -282,11 +275,8 @@ describe("RelayList paging", () => {
     it("renders long lists in batches until every relay is shown", async () => {
         await page.viewport(1400, 900)
         const relays = Array.from({length: 120}, (_, index) =>
-            makeRelay({detailsId: 1000 + index, nickname: `relay${String(index).padStart(3, "0")}`}))
-        mockBackend.onPost("/relay/details/relay/identifiers", relays.map(relay =>
-            makeRelayIdentifier({id: relay.detailsId!, nickname: relay.nickname, fingerprint: `FP${relay.detailsId}`})))
-        mockBackend.onGet(/^\/relay\/details\/relay\/(\d+)$/, ({match}) =>
-            makeRelayDetails({id: Number(match![1])}))
+            makeRelay({fingerprint: fingerprintOf(1000 + index), nickname: `relay${String(index).padStart(3, "0")}`}))
+        mockBackend.onGet(detailsPathPattern, ({match}) => makeRelayDetails({fingerprint: match![1]}))
         await renderWithProviders(<Harness relays={relays}/>)
 
         await expect.element(page.getByRole("button", {name: "relay000"})).toBeVisible()
