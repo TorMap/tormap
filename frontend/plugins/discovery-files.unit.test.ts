@@ -19,6 +19,12 @@ describe("discoveryFiles", () => {
         expect(llmsTxt("https://tormap.org", undefined)).not.toContain("TorMap Lite")
     })
 
+    it("links the CLI and the API v1 in llms.txt", () => {
+        const llms = llmsTxt("https://tormap.org", undefined)
+        expect(llms).toContain("(https://github.com/TorMap/tormap/blob/master/cli/README.md)")
+        expect(llms).toContain("(https://github.com/TorMap/tormap/blob/master/api/openapi-v1.json)")
+    })
+
     it("starts llms.txt with a title and a summary", () => {
         expect(llmsTxt("https://tormap.org", undefined)).toMatch(/^# TorMap\n\n> /)
     })
