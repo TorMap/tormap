@@ -1,7 +1,8 @@
 name: cli_native
 
 # Native binaries of the CLI (cli/) and the tormap/cli Docker image.
-# - Pull requests that change the CLI: build and smoke-test the binaries, publish nothing.
+# - Pull requests that change the CLI, the API or the backend: build and smoke-test the binaries, run the Linux binary
+#   end to end against a backend with the relays of cli/e2e/fixture.sql, publish nothing.
 # - Push to master: also push tormap/cli:edge.
 # - v* tag: also attest the build provenance of the binaries, attach them and SHA256SUMS to the draft release of the
 #   tag (created if missing) and push tormap/cli:<version>, :<major> and :latest. Releases are immutable once published, so publish the release only
@@ -20,6 +21,9 @@ on:
     paths:
       - 'cli/**'
       - 'api/**'
+      # The end-to-end test runs the CLI against the backend
+      - 'backend/src/main/**'
+      - 'backend/build.gradle.kts'
       - '.github/workflows/cli-native.yml'
   workflow_dispatch:
 
@@ -106,6 +110,73 @@ jobs:
           path: dist/
           if-no-files-found: error
           retention-days: 7
+
+  e2e:
+    # The Linux binary against a real backend and database
+    needs: native
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:18-alpine@sha256:d3e1620b530c944afa6e887d22eb899824da68e19c52024bf98f5220c88a65b2
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
+      - uses: gradle/actions/wrapper-validation@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: tormap-linux-x64
+          path: dist
+
+      - name: Start the backend
+        # bootRun, because the backend reads the IP lookup databases from its exploded resources. Without the
+        # scheduled jobs, it neither processes descriptors nor fills caches before the fixture is in the database.
+        env:
+          SPRING_DATASOURCE_PASSWORD: postgres
+        run: |
+          cd backend
+          nohup ./gradlew bootRun --args="--tormap.scheduling.enabled=false" > ../backend.log 2>&1 &
+          for _ in $(seq 1 120); do
+            if curl -sf -o /dev/null http://localhost:8080/; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::The backend did not start within 10 minutes"
+          tail -100 ../backend.log
+          exit 1
+
+      - name: Load the fixture
+        run: docker exec -i "${{ job.services.postgres.id }}" psql -U postgres -v ON_ERROR_STOP=1 < cli/e2e/fixture.sql
+
+      - name: End-to-end test
+        run: |
+          chmod +x dist/tormap-*-linux-x64
+          bash cli/e2e/run.sh "$(ls dist/tormap-*-linux-x64)" http://localhost:8080
+
+      - name: Backend log
+        if: failure()
+        run: tail -200 backend.log
 
   release:
     # Attaches the binaries to the draft release of the tag
