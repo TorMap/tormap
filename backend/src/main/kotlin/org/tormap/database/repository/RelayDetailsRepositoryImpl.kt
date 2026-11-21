@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.tormap.adapter.dto.AutonomousSystemDto
 import org.tormap.adapter.dto.RelayFamilyIdentifiersDto
 import org.tormap.adapter.dto.RelayIdentifiersDto
+import org.tormap.adapter.dto.v1.FamilyMemberRow
 import org.tormap.database.entity.FIND_FAMILY_IDENTIFIERS_QUERY
 
 
@@ -40,6 +41,12 @@ interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
             "GROUP BY autonomousSystemNumber"
     )
     fun findAutonomousSystemsByMonth(month: String): List<AutonomousSystemDto>
+
+    @Query(
+        "SELECT new org.tormap.adapter.dto.v1.FamilyMemberRow(familyId, fingerprint, nickname, autonomousSystemNumber, autonomousSystemName) " +
+            "FROM RelayDetails WHERE month = :month AND familyId IS NOT NULL"
+    )
+    fun findFamilyMembersByMonth(month: String): List<FamilyMemberRow>
 
     @Transactional
     @Modifying

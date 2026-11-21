@@ -26,7 +26,10 @@ class ApiV1RelaysOfDayService(
     // Days without relays are not cached, so requests for made-up days can not evict the days that have data.
     // The key is the day as text, which CacheService uses to evict reprocessed days.
     @Cacheable(CacheConfig.API_V1_RELAYS_PER_DAY, key = "#day.toString()", unless = "#result.relays.isEmpty()")
-    fun getRelaysOfDay(day: LocalDate): RelaysOfDay {
+    fun getRelaysOfDay(day: LocalDate): RelaysOfDay = load(day)
+
+    /** Reads the relays of a day from the database, without the cache. CacheService uses it to warm up the cache. */
+    fun load(day: LocalDate): RelaysOfDay {
         val relays = relayLocationRepositoryImpl.findAllV1UsingDay(day)
         val hash = MessageDigest.getInstance("SHA-256").digest(objectMapper.writeValueAsBytes(relays))
         // Weak, because the response may be compressed on the way

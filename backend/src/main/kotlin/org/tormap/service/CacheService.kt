@@ -16,6 +16,7 @@ class CacheService(
     private val cacheManager: CacheManager,
     private val relayLocationRepositoryImpl: RelayLocationRepositoryImpl,
     private val coalesceService: CoalesceService,
+    private val apiV1RelaysOfDayService: ApiV1RelaysOfDayService,
 ) {
     private val logger = logger()
 
@@ -46,14 +47,14 @@ class CacheService(
                 val yearMonth = YearMonth.parse(month)
                 yearMonth.atDay(1).datesUntil(yearMonth.plusMonths(1).atDay(1)).forEach {
                     val day = it.toString()
-                    // The API v1 cache is not warmed up, only filled on request, so it is cleared for the reprocessed day
-                    cacheManager.getCache(CacheConfig.API_V1_RELAYS_PER_DAY)?.evict(day)
-                    val relayLocations = relayLocationRepositoryImpl.findAllUsingDay(LocalDate.parse(day))
-                    if (relayLocations.isNotEmpty()) {
-                        cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)?.put(
-                            day,
-                            relayLocations
-                        )
+                    // The map uses API v1, so its cache is warmed up. The old /relay/location/day/{day} endpoint is only
+                    // filled on request, so its entry is cleared for the reprocessed day.
+                    cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)?.evict(day)
+                    val relaysOfDay = apiV1RelaysOfDayService.load(it)
+                    if (relaysOfDay.relays.isNotEmpty()) {
+                        cacheManager.getCache(CacheConfig.API_V1_RELAYS_PER_DAY)?.put(day, relaysOfDay)
+                    } else {
+                        cacheManager.getCache(CacheConfig.API_V1_RELAYS_PER_DAY)?.evict(day)
                     }
                 }
             }

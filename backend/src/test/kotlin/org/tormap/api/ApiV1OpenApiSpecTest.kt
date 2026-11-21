@@ -78,6 +78,7 @@ class ApiV1OpenApiSpecTest(
         responseFields("/v1/days/2024-03-05/relays") { it.get(0) } shouldBe specFields("RelayV1Dto")
         responseFields("/v1/relays/${"A".repeat(40)}?month=2024-03") { it } shouldBe specFields("RelayDetailsV1Dto")
         responseFields("/v1/families/7") { it.get(0) } shouldBe specFields("RelayIdentifiersV1Dto")
+        responseFields("/v1/families?month=2024-03") { it.get(0) } shouldBe specFields("FamilyV1Dto")
         relayDetailsRepository.deleteAll()
         relayLocationRepository.deleteAll()
     }

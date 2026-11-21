@@ -2,6 +2,7 @@ package org.tormap.adapter.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,9 +15,11 @@ import org.tormap.adapter.controller.exception.RelayNotFoundException
 import org.tormap.adapter.dto.AutonomousSystemDto
 import org.tormap.adapter.dto.CountryUsageDto
 import org.tormap.adapter.dto.DailyRelayCountDto
+import org.tormap.adapter.dto.v1.FamilyV1Dto
 import org.tormap.adapter.dto.v1.RelayDetailsV1Dto
 import org.tormap.adapter.dto.v1.RelayIdentifiersV1Dto
 import org.tormap.adapter.dto.v1.RelayV1Dto
+import org.tormap.config.CacheConfig
 import org.tormap.database.repository.RelayDetailsRepositoryImpl
 import org.tormap.service.ApiV1RelaysOfDayService
 import org.tormap.service.RelayDetailsQueryService
@@ -80,6 +83,27 @@ class ApiV1Controller(
             ?: throw RelayNotFoundException()
         return RelayDetailsV1Dto(relayDetailsQueryService.getRelay(details.id!!))
     }
+
+    // Months without families are not cached, so requests for made-up months can not evict real ones
+    @Cacheable(CacheConfig.API_V1_FAMILIES_PER_MONTH, key = "#month", unless = "#result.isEmpty()")
+    @Operation(summary = "Returns all families of a month (like 2024-05) with their members and autonomous systems.")
+    @GetMapping("families")
+    fun getFamilies(@RequestParam month: String): List<FamilyV1Dto> =
+        relayDetailsRepositoryImpl.findFamilyMembersByMonth(parseMonth(month).toString())
+            .groupBy { it.familyId }
+            .map { (id, members) ->
+                FamilyV1Dto(
+                    id = id,
+                    members = members
+                        .map { RelayIdentifiersV1Dto(it.fingerprint, it.nickname) }
+                        .sortedWith(compareBy({ it.nickname.lowercase() }, { it.fingerprint })),
+                    autonomousSystems = members
+                        .mapNotNull { member -> member.autonomousSystemNumber?.let { AutonomousSystemDto(it, member.autonomousSystemName) } }
+                        .distinctBy { it.number }
+                        .sortedBy { it.number },
+                )
+            }
+            .sortedBy { it.id }
 
     @Operation(summary = "Returns the fingerprint and nickname of all relays in a family.")
     @GetMapping("families/{id}")
