@@ -14,12 +14,23 @@ class FakeApi : AutoCloseable {
     val routes = mutableMapOf<String, Pair<Int, String>>()
     val requests = CopyOnWriteArrayList<String>()
     val userAgents = CopyOnWriteArrayList<String>()
+    /** ETags per path. A request with a matching If-None-Match gets 304 Not Modified. */
+    val eTags = mutableMapOf<String, String>()
+    val ifNoneMatch = CopyOnWriteArrayList<String?>()
     private val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0).apply {
         createContext("/") { exchange ->
             val target = exchange.requestURI.toString()
             requests += target
             userAgents += exchange.requestHeaders.getFirst("User-Agent").orEmpty()
+            ifNoneMatch += exchange.requestHeaders.getFirst("If-None-Match")
             val (status, body) = routes[target] ?: (404 to """{"status":404}""")
+            val eTag = eTags[target]
+            if (eTag != null) exchange.responseHeaders.add("ETag", eTag)
+            if (eTag != null && exchange.requestHeaders.getFirst("If-None-Match") == eTag) {
+                exchange.sendResponseHeaders(304, -1)
+                exchange.close()
+                return@createContext
+            }
             val gzip = exchange.requestHeaders.getFirst("Accept-Encoding")?.contains("gzip") == true
             val bytes = if (gzip) ByteArrayOutputStream().also { GZIPOutputStream(it).use { out -> out.write(body.toByteArray()) } }.toByteArray() else body.toByteArray()
             if (gzip) exchange.responseHeaders.add("Content-Encoding", "gzip")

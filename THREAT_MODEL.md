@@ -126,7 +126,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   attached to the draft release with a `SHA256SUMS` file; only that workflow's `release` job has `contents: write`.
   Published releases are immutable. The binaries carry the JDK's CA certificates from build time. The `tormap/cli`
   image copies the Linux binaries onto a distroless base pinned by digest and runs as a non-root user.
-- Caches with bounded entry counts (Caffeine `maximumSize`, unknown cache names rejected). Cache keys built from path variables (day, month) must be canonical: the controllers reject padded forms such as `+0002024-05-01`, and empty results are not cached, so made-up values can not fill or evict a cache. Shallow ETags only on small endpoints. `CoalesceService`
+- Caches with bounded entry counts (Caffeine `maximumSize`, unknown cache names rejected). Cache keys built from path variables (day, month) must be canonical: the controllers reject padded forms such as `+0002024-05-01`, and empty results are not cached, so made-up values can not fill or evict a cache. Shallow ETags only on small endpoints; the API v1 day of relays hashes its JSON once per cache fill and answers `If-None-Match` with 304. `CoalesceService`
   bounds concurrent background recomputation per key.
 - Ingestion: remote file names must not contain `/`, `\`, `.` or `..`, and target directories must resolve inside the
   download directory (real-path check). Downloads are written to a temp file and kept only if the size matches the

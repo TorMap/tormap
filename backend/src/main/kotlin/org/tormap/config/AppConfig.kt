@@ -34,6 +34,7 @@ class AppConfig : WebMvcConfigurer {
      * Shallow ETags require Spring to buffer the full response body before it can be hashed.
      * Keep this filter away from large public endpoints such as /relay/location/day/{day} and /v1/days/{day}/relays,
      * where buffering an entire day's relay locations can amplify memory and CPU usage.
+     * /v1/days/{day}/relays gets its ETag from ApiV1RelaysOfDayService instead, computed once per cache fill.
      */
     @Bean
     fun shallowEtagHeaderFilterRegistration(): FilterRegistrationBean<ShallowEtagHeaderFilter> {

@@ -2,8 +2,8 @@ package org.tormap.adapter.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -17,9 +17,8 @@ import org.tormap.adapter.dto.DailyRelayCountDto
 import org.tormap.adapter.dto.v1.RelayDetailsV1Dto
 import org.tormap.adapter.dto.v1.RelayIdentifiersV1Dto
 import org.tormap.adapter.dto.v1.RelayV1Dto
-import org.tormap.config.CacheConfig
 import org.tormap.database.repository.RelayDetailsRepositoryImpl
-import org.tormap.database.repository.RelayLocationRepositoryImpl
+import org.tormap.service.ApiV1RelaysOfDayService
 import org.tormap.service.RelayDetailsQueryService
 import java.time.LocalDate
 import java.time.YearMonth
@@ -42,9 +41,9 @@ class ApiV1Controller(
     private val relayStatisticsController: RelayStatisticsController,
     private val relayDetailsController: RelayDetailsController,
     private val countryUsageController: CountryUsageController,
-    private val relayLocationRepositoryImpl: RelayLocationRepositoryImpl,
     private val relayDetailsRepositoryImpl: RelayDetailsRepositoryImpl,
     private val relayDetailsQueryService: RelayDetailsQueryService,
+    private val apiV1RelaysOfDayService: ApiV1RelaysOfDayService,
 ) {
     companion object {
         const val PATH = "/v1/"
@@ -55,12 +54,13 @@ class ApiV1Controller(
     @GetMapping("days")
     fun getDays(): List<LocalDate> = relayLocationController.getDays().sorted()
 
-    // Days without relays are not cached, so requests for made-up days can not evict the days that have data
-    @Cacheable(CacheConfig.API_V1_RELAYS_PER_DAY, key = "#day", unless = "#result.isEmpty()")
+    // Answers If-None-Match with 304 Not Modified, so clients can revalidate a cached day without downloading it again
     @Operation(summary = "Returns all relays of a day with fingerprint, nickname, country, location, flags, consensus weight, autonomous system and family.")
     @GetMapping("days/{day}/relays")
-    fun getRelaysOfDay(@PathVariable day: String): List<RelayV1Dto> =
-        relayLocationRepositoryImpl.findAllV1UsingDay(parseDay(day))
+    fun getRelaysOfDay(@PathVariable day: String): ResponseEntity<List<RelayV1Dto>> {
+        val relaysOfDay = apiV1RelaysOfDayService.getRelaysOfDay(parseDay(day))
+        return ResponseEntity.ok().eTag(relaysOfDay.eTag).body(relaysOfDay.relays)
+    }
 
     // The fingerprint is the relay's identity in Tor and stays the same across months, unlike the internal details ID.
     // The lookup uses the unique (month, fingerprint) index, also when no month is given (see RelayDetailsIndexUsageTest).

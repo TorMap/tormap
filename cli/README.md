@@ -82,7 +82,8 @@ when piped. JSON and NDJSON contain all fields of the API, named as in [api/open
 | `--no-cache`, `--timeout`, `--output` | | |
 | `--quiet` (`-q`): no results or hints, only errors and the exit code | | |
 
-Downloaded days are cached as gzip files: recent days for an hour, older days for 30 days.
+Downloaded days are cached as gzip files: recent days for an hour, older days for 30 days. After that, the CLI asks the
+server whether the day changed (`If-None-Match`) and only downloads it again if it did.
 
 ### Shell completion
 

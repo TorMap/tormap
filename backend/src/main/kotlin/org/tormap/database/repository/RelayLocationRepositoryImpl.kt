@@ -30,7 +30,9 @@ interface RelayLocationRepositoryImpl : RelayLocationRepository {
                 "LEFT JOIN FETCH RelayDetails n " +
                 "ON g.fingerprint = n.fingerprint " +
                 "AND function('TO_CHAR', g.day, 'YYYY-MM') = n.month " +
-                "WHERE g.day = :day"
+                "WHERE g.day = :day " +
+                // A stable order keeps the ETag of a day the same when the cache is filled again
+                "ORDER BY g.fingerprint"
     )
     fun findAllV1UsingDay(day: LocalDate): List<RelayV1Dto>
 
