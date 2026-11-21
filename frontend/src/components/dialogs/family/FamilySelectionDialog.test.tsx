@@ -3,7 +3,7 @@ import {page} from "vitest/browser";
 
 import {useSettings} from "../../../context/settings-context";
 import {RelayLocationDto} from "../../../dto/relay";
-import {fingerprintOf, makeFamily, makeRelay} from "../../../test/fixtures";
+import {makeFamilyIdentifier, makeRelay} from "../../../test/fixtures";
 import {mockBackend, networkError} from "../../../test/mock-backend";
 import {renderWithProviders} from "../../../test/render";
 import {RelayFlag} from "../../../types/relay";
@@ -17,16 +17,6 @@ const SelectedFamily = () => {
 }
 
 const familyIds = [3, 4]
-const familiesPath = "/v1/families?month=2024-01"
-
-/**
- * A family of the month with members of the given nicknames
- */
-const family = (id: number, nicknames: string[], autonomousSystems: string[] = []) => makeFamily({
-    id,
-    members: nicknames.map((nickname, index) => ({fingerprint: fingerprintOf(id * 100 + index), nickname})),
-    autonomousSystems: autonomousSystems.map((name, index) => ({number: 64500 + index, name})),
-})
 
 describe.each([
     ["large", 1400, 900, "Select a family"],
@@ -49,7 +39,6 @@ describe.each([
                     familyIds={props.familyIds ?? familyIds}
                     relayFamilyMap={props.relayFamilyMap}
                     totalConsensusWeight={props.totalConsensusWeight}
-                    month="2024-01"
                 />
                 <SelectedFamily/>
             </>,
@@ -59,9 +48,9 @@ describe.each([
     }
 
     it("lists the families that were looked up", async () => {
-        mockBackend.onGet(familiesPath, [
-            family(3, ["alpha", "bravo"], ["AS1"]),
-            family(4, ["charlie"]),
+        mockBackend.onPost("/relay/details/family/identifiers", [
+            makeFamilyIdentifier({id: 3, nicknames: "alpha, bravo", memberCount: 2, autonomousSystems: "AS1"}),
+            makeFamilyIdentifier({id: 4, nicknames: "charlie", memberCount: 1, autonomousSystems: undefined}),
         ])
         await open()
 
@@ -69,20 +58,20 @@ describe.each([
         await expect.element(page.getByText("alpha, bravo")).toBeVisible()
         await expect.element(page.getByText("AS1")).toBeVisible()
         await expect.element(page.getByText("data not yet available")).toBeVisible()
-        expect(mockBackend.requested).toEqual([`GET ${familiesPath}`])
+        expect(mockBackend.requests[0].data).toEqual(familyIds)
     })
 
     it("has an accessible name for the dialog", async () => {
-        mockBackend.onGet(familiesPath, [family(3, ["alpha"])])
+        mockBackend.onPost("/relay/details/family/identifiers", [makeFamilyIdentifier({id: 3, nicknames: "alpha"})])
         await open()
 
         await expect.element(page.getByRole("dialog", {name: new RegExp(title)})).toBeVisible()
     })
 
     it("selects the family of the clicked row and closes", async () => {
-        mockBackend.onGet(familiesPath, [
-            family(3, ["alpha", "bravo"]),
-            family(4, ["charlie"]),
+        mockBackend.onPost("/relay/details/family/identifiers", [
+            makeFamilyIdentifier({id: 3, nicknames: "alpha, bravo"}),
+            makeFamilyIdentifier({id: 4, nicknames: "charlie"}),
         ])
         const {closeDialog} = await open()
         await page.getByText("charlie").click()
@@ -93,9 +82,9 @@ describe.each([
     })
 
     it("shows the relays, exits, consensus weight and countries of the families on the map, heaviest first", async () => {
-        mockBackend.onGet(familiesPath, [
-            family(3, ["alpha", "bravo"]),
-            family(4, ["charlie"]),
+        mockBackend.onPost("/relay/details/family/identifiers", [
+            makeFamilyIdentifier({id: 3, nicknames: "alpha, bravo", memberCount: 2}),
+            makeFamilyIdentifier({id: 4, nicknames: "charlie", memberCount: 1}),
         ])
         const relayFamilyMap = buildRelayFamilyMap([
             makeRelay({familyId: 3, country: "DE", consensusWeight: 10, flags: [RelayFlag.Exit]}),
@@ -113,15 +102,14 @@ describe.each([
     })
 
     it("sorts the families by the clicked column", async () => {
-        mockBackend.onGet(familiesPath, [
-            family(3, ["bravo", "member2"], ["AS10"]),
-            family(4, ["alpha", "member2", "member3", "member4", "member5", "member6", "member7", "member8", "member9"]),
-            family(5, ["charlie", "member2", "member3", "member4", "member5"], ["AS9"]),
+        mockBackend.onPost("/relay/details/family/identifiers", [
+            makeFamilyIdentifier({id: 3, nicknames: "bravo", memberCount: 2, autonomousSystems: "AS10"}),
+            makeFamilyIdentifier({id: 4, nicknames: "alpha", memberCount: 9, autonomousSystems: undefined}),
+            makeFamilyIdentifier({id: 5, nicknames: "charlie", memberCount: 5, autonomousSystems: "AS9"}),
         ])
-        await open({familyIds: [3, 4, 5]})
-        // The first nickname of each family
+        await open()
         const nicknames = () => Array.from(document.querySelectorAll("tbody tr"))
-            .map(row => row.querySelector("td")?.textContent?.split(", ")[0])
+            .map(row => row.querySelector("td")?.textContent)
 
         // Largest families first by default
         await expect.poll(nicknames).toEqual(["alpha", "charlie", "bravo"])
@@ -142,13 +130,13 @@ describe.each([
     })
 
     it("filters a long list by nickname or autonomous system", async () => {
-        mockBackend.onGet(familiesPath, [
-            family(3, ["alpha"], ["Hetzner Online GmbH"]),
-            family(4, ["bravo"], ["OVH SAS"]),
-            family(5, ["charlie"]),
-            family(6, ["delta"]),
-            family(7, ["echo"]),
-            family(8, ["foxtrot"]),
+        mockBackend.onPost("/relay/details/family/identifiers", [
+            makeFamilyIdentifier({id: 3, nicknames: "alpha", autonomousSystems: "Hetzner Online GmbH"}),
+            makeFamilyIdentifier({id: 4, nicknames: "bravo", autonomousSystems: "OVH SAS"}),
+            makeFamilyIdentifier({id: 5, nicknames: "charlie"}),
+            makeFamilyIdentifier({id: 6, nicknames: "delta"}),
+            makeFamilyIdentifier({id: 7, nicknames: "echo"}),
+            makeFamilyIdentifier({id: 8, nicknames: "foxtrot"}),
         ])
         await open({familyIds: [3, 4, 5, 6, 7, 8]})
         const nicknames = () => Array.from(document.querySelectorAll("tbody tr"))
@@ -162,7 +150,7 @@ describe.each([
     })
 
     it("reloads the day when the families are outdated", async () => {
-        mockBackend.onGet(familiesPath, [])
+        mockBackend.onPost("/relay/details/family/identifiers", [])
         const {closeDialog, reloadSelectedDay} = await open()
 
         await expect.element(page.getByText(SnackbarMessage.UpdatedData)).toBeVisible()
@@ -171,7 +159,7 @@ describe.each([
     })
 
     it("reports a failed lookup", async () => {
-        mockBackend.onGet(familiesPath, () => networkError())
+        mockBackend.onPost("/relay/details/family/identifiers", () => networkError())
         const {closeDialog, reloadSelectedDay} = await open()
 
         await expect.element(page.getByText(SnackbarMessage.ConnectionFailed)).toBeVisible()

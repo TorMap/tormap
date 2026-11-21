@@ -54,7 +54,7 @@ describe.each([
         .map(row => row.querySelector("td")?.textContent)
 
     it("lists the autonomous systems with relays and consensus weight, heaviest first", async () => {
-        mockBackend.onGet("/v1/autonomous-systems/2024-01", names)
+        mockBackend.onGet("/relay/details/autonomous-systems/2024-01", names)
         await open()
 
         await expect.element(page.getByRole("dialog", {name: new RegExp(title)})).toBeVisible()
@@ -65,7 +65,7 @@ describe.each([
     })
 
     it("sorts by the clicked column", async () => {
-        mockBackend.onGet("/v1/autonomous-systems/2024-01", names)
+        mockBackend.onGet("/relay/details/autonomous-systems/2024-01", names)
         await open()
         await expect.poll(firstCells).toHaveLength(3)
 
@@ -76,7 +76,7 @@ describe.each([
     })
 
     it("filters by name or number", async () => {
-        mockBackend.onGet("/v1/autonomous-systems/2024-01", names)
+        mockBackend.onGet("/relay/details/autonomous-systems/2024-01", names)
         await open()
         await expect.poll(firstCells).toHaveLength(3)
 
@@ -87,7 +87,7 @@ describe.each([
     })
 
     it("selects the autonomous system of the clicked row and closes", async () => {
-        mockBackend.onGet("/v1/autonomous-systems/2024-01", names)
+        mockBackend.onGet("/relay/details/autonomous-systems/2024-01", names)
         const {closeDialog} = await open()
         await page.getByText("Deutsche Telekom AG").click()
 
@@ -97,7 +97,7 @@ describe.each([
     })
 
     it("still lists the autonomous systems when the names can not be loaded", async () => {
-        mockBackend.onGet("/v1/autonomous-systems/2024-01", () => networkError())
+        mockBackend.onGet("/relay/details/autonomous-systems/2024-01", () => networkError())
         await open()
 
         await expect.poll(firstCells).toEqual(["Unknown name", "Unknown name", "Unknown name"])

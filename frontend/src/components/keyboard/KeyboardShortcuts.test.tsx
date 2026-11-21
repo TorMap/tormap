@@ -4,7 +4,7 @@ import {describe, expect, it} from "vitest";
 import {page, userEvent} from "vitest/browser";
 
 import {useDate} from "../../context/date-context";
-import {makeRelay, makeRelayDetails} from "../../test/fixtures";
+import {makeRelay, makeRelayDetails, makeRelayIdentifier} from "../../test/fixtures";
 import {mockBackend} from "../../test/mock-backend";
 import {renderWithProviders} from "../../test/render";
 import {AboutInformation} from "../dialogs/AboutInformation";
@@ -14,8 +14,8 @@ import {dayIndexForKey, KeyboardShortcuts} from "./KeyboardShortcuts";
 
 const days = ["2024-02-01", "2024-02-02", "2024-02-03"]
 const relays = [
-    makeRelay({nickname: "alpha"}),
-    makeRelay({nickname: "beta"}),
+    makeRelay({detailsId: 31, nickname: "alpha"}),
+    makeRelay({detailsId: 32, nickname: "beta"}),
 ]
 
 /**
@@ -111,7 +111,9 @@ describe("KeyboardShortcuts", () => {
 
     it("opens the relay search with Ctrl+K and focuses its search field", async () => {
         await page.viewport(1400, 900)
-        mockBackend.onGet(/^\/v1\/relays\/([0-9A-F]{40})\?month=2024-02$/, ({match}) => makeRelayDetails({fingerprint: match![1]}))
+        mockBackend.onPost("/relay/details/relay/identifiers", relays.map(relay =>
+            makeRelayIdentifier({id: relay.detailsId!, nickname: relay.nickname, fingerprint: `FP${relay.detailsId}`})))
+        mockBackend.onGet(/^\/relay\/details\/relay\/(\d+)$/, ({match}) => makeRelayDetails({id: Number(match![1])}))
         await renderWithProviders(<Harness/>)
         await expect.element(selectedDate()).toHaveTextContent("2024-02-03")
 
@@ -128,7 +130,9 @@ describe("KeyboardShortcuts", () => {
 
     it("opens the relay search with /", async () => {
         await page.viewport(1400, 900)
-        mockBackend.onGet(/^\/v1\/relays\/([0-9A-F]{40})\?month=2024-02$/, ({match}) => makeRelayDetails({fingerprint: match![1]}))
+        mockBackend.onPost("/relay/details/relay/identifiers", relays.map(relay =>
+            makeRelayIdentifier({id: relay.detailsId!, nickname: relay.nickname, fingerprint: `FP${relay.detailsId}`})))
+        mockBackend.onGet(/^\/relay\/details\/relay\/(\d+)$/, ({match}) => makeRelayDetails({id: Number(match![1])}))
         await renderWithProviders(<Harness/>)
         await expect.element(selectedDate()).toHaveTextContent("2024-02-03")
 

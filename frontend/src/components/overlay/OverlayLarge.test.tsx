@@ -16,7 +16,7 @@ const ShowSearchOnMap: FunctionComponent<{ search: string }> = ({search}) => {
 
 describe("OverlayLarge", () => {
     it("keeps the width of the settings when a limit info with a long text appears", async () => {
-        mockBackend.onGet("/v1/statistics/daily-counts", [])
+        mockBackend.onGet("/relay/statistics/daily-counts", [])
         const search = "a very long search text that would widen the settings panel if it was allowed to grow"
         await renderWithProviders(<><OverlayLarge/><ShowSearchOnMap search={search}/></>)
         const panel = () => page.getByRole("button", {name: /^Search \d+ relays/}).element().parentElement as HTMLElement

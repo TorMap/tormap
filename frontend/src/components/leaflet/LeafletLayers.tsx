@@ -100,8 +100,8 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
     const searchedRelays = useMemo(
         () => {
             if (!relays || !relaySearchOnMap) return relays
-            const searchedFingerprints = new Set(relaySearchOnMap.relays.map(relay => relay.fingerprint))
-            const matches = relays.filter(relay => searchedFingerprints.has(relay.fingerprint))
+            const searchedIds = new Set(relaySearchOnMap.relays.map(relay => relay.detailsId))
+            const matches = relays.filter(relay => relay.detailsId && searchedIds.has(relay.detailsId))
             return matches.length > 0 ? matches : relays
         },
         [relays, relaySearchOnMap]
@@ -348,7 +348,6 @@ export const LeafletLayers: FunctionComponent<Props> = ({relays, reloadSelectedD
                 familyIds={familySelection.ids}
                 relayFamilyMap={relayFamilyMap}
                 totalConsensusWeight={totalConsensusWeight}
-                month={selectedDate?.slice(0, 7)}
             /> : null}
             {hasOpenedAutonomousSystemSelectionDialog ? <AutonomousSystemSelectionDialog
                 shouldShowDialog={autonomousSystemSelection.show}

@@ -1,13 +1,8 @@
 import {defaultSettings} from "../config";
-import {FamilyV1Dto, RelayDetailsDto, RelayFamilyIdentifier, RelayIdentifierDto, RelayLocationDto, RelayV1Dto} from "../dto/relay";
+import {RelayDetailsDto, RelayFamilyIdentifier, RelayIdentifierDto, RelayLocationDto} from "../dto/relay";
 import {Settings} from "../types/settings";
 
-let nextRelay = 1
-
-/**
- * A fingerprint (40 hexadecimal characters) made from a number, e.g. for the n-th relay of a test
- */
-export const fingerprintOf = (n: number) => n.toString(16).toUpperCase().padStart(40, "0")
+let nextDetailsId = 1
 
 /**
  * Builds a relay at 0,0 in DE. Override only what a test cares about.
@@ -18,8 +13,7 @@ export const makeRelay = (overrides: Partial<RelayLocationDto> = {}): RelayLocat
     country: "DE",
     nickname: "relay",
     flags: [],
-    fingerprint: fingerprintOf(nextRelay++),
-    hasDetails: true,
+    detailsId: nextDetailsId++,
     familyId: null,
     ...overrides,
 })
@@ -45,6 +39,7 @@ export const makeSettings = (overrides: Partial<Settings> = {}): Settings => ({
  * Builds the details of one relay. Override only what a test cares about.
  */
 export const makeRelayDetails = (overrides: Partial<RelayDetailsDto> = {}): RelayDetailsDto => ({
+    id: 1,
     month: "2024-01",
     day: "2024-01-02",
     address: "192.0.2.1",
@@ -58,14 +53,14 @@ export const makeRelayDetails = (overrides: Partial<RelayDetailsDto> = {}): Rela
     platform: "Tor 0.4.8 on Linux",
     protocols: "Cons=1-2",
     fingerprint: "0123456789ABCDEF0123456789ABCDEF01234567",
-    hibernating: false,
+    isHibernating: false,
     uptime: 7200,
     contact: "operator@example.org",
     familyEntries: "",
     familyKeys: [],
     familyId: null,
     cachesExtraInfo: true,
-    hiddenServiceDir: true,
+    isHiddenServiceDir: true,
     linkProtocolVersions: "1-5",
     circuitProtocolVersions: "1-2",
     tunnelledDirServer: true,
@@ -76,6 +71,7 @@ export const makeRelayDetails = (overrides: Partial<RelayDetailsDto> = {}): Rela
 })
 
 export const makeRelayIdentifier = (overrides: Partial<RelayIdentifierDto> = {}): RelayIdentifierDto => ({
+    id: 1,
     fingerprint: "0123456789ABCDEF0123456789ABCDEF01234567",
     nickname: "relay",
     ...overrides,
@@ -84,37 +80,8 @@ export const makeRelayIdentifier = (overrides: Partial<RelayIdentifierDto> = {})
 export const makeFamilyIdentifier = (overrides: Partial<RelayFamilyIdentifier> = {}): RelayFamilyIdentifier => ({
     id: 1,
     memberCount: 2,
+    fingerprints: "AAAA,BBBB",
     nicknames: "alpha, bravo",
     autonomousSystems: "AS64500",
     ...overrides,
 })
-
-/**
- * Builds a family as `/v1/families?month=` returns it
- */
-export const makeFamily = (overrides: Partial<FamilyV1Dto> = {}): FamilyV1Dto => ({
-    id: 1,
-    members: [
-        {fingerprint: fingerprintOf(0xA), nickname: "alpha"},
-        {fingerprint: fingerprintOf(0xB), nickname: "bravo"},
-    ],
-    autonomousSystems: [{number: 64500, name: "AS64500"}],
-    ...overrides,
-})
-
-/**
- * Builds `count` relays of a day as `/v1/days/{day}/relays` returns them
- */
-export const makeApiRelays = (count: number, overrides: Partial<RelayV1Dto> = {}): RelayV1Dto[] =>
-    Array.from({length: count}, () => ({
-        fingerprint: fingerprintOf(nextRelay++),
-        nickname: "relay",
-        country: "DE",
-        lat: 0,
-        long: 0,
-        flags: [],
-        consensusWeight: null,
-        autonomousSystemNumber: null,
-        familyId: null,
-        ...overrides,
-    }))

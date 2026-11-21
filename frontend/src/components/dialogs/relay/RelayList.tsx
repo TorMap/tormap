@@ -15,12 +15,12 @@ interface Props {
     /**
      * ID of currently selected relay
      */
-    selectedRelayId?: string
+    selectedRelayId?: number
 
     /**
      * Setter for the currently selected relay
      */
-    setSelectedRelayId: (fingerprint: string) => void
+    setSelectedRelayId: (id: number) => void
 
     /**
      * Shows the relay matches on the map, if available
@@ -73,11 +73,11 @@ export const RelayList: FunctionComponent<Props> = ({
             {relayMatches.length > 0 ?
                 <List>
                     {relayMatches.slice(0, numberOfMatchesToDisplay).map(relayMatch =>
-                        (
+                        (relayMatch.id &&
                             <ListItemButton
-                                key={relayMatch.fingerprint}
-                                selected={relayMatch.fingerprint === selectedRelayId}
-                                onClick={() => setSelectedRelayId(relayMatch.fingerprint)}
+                                key={relayMatch.id}
+                                selected={relayMatch.id === selectedRelayId}
+                                onClick={() => setSelectedRelayId(relayMatch.id)}
                             >
                                 <ListItemText primary={relayMatch.nickname}/>
                                 <ListItemIcon sx={{minWidth: "70px"}}>

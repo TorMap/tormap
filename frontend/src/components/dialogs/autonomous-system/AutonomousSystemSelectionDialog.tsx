@@ -73,7 +73,7 @@ export const AutonomousSystemSelectionDialog: FunctionComponent<Props> = ({
     useEffect(() => {
         if (!shouldShowDialog || !month || namesLoaded || failedMonth === month) return undefined
         let isCancelled = false
-        backend.get<AutonomousSystemDto[]>(`/v1/autonomous-systems/${month}`).then(response => {
+        backend.get<AutonomousSystemDto[]>(`/relay/details/autonomous-systems/${month}`).then(response => {
             if (isCancelled) return
             // A proxy may answer 200 with something else than the expected list
             if (Array.isArray(response.data)) setNames({month, autonomousSystems: response.data})

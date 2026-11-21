@@ -221,10 +221,10 @@ The backend enables CORS so specific frontend browser origins can call the publi
 
 #### HTTP caching
 
-Public `GET` endpoints under `/relay/**`, `/v1/**` and `/lite/**` can return `Cache-Control` headers to allow browser and
+Public `GET` endpoints under `/relay/**` and `/lite/**` can return `Cache-Control` headers to allow browser and
 CDN/proxy caching.
 
-- Default: `app.http.cache.public.max-age-seconds: 300`, so `/relay/**`, `/v1/**` and `/lite/**` responses include
+- Default: `app.http.cache.public.max-age-seconds: 300`, so `/relay/**` and `/lite/**` responses include
   `Cache-Control: public, max-age=300`.
 - Dev: `application-dev.yml` sets it to `0`, which disables the caching headers. Responses are then typically not
   cached unless a controller explicitly sets caching headers.

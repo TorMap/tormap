@@ -13,7 +13,7 @@ import {
     buildStatistics,
     createLatLonKey,
     filterRelaysByFlags,
-    findRelayLocationByFingerprint,
+    findRelayLocationById,
     getRelayType,
     keepRelaysWithHighestWeight,
     sortGroupCoordinatesMap,
@@ -330,15 +330,15 @@ describe("buildStatistics", () => {
     })
 })
 
-describe("findRelayLocationByFingerprint", () => {
-    const relays = [makeRelay(), makeRelay()]
+describe("findRelayLocationById", () => {
+    const relays = [makeRelay({detailsId: 10}), makeRelay({detailsId: 20})]
 
-    it("finds a relay by fingerprint", () => {
-        expect(findRelayLocationByFingerprint(relays[1].fingerprint, relays)).toBe(relays[1])
+    it("finds a relay by details id", () => {
+        expect(findRelayLocationById(20, relays)).toBe(relays[1])
     })
 
-    it("returns undefined for unknown fingerprints", () => {
-        expect(findRelayLocationByFingerprint("F".repeat(40), relays)).toBeUndefined()
+    it("returns undefined for unknown ids", () => {
+        expect(findRelayLocationById(30, relays)).toBeUndefined()
     })
 })
 

@@ -47,14 +47,14 @@ describe("CountryUsageLayer", () => {
     })
 
     it("loads the estimates of the selected day", async () => {
-        mockBackend.onGet("/v1/country-usage/2024-03-05", usage)
+        mockBackend.onGet("/relay/country-usage/day/2024-03-05", usage)
         await renderLayer(true)
         await expect.element(page.getByRole("status", {name: "usage"})).toHaveTextContent("2024-03-05:2")
-        expect(mockBackend.requested).toEqual(["GET /v1/country-usage/2024-03-05"])
+        expect(mockBackend.requested).toEqual(["GET /relay/country-usage/day/2024-03-05"])
     })
 
     it("keeps an empty list for days without estimates", async () => {
-        mockBackend.onGet("/v1/country-usage/2008-01-01", [])
+        mockBackend.onGet("/relay/country-usage/day/2008-01-01", [])
         await renderLayer(true, "2008-01-01")
         await expect.element(page.getByRole("status", {name: "usage"})).toHaveTextContent("2008-01-01:0")
     })
@@ -63,21 +63,21 @@ describe("CountryUsageLayer", () => {
         ["a backend that does not know the endpoint", () => reply(404, {error: "Not Found"})],
         ["a lost connection", () => networkError()],
     ])("tells the user about %s", async (_name, answer) => {
-        mockBackend.onGet("/v1/country-usage/2024-03-05", answer)
+        mockBackend.onGet("/relay/country-usage/day/2024-03-05", answer)
         await renderLayer(true)
         await expect.element(page.getByText(SnackbarMessage.CountryUsageUnavailable)).toBeVisible()
         await expect.element(page.getByRole("status", {name: "usage"})).toHaveTextContent("none")
     })
 
     it("ignores a response that is not a list", async () => {
-        mockBackend.onGet("/v1/country-usage/2024-03-05", "<html>not the api</html>")
+        mockBackend.onGet("/relay/country-usage/day/2024-03-05", "<html>not the api</html>")
         await renderLayer(true)
         await expect.poll(() => mockBackend.requested.length).toBe(1)
         await expect.element(page.getByRole("status", {name: "usage"})).toHaveTextContent("none")
     })
 
     it("colors the countries with an estimate on the map", async () => {
-        mockBackend.onGet("/v1/country-usage/2024-03-05", usage)
+        mockBackend.onGet("/relay/country-usage/day/2024-03-05", usage)
         await renderLayer(true)
         await expect.element(page.getByRole("status", {name: "usage"})).toHaveTextContent("2024-03-05:2")
         // Only the two countries with an estimate are drawn, in their own pane below the markers
@@ -87,7 +87,7 @@ describe("CountryUsageLayer", () => {
     })
 
     it("removes the colors when the estimates are switched off", async () => {
-        mockBackend.onGet("/v1/country-usage/2024-03-05", usage)
+        mockBackend.onGet("/relay/country-usage/day/2024-03-05", usage)
         const screen = await renderLayer(true)
         await expect.poll(() => document.querySelectorAll(".leaflet-countryUsage-pane path").length).toBe(2)
         await screen.unmount()

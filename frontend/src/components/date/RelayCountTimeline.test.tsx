@@ -37,7 +37,7 @@ const renderTimeline = () => renderWithProviders(
 
 describe("RelayCountTimeline", () => {
     it("renders a chart and marks days with an unusual relay count", async () => {
-        mockBackend.onGet("/v1/statistics/daily-counts", counts)
+        mockBackend.onGet("/relay/statistics/daily-counts", counts)
         await renderTimeline()
 
         await expect.element(page.getByRole("img", {name: /Relays per day/})).toBeVisible()
@@ -46,7 +46,7 @@ describe("RelayCountTimeline", () => {
     })
 
     it("selects an outlier day when it is clicked", async () => {
-        mockBackend.onGet("/v1/statistics/daily-counts", counts)
+        mockBackend.onGet("/relay/statistics/daily-counts", counts)
         await renderTimeline()
 
         await expect.element(page.getByTestId("selected-date")).toHaveTextContent(days[39])
@@ -55,33 +55,33 @@ describe("RelayCountTimeline", () => {
     })
 
     it("renders nothing without data", async () => {
-        mockBackend.onGet("/v1/statistics/daily-counts", [])
+        mockBackend.onGet("/relay/statistics/daily-counts", [])
         await renderTimeline()
         await expect.element(page.getByRole("img", {name: /Relays per day/})).not.toBeInTheDocument()
     })
 
     it("stays quiet when the backend does not know the endpoint yet", async () => {
-        mockBackend.onGet("/v1/statistics/daily-counts", reply(404, {error: "Not Found"}))
+        mockBackend.onGet("/relay/statistics/daily-counts", reply(404, {error: "Not Found"}))
         await renderTimeline()
         await expect.element(page.getByRole("img", {name: /Relays per day/})).not.toBeInTheDocument()
         await expect.element(page.getByText(SnackbarMessage.ConnectionFailed)).not.toBeInTheDocument()
     })
 
     it("ignores an unexpected response body", async () => {
-        mockBackend.onGet("/v1/statistics/daily-counts", "<html>not the api</html>")
+        mockBackend.onGet("/relay/statistics/daily-counts", "<html>not the api</html>")
         await renderTimeline()
         await expect.element(page.getByRole("img", {name: /Relays per day/})).not.toBeInTheDocument()
         await expect.element(page.getByTestId("selected-date")).toHaveTextContent(days[39])
     })
 
     it("stays quiet when the request fails", async () => {
-        mockBackend.onGet("/v1/statistics/daily-counts", () => networkError())
+        mockBackend.onGet("/relay/statistics/daily-counts", () => networkError())
         await renderTimeline()
         await expect.element(page.getByRole("img", {name: /Relays per day/})).not.toBeInTheDocument()
     })
 
     it("selects an outlier day with the keyboard", async () => {
-        mockBackend.onGet("/v1/statistics/daily-counts", counts)
+        mockBackend.onGet("/relay/statistics/daily-counts", counts)
         await renderTimeline()
 
         const outlier = page.getByTestId("relay-count-outlier")
@@ -97,7 +97,7 @@ describe("RelayCountTimeline", () => {
     })
 
     it("selects an outlier day with Enter", async () => {
-        mockBackend.onGet("/v1/statistics/daily-counts", counts)
+        mockBackend.onGet("/relay/statistics/daily-counts", counts)
         await renderTimeline()
 
         const outlier = page.getByTestId("relay-count-outlier")
@@ -108,7 +108,7 @@ describe("RelayCountTimeline", () => {
 
     it("describes the outlier with its change and marks the selected day", async () => {
         const spike = counts.map((count, i) => i === 10 ? {...count, total: 9000} : count)
-        mockBackend.onGet("/v1/statistics/daily-counts", spike)
+        mockBackend.onGet("/relay/statistics/daily-counts", spike)
         await renderTimeline()
 
         await expect.element(page.getByRole("button", {name: new RegExp(`Select ${days[10]}: 9000 relays \\(\\+`)})).toBeVisible()
@@ -119,7 +119,7 @@ describe("RelayCountTimeline", () => {
 
     it("breaks the line at days without counts", async () => {
         const withGap = counts.filter((_, i) => i < 15 || i > 17)
-        mockBackend.onGet("/v1/statistics/daily-counts", withGap)
+        mockBackend.onGet("/relay/statistics/daily-counts", withGap)
         await renderTimeline()
 
         await expect.element(page.getByRole("img", {name: /Relays per day/})).toBeVisible()
@@ -127,7 +127,7 @@ describe("RelayCountTimeline", () => {
     })
 
     it("renders nothing if no count matches an available day", async () => {
-        mockBackend.onGet("/v1/statistics/daily-counts", [{day: "2001-01-01", total: 1, exit: 0, guard: 0, other: 1}])
+        mockBackend.onGet("/relay/statistics/daily-counts", [{day: "2001-01-01", total: 1, exit: 0, guard: 0, other: 1}])
         await renderTimeline()
         await expect.element(page.getByTestId("selected-date")).toHaveTextContent(days[39])
         await expect.element(page.getByRole("img", {name: /Relays per day/})).not.toBeInTheDocument()
