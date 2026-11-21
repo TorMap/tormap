@@ -103,14 +103,14 @@ class RelayDetailsUpdateService(
      * Updates [RelayDetails.familyId] of all entities for the given [month].
      */
     private fun computeFamiliesForMonth(month: String) {
-        val requestingRelays = relayDetailsRepositoryImpl.findAllByMonthEqualsAndFamilyEntriesNotNull(month)
+        val requestingRelays = relayDetailsRepositoryImpl.findAllWithFamilyDeclarationByMonth(month)
         val result = computeRelayFamilies(requestingRelays) { relay, familyEntry ->
             logger.debug("Format of alleged family member $familyEntry for requestingRelay ${relay.fingerprint} not supported!")
         }
         relayDetailsRepositoryImpl.clearFamiliesFromMonth(month)
         saveFamilies(result.families)
         val totalFamilyConnectionCount = result.confirmedConnectionCount + result.rejectedConnectionCount
-        logger.info("Finished families for month $month. Rejected ${result.rejectedConnectionCount} / $totalFamilyConnectionCount connections. Found ${result.families.size} different families.")
+        logger.info("Finished families for month $month. Rejected ${result.rejectedConnectionCount} / $totalFamilyConnectionCount family line connections. ${result.relaysWithFamilyIdCount} relays have family certificates. Found ${result.families.size} different families.")
     }
 
     /**

@@ -7,6 +7,8 @@ import org.tormap.database.repository.RelayDetailsRepository
 import org.tormap.database.repository.RelayLocationRepositoryImpl
 import org.tormap.util.logger
 import org.tormap.util.PathSelection
+import org.tormap.util.jointToCommaSeparated
+import org.tormap.util.verifiedFamilyIds
 import org.tormap.util.millisSinceEpochToLocalDate
 import org.torproject.descriptor.Descriptor
 import org.torproject.descriptor.RelayNetworkStatusConsensus
@@ -106,6 +108,13 @@ class DescriptorProcessingService(
                     existingRelay?.id,
                 )
             )
+        } else if (existingRelay.day == descriptorDay && existingRelay.familyIds == null) {
+            // Fills the family IDs of relays stored before TorMap read family-cert entries, when descriptors are
+            // processed again. Also covers a relay that added a family-cert later on the same day.
+            descriptor.verifiedFamilyIds().ifEmpty { null }?.let {
+                existingRelay.familyIds = it.jointToCommaSeparated()
+                relayDetailsRepository.save(existingRelay)
+            }
         }
         return ProcessedDescriptorInfo(descriptorMonth)
     }

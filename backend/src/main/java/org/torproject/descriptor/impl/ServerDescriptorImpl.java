@@ -225,10 +225,12 @@ public abstract class ServerDescriptorImpl extends DescriptorImpl
               break;
             case FAMILY_CERT:
               /* A relay that is a member of several families publishes one
-               * family-cert per family. Keep the first one. */
+               * family-cert per family. Keep all of them, and the first one
+               * for getFamilyCert(). */
               if (this.familyCert == null) {
                 this.familyCert = cryptoString;
               }
+              this.familyCerts.add(cryptoString);
               break;
             default:
               if (this.unrecognizedLines == null) {
@@ -983,6 +985,13 @@ public abstract class ServerDescriptorImpl extends DescriptorImpl
   @Override
   public String getFamilyCert() {
     return this.familyCert;
+  }
+
+  private List<String> familyCerts = new ArrayList<>();
+
+  @Override
+  public List<String> getFamilyCerts() {
+    return new ArrayList<>(this.familyCerts);
   }
 
   private String masterKeyEd25519;

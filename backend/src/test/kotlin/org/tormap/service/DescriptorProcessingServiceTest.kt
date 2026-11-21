@@ -1,6 +1,7 @@
 package org.tormap.service
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -10,6 +11,7 @@ import org.tormap.database.repository.RelayDetailsRepositoryImpl
 import org.tormap.database.repository.RelayLocationRepositoryImpl
 import org.torproject.descriptor.Descriptor
 import org.torproject.descriptor.DescriptorParseException
+import org.torproject.descriptor.DescriptorSourceFactory
 import org.torproject.descriptor.ServerDescriptor
 import org.torproject.descriptor.UnparseableDescriptor
 import java.io.File
@@ -114,7 +116,29 @@ class DescriptorProcessingServiceTest(
         every { descriptor.familyEntries } returns familyEntries
         every { descriptor.linkProtocolVersions } returns null
         every { descriptor.circuitProtocolVersions } returns null
+        every { descriptor.familyCerts } returns emptyList()
         return descriptor
+    }
+
+    // A real descriptor from CollecTor of a relay that is a member of two families
+    val descriptorWithFamilyCerts = DescriptorProcessingServiceTest::class.java
+        .getResource("/descriptors/server-descriptor-two-families.txt")!!.readText()
+    fun parseServerDescriptor(text: String) = DescriptorSourceFactory.createDescriptorParser()
+        .parseDescriptors(text.toByteArray(), null, "server-descriptor").single() as ServerDescriptor
+
+    "server descriptors processed again fill the missing family IDs of the same day" {
+        val withoutFamilyCerts = descriptorWithFamilyCerts.replace(
+            Regex("family-cert\n-----BEGIN FAMILY CERT-----\n[^-]*-----END FAMILY CERT-----\n"), ""
+        )
+        descriptorProcessingService.processDescriptor(parseServerDescriptor(withoutFamilyCerts))
+        relayDetailsRepository.findAll().single().familyIds.shouldBeNull()
+
+        descriptorProcessingService.processDescriptor(parseServerDescriptor(descriptorWithFamilyCerts))
+
+        val relay = relayDetailsRepository.findAll().single()
+        relay.familyIds shouldBe "ed25519:9ZiuZBKvxIauADkUfqvvU17jtXWhrA8RVKrkZgMEvZ4, " +
+            "ed25519:vO6m/idEC83oHLQcFzeZDoMfYNUsT0Q+0xbhCUuMrFg"
+        relay.nickname shouldBe "3GTor"
     }
 
     "server descriptors store the details of the relay per month" {

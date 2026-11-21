@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Local patch to metrics-lib 2.28.0: relays that are members of several
  * families publish one family-cert per family, which upstream rejects.
+ * getFamilyCerts() returns all of them.
  */
 class ServerDescriptorFamilyCertTest {
 
@@ -55,6 +56,8 @@ class ServerDescriptorFamilyCertTest {
     ServerDescriptor descriptor = parse(familyCert(CERT_1) + familyCert(CERT_2));
     assertEquals("D8733048FC8EC9102466AD8F3098622BF1BF71FD", descriptor.getFingerprint());
     assertTrue(descriptor.getFamilyCert().contains(CERT_1));
+    assertEquals(2, descriptor.getFamilyCerts().size());
+    assertTrue(descriptor.getFamilyCerts().get(1).contains(CERT_2));
     assertTrue(descriptor.getUnrecognizedLines().isEmpty());
   }
 }
