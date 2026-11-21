@@ -11,6 +11,7 @@ import org.tormap.adapter.dto.RelayIdentifiersDto
  * Boolean fields have no `is` prefix, because Jackson and the OpenAPI generator would name such fields differently.
  *
  * @param familyId the family for `/v1/families/{id}`, null if the relay has no confirmed family
+ * @param familyIds family IDs (`ed25519:<family key>`) from the relay's verified family certificates
  */
 class RelayDetailsV1Dto(details: RelayDetailsDto) {
     val fingerprint = details.fingerprint
@@ -35,6 +36,7 @@ class RelayDetailsV1Dto(details: RelayDetailsDto) {
     val linkProtocolVersions = details.linkProtocolVersions
     val circuitProtocolVersions = details.circuitProtocolVersions
     val familyEntries = details.familyEntries
+    val familyIds = details.familyIds
     val familyId = details.familyId
     val confirmedFamilyMembers = details.confirmedFamilyMembers.map(::RelayIdentifiersV1Dto)
     val verifiedHostNames = details.verifiedHostNames

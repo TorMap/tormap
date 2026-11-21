@@ -433,6 +433,12 @@
             "type" : [ "integer", "null" ],
             "format" : "int64"
           },
+          "familyIds" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
           "fingerprint" : {
             "type" : "string"
           },
