@@ -32,7 +32,7 @@ tormap relay MyRelay --month 2024-05
 tormap family MyRelay
 tormap as --name hetzner
 tormap stats --from 2024-01-01 --to 2024-01-31
-tormap usage --country DE,NL
+tormap usage --country DE,NL   # latest day with estimates, Tor Metrics publishes them 2 to 3 days later
 
 # Everything over Tor
 tormap --proxy socks5h://127.0.0.1:9050 relays --nickname 'tor*'

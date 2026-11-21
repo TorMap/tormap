@@ -20,6 +20,7 @@ import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.clikt.parameters.types.path
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import java.io.PrintStream
@@ -45,6 +46,7 @@ class Settings(val api: ApiClient, val format: Format, private val stdout: Print
     }
 }
 
+private val FORMAT_NAMES = listOf("table", "json", "ndjson", "csv")
 private val DAY = Regex("^\\d{4}-\\d{2}-\\d{2}$")
 private val MONTH = Regex("^\\d{4}-\\d{2}$")
 private val HEX_FINGERPRINT = Regex("^[0-9A-Fa-f]{40}$")
@@ -60,6 +62,10 @@ private fun validMonth(value: String): String {
 }
 
 private fun fail(message: String): Nothing = throw UsageError(message)
+
+private fun CoreCliktCommand.checkRange(from: String?, to: String?) {
+    if (from != null && to != null && from > to) throw UsageError("--from $from is after --to $to.").also { it.context = currentContext }
+}
 
 /** Accepts fingerprints as Tor tools print them: with spaces between groups or a leading $. */
 fun normalizeFingerprint(value: String): String? =
@@ -85,13 +91,17 @@ class Tormap(
     private val apiUrl by option("--api-url", envvar = "TORMAP_API_URL", help = "TorMap backend to use").default(ApiClient.DEFAULT_URL)
     private val proxy by option("--proxy", envvar = "TORMAP_PROXY", help = "Proxy for all requests, e.g. socks5h://127.0.0.1:9050 for Tor")
     private val format by option("--format", "-f", help = "Output format (default: table in a terminal, json otherwise)")
-        .choice("table", "json", "ndjson", "csv")
+        .choice(*FORMAT_NAMES.toTypedArray())
     private val output by option("--output", "-o", help = "Write the output to a file instead of the terminal").path()
     private val cacheDir by option("--cache-dir", envvar = "TORMAP_CACHE_DIR", help = "Where downloaded days are cached").path()
     private val noCache by option("--no-cache", help = "Download everything again and do not cache it").flag()
     private val timeout by option("--timeout", help = "Seconds to wait for the server").int().default(30)
 
     override fun run() {
+        val outputName = output?.toString()
+        if (outputName != null && outputName.lowercase() in FORMAT_NAMES) {
+            fail("-o/--output is the file to write. For the format, use -f $outputName (or -o ./$outputName for a file of that name).")
+        }
         val proxy = proxy?.let { ApiClient.parseProxy(it) } ?: java.net.Proxy.NO_PROXY
         val cache = if (noCache) null else ResponseCache(cacheDir ?: ResponseCache.defaultDirectory(env))
         val api = ApiClient(apiUrl, proxy, timeout * 1000, cache)
@@ -111,6 +121,7 @@ class Days : CoreCliktCommand(name = "days") {
     override fun run() {
         val first = from
         val last = to
+        checkRange(first, last)
         val days = settings.api.days().filter { (first == null || it >= first) && (last == null || it <= last) }
         settings.output { it.values("day", if (latest) days.takeLast(1) else days) }
     }
@@ -207,6 +218,7 @@ class Stats : CoreCliktCommand(name = "stats") {
     private val to by option("--to", help = "Last day").convertDay()
 
     override fun run() {
+        checkRange(from, to)
         val counts = settings.api.dailyCounts(from, to).map { it.jsonObject }
         settings.output { it.rows(counts, Fields.DAILY_COUNT) }
     }
@@ -215,18 +227,29 @@ class Stats : CoreCliktCommand(name = "stats") {
 class Usage : CoreCliktCommand(name = "usage") {
     override fun help(context: Context) = "Estimated Tor users per country for a day, from Tor Metrics."
     private val settings by requireObject<Settings>()
-    private val day by option("--day", help = "Day like 2024-05-01 (default: latest)").convertDay()
+    private val day by option("--day", help = "Day like 2024-05-01 (default: the latest day with estimates, usually 2 to 3 days ago)").convertDay()
     private val countries by option("--country", "-c", help = "Country codes, e.g. DE,NL").split(",").default(emptyList())
 
     override fun run() {
         val api = settings.api
         val wanted = countries.map { it.trim().uppercase() }.toSet()
-        val rows = api.countryUsage(day ?: api.latestDay()).map { it.jsonObject }
+        val rows = (day?.let { api.countryUsage(it) } ?: latestCountryUsage(api)).map { it.jsonObject }
             .filter { wanted.isEmpty() || it.text("country").uppercase() in wanted }
             .sortedByDescending { it.text("users").toLongOrNull() ?: 0 }
         settings.output { it.rows(rows, Fields.COUNTRY_USAGE) }
         if (rows.isEmpty()) throw ProgramResult(ExitCode.NOT_FOUND)
     }
+}
+
+/** Tor Metrics publishes its estimates a few days after the relay data, so the latest relay day usually has none yet. */
+private const val USAGE_LOOKBACK_DAYS = 7L
+
+private fun latestCountryUsage(api: ApiClient): JsonArray {
+    val latest = LocalDate.parse(api.latestDay())
+    return (0..USAGE_LOOKBACK_DAYS).asSequence()
+        .map { api.countryUsage(latest.minusDays(it).toString()) }
+        .firstOrNull { it.isNotEmpty() }
+        ?: JsonArray(emptyList())
 }
 
 /** Finds a relay by fingerprint, or by its nickname in the relays of a day (case-insensitive, must be unique). */

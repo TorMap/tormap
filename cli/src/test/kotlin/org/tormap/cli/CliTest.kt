@@ -114,6 +114,44 @@ class CliTest : StringSpec({
         api.run("usage", "-c", "DE", format = "csv").stdout.lines().drop(1).first() shouldBe "de,200,,,90"
     }
 
+    "usage without a day uses the latest day that has estimates" {
+        api.route("/v1/country-usage/2024-03-05", "[]")
+        api.route("/v1/country-usage/2024-03-04", "[]")
+        api.route("/v1/country-usage/2024-03-03", """[{"country":"de","users":200,"lower":180,"upper":220,"frac":90}]""")
+        api.run("usage", format = "csv").stdout.lines()[1] shouldBe "de,200,180,220,90"
+        api.requests.filter { it.startsWith("/v1/country-usage/") } shouldContainExactly
+            listOf("/v1/country-usage/2024-03-05", "/v1/country-usage/2024-03-04", "/v1/country-usage/2024-03-03")
+        api.run("usage", "--day", "2024-03-05").exitCode shouldBe ExitCode.NOT_FOUND
+    }
+
+    "--from after --to is wrong usage, checked before any request" {
+        api.run("stats", "--from", "2024-03-05", "--to", "2024-03-04").let {
+            it.exitCode shouldBe ExitCode.USAGE
+            it.stderr shouldContain "--from 2024-03-05 is after --to 2024-03-04"
+        }
+        api.run("days", "--from", "2024-03-05", "--to", "2024-03-04").exitCode shouldBe ExitCode.USAGE
+        api.requests shouldBe emptyList()
+    }
+
+    "a format name as --output file is wrong usage" {
+        api.run("-o", "json", "days").let {
+            it.exitCode shouldBe ExitCode.USAGE
+            it.stderr shouldContain "-f json"
+        }
+        api.requests shouldBe emptyList()
+        java.nio.file.Files.exists(java.nio.file.Path.of("json")) shouldBe false
+    }
+
+    "an unreachable proxy is named in the error" {
+        val err = java.io.ByteArrayOutputStream()
+        val code = runCli(
+            arrayOf("--api-url", api.url, "--proxy", "socks5h://127.0.0.1:1", "--no-cache", "days"),
+            System.out, java.io.PrintStream(err, true, Charsets.UTF_8),
+        ) { null }
+        code shouldBe ExitCode.ERROR
+        err.toString(Charsets.UTF_8) shouldContain "through the proxy 127.0.0.1:1"
+    }
+
     "the relays of a day are cached between runs, unless --no-cache" {
         api.run("relays").exitCode shouldBe ExitCode.OK
         api.run("relays", "--country", "NL").exitCode shouldBe ExitCode.OK
