@@ -66,11 +66,11 @@ describe("backend", () => {
 
     it("sends GET requests to the configured backend without a Content-Type", async () => {
         const transport = useTransport(() => Response.json(["2024-01-01"]))
-        const response = await backend.get<string[]>("/v1/days")
+        const response = await backend.get<string[]>("/relay/location/days")
 
         expect(response).toEqual({data: ["2024-01-01"], status: 200})
         const [url, init] = transport.mock.calls[0]
-        expect(url).toBe(`${backendApiUrl}/v1/days`)
+        expect(url).toBe(`${backendApiUrl}/relay/location/days`)
         expect(init).toEqual({method: "GET", headers: {Accept: "application/json"}})
     })
 
@@ -86,13 +86,13 @@ describe("backend", () => {
 
     it("tells when the service worker answered from its offline copy", async () => {
         useTransport(() => Response.json([], {headers: {"X-TorMap-Cached-At": "2026-10-28T12:00:00.000Z"}}))
-        const response = await backend.get("/v1/days")
+        const response = await backend.get("/relay/location/days")
         expect(response.cachedAt).toBe("2026-10-28T12:00:00.000Z")
     })
 
     it("has no offline time for answers from the network", async () => {
         useTransport(() => Response.json([]))
-        expect((await backend.get("/v1/days")).cachedAt).toBeUndefined()
+        expect((await backend.get("/relay/location/days")).cachedAt).toBeUndefined()
     })
 
     it("returns non-JSON bodies as text", async () => {

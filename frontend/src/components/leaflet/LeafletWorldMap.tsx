@@ -2,12 +2,11 @@ import React, {FunctionComponent, useCallback, useEffect, useState} from "react"
 
 import {useDate} from "../../context/date-context";
 import {useSnackbar} from "../../context/snackbar-context";
-import {RelayLocationDto, RelayV1Dto} from "../../dto/relay";
+import {RelayLocationDto} from "../../dto/relay";
 import {SnackbarMessage} from "../../types/ui";
 import {startServiceWorker} from "../../pwa/register";
 import {isOffline, offlineSnackbarKey, onceOnline, useOffline} from "../../util/online";
 import {readPermalink, writePermalink} from "../../util/permalink";
-import {toRelayLocation} from "../../util/api-v1";
 import {backend} from "../../util/util";
 import {CachedDataChip} from "./CachedDataChip";
 import {CountryUsageLayer} from "./CountryUsageLayer";
@@ -78,10 +77,10 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
         let active = true
         let cancelOnlineRetry: (() => void) | undefined
         setIsLoading(true)
-        backend.get<RelayV1Dto[]>(`/v1/days/${selectedDate}/relays`).then(response => {
+        backend.get<RelayLocationDto[]>(`/relay/location/day/${selectedDate}`).then(response => {
             setIsLoading(false)
             if (currentTimeStamp === latestRequestTimestamp) {
-                setRelays(response.data.map(toRelayLocation))
+                setRelays(response.data)
                 setRelaysCachedAt(response.cachedAt)
             }
         }).catch(() => {

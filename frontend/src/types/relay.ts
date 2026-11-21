@@ -1,4 +1,4 @@
-// The values are only used inside the frontend. API v1 sends flags by name, which util/api-v1.ts converts.
+// Order of flags must be kept in sync with backend
 import {RelayDetailsDto, RelayIdentifierDto, RelayLocationDto} from "../dto/relay";
 
 export enum RelayFlag {

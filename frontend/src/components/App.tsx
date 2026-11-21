@@ -43,7 +43,7 @@ export const App: FunctionComponent = () => {
         // The request may fail after this effect was cleaned up, then it must not wait for going online anymore
         let active = true
         let cancelOnlineRetry: (() => void) | undefined
-        backend.get<string[]>('/v1/days').then(response => {
+        backend.get<string[]>('/relay/location/days').then(response => {
             setAvailableDays(response.data)
             setIsLoading(false)
         }).catch(() => {

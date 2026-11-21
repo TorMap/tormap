@@ -1,16 +1,18 @@
 import {describe, expect, it, vi} from "vitest";
 import {page} from "vitest/browser";
 
-import {fingerprintOf, makeRelay} from "../../../test/fixtures";
+import {makeRelay, makeRelayIdentifier} from "../../../test/fixtures";
 import {renderWithProviders} from "../../../test/render";
 import {RelayIdentifierMatch, RelayType} from "../../../types/relay";
 import {RelayList} from "./RelayList";
 
 const makeMatches = (prefix: string, count: number): RelayIdentifierMatch[] =>
     Array.from({length: count}, (_, index) => {
+        const id = 1000 + index
         const nickname = `${prefix}${String(index).padStart(3, "0")}`
         return {
-            ...makeRelay({fingerprint: fingerprintOf(1000 + index), nickname}),
+            ...makeRelay({detailsId: id, nickname}),
+            ...makeRelayIdentifier({id, nickname, fingerprint: `FP${id}`}),
             relayType: RelayType.Other,
         }
     })

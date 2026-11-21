@@ -33,8 +33,8 @@ export const RelayDetailsDialogSmall: FunctionComponent<DetailsDialogProps> = ({
         setShowRelayDetails(!canShowRelayList)
     }
 
-    const handleSelectDetails = (fingerprint: string) => {
-        setRelayDetailsId(fingerprint)
+    const handleSelectDetails = (id: number) => {
+        setRelayDetailsId(id)
         setShowRelayDetails(true)
     }
 
