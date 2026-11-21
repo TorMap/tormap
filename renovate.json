@@ -10,6 +10,17 @@
   "customManagers": [
     {
       "customType": "regex",
+      "description": "Jib base image of the backend, which Renovate's Gradle manager does not detect",
+      "managerFilePatterns": [
+        "/^backend/build\\.gradle\\.kts$/"
+      ],
+      "matchStrings": [
+        "image = \"(?<depName>eclipse-temurin):(?<currentValue>[^@\"]+)@(?<currentDigest>sha256:[a-f0-9]{64})\""
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
       "description": "IP lookup databases, released monthly in TorMap/ip-lookup-data and downloaded by the backend build",
       "managerFilePatterns": [
         "/^backend/gradle\\.properties$/"
@@ -73,6 +84,21 @@
         "@types/react",
         "@types/react-dom"
       ]
+    },
+    {
+      "description": "Backend base image: only digest updates, since the Java version is changed by hand together with sourceCompatibility",
+      "matchDepNames": [
+        "eclipse-temurin"
+      ],
+      "matchFileNames": [
+        "backend/build.gradle.kts"
+      ],
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch"
+      ],
+      "enabled": false
     },
     {
       "description": "Update the IP lookup databases as soon as a monthly release exists (releases are immutable)",

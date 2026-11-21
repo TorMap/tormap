@@ -272,8 +272,9 @@ jib {
         permissions = mapOf("/tormap-data" to "777")
     }
     from {
-        // Pinned by digest for reproducible builds; Renovate keeps the digest current
-        image = "eclipse-temurin:25-jre@sha256:4ed132f6832e9804b123e89a849a7b4502756ae64a4ee08ebab939d9d5d0a9fa"
+        // Temurin JRE on Alpine: the smallest official Temurin image, for amd64 and arm64.
+        // Pinned by digest for reproducible builds; Renovate keeps the digest current (see renovate.json).
+        image = "eclipse-temurin:25-jre-alpine@sha256:69c2a26e9894016e274c880fa542956d005b3755f84db765145185e87405bd89"
         platforms {
             platform {
                 architecture = "amd64"
