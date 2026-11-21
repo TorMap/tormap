@@ -128,7 +128,7 @@ class ApiClient(
         val connection = try {
             uri.toURL().openConnection(proxy) as HttpURLConnection
         } catch (exception: IOException) {
-            throw ApiException("Can not connect to ${baseUri.host}: ${exception.message}")
+            throw ApiException("Can not connect to ${baseUri.host}${viaProxy()}: ${exception.message}")
         }
         try {
             connection.connectTimeout = timeoutMillis
@@ -141,7 +141,7 @@ class ApiClient(
             val status = try {
                 connection.responseCode
             } catch (exception: IOException) {
-                throw ApiException("Can not reach ${baseUri.host}: ${exception.message ?: exception.javaClass.simpleName}")
+                throw ApiException("Can not reach ${baseUri.host}${viaProxy()}: ${exception.message ?: exception.javaClass.simpleName}")
             }
             return when {
                 status == 200 -> readBody(connection, connection.inputStream)
@@ -154,6 +154,12 @@ class ApiClient(
         } finally {
             connection.disconnect()
         }
+    }
+
+    /** A failed connection can mean the proxy is down, so the error names it */
+    private fun viaProxy(): String {
+        val address = proxy.address() as? InetSocketAddress ?: return ""
+        return " through the proxy ${address.hostString}:${address.port}"
     }
 
     private fun errorMessage(connection: HttpURLConnection): String {
