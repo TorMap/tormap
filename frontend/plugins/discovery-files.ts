@@ -45,6 +45,11 @@ export function llmsTxt(siteUrl: string, liteUrl: string | undefined): string {
         `- [TorMap](${siteUrl}/): the interactive map (needs JavaScript)`,
         ...(liteUrl ? [`- [TorMap Lite](${liteUrl}): most of the map's features as plain HTML pages that work without JavaScript`] : []),
         "- [Source code and README](https://github.com/TorMap/tormap): features, self-hosting with Docker, data sources",
+        "- [TorMap CLI](https://github.com/TorMap/tormap/blob/master/cli/README.md): the `tormap` command line tool " +
+        "(native binaries and Docker image) to look up relays, check their flags and export a day's relays as JSON or CSV",
+        "- [API v1](https://github.com/TorMap/tormap/blob/master/api/openapi-v1.json): the stable, read-only JSON API " +
+        "the CLI uses, as an OpenAPI specification (days, relays of a day, relay details by fingerprint, families, " +
+        "autonomous systems, daily relay counts, Tor users per country)",
         "- [Tor Metrics](https://metrics.torproject.org/): the Tor Project's own statistics and relay search",
         "",
     ].join("\n")
