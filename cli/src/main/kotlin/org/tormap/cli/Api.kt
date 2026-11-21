@@ -4,6 +4,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -38,6 +39,9 @@ class ApiClient(
         // A day of relays is about 3 MB of JSON; anything far larger is not a TorMap response
         private const val MAX_RESPONSE_BYTES = 64L * 1024 * 1024
         private val FINGERPRINT = Regex("^[0-9A-F]{40}$")
+        private val DAY = Regex("^\\d{4}-\\d{2}-\\d{2}$")
+
+        private fun isDay(value: String) = DAY.matches(value) && runCatching { java.time.LocalDate.parse(value) }.isSuccess
 
         /** Parses `socks5h://host:port`, `socks5://host:port` or `http://host:port`. */
         fun parseProxy(value: String): Proxy {
@@ -73,7 +77,13 @@ class ApiClient(
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    fun days(): List<String> = (getCached("v1/days", ResponseCache.SHORT) as JsonArray).map { it.jsonPrimitive.content }
+    /** The days with data. They are checked, because they become paths, cache lifetimes and dates in the commands. */
+    fun days(): List<String> {
+        val days = getCached("v1/days", ResponseCache.SHORT) as? JsonArray ?: throw ApiException("The API returned an invalid list of days.")
+        return days.map { element ->
+            (element as? JsonPrimitive)?.content?.takeIf(::isDay) ?: throw ApiException("The API returned an invalid day.")
+        }
+    }
 
     fun latestDay(): String = days().lastOrNull() ?: throw ApiException("The API has no relay data yet.")
 
@@ -82,7 +92,8 @@ class ApiClient(
 
     /** The relay details of a month, or null if the relay was not seen in that month. */
     fun relay(fingerprint: String, month: String?): JsonObject? {
-        require(FINGERPRINT.matches(fingerprint)) { "Not a fingerprint: $fingerprint" }
+        // The fingerprint can come from a list of relays the API returned
+        if (!FINGERPRINT.matches(fingerprint)) throw ApiException("The API returned an invalid fingerprint.")
         val query = month?.let { "?month=${encode(it)}" }.orEmpty()
         return get("v1/relays/$fingerprint$query")?.jsonObject
     }
