@@ -196,14 +196,9 @@ tasks.processResources {
     }
 }
 
-// Hardening: use the plain Java Base64 decoder instead of the CPU-specific intrinsic. Applied to the Docker image,
-// bootRun and tests. Remove once the base image's JDK is known to be fixed (see JvmHardening.kt).
-val hardenedJvmFlags = listOf("-XX:-UseBASE64Intrinsics")
-
 // Configure tests
 tasks.withType<Test> {
     useJUnitPlatform()
-    jvmArgs(hardenedJvmFlags)
 }
 
 jacoco {
@@ -224,7 +219,6 @@ tasks.jacocoTestReport {
 
 // The local development server uses the dev profile unless SPRING_PROFILES_ACTIVE is set
 tasks.bootRun {
-    jvmArgs(hardenedJvmFlags)
     if (providers.environmentVariable("SPRING_PROFILES_ACTIVE").orNull == null) {
         systemProperty("spring.profiles.active", "dev")
     }
@@ -266,7 +260,6 @@ jib {
         user = "1000:1000"
         workingDirectory = "/"
         environment = mapOf("LOG_DIR" to "/tmp/logs")
-        jvmFlags = hardenedJvmFlags
         volumes = listOf("/tormap-data")
     }
     extraDirectories {
@@ -280,7 +273,7 @@ jib {
     }
     from {
         // Pinned by digest for reproducible builds; Renovate keeps the digest current
-        image = "eclipse-temurin:25-jre@sha256:fcd7fd7b387f94bb2ac461478a7436ad8e349924c374ea8313919624dceae636"
+        image = "eclipse-temurin:25-jre@sha256:4ed132f6832e9804b123e89a849a7b4502756ae64a4ee08ebab939d9d5d0a9fa"
         platforms {
             platform {
                 architecture = "amd64"

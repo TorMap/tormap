@@ -164,9 +164,8 @@ Build fat JAR:
 1. Go to `backend` directory where file `gradlew` is located
 2. Run command: `./gradlew bootJar`
 3. A fat jar containing all packages should now be located in `backend/build/libs/`.
-4. Run command `java -XX:-UseBASE64Intrinsics -jar <backend jar file>` with `SPRING_DATASOURCE_PASSWORD` set (add
-   `--spring.profiles.active=dev` for local development). The Docker image sets this JVM option itself, and the backend
-   logs a warning at startup when it is missing.
+4. Run command `java -jar <backend jar file>` with `SPRING_DATASOURCE_PASSWORD` set (add `--spring.profiles.active=dev`
+   for local development)
 5. Backend should be available at http://localhost:8080
 
 Build docker image:
