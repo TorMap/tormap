@@ -43,7 +43,7 @@ class ApiV1ControllerTest(
         ).forEach { cacheManager.getCache(it)?.clear() }
     }
 
-    fun saveRelayA(familyId: Long? = null, familyIds: String? = null): Long {
+    fun saveRelayA(familyId: Long? = null, familyKeys: String? = null): Long {
         relayLocationRepository.save(mockRelayLocation(day, 'A', setOf(TorRelayFlag.Exit, TorRelayFlag.Guard), consensusWeight = 42))
         val details = mockRelayDetails('A').apply {
             month = "2024-03"
@@ -51,7 +51,7 @@ class ApiV1ControllerTest(
             address = "127.0.0.1"
             autonomousSystemNumber = 24940
             this.familyId = familyId
-            this.familyIds = familyIds
+            this.familyKeys = familyKeys
         }
         return relayDetailsRepository.save(details).id!!
     }
@@ -97,14 +97,14 @@ class ApiV1ControllerTest(
     }
 
     "returns relay details by fingerprint in any case, for the latest month by default" {
-        saveRelayA(familyId = 7, familyIds = "ed25519:one, ed25519:two")
+        saveRelayA(familyId = 7, familyKeys = "ed25519:one, ed25519:two")
         mockMvc.perform(get("/v1/relays/${fingerprintA.lowercase()}"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.fingerprint").value(fingerprintA))
             .andExpect(jsonPath("$.month").value("2024-03"))
             .andExpect(jsonPath("$.familyId").value(7))
-            .andExpect(jsonPath("$.familyIds[0]").value("ed25519:one"))
-            .andExpect(jsonPath("$.familyIds[1]").value("ed25519:two"))
+            .andExpect(jsonPath("$.familyKeys[0]").value("ed25519:one"))
+            .andExpect(jsonPath("$.familyKeys[1]").value("ed25519:two"))
             .andExpect(jsonPath("$.id").doesNotExist())
         mockMvc.perform(get("/v1/relays/$fingerprintA").param("month", "2024-03"))
             .andExpect(status().isOk)

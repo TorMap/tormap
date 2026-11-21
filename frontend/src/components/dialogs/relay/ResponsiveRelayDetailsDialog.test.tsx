@@ -135,7 +135,7 @@ describe.each([
         mockBackend.onGet("/relay/details/relay/21", makeRelayDetails({
             id: 21,
             nickname: "alpha",
-            familyIds: ["ed25519:one", "ed25519:two"],
+            familyKeys: ["ed25519:one", "ed25519:two"],
         }))
         await open([makeRelay({detailsId: 21, nickname: "alpha"})])
 

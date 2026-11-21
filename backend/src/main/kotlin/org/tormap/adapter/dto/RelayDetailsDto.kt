@@ -29,7 +29,7 @@ class RelayDetailsDto(
     val uptime = details.uptime
     val contact = details.contact
     val familyEntries = details.familyEntries
-    val familyIds = details.familyIds?.commaSeparatedToList() ?: emptyList()
+    val familyKeys = details.familyKeys?.commaSeparatedToList() ?: emptyList()
     val familyId = details.familyId
     val cachesExtraInfo = details.cachesExtraInfo
     val isHiddenServiceDir = details.isHiddenServiceDir

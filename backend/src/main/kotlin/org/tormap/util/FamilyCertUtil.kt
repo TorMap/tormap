@@ -9,15 +9,18 @@ import java.security.spec.X509EncodedKeySpec
 import java.util.Base64
 
 /**
- * Family IDs of the families this relay proves membership in with its `family-cert` entries
- * ("happy families", Tor proposal 321, since Tor 0.4.9). Relays with the same family ID belong to the same family.
+ * Family keys of the families this relay proves membership in with its `family-cert` entries
+ * ("happy families", Tor proposal 321, since Tor 0.4.9). Relays with the same family key belong to the same family.
  * Invalid certificates are skipped.
  *
  * See https://spec.torproject.org/dir-spec/server-descriptor-format.html and https://spec.torproject.org/cert-spec.html
  *
- * @return sorted family IDs like `ed25519:<unpadded base64 of the family key>`
+ * Tor calls these family IDs (microdescriptor `family-ids`). TorMap calls them family keys, so they are not confused
+ * with its own numeric [org.tormap.database.entity.RelayDetails.familyId].
+ *
+ * @return sorted family keys like `ed25519:<unpadded base64 of the family public key>`
  */
-fun ServerDescriptor.verifiedFamilyIds(): List<String> {
+fun ServerDescriptor.verifiedFamilyKeys(): List<String> {
     val masterKey = masterKeyEd25519?.let { decodeBase64OrNull(it) }?.takeIf { it.size == KEY_LENGTH } ?: return emptyList()
     return familyCerts
         .mapNotNull { cryptoBlock ->
@@ -26,12 +29,12 @@ fun ServerDescriptor.verifiedFamilyIds(): List<String> {
             ) ?: return@mapNotNull null
             verifyFamilyCert(certificate, masterKey, publishedMillis)
         }
-        .map { FAMILY_ID_PREFIX + Base64.getEncoder().withoutPadding().encodeToString(it) }
+        .map { FAMILY_KEY_PREFIX + Base64.getEncoder().withoutPadding().encodeToString(it) }
         .distinct()
         .sorted()
 }
 
-const val FAMILY_ID_PREFIX = "ed25519:"
+const val FAMILY_KEY_PREFIX = "ed25519:"
 
 /**
  * Checks an Ed25519 family certificate as described in the cert-spec and the `family-cert` item of the dir-spec.

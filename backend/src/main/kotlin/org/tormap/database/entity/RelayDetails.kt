@@ -3,7 +3,7 @@ package org.tormap.database.entity
 import org.tormap.adapter.dto.RelayFamilyIdentifiersDto
 import org.tormap.util.jointToCommaSeparated
 import org.tormap.util.stripLengthForDB
-import org.tormap.util.verifiedFamilyIds
+import org.tormap.util.verifiedFamilyKeys
 import org.torproject.descriptor.ServerDescriptor
 import java.time.LocalDate
 import jakarta.persistence.*
@@ -103,10 +103,10 @@ class RelayDetails(
     var tunnelledDirServer: Boolean,
 
     /**
-     * Verified family IDs from the relay's family-cert entries, see [verifiedFamilyIds]
+     * Verified family keys from the relay's family-cert entries, see [verifiedFamilyKeys]
      */
     @Column(columnDefinition = "text")
-    var familyIds: String? = null,
+    var familyKeys: String? = null,
 ) : AbstractBaseEntity<Long>() {
 
     @Suppress("LeakingThis")
@@ -143,7 +143,7 @@ class RelayDetails(
         linkProtocolVersions = descriptor.linkProtocolVersions?.jointToCommaSeparated().stripLengthForDB(),
         circuitProtocolVersions = descriptor.circuitProtocolVersions?.jointToCommaSeparated().stripLengthForDB(),
         tunnelledDirServer = descriptor.tunnelledDirServer,
-        familyIds = descriptor.verifiedFamilyIds().ifEmpty { null }?.jointToCommaSeparated(),
+        familyKeys = descriptor.verifiedFamilyKeys().ifEmpty { null }?.jointToCommaSeparated(),
     ) {
         this.id = id
     }

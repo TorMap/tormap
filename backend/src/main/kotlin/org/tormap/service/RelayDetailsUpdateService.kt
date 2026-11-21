@@ -110,7 +110,7 @@ class RelayDetailsUpdateService(
         relayDetailsRepositoryImpl.clearFamiliesFromMonth(month)
         saveFamilies(result.families)
         val totalFamilyConnectionCount = result.confirmedConnectionCount + result.rejectedConnectionCount
-        logger.info("Finished families for month $month. Rejected ${result.rejectedConnectionCount} / $totalFamilyConnectionCount family line connections. ${result.relaysWithFamilyIdCount} relays have family certificates. Found ${result.families.size} different families.")
+        logger.info("Finished families for month $month. Rejected ${result.rejectedConnectionCount} / $totalFamilyConnectionCount family line connections. ${result.relaysWithFamilyKeyCount} relays have family certificates. Found ${result.families.size} different families.")
     }
 
     /**

@@ -91,17 +91,17 @@ class FamilyCertUtilTest : StringSpec({
     val realDescriptor = FamilyCertUtilTest::class.java
         .getResource("/descriptors/server-descriptor-two-families.txt")!!.readText()
 
-    "the family IDs of a real descriptor are verified" {
+    "the family keys of a real descriptor are verified" {
         val descriptor = parseServerDescriptor(realDescriptor)
 
         descriptor.familyCerts.size shouldBe 2
-        descriptor.verifiedFamilyIds() shouldBe listOf(
+        descriptor.verifiedFamilyKeys() shouldBe listOf(
             "ed25519:9ZiuZBKvxIauADkUfqvvU17jtXWhrA8RVKrkZgMEvZ4",
             "ed25519:vO6m/idEC83oHLQcFzeZDoMfYNUsT0Q+0xbhCUuMrFg",
         )
     }
 
-    "a real descriptor whose family certificate does not match its identity key has no family IDs" {
+    "a real descriptor whose family certificate does not match its identity key has no family keys" {
         val otherMasterKey = Base64.getEncoder().withoutPadding().encodeToString(relayKey)
         val descriptor = parseServerDescriptor(
             realDescriptor.replace(Regex("master-key-ed25519 .*"), "master-key-ed25519 $otherMasterKey")
@@ -110,7 +110,7 @@ class FamilyCertUtilTest : StringSpec({
         )
 
         descriptor.familyCerts.size shouldBe 2
-        descriptor.verifiedFamilyIds().shouldBeEmpty()
+        descriptor.verifiedFamilyKeys().shouldBeEmpty()
     }
 })
 

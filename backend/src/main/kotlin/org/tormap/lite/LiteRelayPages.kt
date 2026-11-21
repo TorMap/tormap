@@ -46,7 +46,7 @@ object LiteRelayPages {
                 "Link protocol versions" to details.linkProtocolVersions?.let { { text(it) } },
                 "Circuit protocol versions" to details.circuitProtocolVersions?.let { { text(it) } },
                 "Self reported family members" to details.familyEntries?.let { { text(it) } },
-                "Certified families" to textList(details.familyIds),
+                "Certified families" to textList(details.familyKeys),
                 "Confirmed family members" to details.confirmedFamilyMembers.takeIf { it.isNotEmpty() }?.let { members ->
                     {
                         tag("ul", "class" to "plain") {

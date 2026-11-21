@@ -433,7 +433,7 @@
             "type" : [ "integer", "null" ],
             "format" : "int64"
           },
-          "familyIds" : {
+          "familyKeys" : {
             "type" : "array",
             "items" : {
               "type" : "string"
