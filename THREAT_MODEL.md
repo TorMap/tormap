@@ -17,7 +17,7 @@ map images it renders itself. There are no user accounts. The only privileged ro
 Browser ──HTTPS──> Frontend (static)            Tor Collector (HTTPS, index.json + tarballs),
    │                                            Tor Metrics (HTTPS, one CSV)
    │                                                    │
-   └──HTTP(S) /relay/** ──> Backend (Spring Boot) <─────┘ scheduled pulls (hourly / 12h)
+   └──HTTP(S) /relay/**, /v1/** ──> Backend (Spring Boot) <─────┘ scheduled pulls (hourly / 12h)
    Operator ── Basic auth ─> /actuator/**  │  ├──> PostgreSQL
                                            │  ├──> DNS resolver (PTR + forward lookups, per request)
                                            │  └──> New Relic OTLP (optional, outbound only)
@@ -32,7 +32,7 @@ Browser ──HTTPS──> Frontend (static)            Tor Collector (HTTPS, in
 | Actuator admin plane                 | Log file, thread dumps, recent HTTP exchanges, metrics, request mappings, cache eviction.             |
 | Secrets                              | `TORMAP_ADMIN_PASSWORD`, DB password, `NEW_RELIC_INGEST_KEY`, CI secrets (Docker Hub, Firebase, release deploy key). |
 | Host and volume                      | `/tormap-data` (tens of GB of descriptors), log directory.                       |
-| Release artifacts                    | `tormap/backend` and `tormap/frontend` images, tormap.org frontend.             |
+| Release artifacts                    | `tormap/backend`, `tormap/frontend` and `tormap/cli` images, CLI binaries on GitHub releases, tormap.org frontend. |
 
 Relay data is public by design, so confidentiality of relay data is not an asset.
 
@@ -40,7 +40,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 
 | # | Boundary                         | Input (attacker control)                                                                 | Main threats                                                   | Code |
 |---|----------------------------------|------------------------------------------------------------------------------------------|----------------------------------------------------------------|------|
-| 1 | Public API `/relay/**`, `/`      | Path params `id`, `day`; JSON arrays of IDs (≤ 50 000 / 5 000); headers (direct)         | Memory/CPU/DB exhaustion, cache thrash, error leakage          | `adapter/controller/`, `config/AppConfig.kt`, `config/CacheConfig.kt` |
+| 1 | Public API `/relay/**`, `/v1/**`, `/` | Path params `id`, `day`, `month`, `fingerprint`; query params `month`, `from`, `to` (v1); JSON arrays of IDs (≤ 50 000 / 5 000); headers (direct) | Memory/CPU/DB exhaustion, cache thrash, error leakage          | `adapter/controller/`, `config/AppConfig.kt`, `config/CacheConfig.kt` |
 | 2 | HTTP Basic authentication        | `Authorization` header on `/actuator/**` (direct)                                         | Brute force, password-hashing CPU cost, cleartext creds without TLS | `config/SecurityConfig.kt` |
 | 3 | Admin plane `/actuator/**`       | Requests from whoever holds the admin password                                            | Info disclosure (log file, thread dumps, exchanges), cache eviction | `application.yml` `management.*` |
 | 4 | Reverse proxy headers            | `X-Forwarded-*` (direct if the backend port is exposed)                                   | Spoofed client IP/scheme/host in logs, redirects, exchanges    | `server.forward-headers-strategy`, `server.tomcat.remoteip.*` in `application.yml` |
@@ -76,7 +76,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 
 - `SecurityConfig`: three filter chains. The actuator chain requires role `ADMIN` via HTTP Basic. The Lite chain allows
   only GET on `/lite` and `/lite/**`. The public chain has no
-  authentication: only `/`, `/error`, `/relay/**` and static files are allowed, everything else is denied, and
+  authentication: only `/`, `/error`, `/relay/**`, GET on `/v1/**` and static files are allowed, everything else is denied, and
   `Authorization` headers are ignored. With no admin password configured, no user exists and the actuator is
   unreachable. Swagger is public only when enabled. Stateless sessions, no form login. CSRF (double-submit cookie) for
   unsafe actuator methods. `SecurityRulesTest` pins these rules.
@@ -111,6 +111,20 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   fully deserialized.
 - Persistence uses Spring Data derived queries and bound parameters only, no string-built SQL/JPQL. Flyway migrations
   with `ddl-auto: validate`.
+- API v1 (`/v1/**`, `ApiV1Controller`): the stable public API for the CLI and other clients, GET only. Its contract
+  is the committed `api/openapi-v1.json`, kept in sync by `ApiV1OpenApiSpecTest`. Filters (country, flag, AS,
+  nickname) run in the client over a whole cached day, so query parameters can not multiply server-side cache keys.
+  The only query parameters (`month` on the fingerprint lookup, `from`/`to` on daily counts) are strictly parsed and
+  are not cache keys. The fingerprint must be 40 hex characters. The relays of a day have their own cache of 10 days.
+- CLI (`cli/`): a read-only client of API v1, run by users. It treats API responses as untrusted: control characters
+  in relay-derived strings are replaced before they reach the terminal, CSV cells starting with `=`, `+`, `-` or `@`
+  are prefixed with `'` against spreadsheet formula injection, redirects are not followed, responses are capped at
+  64 MB, and path values are validated or URL-encoded. With `--proxy socks5h://…` the proxy resolves the API host, so
+  no DNS request leaves outside Tor. The cache holds only public API responses.
+  Native binaries are built by `.github/workflows/cli-native.yml` with GraalVM Community from the tagged commit and
+  attached to the draft release with a `SHA256SUMS` file; only that workflow's `release` job has `contents: write`.
+  Published releases are immutable. The binaries carry the JDK's CA certificates from build time. The `tormap/cli`
+  image copies the Linux binaries onto a distroless base pinned by digest and runs as a non-root user.
 - Caches with bounded entry counts (Caffeine `maximumSize`, unknown cache names rejected). Cache keys built from path variables (day, month) must be canonical: the controllers reject padded forms such as `+0002024-05-01`, and empty results are not cached, so made-up values can not fill or evict a cache. Shallow ETags only on small endpoints. `CoalesceService`
   bounds concurrent background recomputation per key.
 - Ingestion: remote file names must not contain `/`, `\`, `.` or `..`, and target directories must resolve inside the
@@ -140,10 +154,10 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   immutable release pinned by `ipLookupDataVersion` in `backend/gradle.properties` (TorMap/ip-lookup-data, a mirror of
   DB-IP Lite) and checked against that release's `SHA256SUMS`.
 - Releases: only the Release workflow pushes `v*` tags and version bumps, with a deploy key kept in the `release`
-  environment (master only). Rulesets let only deploy keys create, move or delete `v*` tags. The Docker Hub secrets
-  live in the `docker-hub` environment (master and `v*` tags only), so a workflow on another branch can't read them.
-  The Docker workflows refuse a tag that doesn't match both project versions, and the frontend image carries build
-  provenance and an SBOM.
+  environment (master only), which the tag and master rulesets let bypass them. The Docker Hub secrets live in the
+  `docker-hub` environment (master and `v*` tags only), so a workflow on another branch can't read them. The tag
+  workflows refuse a tag that doesn't match all three project versions. Published releases are immutable, and the
+  frontend and CLI images carry build provenance and an SBOM.
 
 ## Threat scenarios
 

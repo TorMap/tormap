@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.transaction.annotation.Transactional
 import org.tormap.adapter.dto.DailyRelayCountDto
 import org.tormap.adapter.dto.RelayLocationDto
+import org.tormap.adapter.dto.v1.RelayV1Dto
 import java.time.LocalDate
 
 
@@ -23,6 +24,15 @@ interface RelayLocationRepositoryImpl : RelayLocationRepository {
                 "WHERE g.day = :day"
     )
     fun findAllUsingDay(day: LocalDate): List<RelayLocationDto>
+
+    @Query(
+        "SELECT new org.tormap.adapter.dto.v1.RelayV1Dto(g.fingerprint, n.nickname, g.countryCode, g.latitude, g.longitude, g.flags, g.consensusWeight, n.autonomousSystemNumber, n.familyId) FROM RelayLocation g " +
+                "LEFT JOIN FETCH RelayDetails n " +
+                "ON g.fingerprint = n.fingerprint " +
+                "AND function('TO_CHAR', g.day, 'YYYY-MM') = n.month " +
+                "WHERE g.day = :day"
+    )
+    fun findAllV1UsingDay(day: LocalDate): List<RelayV1Dto>
 
     /**
      * Flags are stored as comma separated enum ordinals, e.g. "3, 5, 7". The literals below are the ordinals of

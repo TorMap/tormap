@@ -120,7 +120,9 @@ object LiteRelayPages {
         val label = "${name ?: "Autonomous system"} (AS$number)"
         val description = "${relays.size} Tor relays in $label on ${view.day ?: "no day"}, with their nicknames, " +
             "types, countries, families and flags."
-        return LitePage.layout("Tor relays in $label - TorMap Lite", view, fullVersionUrl, description, canonicalUrl) {
+        return LitePage.layout(
+            "Tor relays in $label - TorMap Lite", view, fullVersionUrl, description, canonicalUrl, noIndex = relays.isEmpty(),
+        ) {
             backToMap(view)
             tag("h2", label)
             tag("p", "class" to "summary") { text("Relays in this autonomous system on ${view.day ?: "no day"}.") }

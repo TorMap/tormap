@@ -17,6 +17,7 @@ class CacheConfig {
         const val RELAY_DAILY_COUNTS = "RELAY_DAILY_COUNTS"
         const val RELAY_DAILY_COUNTS_KEY = "RELAY_DAILY_COUNTS_KEY"
         const val RELAY_LOCATIONS_PER_DAY = "RELAY_LOCATIONS_OF_DAY"
+        const val API_V1_RELAYS_PER_DAY = "API_V1_RELAYS_PER_DAY"
         const val COUNTRY_USAGE_PER_DAY = "COUNTRY_USAGE_PER_DAY"
         const val REVERSE_DNS_LOOKUPS = "REVERSE_DNS_LOOKUPS"
         const val LITE_MAP_IMAGES = "LITE_MAP_IMAGES"
@@ -41,6 +42,12 @@ class CacheConfig {
             RELAY_LOCATIONS_PER_DAY,
             // 1 entry ~= 2.5 MB of memory -> 40 entries ~= 100 MB of memory
             Caffeine.newBuilder().maximumSize(40).recordStats().build()
+        )
+        registerCustomCache(
+            API_V1_RELAYS_PER_DAY,
+            // Relays of a day for the public API v1 (CLI). 1 entry ~= 3.5 MB of memory -> 10 entries ~= 35 MB of memory.
+            // Kept smaller than the frontend's cache: API clients mostly ask for recent days.
+            Caffeine.newBuilder().maximumSize(10).recordStats().build()
         )
         registerCustomCache(
             COUNTRY_USAGE_PER_DAY,

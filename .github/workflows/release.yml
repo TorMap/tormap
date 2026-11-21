@@ -1,15 +1,16 @@
 name: Release
 
-# Releases master: Actions → Release → Run workflow (or `gh workflow run release.yml -f bump=auto -f dry_run=false`).
+# Releases master: Actions → Release → Run workflow (or `gh workflow run release.yml -f dry_run=false`).
 # A dry run (the default) only writes the plan to the job summary: next version, PRs by category, CI status.
-# A real run bumps backend/build.gradle.kts and frontend/package.json, pushes that commit and the vX.Y.Z tag to master
-# with the release deploy key (which triggers the Docker workflows for the tag), and creates a draft GitHub release
-# with the generated notes. Publishing the draft stays manual.
+# A real run bumps backend/build.gradle.kts, frontend/package.json and cli/build.gradle.kts, pushes that commit and the
+# vX.Y.Z tag to master with the release deploy key and puts the notes on the draft release of the tag. The tag push
+# starts the Docker workflows and cli_native, which attaches the CLI binaries to the same draft. Releases are
+# immutable once published, so publishing the draft stays manual and comes after the binaries are attached.
 #
 # One-time setup (repository settings):
 # - Environment `release`: deployment branches "master" only. Secret RELEASE_DEPLOY_KEY: private key of a deploy key
-#   with write access. Optionally require a reviewer.
-# - Rulesets: only deploy keys may create, update or delete v* tags, and deploy keys may bypass the master rules.
+#   with write access.
+# - Rulesets: deploy keys may bypass the tag ruleset and the master rules (required status checks, pull requests).
 
 on:
   workflow_dispatch:
@@ -23,6 +24,10 @@ on:
         description: Only show the plan, change nothing
         type: boolean
         default: true
+      description:
+        description: Optional release description for users (Markdown), put above the generated notes
+        type: string
+        default: ''
 
 concurrency:
   group: release
@@ -65,7 +70,7 @@ jobs:
     # Holds RELEASE_DEPLOY_KEY and only allows master, so no other branch or workflow can push release tags
     environment: release
     permissions:
-      contents: write # create the draft release
+      contents: write # create or edit the draft release
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -77,7 +82,7 @@ jobs:
           VERSION: ${{ needs.plan.outputs.version }}
           TAG: ${{ needs.plan.outputs.tag }}
         run: |
-          sed -i "s/^version = \".*\"$/version = \"$VERSION\"/" backend/build.gradle.kts
+          sed -i "s/^version = \".*\"$/version = \"$VERSION\"/" backend/build.gradle.kts cli/build.gradle.kts
           sed -i "0,/\"version\": \"[^\"]*\"/s//\"version\": \"$VERSION\"/" frontend/package.json
           .github/scripts/check-release-version.sh "$TAG"
           git config user.name "github-actions[bot]"
@@ -89,20 +94,29 @@ jobs:
           # Atomic and without force: if master moved since the plan, nothing is pushed
           git push --atomic origin HEAD:refs/heads/master "refs/tags/$TAG"
 
-      - name: Create draft release
+      - name: Put the notes on the draft release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           TAG: ${{ needs.plan.outputs.tag }}
           PREVIOUS_TAG: ${{ needs.plan.outputs.previous_tag }}
+          DESCRIPTION: ${{ inputs.description }}
         run: |
-          gh release create "$TAG" --draft --verify-tag --title "$TAG" \
-            --notes-start-tag "$PREVIOUS_TAG" --generate-notes \
-            --notes "_Add the release description here._"
+          generated=$(gh api "repos/$GH_REPO/releases/generate-notes" -f tag_name="$TAG" \
+            -f previous_tag_name="$PREVIOUS_TAG" --jq .body)
+          printf '%s\n\n%s\n' "${DESCRIPTION:-_Add the release description here._}" "$generated" > notes.md
+          # cli_native creates the draft too when it attaches the binaries, so whichever comes first creates it
+          if gh release create "$TAG" --draft --verify-tag --title "$TAG" --notes-file notes.md; then
+            echo "Created the draft release $TAG."
+          else
+            gh release edit "$TAG" --draft --notes-file notes.md
+            echo "Updated the notes of the existing draft release $TAG."
+          fi
           {
             echo "## Next steps"
             echo ""
-            echo "- The Docker workflows for $TAG are running: https://github.com/$GITHUB_REPOSITORY/actions?query=branch%3A$TAG"
-            echo "- Edit the draft release (description, deployment notes): https://github.com/$GITHUB_REPOSITORY/releases"
+            echo "- Wait for backend_docker, frontend_docker and cli_native on $TAG: https://github.com/$GH_REPO/actions?query=branch%3A$TAG"
+            echo "- Check the draft (description, deployment notes, CLI binaries and SHA256SUMS): https://github.com/$GH_REPO/releases"
             echo "- Publish security advisories fixed in this release together with it."
-            echo "- Publish the draft once both images are pushed."
+            echo "- Publish the draft. Published releases are immutable, so only after cli_native attached the binaries."
           } >> "$GITHUB_STEP_SUMMARY"

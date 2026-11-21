@@ -9,6 +9,7 @@ on:
       - dev
     paths:
       - 'backend/**'
+      - 'api/**'
       - '.github/workflows/backend*'
       - '.github/scripts/osm-check.py'
   pull_request:

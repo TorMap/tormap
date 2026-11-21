@@ -8,11 +8,14 @@ description: >
 
 outputs:
   backend:
-    description: "'true' if backend code or its CI changed"
+    description: "'true' if backend code, the API spec (api/) or its CI changed"
     value: ${{ steps.filter.outputs.backend }}
   frontend:
     description: "'true' if frontend code or its CI changed"
     value: ${{ steps.filter.outputs.frontend }}
+  cli:
+    description: "'true' if CLI code, the API spec (api/) or its CI changed"
+    value: ${{ steps.filter.outputs.cli }}
   workflows:
     description: "'true' if anything under .github changed"
     value: ${{ steps.filter.outputs.workflows }}
@@ -40,8 +43,9 @@ runs:
         fi
         matches() { [ "$all" = true ] || grep -qE "$1" <<< "$files"; }
         for entry in \
-          'backend:^backend/|^\.github/workflows/backend|^\.github/scripts/osm-check\.py$' \
+          'backend:^backend/|^api/|^\.github/workflows/backend|^\.github/scripts/osm-check\.py$' \
           'frontend:^frontend/|^\.github/workflows/frontend|^\.github/scripts/osm-check\.py$' \
+          'cli:^cli/|^api/|^\.github/workflows/cli|^\.github/scripts/osm-check\.py$' \
           'workflows:^\.github/'; do
           name="${entry%%:*}"
           if matches "${entry#*:}"; then

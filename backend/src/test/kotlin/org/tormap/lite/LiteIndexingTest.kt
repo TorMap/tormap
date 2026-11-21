@@ -4,6 +4,9 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
+import org.tormap.adapter.dto.RelayLocationDto
+import java.math.BigDecimal
 import java.time.LocalDate
 
 class LiteIndexingTest : StringSpec({
@@ -40,5 +43,16 @@ class LiteIndexingTest : StringSpec({
         xml shouldContain "<url><loc>https://api.example.org/lite/</loc><lastmod>2026-11-11</lastmod></url>"
         xml shouldContain "<loc>https://api.example.org/lite/as/3</loc>"
         Regex("/lite/as/24940<").findAll(xml).count() shouldBe 1
+    }
+
+    "an autonomous system page with relays links its canonical URL, one without relays is not indexed" {
+        val view = LiteView.parse(emptyMap())
+        val relay = RelayLocationDto(BigDecimal.ONE, BigDecimal.ONE, "DE", null, 1, null, "relay", 100, 3320)
+        val canonical = "https://api.example.org/lite/as/3320"
+        val withRelays = LiteRelayPages.renderAutonomousSystem(3320, "Example", listOf(relay), view, "https://example.org", canonical)
+        withRelays shouldContain "<link rel=\"canonical\" href=\"$canonical\">"
+        withRelays shouldNotContain "noindex"
+        LiteRelayPages.renderAutonomousSystem(3320, null, emptyList(), view, "https://example.org") shouldContain
+            "<meta name=\"robots\" content=\"noindex\">"
     }
 })

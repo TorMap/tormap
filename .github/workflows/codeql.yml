@@ -26,6 +26,7 @@ jobs:
       contents: read
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
+      cli: ${{ steps.filter.outputs.cli }}
       frontend: ${{ steps.filter.outputs.frontend }}
       workflows: ${{ steps.filter.outputs.workflows }}
     steps:
@@ -40,7 +41,7 @@ jobs:
 
   java_kotlin:
     needs: changes
-    if: needs.changes.outputs.backend == 'true'
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.cli == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -71,6 +72,9 @@ jobs:
       # vendored metrics-lib Java sources (org.torproject.descriptor) that should not be analyzed.
       - name: Compile
         run: cd backend && ./gradlew --no-daemon --no-build-cache compileKotlin
+
+      - name: Compile CLI
+        run: cd cli && ./gradlew --no-daemon --no-build-cache compileKotlin
 
       - name: Analyze
         uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
