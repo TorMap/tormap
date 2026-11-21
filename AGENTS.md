@@ -12,7 +12,7 @@ Rules for AI coding agents (and a quick reference for humans) working in this re
 ## Build and test
 - Backend: `cd backend && ./gradlew test` (needs the JDK from `sourceCompatibility` in `backend/build.gradle.kts` and a running Docker daemon for Testcontainers). Add `jacocoTestReport` for coverage (`build/reports/jacoco/test/html/index.html`, vendored `org.torproject` code is excluded).
 - Local backend image: `./gradlew jibDockerBuild -Djib.to.image=tormap/backend:local -Djib.to.tags=local`.
-- CLI: `cd cli && ./gradlew test` (no Docker needed; the contract test reads `api/openapi-v1.json`). Run it locally with `./gradlew installDist && build/install/tormap/bin/tormap --help`.
+- CLI: `cd cli && ./gradlew test` (no Docker needed; the contract test reads `api/openapi-v1.json`). Run it locally with `./gradlew installDist && build/install/tormap/bin/tormap --help`. Native binary: `./gradlew nativeCompile` with `GRAALVM_HOME` pointing to a GraalVM 25 (writes `build/native/tormap`, about 1 minute). CI builds the release binaries and the `tormap/cli` image in `.github/workflows/cli-native.yml`.
 - Frontend: `cd frontend && yarn install --immutable && yarn build && yarn lint`.
 - Frontend tests: `cd frontend && yarn test:run` (Vitest; `yarn test` watches, `yarn test:coverage` adds coverage). `*.unit.test.ts` run in Node, all other `*.test.ts(x)` in headless Chromium, so run `yarn playwright install chromium` once.
 - Sandbox: run Chromium browser tests, `yarn npm audit` and signed `git commit` outside it (it blocks Chromium and the GPG agent, and Node ignores its proxy).

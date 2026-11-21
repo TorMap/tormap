@@ -57,3 +57,51 @@ tasks.test {
     systemProperty("tormap.apiSpec", rootDir.resolve("../api/openapi-v1.json").absolutePath)
     inputs.file("../api/openapi-v1.json")
 }
+
+/*
+ * Native binary with GraalVM native-image, without the GraalVM Gradle plugin: `./gradlew nativeCompile` with
+ * GRAALVM_HOME (or JAVA_HOME) pointing to a GraalVM 25. Writes build/native/tormap (tormap.exe on Windows).
+ * The CLI uses no reflection, resources or dynamic proxies, so native-image needs no reachability metadata.
+ */
+val nativeCompile by tasks.registering(Exec::class) {
+    group = "build"
+    description = "Builds a native binary with GraalVM native-image"
+    val jar = tasks.jar
+    val runtimeClasspath = configurations.runtimeClasspath
+    dependsOn(jar)
+    inputs.files(jar, runtimeClasspath)
+    val outputDirectory = layout.buildDirectory.dir("native")
+    outputs.dir(outputDirectory)
+
+    val windows = System.getProperty("os.name").startsWith("Windows")
+    val linux = System.getProperty("os.name") == "Linux"
+    val graalHome = providers.environmentVariable("GRAALVM_HOME").orElse(providers.environmentVariable("JAVA_HOME"))
+    val nativeImage = graalHome.map { "$it/bin/native-image" + if (windows) ".cmd" else "" }
+    // Extra native-image options, e.g. -PnativeImageOptions=--verbose
+    val extraOptions = providers.gradleProperty("nativeImageOptions").map { it.split(" ").filter(String::isNotBlank) }.orElse(emptyList())
+    inputs.property("nativeImageOptions", extraOptions)
+
+    doFirst {
+        outputDirectory.get().asFile.mkdirs()
+        val classpath = (listOf(jar.get().archiveFile.get().asFile) + runtimeClasspath.get().files)
+            .joinToString(File.pathSeparator) { it.absolutePath }
+        commandLine(
+            listOf(
+                nativeImage.get(),
+                "--no-fallback",
+                // Only http and https are used; a URL with another protocol fails instead of loading a handler
+                "--enable-url-protocols=http,https",
+                // Smaller binary (23 instead of 35 MB), the CLI spends its time waiting for the network anyway
+                "-Os",
+                // Runs on every CPU of the architecture, not only on recent ones (the default is x86-64-v3)
+                "-march=compatibility",
+            ) + (
+                // Links zlib in, so the binary only needs glibc (from the build machine's version on)
+                if (linux) listOf("--static-nolibc") else emptyList()
+            ) + listOf(
+                "-o", outputDirectory.get().file("tormap").asFile.absolutePath,
+                "-cp", classpath,
+            ) + extraOptions.get() + "org.tormap.cli.MainKt"
+        )
+    }
+}
