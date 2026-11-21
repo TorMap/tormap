@@ -98,6 +98,12 @@ class ApiClient(
         return get("v1/relays/$fingerprint$query")?.jsonObject
     }
 
+    /** Every month with details of the relay, oldest first. Empty if the relay was never seen. */
+    fun relayMonths(fingerprint: String): JsonArray {
+        if (!FINGERPRINT.matches(fingerprint)) throw ApiException("The API returned an invalid fingerprint.")
+        return get("v1/relays/$fingerprint/months")?.jsonArray ?: JsonArray(emptyList())
+    }
+
     fun family(id: Long): JsonArray = get("v1/families/$id")?.jsonArray ?: JsonArray(emptyList())
 
     fun autonomousSystems(month: String): JsonArray = required("v1/autonomous-systems/${encode(month)}").jsonArray

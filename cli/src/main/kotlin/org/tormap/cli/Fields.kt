@@ -17,6 +17,15 @@ object Fields {
         "verifiedHostNames", "unverifiedHostNames",
     )
 
+    /** RelayMonthV1Dto, the history of a relay */
+    val RELAY_MONTH = listOf(
+        "month", "day", "nickname", "address", "autonomousSystemNumber", "autonomousSystemName", "platform", "contact",
+        "bandwidthObserved", "familyId",
+    )
+
+    /** The history columns shown in a terminal table */
+    val RELAY_MONTH_TABLE = listOf("month", "nickname", "address", "autonomousSystemNumber", "platform", "bandwidthObserved")
+
     /** RelayIdentifiersV1Dto, members of a family */
     val FAMILY_MEMBER = listOf("fingerprint", "nickname")
 

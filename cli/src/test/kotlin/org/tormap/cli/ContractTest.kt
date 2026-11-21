@@ -22,6 +22,7 @@ class ContractTest : StringSpec({
         missing("RelayV1Dto", Fields.RELAY + Fields.RELAY_TABLE).shouldBeEmpty()
         missing("RelayDetailsV1Dto", Fields.RELAY_DETAILS).shouldBeEmpty()
         missing("RelayIdentifiersV1Dto", Fields.FAMILY_MEMBER).shouldBeEmpty()
+        missing("RelayMonthV1Dto", Fields.RELAY_MONTH + Fields.RELAY_MONTH_TABLE).shouldBeEmpty()
         missing("AutonomousSystemDto", Fields.AUTONOMOUS_SYSTEM).shouldBeEmpty()
         missing("DailyRelayCountDto", Fields.DAILY_COUNT).shouldBeEmpty()
         missing("CountryUsageDto", Fields.COUNTRY_USAGE).shouldBeEmpty()
@@ -29,7 +30,7 @@ class ContractTest : StringSpec({
 
     "every path the CLI calls exists in the API v1 spec" {
         val used = listOf(
-            "/v1/days", "/v1/days/{day}/relays", "/v1/relays/{fingerprint}", "/v1/families/{id}",
+            "/v1/days", "/v1/days/{day}/relays", "/v1/relays/{fingerprint}", "/v1/relays/{fingerprint}/months", "/v1/families/{id}",
             "/v1/autonomous-systems/{month}", "/v1/statistics/daily-counts", "/v1/country-usage/{day}",
         )
         (used - paths).shouldBeEmpty()

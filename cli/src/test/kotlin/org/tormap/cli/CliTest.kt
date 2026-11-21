@@ -161,6 +161,31 @@ class CliTest : StringSpec({
         }
     }
 
+    "--history lists the months of a relay, by fingerprint or nickname" {
+        api.withDay()
+        api.route(
+            "/v1/relays/$FP_B/months",
+            """[{"month":"2024-01","day":"2024-01-20","nickname":"oldbeta","address":"192.0.2.9","autonomousSystemNumber":1101,
+               "autonomousSystemName":"SURF","platform":"Tor 0.4.7","contact":null,"bandwidthObserved":100,"familyId":null},
+              {"month":"2024-03","day":"2024-03-05","nickname":"beta","address":"192.0.2.1","autonomousSystemNumber":1101,
+               "autonomousSystemName":"SURF","platform":"Tor 0.4.8","contact":"x","bandwidthObserved":200,"familyId":7}]""",
+        )
+        api.run("relay", FP_B, "--history", "--format", "csv").let {
+            it.exitCode shouldBe ExitCode.OK
+            it.stdout.lines().first() shouldBe Fields.RELAY_MONTH.joinToString(",")
+            it.stdout shouldContain "2024-01,2024-01-20,oldbeta,192.0.2.9"
+        }
+        // A fingerprint needs no day, a nickname is looked up on the latest day
+        api.requests shouldBe listOf("/v1/relays/$FP_B/months")
+        api.run("relay", "beta", "--history", format = "table").let {
+            it.exitCode shouldBe ExitCode.OK
+            it.stdout shouldContain "oldbeta"
+            it.stdout shouldContain "Tor 0.4.8"
+        }
+        api.run("relay", FP_A, "--history").exitCode shouldBe ExitCode.NOT_FOUND
+        api.run("relay", FP_B, "--history", "--month", "2024-03").exitCode shouldBe ExitCode.USAGE
+    }
+
     "shell completion scripts" {
         listOf("bash", "zsh", "fish").forEach { shell ->
             api.run("completion", shell).let {

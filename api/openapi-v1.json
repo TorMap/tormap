@@ -308,6 +308,49 @@
         "tags" : [ "API v1" ]
       }
     },
+    "/v1/relays/{fingerprint}/months" : {
+      "get" : {
+        "operationId" : "getRelayMonths",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "fingerprint",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RelayMonthV1Dto"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            },
+            "description" : "Bad Request"
+          }
+        },
+        "summary" : "Returns every month in which the relay published a server descriptor, oldest first, with its nickname, address, autonomous system, platform, contact, observed bandwidth and family in that month.",
+        "tags" : [ "API v1" ]
+      }
+    },
     "/v1/statistics/daily-counts" : {
       "get" : {
         "operationId" : "getDailyCounts",
@@ -556,6 +599,45 @@
           },
           "nickname" : {
             "type" : "string"
+          }
+        }
+      },
+      "RelayMonthV1Dto" : {
+        "type" : "object",
+        "properties" : {
+          "address" : {
+            "type" : "string"
+          },
+          "autonomousSystemName" : {
+            "type" : [ "string", "null" ]
+          },
+          "autonomousSystemNumber" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int32"
+          },
+          "bandwidthObserved" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "contact" : {
+            "type" : [ "string", "null" ]
+          },
+          "day" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "familyId" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64"
+          },
+          "month" : {
+            "type" : "string"
+          },
+          "nickname" : {
+            "type" : "string"
+          },
+          "platform" : {
+            "type" : [ "string", "null" ]
           }
         }
       },

@@ -63,6 +63,7 @@ tormap relays --day 2024-05-01 --format csv --output relays-2024-05-01.csv
 # Details of a relay, by fingerprint (spaces and a leading $ are fine) or by nickname
 tormap relay '$A1B2 C3D4 ...'
 tormap relay MyRelay --month 2024-05
+tormap relay MyRelay --history   # every month it was seen, with nickname, address, AS, platform and contact then
 
 # Family members of a relay, autonomous systems, relay counts and Tor users per country
 tormap family MyRelay

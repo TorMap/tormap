@@ -8,6 +8,7 @@ import org.tormap.adapter.dto.AutonomousSystemDto
 import org.tormap.adapter.dto.RelayFamilyIdentifiersDto
 import org.tormap.adapter.dto.RelayIdentifiersDto
 import org.tormap.adapter.dto.v1.FamilyMemberRow
+import org.tormap.adapter.dto.v1.RelayMonthV1Dto
 import org.tormap.database.entity.FIND_FAMILY_IDENTIFIERS_QUERY
 
 
@@ -47,6 +48,14 @@ interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
             "FROM RelayDetails WHERE month = :month AND familyId IS NOT NULL"
     )
     fun findFamilyMembersByMonth(month: String): List<FamilyMemberRow>
+
+    // Postgres 18 answers this with a skip scan of the unique (month, fingerprint) index (see RelayDetailsIndexUsageTest)
+    @Query(
+        "SELECT new org.tormap.adapter.dto.v1.RelayMonthV1Dto(month, day, nickname, address, autonomousSystemNumber, " +
+            "autonomousSystemName, platform, contact, bandwidthObserved, familyId) " +
+            "FROM RelayDetails WHERE fingerprint = :fingerprint ORDER BY month"
+    )
+    fun findMonthsByFingerprint(fingerprint: String): List<RelayMonthV1Dto>
 
     @Transactional
     @Modifying
