@@ -13,9 +13,9 @@ class RelayFamilies(
 )
 
 /**
- * Groups [relays] into families. Two relays are connected if one lists the other by fingerprint and the other
- * confirms this by listing the first relay by fingerprint or nickname. Connected relays form one family,
- * also when they are only connected through other members.
+ * Groups [relays] into families. Two relays are connected if they list each other by fingerprint.
+ * Nickname entries are ignored like in Tor and Onionoo, because nicknames are not unique.
+ * Connected relays form one family, also when they are only connected through other members.
  *
  * Relays are looked up by fingerprint and the families are tracked with a union-find, so this runs in time linear
  * to the number of family entries. It must not put [RelayDetails] into hash based collections, because their
@@ -62,8 +62,6 @@ fun computeRelayFamilies(
                         rejectedConnectionCount++
                     }
                 }
-                // Like before, a nickname entry of the requesting relay does not connect relays.
-                // Only the confirming relay may list the requesting relay by nickname.
                 is FamilyEntry.Nickname -> rejectedConnectionCount++
                 is FamilyEntry.Invalid -> {
                     onInvalidEntry(requestingRelay, entry.value)
@@ -89,7 +87,7 @@ fun computeRelayFamilies(
 
 private sealed interface FamilyEntry {
     class Fingerprint(val fingerprint: String) : FamilyEntry
-    class Nickname(val nickname: String) : FamilyEntry
+    object Nickname : FamilyEntry
     class Invalid(val value: String) : FamilyEntry
 }
 
@@ -98,17 +96,15 @@ private sealed interface FamilyEntry {
  */
 private class DeclaredFamily(val entries: List<FamilyEntry>) {
     private val fingerprints = entries.filterIsInstance<FamilyEntry.Fingerprint>().map { it.fingerprint }.toHashSet()
-    private val nicknames = entries.filterIsInstance<FamilyEntry.Nickname>().map { it.nickname }.toHashSet()
 
-    fun confirms(allegedFamilyMember: RelayDetails) =
-        allegedFamilyMember.fingerprint in fingerprints || allegedFamilyMember.nickname in nicknames
+    fun confirms(allegedFamilyMember: RelayDetails) = allegedFamilyMember.fingerprint in fingerprints
 
     companion object {
         fun of(familyEntries: String?) = DeclaredFamily(
             familyEntries?.commaSeparatedToList()?.map {
                 when {
                     familyEntryFingerprintRegex.matches(it) -> FamilyEntry.Fingerprint(it.substring(1, 41))
-                    familyEntryNicknameRegex.matches(it) -> FamilyEntry.Nickname(it)
+                    familyEntryNicknameRegex.matches(it) -> FamilyEntry.Nickname
                     else -> FamilyEntry.Invalid(it)
                 }
             } ?: emptyList()

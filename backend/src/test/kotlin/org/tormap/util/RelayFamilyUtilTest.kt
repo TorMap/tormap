@@ -28,17 +28,17 @@ class RelayFamilyUtilTest : StringSpec({
         result.rejectedConnectionCount shouldBe 2
     }
 
-    "a relay may confirm a family member by nickname" {
-        val result = computeRelayFamilies(listOf(relay('A', fingerprintEntry('B')), relay('B', "A")))
+    "nickname entries do not connect relays" {
+        listOf(
+            listOf(relay('A', fingerprintEntry('B')), relay('B', "A")),
+            listOf(relay('A', "B"), relay('B', fingerprintEntry('A'))),
+            listOf(relay('A', "B"), relay('B', "A")),
+        ).forEach { relays ->
+            val result = computeRelayFamilies(relays)
 
-        result.nicknames() shouldContainExactlyInAnyOrder listOf(setOf("A", "B"))
-    }
-
-    "a nickname entry of the requesting relay does not connect relays" {
-        val result = computeRelayFamilies(listOf(relay('A', "B"), relay('B', "A")))
-
-        result.families.shouldBeEmpty()
-        result.rejectedConnectionCount shouldBe 2
+            result.families.shouldBeEmpty()
+            result.rejectedConnectionCount shouldBe 2
+        }
     }
 
     "families that are connected through a member are merged" {
