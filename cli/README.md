@@ -16,6 +16,13 @@ install -m 755 tormap-4.3.0-linux-x64 ~/.local/bin/tormap
 tormap --help
 ```
 
+Each binary has a signed build provenance attestation, which shows that it was built from this repository by the
+release workflow. Verify it with the [GitHub CLI](https://cli.github.com/):
+
+```sh
+gh attestation verify tormap-4.3.0-linux-x64 --repo TorMap/tormap
+```
+
 The Linux binaries need glibc 2.35 or newer (Ubuntu 22.04, Debian 12 and later). The binaries are not signed: on
 macOS, a binary downloaded with a browser has to be allowed once with `xattr -d com.apple.quarantine tormap`, and
 Windows SmartScreen may ask for confirmation.

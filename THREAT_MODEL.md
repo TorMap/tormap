@@ -123,7 +123,9 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   64 MB, and path values are validated or URL-encoded. With `--proxy socks5h://…` the proxy resolves the API host, so
   no DNS request leaves outside Tor. The cache holds only public API responses.
   Native binaries are built by `.github/workflows/cli-native.yml` with GraalVM Community from the tagged commit and
-  attached to the draft release with a `SHA256SUMS` file; only that workflow's `release` job has `contents: write`.
+  attached to the draft release with a `SHA256SUMS` file and a signed build provenance attestation
+  (`gh attestation verify`); only that workflow's `release` job has `contents: write`, `id-token: write` and
+  `attestations: write`.
   Published releases are immutable. The binaries carry the JDK's CA certificates from build time. The `tormap/cli`
   image copies the Linux binaries onto a distroless base pinned by digest and runs as a non-root user.
 - Caches with bounded entry counts (Caffeine `maximumSize`, unknown cache names rejected). Cache keys built from path variables (day, month) must be canonical: the controllers reject padded forms such as `+0002024-05-01`, and empty results are not cached, so made-up values can not fill or evict a cache. Shallow ETags only on small endpoints; the API v1 day of relays hashes its JSON once per cache fill and answers `If-None-Match` with 304. `CoalesceService`
