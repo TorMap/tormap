@@ -131,6 +131,19 @@ describe.each([
         await expect.element(page.getByText("Example AS (64500)")).toBeVisible()
     })
 
+    it("lists the families the relay certified", async () => {
+        mockBackend.onGet("/relay/details/relay/21", makeRelayDetails({
+            id: 21,
+            nickname: "alpha",
+            familyKeys: ["ed25519:one", "ed25519:two"],
+        }))
+        await open([makeRelay({detailsId: 21, nickname: "alpha"})])
+
+        await expect.element(page.getByText("Certified families")).toBeVisible()
+        await expect.element(page.getByText("ed25519:one")).toBeVisible()
+        await expect.element(page.getByText("ed25519:two")).toBeVisible()
+    })
+
     it("lists several relays at one location and opens the chosen one", async () => {
         mockLocationWithThreeRelays()
         await open([charlie, alpha, bravo])

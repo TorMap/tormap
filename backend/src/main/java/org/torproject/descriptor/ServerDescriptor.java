@@ -504,6 +504,16 @@ public interface ServerDescriptor extends Descriptor {
   String getFamilyCert();
 
   /**
+   * Get all Family certificates, one per family the relay is a member of,
+   * or an empty list if the descriptor doesn't contain any.
+   *
+   * <p>Local TorMap patch, not part of upstream metrics-lib.</p>
+   *
+   * @return Ed25519 certificates in the order of the descriptor
+   */
+  List<String> getFamilyCerts();
+
+  /**
    * Get the Ed25519 master key, encoded as 43 base64 characters
    * without padding characters, which was either parsed from the optional
    * {@code "master-key-ed25519"} line or derived from the (likewise

@@ -2,13 +2,10 @@ package org.tormap.service
 
 import org.springframework.jdbc.support.incrementer.PostgresSequenceMaxValueIncrementer
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
 import org.tormap.database.entity.RelayDetails
 import org.tormap.database.repository.RelayDetailsRepositoryImpl
-import org.tormap.util.addFamilyMember
-import org.tormap.util.commaSeparatedToList
-import org.tormap.util.getFamilyMember
+import org.tormap.util.computeRelayFamilies
 import org.tormap.util.logger
 import java.util.concurrent.CompletableFuture
 import javax.sql.DataSource
@@ -106,43 +103,25 @@ class RelayDetailsUpdateService(
      * Updates [RelayDetails.familyId] of all entities for the given [month].
      */
     private fun computeFamiliesForMonth(month: String) {
-        var confirmedFamilyConnectionCount = 0
-        var rejectedFamilyConnectionCount = 0
-        val families = mutableListOf<Set<RelayDetails>>()
-        val requestingRelays =
-            relayDetailsRepositoryImpl.findAllByMonthEqualsAndFamilyEntriesNotNull(month)
-        requestingRelays.forEach { requestingRelay ->
-            requestingRelay.familyEntries!!.commaSeparatedToList().forEach { familyEntry ->
-                try {
-                    val newConfirmedMember =
-                        requestingRelay.getFamilyMember(familyEntry, requestingRelays)
-                    if (newConfirmedMember != null && requestingRelay != newConfirmedMember) {
-                        families.addFamilyMember(requestingRelay, newConfirmedMember)
-                        confirmedFamilyConnectionCount++
-                    } else {
-                        rejectedFamilyConnectionCount++
-                    }
-                } catch (exception: Exception) {
-                    logger.debug(exception.message)
-                    rejectedFamilyConnectionCount++
-                }
-            }
+        val requestingRelays = relayDetailsRepositoryImpl.findAllWithFamilyDeclarationByMonth(month)
+        val result = computeRelayFamilies(requestingRelays) { relay, familyEntry ->
+            logger.debug("Format of alleged family member $familyEntry for requestingRelay ${relay.fingerprint} not supported!")
         }
         relayDetailsRepositoryImpl.clearFamiliesFromMonth(month)
-        families.saveToDatabase()
-        val totalFamilyConnectionCount = confirmedFamilyConnectionCount + rejectedFamilyConnectionCount
-        logger.info("Finished families for month $month. Rejected $rejectedFamilyConnectionCount / $totalFamilyConnectionCount connections. Found ${families.size} different families.")
+        saveFamilies(result.families)
+        val totalFamilyConnectionCount = result.confirmedConnectionCount + result.rejectedConnectionCount
+        logger.info("Finished families for month $month. Rejected ${result.rejectedConnectionCount} / $totalFamilyConnectionCount family line connections. ${result.relaysWithFamilyKeyCount} relays have family certificates. Found ${result.families.size} different families.")
     }
 
     /**
-     * Save families of [RelayDetails] by updating their [RelayDetails.familyId]
+     * Save [families] of [RelayDetails] by updating their [RelayDetails.familyId].
+     * Flushes once, because each flush checks all relays of the month for changes.
      */
-    @Transactional
-    fun List<Set<RelayDetails>>.saveToDatabase() {
-        this.forEach { family ->
+    private fun saveFamilies(families: List<List<RelayDetails>>) {
+        families.forEach { family ->
             val familyId = dbSequenceIncrementer.nextLongValue()
             family.forEach { it.familyId = familyId }
-            relayDetailsRepositoryImpl.saveAllAndFlush(family)
         }
+        relayDetailsRepositoryImpl.saveAllAndFlush(families.flatten())
     }
 }

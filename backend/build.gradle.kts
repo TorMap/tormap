@@ -70,7 +70,7 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
 
     // Read .mmdb (MaxMind DB format) files for IP lookups https://maxmind.github.io/MaxMind-DB/
-    implementation("com.maxmind.geoip2:geoip2:5.2.0")
+    implementation("com.maxmind.geoip2:geoip2:5.3.0")
 
     // Export metrics to New Relic via OTLP (https://micrometer.io/)
     implementation("org.springframework.boot:spring-boot-starter-micrometer-metrics")
