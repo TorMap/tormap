@@ -48,3 +48,14 @@ export const openRelaySearchAtom = atom(null, (_get, set, {relays, focusSearch =
     set(relayDetailsDialogSearchAtom, "")
     set(focusRelaySearchAtom, focusSearch)
 });
+
+/**
+ * The relays of the day the map shows, set once they are loaded
+ */
+export const dayRelaysAtom = atom<{ day: string, relays: RelayLocationDto[] } | undefined>(undefined);
+
+/**
+ * Set when the user jumps to another month of a relay: once the relays of `day` are loaded, the dialog shows the
+ * relay as it was on that day
+ */
+export const followRelayAtom = atom<{ fingerprint: string, day: string } | undefined>(undefined);

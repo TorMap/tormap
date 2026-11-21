@@ -112,6 +112,25 @@ export interface RelayDetailsDto {
     unverifiedHostNames: string[]
 }
 
+/**
+ * A month in which a relay published a server descriptor (`/v1/relays/{fingerprint}/months`)
+ */
+export interface RelayMonthDto {
+    month: string
+    /**
+     * The day of the relay's latest server descriptor in the month
+     */
+    day: string
+    nickname: string
+    address: string
+    autonomousSystemNumber?: number | null
+    autonomousSystemName?: string | null
+    platform?: string | null
+    contact?: string | null
+    bandwidthObserved: number
+    familyId?: number | null
+}
+
 export interface RelayIdentifierDto {
     fingerprint: string
     nickname: string

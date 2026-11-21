@@ -3,6 +3,7 @@ import "vitest-browser-react";
 
 import {afterEach, beforeEach, expect} from "vitest";
 
+import {clearRelayMonthsCache} from "../components/dialogs/relay/RelayMonths";
 import {mockBackend} from "./mock-backend";
 
 beforeEach(() => {
@@ -12,6 +13,9 @@ beforeEach(() => {
     window.history.replaceState(null, "", window.location.pathname + window.location.search)
     mockBackend.reset()
     mockBackend.install()
+    // The relay details show the months of the relay. Without a test's own mock, a relay has no history.
+    mockBackend.onGet(/^\/v1\/relays\/[0-9A-F]{40}\/months$/, [])
+    clearRelayMonthsCache()
 })
 
 afterEach(() => {

@@ -11,7 +11,7 @@ import {mockBackend, networkError} from "../../../test/mock-backend";
 import {renderWithProviders} from "../../../test/render";
 import {RelayFlag, RelayType} from "../../../types/relay";
 import {SnackbarMessage} from "../../../types/ui";
-import {relaysForDetailsDialogAtom, relaySearchOnMapAtom, showRelayDetailsDialogAtom} from "./relay-details-atoms";
+import {dayRelaysAtom, relaysForDetailsDialogAtom, relaySearchOnMapAtom, showRelayDetailsDialogAtom} from "./relay-details-atoms";
 import {ResponsiveRelayDetailsDialog} from "./ResponsiveRelayDetailsDialog";
 
 /**
@@ -107,7 +107,7 @@ describe.each([
         await expect.element(page.getByRole("link", {name: "198.51.100.7"})).toBeVisible()
         await expect.element(page.getByRole("link", {name: "sibling (SIB1)"})).toBeVisible()
         await expect.element(page.getByLabelText("Nickname or fingerprint")).not.toBeInTheDocument()
-        expect(mockBackend.requested).toEqual([`GET ${detailsPath(21)}`])
+        expect(mockBackend.requested.filter(request => !request.endsWith("/months"))).toEqual([`GET ${detailsPath(21)}`])
     })
 
     it("has an accessible name for the dialog", async () => {
@@ -288,5 +288,100 @@ describe("RelayList paging", () => {
             throw new Error("not every relay is rendered yet")
         }, {timeout: 5000})
         await expect.element(page.getByRole("progressbar")).not.toBeInTheDocument()
+    })
+})
+
+describe("Months of a relay", () => {
+    const availableDays = ["2023-12-15", "2024-01-02", "2024-03-01", "2024-03-09"]
+    const months = [
+        {month: "2023-12", day: "2023-12-15", nickname: "alpha-old", address: "192.0.2.1", bandwidthObserved: 1, platform: "Tor 0.4.7"},
+        {month: "2024-01", day: "2024-01-02", nickname: "alpha", address: "192.0.2.1", bandwidthObserved: 1},
+        {month: "2024-03", day: "2024-03-09", nickname: "alpha-march", address: "192.0.2.2", bandwidthObserved: 1},
+    ]
+
+    /**
+     * Opens the dialog for alpha on 2024-01-02 and loads the relays of each newly selected day, like the map does
+     */
+    const MapHarness = () => {
+        const setRelays = useSetAtom(relaysForDetailsDialogAtom)
+        const setShow = useSetAtom(showRelayDetailsDialogAtom)
+        const setDayRelays = useSetAtom(dayRelaysAtom)
+        const {selectedDate, setSelectedDate, setAvailableDays} = useDate()
+        useEffect(() => {
+            setAvailableDays(availableDays)
+            setSelectedDate(day)
+            setRelays([alpha])
+            setShow(true)
+        }, [setAvailableDays, setRelays, setSelectedDate, setShow])
+        useEffect(() => {
+            if (!selectedDate || selectedDate === day) return
+            const relay = makeRelay({fingerprint: fingerprintOf(21), nickname: `alpha on ${selectedDate}`, flags: [RelayFlag.Guard]})
+            setDayRelays({day: selectedDate, relays: [relay]})
+        }, [selectedDate, setDayRelays])
+        return (
+            <>
+                <ResponsiveRelayDetailsDialog/>
+                <output aria-label="selected day">{selectedDate}</output>
+            </>
+        )
+    }
+
+    const selectedDay = () => document.querySelector('output[aria-label="selected day"]')?.textContent
+
+    const mockAlpha = () => {
+        mockBackend.onGet(`/v1/relays/${fingerprintOf(21)}/months`, months)
+        mockBackend.onGet(/^\/v1\/relays\/([0-9A-F]{40})\?month=(\d{4}-\d{2})$/, ({match}) =>
+            makeRelayDetails({fingerprint: match![1], nickname: "alpha", day: `${match![2]}-02`}))
+    }
+
+    it("shows the months the relay was seen and the current one", async () => {
+        await page.viewport(1400, 900)
+        mockAlpha()
+        await renderWithProviders(<MapHarness/>)
+
+        await expect.element(page.getByText("Seen in 3 months (2023-12 to 2024-03)")).toBeVisible()
+        await expect.element(page.getByRole("button", {name: "Previous month seen: 2023-12"})).toBeEnabled()
+        await expect.element(page.getByRole("button", {name: "Next month seen: 2024-03"})).toBeEnabled()
+        await expect.element(page.getByLabelText("2024-02 not seen")).toBeDisabled()
+        expect(document.querySelector('[aria-current="date"]')?.getAttribute("aria-label")).toBe("Show 2024-01")
+    })
+
+    it("jumps to the next month and shows the relay as it was on that day", async () => {
+        await page.viewport(1400, 900)
+        mockAlpha()
+        await renderWithProviders(<MapHarness/>)
+
+        await page.getByRole("button", {name: "Next month seen: 2024-03"}).click()
+
+        // The relay's descriptor day of that month, as the map has data for it
+        await expect.poll(selectedDay).toBe("2024-03-09")
+        await expect.element(page.getByRole("heading", {name: "Relay's nickname"})).toHaveTextContent("alpha on 2024-03-09")
+        await expect.element(page.getByText("Guard", {exact: true})).toBeVisible()
+        expect(mockBackend.requested).toContain(`GET /v1/relays/${fingerprintOf(21)}?month=2024-03`)
+        await expect.element(page.getByRole("button", {name: "Previous month seen: 2024-01"})).toBeEnabled()
+        await expect.element(page.getByRole("button", {name: "No later month seen"})).toBeDisabled()
+        // The months are not downloaded again
+        expect(mockBackend.requested.filter(request => request.endsWith("/months"))).toHaveLength(1)
+    })
+
+    it("jumps to a month from the overview", async () => {
+        await page.viewport(500, 800)
+        mockAlpha()
+        await renderWithProviders(<MapHarness/>)
+
+        await page.getByLabelText("Show 2023-12").click()
+
+        await expect.poll(selectedDay).toBe("2023-12-15")
+        await expect.element(page.getByRole("heading", {name: "Relay's nickname"})).toHaveTextContent("alpha on 2023-12-15")
+    })
+
+    it("hides the months when they can not be loaded", async () => {
+        await page.viewport(1400, 900)
+        mockAlpha()
+        mockBackend.onGet(`/v1/relays/${fingerprintOf(21)}/months`, () => networkError())
+        await renderWithProviders(<MapHarness/>)
+
+        await expect.element(page.getByRole("heading", {name: "Relay's nickname"})).toHaveTextContent("alpha")
+        await expect.element(page.getByText(/Seen in/)).not.toBeInTheDocument()
     })
 })
