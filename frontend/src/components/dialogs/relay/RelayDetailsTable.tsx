@@ -52,7 +52,7 @@ export const RelayDetailsTable: FunctionComponent<Props> = ({relayDetailsMatch, 
         {name: "Link protocol versions", value: relayDetailsMatch.linkProtocolVersions},
         {name: "Circuit protocol versions", value: relayDetailsMatch.circuitProtocolVersions},
         {name: "Self reported family members", value: relayDetailsMatch.familyEntries},
-        {name: "Certified families", value: renderTextList(relayDetailsMatch.familyIds)},
+        {name: "Certified families", value: renderTextList(relayDetailsMatch.familyKeys)},
         {
             name: "Confirmed family members",
             value: renderConfirmedFamilyMembers(relayDetailsMatch.confirmedFamilyMembers)

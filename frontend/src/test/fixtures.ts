@@ -57,7 +57,7 @@ export const makeRelayDetails = (overrides: Partial<RelayDetailsDto> = {}): Rela
     uptime: 7200,
     contact: "operator@example.org",
     familyEntries: "",
-    familyIds: [],
+    familyKeys: [],
     familyId: null,
     cachesExtraInfo: true,
     isHiddenServiceDir: true,

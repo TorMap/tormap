@@ -92,7 +92,7 @@ class LiteControllerTest(
     }
 
     "relay pages list the certified families" {
-        val relay = relayDetailsRepository.save(mockRelayDetails('F').apply { familyIds = "ed25519:one, ed25519:two" })
+        val relay = relayDetailsRepository.save(mockRelayDetails('F').apply { familyKeys = "ed25519:one, ed25519:two" })
         val html = mockMvc.perform(get("/lite/relay/${relay.id}")).andReturn().response.contentAsString
         html shouldContain "Certified families"
         html shouldContain "<li>ed25519:one</li>"

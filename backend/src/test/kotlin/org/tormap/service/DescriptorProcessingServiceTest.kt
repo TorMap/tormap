@@ -126,17 +126,17 @@ class DescriptorProcessingServiceTest(
     fun parseServerDescriptor(text: String) = DescriptorSourceFactory.createDescriptorParser()
         .parseDescriptors(text.toByteArray(), null, "server-descriptor").single() as ServerDescriptor
 
-    "server descriptors processed again fill the missing family IDs of the same day" {
+    "server descriptors processed again fill the missing family keys of the same day" {
         val withoutFamilyCerts = descriptorWithFamilyCerts.replace(
             Regex("family-cert\n-----BEGIN FAMILY CERT-----\n[^-]*-----END FAMILY CERT-----\n"), ""
         )
         descriptorProcessingService.processDescriptor(parseServerDescriptor(withoutFamilyCerts))
-        relayDetailsRepository.findAll().single().familyIds.shouldBeNull()
+        relayDetailsRepository.findAll().single().familyKeys.shouldBeNull()
 
         descriptorProcessingService.processDescriptor(parseServerDescriptor(descriptorWithFamilyCerts))
 
         val relay = relayDetailsRepository.findAll().single()
-        relay.familyIds shouldBe "ed25519:9ZiuZBKvxIauADkUfqvvU17jtXWhrA8RVKrkZgMEvZ4, " +
+        relay.familyKeys shouldBe "ed25519:9ZiuZBKvxIauADkUfqvvU17jtXWhrA8RVKrkZgMEvZ4, " +
             "ed25519:vO6m/idEC83oHLQcFzeZDoMfYNUsT0Q+0xbhCUuMrFg"
         relay.nickname shouldBe "3GTor"
     }

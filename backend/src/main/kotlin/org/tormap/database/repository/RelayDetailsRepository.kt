@@ -11,7 +11,7 @@ interface RelayDetailsRepository : JpaRepository<RelayDetails, Long> {
     /**
      * Relays of the [month] that declare a family, by a family line or by family certificates
      */
-    @Query("FROM RelayDetails WHERE month = :month AND (familyEntries IS NOT NULL OR familyIds IS NOT NULL)")
+    @Query("FROM RelayDetails WHERE month = :month AND (familyEntries IS NOT NULL OR familyKeys IS NOT NULL)")
     fun findAllWithFamilyDeclarationByMonth(@Param("month") month: String): List<RelayDetails>
 
     fun findAllByMonthEqualsAndAutonomousSystemNumberNull(month: String): List<RelayDetails>

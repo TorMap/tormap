@@ -13,7 +13,7 @@ object Fields {
         "fingerprint", "nickname", "month", "day", "address", "autonomousSystemNumber", "autonomousSystemName",
         "platform", "protocols", "contact", "uptime", "bandwidthRate", "bandwidthBurst", "bandwidthObserved",
         "hibernating", "allowSingleHopExits", "cachesExtraInfo", "hiddenServiceDir", "tunnelledDirServer",
-        "linkProtocolVersions", "circuitProtocolVersions", "familyEntries", "familyIds", "familyId", "confirmedFamilyMembers",
+        "linkProtocolVersions", "circuitProtocolVersions", "familyEntries", "familyKeys", "familyId", "confirmedFamilyMembers",
         "verifiedHostNames", "unverifiedHostNames",
     )
 

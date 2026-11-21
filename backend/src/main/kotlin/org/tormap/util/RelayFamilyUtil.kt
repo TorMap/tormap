@@ -4,23 +4,23 @@ import org.tormap.database.entity.RelayDetails
 
 /**
  * The families found by [computeRelayFamilies].
- * @param families relays that are connected through confirmed family entries or shared family IDs,
+ * @param families relays that are connected through confirmed family entries or shared family keys,
  * each family has at least two members
  * @param confirmedConnectionCount family line entries that are confirmed by the listed relay
  * @param rejectedConnectionCount family line entries that are not confirmed or invalid
- * @param relaysWithFamilyIdCount relays with at least one family ID from a family certificate
+ * @param relaysWithFamilyKeyCount relays with at least one family key from a family certificate
  */
 class RelayFamilies(
     val families: List<List<RelayDetails>>,
     val confirmedConnectionCount: Int,
     val rejectedConnectionCount: Int,
-    val relaysWithFamilyIdCount: Int,
+    val relaysWithFamilyKeyCount: Int,
 )
 
 /**
  * Groups [relays] into families like Tor clients do (proposal 321). Two relays are connected if
  * - they list each other by fingerprint in their family lines ([RelayDetails.familyEntries]), or
- * - they share a family ID from a verified family certificate ([RelayDetails.familyIds]).
+ * - they share a family key from a verified family certificate ([RelayDetails.familyKeys]).
  *
  * Nickname entries are ignored like in Tor and Onionoo, because nicknames are not unique.
  * Connected relays form one family, also when they are only connected through other members.
@@ -83,13 +83,13 @@ fun computeRelayFamilies(
         }
     }
 
-    val firstIndexByFamilyId = HashMap<String, Int>()
-    var relaysWithFamilyIdCount = 0
+    val firstIndexByFamilyKey = HashMap<String, Int>()
+    var relaysWithFamilyKeyCount = 0
     relays.forEachIndexed { index, relay ->
-        val familyIds = relay.familyIds?.commaSeparatedToList()?.filter { it.isNotEmpty() } ?: emptyList()
-        if (familyIds.isNotEmpty()) relaysWithFamilyIdCount++
-        familyIds.forEach { familyId ->
-            val firstIndex = firstIndexByFamilyId.putIfAbsent(familyId, index)
+        val familyKeys = relay.familyKeys?.commaSeparatedToList()?.filter { it.isNotEmpty() } ?: emptyList()
+        if (familyKeys.isNotEmpty()) relaysWithFamilyKeyCount++
+        familyKeys.forEach { familyKey ->
+            val firstIndex = firstIndexByFamilyKey.putIfAbsent(familyKey, index)
             if (firstIndex != null && firstIndex != index) connect(firstIndex, index)
         }
     }
@@ -105,7 +105,7 @@ fun computeRelayFamilies(
             families[familyIndex].add(relay)
         }
     }
-    return RelayFamilies(families, confirmedConnectionCount, rejectedConnectionCount, relaysWithFamilyIdCount)
+    return RelayFamilies(families, confirmedConnectionCount, rejectedConnectionCount, relaysWithFamilyKeyCount)
 }
 
 private sealed interface FamilyEntry {
