@@ -3,14 +3,17 @@ name: Release
 # Releases master: Actions → Release → Run workflow (or `gh workflow run release.yml -f dry_run=false`).
 # A dry run (the default) only writes the plan to the job summary: next version, PRs by category, CI status.
 # A real run bumps backend/build.gradle.kts, frontend/package.json and cli/build.gradle.kts, pushes that commit and the
-# vX.Y.Z tag to master with the release deploy key and puts the notes on the draft release of the tag. The tag push
-# starts the Docker workflows and cli_native, which attaches the CLI binaries to the same draft. Releases are
-# immutable once published, so publishing the draft stays manual and comes after the binaries are attached.
+# vX.Y.Z tag to master with a short-lived token of the release GitHub App and puts the notes on the draft release of
+# the tag. The tag push starts the Docker workflows and cli_native, which attaches the CLI binaries to the same draft.
+# Releases are immutable once published, so publishing the draft stays manual and comes after the binaries are
+# attached.
 #
 # One-time setup (repository settings):
-# - Environment `release`: deployment branches "master" only. Secret RELEASE_DEPLOY_KEY: private key of a deploy key
-#   with write access.
-# - Rulesets: deploy keys may bypass the tag ruleset and the master rules (required status checks, pull requests).
+# - A GitHub App owned by TorMap, installed only on this repository, without webhook, with the repository permission
+#   Contents: read and write (nothing else).
+# - Environment `release`: deployment branches "master" only. Variable RELEASE_APP_CLIENT_ID: the app's client ID.
+#   Secret RELEASE_APP_PRIVATE_KEY: a private key of the app.
+# - Rulesets: the app may bypass the tag ruleset and the master rules (required status checks, pull requests).
 
 on:
   workflow_dispatch:
@@ -67,26 +70,39 @@ jobs:
     needs: plan
     if: ${{ !inputs.dry_run }}
     runs-on: ubuntu-latest
-    # Holds RELEASE_DEPLOY_KEY and only allows master, so no other branch or workflow can push release tags
+    # Holds the release app's private key and only allows master, so no other branch or workflow can push release tags
     environment: release
     permissions:
-      contents: write # create or edit the draft release
+      contents: read # everything that writes uses the app token
     steps:
+      - name: Create a token of the release app
+        # Valid for an hour, limited to this repository and its contents, revoked when the job ends
+        id: app_token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ needs.plan.outputs.sha }} # exactly the commit whose CI passed
-          ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
+          token: ${{ steps.app_token.outputs.token }}
 
       - name: Bump versions, commit and tag
         env:
           VERSION: ${{ needs.plan.outputs.version }}
           TAG: ${{ needs.plan.outputs.tag }}
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+          APP_SLUG: ${{ steps.app_token.outputs.app-slug }}
         run: |
           sed -i "s/^version = \".*\"$/version = \"$VERSION\"/" backend/build.gradle.kts cli/build.gradle.kts
           sed -i "0,/\"version\": \"[^\"]*\"/s//\"version\": \"$VERSION\"/" frontend/package.json
           .github/scripts/check-release-version.sh "$TAG"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Commit as the app's bot user, so the bump shows who made it
+          bot_id=$(gh api "users/$APP_SLUG%5Bbot%5D" --jq .id)
+          git config user.name "$APP_SLUG[bot]"
+          git config user.email "$bot_id+$APP_SLUG[bot]@users.noreply.github.com"
           if ! git diff --quiet; then
             git commit -am "chore(release): bump version to $VERSION"
           fi
@@ -96,7 +112,7 @@ jobs:
 
       - name: Put the notes on the draft release
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
           GH_REPO: ${{ github.repository }}
           TAG: ${{ needs.plan.outputs.tag }}
           PREVIOUS_TAG: ${{ needs.plan.outputs.previous_tag }}
