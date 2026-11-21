@@ -7,7 +7,8 @@ import {page} from "vitest/browser";
 import {useSettings} from "../../context/settings-context";
 import {useStatistics} from "../../context/statistics-context";
 import {RelayLocationDto} from "../../dto/relay";
-import {makeFamilyIdentifier, makeRelay, makeRelayDetails, makeRelays, makeSettings} from "../../test/fixtures";
+import {makeFamily, makeRelay, makeRelayDetails, makeRelays, makeSettings} from "../../test/fixtures";
+import {useDate} from "../../context/date-context";
 import {mockBackend} from "../../test/mock-backend";
 import {renderWithProviders} from "../../test/render";
 import {RelayFlag} from "../../types/relay";
@@ -47,6 +48,13 @@ const State = () => {
     )
 }
 
+// Selects the day of the relays, like the map does. Details and families are requested for its month.
+const SelectDay = () => {
+    const {setSelectedDate} = useDate()
+    useEffect(() => setSelectedDate("2024-01-02"), [setSelectedDate])
+    return null
+}
+
 // Shows search results on the map, like the relay details dialog does
 const SearchOnMap = ({searchOnMap}: { searchOnMap: RelaySearchOnMap }) => {
     const setSearchOnMap = useSetAtom(relaySearchOnMapAtom)
@@ -82,6 +90,7 @@ const renderLayers = async (relays: RelayLocationDto[] | undefined, settings: Pa
         <>
             <MapContainer center={[30, 0]} zoom={3} style={{width: 800, height: 600}} preferCanvas={true}>
                 <MapProbe/>
+                <SelectDay/>
                 <LeafletLayers relays={relays} reloadSelectedDay={reloadSelectedDay}/>
             </MapContainer>
             <State/>
@@ -94,9 +103,9 @@ const renderLayers = async (relays: RelayLocationDto[] | undefined, settings: Pa
 
 // Two relays in Germany at one place and one in France
 const relays = [
-    makeRelay({country: "DE", lat: 50, long: 8, flags: [RelayFlag.Exit], detailsId: 1, nickname: "de-exit"}),
-    makeRelay({country: "DE", lat: 50, long: 8, flags: [RelayFlag.Guard], detailsId: 2, nickname: "de-guard"}),
-    makeRelay({country: "FR", lat: 48, long: 2, detailsId: 3, nickname: "fr-other"}),
+    makeRelay({country: "DE", lat: 50, long: 8, flags: [RelayFlag.Exit], nickname: "de-exit"}),
+    makeRelay({country: "DE", lat: 50, long: 8, flags: [RelayFlag.Guard], nickname: "de-guard"}),
+    makeRelay({country: "FR", lat: 48, long: 2, nickname: "fr-other"}),
 ]
 
 describe("LeafletLayers", () => {
@@ -169,10 +178,10 @@ describe("LeafletLayers", () => {
 
     describe("grouping by family", () => {
         const familyRelays = [
-            makeRelay({lat: 1, long: 1, familyId: 10, detailsId: 11}),
-            makeRelay({lat: 1, long: 1, familyId: 10, detailsId: 12}),
-            makeRelay({lat: 2, long: 2, familyId: 20, detailsId: 21}),
-            makeRelay({lat: 2, long: 2, familyId: 30, detailsId: 31}),
+            makeRelay({lat: 1, long: 1, familyId: 10}),
+            makeRelay({lat: 1, long: 1, familyId: 10}),
+            makeRelay({lat: 2, long: 2, familyId: 20}),
+            makeRelay({lat: 2, long: 2, familyId: 30}),
         ]
 
         it("warns when there is no family data", async () => {
@@ -191,9 +200,10 @@ describe("LeafletLayers", () => {
         })
 
         it("lets the user pick between families that share a location", async () => {
-            mockBackend.onPost("/relay/details/family/identifiers", [
-                makeFamilyIdentifier({id: 20, nicknames: "twenty"}),
-                makeFamilyIdentifier({id: 30, nicknames: "thirty"}),
+            mockBackend.onGet("/v1/families?month=2024-01", [
+                makeFamily({id: 10, members: [{fingerprint: "A".repeat(40), nickname: "ten"}]}),
+                makeFamily({id: 20, members: [{fingerprint: "B".repeat(40), nickname: "twenty"}]}),
+                makeFamily({id: 30, members: [{fingerprint: "C".repeat(40), nickname: "thirty"}]}),
             ])
             await renderLayers(familyRelays, {sortFamily: true})
             await expectState(/"filtered":4/)
@@ -201,7 +211,9 @@ describe("LeafletLayers", () => {
             familyCircles().find(circle => circle.options.className === "2,2")!.fire("click")
 
             await expect.element(page.getByText("thirty")).toBeVisible()
-            expect(mockBackend.requests.at(-1)?.data).toEqual([20, 30])
+            // Only the families at the location are listed
+            await expect.element(page.getByText("twenty")).toBeVisible()
+            await expect.element(page.getByText("ten")).not.toBeInTheDocument()
             await page.getByText("thirty").click()
             await expectState(/"selectedFamily":30/)
         })
@@ -224,10 +236,10 @@ describe("LeafletLayers", () => {
 
     describe("grouping by autonomous system", () => {
         const asRelays = [
-            makeRelay({lat: 1, long: 1, asNumber: 24940, detailsId: 11}),
-            makeRelay({lat: 1, long: 1, asNumber: 24940, detailsId: 12}),
-            makeRelay({lat: 2, long: 2, asNumber: 24940, detailsId: 21}),
-            makeRelay({lat: 2, long: 2, asNumber: 16276, detailsId: 22}),
+            makeRelay({lat: 1, long: 1, asNumber: 24940}),
+            makeRelay({lat: 1, long: 1, asNumber: 24940}),
+            makeRelay({lat: 2, long: 2, asNumber: 24940}),
+            makeRelay({lat: 2, long: 2, asNumber: 16276}),
         ]
 
         it("warns when there is no AS data", async () => {
@@ -255,6 +267,8 @@ describe("LeafletLayers", () => {
         })
 
         it("lets the user pick between autonomous systems that share a location", async () => {
+            // Names of the autonomous systems are looked up for the month of the selected day
+            mockBackend.onGet("/v1/autonomous-systems/2024-01", [])
             await renderLayers(asRelays, {sortAutonomousSystem: true})
             await expectState(/"filtered":4/)
 
@@ -287,7 +301,7 @@ describe("LeafletLayers", () => {
         })
 
         it("forgets the search when the day has none of the searched relays", async () => {
-            const otherMonth = {search: "gone", relays: [makeRelay({detailsId: 99})]}
+            const otherMonth = {search: "gone", relays: [makeRelay()]}
             await renderLayers(relays, {}, <SearchOnMap searchOnMap={otherMonth}/>)
 
             await expectState(/"searchOnMap":null/)
@@ -310,7 +324,7 @@ describe("LeafletLayers", () => {
     describe("marker click", () => {
         it("opens the details of a single relay", async () => {
             await page.viewport(1400, 900)
-            mockBackend.onGet("/relay/details/relay/3", makeRelayDetails({id: 3, nickname: "fr-other"}))
+            mockBackend.onGet(`/v1/relays/${relays[2].fingerprint}?month=2024-01`, makeRelayDetails({nickname: "fr-other"}))
             await renderLayers(relays)
             await expectState(/"filtered":3/)
 

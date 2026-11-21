@@ -31,7 +31,7 @@ export const CountryUsageLayer: FunctionComponent = () => {
             return
         }
         let cancelled = false
-        backend.get<CountryUsageDto[]>(`/relay/country-usage/day/${selectedDate}`).then(response => {
+        backend.get<CountryUsageDto[]>(`/v1/country-usage/${selectedDate}`).then(response => {
             if (cancelled) return
             // An older backend does not know the endpoint and a proxy may answer with something else
             if (Array.isArray(response.data)) {

@@ -3,7 +3,7 @@ import {useEffect} from "react";
 import {afterEach, describe, expect, it, vi} from "vitest";
 
 import {useDate} from "../../context/date-context";
-import {makeRelays} from "../../test/fixtures";
+import {makeApiRelays} from "../../test/fixtures";
 import {deferred, mockBackend, networkError} from "../../test/mock-backend";
 import {renderWithProviders} from "../../test/render";
 import {SnackbarMessage} from "../../types/ui";
@@ -45,12 +45,12 @@ describe("LeafletWorldMap", () => {
     })
 
     it("loads the latest available day and draws its relays", async () => {
-        mockBackend.onGet("/relay/location/day/2024-01-02", makeRelays(3))
+        mockBackend.onGet("/v1/days/2024-01-02/relays", makeApiRelays(3))
         const setIsLoading = vi.fn()
         const screen = await renderWithProviders(<Harness availableDays={days} setIsLoading={setIsLoading}/>)
 
         await expect.element(screen.getByText("shown=3")).toBeVisible()
-        expect(mockBackend.requested).toEqual(["GET /relay/location/day/2024-01-02"])
+        expect(mockBackend.requested).toEqual(["GET /v1/days/2024-01-02/relays"])
         expect(setIsLoading.mock.calls.map(([loading]) => loading)).toEqual([true, false])
     })
 
@@ -62,7 +62,7 @@ describe("LeafletWorldMap", () => {
     })
 
     it("tells the user when the day can not be loaded", async () => {
-        mockBackend.onGet("/relay/location/day/2024-01-02", () => networkError())
+        mockBackend.onGet("/v1/days/2024-01-02/relays", () => networkError())
         const setIsLoading = vi.fn()
         const screen = await renderWithProviders(<Harness availableDays={days} setIsLoading={setIsLoading}/>)
 
@@ -74,7 +74,7 @@ describe("LeafletWorldMap", () => {
     it("loads the day once the browser is online again", async () => {
         const onLine = vi.spyOn(Navigator.prototype, "onLine", "get").mockReturnValue(false)
         let attempts = 0
-        mockBackend.onGet("/relay/location/day/2024-01-02", () => ++attempts === 1 ? networkError() : makeRelays(2))
+        mockBackend.onGet("/v1/days/2024-01-02/relays", () => ++attempts === 1 ? networkError() : makeApiRelays(2))
         const screen = await renderWithProviders(<Harness availableDays={days} setIsLoading={vi.fn()}/>)
 
         await expect.element(page.getByText(SnackbarMessage.Offline)).toBeVisible()
@@ -112,8 +112,8 @@ describe("LeafletWorldMap", () => {
         vi.setSystemTime(new Date("2024-02-01T00:00:00Z"))
         const latest = deferred<unknown>()
         const first = deferred<unknown>()
-        mockBackend.onGet("/relay/location/day/2024-01-02", () => latest.promise)
-        mockBackend.onGet("/relay/location/day/2024-01-01", () => first.promise)
+        mockBackend.onGet("/v1/days/2024-01-02/relays", () => latest.promise)
+        mockBackend.onGet("/v1/days/2024-01-01/relays", () => first.promise)
         const screen = await renderWithProviders(<Harness availableDays={days} setIsLoading={vi.fn()}/>)
         await vi.waitFor(() => expect(mockBackend.requested).toHaveLength(1))
 
@@ -122,10 +122,10 @@ describe("LeafletWorldMap", () => {
         await screen.getByRole("button", {name: "pick first day"}).click()
         await vi.waitFor(() => expect(mockBackend.requested).toHaveLength(2))
 
-        first.resolve(makeRelays(1))
+        first.resolve(makeApiRelays(1))
         await expect.element(screen.getByText("shown=1")).toBeVisible()
 
-        latest.resolve(makeRelays(5))
+        latest.resolve(makeApiRelays(5))
         await new Promise(resolve => setTimeout(resolve, 50))
         await expect.element(screen.getByText("shown=1")).toBeVisible()
     })

@@ -2,9 +2,10 @@ import {useMediaQuery, useTheme} from "@mui/material";
 import {FunctionComponent, useEffect, useMemo, useState} from "react";
 
 import {useSnackbar} from "../../../context/snackbar-context";
-import {RelayFamilyIdentifier, RelayLocationDto} from "../../../dto/relay";
+import {FamilyV1Dto, RelayFamilyIdentifier, RelayLocationDto} from "../../../dto/relay";
 import {SnackbarMessage} from "../../../types/ui";
 import {RelayGroupSummary, summarizeRelays} from "../../../util/relay-group-summary";
+import {toFamilyIdentifier} from "../../../util/api-v1";
 import {backend} from "../../../util/util";
 import {FamilySelectionDialogLarge} from "./FamilySelectionDialogLarge";
 import {FamilySelectionDialogSmall} from "./FamilySelectionDialogSmall";
@@ -39,6 +40,11 @@ interface FamilySelectionProps {
      * The consensus weight of all relays on the map
      */
     totalConsensusWeight?: number
+
+    /**
+     * The month of the selected day (YYYY-MM), families are computed per month
+     */
+    month?: string
 }
 
 /**
@@ -72,6 +78,7 @@ export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
                                                                                    familyIds,
                                                                                    relayFamilyMap,
                                                                                    totalConsensusWeight = 0,
+                                                                                   month,
                                                                                }) => {
     // Component state
     const [isLoading, setIsLoading] = useState(true)
@@ -102,14 +109,13 @@ export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
      * Query more information about the Families specified in "families" parameter
      */
     useEffect(() => {
-        if (familyIds.length > 0) {
-            backend.post<RelayFamilyIdentifier[]>(
-                '/relay/details/family/identifiers',
-                familyIds
-            ).then(response => {
-                const identifiers = response.data
+        if (familyIds.length > 0 && month) {
+            // All families of the month are one cached response, the dialog shows the ones on the map
+            backend.get<FamilyV1Dto[]>(`/v1/families?month=${encodeURIComponent(month)}`).then(response => {
+                const wanted = new Set(familyIds)
+                const identifiers = response.data.filter(family => wanted.has(family.id)).map(toFamilyIdentifier)
                 if (identifiers.length > 0) {
-                    setFamilyIdentifiers(response.data)
+                    setFamilyIdentifiers(identifiers)
                 } else {
                     closeDialog()
                     enqueueSnackbar(SnackbarMessage.UpdatedData, {variant: "success"})
@@ -121,7 +127,7 @@ export const FamilySelectionDialog: FunctionComponent<FamilySelectionProps> = ({
                 setIsLoading(false)
             })
         }
-    }, [closeDialog, enqueueSnackbar, familyIds, reloadSelectedDay])
+    }, [closeDialog, enqueueSnackbar, familyIds, month, reloadSelectedDay])
 
     return (isLargeScreen ?
             <FamilySelectionDialogLarge
