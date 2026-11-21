@@ -70,7 +70,7 @@ fun verifyFamilyCert(certificate: ByteArray, relayIdentityKey: ByteArray, publis
             type == EXTENSION_TYPE_SIGNED_WITH_ED25519_KEY && length == KEY_LENGTH -> signingKey = data
             type == EXTENSION_TYPE_SIGNED_WITH_ED25519_KEY -> return null
             // Unknown extensions that affect validation must not be ignored
-            flags and EXTENSION_FLAG_AFFECTS_VALIDATION != 0 -> return null
+            (flags and EXTENSION_FLAG_AFFECTS_VALIDATION) != 0 -> return null
         }
     }
     // The family key must be included in the certificate and the signature must follow the extensions directly
