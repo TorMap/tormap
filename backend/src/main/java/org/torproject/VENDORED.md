@@ -27,9 +27,9 @@ Keep this list current. Re-apply each patch after copying a new upstream release
    indexing local files. See `DescriptorIndexCollectorTest`.
 2. `index/IndexNode`, `onionperf/ParsedOnionPerfAnalysis`: use `PropertyNamingStrategies.SNAKE_CASE`, required by the
    Jackson 2 version pinned in `build.gradle.kts`.
-3. `impl/ServerDescriptorImpl`: allow multiple `family-cert` lines (one per family) and keep the first one for
-   `getFamilyCert()`. Upstream 2.28.0 allows it at most once and rejects such descriptors. See
-   `ServerDescriptorFamilyCertTest`.
+3. `impl/ServerDescriptorImpl`, `ServerDescriptor`: allow multiple `family-cert` lines (one per family), keep the
+   first one for `getFamilyCert()` and all of them for the new `getFamilyCerts()`. Upstream 2.28.0 allows it at most
+   once and rejects such descriptors. See `ServerDescriptorFamilyCertTest`.
 4. `index/DescriptorIndexCollector`: delete the temporary `.<filename>` download when its size does not match the index
    or the download fails. Upstream leaves it behind, and `DescriptorReaderImpl` then reads it like any other file on
    every run. See `DescriptorIndexCollectorTest`.

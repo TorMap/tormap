@@ -1,0 +1,71 @@
+@type server-descriptor 1.0
+router 3GTor 193.200.221.85 9001 0 0
+identity-ed25519
+-----BEGIN ED25519 CERT-----
+AQQAB5v0AQ2zRun9aNQDyw8xRO9VoAymoFquewlyDBw0yIpoIGNDAQAgBAA7FMzg
+PaxXUaD4GO7p2JzpF8WWRdo3uVTLhrhTZUVdbNHumuKcmJqRhaOgJJqnL+xNmz9h
+77gqauMMi2r4s4Ges5WWbP+IqCftn2SGl5VBQ9BqZyPoxbtMxrTifpb72AM=
+-----END ED25519 CERT-----
+master-key-ed25519 OxTM4D2sV1Gg+Bju6dic6RfFlkXaN7lUy4a4U2VFXWw
+platform Tor 0.4.9.15 on Linux
+proto Conflux=1 Cons=1-2 Desc=1-4 DirCache=2 FlowCtrl=1-2 HSDir=2 HSIntro=4-5 HSRend=1-2 Link=3-5 LinkAuth=3 Microdesc=1-3 Padding=2 Relay=2-6
+published 2026-11-17 15:59:41
+fingerprint 1A88 A34C 7E48 42AA 658F 8437 436B DE64 6296 7A64
+uptime 2
+bandwidth 1073741824 1073741824 71447552
+extra-info-digest 3B2AFABAA81D6E018B5DDF2C3BDDE7E41FA733BD X6e6B3sAeuLkiDvnGVcqZ+JrxC6V8J5MpkL5rda/a4Y
+onion-key
+-----BEGIN RSA PUBLIC KEY-----
+MIGJAoGBALE/cRvHTEBRBhrBQBrL1s2BM6ecrtiB2VAPZQFT4uCV3xqkWfzBpwYI
+rG7SKxYHa2uyVKI23LdcFYxauO/02qqqJdqy84Pa8E1Ovgsxx/uuzqyB6mo7LHKQ
+LtwWhxOC65wJrYPXIX9JjryPweOXAE3LU7WVdp6yRQmJDHy9gLELAgMBAAE=
+-----END RSA PUBLIC KEY-----
+signing-key
+-----BEGIN RSA PUBLIC KEY-----
+MIGJAoGBAJNZ/+qP7VIlFhK8VXxKSramzel+gOSbjnH1YVEAn0uhi191WfafZ+Om
+nWJXB8+PjA6YGQDn751XpMayeHd1LdlCQU+dXWLyiGl3vx5Kl3TjLIOOjotWZVL2
+RiweDnH3v2ii30mxxp3jy2ybMPW3DWorHDq5JbaZnP8JwhMeMZmpAgMBAAE=
+-----END RSA PUBLIC KEY-----
+onion-key-crosscert
+-----BEGIN CROSSCERT-----
+jYX0j0BBXIL6KSFum4O6v1UyerbMg2bblpotQKApVh22fWdOP3WYs6DnKltIWJgt
+CYjcUz1j01K6X0pgroO++nV77dQliDJ5u1QOcE9VrSzDGJqcoZ2qMLjcTRfHsnDz
+9Y+KN9otDtY4K63EEQM1pMNVx8GIj0FvHotvhD9LAFA=
+-----END CROSSCERT-----
+ntor-onion-key-crosscert 1
+-----BEGIN ED25519 CERT-----
+AQoAB55AATsUzOA9rFdRoPgY7unYnOkXxZZF2je5VMuGuFNlRV1sAK7Eslt0H9X5
+R2YwwPP001aVKuI51av5Qk/5jfJCYV8cd4WRicuIVGMFmNuxfGmWa6GqVPpy22tX
+iXVrHPCK8gA=
+-----END ED25519 CERT-----
+hidden-service-dir
+family-cert
+-----BEGIN FAMILY CERT-----
+AQwAB55wATsUzOA9rFdRoPgY7unYnOkXxZZF2je5VMuGuFNlRV1sAQAgBAC87qb+
+J0QLzegctBwXN5kOgx9g1SxPRD7TFuEJS4ysWKbd+kCyvgVOt5HAEZk/MVKinupP
+KKX5Zon8SVViREv3MQFu8THYbu1VUdZCLTEUXnqsDfz/QP6jrOToYXStww4=
+-----END FAMILY CERT-----
+family-cert
+-----BEGIN FAMILY CERT-----
+AQwAB55wATsUzOA9rFdRoPgY7unYnOkXxZZF2je5VMuGuFNlRV1sAQAgBAD1mK5k
+Eq/Ehq4AORR+q+9TXuO1daGsDxFUquRmAwS9nskQ5x7CMDAqXYKy0iTRu2+kTzm/
+ifsk7xOynWIpu1IOwt/vJ33ffatKSeVmcpqhFmMUnVcoaYKaCukPeKQSYA0=
+-----END FAMILY CERT-----
+contact 3GTor email:winonaraussi@hotmail.com pgp:F68B2633D02EA21FB19274F3D630746E29D14891 url:http://193.200.221.85/
+ntor-onion-key uYE5ffml7JSXZeNdiNDCzp6MYayobwSu29qrcjGR9l0
+reject 0.0.0.0/8:*
+reject 169.254.0.0/16:*
+reject 127.0.0.0/8:*
+reject 192.168.0.0/16:*
+reject 10.0.0.0/8:*
+reject 172.16.0.0/12:*
+reject 193.200.221.85:*
+accept *:*
+tunnelled-dir-server
+router-sig-ed25519 kG83oI1KrO0/ezYyOEFwMIBAAnQjb+bxaDQIhaJ46bUtG2677QrJBCalw2b3iYxzexMed3WaaOuxLBg7eczkBg
+router-signature
+-----BEGIN SIGNATURE-----
+eKluNbHRMa7FHYHddiMI23Vej0AQju36ufogp4GuETrwhd8UJ6rQ5L2J+kU8jdd2
+Wtp83Z0EgSASdeeh1wKs0ZxXYdGquhBWC1OX3M0lhWPQgEvepfnFEw1L2QSxgsEH
+sj3U3emnL3rJhes+LJbmH6rSKemGn3fIuzoDK8aXnUY=
+-----END SIGNATURE-----

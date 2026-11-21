@@ -4,16 +4,24 @@ import org.tormap.database.entity.RelayDetails
 
 /**
  * The families found by [computeRelayFamilies].
- * @param families relays that are connected through confirmed family entries, each family has at least two members
+ * @param families relays that are connected through confirmed family entries or shared family IDs,
+ * each family has at least two members
+ * @param confirmedConnectionCount family line entries that are confirmed by the listed relay
+ * @param rejectedConnectionCount family line entries that are not confirmed or invalid
+ * @param relaysWithFamilyIdCount relays with at least one family ID from a family certificate
  */
 class RelayFamilies(
     val families: List<List<RelayDetails>>,
     val confirmedConnectionCount: Int,
     val rejectedConnectionCount: Int,
+    val relaysWithFamilyIdCount: Int,
 )
 
 /**
- * Groups [relays] into families. Two relays are connected if they list each other by fingerprint.
+ * Groups [relays] into families like Tor clients do (proposal 321). Two relays are connected if
+ * - they list each other by fingerprint in their family lines ([RelayDetails.familyEntries]), or
+ * - they share a family ID from a verified family certificate ([RelayDetails.familyIds]).
+ *
  * Nickname entries are ignored like in Tor and Onionoo, because nicknames are not unique.
  * Connected relays form one family, also when they are only connected through other members.
  *
@@ -44,6 +52,12 @@ fun computeRelayFamilies(
         return root
     }
 
+    fun connect(index: Int, otherIndex: Int) {
+        parents[root(otherIndex)] = root(index)
+        hasMember[otherIndex] = true
+        hasMember[index] = true
+    }
+
     relays.forEachIndexed { requestingIndex, requestingRelay ->
         declaredFamilies[requestingIndex].entries.forEach { entry ->
             when (entry) {
@@ -54,9 +68,7 @@ fun computeRelayFamilies(
                         && memberIndex != requestingIndex
                         && declaredFamilies[memberIndex].confirms(requestingRelay)
                     ) {
-                        parents[root(memberIndex)] = root(requestingIndex)
-                        hasMember[memberIndex] = true
-                        hasMember[requestingIndex] = true
+                        connect(requestingIndex, memberIndex)
                         confirmedConnectionCount++
                     } else {
                         rejectedConnectionCount++
@@ -71,6 +83,17 @@ fun computeRelayFamilies(
         }
     }
 
+    val firstIndexByFamilyId = HashMap<String, Int>()
+    var relaysWithFamilyIdCount = 0
+    relays.forEachIndexed { index, relay ->
+        val familyIds = relay.familyIds?.commaSeparatedToList()?.filter { it.isNotEmpty() } ?: emptyList()
+        if (familyIds.isNotEmpty()) relaysWithFamilyIdCount++
+        familyIds.forEach { familyId ->
+            val firstIndex = firstIndexByFamilyId.putIfAbsent(familyId, index)
+            if (firstIndex != null && firstIndex != index) connect(firstIndex, index)
+        }
+    }
+
     val familyIndexByRoot = HashMap<Int, Int>()
     val families = mutableListOf<MutableList<RelayDetails>>()
     relays.forEachIndexed { index, relay ->
@@ -82,7 +105,7 @@ fun computeRelayFamilies(
             families[familyIndex].add(relay)
         }
     }
-    return RelayFamilies(families, confirmedConnectionCount, rejectedConnectionCount)
+    return RelayFamilies(families, confirmedConnectionCount, rejectedConnectionCount, relaysWithFamilyIdCount)
 }
 
 private sealed interface FamilyEntry {

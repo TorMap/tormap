@@ -56,6 +56,35 @@ class RelayFamilyUtilTest : StringSpec({
         result.nicknames() shouldContainExactlyInAnyOrder listOf(setOf("A", "B", "C", "D"), setOf("E", "F"))
     }
 
+    "relays with a shared family ID form a family" {
+        val result = computeRelayFamilies(
+            listOf(
+                relay('A', null).apply { familyIds = "ed25519:one" },
+                relay('B', null).apply { familyIds = "ed25519:one, ed25519:two" },
+                relay('C', null).apply { familyIds = "ed25519:two" },
+                // A family ID that no other relay has is no family
+                relay('D', null).apply { familyIds = "ed25519:three" },
+                relay('E', null).apply { familyIds = "ed25519:four" },
+                relay('F', null).apply { familyIds = "ed25519:four" },
+            )
+        )
+
+        result.nicknames() shouldContainExactlyInAnyOrder listOf(setOf("A", "B", "C"), setOf("E", "F"))
+        result.relaysWithFamilyIdCount shouldBe 6
+    }
+
+    "family IDs and family lines connect relays to one family" {
+        val result = computeRelayFamilies(
+            listOf(
+                relay('A', fingerprintEntry('B')),
+                relay('B', fingerprintEntry('A')).apply { familyIds = "ed25519:one" },
+                relay('C', null).apply { familyIds = "ed25519:one" },
+            )
+        )
+
+        result.nicknames() shouldContainExactlyInAnyOrder listOf(setOf("A", "B", "C"))
+    }
+
     "a relay listing itself or unknown relays has no family" {
         val result = computeRelayFamilies(listOf(relay('A', "${fingerprintEntry('A')}, ${fingerprintEntry('Z')}")))
 
