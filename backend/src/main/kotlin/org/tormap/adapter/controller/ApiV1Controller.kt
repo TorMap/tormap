@@ -18,6 +18,7 @@ import org.tormap.adapter.dto.DailyRelayCountDto
 import org.tormap.adapter.dto.v1.FamilyV1Dto
 import org.tormap.adapter.dto.v1.RelayDetailsV1Dto
 import org.tormap.adapter.dto.v1.RelayIdentifiersV1Dto
+import org.tormap.adapter.dto.v1.RelayMonthV1Dto
 import org.tormap.adapter.dto.v1.RelayV1Dto
 import org.tormap.config.CacheConfig
 import org.tormap.database.repository.RelayDetailsRepositoryImpl
@@ -73,16 +74,19 @@ class ApiV1Controller(
         @PathVariable fingerprint: String,
         @RequestParam(required = false) month: String?,
     ): RelayDetailsV1Dto {
-        if (!FINGERPRINT.matches(fingerprint)) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The fingerprint must be 40 hexadecimal characters.")
-        }
+        val normalizedFingerprint = parseFingerprint(fingerprint)
         val yearMonth = month?.let(::parseMonth)
             ?: relayLocationController.getDays().maxOrNull()?.let(YearMonth::from)
             ?: throw RelayNotFoundException()
-        val details = relayDetailsRepositoryImpl.findByMonthAndFingerprint(yearMonth.toString(), fingerprint.uppercase())
+        val details = relayDetailsRepositoryImpl.findByMonthAndFingerprint(yearMonth.toString(), normalizedFingerprint)
             ?: throw RelayNotFoundException()
         return RelayDetailsV1Dto(relayDetailsQueryService.getRelay(details.id!!))
     }
+
+    @Operation(summary = "Returns every month in which the relay published a server descriptor, oldest first, with its nickname, address, autonomous system, platform, contact, observed bandwidth and family in that month.")
+    @GetMapping("relays/{fingerprint}/months")
+    fun getRelayMonths(@PathVariable fingerprint: String): List<RelayMonthV1Dto> =
+        relayDetailsRepositoryImpl.findMonthsByFingerprint(parseFingerprint(fingerprint)).ifEmpty { throw RelayNotFoundException() }
 
     // Months without families are not cached, so requests for made-up months can not evict real ones
     @Cacheable(CacheConfig.API_V1_FAMILIES_PER_MONTH, key = "#month", unless = "#result.isEmpty()")
@@ -146,6 +150,13 @@ class ApiV1Controller(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The day must be a date like 2024-05-01.")
         }
         return date
+    }
+
+    private fun parseFingerprint(fingerprint: String): String {
+        if (!FINGERPRINT.matches(fingerprint)) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "The fingerprint must be 40 hexadecimal characters.")
+        }
+        return fingerprint.uppercase()
     }
 
     private fun parseMonth(month: String): YearMonth {

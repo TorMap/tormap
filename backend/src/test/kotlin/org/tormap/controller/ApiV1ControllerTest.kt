@@ -162,6 +162,33 @@ class ApiV1ControllerTest(
         }
     }
 
+    "lists the months of a relay, oldest first" {
+        saveRelayA(familyId = 7)
+        relayDetailsRepository.save(mockRelayDetails('A').apply {
+            month = "2024-01"; this.day = LocalDate.of(2024, 1, 20); nickname = "OldName"; address = "192.0.2.1"; platform = "Tor 0.4.7"
+        })
+        relayDetailsRepository.save(mockRelayDetails('B').apply { month = "2024-02" })
+        mockMvc.perform(get("/v1/relays/${fingerprintA.lowercase()}/months"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].month").value("2024-01"))
+            .andExpect(jsonPath("$[0].day").value("2024-01-20"))
+            .andExpect(jsonPath("$[0].nickname").value("OldName"))
+            .andExpect(jsonPath("$[0].address").value("192.0.2.1"))
+            .andExpect(jsonPath("$[0].platform").value("Tor 0.4.7"))
+            .andExpect(jsonPath("$[0].familyId").isEmpty)
+            .andExpect(jsonPath("$[1].month").value("2024-03"))
+            .andExpect(jsonPath("$[1].nickname").value("A"))
+            .andExpect(jsonPath("$[1].autonomousSystemNumber").value(24940))
+            .andExpect(jsonPath("$[1].familyId").value(7))
+            .andExpect(jsonPath("$[1].id").doesNotExist())
+    }
+
+    "the months of an unknown relay are not found, a malformed fingerprint is a bad request" {
+        mockMvc.perform(get("/v1/relays/${fingerprintA}/months")).andExpect(status().isNotFound)
+        mockMvc.perform(get("/v1/relays/abc/months")).andExpect(status().isBadRequest)
+    }
+
     "lists family members by fingerprint and nickname only" {
         saveRelayA(familyId = 7)
         mockMvc.perform(get("/v1/families/7"))

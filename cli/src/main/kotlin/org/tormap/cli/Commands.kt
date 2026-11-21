@@ -199,9 +199,22 @@ class Relay : CoreCliktCommand(name = "relay") {
         "--require-flag",
         help = "Exit with code 5 unless the relay has all these flags on the day, e.g. Running,Guard. Exit code 3 if it is not in that day's consensus",
     ).split(",").default(emptyList())
+    private val history by option(
+        "--history",
+        help = "List every month the relay published a server descriptor, with its nickname, address, AS, platform and contact then",
+    ).flag()
 
     override fun run() {
         val api = settings.api
+        if (history) {
+            if (month != null) throw UsageError("--history lists all months, so it can not be combined with --month.")
+            val fingerprint = normalizeFingerprint(query) ?: findFingerprint(api, query, day)
+            val months = api.relayMonths(fingerprint).map { it.jsonObject }
+            if (months.isEmpty()) throw NotFound("No months with details for $fingerprint.")
+            settings.output { it.rows(months, Fields.RELAY_MONTH_TABLE, Fields.RELAY_MONTH) }
+            if (requiredFlags.isNotEmpty()) checkFlags(api, fingerprint, months.last().text("nickname"))
+            return
+        }
         val details = findRelay(api, query, month, day)
         settings.output { it.single(details, Fields.RELAY_DETAILS) }
         if (requiredFlags.isNotEmpty()) checkFlags(api, details.text("fingerprint"), details.text("nickname"))
@@ -307,12 +320,19 @@ private fun findRelay(api: ApiClient, query: String, month: String?, day: String
         return api.relay(fingerprint, month) ?: throw NotFound("No relay with fingerprint $fingerprint in ${month ?: "the latest month"}.")
     }
     val lookupDay = day ?: api.latestDay()
-    val matches = api.relaysOfDay(lookupDay).map { it.jsonObject }.filter { it.text("nickname").equals(query, ignoreCase = true) }
+    val fingerprint = findFingerprint(api, query, lookupDay)
+    return api.relay(fingerprint, month ?: lookupDay.take(7))
+        ?: throw NotFound("No details for '$query' in ${month ?: lookupDay.take(7)}.")
+}
+
+/** The fingerprint of the relay with this nickname on the day (default: latest) */
+private fun findFingerprint(api: ApiClient, nickname: String, day: String?): String {
+    val lookupDay = day ?: api.latestDay()
+    val matches = api.relaysOfDay(lookupDay).map { it.jsonObject }.filter { it.text("nickname").equals(nickname, ignoreCase = true) }
     return when (matches.size) {
-        0 -> throw NotFound("No relay named '$query' on $lookupDay.")
-        1 -> api.relay(matches.single().text("fingerprint"), month ?: lookupDay.take(7))
-            ?: throw NotFound("No details for '$query' in ${month ?: lookupDay.take(7)}.")
-        else -> throw Ambiguous(query, lookupDay, matches)
+        0 -> throw NotFound("No relay named '$nickname' on $lookupDay.")
+        1 -> matches.single().text("fingerprint")
+        else -> throw Ambiguous(nickname, lookupDay, matches)
     }
 }
 
