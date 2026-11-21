@@ -32,7 +32,7 @@ Browser ──HTTPS──> Frontend (static)            Tor Collector (HTTPS, in
 | Actuator admin plane                 | Log file, thread dumps, recent HTTP exchanges, metrics, request mappings, cache eviction.             |
 | Secrets                              | `TORMAP_ADMIN_PASSWORD`, DB password, `NEW_RELIC_INGEST_KEY`, CI secrets (Docker Hub, Firebase). |
 | Host and volume                      | `/tormap-data` (tens of GB of descriptors), log directory.                       |
-| Release artifacts                    | `tormap/backend` and `tormap/frontend` images, tormap.org frontend.             |
+| Release artifacts                    | `tormap/backend`, `tormap/frontend` and `tormap/cli` images, CLI binaries on GitHub releases, tormap.org frontend. |
 
 Relay data is public by design, so confidentiality of relay data is not an asset.
 
@@ -121,6 +121,10 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   are prefixed with `'` against spreadsheet formula injection, redirects are not followed, responses are capped at
   64 MB, and path values are validated or URL-encoded. With `--proxy socks5h://…` the proxy resolves the API host, so
   no DNS request leaves outside Tor. The cache holds only public API responses.
+  Native binaries are built by `.github/workflows/cli-native.yml` with GraalVM Community from the tagged commit and
+  attached to the draft release with a `SHA256SUMS` file; only that workflow's `release` job has `contents: write`.
+  Published releases are immutable. The binaries carry the JDK's CA certificates from build time. The `tormap/cli`
+  image copies the Linux binaries onto a distroless base pinned by digest and runs as a non-root user.
 - Caches with bounded entry counts (Caffeine `maximumSize`, unknown cache names rejected). Cache keys built from path variables (day, month) must be canonical: the controllers reject padded forms such as `+0002024-05-01`, and empty results are not cached, so made-up values can not fill or evict a cache. Shallow ETags only on small endpoints. `CoalesceService`
   bounds concurrent background recomputation per key.
 - Ingestion: remote file names must not contain `/`, `\`, `.` or `..`, and target directories must resolve inside the

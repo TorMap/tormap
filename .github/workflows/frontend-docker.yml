@@ -21,15 +21,16 @@ jobs:
           persist-credentials: false
 
       - name: Check that the tag matches the project versions
-        # A v* tag pushes images named after the versions in build.gradle.kts (backend) and the tag (frontend).
+        # A v* tag pushes images named after the versions in build.gradle.kts (backend) and the tag (frontend, CLI).
         # Stop before pushing anything if they differ, so a release tag never overwrites an older image.
         if: github.ref_type == 'tag'
         run: |
           backend_version=$(sed -n 's/^version = "\(.*\)"$/\1/p' backend/build.gradle.kts)
           frontend_version=$(jq -r .version frontend/package.json)
-          for v in "$backend_version" "$frontend_version"; do
+          cli_version=$(sed -n 's/^version = "\(.*\)"$/\1/p' cli/build.gradle.kts)
+          for v in "$backend_version" "$frontend_version" "$cli_version"; do
             if [[ "v$v" != "$GITHUB_REF_NAME" ]]; then
-              echo "::error::Tag $GITHUB_REF_NAME does not match backend version $backend_version (backend/build.gradle.kts) and frontend version $frontend_version (frontend/package.json). Bump both versions on master before tagging."
+              echo "::error::Tag $GITHUB_REF_NAME does not match backend version $backend_version (backend/build.gradle.kts), frontend version $frontend_version (frontend/package.json) and CLI version $cli_version (cli/build.gradle.kts). Bump all three versions on master before tagging."
               exit 1
             fi
           done

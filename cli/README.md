@@ -6,13 +6,42 @@ add load to the server.
 
 ## Install
 
-Native binaries and the `tormap/cli` Docker image will be attached to TorMap releases. Until then, build it with
-JDK 25:
+Every [TorMap release](https://github.com/TorMap/tormap/releases) from 4.3.0 on has native binaries that need no
+Java: `tormap-<version>-linux-x64`, `-linux-arm64`, `-macos-arm64` and `-windows-x64.exe`. Check the download against
+`SHA256SUMS` from the same release, then put it on your `PATH`:
+
+```sh
+sha256sum --check --ignore-missing SHA256SUMS   # macOS: shasum -a 256 --check --ignore-missing SHA256SUMS
+install -m 755 tormap-4.3.0-linux-x64 ~/.local/bin/tormap
+tormap --help
+```
+
+The Linux binaries need glibc 2.35 or newer (Ubuntu 22.04, Debian 12 and later). The binaries are not signed: on
+macOS, a binary downloaded with a browser has to be allowed once with `xattr -d com.apple.quarantine tormap`, and
+Windows SmartScreen may ask for confirmation.
+
+With Docker (`linux/amd64` and `linux/arm64`; `:edge` follows master):
+
+```sh
+docker run --rm tormap/cli relays --country DE --limit 10
+# Keep the cache between runs
+docker run --rm -v tormap-cache:/home/nonroot/.cache tormap/cli relays --flag Exit
+```
+
+### Build it yourself
+
+With JDK 25, as a JVM application:
 
 ```sh
 cd cli
 ./gradlew installDist
 build/install/tormap/bin/tormap --help
+```
+
+As a native binary with [GraalVM](https://www.graalvm.org/) 25 (`build/native/tormap`):
+
+```sh
+GRAALVM_HOME=/path/to/graalvm ./gradlew nativeCompile
 ```
 
 ## Examples
