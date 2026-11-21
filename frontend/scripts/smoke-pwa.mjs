@@ -43,7 +43,7 @@ try {
     const context = await browser.newContext()
     const answerBackend = route => {
         const pathname = new URL(route.request().url()).pathname
-        const body = pathname === "/relay/location/days" ? ["2024-01-01"] : []
+        const body = pathname === "/v1/days" ? ["2024-01-01"] : []
         return route.fulfill({json: body, headers: {"Access-Control-Allow-Origin": "*"}})
     }
     await context.route("https://api.tormap.org/**", answerBackend)
