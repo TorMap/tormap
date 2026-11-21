@@ -24,7 +24,7 @@ Rules for AI coding agents (and a quick reference for humans) working in this re
 - Keep PRs small: each one leaves the project working and mergeable on its own.
 
 ## Releases
-- Releases are made with the Release workflow (`.github/workflows/release.yml`, started by hand): a dry run shows the next version from the PR labels, a real run bumps all three versions, pushes the commit and the `vX.Y.Z` tag with the release deploy key and puts the notes on the draft release. The tag starts the Docker workflows and `cli_native`, which attaches the CLI binaries to the same draft. The maintainer checks the draft, then publishes it and any security advisories fixed in it. Releases are immutable once published.
+- Releases are made with the Release workflow (`.github/workflows/release.yml`, started by hand): a dry run shows the next version from the PR labels, a real run bumps all three versions, pushes the commit and the `vX.Y.Z` tag with a short-lived token of the release GitHub App and puts the notes on the draft release. The tag starts the Docker workflows and `cli_native`, which attaches the CLI binaries to the same draft. The maintainer checks the draft, then publishes it and any security advisories fixed in it. Releases are immutable once published.
 - Never push `v*` tags or edit the versions by hand. The tag workflows refuse a tag that doesn't match all three versions (`.github/scripts/check-release-version.sh`), so an older image is never overwritten.
 - Don't put details of unpublished vulnerabilities in commits, PRs or workflow output; the dry-run summary is public.
 

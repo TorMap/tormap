@@ -30,7 +30,7 @@ Browser ──HTTPS──> Frontend (static)            Tor Collector (HTTPS, in
 | Service availability                 | The main security property: public API, scheduler, DB. Low-effort DoS matters.  |
 | Data integrity                       | Correct relay, family and location data. Users draw conclusions about Tor.      |
 | Actuator admin plane                 | Log file, thread dumps, recent HTTP exchanges, metrics, request mappings, cache eviction.             |
-| Secrets                              | `TORMAP_ADMIN_PASSWORD`, DB password, `NEW_RELIC_INGEST_KEY`, CI secrets (Docker Hub, Firebase, release deploy key). |
+| Secrets                              | `TORMAP_ADMIN_PASSWORD`, DB password, `NEW_RELIC_INGEST_KEY`, CI secrets (Docker Hub, Firebase, release app private key). |
 | Host and volume                      | `/tormap-data` (tens of GB of descriptors), log directory.                       |
 | Release artifacts                    | `tormap/backend`, `tormap/frontend` and `tormap/cli` images, CLI binaries on GitHub releases, tormap.org frontend. |
 
@@ -156,8 +156,9 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   `backend/src/main/java/org/torproject/VENDORED.md`. The IP lookup databases are downloaded at build time from the
   immutable release pinned by `ipLookupDataVersion` in `backend/gradle.properties` (TorMap/ip-lookup-data, a mirror of
   DB-IP Lite) and checked against that release's `SHA256SUMS`.
-- Releases: only the Release workflow pushes `v*` tags and version bumps, with a deploy key kept in the `release`
-  environment (master only), which the tag and master rulesets let bypass them. The Docker Hub secrets live in the
+- Releases: only the Release workflow pushes `v*` tags and version bumps. It uses an installation token of the
+  release GitHub App (contents only, this repository only, valid for an hour), created from the app's private key in
+  the `release` environment (master only). The tag and master rulesets let only that app bypass them. The Docker Hub secrets live in the
   `docker-hub` environment (master and `v*` tags only), so a workflow on another branch can't read them. The tag
   workflows refuse a tag that doesn't match all three project versions. Published releases are immutable, and the
   frontend and CLI images carry build provenance and an SBOM.
