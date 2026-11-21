@@ -10,6 +10,13 @@ import java.io.PrintStream
 
 enum class Format { TABLE, JSON, NDJSON, CSV }
 
+/**
+ * Replaces control characters before a value from the API reaches the terminal. Relay nicknames and contacts are
+ * chosen by relay operators, and every other string comes from a server the user may not control (`--api-url`):
+ * escape sequences could rewrite the terminal.
+ */
+fun sanitize(value: String) = value.map { if (it.isISOControl()) '?' else it }.joinToString("")
+
 /** Text of a field for tables and CSV: arrays are joined with spaces, objects are shown by their fingerprint or as JSON. */
 fun JsonObject.text(field: String): String = when (val value = this[field]) {
     null, JsonNull -> ""
@@ -62,7 +69,7 @@ class Output(private val out: PrintStream, private val format: Format) {
                 out.println(name)
                 values.forEach { out.println(csv(it)) }
             }
-            Format.TABLE -> values.forEach(out::println)
+            Format.TABLE -> values.forEach { out.println(sanitize(it)) }
         }
     }
 
@@ -79,8 +86,6 @@ class Output(private val out: PrintStream, private val format: Format) {
         }
     }
 
-    // Relay nicknames and contacts are chosen by relay operators: control characters could rewrite the terminal
-    private fun sanitize(value: String) = value.map { if (it.isISOControl()) '?' else it }.joinToString("")
 
     private fun csv(value: String): String {
         val safe = sanitize(value)
