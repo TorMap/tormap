@@ -42,6 +42,7 @@ class ApiV1ControllerTest(
             CacheConfig.RELAY_DAILY_COUNTS,
             CacheConfig.API_V1_RELAYS_PER_DAY,
             CacheConfig.AUTONOMOUS_SYSTEMS_PER_MONTH,
+            CacheConfig.API_V1_FAMILIES_PER_MONTH,
         ).forEach { cacheManager.getCache(it)?.clear() }
     }
 
@@ -170,6 +171,36 @@ class ApiV1ControllerTest(
             .andExpect(jsonPath("$[0].fingerprint").value(fingerprintA))
             .andExpect(jsonPath("$[0].nickname").value("A"))
             .andExpect(jsonPath("$[0].address").doesNotExist())
+    }
+
+    "lists the families of a month with their members and autonomous systems" {
+        saveRelayA(familyId = 7)
+        relayDetailsRepository.save(mockRelayDetails('B').apply {
+            month = "2024-03"; familyId = 7; autonomousSystemNumber = 24940; autonomousSystemName = "Hetzner"
+        })
+        relayDetailsRepository.save(mockRelayDetails('C').apply { month = "2024-03"; familyId = 9 })
+        relayDetailsRepository.save(mockRelayDetails('D').apply { month = "2024-03" })
+        relayDetailsRepository.save(mockRelayDetails('E').apply { month = "2024-04"; familyId = 11 })
+        mockMvc.perform(get("/v1/families").param("month", "2024-03"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].id").value(7))
+            .andExpect(jsonPath("$[0].members.length()").value(2))
+            .andExpect(jsonPath("$[0].members[0].fingerprint").value(fingerprintA))
+            .andExpect(jsonPath("$[0].members[1].nickname").value("B"))
+            .andExpect(jsonPath("$[0].autonomousSystems.length()").value(1))
+            .andExpect(jsonPath("$[0].autonomousSystems[0].number").value(24940))
+            .andExpect(jsonPath("$[1].id").value(9))
+            .andExpect(jsonPath("$[1].autonomousSystems.length()").value(0))
+    }
+
+    "the families of a month need a well-formed month, and months without families are not cached" {
+        mockMvc.perform(get("/v1/families")).andExpect(status().isBadRequest)
+        mockMvc.perform(get("/v1/families").param("month", "+02024-03")).andExpect(status().isBadRequest)
+        mockMvc.perform(get("/v1/families").param("month", "2001-01"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.length()").value(0))
+        cacheManager.getCache(CacheConfig.API_V1_FAMILIES_PER_MONTH)!!.get("2001-01") shouldBe null
     }
 
     "lists the autonomous systems of a month" {

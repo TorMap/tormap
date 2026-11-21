@@ -22,6 +22,7 @@ class CacheConfig {
         const val REVERSE_DNS_LOOKUPS = "REVERSE_DNS_LOOKUPS"
         const val LITE_MAP_IMAGES = "LITE_MAP_IMAGES"
         const val AUTONOMOUS_SYSTEMS_PER_MONTH = "AUTONOMOUS_SYSTEMS_PER_MONTH"
+        const val API_V1_FAMILIES_PER_MONTH = "API_V1_FAMILIES_PER_MONTH"
     }
 
     @Bean
@@ -40,14 +41,15 @@ class CacheConfig {
         )
         registerCustomCache(
             RELAY_LOCATIONS_PER_DAY,
-            // 1 entry ~= 2.5 MB of memory -> 40 entries ~= 100 MB of memory
-            Caffeine.newBuilder().maximumSize(40).recordStats().build()
+            // The old frontend endpoint, kept for clients that do not use API v1 yet. Filled on request only.
+            // 1 entry ~= 2.5 MB of memory -> 10 entries ~= 25 MB of memory
+            Caffeine.newBuilder().maximumSize(10).recordStats().build()
         )
         registerCustomCache(
             API_V1_RELAYS_PER_DAY,
-            // Relays of a day for the public API v1 (CLI). 1 entry ~= 3.5 MB of memory -> 10 entries ~= 35 MB of memory.
-            // Kept smaller than the frontend's cache: API clients mostly ask for recent days.
-            Caffeine.newBuilder().maximumSize(10).recordStats().build()
+            // Relays of a day for the public API v1 (map and CLI), warmed up by CacheService after each import.
+            // 1 entry ~= 3.5 MB of memory -> 40 entries ~= 140 MB of memory
+            Caffeine.newBuilder().maximumSize(40).recordStats().build()
         )
         registerCustomCache(
             COUNTRY_USAGE_PER_DAY,
@@ -70,6 +72,16 @@ class CacheConfig {
                 // 1 entry ~= 100 KB for ~2,500 autonomous systems -> 24 entries ~= 2.4 MB of memory
                 .maximumSize(24)
                 // New relays get their autonomous system in the background, so the list is refreshed after a while
+                .expireAfterWrite(Duration.ofHours(1))
+                .recordStats()
+                .build()
+        )
+        registerCustomCache(
+            API_V1_FAMILIES_PER_MONTH,
+            Caffeine.newBuilder()
+                // 1 entry ~= 300 KB for ~500 families with ~3,000 members -> 12 entries ~= 4 MB of memory
+                .maximumSize(12)
+                // Families are computed in the background after new descriptors arrived
                 .expireAfterWrite(Duration.ofHours(1))
                 .recordStats()
                 .build()

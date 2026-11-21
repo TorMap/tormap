@@ -19,7 +19,7 @@ class CacheServiceTest(
     private val cacheManager: CacheManager,
 ) : StringSpec({
     val relayLocationDistinctDaysCache = cacheManager.getCache(CacheConfig.RELAY_LOCATION_DISTINCT_DAYS)
-    val relayLocationsPerDayCache = cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)
+    val relayLocationsPerDayCache = cacheManager.getCache(CacheConfig.API_V1_RELAYS_PER_DAY)
     val relayDailyCountsCache = cacheManager.getCache(CacheConfig.RELAY_DAILY_COUNTS)
 
     beforeEach {
@@ -87,15 +87,21 @@ class CacheServiceTest(
         relayLocationsPerDayCache?.get("2024-02-01") shouldNotBe null
     }
 
-    "the API v1 cache is cleared for reprocessed and evicted days" {
-        val apiV1Cache = cacheManager.getCache(CacheConfig.API_V1_RELAYS_PER_DAY)!!
-        apiV1Cache.put("2024-01-01", listOf<Any>())
-        apiV1Cache.put("2024-02-01", listOf<Any>())
-        apiV1Cache.put("2024-03-01", listOf<Any>())
+    "the cache of the old day endpoint is cleared for reprocessed and evicted days" {
+        val legacyCache = cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)!!
+        legacyCache.put("2024-01-01", listOf<Any>())
+        legacyCache.put("2024-02-01", listOf<Any>())
+        legacyCache.put("2024-03-01", listOf<Any>())
         cacheService.cacheRelayLocationsPerDay(setOf("2024-01")).get()
         cacheService.evictRelayLocationsPerDay(setOf("2024-02")).get()
-        apiV1Cache.get("2024-01-01") shouldBe null
-        apiV1Cache.get("2024-02-01") shouldBe null
-        apiV1Cache.get("2024-03-01") shouldNotBe null
+        legacyCache.get("2024-01-01") shouldBe null
+        legacyCache.get("2024-02-01") shouldBe null
+        legacyCache.get("2024-03-01") shouldNotBe null
+    }
+
+    "reprocessing a day that lost its relays clears its API v1 entry" {
+        relayLocationsPerDayCache!!.put("2024-01-03", listOf<Any>())
+        cacheService.cacheRelayLocationsPerDay(setOf("2024-01")).get()
+        relayLocationsPerDayCache.get("2024-01-03") shouldBe null
     }
 })

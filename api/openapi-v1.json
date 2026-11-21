@@ -174,6 +174,49 @@
         "tags" : [ "API v1" ]
       }
     },
+    "/v1/families" : {
+      "get" : {
+        "operationId" : "getFamilies",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "month",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/FamilyV1Dto"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            },
+            "description" : "Bad Request"
+          }
+        },
+        "summary" : "Returns all families of a month (like 2024-05) with their members and autonomous systems.",
+        "tags" : [ "API v1" ]
+      }
+    },
     "/v1/families/{id}" : {
       "get" : {
         "operationId" : "getFamily",
@@ -376,6 +419,27 @@
           "total" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }
+      },
+      "FamilyV1Dto" : {
+        "type" : "object",
+        "properties" : {
+          "autonomousSystems" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AutonomousSystemDto"
+            }
+          },
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "members" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RelayIdentifiersV1Dto"
+            }
           }
         }
       },
