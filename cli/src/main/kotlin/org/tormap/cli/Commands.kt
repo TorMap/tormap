@@ -36,15 +36,35 @@ object ExitCode {
     const val USAGE = 2
     const val NOT_FOUND = 3
     const val AMBIGUOUS = 4
+    const val CHECK_FAILED = 5
 }
 
 /** What the root command parsed, shared with the subcommands */
-class Settings(val api: ApiClient, val format: Format, private val stdout: PrintStream, private val outputFile: Path?) {
-    fun <T> output(block: (Output) -> T): T {
-        if (outputFile == null) return block(Output(stdout, format))
-        return PrintStream(Files.newOutputStream(outputFile), false, Charsets.UTF_8).use { block(Output(it, format)) }
+class Settings(
+    val api: ApiClient,
+    val format: Format,
+    private val stdout: PrintStream,
+    private val stderr: PrintStream,
+    private val outputFile: Path?,
+    private val quiet: Boolean,
+) {
+    /** Writes the results to the terminal or to --output. With --quiet nothing reaches the terminal. */
+    fun output(block: (Output) -> Unit) {
+        if (outputFile != null) {
+            PrintStream(Files.newOutputStream(outputFile), false, Charsets.UTF_8).use { block(Output(it, format)) }
+        } else if (!quiet) {
+            block(Output(stdout, format))
+        }
+    }
+
+    /** A hint about the results on stderr, so it never mixes with JSON or CSV on stdout. Silent with --quiet. */
+    fun note(message: String) {
+        if (!quiet) stderr.println("tormap: $message")
     }
 }
+
+/** A relay was found but lacks flags the user requires (`relay --require-flag`), exit code 5 */
+class CheckFailed(message: String) : Exception(message)
 
 private val FORMAT_NAMES = listOf("table", "json", "ndjson", "csv")
 private val DAY = Regex("^\\d{4}-\\d{2}-\\d{2}$")
@@ -75,6 +95,7 @@ class NotFound(message: String) : Exception(message)
 
 class Tormap(
     private val stdout: PrintStream,
+    private val stderr: PrintStream,
     private val env: (String) -> String?,
 ) : CoreCliktCommand(name = "tormap") {
     init {
@@ -85,8 +106,9 @@ class Tormap(
     override fun help(context: Context) = "Look up Tor relays and export TorMap data from the command line."
 
     override fun helpEpilog(context: Context) =
-        "Data: TorMap (https://tormap.org), from Tor Project CollecTor and Tor Metrics. Exit codes: 0 ok, 1 error, " +
-                "2 wrong usage, 3 nothing found, 4 more than one relay matches."
+        "Data: TorMap (https://tormap.org), from Tor Project CollecTor and Tor Metrics. IP geolocation and autonomous " +
+                "systems by DB-IP (https://db-ip.com), licensed under CC BY 4.0. Exit codes: 0 ok, 1 error, 2 wrong usage, " +
+                "3 nothing found, 4 more than one relay matches, 5 a relay lacks a required flag."
 
     private val apiUrl by option("--api-url", envvar = "TORMAP_API_URL", help = "TorMap backend to use").default(ApiClient.DEFAULT_URL)
     private val proxy by option("--proxy", envvar = "TORMAP_PROXY", help = "Proxy for all requests, e.g. socks5h://127.0.0.1:9050 for Tor")
@@ -95,6 +117,7 @@ class Tormap(
     private val output by option("--output", "-o", help = "Write the output to a file instead of the terminal").path()
     private val cacheDir by option("--cache-dir", envvar = "TORMAP_CACHE_DIR", help = "Where downloaded days are cached").path()
     private val noCache by option("--no-cache", help = "Download everything again and do not cache it").flag()
+    private val quiet by option("--quiet", "-q", help = "Print no results or hints, only errors. Check the exit code instead").flag()
     private val timeout by option("--timeout", help = "Seconds to wait for the server").int().default(30)
 
     override fun run() {
@@ -107,7 +130,7 @@ class Tormap(
         val api = ApiClient(apiUrl, proxy, timeout * 1000, cache)
         val chosen = format?.let { Format.valueOf(it.uppercase()) }
             ?: if (output == null && System.console()?.isTerminal == true) Format.TABLE else Format.JSON
-        currentContext.findOrSetObject { Settings(api, chosen, stdout, output) }
+        currentContext.findOrSetObject { Settings(api, chosen, stdout, stderr, output, quiet) }
     }
 }
 
@@ -171,11 +194,30 @@ class Relay : CoreCliktCommand(name = "relay") {
     private val settings by requireObject<Settings>()
     private val query by argument("FINGERPRINT_OR_NICKNAME")
     private val month by option("--month", help = "Month like 2024-05 (default: latest)").convert { validMonth(it) }
-    private val day by option("--day", help = "Day for nickname lookups (default: latest)").convertDay()
+    private val day by option("--day", help = "Day for nickname lookups and --require-flag (default: latest)").convertDay()
+    private val requiredFlags by option(
+        "--require-flag",
+        help = "Exit with code 5 unless the relay has all these flags on the day, e.g. Running,Guard. Exit code 3 if it is not in that day's consensus",
+    ).split(",").default(emptyList())
 
     override fun run() {
-        val details = findRelay(settings.api, query, month, day)
+        val api = settings.api
+        val details = findRelay(api, query, month, day)
         settings.output { it.single(details, Fields.RELAY_DETAILS) }
+        if (requiredFlags.isNotEmpty()) checkFlags(api, details.text("fingerprint"), details.text("nickname"))
+    }
+
+    /** For monitoring, e.g. from cron: the flags come from the day's consensus, the details are per month. */
+    private fun checkFlags(api: ApiClient, fingerprint: String, nickname: String) {
+        val checkDay = day ?: api.latestDay()
+        val relay = api.relaysOfDay(checkDay).map { it.jsonObject }.firstOrNull { it.text("fingerprint") == fingerprint }
+            ?: throw NotFound("$nickname ($fingerprint) is not in the consensus on $checkDay.")
+        val flags = relay.text("flags").split(" ").filter(String::isNotEmpty)
+        val missing = requiredFlags.map(String::trim).filter(String::isNotEmpty)
+            .filter { wanted -> flags.none { it.equals(wanted, ignoreCase = true) } }
+        if (missing.isNotEmpty()) {
+            throw CheckFailed("$nickname ($fingerprint) lacks ${missing.joinToString(", ")} on $checkDay. Its flags: ${flags.joinToString(" ")}.")
+        }
     }
 }
 
@@ -233,7 +275,7 @@ class Usage : CoreCliktCommand(name = "usage") {
     override fun run() {
         val api = settings.api
         val wanted = countries.map { it.trim().uppercase() }.toSet()
-        val rows = (day?.let { api.countryUsage(it) } ?: latestCountryUsage(api)).map { it.jsonObject }
+        val rows = (day?.let { api.countryUsage(it) } ?: latestCountryUsage(api, settings)).map { it.jsonObject }
             .filter { wanted.isEmpty() || it.text("country").uppercase() in wanted }
             .sortedByDescending { it.text("users").toLongOrNull() ?: 0 }
         settings.output { it.rows(rows, Fields.COUNTRY_USAGE) }
@@ -244,12 +286,19 @@ class Usage : CoreCliktCommand(name = "usage") {
 /** Tor Metrics publishes its estimates a few days after the relay data, so the latest relay day usually has none yet. */
 private const val USAGE_LOOKBACK_DAYS = 7L
 
-private fun latestCountryUsage(api: ApiClient): JsonArray {
-    val latest = LocalDate.parse(api.latestDay())
-    return (0..USAGE_LOOKBACK_DAYS).asSequence()
-        .map { api.countryUsage(latest.minusDays(it).toString()) }
-        .firstOrNull { it.isNotEmpty() }
-        ?: JsonArray(emptyList())
+/** The latest day with estimates. Usage rows carry no day, so the day is named in a hint when it is not the latest relay day. */
+private fun latestCountryUsage(api: ApiClient, settings: Settings): JsonArray {
+    val latestRelayDay = api.latestDay()
+    val latest = LocalDate.parse(latestRelayDay)
+    val (found, rows) = (0..USAGE_LOOKBACK_DAYS).asSequence()
+        .map { latest.minusDays(it).toString() }
+        .map { it to api.countryUsage(it) }
+        .firstOrNull { it.second.isNotEmpty() }
+        ?: throw NotFound("Tor Metrics has no estimates for the $USAGE_LOOKBACK_DAYS days up to $latestRelayDay.")
+    if (found != latestRelayDay) {
+        settings.note("Estimates for $found, the latest day Tor Metrics has published (relay data goes up to $latestRelayDay).")
+    }
+    return rows
 }
 
 /** Finds a relay by fingerprint, or by its nickname in the relays of a day (case-insensitive, must be unique). */

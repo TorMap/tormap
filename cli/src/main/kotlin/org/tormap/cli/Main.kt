@@ -1,5 +1,6 @@
 package org.tormap.cli
 
+import com.github.ajalt.clikt.completion.CompletionCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.core.ProgramResult
 import com.github.ajalt.clikt.core.UsageError
@@ -15,7 +16,10 @@ fun main(args: Array<String>) {
 
 /** Runs the CLI and returns the exit code (see [ExitCode]); stdout and stderr are parameters for tests. */
 fun runCli(args: Array<String>, stdout: PrintStream, stderr: PrintStream, env: (String) -> String?): Int {
-    val command = Tormap(stdout, env).subcommands(Days(), Relays(), Relay(), Family(), AutonomousSystems(), Stats(), Usage())
+    val command = Tormap(stdout, stderr, env).subcommands(
+        Days(), Relays(), Relay(), Family(), AutonomousSystems(), Stats(), Usage(),
+        CompletionCommand(name = "completion", help = "Print a shell completion script for bash, zsh or fish."),
+    )
     command.context {
         echoMessage = { _, message, trailingNewline, err ->
             val stream = if (err) stderr else stdout
@@ -38,6 +42,9 @@ fun runCli(args: Array<String>, stdout: PrintStream, stderr: PrintStream, env: (
         stderr.println(sanitize("tormap: ${error.matches.size} relays are named '${error.query}' on ${error.day}. Use one of these fingerprints:"))
         error.matches.forEach { stderr.println(sanitize("  ${it.text("fingerprint")}  ${it.text("country")}")) }
         ExitCode.AMBIGUOUS
+    } catch (error: CheckFailed) {
+        stderr.println("tormap: ${error.message}")
+        ExitCode.CHECK_FAILED
     } catch (error: ApiException) {
         // Error messages can quote the server, e.g. the message of a 400 response
         stderr.println("tormap: ${sanitize(error.message.orEmpty())}")
@@ -46,7 +53,7 @@ fun runCli(args: Array<String>, stdout: PrintStream, stderr: PrintStream, env: (
 }
 
 private val GLOBAL_OPTIONS_WITH_VALUE = setOf("--api-url", "--proxy", "--format", "-f", "--output", "-o", "--cache-dir", "--timeout")
-private val GLOBAL_FLAGS = setOf("--no-cache")
+private val GLOBAL_FLAGS = setOf("--no-cache", "--quiet", "-q")
 
 /**
  * Moves the options of the root command in front of the subcommand, so `tormap relays --format csv` works like

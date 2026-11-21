@@ -65,6 +65,9 @@ tormap usage --country DE,NL   # latest day with estimates, Tor Metrics publishe
 
 # Everything over Tor
 tormap --proxy socks5h://127.0.0.1:9050 relays --nickname 'tor*'
+
+# Monitoring from cron: exit code 3 if the relay is not in today's consensus, 5 if it lacks a flag
+tormap --quiet relay MyRelay --require-flag Running,Guard || echo "MyRelay needs attention"
 ```
 
 Options such as `--format` can be given before or after the command. The output is a table in a terminal and JSON
@@ -77,8 +80,17 @@ when piped. JSON and NDJSON contain all fields of the API, named as in [api/open
 | `--format` (`table`, `json`, `ndjson`, `csv`) | | table in a terminal, otherwise json |
 | `--cache-dir` | `TORMAP_CACHE_DIR` | `$XDG_CACHE_HOME/tormap`, `%LOCALAPPDATA%\tormap\cache` or `~/.cache/tormap` |
 | `--no-cache`, `--timeout`, `--output` | | |
+| `--quiet` (`-q`): no results or hints, only errors and the exit code | | |
 
 Downloaded days are cached as gzip files: recent days for an hour, older days for 30 days.
+
+### Shell completion
+
+```sh
+tormap completion bash > ~/.local/share/bash-completion/completions/tormap
+tormap completion zsh > "${fpath[1]}/_tormap"
+tormap completion fish > ~/.config/fish/completions/tormap.fish
+```
 
 ## Exit codes
 
@@ -89,6 +101,26 @@ Downloaded days are cached as gzip files: recent days for an hour, older days fo
 | 2 | Wrong usage, e.g. a malformed day |
 | 3 | Nothing found |
 | 4 | More than one relay has the nickname; the fingerprints are printed |
+| 5 | `relay --require-flag`: the relay lacks one of the flags on that day |
+
+## Privacy
+
+The CLI sends no telemetry and never checks for updates. It only connects to the API URL (default
+`api.tormap.org`), with the header `User-Agent: tormap-cli/<version>`, and keeps downloaded data in its cache
+directory.
+
+Without a proxy, the API server sees your IP address and which relays you look up. To hide both, run the CLI
+through Tor with `--proxy socks5h://127.0.0.1:9050` (Tor Browser listens on port 9150), or set `TORMAP_PROXY`.
+The CLI always lets the proxy resolve the API host name, so no DNS request leaves outside Tor. In Docker, the Tor proxy must be reachable from the container, e.g.
+`--network host`. The cache is not encrypted; delete it, or use `--no-cache`, if others can read your files.
+
+## Data and licences
+
+The data comes from the [Tor Project](https://metrics.torproject.org/) (CollecTor descriptors and Tor Metrics user
+estimates). Countries, coordinates and autonomous systems are looked up in the free databases of
+[DB-IP](https://db-ip.com), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). If you publish
+data exported with the CLI, credit DB-IP for the location and AS fields.
+
 
 ## Development
 

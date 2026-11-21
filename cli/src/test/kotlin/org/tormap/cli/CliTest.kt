@@ -124,6 +124,53 @@ class CliTest : StringSpec({
         api.run("usage", "--day", "2024-03-05").exitCode shouldBe ExitCode.NOT_FOUND
     }
 
+    "usage names the day when it falls back to an earlier one" {
+        api.route("/v1/country-usage/2024-03-05", "[]")
+        api.route("/v1/country-usage/2024-03-04", """[{"country":"de","users":200,"lower":180,"upper":220,"frac":90}]""")
+        api.run("usage").stderr shouldContain "Estimates for 2024-03-04"
+        api.run("usage", "--quiet").stderr shouldBe ""
+    }
+
+    "usage without estimates in the last week is exit code 3" {
+        (0L..7L).forEach { api.route("/v1/country-usage/${java.time.LocalDate.parse("2024-03-05").minusDays(it)}", "[]") }
+        api.run("usage").exitCode shouldBe ExitCode.NOT_FOUND
+    }
+
+    "--quiet prints nothing, the exit code still tells the result" {
+        api.run("relays", "--quiet").let {
+            it.exitCode shouldBe ExitCode.OK
+            it.stdout shouldBe ""
+        }
+        api.run("-q", "relays", "--country", "FR").exitCode shouldBe ExitCode.NOT_FOUND
+    }
+
+    "--require-flag checks the relay's flags on the day" {
+        api.route("/v1/relays/$FP_B?month=2024-03", details(FP_B, "beta"))
+        api.run("relay", "beta", "--require-flag", "running,Guard", "-q").exitCode shouldBe ExitCode.OK
+        api.run("relay", "beta", "--require-flag", "Exit").let {
+            it.exitCode shouldBe ExitCode.CHECK_FAILED
+            it.stderr shouldContain "beta ($FP_B) lacks Exit on 2024-03-05"
+            it.stdout shouldContain FP_B
+        }
+        // Details exist for the month, but the relay is not in the day's consensus
+        api.route("/v1/relays/$FP_C", details(FP_C, "gone"))
+        api.route("/v1/days/2024-03-05/relays", RELAYS_OF_DAY.replace(FP_C, FP_A.replace('A', 'D')))
+        api.run("--no-cache", "relay", FP_C, "--require-flag", "Running").let {
+            it.exitCode shouldBe ExitCode.NOT_FOUND
+            it.stderr shouldContain "is not in the consensus on 2024-03-05"
+        }
+    }
+
+    "shell completion scripts" {
+        listOf("bash", "zsh", "fish").forEach { shell ->
+            api.run("completion", shell).let {
+                it.exitCode shouldBe ExitCode.OK
+                it.stdout shouldContain "relays"
+            }
+        }
+        api.requests shouldBe emptyList()
+    }
+
     "--from after --to is wrong usage, checked before any request" {
         api.run("stats", "--from", "2024-03-05", "--to", "2024-03-04").let {
             it.exitCode shouldBe ExitCode.USAGE
