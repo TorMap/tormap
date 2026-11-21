@@ -15,8 +15,10 @@ import {monthOfDay, relayDetailsPath} from "../../../util/api-v1";
 import {backend, nameOfFactory} from "../../../util/util";
 import {RelayDetailsDialogLarge} from "./RelayDetailsDialogLarge";
 import {RelayDetailsDialogSmall} from "./RelayDetailsDialogSmall";
-import {useAtom, useSetAtom} from "jotai";
+import {useAtom, useAtomValue, useSetAtom} from "jotai";
 import {
+    dayRelaysAtom,
+    followRelayAtom,
     relayDetailsDialogOrderAtom,
     relayDetailsDialogSearchAtom,
     relaysForDetailsDialogAtom,
@@ -52,7 +54,9 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
 
     // Atom state
     const [showRelayDetailsDialog, setShowRelayDetailsDialog] = useAtom(showRelayDetailsDialogAtom)
-    const [relaysForDetailsDialog] = useAtom(relaysForDetailsDialogAtom)
+    const [relaysForDetailsDialog, setRelaysForDetailsDialog] = useAtom(relaysForDetailsDialogAtom)
+    const [followRelay, setFollowRelay] = useAtom(followRelayAtom)
+    const dayRelays = useAtomValue(dayRelaysAtom)
     const [searchRelaysBy] = useAtom(relayDetailsDialogSearchAtom)
     const [orderRelaysBy] = useAtom(relayDetailsDialogOrderAtom)
     const setRelaySearchOnMap = useSetAtom(relaySearchOnMapAtom)
@@ -125,6 +129,15 @@ export const ResponsiveRelayDetailsDialog: FunctionComponent = () => {
             setRelayDetailsId(undefined)
         }
     }
+
+    // After a jump to another month, show the relay as it is on the new day, once that day is loaded. If it is not on
+    // the map that day, the details of the new month are still shown with the relay's last known location.
+    useEffect(() => {
+        if (!followRelay || dayRelays?.day !== followRelay.day) return
+        setFollowRelay(undefined)
+        const relay = dayRelays.relays.find(relay => relay.fingerprint === followRelay.fingerprint && relay.hasDetails)
+        if (relay) setRelaysForDetailsDialog([relay])
+    }, [followRelay, dayRelays, setFollowRelay, setRelaysForDetailsDialog])
 
     // Offer to show the search results on the map once the user searched for something
     const showMatchesOnMap = searchRelaysBy.trim() && searchedRelayIdentifierMatches.length > 0 ?

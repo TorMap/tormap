@@ -5,6 +5,7 @@ import {RelayDetailsMatch, RelayFlag, RelayFlagLabel} from "../../../types/relay
 import {ExternalLink} from "../../link/ExternalLink";
 import {SelectFamilyButton} from "../../buttons/SelectFamilyButton";
 import {RelayIdentifierDto} from "../../../dto/relay";
+import {RelayMonths} from "./RelayMonths";
 
 interface Props {
     relayDetailsMatch: RelayDetailsMatch
@@ -71,7 +72,9 @@ export const RelayDetailsTable: FunctionComponent<Props> = ({relayDetailsMatch, 
     ].filter(isTableRow) as RelayDetailsTableRow[]
 
     return (
-        <Table size={"small"}>
+        <>
+            <RelayMonths fingerprint={relayDetailsMatch.fingerprint}/>
+            <Table size={"small"}>
             <TableBody>
                 {tableRows.map((row) =>
                     <TableRow key={row.name}>
@@ -85,6 +88,7 @@ export const RelayDetailsTable: FunctionComponent<Props> = ({relayDetailsMatch, 
                 )}
             </TableBody>
         </Table>
+        </>
     )
 }
 

@@ -1,3 +1,4 @@
+import {useSetAtom} from "jotai";
 import React, {FunctionComponent, useCallback, useEffect, useState} from "react";
 
 import {useDate} from "../../context/date-context";
@@ -8,6 +9,7 @@ import {startServiceWorker} from "../../pwa/register";
 import {isOffline, offlineSnackbarKey, onceOnline, useOffline} from "../../util/online";
 import {readPermalink, writePermalink} from "../../util/permalink";
 import {toRelayLocation} from "../../util/api-v1";
+import {dayRelaysAtom} from "../dialogs/relay/relay-details-atoms";
 import {backend} from "../../util/util";
 import {CachedDataChip} from "./CachedDataChip";
 import {CountryUsageLayer} from "./CountryUsageLayer";
@@ -51,6 +53,7 @@ const MapPermalink: FunctionComponent = () => {
 export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
     // Component state
     const [relays, setRelays] = useState<RelayLocationDto[]>()
+    const setDayRelays = useSetAtom(dayRelaysAtom)
     const [relaysCachedAt, setRelaysCachedAt] = useState<string>()
     const [refreshDayCount, setRefreshDayCount] = useState<number>(0)
 
@@ -81,7 +84,9 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
         backend.get<RelayV1Dto[]>(`/v1/days/${selectedDate}/relays`).then(response => {
             setIsLoading(false)
             if (currentTimeStamp === latestRequestTimestamp) {
-                setRelays(response.data.map(toRelayLocation))
+                const dayRelays = response.data.map(toRelayLocation)
+                setRelays(dayRelays)
+                setDayRelays({day: selectedDate, relays: dayRelays})
                 setRelaysCachedAt(response.cachedAt)
             }
         }).catch(() => {
@@ -102,7 +107,7 @@ export const LeafletWorldMap: FunctionComponent<Props> = ({setIsLoading}) => {
             active = false
             cancelOnlineRetry?.()
         }
-    }, [selectedDate, enqueueSnackbar, closeSnackbar, setIsLoading, refreshDayCount])
+    }, [selectedDate, enqueueSnackbar, closeSnackbar, setIsLoading, refreshDayCount, setDayRelays])
 
     return (
         <>
