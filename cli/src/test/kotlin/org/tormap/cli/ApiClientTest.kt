@@ -5,6 +5,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import java.net.InetSocketAddress
 import java.net.Proxy
+import java.time.Clock
 import java.time.Duration
 import java.time.LocalDate
 
@@ -32,6 +33,42 @@ class ApiClientTest : StringSpec({
         ResponseCache.ttlForDay("2024-03-09", today) shouldBe Duration.ofHours(1)
         ResponseCache.ttlForDay("2024-03-07", today) shouldBe Duration.ofHours(1)
         ResponseCache.ttlForDay("2024-03-01", today) shouldBe Duration.ofDays(30)
+    }
+
+    "an expired day is revalidated with its ETag and not downloaded again while it is unchanged" {
+        FakeApi().use { api ->
+            api.withDay()
+            val path = "/v1/days/2024-03-05/relays"
+            api.eTags[path] = "W/\"one\""
+            fun client(offset: Duration) = ApiClient(api.url, cache = ResponseCache(api.cacheDir, Clock.offset(Clock.systemUTC(), offset)))
+
+            client(Duration.ZERO).relaysOfDay("2024-03-05").size shouldBe 3
+            api.ifNoneMatch.last() shouldBe null
+
+            // Older days are kept for 30 days, so 31 days later the entry has expired
+            val later = client(Duration.ofDays(31))
+            later.relaysOfDay("2024-03-05").size shouldBe 3
+            api.ifNoneMatch.last() shouldBe "W/\"one\""
+            api.requests.count { it == path } shouldBe 2
+            // The 304 made the entry fresh again
+            later.relaysOfDay("2024-03-05").size shouldBe 3
+            api.requests.count { it == path } shouldBe 2
+
+            // A changed day is downloaded with its new ETag
+            api.route(path, "[" + RELAYS_OF_DAY.trim().removePrefix("[").substringBefore("},") + "}]")
+            api.eTags[path] = "W/\"two\""
+            val muchLater = client(Duration.ofDays(62))
+            muchLater.relaysOfDay("2024-03-05").size shouldBe 1
+            client(Duration.ofDays(93)).relaysOfDay("2024-03-05").size shouldBe 1
+            api.ifNoneMatch.last() shouldBe "W/\"two\""
+        }
+    }
+
+    "ETags that could not be sent back as a header are not kept" {
+        isValidETag("W/\"abc\"") shouldBe true
+        isValidETag("a\r\nX-Injected: 1") shouldBe false
+        isValidETag("") shouldBe false
+        isValidETag("x".repeat(300)) shouldBe false
     }
 
     "options of the root command may follow the subcommand" {

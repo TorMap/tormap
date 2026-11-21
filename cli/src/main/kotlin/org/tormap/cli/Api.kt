@@ -113,15 +113,21 @@ class ApiClient(
 
     private fun getCached(path: String, ttl: java.time.Duration): JsonElement {
         val key = baseUri.resolve(path).toString()
-        cache?.read(key, ttl)?.let { return parse(it, path) }
-        val body = request(path) ?: throw notFound(path)
+        val cached = cache?.read(key, ttl)
+        if (cached != null && cached.fresh) return parse(cached.body, path)
+        val response = request(path, ifNoneMatch = cached?.eTag)
+        if (response.status == 304 && cached != null) {
+            cache?.refresh(key)
+            return parse(cached.body, path)
+        }
+        val body = response.body ?: throw notFound(path)
         val element = parse(body, path)
         // Empty lists are not cached: the day may get data later
-        if (!(element is JsonArray && element.isEmpty())) cache?.write(key, body)
+        if (!(element is JsonArray && element.isEmpty())) cache?.write(key, body, response.eTag)
         return element
     }
 
-    private fun get(path: String): JsonElement? = request(path)?.let { parse(it, path) }
+    private fun get(path: String): JsonElement? = request(path).body?.let { parse(it, path) }
 
     private fun required(path: String): JsonElement = get(path) ?: throw notFound(path)
 
@@ -133,8 +139,10 @@ class ApiClient(
         throw ApiException("The API returned invalid JSON for /$path.")
     }
 
-    /** Returns the body, or null for 404. */
-    private fun request(path: String): String? {
+    /** [body] is null for 404 and 304 Not Modified. */
+    private class Response(val status: Int, val body: String?, val eTag: String?)
+
+    private fun request(path: String, ifNoneMatch: String? = null): Response {
         val uri = baseUri.resolve(path)
         val connection = try {
             uri.toURL().openConnection(proxy) as HttpURLConnection
@@ -149,14 +157,16 @@ class ApiClient(
             connection.setRequestProperty("Accept", "application/json")
             connection.setRequestProperty("Accept-Encoding", "gzip")
             connection.setRequestProperty("User-Agent", "tormap-cli/$VERSION")
+            ifNoneMatch?.let { connection.setRequestProperty("If-None-Match", it) }
             val status = try {
                 connection.responseCode
             } catch (exception: IOException) {
                 throw ApiException("Can not reach ${baseUri.host}${viaProxy()}: ${exception.message ?: exception.javaClass.simpleName}")
             }
             return when {
-                status == 200 -> readBody(connection, connection.inputStream)
-                status == 404 -> null
+                status == 200 -> Response(status, readBody(connection, connection.inputStream), connection.getHeaderField("ETag"))
+                status == 304 && ifNoneMatch != null -> Response(status, null, null)
+                status == 404 -> Response(status, null, null)
                 status == 400 -> throw ApiException("The API rejected the request: ${errorMessage(connection)}")
                 // Backends without API v1 deny unknown paths
                 status == 403 -> throw ApiException("The API returned HTTP 403 for /$path. Does ${baseUri.host} run TorMap 4.3 or newer?")

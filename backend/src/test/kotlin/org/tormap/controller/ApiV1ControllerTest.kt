@@ -10,6 +10,8 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.tormap.config.CacheConfig
@@ -94,6 +96,33 @@ class ApiV1ControllerTest(
         saveRelayA()
         mockMvc.perform(get("/v1/days/2024-03-05/relays")).andExpect(status().isOk)
         cacheManager.getCache(CacheConfig.API_V1_RELAYS_PER_DAY)!!.get("2024-03-05") shouldNotBe null
+    }
+
+    "answers a request with the ETag of the day with 304 Not Modified" {
+        saveRelayA()
+        val eTag = mockMvc.perform(get("/v1/days/2024-03-05/relays"))
+            .andExpect(status().isOk)
+            .andReturn().response.getHeader("ETag")
+        eTag shouldNotBe null
+        eTag!!.startsWith("W/\"") shouldBe true
+        mockMvc.perform(get("/v1/days/2024-03-05/relays").header("If-None-Match", eTag))
+            .andExpect(status().isNotModified)
+            .andExpect(header().string("ETag", eTag))
+            .andExpect(content().string(""))
+        mockMvc.perform(get("/v1/days/2024-03-05/relays").header("If-None-Match", "W/\"other\""))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.length()").value(1))
+    }
+
+    "the ETag of a day changes with its relays and stays the same when the cache is filled again" {
+        saveRelayA()
+        fun eTag() = mockMvc.perform(get("/v1/days/2024-03-05/relays")).andReturn().response.getHeader("ETag")
+        val first = eTag()
+        cacheManager.getCache(CacheConfig.API_V1_RELAYS_PER_DAY)!!.clear()
+        eTag() shouldBe first
+        relayLocationRepository.save(mockRelayLocation(day, 'B'))
+        cacheManager.getCache(CacheConfig.API_V1_RELAYS_PER_DAY)!!.clear()
+        eTag() shouldNotBe first
     }
 
     "returns relay details by fingerprint in any case, for the latest month by default" {
