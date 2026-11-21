@@ -52,6 +52,7 @@ export const RelayDetailsTable: FunctionComponent<Props> = ({relayDetailsMatch, 
         {name: "Link protocol versions", value: relayDetailsMatch.linkProtocolVersions},
         {name: "Circuit protocol versions", value: relayDetailsMatch.circuitProtocolVersions},
         {name: "Self reported family members", value: relayDetailsMatch.familyEntries},
+        {name: "Certified families", value: renderTextList(relayDetailsMatch.familyIds)},
         {
             name: "Confirmed family members",
             value: renderConfirmedFamilyMembers(relayDetailsMatch.confirmedFamilyMembers)
@@ -64,8 +65,8 @@ export const RelayDetailsTable: FunctionComponent<Props> = ({relayDetailsMatch, 
                 label="Show confirmed family"
             />
         } : undefined,
-        {name: "Verified host names", value: renderHostNames(relayDetailsMatch.verifiedHostNames)},
-        {name: "Unverified host names", value: renderHostNames(relayDetailsMatch.unverifiedHostNames)},
+        {name: "Verified host names", value: renderTextList(relayDetailsMatch.verifiedHostNames)},
+        {name: "Unverified host names", value: renderTextList(relayDetailsMatch.unverifiedHostNames)},
         {name: "Infos published by relay on", value: relayDetailsMatch.day},
     ].filter(isTableRow) as RelayDetailsTableRow[]
 
@@ -136,10 +137,10 @@ const renderConfirmedFamilyMembers = (confirmedFamilyMembers?: RelayIdentifierDt
     </Box> :
     undefined
 
-const renderHostNames = (hostNames?: string[]) => hostNames && hostNames.length > 0 ?
+const renderTextList = (texts?: string[]) => texts && texts.length > 0 ?
     <Box sx={{display: "flex", flexDirection: "column", gap: 0.5}}>
-        {hostNames.map((hostName) =>
-            <Typography key={hostName}>{hostName}</Typography>
+        {texts.map((text) =>
+            <Typography key={text}>{text}</Typography>
         )}
     </Box> :
     undefined

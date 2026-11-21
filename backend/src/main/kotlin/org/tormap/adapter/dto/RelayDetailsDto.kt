@@ -4,6 +4,7 @@ package org.tormap.adapter.dto
 
 import org.tormap.database.entity.RelayDetails
 import org.tormap.service.ReverseDnsLookupResult
+import org.tormap.util.commaSeparatedToList
 
 class RelayDetailsDto(
     details: RelayDetails,
@@ -28,6 +29,7 @@ class RelayDetailsDto(
     val uptime = details.uptime
     val contact = details.contact
     val familyEntries = details.familyEntries
+    val familyIds = details.familyIds?.commaSeparatedToList() ?: emptyList()
     val familyId = details.familyId
     val cachesExtraInfo = details.cachesExtraInfo
     val isHiddenServiceDir = details.isHiddenServiceDir

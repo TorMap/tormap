@@ -46,6 +46,7 @@ object LiteRelayPages {
                 "Link protocol versions" to details.linkProtocolVersions?.let { { text(it) } },
                 "Circuit protocol versions" to details.circuitProtocolVersions?.let { { text(it) } },
                 "Self reported family members" to details.familyEntries?.let { { text(it) } },
+                "Certified families" to textList(details.familyIds),
                 "Confirmed family members" to details.confirmedFamilyMembers.takeIf { it.isNotEmpty() }?.let { members ->
                     {
                         tag("ul", "class" to "plain") {
@@ -60,8 +61,8 @@ object LiteRelayPages {
                         }
                     }
                 },
-                "Verified host names" to hostNames(details.verifiedHostNames),
-                "Unverified host names" to hostNames(details.unverifiedHostNames),
+                "Verified host names" to textList(details.verifiedHostNames),
+                "Unverified host names" to textList(details.unverifiedHostNames),
                 "Infos published by relay on" to { text(details.day.toString()) },
             )
             tag("table", "class" to "details") {
@@ -165,7 +166,7 @@ object LiteRelayPages {
 
     private fun yesNo(value: Boolean): Html.() -> Unit = { text(if (value) "yes" else "no") }
 
-    private fun hostNames(names: Collection<String>?): (Html.() -> Unit)? = names?.takeIf { it.isNotEmpty() }?.let {
+    private fun textList(names: Collection<String>?): (Html.() -> Unit)? = names?.takeIf { it.isNotEmpty() }?.let {
         { tag("ul", "class" to "plain") { it.forEach { name -> tag("li", name) } } }
     }
 }

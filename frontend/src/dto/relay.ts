@@ -67,6 +67,7 @@ export interface RelayDetailsDto {
     uptime: number
     contact: string
     familyEntries: string
+    familyIds: string[]
     familyId?: number | null
     cachesExtraInfo: boolean
     isHiddenServiceDir: boolean
