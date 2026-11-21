@@ -54,9 +54,10 @@ interface DataIndex {
     entries: Record<string, IndexEntry>
 }
 
-const datePathPattern = /^\/relay\/(?:location|country-usage)\/day\/(\d{4}-\d{2}-\d{2})$/
-const detailsPathPattern = /^\/relay\/details\/(?:relay\/\d+|autonomous-systems\/\d{4}-\d{2})$/
-const listPaths = ["/relay/location/days", "/relay/statistics/daily-counts"]
+// API v1 paths (api/openapi-v1.json). The only query strings allowed are a well-formed month, so keys stay bounded.
+const datePathPattern = /^\/v1\/(?:days\/(\d{4}-\d{2}-\d{2})\/relays|country-usage\/(\d{4}-\d{2}-\d{2}))$/
+const detailsPathPattern = /^\/v1\/(?:relays\/[0-9A-F]{40}\?month=\d{4}-\d{2}|autonomous-systems\/\d{4}-\d{2}|families\?month=\d{4}-\d{2})$/
+const listPaths = ["/v1/days", "/v1/statistics/daily-counts"]
 
 /**
  * Whether a day is in the current or previous month. The backend reprocesses whole months when new descriptors
@@ -74,11 +75,11 @@ export function matchDataRoute(url: string, apiBase: string, now: Date): DataRou
     const base = apiBase.replace(/\/+$/, "")
     if (!url.startsWith(base + "/")) return undefined
     const path = url.slice(base.length)
-    // Query strings and fragments would allow unbounded keys
-    if (/[?#]/.test(path)) return undefined
     if (listPaths.includes(path)) return {group: "list", strategy: "network-first"}
-    const date = datePathPattern.exec(path)?.[1]
+    const dateMatch = datePathPattern.exec(path)
+    const date = dateMatch?.[1] ?? dateMatch?.[2]
     if (date) return {group: "date", date, strategy: isRecentDate(date, now) ? "network-first" : "stale-while-revalidate"}
+    // Other query strings and fragments would allow unbounded keys, so the patterns match the whole path
     if (detailsPathPattern.test(path)) return {group: "details", strategy: "network-first"}
     return undefined
 }
