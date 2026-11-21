@@ -1,0 +1,122 @@
+name: Release
+
+# Releases master: Actions → Release → Run workflow (or `gh workflow run release.yml -f dry_run=false`).
+# A dry run (the default) only writes the plan to the job summary: next version, PRs by category, CI status.
+# A real run bumps backend/build.gradle.kts, frontend/package.json and cli/build.gradle.kts, pushes that commit and the
+# vX.Y.Z tag to master with the release deploy key and puts the notes on the draft release of the tag. The tag push
+# starts the Docker workflows and cli_native, which attaches the CLI binaries to the same draft. Releases are
+# immutable once published, so publishing the draft stays manual and comes after the binaries are attached.
+#
+# One-time setup (repository settings):
+# - Environment `release`: deployment branches "master" only. Secret RELEASE_DEPLOY_KEY: private key of a deploy key
+#   with write access.
+# - Rulesets: deploy keys may bypass the tag ruleset and the master rules (required status checks, pull requests).
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump. auto picks it from the PR labels (breaking → major, enhancement or deployment → minor, else patch)
+        type: choice
+        options: [auto, patch, minor, major]
+        default: auto
+      dry_run:
+        description: Only show the plan, change nothing
+        type: boolean
+        default: true
+      description:
+        description: Optional release description for users (Markdown), put above the generated notes
+        type: string
+        default: ''
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: read
+      statuses: read
+      actions: read
+    outputs:
+      version: ${{ steps.plan.outputs.version }}
+      tag: ${{ steps.plan.outputs.tag }}
+      previous_tag: ${{ steps.plan.outputs.previous_tag }}
+      sha: ${{ steps.plan.outputs.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0 # tags and history since the last release
+          persist-credentials: false
+
+      - name: Plan the release
+        id: plan
+        run: python3 .github/scripts/release-plan.py
+        env:
+          BUMP: ${{ inputs.bump }}
+          GH_TOKEN: ${{ github.token }}
+
+  release:
+    needs: plan
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    # Holds RELEASE_DEPLOY_KEY and only allows master, so no other branch or workflow can push release tags
+    environment: release
+    permissions:
+      contents: write # create or edit the draft release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.plan.outputs.sha }} # exactly the commit whose CI passed
+          ssh-key: ${{ secrets.RELEASE_DEPLOY_KEY }}
+
+      - name: Bump versions, commit and tag
+        env:
+          VERSION: ${{ needs.plan.outputs.version }}
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          sed -i "s/^version = \".*\"$/version = \"$VERSION\"/" backend/build.gradle.kts cli/build.gradle.kts
+          sed -i "0,/\"version\": \"[^\"]*\"/s//\"version\": \"$VERSION\"/" frontend/package.json
+          .github/scripts/check-release-version.sh "$TAG"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
+            git commit -am "chore(release): bump version to $VERSION"
+          fi
+          git tag -a "$TAG" -m "TorMap $VERSION"
+          # Atomic and without force: if master moved since the plan, nothing is pushed
+          git push --atomic origin HEAD:refs/heads/master "refs/tags/$TAG"
+
+      - name: Put the notes on the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.plan.outputs.tag }}
+          PREVIOUS_TAG: ${{ needs.plan.outputs.previous_tag }}
+          DESCRIPTION: ${{ inputs.description }}
+        run: |
+          generated=$(gh api "repos/$GH_REPO/releases/generate-notes" -f tag_name="$TAG" \
+            -f previous_tag_name="$PREVIOUS_TAG" --jq .body)
+          printf '%s\n\n%s\n' "${DESCRIPTION:-_Add the release description here._}" "$generated" > notes.md
+          # cli_native creates the draft too when it attaches the binaries, so whichever comes first creates it
+          if gh release create "$TAG" --draft --verify-tag --title "$TAG" --notes-file notes.md; then
+            echo "Created the draft release $TAG."
+          else
+            gh release edit "$TAG" --draft --notes-file notes.md
+            echo "Updated the notes of the existing draft release $TAG."
+          fi
+          {
+            echo "## Next steps"
+            echo ""
+            echo "- Wait for backend_docker, frontend_docker and cli_native on $TAG: https://github.com/$GH_REPO/actions?query=branch%3A$TAG"
+            echo "- Check the draft (description, deployment notes, CLI binaries and SHA256SUMS): https://github.com/$GH_REPO/releases"
+            echo "- Publish security advisories fixed in this release together with it."
+            echo "- Publish the draft. Published releases are immutable, so only after cli_native attached the binaries."
+          } >> "$GITHUB_STEP_SUMMARY"

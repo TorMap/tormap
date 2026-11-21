@@ -56,12 +56,7 @@ jobs:
       - name: Check that the tag matches the project versions
         if: github.ref_type == 'tag'
         shell: bash
-        run: |
-          cli_version=$(sed -n 's/^version = "\(.*\)"$/\1/p' cli/build.gradle.kts)
-          if [[ "v$cli_version" != "$GITHUB_REF_NAME" ]]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match CLI version $cli_version (cli/build.gradle.kts). Bump it on master before tagging."
-            exit 1
-          fi
+        run: bash .github/scripts/check-release-version.sh "$GITHUB_REF_NAME"
 
       - name: Set up GraalVM 25
         uses: graalvm/setup-graalvm@60e76998d25690099182b796e99b8804da582d90 # v1.6.10
@@ -153,6 +148,8 @@ jobs:
     needs: native
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    # Holds the Docker Hub secrets; its deployment rules allow only master and v* tags
+    environment: docker-hub
     permissions:
       contents: read
     steps:

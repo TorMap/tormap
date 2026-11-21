@@ -6,7 +6,7 @@ Rules for AI coding agents (and a quick reference for humans) working in this re
 - `backend/`: Kotlin, Spring Boot, Gradle (Kotlin DSL), image built with Jib. Dependency versions are inline in `backend/build.gradle.kts`.
 - `frontend/`: React, TypeScript, Vite, Yarn 4 with exact version pins.
 - `cli/`: the `tormap` command line client, a separate Kotlin Gradle build (Clikt, kotlinx.serialization, JDK HTTP only), built against the API v1. Keep it free of further runtime dependencies where the JDK suffices.
-- The project version is duplicated in `backend/build.gradle.kts`, `frontend/package.json` and `cli/build.gradle.kts`.
+- The project version is duplicated in `backend/build.gradle.kts`, `frontend/package.json` and `cli/build.gradle.kts`. Only the Release workflow changes it.
 - `api/openapi-v1.json`: the contract of the public API v1 (`/v1/**`, `ApiV1Controller`), for the CLI and other clients. Within v1 only add endpoints or fields; renaming or removing needs `/v2/` and the `breaking` label. After an intended change, regenerate it with `UPDATE_OPENAPI_SPEC=true ./gradlew test --tests 'org.tormap.api.ApiV1OpenApiSpecTest'`.
 
 ## Build and test
@@ -22,6 +22,11 @@ Rules for AI coding agents (and a quick reference for humans) working in this re
 - Set labels when opening the PR; they group the release notes: `breaking` (incompatible API or behavior), `deployment` (operators must act: env var, volume ownership, JDK or image change), `security` (fixes a vulnerability), `enhancement`, `bug`, `documentation`, plus `backend` and/or `frontend`.
 - If operators must act, add a short "Deployment notes" section to the description.
 - Keep PRs small: each one leaves the project working and mergeable on its own.
+
+## Releases
+- Releases are made with the Release workflow (`.github/workflows/release.yml`, started by hand): a dry run shows the next version from the PR labels, a real run bumps all three versions, pushes the commit and the `vX.Y.Z` tag with the release deploy key and puts the notes on the draft release. The tag starts the Docker workflows and `cli_native`, which attaches the CLI binaries to the same draft. The maintainer checks the draft, then publishes it and any security advisories fixed in it. Releases are immutable once published.
+- Never push `v*` tags or edit the versions by hand. The tag workflows refuse a tag that doesn't match all three versions (`.github/scripts/check-release-version.sh`), so an older image is never overwritten.
+- Don't put details of unpublished vulnerabilities in commits, PRs or workflow output; the dry-run summary is public.
 
 ## Dependencies
 - Before adding, upgrading, removing or overriding any dependency (Gradle, Yarn, lockfile, plugins), follow [`.claude/skills/dependencies/SKILL.md`](.claude/skills/dependencies/SKILL.md). Don't install, build or test with a new or changed dependency until the maintainer has approved its vetting report.
