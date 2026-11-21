@@ -15,5 +15,8 @@ COPY --chmod=0755 build/docker/${TARGETOS}-${TARGETARCH}/tormap /usr/local/bin/t
 # The cache lives in the container and is lost with --rm; mount a volume here to keep it between runs
 ENV XDG_CACHE_HOME=/home/nonroot/.cache
 
+# Already the default of the :nonroot base image, repeated so it is explicit
+USER 65532:65532
+
 ENTRYPOINT ["/usr/local/bin/tormap"]
 CMD ["--help"]
