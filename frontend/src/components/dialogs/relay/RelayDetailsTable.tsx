@@ -45,9 +45,9 @@ export const RelayDetailsTable: FunctionComponent<Props> = ({relayDetailsMatch, 
         {name: "Bandwidth observed", value: formatBytesToMBPerSecond(relayDetailsMatch.bandwidthObserved)},
         {name: "Supported protocols", value: relayDetailsMatch.protocols},
         {name: "Allows single hop exit", value: formatBoolean(relayDetailsMatch.allowSingleHopExits)},
-        {name: "Is hibernating", value: formatBoolean(relayDetailsMatch.isHibernating)},
+        {name: "Is hibernating", value: formatBoolean(relayDetailsMatch.hibernating)},
         {name: "Caches extra info", value: formatBoolean(relayDetailsMatch.cachesExtraInfo)},
-        {name: "Is a hidden service directory", value: formatBoolean(relayDetailsMatch.isHiddenServiceDir)},
+        {name: "Is a hidden service directory", value: formatBoolean(relayDetailsMatch.hiddenServiceDir)},
         {name: "Accepts tunneled directory requests", value: formatBoolean(relayDetailsMatch.tunnelledDirServer)},
         {name: "Link protocol versions", value: relayDetailsMatch.linkProtocolVersions},
         {name: "Circuit protocol versions", value: relayDetailsMatch.circuitProtocolVersions},
@@ -129,7 +129,7 @@ const renderConfirmedFamilyMembers = (confirmedFamilyMembers?: RelayIdentifierDt
     <Box sx={{display: "flex", flexDirection: "column", gap: 0.5}}>
         {confirmedFamilyMembers.map((familyMember) =>
             <ExternalLink
-                key={familyMember.id}
+                key={familyMember.fingerprint}
                 href={`https://metrics.torproject.org/rs.html#details/${familyMember.fingerprint}`}
                 label={`${familyMember.nickname} (${familyMember.fingerprint})`}
             />

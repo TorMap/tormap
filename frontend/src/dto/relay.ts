@@ -1,12 +1,43 @@
 import {RelayFlag} from "../types/relay";
 
+/**
+ * A relay of a day as API v1 returns it (`/v1/days/{day}/relays`, see api/openapi-v1.json)
+ */
+export interface RelayV1Dto {
+    fingerprint: string
+    /**
+     * Missing if the relay has no details (server descriptor) in that month
+     */
+    nickname?: string | null
+    country: string
+    lat: number
+    long: number
+    flags: string[]
+    consensusWeight?: number | null
+    autonomousSystemNumber?: number | null
+    familyId?: number | null
+}
+
+/**
+ * A relay of the selected day, as the map uses it. Built from a [RelayV1Dto] by `toRelayLocation`.
+ */
 export interface RelayLocationDto {
     lat: number
     long: number
     country: string
     flags?: RelayFlag[] | null
-    detailsId?: number | null
+    /**
+     * The identity of the relay in Tor. Its details are requested by fingerprint and month.
+     */
+    fingerprint: string
+    /**
+     * Whether the relay has details in the month of the day. Relays without details can not be shown in the dialog.
+     */
+    hasDetails: boolean
     familyId?: number | null
+    /**
+     * Empty if the relay has no details
+     */
     nickname: string
 
     /**
@@ -15,7 +46,7 @@ export interface RelayLocationDto {
     consensusWeight?: number | null
 
     /**
-     * The number of the autonomous system the relay is located in. Missing for unknown systems and older responses.
+     * The number of the autonomous system the relay is located in. Missing for unknown systems.
      */
     asNumber?: number | null
 }
@@ -48,8 +79,10 @@ export interface DailyRelayCountDto {
     other: number
 }
 
+/**
+ * The details of a relay in a month, as API v1 returns them (`/v1/relays/{fingerprint}?month=`)
+ */
 export interface RelayDetailsDto {
-    id: number
     month: string
     day: string
     address: string
@@ -63,14 +96,14 @@ export interface RelayDetailsDto {
     platform: string
     protocols: string
     fingerprint: string
-    isHibernating: boolean
+    hibernating: boolean
     uptime: number
     contact: string
     familyEntries: string
     familyKeys: string[]
     familyId?: number | null
     cachesExtraInfo: boolean
-    isHiddenServiceDir: boolean
+    hiddenServiceDir: boolean
     linkProtocolVersions: string
     circuitProtocolVersions: string
     tunnelledDirServer: boolean
@@ -80,15 +113,25 @@ export interface RelayDetailsDto {
 }
 
 export interface RelayIdentifierDto {
-    id: number
     fingerprint: string
     nickname: string
 }
 
+/**
+ * A family of a month, as API v1 returns it (`/v1/families?month=`)
+ */
+export interface FamilyV1Dto {
+    id: number
+    members: RelayIdentifierDto[]
+    autonomousSystems: AutonomousSystemDto[]
+}
+
+/**
+ * A family as the family dialog shows it. Built from a [FamilyV1Dto] by `toFamilyIdentifier`.
+ */
 export interface RelayFamilyIdentifier {
     id: number
     memberCount: number
-    fingerprints: string
     nicknames: string
     autonomousSystems?: string
 }

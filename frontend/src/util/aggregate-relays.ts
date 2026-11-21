@@ -273,11 +273,10 @@ export function getRelayType(relay: RelayLocationDto): RelayType {
 }
 
 /**
- *
- * Returns a GeoRelayView-Object if there exists an Relay with this ID
- * @param id - The detailsID of the searched relay
- * @param relays - The GeoRelayView[] to be searched
+ * Finds a relay by its fingerprint
+ * @param fingerprint - The fingerprint of the searched relay
+ * @param relays - The relays to be searched
  */
-export function findRelayLocationById(id: number, relays: RelayLocationDto[]): RelayLocationDto | undefined {
-    return relays.find((relay) => relay.detailsId === id)
+export function findRelayLocationByFingerprint(fingerprint: string, relays: RelayLocationDto[]): RelayLocationDto | undefined {
+    return relays.find((relay) => relay.fingerprint === fingerprint)
 }
