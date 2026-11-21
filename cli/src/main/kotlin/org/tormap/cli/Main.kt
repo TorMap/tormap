@@ -32,14 +32,15 @@ fun runCli(args: Array<String>, stdout: PrintStream, stderr: PrintStream, env: (
         command.echoFormattedHelp(error)
         if (error is UsageError) ExitCode.USAGE else error.statusCode
     } catch (error: NotFound) {
-        stderr.println("tormap: ${error.message}")
+        stderr.println("tormap: ${sanitize(error.message.orEmpty())}")
         ExitCode.NOT_FOUND
     } catch (error: Ambiguous) {
-        stderr.println("tormap: ${error.matches.size} relays are named '${error.query}' on ${error.day}. Use one of these fingerprints:")
-        error.matches.forEach { stderr.println("  ${it.text("fingerprint")}  ${it.text("country")}") }
+        stderr.println(sanitize("tormap: ${error.matches.size} relays are named '${error.query}' on ${error.day}. Use one of these fingerprints:"))
+        error.matches.forEach { stderr.println(sanitize("  ${it.text("fingerprint")}  ${it.text("country")}")) }
         ExitCode.AMBIGUOUS
     } catch (error: ApiException) {
-        stderr.println("tormap: ${error.message}")
+        // Error messages can quote the server, e.g. the message of a 400 response
+        stderr.println("tormap: ${sanitize(error.message.orEmpty())}")
         ExitCode.ERROR
     }
 }

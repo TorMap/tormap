@@ -194,6 +194,34 @@ class CliTest : StringSpec({
         api.run("relays", format = "table").stdout shouldNotContain "\u001b"
     }
 
+    "control characters in ambiguous matches and server error messages do not reach the terminal" {
+        val esc = "\\u001b]0;pwned\\u0007"
+        api.route(
+            "/v1/days/2024-03-05/relays",
+            RELAYS_OF_DAY.replace("\"Alphabet\"", "\"alpha\"").replace("\"country\":\"NL\"", "\"country\":\"N$esc\""),
+        )
+        api.run("relay", "alpha").also { it.exitCode shouldBe ExitCode.AMBIGUOUS }.stderr shouldNotContain "\u001b"
+        api.route("/v1/country-usage/2024-03-05", """{"message":"bad$esc day"}""", status = 400)
+        api.run("usage", "--day", "2024-03-05").also { it.exitCode shouldBe ExitCode.ERROR }.stderr shouldNotContain "\u001b"
+    }
+
+    "invalid days or fingerprints from the server are an error, not a crash" {
+        api.route("/v1/days", """["2024-03-04","20\u001b[2J"]""")
+        api.run("--no-cache", "days", format = "table").let {
+            it.exitCode shouldBe ExitCode.ERROR
+            it.stderr shouldContain "invalid day"
+            it.stdout shouldNotContain "\u001b"
+        }
+        api.route("/v1/days", """["2024-03-04",{"day":1}]""")
+        api.run("--no-cache", "relays").stderr shouldContain "invalid day"
+        api.route("/v1/days", """["2024-03-04","2024-03-05"]""")
+        api.route("/v1/days/2024-03-05/relays", RELAYS_OF_DAY.replace(FP_B, "../../x"))
+        api.run("--no-cache", "relay", "beta").let {
+            it.exitCode shouldBe ExitCode.ERROR
+            it.stderr shouldContain "invalid fingerprint"
+        }
+    }
+
     "--version and --help" {
         api.run("--version").stdout shouldContain VERSION
         api.run("relays", "--help").let {
