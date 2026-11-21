@@ -1,39 +1,66 @@
 package org.tormap.util
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
+import org.tormap.database.entity.RelayDetails
 import org.tormap.mockRelayDetails
+import kotlin.time.Duration.Companion.seconds
 
-@SpringBootTest
-@ActiveProfiles("test")
 class RelayFamilyUtilTest : StringSpec({
-    val relay1 = mockRelayDetails('A')
-    val relay2 = mockRelayDetails('B')
-    val relay3 = mockRelayDetails('C')
+    fun relay(letter: Char, familyEntries: String?) = mockRelayDetails(letter).apply { this.familyEntries = familyEntries }
+    fun fingerprintEntry(letter: Char) = "$" + letter.toString().repeat(40)
+    fun RelayFamilies.nicknames() = families.map { family -> family.map { it.nickname }.toSet() }
 
-    listOf(
-        relay2.nickname,
-        "$" + relay2.fingerprint,
-    ).forEach {
-        "get relay family member (familyEntry=$it)" {
-            relay1.familyEntries = "\$${relay2.fingerprint}, ${relay2.nickname}"
-            relay2.familyEntries = "\$${relay1.fingerprint}, ${relay1.nickname}"
-            relay1.getFamilyMember(it, listOf(relay1, relay2))
-        }
+    "relays that list each other by fingerprint form a family" {
+        val result = computeRelayFamilies(
+            listOf(
+                relay('A', fingerprintEntry('B')),
+                relay('B', "${fingerprintEntry('A')}, ${fingerprintEntry('C')}"),
+                // C does not confirm B
+                relay('C', fingerprintEntry('D')),
+            )
+        )
+
+        result.nicknames() shouldContainExactlyInAnyOrder listOf(setOf("A", "B"))
+        result.confirmedConnectionCount shouldBe 2
+        result.rejectedConnectionCount shouldBe 2
     }
 
-    listOf(
-        relay2.nickname,
-        "\$${relay2.fingerprint}",
-    ).forEach {
-        "get relay family member returns null (familyEntry=$it)" {
-            relay1.familyEntries = "\$${relay3.fingerprint}, ${relay3.nickname}"
-            relay2.familyEntries = "\$${relay3.fingerprint}, ${relay3.nickname}"
-            relay1.getFamilyMember(it, listOf(relay1, relay2))
-        }
+    "a relay may confirm a family member by nickname" {
+        val result = computeRelayFamilies(listOf(relay('A', fingerprintEntry('B')), relay('B', "A")))
+
+        result.nicknames() shouldContainExactlyInAnyOrder listOf(setOf("A", "B"))
+    }
+
+    "a nickname entry of the requesting relay does not connect relays" {
+        val result = computeRelayFamilies(listOf(relay('A', "B"), relay('B', "A")))
+
+        result.families.shouldBeEmpty()
+        result.rejectedConnectionCount shouldBe 2
+    }
+
+    "families that are connected through a member are merged" {
+        val result = computeRelayFamilies(
+            listOf(
+                relay('A', fingerprintEntry('B')),
+                relay('C', fingerprintEntry('D')),
+                relay('B', "${fingerprintEntry('A')}, ${fingerprintEntry('D')}"),
+                relay('D', "${fingerprintEntry('C')}, ${fingerprintEntry('B')}"),
+                relay('E', "${fingerprintEntry('F')}"),
+                relay('F', "${fingerprintEntry('E')}"),
+            )
+        )
+
+        result.nicknames() shouldContainExactlyInAnyOrder listOf(setOf("A", "B", "C", "D"), setOf("E", "F"))
+    }
+
+    "a relay listing itself or unknown relays has no family" {
+        val result = computeRelayFamilies(listOf(relay('A', "${fingerprintEntry('A')}, ${fingerprintEntry('Z')}")))
+
+        result.families.shouldBeEmpty()
+        result.rejectedConnectionCount shouldBe 2
     }
 
     listOf(
@@ -42,31 +69,30 @@ class RelayFamilyUtilTest : StringSpec({
         "$" + "A".repeat(41),
         "???",
     ).forEach {
-        "get relay family member throws on wrong familyEntry format ($it)" {
-            shouldThrow<Exception> {
-                relay1.getFamilyMember(it, listOf(relay1, relay2))
-            }
+        "invalid family entries are rejected ($it)" {
+            val invalidEntries = mutableListOf<String>()
+            val result = computeRelayFamilies(
+                listOf(relay('A', "$it, ${fingerprintEntry('B')}"), relay('B', fingerprintEntry('A')))
+            ) { _, entry -> invalidEntries.add(entry) }
+
+            invalidEntries shouldBe listOf(it.trim())
+            result.nicknames() shouldContainExactlyInAnyOrder listOf(setOf("A", "B"))
+            result.rejectedConnectionCount shouldBe 1
         }
     }
 
-    listOf(
-        "\$${relay2.fingerprint}",
-        "${relay3.nickname}, \$${relay2.fingerprint}",
-        relay2.nickname,
-        "${relay3.nickname}, ${relay2.nickname}",
-    ).forEach {
-        "relay confirms family member (familyEntries=$it)" {
-            relay1.familyEntries = it
-            relay1.confirmsFamilyMember(relay2) shouldBe true
+    // RelayDetails has a constant hashCode, the computation took 17 minutes for a month of the real Tor network
+    "computes large families quickly".config(timeout = 30.seconds) {
+        val familySize = 200
+        val relays = (0 until 4_000).map { index -> mockRelayDetails().apply { fingerprint = "%040X".format(index) } }
+        relays.chunked(familySize).forEach { family ->
+            val entries = family.joinToString(", ") { "$" + it.fingerprint }
+            family.forEach { it.familyEntries = entries }
         }
-    }
 
+        val result = computeRelayFamilies(relays)
 
-    "relay does not confirm family member" {
-        relay1.familyEntries = "\$${relay3.fingerprint}, ${relay3.nickname}"
-        relay2.familyEntries = "\$${relay1.fingerprint}, ${relay1.nickname}"
-
-        relay1.confirmsFamilyMember(relay2) shouldBe false
+        result.families.map(List<RelayDetails>::size) shouldBe List(relays.size / familySize) { familySize }
+        result.confirmedConnectionCount shouldBe relays.size * (familySize - 1)
     }
 })
-
