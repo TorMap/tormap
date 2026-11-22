@@ -43,8 +43,8 @@ class CacheConfigTest(
         mapOf(
             CacheConfig.RELAY_LOCATION_DISTINCT_DAYS to 1L,
             CacheConfig.RELAY_DAILY_COUNTS to 1L,
-            CacheConfig.RELAY_LOCATIONS_PER_DAY to 10L,
-            CacheConfig.API_V1_RELAYS_PER_DAY to 40L,
+            CacheConfig.RELAY_LOCATIONS_PER_DAY to 40L,
+            CacheConfig.API_V1_RELAYS_PER_DAY to 10L,
             CacheConfig.API_V1_FAMILIES_PER_MONTH to 12L,
             CacheConfig.COUNTRY_USAGE_PER_DAY to 400L,
             CacheConfig.AUTONOMOUS_SYSTEMS_PER_MONTH to 24L,
@@ -52,7 +52,7 @@ class CacheConfigTest(
         ).forEach { (name, maximumSize) ->
             nativeCache(name).policy().eviction().get().maximum shouldBe maximumSize
         }
-        val perDay = nativeCache(CacheConfig.API_V1_RELAYS_PER_DAY)
+        val perDay = nativeCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)
         repeat(100) { perDay.put("day-$it", it) }
         perDay.cleanUp()
         perDay.estimatedSize() shouldBeLessThanOrEqual 40L

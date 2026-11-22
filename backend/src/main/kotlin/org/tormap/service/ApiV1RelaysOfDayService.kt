@@ -28,7 +28,7 @@ class ApiV1RelaysOfDayService(
     @Cacheable(CacheConfig.API_V1_RELAYS_PER_DAY, key = "#day.toString()", unless = "#result.relays.isEmpty()")
     fun getRelaysOfDay(day: LocalDate): RelaysOfDay = load(day)
 
-    /** Reads the relays of a day from the database, without the cache. CacheService uses it to warm up the cache. */
+    /** Reads the relays of a day from the database, without the cache. */
     fun load(day: LocalDate): RelaysOfDay {
         val relays = relayLocationRepositoryImpl.findAllV1UsingDay(day)
         val hash = MessageDigest.getInstance("SHA-256").digest(objectMapper.writeValueAsBytes(relays))

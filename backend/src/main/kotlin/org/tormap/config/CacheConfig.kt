@@ -41,15 +41,15 @@ class CacheConfig {
         )
         registerCustomCache(
             RELAY_LOCATIONS_PER_DAY,
-            // The old frontend endpoint, kept for clients that do not use API v1 yet. Filled on request only.
-            // 1 entry ~= 2.5 MB of memory -> 10 entries ~= 25 MB of memory
-            Caffeine.newBuilder().maximumSize(10).recordStats().build()
+            // Relay locations of a day for the map and TorMap Lite, warmed up by CacheService after each import.
+            // 1 entry ~= 2.5 MB of memory -> 40 entries ~= 100 MB of memory
+            Caffeine.newBuilder().maximumSize(40).recordStats().build()
         )
         registerCustomCache(
             API_V1_RELAYS_PER_DAY,
-            // Relays of a day for the public API v1 (map and CLI), warmed up by CacheService after each import.
-            // 1 entry ~= 3.5 MB of memory -> 40 entries ~= 140 MB of memory
-            Caffeine.newBuilder().maximumSize(40).recordStats().build()
+            // Relays of a day for the public API v1 (CLI and other clients). Filled on request only.
+            // 1 entry ~= 3.5 MB of memory -> 10 entries ~= 35 MB of memory
+            Caffeine.newBuilder().maximumSize(10).recordStats().build()
         )
         registerCustomCache(
             COUNTRY_USAGE_PER_DAY,
