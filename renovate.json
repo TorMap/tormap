@@ -106,6 +106,18 @@
         "TorMap/ip-lookup-data"
       ],
       "minimumReleaseAge": "0 days"
+    },
+    {
+      "description": "PostgreSQL version updates in one PR for all files, merged by hand after checking the release notes",
+      "matchDepNames": [
+        "postgres"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "major"
+      ],
+      "groupName": "postgres",
+      "automerge": false
     }
   ]
 }
