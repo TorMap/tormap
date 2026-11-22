@@ -44,6 +44,6 @@ Anything you could not verify is a blocker: proceed only if the maintainer expli
 
 ## 6. After approval (removals: right away)
 - Install through the package manager, then build and test as in `AGENTS.md`.
-- SCA: `cd backend && ./gradlew snykTest` and/or `cd frontend && yarn snyk:test` (only if the maintainer authenticated the Snyk CLI). For frontend changes also `cd frontend && yarn npm audit --severity high` (`--environment production` for runtime only; run outside the sandbox). Fix or report new high/critical findings before opening the PR. Don't add other scanner plugins without maintainer approval.
+- SCA: `cd backend && ./gradlew snykTest` and/or `cd frontend && yarn snyk:test` (only if the maintainer authenticated the Snyk CLI). For frontend changes also run `cd frontend && yarn npm audit --recursive --severity high` (outside the sandbox). Without `--recursive` Yarn only checks direct dependencies and misses transitive ones. `--environment production` limits it to runtime dependencies, but still report dev-only findings. Trace a finding with `yarn why <name>` and fix it as in step 4 (compatible parent update first). Fix or report new high/critical findings before opening the PR. Don't add other scanner plugins without maintainer approval.
 - CI's OpenSourceMalware check (`.github/scripts/osm-check.py`) only covers new or changed `yarn.lock` entries and inline Gradle versions, not BOM-managed or transitive Maven artifacts: those rely on your step 3.
 - Put the step 5 report in the PR description. Don't claim vetting from a skipped source.
