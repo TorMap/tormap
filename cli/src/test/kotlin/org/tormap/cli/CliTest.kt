@@ -161,6 +161,20 @@ class CliTest : StringSpec({
         }
     }
 
+    "--require-flag does not write control characters from the API to the terminal" {
+        api.route("/v1/relays/$FP_B?month=2024-03", details(FP_B, "beta"))
+        api.route(
+            "/v1/days/2024-03-05/relays",
+            RELAYS_OF_DAY.replace(""""flags":["Fast","Guard","Running"]""", """"flags":["Fast","\u001b]0;pwned\u0007\u001b[2J","Running"]"""),
+        )
+        api.run("--no-cache", "relay", "beta", "--require-flag", "Exit", "-q").let {
+            it.exitCode shouldBe ExitCode.CHECK_FAILED
+            it.stderr shouldContain "lacks Exit on 2024-03-05"
+            it.stderr shouldContain "?]0;pwned??[2J"
+            it.stderr.none { char -> char.isISOControl() && char != '\n' && char != '\r' } shouldBe true
+        }
+    }
+
     "--history lists the months of a relay, by fingerprint or nickname" {
         api.withDay()
         api.route(
