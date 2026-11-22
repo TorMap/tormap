@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 group = "org.tormap"
 // Shared with backend/build.gradle.kts and frontend/package.json: bump all three before tagging a release
-version = "4.2.2"
+version = "4.3.0"
 java.sourceCompatibility = JavaVersion.VERSION_25
 
 plugins {
