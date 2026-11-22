@@ -1,6 +1,7 @@
 package org.tormap.cli
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -278,6 +279,23 @@ class CliTest : StringSpec({
     "control characters from relay data do not reach the terminal" {
         api.route("/v1/days/2024-03-05/relays", RELAYS_OF_DAY.replace("\"beta\"", "\"be\\u001b[2Jta\""))
         api.run("relays", format = "table").stdout shouldNotContain "\u001b"
+    }
+
+    "control characters from relay data are escaped in JSON and NDJSON" {
+        // ESC is escaped by every JSON encoder, the C1 control CSI (U+009B) and DEL are not
+        api.route("/v1/days/2024-03-05/relays", RELAYS_OF_DAY.replace("\"beta\"", "\"be\\u009b2J\\u007f\\u001bta\""))
+        listOf("json", "ndjson").forEach { format ->
+            api.run("relays", format = format).let {
+                it.exitCode shouldBe ExitCode.OK
+                it.stdout.none { char -> char.isISOControl() && char != '\n' } shouldBe true
+                it.stdout shouldContain "be\\u009b2J\\u007f\\u001bta"
+                // The value stays the same for JSON parsers
+                val rows = if (format == "json") Json.parseToJsonElement(it.stdout).jsonArray.toList()
+                else it.stdout.lines().filter(String::isNotBlank).map(Json::parseToJsonElement)
+                rows.map { row -> row.jsonObject["nickname"]!!.jsonPrimitive.content } shouldContain "be\u009b2J\u007f\u001bta"
+            }
+        }
+        api.run("relay", "beta", "--format", "json").stdout.none { char -> char.isISOControl() && char != '\n' } shouldBe true
     }
 
     "control characters in ambiguous matches and server error messages do not reach the terminal" {

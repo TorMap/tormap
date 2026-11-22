@@ -17,6 +17,17 @@ enum class Format { TABLE, JSON, NDJSON, CSV }
  */
 fun sanitize(value: String) = value.map { if (it.isISOControl()) '?' else it }.joinToString("")
 
+/**
+ * JSON for the terminal: JSON encoders escape only C0 control characters (like ESC), so DEL and the C1 controls
+ * (U+007F to U+009F, e.g. U+009B, a single-character CSI in some terminals) are escaped here as well. They can only
+ * occur inside JSON strings, where `\u` escapes keep the value the same for any JSON parser.
+ */
+internal fun escapeControls(json: String): String =
+    if (json.none { it.isISOControl() && it >= '\u007f' }) json
+    else buildString(json.length + 16) {
+        json.forEach { if (it.isISOControl() && it >= '\u007f') append("\\u%04x".format(it.code)) else append(it) }
+    }
+
 /** Text of a field for tables and CSV: arrays are joined with spaces, objects are shown by their fingerprint or as JSON. */
 fun JsonObject.text(field: String): String = when (val value = this[field]) {
     null, JsonNull -> ""
@@ -40,8 +51,8 @@ class Output(private val out: PrintStream, private val format: Format) {
 
     fun rows(rows: List<JsonObject>, tableColumns: List<String>, csvColumns: List<String> = tableColumns) {
         when (format) {
-            Format.JSON -> out.println(prettyJson.encodeToString(JsonElement.serializer(), JsonArray(rows)))
-            Format.NDJSON -> rows.forEach { out.println(it.toString()) }
+            Format.JSON -> out.println(escapeControls(prettyJson.encodeToString(JsonElement.serializer(), JsonArray(rows))))
+            Format.NDJSON -> rows.forEach { out.println(escapeControls(it.toString())) }
             Format.CSV -> {
                 out.println(csvColumns.joinToString(",") { csv(it) })
                 rows.forEach { row -> out.println(csvColumns.joinToString(",") { csv(row.text(it)) }) }
@@ -53,8 +64,8 @@ class Output(private val out: PrintStream, private val format: Format) {
     /** One object: a two-column field/value table, or the object itself in JSON. */
     fun single(row: JsonObject, columns: List<String>) {
         when (format) {
-            Format.JSON -> out.println(prettyJson.encodeToString(JsonElement.serializer(), row))
-            Format.NDJSON -> out.println(row.toString())
+            Format.JSON -> out.println(escapeControls(prettyJson.encodeToString(JsonElement.serializer(), row)))
+            Format.NDJSON -> out.println(escapeControls(row.toString()))
             Format.CSV -> rows(listOf(row), columns)
             Format.TABLE -> table(listOf("field", "value"), columns.map { listOf(it, row.text(it)) }, header = false)
         }
@@ -63,8 +74,8 @@ class Output(private val out: PrintStream, private val format: Format) {
     /** Plain values, e.g. days: one per line, a JSON array of strings, or a one-column CSV. */
     fun values(name: String, values: List<String>) {
         when (format) {
-            Format.JSON -> out.println(prettyJson.encodeToString(JsonElement.serializer(), JsonArray(values.map(::JsonPrimitive))))
-            Format.NDJSON -> values.forEach { out.println(JsonPrimitive(it).toString()) }
+            Format.JSON -> out.println(escapeControls(prettyJson.encodeToString(JsonElement.serializer(), JsonArray(values.map(::JsonPrimitive)))))
+            Format.NDJSON -> values.forEach { out.println(escapeControls(JsonPrimitive(it).toString())) }
             Format.CSV -> {
                 out.println(name)
                 values.forEach { out.println(csv(it)) }
