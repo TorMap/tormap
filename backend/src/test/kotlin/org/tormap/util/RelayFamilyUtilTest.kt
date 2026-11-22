@@ -41,6 +41,24 @@ class RelayFamilyUtilTest : StringSpec({
         }
     }
 
+    mapOf<String, (Char) -> String>(
+        "lowercase hex" to { fingerprintEntry(it.lowercaseChar()) },
+        "with =nickname" to { fingerprintEntry(it) + "=Relay$it" },
+        "with ~nickname" to { fingerprintEntry(it) + "~Relay$it" },
+        "lowercase hex with ~nickname" to { fingerprintEntry(it.lowercaseChar()) + "~Relay$it" },
+    ).forEach { (format, entry) ->
+        "fingerprint entries in other formats connect relays ($format)" {
+            val invalidEntries = mutableListOf<String>()
+            val result = computeRelayFamilies(
+                listOf(relay('A', entry('B')), relay('B', entry('A')))
+            ) { _, invalidEntry -> invalidEntries.add(invalidEntry) }
+
+            result.nicknames() shouldContainExactlyInAnyOrder listOf(setOf("A", "B"))
+            result.confirmedConnectionCount shouldBe 2
+            invalidEntries.shouldBeEmpty()
+        }
+    }
+
     "families that are connected through a member are merged" {
         val result = computeRelayFamilies(
             listOf(
@@ -96,6 +114,10 @@ class RelayFamilyUtilTest : StringSpec({
         " ",
         "A".repeat(20),
         "$" + "A".repeat(41),
+        "$" + "A".repeat(40) + "=",
+        "$" + "A".repeat(40) + "=" + "A".repeat(20),
+        "$" + "A".repeat(40) + "-Alice",
+        "A".repeat(40),
         "???",
     ).forEach {
         "invalid family entries are rejected ($it)" {

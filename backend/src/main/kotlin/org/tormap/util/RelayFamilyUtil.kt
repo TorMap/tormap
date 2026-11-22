@@ -126,7 +126,7 @@ private class DeclaredFamily(val entries: List<FamilyEntry>) {
         fun of(familyEntries: String?) = DeclaredFamily(
             familyEntries?.commaSeparatedToList()?.map {
                 when {
-                    familyEntryFingerprintRegex.matches(it) -> FamilyEntry.Fingerprint(it.substring(1, 41))
+                    familyEntryFingerprintRegex.matches(it) -> FamilyEntry.Fingerprint(it.substring(1, 41).uppercase())
                     familyEntryNicknameRegex.matches(it) -> FamilyEntry.Nickname
                     else -> FamilyEntry.Invalid(it)
                 }
@@ -135,5 +135,9 @@ private class DeclaredFamily(val entries: List<FamilyEntry>) {
     }
 }
 
-private val familyEntryFingerprintRegex = Regex("^\\$[A-F0-9]{40}$")
+/**
+ * A fingerprint entry like Tor accepts it: `$` and 40 hex digits in any case, optionally followed by
+ * `=nickname` or `~nickname`. Old Tor versions published these forms, current ones publish only `$HEX`.
+ */
+private val familyEntryFingerprintRegex = Regex("^\\$[A-Fa-f0-9]{40}([=~][a-zA-Z0-9]{1,19})?$")
 private val familyEntryNicknameRegex = Regex("^[a-zA-Z0-9]{1,19}$")
