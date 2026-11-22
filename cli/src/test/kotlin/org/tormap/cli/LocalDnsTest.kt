@@ -41,6 +41,7 @@ class LocalDnsTest : StringSpec({
     }
 
     "a SOCKS proxy gets the API host name, not an address resolved locally" {
+        // nosemgrep: kotlin.lang.security.unencrypted-socket.unencrypted-socket -- a fake SOCKS proxy on loopback, SOCKS itself is unencrypted
         ServerSocket(0, 1, InetAddress.getLoopbackAddress()).use { server ->
             // A SOCKS5 proxy that records the requested address and then refuses the connection
             val requested = CompletableFuture.supplyAsync {
