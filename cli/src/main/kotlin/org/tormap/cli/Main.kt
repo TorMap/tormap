@@ -43,7 +43,8 @@ fun runCli(args: Array<String>, stdout: PrintStream, stderr: PrintStream, env: (
         error.matches.forEach { stderr.println(sanitize("  ${it.text("fingerprint")}  ${it.text("country")}")) }
         ExitCode.AMBIGUOUS
     } catch (error: CheckFailed) {
-        stderr.println("tormap: ${error.message}")
+        // The message quotes the relay's nickname and flags from the API
+        stderr.println("tormap: ${sanitize(error.message.orEmpty())}")
         ExitCode.CHECK_FAILED
     } catch (error: ApiException) {
         // Error messages can quote the server, e.g. the message of a 400 response
