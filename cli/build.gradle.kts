@@ -61,7 +61,8 @@ tasks.test {
 /*
  * Native binary with GraalVM native-image, without the GraalVM Gradle plugin: `./gradlew nativeCompile` with
  * GRAALVM_HOME (or JAVA_HOME) pointing to a GraalVM 25. Writes build/native/tormap (tormap.exe on Windows).
- * The CLI uses no reflection, resources or dynamic proxies, so native-image needs no reachability metadata.
+ * The CLI uses no reflection or dynamic proxies, so native-image needs no reachability metadata. Its only resource,
+ * the service provider in META-INF/services (the name resolver of LocalDns.kt), is included from the classpath.
  */
 val nativeCompile by tasks.registering(Exec::class) {
     group = "build"

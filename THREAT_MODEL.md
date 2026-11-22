@@ -121,7 +121,9 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   fingerprints from the API are validated before they become paths or dates, CSV cells starting with `=`, `+`, `-` or `@`
   are prefixed with `'` against spreadsheet formula injection, redirects are not followed, responses are capped at
   64 MB, and path values are validated or URL-encoded. With `--proxy socks5h://…` the proxy resolves the API host, so
-  no DNS request leaves outside Tor. The cache holds only public API responses.
+  no DNS request leaves outside Tor: the JDK's `HttpURLConnection` would resolve the host itself and send only the IP
+  to the proxy, so the CLI's name resolver (`cli/.../LocalDns.kt`) refuses all lookups while a request goes through a
+  SOCKS proxy (only the proxy's own host name is resolved locally). The cache holds only public API responses.
   Native binaries are built by `.github/workflows/cli-native.yml` with GraalVM Community from the tagged commit and
   attached to the draft release with a `SHA256SUMS` file and a signed build provenance attestation
   (`gh attestation verify`); only that workflow's `release` job has `contents: write`, `id-token: write` and
