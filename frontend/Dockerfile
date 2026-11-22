@@ -1,6 +1,6 @@
 # Build app. The output is static and architecture independent, so always build on the native build platform
 # instead of emulating the target platform with QEMU (which is very slow and gets multi-arch builds cancelled).
-FROM --platform=$BUILDPLATFORM node:26-slim@sha256:e4db4c914bf8ad241bd24804fc25d272d89bad97e68cdc8a1414862790a02c39 AS builder
+FROM --platform=$BUILDPLATFORM node:26.13.1-slim@sha256:e6bedef217677b276c591795e169840edd9096dbf13f29df8ef8d1856b8820bc AS builder
 WORKDIR /app
 COPY . .
 # Node 25+ images no longer ship Yarn, so run the release that .yarnrc.yml pins (yarnPath, kept up to date by Renovate)
