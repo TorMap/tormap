@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service
 import org.tormap.config.CacheConfig
 import org.tormap.database.repository.RelayLocationRepositoryImpl
 import org.tormap.util.logger
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.concurrent.CompletableFuture
 
@@ -16,7 +15,6 @@ class CacheService(
     private val cacheManager: CacheManager,
     private val relayLocationRepositoryImpl: RelayLocationRepositoryImpl,
     private val coalesceService: CoalesceService,
-    private val apiV1RelaysOfDayService: ApiV1RelaysOfDayService,
 ) {
     private val logger = logger()
 
@@ -47,14 +45,14 @@ class CacheService(
                 val yearMonth = YearMonth.parse(month)
                 yearMonth.atDay(1).datesUntil(yearMonth.plusMonths(1).atDay(1)).forEach {
                     val day = it.toString()
-                    // The map uses API v1, so its cache is warmed up. The old /relay/location/day/{day} endpoint is only
-                    // filled on request, so its entry is cleared for the reprocessed day.
-                    cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)?.evict(day)
-                    val relaysOfDay = apiV1RelaysOfDayService.load(it)
-                    if (relaysOfDay.relays.isNotEmpty()) {
-                        cacheManager.getCache(CacheConfig.API_V1_RELAYS_PER_DAY)?.put(day, relaysOfDay)
+                    // The map and TorMap Lite read /relay/location/day/{day}, so its cache is warmed up. The API v1 day
+                    // (CLI and other clients) is filled on request, so its entry is cleared for the reprocessed day.
+                    cacheManager.getCache(CacheConfig.API_V1_RELAYS_PER_DAY)?.evict(day)
+                    val relayLocations = relayLocationRepositoryImpl.findAllUsingDay(it)
+                    if (relayLocations.isNotEmpty()) {
+                        cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)?.put(day, relayLocations)
                     } else {
-                        cacheManager.getCache(CacheConfig.API_V1_RELAYS_PER_DAY)?.evict(day)
+                        cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)?.evict(day)
                     }
                 }
             }
