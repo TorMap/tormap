@@ -55,7 +55,8 @@ class ApiClient(
             if (uri == null || host == null || port !in 1..65535) {
                 throw ApiException("The proxy must look like socks5h://127.0.0.1:9050 or http://proxy:8080.")
             }
-            // Unresolved, so the proxy resolves the API host name: DNS requests go through Tor, not around it
+            // Unresolved, so the proxy host is looked up only when a request is sent. The API host name is always
+            // resolved by a SOCKS proxy, see request()
             val address = InetSocketAddress.createUnresolved(host, port)
             return when (uri.scheme?.lowercase()) {
                 "socks5h", "socks5", "socks" -> Proxy(Proxy.Type.SOCKS, address)
@@ -149,6 +150,15 @@ class ApiClient(
     private class Response(val status: Int, val body: String?, val eTag: String?)
 
     private fun request(path: String, ifNoneMatch: String? = null): Response {
+        if (proxy.type() != Proxy.Type.SOCKS) return send(path, ifNoneMatch, proxy)
+        // The proxy's own host name may be resolved locally (e.g. "tor" in a Docker network), the API host may not:
+        // HttpURLConnection would resolve it and send only its IP address to the proxy (see LocalDnsResolverProvider)
+        val address = proxy.address() as InetSocketAddress
+        val resolvedProxy = Proxy(Proxy.Type.SOCKS, InetSocketAddress(address.hostString, address.port))
+        return LocalDns.refuse { send(path, ifNoneMatch, resolvedProxy) }
+    }
+
+    private fun send(path: String, ifNoneMatch: String?, proxy: Proxy): Response {
         val uri = baseUri.resolve(path)
         val connection = try {
             uri.toURL().openConnection(proxy) as HttpURLConnection
