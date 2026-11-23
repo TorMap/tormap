@@ -98,6 +98,9 @@ jobs:
         run: |
           sed -i "s/^version = \".*\"$/version = \"$VERSION\"/" backend/build.gradle.kts cli/build.gradle.kts
           sed -i "0,/\"version\": \"[^\"]*\"/s//\"version\": \"$VERSION\"/" frontend/package.json
+          # The default image tag of docker compose follows the major version, so a new major is picked up
+          sed -i "s/\${TORMAP_VERSION:-[0-9]*}/\${TORMAP_VERSION:-${VERSION%%.*}}/" backend/docker-compose.yml
+          sed -i "s/^TORMAP_VERSION=[0-9]*$/TORMAP_VERSION=${VERSION%%.*}/" backend/.env.example
           .github/scripts/check-release-version.sh "$TAG"
           # Commit as the app's bot user, so the bump shows who made it
           bot_id=$(gh api "users/$APP_SLUG%5Bbot%5D" --jq .id)
