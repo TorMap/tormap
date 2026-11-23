@@ -5,7 +5,11 @@ Usage: release-plan.py   (from the repository root, with full git history and ta
 
 Reads the latest vX.Y.Z tag reachable from HEAD and the pull requests merged since then, picks the next version from
 their labels and checks that every CI check on HEAD passed. Writes a summary (to $GITHUB_STEP_SUMMARY, else stdout)
-and the outputs version, tag, previous_tag and sha (to $GITHUB_OUTPUT when set).
+and the outputs version, tag, previous_tag, sha and renovate_notes (to $GITHUB_OUTPUT when set).
+
+Renovate PRs are left out of the bump and the notes, unless they are labeled breaking, deployment or security (e.g. a
+PostgreSQL major upgrade). The generated notes exclude every Renovate PR, so renovate_notes lists these ones in the
+format of the generated notes, for the Release workflow to append.
 
 Environment:
   BUMP               auto (default), patch, minor or major. auto: breaking -> major, enhancement or deployment -> minor,
@@ -20,6 +24,7 @@ Pull request titles and labels are untrusted text: they only go into the Markdow
 import json
 import os
 import re
+import secrets
 import subprocess
 import sys
 
@@ -34,6 +39,8 @@ CATEGORIES = [
 CATEGORY_LABELS = set().union(*(labels for _, labels in CATEGORIES))
 OK_CONCLUSIONS = {"success", "neutral", "skipped"}
 TAG_PATTERN = re.compile(r"^v(\d+)\.(\d+)\.(\d+)$")
+# Labels that keep a Renovate PR in the bump and the notes, because operators or users must know about it
+RENOVATE_KEEP_LABELS = {"breaking", "deployment", "security"}
 
 
 def run(*args):
@@ -56,7 +63,12 @@ def gh_api_pages(path, key):
 
 
 def is_renovate(pr):
-    return pr["author"].startswith("renovate") or "renovate" in pr["labels"]
+    # Same rule as the exclude list in .github/release.yml
+    return pr["author"] == "renovate[bot]" or "renovate" in pr["labels"]
+
+
+def is_listed(pr):
+    return not is_renovate(pr) or bool(RENOVATE_KEEP_LABELS & set(pr["labels"]))
 
 
 def next_version(previous, bump):
@@ -106,8 +118,13 @@ def main():
             }
     if not commits:
         errors.append(f"Nothing was committed since {previous_tag}.")
-    listed = [pr for pr in sorted(prs.values(), key=lambda pr: pr["number"]) if not is_renovate(pr)]
+    listed = [pr for pr in sorted(prs.values(), key=lambda pr: pr["number"]) if is_listed(pr)]
     renovate_count = len(prs) - len(listed)
+    # The generated notes leave out every Renovate PR, so the listed ones are appended in their format
+    renovate_notes = "\n".join(
+        f"* {md(pr['title'])} by @{pr['author']} in https://github.com/{repo}/pull/{pr['number']}"
+        for pr in listed if is_renovate(pr)
+    )
 
     labels = {label for pr in listed for label in pr["labels"]}
     if "breaking" in labels:
@@ -183,7 +200,8 @@ def main():
         for pr in members:
             lines.append(f"| #{pr['number']} | {md(pr['title'])} | {md(', '.join(pr['labels']))} |")
         lines.append("")
-    lines.append(f"{renovate_count} Renovate PRs are left out of the notes, like in the generated release notes.")
+    lines.append(f"{renovate_count} Renovate PRs without a breaking, deployment or security label are left out of the bump and"
+                 " the notes, like in the generated release notes.")
     lines.append("")
     for warning in warnings:
         lines.append(f"> [!WARNING]\n> {md(warning)}\n")
@@ -205,6 +223,9 @@ def main():
     if output_path:
         with open(output_path, "a", encoding="utf-8") as file:
             file.write(f"version={version}\ntag={tag}\nprevious_tag={previous_tag}\nsha={sha}\n")
+            # Multiline output: a random delimiter, so no PR title can end it early and set other outputs
+            delimiter = f"EOF_{secrets.token_hex(16)}"
+            file.write(f"renovate_notes<<{delimiter}\n{renovate_notes}\n{delimiter}\n")
     return 1 if errors else 0
 
 
