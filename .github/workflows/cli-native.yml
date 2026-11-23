@@ -180,7 +180,7 @@ jobs:
 
   release:
     # Attaches the binaries to the draft release of the tag
-    needs: native
+    needs: [native, e2e]
     if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     permissions:
@@ -224,7 +224,7 @@ jobs:
           gh release upload "$TAG" dist/* --clobber
 
   docker:
-    needs: native
+    needs: [native, e2e]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     # Holds the Docker Hub secrets; its deployment rules allow only master and v* tags
