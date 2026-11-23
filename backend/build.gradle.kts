@@ -50,9 +50,9 @@ dependencies {
     // Only for local development (bootRun) and tests, so it is not in the production image (Jib uses runtimeClasspath).
     // The controllers only need the annotations at compile time; without springdoc they are ignored at runtime.
     // Keep the three versions equal. Inline literals, so CI's OpenSourceMalware check sees version changes.
-    compileOnly("org.springdoc:springdoc-openapi-starter-webmvc-api:3.2.0")
-    developmentOnly("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0")
-    testImplementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0")
+    compileOnly("org.springdoc:springdoc-openapi-starter-webmvc-api:3.2.1")
+    developmentOnly("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.1")
+    testImplementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.1")
 
     // Serialization
     implementation("tools.jackson.module:jackson-module-kotlin")
