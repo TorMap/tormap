@@ -5,7 +5,6 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.IOException
@@ -89,32 +88,38 @@ class ApiClient(
     fun latestDay(): String = days().lastOrNull() ?: throw ApiException("The API has no relay data yet.")
 
     fun relaysOfDay(day: String): JsonArray =
-        getCached("v1/days/${encode(day)}/relays", ResponseCache.ttlForDay(day)).jsonArray
+        getCached("v1/days/${encode(day)}/relays", ResponseCache.ttlForDay(day)).objects("v1/days/$day/relays")
 
     /** The relay details of a month, or null if the relay was not seen in that month. */
     fun relay(fingerprint: String, month: String?): JsonObject? {
         // The fingerprint can come from a list of relays the API returned
         if (!FINGERPRINT.matches(fingerprint)) throw ApiException("The API returned an invalid fingerprint.")
         val query = month?.let { "?month=${encode(it)}" }.orEmpty()
-        return get("v1/relays/$fingerprint$query")?.jsonObject
+        return get("v1/relays/$fingerprint$query")?.let { it as? JsonObject ?: throw unexpected("v1/relays/$fingerprint") }
     }
 
     /** Every month with details of the relay, oldest first. Empty if the relay was never seen. */
     fun relayMonths(fingerprint: String): JsonArray {
         if (!FINGERPRINT.matches(fingerprint)) throw ApiException("The API returned an invalid fingerprint.")
-        return get("v1/relays/$fingerprint/months")?.jsonArray ?: JsonArray(emptyList())
+        return get("v1/relays/$fingerprint/months")?.objects("v1/relays/$fingerprint/months") ?: JsonArray(emptyList())
     }
 
-    fun family(id: Long): JsonArray = get("v1/families/$id")?.jsonArray ?: JsonArray(emptyList())
+    fun family(id: Long): JsonArray = get("v1/families/$id")?.objects("v1/families/$id") ?: JsonArray(emptyList())
 
-    fun autonomousSystems(month: String): JsonArray = required("v1/autonomous-systems/${encode(month)}").jsonArray
+    fun autonomousSystems(month: String): JsonArray = required("v1/autonomous-systems/${encode(month)}").objects("v1/autonomous-systems/$month")
 
     fun dailyCounts(from: String?, to: String?): JsonArray {
         val query = listOfNotNull(from?.let { "from=${encode(it)}" }, to?.let { "to=${encode(it)}" }).joinToString("&")
-        return required("v1/statistics/daily-counts" + if (query.isEmpty()) "" else "?$query").jsonArray
+        return required("v1/statistics/daily-counts" + if (query.isEmpty()) "" else "?$query").objects("v1/statistics/daily-counts")
     }
 
-    fun countryUsage(day: String): JsonArray = required("v1/country-usage/${encode(day)}").jsonArray
+    fun countryUsage(day: String): JsonArray = required("v1/country-usage/${encode(day)}").objects("v1/country-usage/$day")
+
+    /** A list of objects, as every list endpoint returns. Anything else is an error instead of a crash in the commands. */
+    private fun JsonElement.objects(path: String): JsonArray =
+        (this as? JsonArray)?.takeIf { array -> array.all { it is JsonObject } } ?: throw unexpected(path)
+
+    private fun unexpected(path: String) = ApiException("The API returned an unexpected response for /$path.")
 
     private fun encode(value: String) = URLEncoder.encode(value, StandardCharsets.UTF_8)
 
@@ -180,7 +185,15 @@ class ApiClient(
                 throw ApiException("Can not reach ${baseUri.host}${viaProxy()}: ${exception.message ?: exception.javaClass.simpleName}")
             }
             return when {
-                status == 200 -> Response(status, readBody(connection, connection.inputStream), connection.getHeaderField("ETag"))
+                status == 200 -> {
+                    val body = try {
+                        readBody(connection, connection.inputStream)
+                    } catch (exception: IOException) {
+                        // E.g. a timeout or reset during the download, or a body that is not the gzip it claims to be
+                        throw ApiException("Can not read the response of ${baseUri.host}${viaProxy()}: ${exception.message ?: exception.javaClass.simpleName}")
+                    }
+                    Response(status, body, connection.getHeaderField("ETag"))
+                }
                 status == 304 && ifNoneMatch != null -> Response(status, null, null)
                 status == 404 -> Response(status, null, null)
                 status == 400 -> throw ApiException("The API rejected the request: ${errorMessage(connection)}")

@@ -13,9 +13,14 @@ enum class Format { TABLE, JSON, NDJSON, CSV }
 /**
  * Replaces control characters before a value from the API reaches the terminal. Relay nicknames and contacts are
  * chosen by relay operators, and every other string comes from a server the user may not control (`--api-url`):
- * escape sequences could rewrite the terminal.
+ * escape sequences could rewrite the terminal, and Unicode bidirectional controls could reorder the rest of a table
+ * row or CSV line, e.g. to show a fingerprint or address next to another relay.
  */
-fun sanitize(value: String) = value.map { if (it.isISOControl()) '?' else it }.joinToString("")
+fun sanitize(value: String) = value.map { if (it.isISOControl() || isBidiControl(it)) '?' else it }.joinToString("")
+
+/** U+061C, U+200E and U+200F, U+202A to U+202E, U+2066 to U+2069: the explicit bidirectional formatting characters. */
+private fun isBidiControl(char: Char) =
+    char == '\u061c' || char == '\u200e' || char == '\u200f' || char in '\u202a'..'\u202e' || char in '\u2066'..'\u2069'
 
 /**
  * JSON for the terminal: JSON encoders escape only C0 control characters (like ESC), so DEL and the C1 controls

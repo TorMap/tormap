@@ -118,7 +118,8 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   are not cache keys. The fingerprint must be 40 hex characters. The relays of a day have their own cache of 10 days.
 - CLI (`cli/`): a read-only client of API v1, run by users. It treats API responses as untrusted: control characters
   in strings from the API (relay data, days, error messages) are replaced before they reach the terminal (JSON and
-  NDJSON output escapes them, including DEL and the C1 controls that JSON encoders leave as they are), days and
+  NDJSON output escapes them, including DEL and the C1 controls that JSON encoders leave as they are), tables and CSV
+  also replace Unicode bidirectional controls, so a relay's contact can not reorder a row, days and
   fingerprints from the API are validated before they become paths or dates, CSV cells starting with `=`, `+`, `-` or `@`
   are prefixed with `'` against spreadsheet formula injection, redirects are not followed, responses are capped at
   64 MB, and path values are validated or URL-encoded. With `--proxy socks5h://…` the proxy resolves the API host, so
