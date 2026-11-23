@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.core.UsageError
 import com.github.ajalt.clikt.core.context
 import com.github.ajalt.clikt.core.parse
 import com.github.ajalt.clikt.core.subcommands
+import java.io.IOException
 import java.io.PrintStream
 import kotlin.system.exitProcess
 
@@ -49,6 +50,10 @@ fun runCli(args: Array<String>, stdout: PrintStream, stderr: PrintStream, env: (
     } catch (error: ApiException) {
         // Error messages can quote the server, e.g. the message of a 400 response
         stderr.println("tormap: ${sanitize(error.message.orEmpty())}")
+        ExitCode.ERROR
+    } catch (error: IOException) {
+        // E.g. --output names a missing directory or a file that can not be written
+        stderr.println("tormap: ${sanitize(error.message ?: error.javaClass.simpleName)}")
         ExitCode.ERROR
     }
 }

@@ -28,11 +28,15 @@ class ApiClientTest : StringSpec({
         }
     }
 
-    "recent days are refreshed after an hour, older days are kept longer" {
+    "days of the current and previous month are refreshed after an hour, older days are kept longer" {
         val today = LocalDate.of(2024, 3, 10)
         ResponseCache.ttlForDay("2024-03-09", today) shouldBe Duration.ofHours(1)
-        ResponseCache.ttlForDay("2024-03-07", today) shouldBe Duration.ofHours(1)
-        ResponseCache.ttlForDay("2024-03-01", today) shouldBe Duration.ofDays(30)
+        // The server reprocesses whole months, so early days of a recent month still change
+        ResponseCache.ttlForDay("2024-03-01", today) shouldBe Duration.ofHours(1)
+        ResponseCache.ttlForDay("2024-02-01", today) shouldBe Duration.ofHours(1)
+        ResponseCache.ttlForDay("2024-01-31", today) shouldBe Duration.ofDays(30)
+        ResponseCache.ttlForDay("2023-12-15", LocalDate.of(2024, 1, 2)) shouldBe Duration.ofHours(1)
+        ResponseCache.ttlForDay("2023-11-30", LocalDate.of(2024, 1, 2)) shouldBe Duration.ofDays(30)
     }
 
     "an expired day is revalidated with its ETag and not downloaded again while it is unchanged" {

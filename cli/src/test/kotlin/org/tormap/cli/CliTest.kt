@@ -281,6 +281,17 @@ class CliTest : StringSpec({
         api.run("relays", format = "table").stdout shouldNotContain "\u001b"
     }
 
+    "bidirectional controls from relay data do not reorder table rows or CSV lines" {
+        api.route("/v1/days/2024-03-05/relays", RELAYS_OF_DAY.replace("\"beta\"", "\"be\\u202eta\\u2066x\""))
+        listOf("table", "csv").forEach { format ->
+            api.run("relays", format = format).stdout.let {
+                it shouldContain "be?ta?x"
+                it shouldNotContain "\u202e"
+                it shouldNotContain "\u2066"
+            }
+        }
+    }
+
     "control characters from relay data are escaped in JSON and NDJSON" {
         // ESC is escaped by every JSON encoder, the C1 control CSI (U+009B) and DEL are not
         api.route("/v1/days/2024-03-05/relays", RELAYS_OF_DAY.replace("\"beta\"", "\"be\\u009b2J\\u007f\\u001bta\""))
@@ -326,6 +337,22 @@ class CliTest : StringSpec({
         }
     }
 
+    "responses of an unexpected shape are an error, not a crash" {
+        api.route("/v1/days/2024-03-05/relays", "{}")
+        api.run("--no-cache", "relays").let {
+            it.exitCode shouldBe ExitCode.ERROR
+            it.stderr shouldContain "unexpected response"
+            it.stderr shouldNotContain "Exception"
+        }
+        api.route("/v1/days/2024-03-05/relays", "[1,2]")
+        api.run("--no-cache", "relays").stderr shouldContain "unexpected response"
+        api.route("/v1/relays/$FP_A", "[]")
+        api.run("--no-cache", "relay", FP_A).let {
+            it.exitCode shouldBe ExitCode.ERROR
+            it.stderr shouldContain "unexpected response"
+        }
+    }
+
     "--version and --help" {
         api.run("--version").stdout shouldContain VERSION
         api.run("relays", "--help").let {
@@ -338,5 +365,14 @@ class CliTest : StringSpec({
         val file = api.cacheDir.resolve("out.csv")
         api.run("relays", "--output", file.toString(), format = "csv").stdout shouldBe ""
         java.nio.file.Files.readString(file) shouldStartWith "fingerprint,"
+    }
+
+    "an --output file that can not be written is an error, not a crash" {
+        val file = api.cacheDir.resolve("missing").resolve("out.csv")
+        api.run("relays", "--output", file.toString(), format = "csv").let {
+            it.exitCode shouldBe ExitCode.ERROR
+            it.stderr shouldContain "Can not write"
+            it.stderr shouldNotContain "\tat "
+        }
     }
 })

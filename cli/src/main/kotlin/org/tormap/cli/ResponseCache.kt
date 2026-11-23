@@ -8,23 +8,29 @@ import java.security.MessageDigest
 import java.time.Clock
 import java.time.Duration
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneOffset
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
 /**
  * Caches large API responses (the list of days and the relays of a day) as gzip files, so repeated commands and
- * filters work without downloading a day again. Recent days are refreshed after an hour, because the server still
- * adds descriptors to them; older days are kept for 30 days. An expired entry is revalidated with its ETag, so an
- * unchanged day is not downloaded again.
+ * filters work without downloading a day again. Days of the current and previous month are refreshed after an hour,
+ * because the server still reprocesses them; older days are kept for 30 days. An expired entry is revalidated with its
+ * ETag, so an unchanged day is not downloaded again.
  */
 class ResponseCache(private val directory: Path, private val clock: Clock = Clock.systemUTC()) {
     companion object {
         val SHORT: Duration = Duration.ofHours(1)
         private val LONG: Duration = Duration.ofDays(30)
 
+        /**
+         * Days of the current and the previous month are refreshed after an hour: the server reprocesses whole months
+         * when new descriptors arrive, which can change families, nicknames and ASs of every day of the month (like
+         * `isRecentDate` in the frontend's service worker). Older days are kept for 30 days.
+         */
         fun ttlForDay(day: String, today: LocalDate = LocalDate.now(ZoneOffset.UTC)): Duration =
-            if (LocalDate.parse(day) < today.minusDays(3)) LONG else SHORT
+            if (YearMonth.from(LocalDate.parse(day)) < YearMonth.from(today).minusMonths(1)) LONG else SHORT
 
         /** `$XDG_CACHE_HOME/tormap`, `%LOCALAPPDATA%\tormap\cache` on Windows, or `~/.cache/tormap`. */
         fun defaultDirectory(env: (String) -> String?): Path {

@@ -23,6 +23,7 @@ import com.github.ajalt.clikt.parameters.types.path
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
+import java.io.IOException
 import java.io.PrintStream
 import java.nio.file.Files
 import java.nio.file.Path
@@ -51,7 +52,13 @@ class Settings(
     /** Writes the results to the terminal or to --output. With --quiet nothing reaches the terminal. */
     fun output(block: (Output) -> Unit) {
         if (outputFile != null) {
-            PrintStream(Files.newOutputStream(outputFile), false, Charsets.UTF_8).use { block(Output(it, format)) }
+            val stream = try {
+                Files.newOutputStream(outputFile)
+            } catch (exception: IOException) {
+                // Main prints it as an error: e.g. NoSuchFileException has only the path as its message
+                throw IOException("Can not write $outputFile (${exception.javaClass.simpleName})", exception)
+            }
+            PrintStream(stream, false, Charsets.UTF_8).use { block(Output(it, format)) }
         } else if (!quiet) {
             block(Output(stdout, format))
         }
