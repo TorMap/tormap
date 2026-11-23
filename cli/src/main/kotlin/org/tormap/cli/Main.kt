@@ -12,11 +12,22 @@ import java.io.PrintStream
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
-    exitProcess(runCli(args, System.out, System.err, System::getenv))
+    // Also System.out and System.err, so that not even the stack trace of an uncaught exception, whose message may
+    // quote the server, can write control characters to the terminal
+    val stdout = TerminalSafePrintStream.wrap(System.out)
+    val stderr = TerminalSafePrintStream.wrap(System.err)
+    System.setOut(stdout)
+    System.setErr(stderr)
+    exitProcess(runCli(args, stdout, stderr, System::getenv))
 }
 
-/** Runs the CLI and returns the exit code (see [ExitCode]); stdout and stderr are parameters for tests. */
-fun runCli(args: Array<String>, stdout: PrintStream, stderr: PrintStream, env: (String) -> String?): Int {
+/**
+ * Runs the CLI and returns the exit code (see [ExitCode]); stdout and stderr are parameters for tests. Both are wrapped
+ * in a [TerminalSafePrintStream], so nothing the CLI prints can contain control characters, whatever the code path.
+ */
+fun runCli(args: Array<String>, rawStdout: PrintStream, rawStderr: PrintStream, env: (String) -> String?): Int {
+    val stdout = TerminalSafePrintStream.wrap(rawStdout)
+    val stderr = TerminalSafePrintStream.wrap(rawStderr)
     val command = Tormap(stdout, stderr, env).subcommands(
         Days(), Relays(), Relay(), Family(), AutonomousSystems(), Stats(), Usage(),
         CompletionCommand(name = "completion", help = "Print a shell completion script for bash, zsh or fish."),
