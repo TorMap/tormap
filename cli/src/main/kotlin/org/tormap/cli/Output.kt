@@ -11,26 +11,30 @@ import java.io.PrintStream
 enum class Format { TABLE, JSON, NDJSON, CSV }
 
 /**
- * Replaces control characters before a value from the API reaches the terminal. Relay nicknames and contacts are
- * chosen by relay operators, and every other string comes from a server the user may not control (`--api-url`):
- * escape sequences could rewrite the terminal, and Unicode bidirectional controls could reorder the rest of a table
- * row or CSV line, e.g. to show a fingerprint or address next to another relay.
+ * A value from the API for a table cell or CSV field: every character that is not visible text ([isVisible]) is
+ * replaced, including line breaks and tabs, which would fake rows or columns. Relay nicknames and contacts are chosen
+ * by relay operators, and every other string comes from a server the user may not control (`--api-url`).
+ * [TerminalSafePrintStream] enforces the same rule on all output; this keeps the rows and columns intact.
  */
-fun sanitize(value: String) = value.map { if (it.isISOControl() || isBidiControl(it)) '?' else it }.joinToString("")
-
-/** U+061C, U+200E and U+200F, U+202A to U+202E, U+2066 to U+2069: the explicit bidirectional formatting characters. */
-private fun isBidiControl(char: Char) =
-    char == '\u061c' || char == '\u200e' || char == '\u200f' || char in '\u202a'..'\u202e' || char in '\u2066'..'\u2069'
+fun sanitize(value: String): String =
+    if (value.codePoints().allMatch(::isVisible)) value
+    else buildString(value.length) {
+        value.codePoints().forEach { if (isVisible(it)) appendCodePoint(it) else append(REPLACEMENT) }
+    }
 
 /**
- * JSON for the terminal: JSON encoders escape only C0 control characters (like ESC), so DEL and the C1 controls
- * (U+007F to U+009F, e.g. U+009B, a single-character CSI in some terminals) are escaped here as well. They can only
- * occur inside JSON strings, where `\u` escapes keep the value the same for any JSON parser.
+ * JSON for the terminal: JSON encoders escape only C0 control characters, so every other character that is not
+ * visible text ([isVisible]: DEL, C1 controls, bidirectional and other format characters, ...) is escaped as `\u`
+ * here. Outside of strings, JSON has only visible characters and line breaks, and inside of strings the escapes keep
+ * the value the same for any JSON parser, so [TerminalSafePrintStream] never has to replace a character of it.
  */
 internal fun escapeControls(json: String): String =
-    if (json.none { it.isISOControl() && it >= '\u007f' }) json
+    if (json.codePoints().allMatch { it == '\n'.code || isVisible(it) }) json
     else buildString(json.length + 16) {
-        json.forEach { if (it.isISOControl() && it >= '\u007f') append("\\u%04x".format(it.code)) else append(it) }
+        json.codePoints().forEach { codePoint ->
+            if (codePoint == '\n'.code || isVisible(codePoint)) appendCodePoint(codePoint)
+            else Character.toChars(codePoint).forEach { append("\\u%04x".format(it.code)) }
+        }
     }
 
 /** Text of a field for tables and CSV: arrays are joined with spaces, objects are shown by their fingerprint or as JSON. */

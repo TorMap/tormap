@@ -58,7 +58,8 @@ class Settings(
                 // Main prints it as an error: e.g. NoSuchFileException has only the path as its message
                 throw IOException("Can not write $outputFile (${exception.javaClass.simpleName})", exception)
             }
-            PrintStream(stream, false, Charsets.UTF_8).use { block(Output(it, format)) }
+            // A file is filtered like the terminal: it may be printed with cat later
+            TerminalSafePrintStream.wrap(PrintStream(stream, false, Charsets.UTF_8)).use { block(Output(it, format)) }
         } else if (!quiet) {
             block(Output(stdout, format))
         }
