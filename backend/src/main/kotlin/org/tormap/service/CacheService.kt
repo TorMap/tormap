@@ -42,6 +42,8 @@ class CacheService(
         logger.info("Caching relay locations for each day of months: {}", months.joinToString(", "))
         val futures = months.map { month ->
             coalesceService.submitAsync("cacheRelayLocationsPerDay-$month") {
+                // Families get new IDs when a month is reprocessed, so the families must match the days again
+                cacheManager.getCache(CacheConfig.API_V1_FAMILIES_PER_MONTH)?.evict(month)
                 val yearMonth = YearMonth.parse(month)
                 yearMonth.atDay(1).datesUntil(yearMonth.plusMonths(1).atDay(1)).forEach {
                     val day = it.toString()
@@ -64,6 +66,7 @@ class CacheService(
     fun evictRelayLocationsPerDay(months: Set<String>): CompletableFuture<Void> {
         logger.info("Evicting cache of relay locations per day for months: ${months.joinToString(", ")}")
         months.forEach { month ->
+            cacheManager.getCache(CacheConfig.API_V1_FAMILIES_PER_MONTH)?.evict(month)
             val yearMonth = YearMonth.parse(month)
             yearMonth.atDay(1).datesUntil(yearMonth.plusMonths(1).atDay(1)).forEach {
                 cacheManager.getCache(CacheConfig.RELAY_LOCATIONS_PER_DAY)?.evict(it.toString())

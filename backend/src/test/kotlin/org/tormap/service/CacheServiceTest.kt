@@ -104,4 +104,16 @@ class CacheServiceTest(
         cacheService.cacheRelayLocationsPerDay(setOf("2024-01")).get()
         relayLocationsPerDayCache.get("2024-01-03") shouldBe null
     }
+
+    "the API v1 families of reprocessed and evicted months are cleared, because their IDs change" {
+        val familiesCache = cacheManager.getCache(CacheConfig.API_V1_FAMILIES_PER_MONTH)!!
+        familiesCache.put("2024-01", listOf<Any>())
+        familiesCache.put("2024-02", listOf<Any>())
+        familiesCache.put("2024-03", listOf<Any>())
+        cacheService.cacheRelayLocationsPerDay(setOf("2024-01")).get()
+        cacheService.evictRelayLocationsPerDay(setOf("2024-02")).get()
+        familiesCache.get("2024-01") shouldBe null
+        familiesCache.get("2024-02") shouldBe null
+        familiesCache.get("2024-03") shouldNotBe null
+    }
 })

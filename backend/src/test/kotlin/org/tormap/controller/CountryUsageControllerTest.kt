@@ -1,6 +1,8 @@
 package org.tormap.controller
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.cache.CacheManager
@@ -46,10 +48,22 @@ class CountryUsageControllerTest(
             .andExpect(jsonPath("$[0].frac").value(61))
     }
 
-    "returns an empty list for days without estimates" {
+    "returns an empty list for days without estimates, and does not cache it" {
         mockMvc.perform(get("/relay/country-usage/day/2007-10-28"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.length()").value(0))
+        mockMvc.perform(get("/v1/country-usage/2007-10-29"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.length()").value(0))
+        val cache = cacheManager.getCache(CacheConfig.COUNTRY_USAGE_PER_DAY)!!
+        cache.get(LocalDate.of(2007, 10, 28)) shouldBe null
+        cache.get(LocalDate.of(2007, 10, 29)) shouldBe null
+    }
+
+    "caches days with estimates" {
+        countryUsageRepository.upsertAll(listOf(CountryUsageRow(LocalDate.of(2024, 3, 5), "DE", 110, 90, 130, 61)))
+        mockMvc.perform(get("/relay/country-usage/day/2024-03-05")).andExpect(status().isOk)
+        cacheManager.getCache(CacheConfig.COUNTRY_USAGE_PER_DAY)!!.get(LocalDate.of(2024, 3, 5)) shouldNotBe null
     }
 
     "rejects days that are not a date" {
