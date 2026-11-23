@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: Version bump. auto picks it from the PR labels (breaking → major, enhancement or deployment → minor, else patch)
+        description: Version bump. auto picks it from the PR labels (breaking → major, enhancement or deployment → minor, else patch), Renovate PRs only when labeled breaking, deployment or security
         type: choice
         options: [auto, patch, minor, major]
         default: auto
@@ -53,6 +53,7 @@ jobs:
       tag: ${{ steps.plan.outputs.tag }}
       previous_tag: ${{ steps.plan.outputs.previous_tag }}
       sha: ${{ steps.plan.outputs.sha }}
+      renovate_notes: ${{ steps.plan.outputs.renovate_notes }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -120,10 +121,15 @@ jobs:
           TAG: ${{ needs.plan.outputs.tag }}
           PREVIOUS_TAG: ${{ needs.plan.outputs.previous_tag }}
           DESCRIPTION: ${{ inputs.description }}
+          # Renovate PRs labeled breaking, deployment or security, which the generated notes exclude
+          RENOVATE_NOTES: ${{ needs.plan.outputs.renovate_notes }}
         run: |
           generated=$(gh api "repos/$GH_REPO/releases/generate-notes" -f tag_name="$TAG" \
             -f previous_tag_name="$PREVIOUS_TAG" --jq .body)
           printf '%s\n\n%s\n' "${DESCRIPTION:-_Add the release description here._}" "$generated" > notes.md
+          if [[ -n "$RENOVATE_NOTES" ]]; then
+            printf '\n## Dependency updates to note\n%s\n' "$RENOVATE_NOTES" >> notes.md
+          fi
           # cli_native creates the draft too when it attaches the binaries, so whichever comes first creates it
           if gh release create "$TAG" --draft --verify-tag --title "$TAG" --notes-file notes.md; then
             echo "Created the draft release $TAG."
