@@ -32,8 +32,6 @@ repositories {
 
 // Overrides of Spring Boot managed versions to pick up security fixes ahead of a Boot release (reported by Snyk).
 // Remove an override once the Boot-managed version is at or above it.
-extra["tomcat.version"] = "11.0.26"
-extra["jackson-bom.version"] = "3.1.7" // Jackson 3 (tools.jackson)
 extra["jackson-2-bom.version"] = "2.23.0" // Jackson 2 (com.fasterxml.jackson), keep in sync with the pins for metrics-lib below
 
 dependencies {
