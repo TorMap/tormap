@@ -17,7 +17,8 @@ import java.time.LocalDate
 class CountryUsageController(
     val countryUsageRepository: CountryUsageRepository,
 ) {
-    @Cacheable(CacheConfig.COUNTRY_USAGE_PER_DAY, key = "#day")
+    // Days without estimates are not cached, so requests for made-up days can not evict real ones
+    @Cacheable(CacheConfig.COUNTRY_USAGE_PER_DAY, key = "#day", unless = "#result.isEmpty()")
     @Operation(
         summary = "Returns the estimated number of Tor relay users per country for a given day. " +
                 "The list is empty for days without estimates (they exist from 2011-03 on). Source: Tor Metrics."
