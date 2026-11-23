@@ -50,13 +50,13 @@ class TerminalSafetyTest : StringSpec({
     }
 
     "visible text passes unchanged, also when its bytes arrive one by one" {
-        val text = "alpha Ünïcødé 中文 العربية 😀 é € ≥ «»\ttab\nnext\r\nwindows\n"
+        val text = "alpha Ünïcødé 中文 \u0627\u0644\u0639\u0631\u0628\u064a\u0629 \ud83d\ude00 e\u0301 € ≥ «»\ttab\nnext\r\nwindows\n"
         filtered { it.print(text) } shouldBe text
         filtered { out -> text.toByteArray(Charsets.UTF_8).forEach { out.write(it.toInt()) } } shouldBe text
     }
 
     "control and format characters are replaced, a CR only outside of CRLF" {
-        filtered { it.print("a\u001b[2Jb\u009bc\u007fd‮e⁦f​g­h i\rj\u0007") } shouldBe "a?[2Jb?c?d?e?f?g?h?i?j?"
+        filtered { it.print("a\u001b[2Jb\u009bc\u007fd\u202ee\u2066f\u200bg\u00adh\u2028i\rj\u0007") } shouldBe "a?[2Jb?c?d?e?f?g?h?i?j?"
         filtered { it.print("a\ud800b\udc00c") } shouldBe "a?b?c"
         filtered { it.print("ends with CR\r") } shouldBe "ends with CR?"
     }
@@ -68,10 +68,10 @@ class TerminalSafetyTest : StringSpec({
     }
 
     "sanitize and escapeControls follow the same rule" {
-        sanitize("be‮ta\nx\ty") shouldBe "be?ta?x?y"
-        val json = escapeControls("{\"n\":\"a‮b\u009bc😀󠁁\"}\n")
-        json shouldBe "{\"n\":\"a\\u202eb\\u009bc😀\\udb40\\udc41\"}\n"
-        Json.parseToJsonElement(json).jsonObject["n"]!!.jsonPrimitive.content shouldBe "a‮b\u009bc😀󠁁"
+        sanitize("be\u202eta\nx\ty") shouldBe "be?ta?x?y"
+        val json = escapeControls("{\"n\":\"a\u202eb\u009bc\ud83d\ude00\udb40\udc41\"}\n")
+        json shouldBe "{\"n\":\"a\\u202eb\\u009bc\ud83d\ude00\\udb40\\udc41\"}\n"
+        Json.parseToJsonElement(json).jsonObject["n"]!!.jsonPrimitive.content shouldBe "a\u202eb\u009bc\ud83d\ude00\udb40\udc41"
     }
 
     "no command and format writes a forbidden character, whatever the API returns" {
