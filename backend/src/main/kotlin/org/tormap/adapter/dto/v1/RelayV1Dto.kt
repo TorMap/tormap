@@ -2,6 +2,7 @@
 
 package org.tormap.adapter.dto.v1
 
+import io.swagger.v3.oas.annotations.media.Schema
 import org.tormap.database.entity.TorRelayFlag
 import org.tormap.util.commaSeparatedToList
 import java.math.BigDecimal
@@ -12,13 +13,16 @@ import java.math.BigDecimal
  *
  * @param familyId the family for `/v1/families/{id}`, null if the relay has no confirmed family
  * @param flags the names of the relay's flags, e.g. "Exit" or "Guard"
+ *
+ * Constructor parameters that are no property (latitude, longitude) are hidden: springdoc would document them as
+ * writeOnly fields, but this DTO is only ever serialized.
  */
 class RelayV1Dto(
     val fingerprint: String,
     val nickname: String?,
     val country: String,
-    latitude: BigDecimal,
-    longitude: BigDecimal,
+    @Schema(hidden = true) latitude: BigDecimal,
+    @Schema(hidden = true) longitude: BigDecimal,
     flags: String?,
     val consensusWeight: Long?,
     val autonomousSystemNumber: Int?,

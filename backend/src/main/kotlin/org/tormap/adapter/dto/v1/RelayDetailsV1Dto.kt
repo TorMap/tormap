@@ -2,6 +2,7 @@
 
 package org.tormap.adapter.dto.v1
 
+import io.swagger.v3.oas.annotations.media.Schema
 import org.tormap.adapter.dto.RelayDetailsDto
 import org.tormap.adapter.dto.RelayIdentifiersDto
 
@@ -12,8 +13,11 @@ import org.tormap.adapter.dto.RelayIdentifiersDto
  *
  * @param familyId the family for `/v1/families/{id}`, null if the relay has no confirmed family
  * @param familyKeys family keys (`ed25519:<family key>`) from the relay's verified family certificates
+ *
+ * The constructor parameter is hidden: springdoc would document it as a writeOnly `details` field, but this DTO is
+ * only ever serialized.
  */
-class RelayDetailsV1Dto(details: RelayDetailsDto) {
+class RelayDetailsV1Dto(@Schema(hidden = true) details: RelayDetailsDto) {
     val fingerprint = details.fingerprint
     val nickname = details.nickname
     val month = details.month
