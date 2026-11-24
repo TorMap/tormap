@@ -414,7 +414,8 @@
             "type" : "integer",
             "format" : "int32"
           }
-        }
+        },
+        "required" : [ "number" ]
       },
       "CountryUsageDto" : {
         "type" : "object",
@@ -438,7 +439,8 @@
             "type" : "integer",
             "format" : "int32"
           }
-        }
+        },
+        "required" : [ "country", "frac", "users" ]
       },
       "DailyRelayCountDto" : {
         "type" : "object",
@@ -463,7 +465,8 @@
             "type" : "integer",
             "format" : "int64"
           }
-        }
+        },
+        "required" : [ "day", "exit", "guard", "other", "total" ]
       },
       "FamilyV1Dto" : {
         "type" : "object",
@@ -484,7 +487,8 @@
               "$ref" : "#/components/schemas/RelayIdentifiersV1Dto"
             }
           }
-        }
+        },
+        "required" : [ "autonomousSystems", "id", "members" ]
       },
       "RelayDetailsV1Dto" : {
         "type" : "object",
@@ -589,7 +593,8 @@
               "type" : "string"
             }
           }
-        }
+        },
+        "required" : [ "address", "allowSingleHopExits", "bandwidthBurst", "bandwidthObserved", "bandwidthRate", "cachesExtraInfo", "confirmedFamilyMembers", "day", "familyKeys", "fingerprint", "hibernating", "hiddenServiceDir", "month", "nickname", "tunnelledDirServer", "unverifiedHostNames", "verifiedHostNames" ]
       },
       "RelayIdentifiersV1Dto" : {
         "type" : "object",
@@ -600,7 +605,8 @@
           "nickname" : {
             "type" : "string"
           }
-        }
+        },
+        "required" : [ "fingerprint", "nickname" ]
       },
       "RelayMonthV1Dto" : {
         "type" : "object",
@@ -639,7 +645,8 @@
           "platform" : {
             "type" : [ "string", "null" ]
           }
-        }
+        },
+        "required" : [ "address", "bandwidthObserved", "day", "month", "nickname" ]
       },
       "RelayV1Dto" : {
         "type" : "object",
@@ -677,7 +684,8 @@
           "nickname" : {
             "type" : [ "string", "null" ]
           }
-        }
+        },
+        "required" : [ "country", "fingerprint", "flags", "lat", "long" ]
       }
     }
   }
