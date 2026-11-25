@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Points git at the versioned hooks in .githooks/ (secret scan on commit).
+# Points git at the versioned hooks in .githooks/ (secret scan and frontend lint on commit).
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"

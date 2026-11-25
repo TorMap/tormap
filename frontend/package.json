@@ -8,6 +8,7 @@
     "build": "tsc && tsc -p src/service-worker && vite build",
     "preview": "vite preview --port 3000",
     "lint": "eslint ./src --fix",
+    "lint:check": "eslint --max-warnings 0 ./src",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",

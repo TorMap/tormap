@@ -1,17 +1,29 @@
 #!/usr/bin/env bash
-# Scans staged changes for secrets with betterleaks before every commit.
+# Runs before every commit:
+# 1. Scans staged changes for secrets with betterleaks.
+# 2. Lints staged frontend source files with ESLint (when frontend dependencies are installed).
 # Enable with: scripts/install-git-hooks.sh
 # Bypass in an emergency: git commit --no-verify (CI/push protection still apply).
 set -euo pipefail
 
-if ! command -v betterleaks >/dev/null 2>&1; then
+if command -v betterleaks >/dev/null 2>&1; then
+  # `git --staged` works on released versions. The docs' `git diff --cached | betterleaks stdin --git-diff`
+  # pattern needs a newer build than 1.9.0.
+  betterleaks git --staged --redact --no-banner .
+else
   cat >&2 <<'EOF'
 pre-commit: betterleaks is not installed, so staged changes were NOT scanned for secrets.
   Install it (macOS: brew install betterleaks) or see https://github.com/betterleaks/betterleaks
 EOF
-  exit 0
 fi
 
-# `git --staged` works on released versions. The docs' `git diff --cached | betterleaks stdin --git-diff`
-# pattern needs a newer build than 1.9.0.
-exec betterleaks git --staged --redact --no-banner .
+# Staged, not deleted .ts/.tsx/.js/.jsx/.mjs files under frontend/src, relative to frontend/
+mapfile -t frontend_files < <(git diff --cached --name-only --diff-filter=d -z -- 'frontend/src/' \
+  | tr '\0' '\n' | grep -E '\.(ts|tsx|js|jsx|mjs)$' | sed 's|^frontend/||' || true)
+if [[ ${#frontend_files[@]} -gt 0 ]]; then
+  if [[ -x frontend/node_modules/.bin/eslint ]]; then
+    (cd frontend && node_modules/.bin/eslint --max-warnings 0 -- "${frontend_files[@]}")
+  else
+    echo "pre-commit: frontend dependencies are not installed, so staged frontend files were NOT linted (CI still lints them)." >&2
+  fi
+fi
