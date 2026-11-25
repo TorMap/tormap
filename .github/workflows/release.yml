@@ -85,10 +85,12 @@ jobs:
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
           permission-contents: write
 
+      # Keeps the app token in the git config for the push below. The job uploads no artifacts and the token expires
+      # with the job.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ needs.plan.outputs.sha }} # exactly the commit whose CI passed
-          token: ${{ steps.app_token.outputs.token }}
+          token: ${{ steps.app_token.outputs.token }} # zizmor: ignore[artipacked]
 
       - name: Bump versions, commit and tag
         env:

@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Rules for AI coding agents (and a quick reference for humans) working in this repository.
+Rules for AI coding agents (and a quick reference for humans) working in this repository. The pipeline and its security rules are in [PIPELINE.md](PIPELINE.md).
 
 ## Layout
 - `backend/`: Kotlin, Spring Boot, Gradle (Kotlin DSL), image built with Jib. Dependency versions are inline in `backend/build.gradle.kts`.
@@ -13,7 +13,7 @@ Rules for AI coding agents (and a quick reference for humans) working in this re
 - Backend: `cd backend && ./gradlew test` (needs the JDK from `sourceCompatibility` in `backend/build.gradle.kts` and a running Docker daemon for Testcontainers). Add `jacocoTestReport` for coverage (`build/reports/jacoco/test/html/index.html`, vendored `org.torproject` code is excluded).
 - Local backend image: `./gradlew jibDockerBuild -Djib.to.image=tormap/backend:local -Djib.to.tags=local`.
 - CLI: `cd cli && ./gradlew test` (no Docker needed; the contract test reads `api/openapi-v1.json`). Run it locally with `./gradlew installDist && build/install/tormap/bin/tormap --help`. Native binary: `./gradlew nativeCompile` with `GRAALVM_HOME` pointing to a GraalVM 25 (writes `build/native/tormap`, about 1 minute). CI builds the release binaries and the `tormap/cli` image in `.github/workflows/cli-native.yml`.
-- Frontend: `cd frontend && yarn install --immutable && yarn build && yarn lint`.
+- Frontend: `cd frontend && yarn install --immutable && yarn build && yarn lint` (`yarn lint` fixes what it can; CI runs `yarn lint:check`, which fails on any error or warning).
 - Frontend tests: `cd frontend && yarn test:run` (Vitest; `yarn test` watches, `yarn test:coverage` adds coverage). `*.unit.test.ts` run in Node, all other `*.test.ts(x)` in headless Chromium, so run `yarn playwright install chromium` once.
 - Sandbox: run Chromium browser tests, `yarn npm audit` and signed `git commit` outside it (it blocks Chromium and the GPG agent, and Node ignores its proxy).
 
@@ -41,11 +41,11 @@ Rules for AI coding agents (and a quick reference for humans) working in this re
 - Don't loosen `SecurityConfig`: no wider `permitAll`, no new unauthenticated actuator or admin paths, keep CSRF protection on the actuator chain. Every change there needs a matching change in `SecurityRulesTest`.
 - Descriptors, request parameters and headers are untrusted. Use parameterized queries (no string-built JPQL or SQL), validate input at the controller, never log secrets or raw untrusted input.
 - Workflows (`.github/workflows/`) are security-relevant: least-privilege `permissions:` per job, never check out PR head code under `pull_request_target`, pin actions by commit SHA with a version comment.
-- SAST in CI: CodeQL (`.github/workflows/codeql.yml`) and Semgrep CE (`.github/workflows/semgrep.yml`) run on pull requests, `master` and weekly, and upload SARIF to Code scanning. To read Semgrep findings without Code scanning access, read the `semgrep` job log (one line per finding) or the `semgrep-results` artifact. Fix real findings in the PR; for a false positive add a `// nosemgrep: <rule-id>` comment with the reason. Don't add other scanners without maintainer approval.
+- SAST in CI: CodeQL (`.github/workflows/codeql.yml`) and Semgrep CE (`.github/workflows/semgrep.yml`) run on pull requests, `master` and weekly, and upload SARIF to Code scanning. To read Semgrep findings without Code scanning access, read the `semgrep` job log (one line per finding) or the `semgrep-results` artifact. Fix real findings in the PR; for a false positive add a `// nosemgrep: <rule-id>` comment with the reason. zizmor (`.github/workflows/zizmor.yml`) checks workflows and fails on findings; run it locally as in that workflow, and mark a false positive with `# zizmor: ignore[<audit>]` and the reason. Don't add other scanners without maintainer approval.
 - Snyk: dependency scanning (SCA) only. The Snyk GitHub integration checks dependency changes on PRs, and `./gradlew snykTest` / `yarn snyk:test` run the same scan locally. Only run them if the maintainer has authenticated the CLI; never run `snyk auth` or handle tokens. Snyk Code (SAST) is not used because of the free plan's quota; use the CodeQL and Semgrep results instead. Don't add Snyk steps or `SNYK_TOKEN` to workflows, keep shared flags in the Gradle task or yarn script, and don't add `.snyk` ignores without a documented reason and expiry date.
 
 ## Commits and secrets
 - Never commit secrets or `.env` files. New Relic and admin credentials come from environment variables.
-- Run `scripts/install-git-hooks.sh` once per clone (pre-commit `betterleaks` secret scan; warns and skips if betterleaks is missing). Never bypass it (`--no-verify`) or GitHub push protection; if a push is blocked, remove the secret from history.
+- Run `scripts/install-git-hooks.sh` once per clone (pre-commit `betterleaks` secret scan and ESLint on staged frontend files; each warns and skips if its tool is missing). Never bypass it (`--no-verify`) or GitHub push protection; if a push is blocked, remove the secret from history.
 - Agent-written commits end with the agent's Co-Authored-By trailer, PR descriptions with the generated-with note.
 - If `commit.gpgsign=true`, don't disable signing (`-c commit.gpgsign=false`, `--no-gpg-sign`) and don't touch `~/.gnupg`.
