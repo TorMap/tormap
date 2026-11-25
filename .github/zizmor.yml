@@ -1,0 +1,5 @@
+# Configuration of zizmor (.github/workflows/zizmor.yml). https://docs.zizmor.sh/configuration/
+rules:
+  # Suggests the `$/` syntax for local actions and reusable workflows instead of `./`; style only, not adopted.
+  self-repository:
+    disable: true

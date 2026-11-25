@@ -1,0 +1,63 @@
+name: zizmor
+
+# zizmor checks the GitHub Actions workflows and actions for template injection, credential persistence, cache
+# poisoning, excessive permissions, unpinned or impostor action commits and known-vulnerable actions.
+# https://docs.zizmor.sh/ Configuration: .github/zizmor.yml. Findings fail the job, go to Code scanning (SARIF,
+# category "zizmor") and are listed in the job log. For a false positive add `# zizmor: ignore[<audit>]` with the reason.
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: '45 5 * * 1' # weekly, new audits and advisories for actions appear without changes here
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  zizmor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Install zizmor
+        # Pinned by version and hash in .github/zizmor-requirements.txt, binary wheels only
+        run: |
+          python3 -m venv "$RUNNER_TEMP/zizmor"
+          "$RUNNER_TEMP/zizmor/bin/pip" install --quiet --require-hashes --only-binary :all: --no-deps \
+            -r .github/zizmor-requirements.txt
+
+      - name: Scan
+        # The token lets the online audits resolve action refs and look up advisories (read-only)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          "$RUNNER_TEMP/zizmor/bin/zizmor" --no-progress --config .github/zizmor.yml --format sarif . > zizmor.sarif
+          "$RUNNER_TEMP/zizmor/bin/zizmor" --no-progress --config .github/zizmor.yml .
+          status=$?
+          set -e
+          exit $status
+
+      # Pull requests from forks get a read-only token, their findings are in the job log
+      - name: Upload to Code scanning
+        if: >
+          !cancelled() && hashFiles('zizmor.sarif') != '' &&
+          (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          sarif_file: zizmor.sarif
+          category: zizmor
