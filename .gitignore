@@ -27,3 +27,17 @@ package-lock.json
 !.yarn/versions
 
 tormap-data
+
+# Secrets, keys and local environment files (copy .env.example to .env)
+.env
+.env.*
+!.env.example
+# Public Vite build settings of the frontend, no secrets (only VITE_* values, which end up in the bundle)
+!/frontend/.env
+!/frontend/.env.production
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore

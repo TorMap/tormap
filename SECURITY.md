@@ -38,6 +38,8 @@ the repository's Code scanning alerts:
 - [Semgrep Community Edition](https://semgrep.dev/) (`.github/workflows/semgrep.yml`): Semgrep Registry rules for
   Kotlin, TypeScript/React, GitHub Actions and Dockerfiles. Findings are also listed in the job log and the
   `semgrep-results` artifact.
+- [zizmor](https://docs.zizmor.sh/) (`.github/workflows/zizmor.yml`): GitHub Actions workflows and actions. Findings
+  fail the check and are listed in the job log.
 
 [Snyk](https://snyk.io/) is used for dependency scanning (SCA). Pull requests are checked by the Snyk GitHub
 integration (PR status checks, configured in Snyk, no CI workflow involved). Snyk Code (SAST) is not used, because the
@@ -57,6 +59,8 @@ dependencies change:
   `--environment production` for runtime dependencies only).
 
 ## Supply chain
+
+The build and release pipeline and its rules are described in [PIPELINE.md](PIPELINE.md).
 
 - Dependencies come only from Maven Central (plus the Gradle plugin portal) and the default npm registry.
 - Frontend install scripts are disabled and package versions younger than 3 days are refused (`frontend/.yarnrc.yml`).
