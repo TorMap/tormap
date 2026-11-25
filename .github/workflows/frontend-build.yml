@@ -35,10 +35,11 @@ jobs:
         with:
           node-version-file: frontend/.nvmrc
 
-      - name: yarn build
+      - name: yarn lint and build
         run: |
           cd frontend
           yarn install --immutable
+          yarn lint:check
           yarn build
           yarn smoke:load:ci
 
