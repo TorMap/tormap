@@ -115,7 +115,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   is the committed `api/openapi-v1.json`, kept in sync by `ApiV1OpenApiSpecTest`. Filters (country, flag, AS,
   nickname) run in the client over a whole cached day, so query parameters can not multiply server-side cache keys.
   The only query parameters (`month` on the fingerprint lookup, `from`/`to` on daily counts) are strictly parsed and
-  are not cache keys. The fingerprint must be 40 hex characters. The relays of a day have their own cache of 10 days.
+  are not cache keys. The fingerprint must be 40 hex characters. The relays of a day have their own cache of 40 days, which the map uses too: it is warmed up after each import, and empty days are not cached.
 - CLI (`cli/`): a read-only client of API v1, run by users. It treats API responses as untrusted. Terminal output is
   an allowlist, enforced at the sink: stdout, stderr (including stack traces) and `--output` files are wrapped in
   `TerminalSafePrintStream`, which lets only visible text (letters, marks, numbers, punctuation, symbols, spaces), line
