@@ -65,8 +65,9 @@ jobs:
       - name: Build the image
         run: |
           cd backend
+          # OCI media types, because the image is handed on as an OCI archive with its digest unchanged
           ./gradlew jib -Djib.to.image=localhost:5000/tormap/backend:build -Djib.to.tags=build \
-            -Djib.allowInsecureRegistries=true
+            -Djib.allowInsecureRegistries=true -Djib.container.format=OCI
 
       - name: Export the image
         id: image
