@@ -16,6 +16,7 @@
     <a href="LICENSE.txt"><img src="https://img.shields.io/github/license/TorMap/tormap" alt="License: GPL-3.0"></a>
     <a href="https://github.com/TorMap/tormap/actions/workflows/backend-test.yml"><img src="https://img.shields.io/github/actions/workflow/status/TorMap/tormap/backend-test.yml?branch=master&label=backend" alt="Backend tests"></a>
     <a href="https://github.com/TorMap/tormap/actions/workflows/frontend-push.yml"><img src="https://img.shields.io/github/actions/workflow/status/TorMap/tormap/frontend-push.yml?branch=master&label=frontend" alt="Frontend build"></a>
+    <a href="https://scorecard.dev/viewer/?uri=github.com/TorMap/tormap"><img src="https://api.scorecard.dev/projects/github.com/TorMap/tormap/badge" alt="OpenSSF Scorecard"></a>
   </p>
 </div>
 
