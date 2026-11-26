@@ -41,7 +41,7 @@ tasks.register("resolveAndLockAll") {
 
 dependencies {
     // Command line parsing without the Mordant terminal library https://ajalt.github.io/clikt/
-    implementation("com.github.ajalt.clikt:clikt-core:5.2.0")
+    implementation("com.github.ajalt.clikt:clikt-core:5.2.1")
 
     // JSON parsing without reflection, so native images need no extra configuration https://github.com/Kotlin/kotlinx.serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.13.0")
