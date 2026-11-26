@@ -1,0 +1,99 @@
+name: fuzzing
+
+# Fuzzes the backend's Jazzer targets (backend/src/fuzz) with ClusterFuzzLite on the latest master, see
+# .clusterfuzzlite/README.md. The corpus is kept between runs as a workflow artifact. A crash fails the run and is
+# reported in an issue labeled "fuzzing" with the stack trace and the input.
+
+on:
+  schedule:
+    - cron: '17 2 * * *' # daily batch fuzzing
+    - cron: '47 4 * * 0' # weekly corpus pruning
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'batch (fuzzing) or prune (corpus minimization)'
+        type: choice
+        options:
+          - batch
+          - prune
+        default: batch
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  fuzz:
+    if: github.repository == 'TorMap/tormap' && github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      # Download the corpus and builds of earlier runs
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          path: tormap
+          persist-credentials: false
+
+      - name: Build fuzz targets
+        uses: google/clusterfuzzlite/actions/build_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1 # v1
+        with:
+          language: jvm
+          sanitizer: address
+          project-src-path: ${{ github.workspace }}/tormap
+
+      - name: Run fuzz targets
+        id: run
+        uses: google/clusterfuzzlite/actions/run_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1 # v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          language: jvm
+          sanitizer: address
+          mode: ${{ (github.event.schedule == '47 4 * * 0' || inputs.mode == 'prune') && 'prune' || 'batch' }}
+          # Shared by all targets
+          fuzz-seconds: 3600
+          minimize-crashes: true
+
+      - name: Keep crashes for the report
+        if: failure() && steps.run.outcome == 'failure'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: fuzzing-crashes
+          path: out/artifacts
+          if-no-files-found: ignore
+          retention-days: 90
+
+  report:
+    needs: fuzz
+    if: failure() && needs.fuzz.result == 'failure'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      # Open or comment on the issue of a crashing fuzz target
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+
+      - name: Download crashes
+        id: download
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: fuzzing-crashes
+          path: crashes
+
+      - name: Report crashes in issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          COMMIT: ${{ github.sha }}
+        run: .github/scripts/report-fuzzing-crashes.sh crashes

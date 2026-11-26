@@ -86,12 +86,13 @@
       ]
     },
     {
-      "description": "Backend base image: only digest updates, since the Java version is changed by hand together with sourceCompatibility",
+      "description": "Backend base image and fuzzing JDK: only digest updates, since the Java version is changed by hand together with sourceCompatibility",
       "matchDepNames": [
         "eclipse-temurin"
       ],
       "matchFileNames": [
-        "backend/build.gradle.kts"
+        "backend/build.gradle.kts",
+        ".clusterfuzzlite/Dockerfile"
       ],
       "matchUpdateTypes": [
         "major",
@@ -99,6 +100,15 @@
         "patch"
       ],
       "enabled": false
+    },
+    {
+      "description": "Fuzzing base image: rebuilt daily upstream, so its digest is only updated weekly",
+      "matchDepNames": [
+        "gcr.io/oss-fuzz-base/base-builder-jvm"
+      ],
+      "schedule": [
+        "before 6am on monday"
+      ]
     },
     {
       "description": "Update the IP lookup databases as soon as a monthly release exists (releases are immutable)",

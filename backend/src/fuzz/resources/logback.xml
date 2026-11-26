@@ -1,0 +1,4 @@
+<!-- The parsers log every invalid input, which would slow down fuzzing a lot -->
+<configuration>
+    <root level="OFF"/>
+</configuration>
