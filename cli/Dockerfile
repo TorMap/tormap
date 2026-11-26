@@ -6,7 +6,7 @@
 #          docker build --platform linux/amd64 -t tormap/cli:local .
 
 # glibc only, no shell, runs as an unprivileged user. The binary brings its own CA certificates and zlib.
-FROM gcr.io/distroless/base-nossl-debian13:nonroot@sha256:89815d620ac01d8de13cdaf04d19ed874447ca2296d4985b14b818f6e5e47854
+FROM gcr.io/distroless/base-nossl-debian13:nonroot@sha256:4006ac92504be607b70de01d1f64f38288c69fcd8faa820f6d3aed266ea32ac5
 
 ARG TARGETOS
 ARG TARGETARCH
