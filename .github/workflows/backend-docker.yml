@@ -1,5 +1,11 @@
 name: backend_docker
 
+# Builds the backend image (amd64 and arm64) with Jib and publishes it to Docker Hub.
+# - build: compiles and builds the image without any secret, into a registry that only lives in this job, and hands
+#   the image on as an OCI archive artifact. Also runs on pull requests, so a broken image build shows up before merge.
+# - publish (pushes only, environment docker-hub): copies exactly that image (same digest) to Docker Hub. On v* tags
+#   it pushes :<version>, :<major> and :latest and attests the build provenance (`gh attestation verify
+#   oci://docker.io/tormap/backend@<digest> --repo TorMap/tormap`); on master it pushes :edge.
 on:
   push:
     tags:
@@ -9,21 +15,38 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/backend-docker.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-docker.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  # Never cancel a publish halfway through
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions: {}
 
 jobs:
-  backend_docker:
+  build:
     runs-on: ubuntu-latest
-    # Holds the Docker Hub secrets; its deployment rules allow only master and v* tags
-    environment: docker-hub
     permissions:
       contents: read
+    outputs:
+      digest: ${{ steps.image.outputs.digest }}
+    services:
+      # Jib builds multi-platform images only into a registry, so it gets one inside this job
+      registry:
+        image: registry:3.1.2@sha256:82f6ff4a7f982960c8aa51617fea3aabc485df6e55cce80d22deb1de36f1bc3c
+        ports:
+          - 5000:5000
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
 
       - name: Check that the tag matches the project versions
-        # Stop before pushing anything if they differ, so a release tag never overwrites an older image
+        # Stop before building anything if they differ, so a release tag never overwrites an older image
         if: github.ref_type == 'tag'
         run: .github/scripts/check-release-version.sh "$GITHUB_REF_NAME"
 
@@ -39,15 +62,85 @@ jobs:
           cache-disabled: true
       - uses: gradle/actions/wrapper-validation@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
 
-      - name: Build and push docker image
-        # On v* tag → semver + :latest. On non-tag push → :edge only.
+      - name: Build the image
         run: |
           cd backend
-          if [[ "$GITHUB_REF_TYPE" = "tag" ]]; then
-            ./gradlew jib # tags come from build.gradle.kts
-          elif [[ "$GITHUB_REF_TYPE" = "branch" && "$GITHUB_REF_NAME" = "master" ]]; then
-            ./gradlew jib -Djib.to.image=tormap/backend:edge -Djib.to.tags=edge
+          ./gradlew jib -Djib.to.image=localhost:5000/tormap/backend:build -Djib.to.tags=build \
+            -Djib.allowInsecureRegistries=true
+
+      - name: Export the image
+        id: image
+        run: |
+          digest=$(cat backend/build/jib-image.digest)
+          if [[ ! "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "::error::Unexpected image digest '$digest'"
+            exit 1
           fi
+          built="sha256:$(skopeo inspect --raw --tls-verify=false docker://localhost:5000/tormap/backend:build \
+            | sha256sum | cut -d' ' -f1)"
+          if [[ "$built" != "$digest" ]]; then
+            echo "::error::The registry has digest $built, Jib reported $digest"
+            exit 1
+          fi
+          skopeo copy --all --preserve-digests --src-tls-verify=false \
+            docker://localhost:5000/tormap/backend:build oci-archive:backend-image.tar
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "Image digest: $digest" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: backend-image
+          path: backend-image.tar
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    # Holds the Docker Hub secrets; its deployment rules allow only master and v* tags
+    environment: docker-hub
+    permissions:
+      contents: read
+      # Build provenance on release tags
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: backend-image
+
+      - name: DockerHub login
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push to Docker Hub
+        # skopeo reads the credentials of the login above from ~/.docker/config.json
         env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          DIGEST: ${{ needs.build.outputs.digest }}
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+            tags=("$version" "${version%%.*}" latest)
+          else
+            tags=(edge)
+          fi
+          for tag in "${tags[@]}"; do
+            skopeo copy --all --preserve-digests oci-archive:backend-image.tar "docker://docker.io/tormap/backend:$tag"
+            pushed="sha256:$(skopeo inspect --raw "docker://docker.io/tormap/backend:$tag" | sha256sum | cut -d' ' -f1)"
+            if [[ "$pushed" != "$DIGEST" ]]; then
+              echo "::error::tormap/backend:$tag has digest $pushed, expected the built $DIGEST"
+              exit 1
+            fi
+            echo "Pushed tormap/backend:$tag ($DIGEST)" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      - name: Attest build provenance
+        if: github.ref_type == 'tag'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: index.docker.io/tormap/backend
+          subject-digest: ${{ needs.build.outputs.digest }}
+          push-to-registry: true

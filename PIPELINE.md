@@ -20,7 +20,8 @@ pull request ──► required checks ──► review and merge to master ─�
 | `frontend-push.yml` | master | Build, test, deploy | Firebase (env `firebase-live`) | tormap.org |
 | `codeql.yml`, `semgrep.yml`, `zizmor.yml` | PR, master, weekly | SAST of code and workflows | None | Code scanning results |
 | `release.yml` | Manual (master) | Version bump commit, `vX.Y.Z` tag, draft release | Release GitHub App (env `release`) | Tag, draft release |
-| `backend-docker.yml`, `frontend-docker.yml` | master, `v*` tags | Build and push images | Docker Hub (env `docker-hub`) | `tormap/backend`, `tormap/frontend` |
+| `backend-docker.yml` | PR, master, `v*` tags | Build the image without secrets, then push exactly that digest and attest it | Docker Hub (env `docker-hub`), push job only | `tormap/backend` |
+| `frontend-docker.yml` | master, `v*` tags | Build and push the image | Docker Hub (env `docker-hub`) | `tormap/frontend` |
 | `cli-native.yml` | PR, master, `v*` tags | Native binaries, end-to-end test, image | Docker Hub (env `docker-hub`) | CLI binaries on the release, `tormap/cli` |
 
 Outside Actions: Renovate opens dependency PRs; the Snyk and Socket GitHub integrations and GitGuardian check PRs;
@@ -34,7 +35,7 @@ Mapped to the [OWASP Top 10 CI/CD Security Risks](https://owasp.org/www-project-
 |---|---|
 | CICD-SEC-1 Flow control | `master` only changes through pull requests with passing required checks. Only the Release workflow creates `v*` tags. Tags, releases and published images are never overwritten. |
 | CICD-SEC-2 Identity and access | Every account with access uses 2FA (passkeys or security keys where offered). Bots and apps get the smallest scope that works. Access is reviewed once a year. |
-| CICD-SEC-3 Dependency chain abuse | [Dependency policy](.claude/skills/dependencies/SKILL.md): approved registries only, exact pins and lockfiles, install scripts off, release-age gate, vetting before adding a dependency. |
+| CICD-SEC-3 Dependency chain abuse | [Dependency policy](.claude/skills/dependencies/SKILL.md): approved registries only, exact pins and lockfiles (`yarn.lock`, Gradle `gradle.lockfile`), install scripts off, release-age gate, vetting before adding a dependency. |
 | CICD-SEC-4 Poisoned pipeline execution | No `pull_request_target`, no `workflow_run` on PR code. Untrusted text (branch names, titles, inputs) reaches shell steps only through `env:`. |
 | CICD-SEC-5 Pipeline-based access controls | Every job declares least-privilege `permissions:`. Release, publishing and production deploy secrets live in environments limited to `master` and `v*` tags. |
 | CICD-SEC-6 Credential hygiene | See [Secrets](#secrets). |
