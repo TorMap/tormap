@@ -17,6 +17,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   # Pull requests only analyze the languages they touch. Skipped jobs count as passed for required checks.
   # Pushes to master and the schedule always analyze everything, which keeps the baseline on master complete.

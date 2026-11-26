@@ -12,6 +12,8 @@ on:
       OSM_TOKEN:
         required: false
 
+permissions: {}
+
 jobs:
   frontend_build:
     if: inputs.run
