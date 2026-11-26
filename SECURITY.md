@@ -64,5 +64,6 @@ The build and release pipeline and its rules are described in [PIPELINE.md](PIPE
 
 - Dependencies come only from Maven Central (plus the Gradle plugin portal) and the default npm registry.
 - Frontend install scripts are disabled and package versions younger than 3 days are refused (`frontend/.yarnrc.yml`).
+- Gradle builds lock every resolved version, including transitive ones, in `gradle.lockfile`.
 - Dependency updates are managed by Renovate.
 - GitHub secret scanning and push protection are enabled.

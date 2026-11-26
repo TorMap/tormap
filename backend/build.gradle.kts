@@ -5,6 +5,13 @@ import java.net.URI
 import java.security.MessageDigest
 import java.util.zip.GZIPInputStream
 
+// Locks the plugin classpath too (buildscript-gradle.lockfile), see dependencyLocking below
+buildscript {
+    configurations.classpath {
+        resolutionStrategy.activateDependencyLocking()
+    }
+}
+
 group = "org.tormap"
 version = "4.3.1"
 java.sourceCompatibility = JavaVersion.VERSION_25
@@ -28,6 +35,24 @@ plugins {
 
 repositories {
     mavenCentral()
+}
+
+// Dependency locking: every resolved version, including transitive and BOM-managed ones, is pinned in gradle.lockfile
+// (the plugins in buildscript-gradle.lockfile), so builds only change when the lockfile does.
+// After changing a dependency, update the lockfiles with: ./gradlew resolveAndLockAll --write-locks
+dependencyLocking {
+    lockAllConfigurations()
+}
+
+tasks.register("resolveAndLockAll") {
+    description = "Resolves all configurations, to write the lockfile with --write-locks"
+    notCompatibleWithConfigurationCache("Filters configurations at execution time")
+    doFirst {
+        require(gradle.startParameter.isWriteDependencyLocks) { "Run with --write-locks" }
+    }
+    doLast {
+        configurations.filter { it.isCanBeResolved }.forEach { it.resolve() }
+    }
 }
 
 // Overrides of Spring Boot managed versions to pick up security fixes ahead of a Boot release (reported by Snyk).
