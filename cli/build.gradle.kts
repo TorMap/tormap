@@ -104,13 +104,18 @@ val nativeCompile by tasks.registering(Exec::class) {
     val graalHome = providers.environmentVariable("GRAALVM_HOME").orElse(providers.environmentVariable("JAVA_HOME"))
     val nativeImage = graalHome.map { "$it/bin/native-image" + if (windows) ".cmd" else "" }
     // Extra native-image options, e.g. -PnativeImageOptions=--verbose
-    val extraOptions = providers.gradleProperty("nativeImageOptions").map { it.split(" ").filter(String::isNotBlank) }.orElse(emptyList())
+    val extraOptions = providers.gradleProperty("nativeImageOptions").orElse("").map {
+        it.split(" ").filter(String::isNotBlank)
+    }
     inputs.property("nativeImageOptions", extraOptions)
 
     doFirst {
         outputDirectory.get().asFile.mkdirs()
-        val classpath = (listOf(jar.get().archiveFile.get().asFile) + runtimeClasspath.get().files)
-            .joinToString(File.pathSeparator) { it.absolutePath }
+        val jarFile = jar.get().archiveFile.get().asFile
+        val classpath = listOf(jarFile) + runtimeClasspath.get().files
+        val binary = outputDirectory.get().file("tormap").asFile
+        // Links zlib in, so the binary only needs glibc (from the build machine's version on)
+        val linkOptions = if (linux) listOf("--static-nolibc") else emptyList()
         commandLine(
             listOf(
                 nativeImage.get(),
@@ -121,13 +126,44 @@ val nativeCompile by tasks.registering(Exec::class) {
                 "-Os",
                 // Runs on every CPU of the architecture, not only on recent ones (the default is x86-64-v3)
                 "-march=compatibility",
-            ) + (
-                // Links zlib in, so the binary only needs glibc (from the build machine's version on)
-                if (linux) listOf("--static-nolibc") else emptyList()
-            ) + listOf(
-                "-o", outputDirectory.get().file("tormap").asFile.absolutePath,
-                "-cp", classpath,
-            ) + extraOptions.get() + "org.tormap.cli.MainKt"
+            ) + linkOptions + listOf("-o", binary.absolutePath, "-cp", classpath.joinToString(File.pathSeparator)) +
+                extraOptions.get() + "org.tormap.cli.MainKt",
         )
     }
+}
+
+// Kotlin code style (https://pinterest.github.io/ktlint/), part of `check`. ./gradlew ktlintFormat fixes most findings.
+val ktlint: Configuration by configurations.creating
+
+dependencies {
+    ktlint("com.pinterest.ktlint:ktlint-cli:1.8.0") {
+        attributes {
+            attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
+        }
+    }
+}
+
+val ktlintSources = listOf("src/**/*.kt", "*.kts", "!**/build/**")
+
+val ktlintCheck = tasks.register<JavaExec>("ktlintCheck") {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = "Checks the Kotlin code style with ktlint"
+    classpath = ktlint
+    mainClass.set("com.pinterest.ktlint.Main")
+    // ktlint's embedded Kotlin compiler still uses sun.misc.Unsafe
+    jvmArgs("--sun-misc-unsafe-memory-access=allow")
+    args(ktlintSources)
+}
+
+tasks.check {
+    dependsOn(ktlintCheck)
+}
+
+tasks.register<JavaExec>("ktlintFormat") {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = "Fixes the Kotlin code style with ktlint where it can"
+    classpath = ktlint
+    mainClass.set("com.pinterest.ktlint.Main")
+    jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED", "--sun-misc-unsafe-memory-access=allow")
+    args(listOf("--format") + ktlintSources)
 }
