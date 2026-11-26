@@ -133,7 +133,14 @@ val nativeCompile by tasks.registering(Exec::class) {
 }
 
 // Kotlin code style (https://pinterest.github.io/ktlint/), part of `check`. ./gradlew ktlintFormat fixes most findings.
-val ktlint: Configuration by configurations.creating
+val ktlint: Configuration by configurations.creating {
+    // ktlint still asks for logback 1.3.x, which has known advisories, so it gets the patched line
+    resolutionStrategy.eachDependency {
+        if (requested.group == "ch.qos.logback") {
+            useVersion("1.6.6")
+        }
+    }
+}
 
 dependencies {
     ktlint("com.pinterest.ktlint:ktlint-cli:1.8.0") {

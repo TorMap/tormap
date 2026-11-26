@@ -10,6 +10,15 @@ buildscript {
     configurations.classpath {
         resolutionStrategy.activateDependencyLocking()
     }
+    // Patched versions of libraries the Jib and Spring Boot plugins pull in, to keep known advisories out of the build.
+    // Drop each one once the plugins depend on a fixed version themselves.
+    dependencies {
+        classpath(platform("com.fasterxml.jackson:jackson-bom:2.23.0"))
+        constraints {
+            classpath("com.google.guava:guava:33.8.0-jre")
+            classpath("org.apache.commons:commons-lang3:3.21.0")
+        }
+    }
 }
 
 group = "org.tormap"
@@ -334,8 +343,13 @@ jib {
 val ktlint: Configuration by configurations.creating {
     // Spring's dependency management would raise ktlint's embedded Kotlin compiler to the project's Kotlin version,
     // which ktlint can't run with. Keep the versions ktlint asks for.
+    // Except logback: ktlint still asks for 1.3.x, which has known advisories, so it gets the patched line.
     resolutionStrategy.eachDependency {
-        requested.version?.let { useVersion(it) }
+        if (requested.group == "ch.qos.logback") {
+            useVersion("1.6.6")
+        } else {
+            requested.version?.let { useVersion(it) }
+        }
     }
 }
 

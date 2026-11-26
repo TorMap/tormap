@@ -32,6 +32,8 @@ concurrency:
   # Never cancel a release run halfway through uploading
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+permissions: {}
+
 jobs:
   native:
     name: native (${{ matrix.target }})
