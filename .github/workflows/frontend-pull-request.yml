@@ -44,7 +44,6 @@ jobs:
     if: needs.changes.outputs.frontend == 'true'
     permissions:
       contents: read
-      deployments: write
       checks: write
       pull-requests: write
     steps:
