@@ -157,7 +157,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   paths without query strings, at most 20 days for 60 days and 100 relay details for 7 days. Users can turn this off,
   which deletes the data. Both hosts serve `sw.js` with `no-cache`, so a fixed version replaces a faulty one on the
   next visit.
-- Supply chain: Maven Central and npm registry only, Yarn install scripts disabled, 3-day npm age gate, Renovate with
+- Supply chain: Maven Central and npm registry only, Yarn install scripts disabled, 3-day npm age gate, Gradle dependency locking (transitive versions pinned in `gradle.lockfile`), Renovate with
   release age, actions pinned by SHA, Gradle wrapper validation, least-privilege workflow `permissions`, no
   `pull_request_target`, CodeQL, Semgrep and zizmor on PRs and weekly, no restored build caches in jobs that publish, Snyk dependency PR checks, GitHub secret scanning with push protection. The vendored
   metrics-lib is copied from an upstream release tarball. Its checksum and local patches are listed in
@@ -169,7 +169,7 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   the `release` environment (master only). The tag and master rulesets let only that app bypass them. The Docker Hub secrets live in the
   `docker-hub` environment (master and `v*` tags only), so a workflow on another branch can't read them. The tag
   workflows refuse a tag that doesn't match all three project versions. Published releases are immutable, and the
-  frontend and CLI images carry build provenance and an SBOM.
+  frontend and CLI images carry build provenance and an SBOM. The backend image is built without access to any secret and the publish job copies exactly that digest to Docker Hub, with signed build provenance on release tags.
 
 ## Threat scenarios
 
