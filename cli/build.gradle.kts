@@ -17,10 +17,6 @@ plugins {
     application
 }
 
-repositories {
-    mavenCentral()
-}
-
 // Dependency locking: every resolved version, including transitive and BOM-managed ones, is pinned in gradle.lockfile
 // (the plugins in buildscript-gradle.lockfile), so builds only change when the lockfile does.
 // After changing a dependency, update the lockfiles with: ./gradlew resolveAndLockAll --write-locks
