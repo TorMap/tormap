@@ -2,8 +2,8 @@
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
 # To regenerate this file, run: ./gradlew :dependencies --write-locks
-com.github.ajalt.clikt:clikt-core-jvm:5.2.0=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
-com.github.ajalt.clikt:clikt-core:5.2.0=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.github.ajalt.clikt:clikt-core-jvm:5.2.1=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.github.ajalt.clikt:clikt-core:5.2.1=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 io.github.classgraph:classgraph:4.8.186=testRuntimeClasspath
 io.github.java-diff-utils:java-diff-utils:4.16=testRuntimeClasspath
 io.github.pdvrieze.xmlutil:core-jvmcommon:0.91.3=testRuntimeClasspath
