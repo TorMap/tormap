@@ -5,8 +5,9 @@ name: backend_docker
 #   the registry storage with the image on as an artifact. Also runs on pull requests, so a broken image build shows
 #   up before merge.
 # - publish (pushes only, environment docker-hub): serves that storage from a local registry again and copies exactly
-#   that image (same digest) to Docker Hub. On v* tags it pushes :<version>, :<major> and :latest and attests the build provenance (`gh attestation verify
-#   oci://docker.io/tormap/backend@<digest> --repo TorMap/tormap`); on master it pushes :edge.
+#   that image (same digest) to Docker Hub. On v* tags it pushes :<version>, :<major> and :latest and attests the
+#   build provenance (`gh attestation verify oci://docker.io/tormap/backend@<digest> --repo TorMap/tormap`); on
+#   master it pushes :edge.
 on:
   push:
     tags:
