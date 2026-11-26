@@ -17,6 +17,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
@@ -34,7 +35,9 @@ class SecurityConfig(
     private val actuatorPath: String,
 
     // Comma-separated list of allowed frontend origins
-    @param:Value("\${app.security.cors.allowed-origins:https://tormap.org,https://www.tormap.org,https://tormap-*.web.app}")
+    @param:Value(
+        "\${app.security.cors.allowed-origins:https://tormap.org,https://www.tormap.org,https://tormap-*.web.app}",
+    )
     private val allowedOriginPatternsCSV: String,
 
     // Avoid exposing Swagger unless explicitly enabled
@@ -47,7 +50,8 @@ class SecurityConfig(
         private const val ENV_ADMIN_PASSWORD = "TORMAP_ADMIN_PASSWORD"
         private const val ENV_REMOVED_ADMIN_PASSWORD_BCRYPT = "TORMAP_ADMIN_PASSWORD_BCRYPT"
         private const val MIN_ADMIN_PASSWORD_LENGTH = 16
-        internal const val DEFAULT_CONTENT_SECURITY_POLICY = "default-src 'none'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'"
+        internal const val DEFAULT_CONTENT_SECURITY_POLICY =
+            "default-src 'none'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'"
         internal const val LITE_CONTENT_SECURITY_POLICY =
             "default-src 'none'; img-src 'self'; style-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"
     }
@@ -56,8 +60,11 @@ class SecurityConfig(
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
     @Bean
-    fun userDetailsService(passwordEncoder: PasswordEncoder): UserDetailsService =
-        buildUserDetailsService(passwordEncoder, System.getenv(ENV_ADMIN_PASSWORD), System.getenv(ENV_REMOVED_ADMIN_PASSWORD_BCRYPT))
+    fun userDetailsService(passwordEncoder: PasswordEncoder): UserDetailsService = buildUserDetailsService(
+        passwordEncoder,
+        System.getenv(ENV_ADMIN_PASSWORD),
+        System.getenv(ENV_REMOVED_ADMIN_PASSWORD_BCRYPT),
+    )
 
     /**
      * Creates the admin user from the values of [ENV_ADMIN_PASSWORD] and [ENV_REMOVED_ADMIN_PASSWORD_BCRYPT].
@@ -69,7 +76,9 @@ class SecurityConfig(
         removedAdminPasswordBcrypt: String?,
     ): UserDetailsService {
         if (!removedAdminPasswordBcrypt.isNullOrBlank()) {
-            logger.warn("$ENV_REMOVED_ADMIN_PASSWORD_BCRYPT is no longer supported and is ignored. Use $ENV_ADMIN_PASSWORD instead.")
+            logger.warn(
+                "$ENV_REMOVED_ADMIN_PASSWORD_BCRYPT is no longer supported and is ignored. Use $ENV_ADMIN_PASSWORD instead.",
+            )
         }
 
         val password = adminPassword?.trim().orEmpty()
@@ -83,7 +92,9 @@ class SecurityConfig(
         }
 
         if (password.length < MIN_ADMIN_PASSWORD_LENGTH) {
-            logger.warn("$ENV_ADMIN_PASSWORD is shorter than $MIN_ADMIN_PASSWORD_LENGTH characters. Use a long generated password.")
+            logger.warn(
+                "$ENV_ADMIN_PASSWORD is shorter than $MIN_ADMIN_PASSWORD_LENGTH characters. Use a long generated password.",
+            )
         }
 
         val user = User.withUsername(adminUserName)
@@ -159,7 +170,14 @@ class SecurityConfig(
                     // Allow CORS preflight
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     // Public API and static resources
-                    .requestMatchers("/", "/error", "/relay/**", "/favicon.ico", "/robots.txt", "/static/**").permitAll()
+                    .requestMatchers(
+                        "/",
+                        "/error",
+                        "/relay/**",
+                        "/favicon.ico",
+                        "/robots.txt",
+                        "/static/**",
+                    ).permitAll()
                     // Versioned public API for the CLI and other clients, read-only
                     .requestMatchers(HttpMethod.GET, "/v1/**").permitAll()
                     // How to report vulnerabilities (RFC 9116)
@@ -173,7 +191,7 @@ class SecurityConfig(
                                 "/swagger",
                                 "/swagger/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
                             ).permitAll()
                         }
                     }
@@ -198,7 +216,9 @@ class SecurityConfig(
                 headers.xssProtection { it.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK) }
                 headers.contentTypeOptions(Customizer.withDefaults())
                 headers.frameOptions { it.deny() }
-                headers.referrerPolicy { it.policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER) }
+                headers.referrerPolicy {
+                    it.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER)
+                }
                 if (contentSecurityPolicy != null) {
                     headers.contentSecurityPolicy { it.policyDirectives(contentSecurityPolicy) }
                 }

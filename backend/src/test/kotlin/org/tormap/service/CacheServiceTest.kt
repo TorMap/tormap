@@ -42,11 +42,11 @@ class CacheServiceTest(
                 mockRelayLocation(januaryOne),
                 mockRelayLocation(januaryTwo, 'A'),
                 mockRelayLocation(januaryTwo, 'B'),
-            )
+            ),
         )
         cacheService.cacheRelayLocationDistinctDays().get()
         relayLocationDistinctDaysCache?.get(
-            CacheConfig.RELAY_LOCATION_DISTINCT_DAYS_KEY
+            CacheConfig.RELAY_LOCATION_DISTINCT_DAYS_KEY,
         )?.get() shouldBe setOf(januaryOne, januaryTwo)
     }
 
@@ -56,7 +56,7 @@ class CacheServiceTest(
                 mockRelayLocation(januaryOne),
                 mockRelayLocation(januaryTwo, 'A'),
                 mockRelayLocation(januaryTwo, 'B'),
-            )
+            ),
         )
         cacheService.cacheRelayDailyCounts().get()
         val cached = relayDailyCountsCache?.get(CacheConfig.RELAY_DAILY_COUNTS_KEY)?.get() as List<*>
@@ -69,7 +69,7 @@ class CacheServiceTest(
                 mockRelayLocation(januaryOne),
                 mockRelayLocation(januaryTwo),
                 mockRelayLocation(februaryOne),
-            )
+            ),
         )
         cacheService.cacheRelayLocationsPerDay(setOf("2024-01")).get()
         val cached = apiV1RelaysPerDayCache.get("2024-01-01")?.get() as ApiV1RelaysOfDayService.RelaysOfDay
@@ -85,7 +85,7 @@ class CacheServiceTest(
             listOf(
                 mockRelayLocation(januaryOne),
                 mockRelayLocation(februaryOne),
-            )
+            ),
         )
         cacheService.cacheRelayLocationsPerDay(setOf("2024-01", "2024-02")).get()
         cacheService.evictRelayLocationsPerDay(setOf("2024-01")).get()

@@ -36,7 +36,7 @@ class CountryUsageControllerTest(
             listOf(
                 CountryUsageRow(LocalDate.of(2024, 3, 5), "DE", 110, 90, 130, 61),
                 CountryUsageRow(LocalDate.of(2024, 3, 6), "DE", 1, null, null, 61),
-            )
+            ),
         )
         mockMvc.perform(get("/relay/country-usage/day/2024-03-05"))
             .andExpect(status().isOk)

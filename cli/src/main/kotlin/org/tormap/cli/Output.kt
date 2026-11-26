@@ -16,11 +16,13 @@ enum class Format { TABLE, JSON, NDJSON, CSV }
  * by relay operators, and every other string comes from a server the user may not control (`--api-url`).
  * [TerminalSafePrintStream] enforces the same rule on all output; this keeps the rows and columns intact.
  */
-fun sanitize(value: String): String =
-    if (value.codePoints().allMatch(::isVisible)) value
-    else buildString(value.length) {
+fun sanitize(value: String): String = if (value.codePoints().allMatch(::isVisible)) {
+    value
+} else {
+    buildString(value.length) {
         value.codePoints().forEach { if (isVisible(it)) appendCodePoint(it) else append(REPLACEMENT) }
     }
+}
 
 /**
  * JSON for the terminal: JSON encoders escape only C0 control characters, so every other character that is not
@@ -29,18 +31,26 @@ fun sanitize(value: String): String =
  * the value the same for any JSON parser, so [TerminalSafePrintStream] never has to replace a character of it.
  */
 internal fun escapeControls(json: String): String =
-    if (json.codePoints().allMatch { it == '\n'.code || isVisible(it) }) json
-    else buildString(json.length + 16) {
-        json.codePoints().forEach { codePoint ->
-            if (codePoint == '\n'.code || isVisible(codePoint)) appendCodePoint(codePoint)
-            else Character.toChars(codePoint).forEach { append("\\u%04x".format(it.code)) }
+    if (json.codePoints().allMatch { it == '\n'.code || isVisible(it) }) {
+        json
+    } else {
+        buildString(json.length + 16) {
+            json.codePoints().forEach { codePoint ->
+                if (codePoint == '\n'.code || isVisible(codePoint)) {
+                    appendCodePoint(codePoint)
+                } else {
+                    Character.toChars(codePoint).forEach { append("\\u%04x".format(it.code)) }
+                }
+            }
         }
     }
 
 /** Text of a field for tables and CSV: arrays are joined with spaces, objects are shown by their fingerprint or as JSON. */
 fun JsonObject.text(field: String): String = when (val value = this[field]) {
     null, JsonNull -> ""
+
     is JsonPrimitive -> value.content
+
     is JsonArray -> value.joinToString(" ") { element ->
         when (element) {
             is JsonPrimitive -> element.content
@@ -48,6 +58,7 @@ fun JsonObject.text(field: String): String = when (val value = this[field]) {
             else -> element.toString()
         }
     }
+
     is JsonObject -> value.toString()
 }
 
@@ -60,12 +71,17 @@ class Output(private val out: PrintStream, private val format: Format) {
 
     fun rows(rows: List<JsonObject>, tableColumns: List<String>, csvColumns: List<String> = tableColumns) {
         when (format) {
-            Format.JSON -> out.println(escapeControls(prettyJson.encodeToString(JsonElement.serializer(), JsonArray(rows))))
+            Format.JSON -> out.println(
+                escapeControls(prettyJson.encodeToString(JsonElement.serializer(), JsonArray(rows))),
+            )
+
             Format.NDJSON -> rows.forEach { out.println(escapeControls(it.toString())) }
+
             Format.CSV -> {
                 out.println(csvColumns.joinToString(",") { csv(it) })
                 rows.forEach { row -> out.println(csvColumns.joinToString(",") { csv(row.text(it)) }) }
             }
+
             Format.TABLE -> table(tableColumns, rows.map { row -> tableColumns.map { row.text(it) } })
         }
     }
@@ -83,12 +99,19 @@ class Output(private val out: PrintStream, private val format: Format) {
     /** Plain values, e.g. days: one per line, a JSON array of strings, or a one-column CSV. */
     fun values(name: String, values: List<String>) {
         when (format) {
-            Format.JSON -> out.println(escapeControls(prettyJson.encodeToString(JsonElement.serializer(), JsonArray(values.map(::JsonPrimitive)))))
+            Format.JSON -> out.println(
+                escapeControls(
+                    prettyJson.encodeToString(JsonElement.serializer(), JsonArray(values.map(::JsonPrimitive))),
+                ),
+            )
+
             Format.NDJSON -> values.forEach { out.println(escapeControls(JsonPrimitive(it).toString())) }
+
             Format.CSV -> {
                 out.println(name)
                 values.forEach { out.println(csv(it)) }
             }
+
             Format.TABLE -> values.forEach { out.println(sanitize(it)) }
         }
     }
@@ -97,20 +120,36 @@ class Output(private val out: PrintStream, private val format: Format) {
         val lines = if (header) listOf(columns) + cells else cells
         val widths = columns.indices.map { column -> lines.maxOfOrNull { it[column].length } ?: 0 }
         // Numbers are right-aligned, so they can be compared at a glance
-        val numeric = columns.indices.map { column -> cells.isNotEmpty() && cells.all { it[column].isEmpty() || it[column].toDoubleOrNull() != null } }
+        val numeric = columns.indices.map { column ->
+            cells.isNotEmpty() &&
+                cells.all { it[column].isEmpty() || it[column].toDoubleOrNull() != null }
+        }
         lines.forEach { line ->
-            out.println(line.indices.joinToString("  ") { column ->
-                val cell = sanitize(line[column])
-                if (numeric[column]) cell.padStart(widths[column]) else cell.padEnd(widths[column])
-            }.trimEnd())
+            out.println(
+                line.indices.joinToString("  ") { column ->
+                    val cell = sanitize(line[column])
+                    if (numeric[column]) cell.padStart(widths[column]) else cell.padEnd(widths[column])
+                }.trimEnd(),
+            )
         }
     }
-
 
     private fun csv(value: String): String {
         val safe = sanitize(value)
         // A leading =, +, - or @ would be run as a formula by spreadsheet programs
-        val defused = if (safe.firstOrNull() in setOf('=', '+', '-', '@') && safe.toDoubleOrNull() == null) "'$safe" else safe
-        return if (defused.any { it == ',' || it == '"' || it == '\n' || it == '\r' } || defused != value) "\"${defused.replace("\"", "\"\"")}\"" else defused
+        val defused = if (safe.firstOrNull() in setOf('=', '+', '-', '@') &&
+            safe.toDoubleOrNull() == null
+        ) {
+            "'$safe"
+        } else {
+            safe
+        }
+        return if (defused.any { it == ',' || it == '"' || it == '\n' || it == '\r' } ||
+            defused != value
+        ) {
+            "\"${defused.replace("\"", "\"\"")}\""
+        } else {
+            defused
+        }
     }
 }

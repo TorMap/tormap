@@ -13,3 +13,8 @@ indent_size = 2
 
 [.github/**.yml]
 indent_size = 2
+
+[*.{kt,kts}]
+max_line_length = 120
+# ktlint (./gradlew ktlintCheck): IntelliJ IDEA's Kotlin style, so the IDE's formatter and ktlint agree
+ktlint_code_style = intellij_idea

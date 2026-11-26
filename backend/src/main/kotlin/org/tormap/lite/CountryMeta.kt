@@ -13,7 +13,10 @@ class CountryMeta(objectMapper: ObjectMapper) {
     private val countries: Map<String, Country> = CountryMeta::class.java.getResourceAsStream(RESOURCE)
         .let { requireNotNull(it) { "Missing resource $RESOURCE" } }
         .use { objectMapper.readTree(it) }
-        .associate { it.get("iso_a2").asString() to Country(it.get("name").asString(), it.get("mapcolor9")?.asInt() ?: 0) }
+        .associate {
+            it.get("iso_a2").asString() to
+                Country(it.get("name").asString(), it.get("mapcolor9")?.asInt() ?: 0)
+        }
 
     /** The country name, or the code itself if it is unknown */
     fun name(isoCode: String): String = countries[isoCode]?.name ?: isoCode

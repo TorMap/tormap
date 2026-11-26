@@ -9,7 +9,6 @@ import org.tormap.database.entity.DescriptorFileId
 import org.tormap.database.entity.DescriptorType
 import org.tormap.database.entity.ProcessedFile
 
-
 /**
  * Repository to interact with DB
  */

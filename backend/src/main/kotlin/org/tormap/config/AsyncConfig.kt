@@ -10,13 +10,12 @@ import java.util.concurrent.ThreadPoolExecutor
 class AsyncConfig {
 
     @Bean("coalesceExecutor")
-    fun coalesceExecutor(): Executor =
-        ThreadPoolTaskExecutor().apply {
-            corePoolSize = 4
-            maxPoolSize = 20
-            queueCapacity = 200
-            setThreadNamePrefix("coalesce-")
-            setRejectedExecutionHandler(ThreadPoolExecutor.CallerRunsPolicy())
-            initialize()
-        }
+    fun coalesceExecutor(): Executor = ThreadPoolTaskExecutor().apply {
+        corePoolSize = 4
+        maxPoolSize = 20
+        queueCapacity = 200
+        setThreadNamePrefix("coalesce-")
+        setRejectedExecutionHandler(ThreadPoolExecutor.CallerRunsPolicy())
+        initialize()
+    }
 }

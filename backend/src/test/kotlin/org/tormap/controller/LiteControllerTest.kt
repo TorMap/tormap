@@ -20,170 +20,189 @@ import javax.imageio.ImageIO
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class LiteControllerTest(
-    private val mockMvc: MockMvc,
-    private val relayDetailsRepository: RelayDetailsRepository,
-) : StringSpec({
-    "the page is HTML with the map, the day controls and a link to the JavaScript version" {
-        val response = mockMvc.perform(get("/lite/")).andReturn().response
-        response.status shouldBe 200
-        response.contentType shouldStartWith "text/html"
-        val html = response.contentAsString
-        html shouldStartWith "<!DOCTYPE html>"
-        html shouldContain "type=\"image\" name=\"map\" src=\"/lite/map.png?"
-        html shouldContain "name=\"go\" value=\"previous\""
-        html shouldContain "type=\"date\""
-        html shouldContain "href=\"https://tormap.org/#lat="
-        html.contains("<script") shouldBe false
-    }
-
-    "without search indexing nothing is indexed" {
-        mockMvc.perform(get("/robots.txt")).andReturn().response.contentAsString shouldBe "User-agent: *\nDisallow: /\n"
-        mockMvc.perform(get("/lite/sitemap.xml")).andReturn().response.status shouldBe 404
-        mockMvc.perform(get("/lite/")).andReturn().response.contentAsString shouldNotContain "rel=\"canonical\""
-    }
-
-    "/lite redirects to /lite/" {
-        val response = mockMvc.perform(get("/lite")).andReturn().response
-        response.status shouldBe 301
-        response.getHeader("Location") shouldBe "/lite/"
-    }
-
-    "a button redirects to the canonical URL of the resulting view" {
-        val response = mockMvc.perform(get("/lite/?lat=0&lng=0&zoom=3&go=in")).andReturn().response
-        response.status shouldBe 303
-        response.getHeader("Location") shouldBe "/lite/?lat=0.0000&lng=0.0000&zoom=4"
-    }
-
-    "a click on the map zooms in when the click mode is zoom" {
-        val response = mockMvc.perform(get("/lite/?lat=0&lng=0&zoom=3&click=zoom&map.x=512&map.y=256")).andReturn().response
-        response.status shouldBe 303
-        response.getHeader("Location") shouldContain "zoom=4"
-    }
-
-    "a click on the map lists the relays there by default" {
-        val response = mockMvc.perform(get("/lite/?lat=0&lng=0&zoom=3&map.x=100&map.y=50")).andReturn().response
-        response.status shouldBe 303
-        response.getHeader("Location") shouldBe "/lite/?lat=0.0000&lng=0.0000&zoom=3&x=100&y=50#relays"
-        val page = mockMvc.perform(get("/lite/?lat=0&lng=0&zoom=3&x=100&y=50")).andReturn().response.contentAsString
-        page shouldContain "Relays at the clicked point"
-    }
-
-    "relay pages escape relay data and link back to the map" {
-        val relay = relayDetailsRepository.save(mockRelayDetails('E').apply {
-            nickname = "<i>x"
-            contact = "javascript:alert(1) <script>alert(1)</script>"
-            familyId = 4711L
-        })
-        val response = mockMvc.perform(get("/lite/relay/${relay.id}?zoom=4")).andReturn().response
-        response.status shouldBe 200
-        val html = response.contentAsString
-        html shouldContain "&lt;i&gt;x"
-        html shouldContain "javascript:alert(1) &lt;script&gt;alert(1)&lt;/script&gt;"
-        html shouldNotContain "<i>x"
-        html shouldNotContain "<script"
-        html shouldNotContain "href=\"javascript"
-        html shouldContain "href=\"https://metrics.torproject.org/rs.html#details/${"E".repeat(40)}\""
-        html shouldContain "href=\"/lite/?lat="
-
-        val family = mockMvc.perform(get("/lite/family/4711")).andReturn().response
-        family.status shouldBe 200
-        family.contentAsString shouldContain "/lite/relay/${relay.id}?"
-    }
-
-    "relay pages list the certified families" {
-        val relay = relayDetailsRepository.save(mockRelayDetails('F').apply { familyKeys = "ed25519:one, ed25519:two" })
-        val html = mockMvc.perform(get("/lite/relay/${relay.id}")).andReturn().response.contentAsString
-        html shouldContain "Certified families"
-        html shouldContain "<li>ed25519:one</li>"
-        html shouldContain "<li>ed25519:two</li>"
-    }
-
-    "unknown relays and families are HTML 404 pages" {
-        listOf("/lite/relay/999999999", "/lite/family/999999999").forEach { path ->
-            val response = mockMvc.perform(get(path)).andReturn().response
-            response.status shouldBe 404
+class LiteControllerTest(private val mockMvc: MockMvc, private val relayDetailsRepository: RelayDetailsRepository) :
+    StringSpec({
+        "the page is HTML with the map, the day controls and a link to the JavaScript version" {
+            val response = mockMvc.perform(get("/lite/")).andReturn().response
+            response.status shouldBe 200
             response.contentType shouldStartWith "text/html"
+            val html = response.contentAsString
+            html shouldStartWith "<!DOCTYPE html>"
+            html shouldContain "type=\"image\" name=\"map\" src=\"/lite/map.png?"
+            html shouldContain "name=\"go\" value=\"previous\""
+            html shouldContain "type=\"date\""
+            html shouldContain "href=\"https://tormap.org/#lat="
+            html.contains("<script") shouldBe false
         }
-    }
 
-    "autonomous system and search pages work without data" {
-        mockMvc.perform(get("/lite/as/3320")).andReturn().response.status shouldBe 200
-        mockMvc.perform(get("/lite/search?q=relay")).andReturn().response.contentAsString shouldContain "Relays matching"
-        val emptySearch = mockMvc.perform(get("/lite/search?q=&zoom=4")).andReturn().response
-        emptySearch.status shouldBe 303
-        emptySearch.getHeader("Location") shouldContain "zoom=4"
-    }
+        "without search indexing nothing is indexed" {
+            mockMvc.perform(get("/robots.txt")).andReturn().response.contentAsString shouldBe
+                "User-agent: *\nDisallow: /\n"
+            mockMvc.perform(get("/lite/sitemap.xml")).andReturn().response.status shouldBe 404
+            mockMvc.perform(get("/lite/")).andReturn().response.contentAsString shouldNotContain "rel=\"canonical\""
+        }
 
-    "malformed parameters do not fail" {
-        mockMvc.perform(get("/lite/?day=x&lat=y&zoom=z&go=nowhere&map.x=a")).andReturn().response.status shouldBe 303
-        mockMvc.perform(get("/lite/?day=x&lat=y&zoom=z")).andReturn().response.status shouldBe 200
-    }
+        "/lite redirects to /lite/" {
+            val response = mockMvc.perform(get("/lite")).andReturn().response
+            response.status shouldBe 301
+            response.getHeader("Location") shouldBe "/lite/"
+        }
 
-    "the map is a PNG of the requested size" {
-        val response = mockMvc.perform(get("/lite/map.png?size=small&day=2001-01-01")).andReturn().response
-        response.status shouldBe 200
-        response.contentType shouldBe "image/png"
-        val image = ImageIO.read(ByteArrayInputStream(response.contentAsByteArray))
-        image.width shouldBe 640
-        image.height shouldBe 400
-    }
+        "a button redirects to the canonical URL of the resulting view" {
+            val response = mockMvc.perform(get("/lite/?lat=0&lng=0&zoom=3&go=in")).andReturn().response
+            response.status shouldBe 303
+            response.getHeader("Location") shouldBe "/lite/?lat=0.0000&lng=0.0000&zoom=4"
+        }
 
-    "the page shows statistics and the grouping settings" {
-        val html = mockMvc.perform(get("/lite/?group=family&group=country&weight=1&top=50")).andReturn().response.contentAsString
-        html shouldContain "Shown relays"
-        html shouldContain "Group relays by"
-        html shouldContain "name=\"group\" value=\"family\" checked"
-        html shouldContain "group=family&amp;group=country&amp;weight=1&amp;top=50"
-    }
+        "a click on the map zooms in when the click mode is zoom" {
+            val response = mockMvc.perform(
+                get("/lite/?lat=0&lng=0&zoom=3&click=zoom&map.x=512&map.y=256"),
+            ).andReturn().response
+            response.status shouldBe 303
+            response.getHeader("Location") shouldContain "zoom=4"
+        }
 
-    "selections of groups without relays on the day are dropped" {
-        val html = mockMvc.perform(get("/lite/?group=family&family=4711&country=DE&as=3320")).andReturn().response.contentAsString
-        html shouldNotContain "Selected:"
-        html shouldNotContain "family=4711"
-    }
+        "a click on the map lists the relays there by default" {
+            val response = mockMvc.perform(get("/lite/?lat=0&lng=0&zoom=3&map.x=100&map.y=50")).andReturn().response
+            response.status shouldBe 303
+            response.getHeader("Location") shouldBe "/lite/?lat=0.0000&lng=0.0000&zoom=3&x=100&y=50#relays"
+            val page = mockMvc.perform(get("/lite/?lat=0&lng=0&zoom=3&x=100&y=50")).andReturn().response.contentAsString
+            page shouldContain "Relays at the clicked point"
+        }
 
-    "the map is drawn with all groupings" {
-        val response = mockMvc.perform(get("/lite/map.png?group=family&group=as&group=country&group=coordinates&weight=1&top=10&country=DE"))
-            .andReturn().response
-        response.status shouldBe 200
-        ImageIO.read(ByteArrayInputStream(response.contentAsByteArray)).width shouldBe 1024
-    }
+        "relay pages escape relay data and link back to the map" {
+            val relay = relayDetailsRepository.save(
+                mockRelayDetails('E').apply {
+                    nickname = "<i>x"
+                    contact = "javascript:alert(1) <script>alert(1)</script>"
+                    familyId = 4711L
+                },
+            )
+            val response = mockMvc.perform(get("/lite/relay/${relay.id}?zoom=4")).andReturn().response
+            response.status shouldBe 200
+            val html = response.contentAsString
+            html shouldContain "&lt;i&gt;x"
+            html shouldContain "javascript:alert(1) &lt;script&gt;alert(1)&lt;/script&gt;"
+            html shouldNotContain "<i>x"
+            html shouldNotContain "<script"
+            html shouldNotContain "href=\"javascript"
+            html shouldContain "href=\"https://metrics.torproject.org/rs.html#details/${"E".repeat(40)}\""
+            html shouldContain "href=\"/lite/?lat="
 
-    "the timeline is a PNG as wide as the map" {
-        val response = mockMvc.perform(get("/lite/timeline.png?size=small&day=2001-01-01")).andReturn().response
-        response.status shouldBe 200
-        response.contentType shouldBe "image/png"
-        val image = ImageIO.read(ByteArrayInputStream(response.contentAsByteArray))
-        image.width shouldBe 640
-        image.height shouldBe 64
-    }
+            val family = mockMvc.perform(get("/lite/family/4711")).andReturn().response
+            family.status shouldBe 200
+            family.contentAsString shouldContain "/lite/relay/${relay.id}?"
+        }
 
-    "a click on the timeline redirects to the canonical URL" {
-        val response = mockMvc.perform(get("/lite/?lat=0&lng=0&zoom=3&timeline.x=100&timeline.y=10")).andReturn().response
-        response.status shouldBe 303
-        response.getHeader("Location") shouldBe "/lite/?lat=0.0000&lng=0.0000&zoom=3"
-    }
+        "relay pages list the certified families" {
+            val relay = relayDetailsRepository.save(
+                mockRelayDetails('F').apply {
+                    familyKeys =
+                        "ed25519:one, ed25519:two"
+                },
+            )
+            val html = mockMvc.perform(get("/lite/relay/${relay.id}")).andReturn().response.contentAsString
+            html shouldContain "Certified families"
+            html shouldContain "<li>ed25519:one</li>"
+            html shouldContain "<li>ed25519:two</li>"
+        }
 
-    "the page shows the country usage and the layer settings" {
-        val html = mockMvc.perform(get("/lite/?usage=1&heat=1")).andReturn().response.contentAsString
-        html shouldContain "Countries with the most Tor users"
-        html shouldContain "name=\"heat\" value=\"1\" checked"
-        html shouldContain "name=\"usage\" value=\"1\" checked"
-        mockMvc.perform(get("/lite/")).andReturn().response.contentAsString shouldNotContain "Countries with the most Tor users"
-    }
+        "unknown relays and families are HTML 404 pages" {
+            listOf("/lite/relay/999999999", "/lite/family/999999999").forEach { path ->
+                val response = mockMvc.perform(get(path)).andReturn().response
+                response.status shouldBe 404
+                response.contentType shouldStartWith "text/html"
+            }
+        }
 
-    "the map is drawn with the heatmap and the country usage" {
-        val response = mockMvc.perform(get("/lite/map.png?heat=1&usage=1")).andReturn().response
-        response.status shouldBe 200
-        ImageIO.read(ByteArrayInputStream(response.contentAsByteArray)).width shouldBe 1024
-    }
+        "autonomous system and search pages work without data" {
+            mockMvc.perform(get("/lite/as/3320")).andReturn().response.status shouldBe 200
+            mockMvc.perform(get("/lite/search?q=relay")).andReturn().response.contentAsString shouldContain
+                "Relays matching"
+            val emptySearch = mockMvc.perform(get("/lite/search?q=&zoom=4")).andReturn().response
+            emptySearch.status shouldBe 303
+            emptySearch.getHeader("Location") shouldContain "zoom=4"
+        }
 
-    "days without data resolve to the closest earlier day" {
-        val days = listOf(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 5))
-        LiteController.resolveDay(days, null) shouldBe LocalDate.of(2024, 1, 5)
-        LiteController.resolveDay(days, LocalDate.of(2024, 1, 3)) shouldBe LocalDate.of(2024, 1, 1)
-        LiteController.resolveDay(days, LocalDate.of(2023, 1, 1)) shouldBe LocalDate.of(2024, 1, 1)
-        LiteController.resolveDay(emptyList(), LocalDate.of(2023, 1, 1)) shouldBe null
-    }
-})
+        "malformed parameters do not fail" {
+            mockMvc.perform(get("/lite/?day=x&lat=y&zoom=z&go=nowhere&map.x=a")).andReturn().response.status shouldBe
+                303
+            mockMvc.perform(get("/lite/?day=x&lat=y&zoom=z")).andReturn().response.status shouldBe 200
+        }
+
+        "the map is a PNG of the requested size" {
+            val response = mockMvc.perform(get("/lite/map.png?size=small&day=2001-01-01")).andReturn().response
+            response.status shouldBe 200
+            response.contentType shouldBe "image/png"
+            val image = ImageIO.read(ByteArrayInputStream(response.contentAsByteArray))
+            image.width shouldBe 640
+            image.height shouldBe 400
+        }
+
+        "the page shows statistics and the grouping settings" {
+            val html = mockMvc.perform(
+                get("/lite/?group=family&group=country&weight=1&top=50"),
+            ).andReturn().response.contentAsString
+            html shouldContain "Shown relays"
+            html shouldContain "Group relays by"
+            html shouldContain "name=\"group\" value=\"family\" checked"
+            html shouldContain "group=family&amp;group=country&amp;weight=1&amp;top=50"
+        }
+
+        "selections of groups without relays on the day are dropped" {
+            val html = mockMvc.perform(
+                get("/lite/?group=family&family=4711&country=DE&as=3320"),
+            ).andReturn().response.contentAsString
+            html shouldNotContain "Selected:"
+            html shouldNotContain "family=4711"
+        }
+
+        "the map is drawn with all groupings" {
+            val response = mockMvc.perform(
+                get("/lite/map.png?group=family&group=as&group=country&group=coordinates&weight=1&top=10&country=DE"),
+            )
+                .andReturn().response
+            response.status shouldBe 200
+            ImageIO.read(ByteArrayInputStream(response.contentAsByteArray)).width shouldBe 1024
+        }
+
+        "the timeline is a PNG as wide as the map" {
+            val response = mockMvc.perform(get("/lite/timeline.png?size=small&day=2001-01-01")).andReturn().response
+            response.status shouldBe 200
+            response.contentType shouldBe "image/png"
+            val image = ImageIO.read(ByteArrayInputStream(response.contentAsByteArray))
+            image.width shouldBe 640
+            image.height shouldBe 64
+        }
+
+        "a click on the timeline redirects to the canonical URL" {
+            val response = mockMvc.perform(
+                get("/lite/?lat=0&lng=0&zoom=3&timeline.x=100&timeline.y=10"),
+            ).andReturn().response
+            response.status shouldBe 303
+            response.getHeader("Location") shouldBe "/lite/?lat=0.0000&lng=0.0000&zoom=3"
+        }
+
+        "the page shows the country usage and the layer settings" {
+            val html = mockMvc.perform(get("/lite/?usage=1&heat=1")).andReturn().response.contentAsString
+            html shouldContain "Countries with the most Tor users"
+            html shouldContain "name=\"heat\" value=\"1\" checked"
+            html shouldContain "name=\"usage\" value=\"1\" checked"
+            mockMvc.perform(get("/lite/")).andReturn().response.contentAsString shouldNotContain
+                "Countries with the most Tor users"
+        }
+
+        "the map is drawn with the heatmap and the country usage" {
+            val response = mockMvc.perform(get("/lite/map.png?heat=1&usage=1")).andReturn().response
+            response.status shouldBe 200
+            ImageIO.read(ByteArrayInputStream(response.contentAsByteArray)).width shouldBe 1024
+        }
+
+        "days without data resolve to the closest earlier day" {
+            val days = listOf(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 5))
+            LiteController.resolveDay(days, null) shouldBe LocalDate.of(2024, 1, 5)
+            LiteController.resolveDay(days, LocalDate.of(2024, 1, 3)) shouldBe LocalDate.of(2024, 1, 1)
+            LiteController.resolveDay(days, LocalDate.of(2023, 1, 1)) shouldBe LocalDate.of(2024, 1, 1)
+            LiteController.resolveDay(emptyList(), LocalDate.of(2023, 1, 1)) shouldBe null
+        }
+    })

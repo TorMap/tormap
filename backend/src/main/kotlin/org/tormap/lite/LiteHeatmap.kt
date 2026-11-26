@@ -22,11 +22,17 @@ object LiteHeatmap {
     private const val BLUR = 35
     private const val MAX = 1.0
     private const val MIN_OPACITY = .55
+
     // The maximum zoom of the JavaScript map, points reach their full intensity there
     private const val MAP_MAX_ZOOM = 18
     private const val OUTER_RADIUS = RADIUS + BLUR
     private const val CELL_SIZE = OUTER_RADIUS / 2.0
-    private val GRADIENT_STOPS = listOf(.4 to Color(0x2e53dc), .65 to Color(0xc924ae), .75 to Color(0xff4646), .83 to Color(0xff0000))
+    private val GRADIENT_STOPS = listOf(
+        .4 to Color(0x2e53dc),
+        .65 to Color(0xc924ae),
+        .75 to Color(0xff4646),
+        .83 to Color(0xff0000),
+    )
 
     /**
      * The alpha of the blurred circle: a canvas shadow blur of [BLUR] pixels is a Gaussian blur with a standard
@@ -48,7 +54,9 @@ object LiteHeatmap {
         val upper = GRADIENT_STOPS.indexOfFirst { it.first >= position }
         when (upper) {
             -1 -> GRADIENT_STOPS.last().second.rgb
+
             0 -> GRADIENT_STOPS.first().second.rgb
+
             else -> {
                 val (lowStop, low) = GRADIENT_STOPS[upper - 1]
                 val (highStop, high) = GRADIENT_STOPS[upper]
@@ -75,7 +83,11 @@ object LiteHeatmap {
             val worldY = WebMercator.y(relay.lat.toDouble(), view.zoom)
             val x = worldX - view.left
             val y = worldY - view.top
-            if (x < -OUTER_RADIUS || y < -OUTER_RADIUS || x > width + OUTER_RADIUS || y > height + OUTER_RADIUS) continue
+            if (x < -OUTER_RADIUS || y < -OUTER_RADIUS || x > width + OUTER_RADIUS ||
+                y > height + OUTER_RADIUS
+            ) {
+                continue
+            }
             val key = floor(worldX / CELL_SIZE).toLong() * 1_000_000 + floor(worldY / CELL_SIZE).toLong()
             val cell = cells[key]
             if (cell == null) {

@@ -40,7 +40,7 @@ class RelayStatisticsControllerTest(
                 mockRelayLocation(day, 'A', setOf(TorRelayFlag.Exit)),
                 mockRelayLocation(day, 'B', setOf(TorRelayFlag.Guard)),
                 mockRelayLocation(day, 'C'),
-            )
+            ),
         )
         mockMvc.perform(get("/relay/statistics/daily-counts"))
             .andExpect(status().isOk)

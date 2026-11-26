@@ -18,7 +18,7 @@ fun String.commaSeparatedToList() = this.split(",").map { it.trim() }
 
 fun millisSinceEpochToLocalDate(millisSinceEpoch: Long): LocalDate = LocalDate.ofInstant(
     Instant.ofEpochMilli(millisSinceEpoch),
-    ZoneId.of("UTC")
+    ZoneId.of("UTC"),
 )
 
 fun String?.stripLengthForDB(maximumCharacters: Int = 255) = when {

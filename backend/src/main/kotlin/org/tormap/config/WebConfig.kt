@@ -17,7 +17,10 @@ class WebConfig(
         // API responses are controlled via controller ResponseEntity headers.
         registry.addResourceHandler("/static/**")
             .addResourceLocations("classpath:/static/")
-            .setCacheControl(org.springframework.http.CacheControl.maxAge(Duration.ofSeconds(publicCacheMaxAgeSeconds)).cachePublic())
+            .setCacheControl(
+                org.springframework.http.CacheControl.maxAge(
+                    Duration.ofSeconds(publicCacheMaxAgeSeconds),
+                ).cachePublic(),
+            )
     }
 }
-

@@ -2,7 +2,6 @@ package org.tormap.config.value
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-
 @ConfigurationProperties("ip-lookup")
 data class IpLookupConfig(
     /**

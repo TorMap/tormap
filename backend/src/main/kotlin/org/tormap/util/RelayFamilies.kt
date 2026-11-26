@@ -64,9 +64,9 @@ fun computeRelayFamilies(
                 is FamilyEntry.Fingerprint -> {
                     val memberIndex = indexByFingerprint[entry.fingerprint]
                     if (
-                        memberIndex != null
-                        && memberIndex != requestingIndex
-                        && declaredFamilies[memberIndex].confirms(requestingRelay)
+                        memberIndex != null &&
+                        memberIndex != requestingIndex &&
+                        declaredFamilies[memberIndex].confirms(requestingRelay)
                     ) {
                         connect(requestingIndex, memberIndex)
                         confirmedConnectionCount++
@@ -74,7 +74,9 @@ fun computeRelayFamilies(
                         rejectedConnectionCount++
                     }
                 }
+
                 is FamilyEntry.Nickname -> rejectedConnectionCount++
+
                 is FamilyEntry.Invalid -> {
                     onInvalidEntry(requestingRelay, entry.value)
                     rejectedConnectionCount++
@@ -130,7 +132,7 @@ private class DeclaredFamily(val entries: List<FamilyEntry>) {
                     familyEntryNicknameRegex.matches(it) -> FamilyEntry.Nickname
                     else -> FamilyEntry.Invalid(it)
                 }
-            } ?: emptyList()
+            } ?: emptyList(),
         )
     }
 }

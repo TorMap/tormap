@@ -51,61 +51,57 @@ class DNSJavaReverseDnsResolver : ReverseDnsResolver {
     private val logger = logger()
     private val dnsResolver = ExtendedResolver().apply { timeout = QUERY_TIMEOUT }
 
-    override fun lookupPtrRecords(ipAddress: String): List<String> {
-        return try {
-            lookup(ReverseMap.fromAddress(ipAddress), Type.PTR)
-                .filterIsInstance<PTRRecord>()
-                .map { it.target.toString().trimEnd('.') }
-        } catch (e: Exception) {
-            logger.debug("PTR record lookup for IP {} failed! {}: {}", ipAddress, e.javaClass, e.message)
-            emptyList()
-        }
+    override fun lookupPtrRecords(ipAddress: String): List<String> = try {
+        lookup(ReverseMap.fromAddress(ipAddress), Type.PTR)
+            .filterIsInstance<PTRRecord>()
+            .map { it.target.toString().trimEnd('.') }
+    } catch (e: Exception) {
+        logger.debug("PTR record lookup for IP {} failed! {}: {}", ipAddress, e.javaClass, e.message)
+        emptyList()
     }
 
-    override fun lookupAddresses(hostName: String): List<String> {
-        return try {
-            // Absolute name, so the search path of the host is not applied
-            val name = Name.fromString(hostName, Name.root)
-            listOf(Type.A, Type.AAAA)
-                .flatMap { lookup(name, it) }
-                .mapNotNull {
-                    when (it) {
-                        is ARecord -> it.address
-                        is AAAARecord -> it.address
-                        else -> null
-                    }
+    override fun lookupAddresses(hostName: String): List<String> = try {
+        // Absolute name, so the search path of the host is not applied
+        val name = Name.fromString(hostName, Name.root)
+        listOf(Type.A, Type.AAAA)
+            .flatMap { lookup(name, it) }
+            .mapNotNull {
+                when (it) {
+                    is ARecord -> it.address
+                    is AAAARecord -> it.address
+                    else -> null
                 }
-                .filter { it.isPubliclyRoutable() }
-                .map { it.hostAddress }
-        } catch (e: Exception) {
-            logger.debug("Address lookup for hostname {} failed! {}: {}", hostName, e.javaClass, e.message)
-            emptyList()
-        }
+            }
+            .filter { it.isPubliclyRoutable() }
+            .map { it.hostAddress }
+    } catch (e: Exception) {
+        logger.debug("Address lookup for hostname {} failed! {}: {}", hostName, e.javaClass, e.message)
+        emptyList()
     }
 
     private fun lookup(name: Name, type: Int): List<Record> =
         Lookup(name, type).apply { setResolver(dnsResolver) }.run()?.toList() ?: emptyList()
 }
 
-private fun InetAddress.isULA(): Boolean =
-    this is Inet6Address &&
-        (address[0].toInt() and 0xFE) == 0xFC  // fc00::/7
+private fun InetAddress.isULA(): Boolean = this is Inet6Address &&
+    (address[0].toInt() and 0xFE) == 0xFC // fc00::/7
 
 /**
  * Whether the address can be reached on the public internet. Forward lookups only verify a PTR name with such
  * addresses, so that a name pointing to an internal address is never reported as verified.
  */
-internal fun InetAddress.isPubliclyRoutable(): Boolean =
-    !isLoopbackAddress &&
-        !isLinkLocalAddress &&
-        !isSiteLocalAddress &&   // reliable for IPv4
-        !isULA() &&              // fills the IPv6 gap isSiteLocalAddress misses
-        !isMulticastAddress &&
-        !isAnyLocalAddress &&
-        address.first() != 0.toByte() &&
-        !(address.size == 4 &&
+internal fun InetAddress.isPubliclyRoutable(): Boolean = !isLoopbackAddress &&
+    !isLinkLocalAddress &&
+    !isSiteLocalAddress && // reliable for IPv4
+    !isULA() && // fills the IPv6 gap isSiteLocalAddress misses
+    !isMulticastAddress &&
+    !isAnyLocalAddress &&
+    address.first() != 0.toByte() &&
+    !(
+        address.size == 4 &&
             address[0] == 100.toByte() &&
-            (address[1].toInt() and 0xFF) in 64..127)
+            (address[1].toInt() and 0xFF) in 64..127
+        )
 
 @Service
 class ReverseDnsLookupService(

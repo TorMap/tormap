@@ -67,8 +67,8 @@ class CountryUsageServiceTest(
         status = 200
         redirectTo = null
         body = "#\n# The Tor Project\n#\ndate,country,users,lower,upper,frac\n" +
-                "2024-03-04,,300,,,60\n2024-03-04,de,100,80,120,60\n2024-03-04,??,5,,,60\n" +
-                "2024-03-05,,310,,,61\n2024-03-05,de,110,90,130,61\n2024-03-05,fr,50,40,60,61\n"
+            "2024-03-04,,300,,,60\n2024-03-04,de,100,80,120,60\n2024-03-04,??,5,,,60\n" +
+            "2024-03-05,,310,,,61\n2024-03-05,de,110,90,130,61\n2024-03-05,fr,50,40,60,61\n"
     }
 
     afterSpec {
@@ -123,7 +123,7 @@ class CountryUsageServiceTest(
 
     "malformed lines are skipped and the valid ones are stored" {
         body = "date,country,users,lower,upper,frac\n2024-03-05,de,2,,,50\n2024-03-05,fr,many,,,50\n" +
-                "2024-03-05,it,3,,,50,extra\n2024-13-01,es,4,,,50\n"
+            "2024-03-05,it,3,,,50,extra\n2024-13-01,es,4,,,50\n"
         service().refresh() shouldBe 1
         countryUsageRepository.findAllByDay(LocalDate.of(2024, 3, 5)).map { it.country } shouldBe listOf("DE")
     }

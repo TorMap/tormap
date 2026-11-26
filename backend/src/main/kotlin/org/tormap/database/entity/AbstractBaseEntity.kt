@@ -1,15 +1,15 @@
 package org.tormap.database.entity
 
-import org.hibernate.Hibernate
-import java.io.Serializable
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.MappedSuperclass
 import jakarta.persistence.SequenceGenerator
+import org.hibernate.Hibernate
+import java.io.Serializable
 
 @MappedSuperclass
-abstract class AbstractBaseEntity<T: Serializable>  {
+abstract class AbstractBaseEntity<T : Serializable> {
 
     // Explicit generator: all entities share the DB sequence created in V1__Create_tables.sql with an increment of 1.
     // Without it, Hibernate 6 would expect one sequence per entity with an increment of 50.
@@ -23,7 +23,7 @@ abstract class AbstractBaseEntity<T: Serializable>  {
         if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
         other as AbstractBaseEntity<*>
 
-        return  this.id != null && this.id == other.id
+        return this.id != null && this.id == other.id
     }
 
     override fun hashCode() = 31

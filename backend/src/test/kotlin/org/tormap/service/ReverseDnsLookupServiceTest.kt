@@ -9,156 +9,157 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
-class ReverseDnsLookupServiceTest : StringSpec({
-    "lookupHostNames separates verified and unverified host names" {
-        val reverseDnsResolver = LookupServiceFakeReverseDnsResolver(
-            ptrRecordsByIpAddress = mapOf(
-                "1.2.3.4" to listOf(
-                    "verified.example.",
-                    "verified.example.",
-                    "unverified.example.",
-                )
-            ),
-            addressesByHostName = mapOf(
-                "verified.example" to listOf("1.2.3.4"),
-                "unverified.example" to listOf("5.6.7.8"),
-            ),
-        )
-        val reverseDnsLookupService = ReverseDnsLookupService(reverseDnsResolver)
+class ReverseDnsLookupServiceTest :
+    StringSpec({
+        "lookupHostNames separates verified and unverified host names" {
+            val reverseDnsResolver = LookupServiceFakeReverseDnsResolver(
+                ptrRecordsByIpAddress = mapOf(
+                    "1.2.3.4" to listOf(
+                        "verified.example.",
+                        "verified.example.",
+                        "unverified.example.",
+                    ),
+                ),
+                addressesByHostName = mapOf(
+                    "verified.example" to listOf("1.2.3.4"),
+                    "unverified.example" to listOf("5.6.7.8"),
+                ),
+            )
+            val reverseDnsLookupService = ReverseDnsLookupService(reverseDnsResolver)
 
-        val result = reverseDnsLookupService.lookupHostNames("1.2.3.4")
+            val result = reverseDnsLookupService.lookupHostNames("1.2.3.4")
 
-        result.verifiedHostNames shouldBe listOf("verified.example")
-        result.unverifiedHostNames shouldBe listOf("unverified.example")
-    }
-
-    "lookupHostNames returns empty lists when no PTR records exist" {
-        val reverseDnsResolver = LookupServiceFakeReverseDnsResolver()
-        val reverseDnsLookupService = ReverseDnsLookupService(reverseDnsResolver)
-
-        val result = reverseDnsLookupService.lookupHostNames("1.2.3.4")
-
-        result shouldBe ReverseDnsLookupResult()
-        reverseDnsResolver.lookupAddressesCallCount shouldBe 0
-    }
-
-
-    "lookupHostNames limits number of host names verified" {
-        val ptrRecords = (1..20).map { "host$it.example." }
-        val reverseDnsResolver = LookupServiceFakeReverseDnsResolver(
-            ptrRecordsByIpAddress = mapOf("1.2.3.4" to ptrRecords),
-            addressesByHostName = ptrRecords.associate { it.trimEnd('.') to listOf("5.6.7.8") },
-        )
-        val reverseDnsLookupService = ReverseDnsLookupService(reverseDnsResolver)
-
-        val result = reverseDnsLookupService.lookupHostNames("1.2.3.4")
-
-        result.verifiedHostNames shouldBe emptyList()
-        result.unverifiedHostNames.size shouldBe 10
-        reverseDnsResolver.lookupAddressesCallCount shouldBe 10
-    }
-
-    "lookupHostNames returns host names not verified before the deadline as unverified" {
-        val reverseDnsResolver = LookupServiceFakeReverseDnsResolver(
-            ptrRecordsByIpAddress = mapOf(
-                "1.2.3.4" to listOf("fast.example.", "slow.example.", "later.example.")
-            ),
-            addressesByHostName = mapOf(
-                "fast.example" to listOf("1.2.3.4"),
-                "slow.example" to listOf("1.2.3.4"),
-                "later.example" to listOf("1.2.3.4"),
-            ),
-            addressLookupDelayByHostName = mapOf("slow.example" to Duration.ofSeconds(10)),
-        )
-        val reverseDnsLookupService = ReverseDnsLookupService(reverseDnsResolver, Duration.ofMillis(200))
-
-        val startTime = System.nanoTime()
-        val result = reverseDnsLookupService.lookupHostNames("1.2.3.4")
-
-        Duration.ofNanos(System.nanoTime() - startTime).toMillis() shouldBeLessThan 2_000
-        result.verifiedHostNames shouldBe listOf("fast.example")
-        result.unverifiedHostNames shouldBe listOf("slow.example", "later.example")
-        reverseDnsLookupService.destroy()
-    }
-
-    "lookupHostNames returns empty lists when the PTR lookup does not finish before the deadline" {
-        val reverseDnsResolver = LookupServiceFakeReverseDnsResolver(
-            ptrRecordsByIpAddress = mapOf("1.2.3.4" to listOf("host.example.")),
-            ptrLookupDelay = Duration.ofSeconds(10),
-        )
-        val reverseDnsLookupService = ReverseDnsLookupService(reverseDnsResolver, Duration.ofMillis(200))
-
-        val startTime = System.nanoTime()
-        val result = reverseDnsLookupService.lookupHostNames("1.2.3.4")
-
-        Duration.ofNanos(System.nanoTime() - startTime).toMillis() shouldBeLessThan 2_000
-        result shouldBe ReverseDnsLookupResult()
-        reverseDnsLookupService.destroy()
-    }
-
-    "lookupHostNames rejects lookups without waiting when all lookup slots are busy" {
-        val ptrLookupStarted = CountDownLatch(1)
-        val releasePtrLookup = CountDownLatch(1)
-        val reverseDnsResolver = object : ReverseDnsResolver {
-            override fun lookupPtrRecords(ipAddress: String): List<String> {
-                ptrLookupStarted.countDown()
-                releasePtrLookup.await()
-                return emptyList()
-            }
-
-            override fun lookupAddresses(hostName: String): List<String> = emptyList()
+            result.verifiedHostNames shouldBe listOf("verified.example")
+            result.unverifiedHostNames shouldBe listOf("unverified.example")
         }
-        val reverseDnsLookupService = ReverseDnsLookupService(
-            reverseDnsResolver = reverseDnsResolver,
-            lookupTimeout = Duration.ofSeconds(10),
-            maxConcurrentLookups = 1,
-        )
-        val busyLookup = thread { reverseDnsLookupService.lookupHostNames("1.2.3.4") }
-        try {
-            ptrLookupStarted.await(5, TimeUnit.SECONDS) shouldBe true
 
-            shouldThrow<ReverseDnsLookupCapacityException> {
-                reverseDnsLookupService.lookupHostNames("5.6.7.8")
-            }
-        } finally {
-            releasePtrLookup.countDown()
-            busyLookup.join()
+        "lookupHostNames returns empty lists when no PTR records exist" {
+            val reverseDnsResolver = LookupServiceFakeReverseDnsResolver()
+            val reverseDnsLookupService = ReverseDnsLookupService(reverseDnsResolver)
+
+            val result = reverseDnsLookupService.lookupHostNames("1.2.3.4")
+
+            result shouldBe ReverseDnsLookupResult()
+            reverseDnsResolver.lookupAddressesCallCount shouldBe 0
+        }
+
+        "lookupHostNames limits number of host names verified" {
+            val ptrRecords = (1..20).map { "host$it.example." }
+            val reverseDnsResolver = LookupServiceFakeReverseDnsResolver(
+                ptrRecordsByIpAddress = mapOf("1.2.3.4" to ptrRecords),
+                addressesByHostName = ptrRecords.associate { it.trimEnd('.') to listOf("5.6.7.8") },
+            )
+            val reverseDnsLookupService = ReverseDnsLookupService(reverseDnsResolver)
+
+            val result = reverseDnsLookupService.lookupHostNames("1.2.3.4")
+
+            result.verifiedHostNames shouldBe emptyList()
+            result.unverifiedHostNames.size shouldBe 10
+            reverseDnsResolver.lookupAddressesCallCount shouldBe 10
+        }
+
+        "lookupHostNames returns host names not verified before the deadline as unverified" {
+            val reverseDnsResolver = LookupServiceFakeReverseDnsResolver(
+                ptrRecordsByIpAddress = mapOf(
+                    "1.2.3.4" to listOf("fast.example.", "slow.example.", "later.example."),
+                ),
+                addressesByHostName = mapOf(
+                    "fast.example" to listOf("1.2.3.4"),
+                    "slow.example" to listOf("1.2.3.4"),
+                    "later.example" to listOf("1.2.3.4"),
+                ),
+                addressLookupDelayByHostName = mapOf("slow.example" to Duration.ofSeconds(10)),
+            )
+            val reverseDnsLookupService = ReverseDnsLookupService(reverseDnsResolver, Duration.ofMillis(200))
+
+            val startTime = System.nanoTime()
+            val result = reverseDnsLookupService.lookupHostNames("1.2.3.4")
+
+            Duration.ofNanos(System.nanoTime() - startTime).toMillis() shouldBeLessThan 2_000
+            result.verifiedHostNames shouldBe listOf("fast.example")
+            result.unverifiedHostNames shouldBe listOf("slow.example", "later.example")
             reverseDnsLookupService.destroy()
         }
-    }
 
-    "lookupHostNames returns what is known when a lookup fails" {
-        val failingResolver = object : ReverseDnsResolver {
-            override fun lookupPtrRecords(ipAddress: String) = listOf("host.example.")
-            override fun lookupAddresses(hostName: String): List<String> = throw IllegalStateException("resolver broke")
+        "lookupHostNames returns empty lists when the PTR lookup does not finish before the deadline" {
+            val reverseDnsResolver = LookupServiceFakeReverseDnsResolver(
+                ptrRecordsByIpAddress = mapOf("1.2.3.4" to listOf("host.example.")),
+                ptrLookupDelay = Duration.ofSeconds(10),
+            )
+            val reverseDnsLookupService = ReverseDnsLookupService(reverseDnsResolver, Duration.ofMillis(200))
+
+            val startTime = System.nanoTime()
+            val result = reverseDnsLookupService.lookupHostNames("1.2.3.4")
+
+            Duration.ofNanos(System.nanoTime() - startTime).toMillis() shouldBeLessThan 2_000
+            result shouldBe ReverseDnsLookupResult()
+            reverseDnsLookupService.destroy()
         }
 
-        val result = ReverseDnsLookupService(failingResolver).lookupHostNames("1.2.3.4")
+        "lookupHostNames rejects lookups without waiting when all lookup slots are busy" {
+            val ptrLookupStarted = CountDownLatch(1)
+            val releasePtrLookup = CountDownLatch(1)
+            val reverseDnsResolver = object : ReverseDnsResolver {
+                override fun lookupPtrRecords(ipAddress: String): List<String> {
+                    ptrLookupStarted.countDown()
+                    releasePtrLookup.await()
+                    return emptyList()
+                }
 
-        result shouldBe ReverseDnsLookupResult(unverifiedHostNames = listOf("host.example"))
-    }
+                override fun lookupAddresses(hostName: String): List<String> = emptyList()
+            }
+            val reverseDnsLookupService = ReverseDnsLookupService(
+                reverseDnsResolver = reverseDnsResolver,
+                lookupTimeout = Duration.ofSeconds(10),
+                maxConcurrentLookups = 1,
+            )
+            val busyLookup = thread { reverseDnsLookupService.lookupHostNames("1.2.3.4") }
+            try {
+                ptrLookupStarted.await(5, TimeUnit.SECONDS) shouldBe true
 
-    "lookupHostNames keeps the interrupt of the calling thread" {
-        val reverseDnsResolver = LookupServiceFakeReverseDnsResolver(
-            ptrRecordsByIpAddress = mapOf("1.2.3.4" to listOf("slow.example.")),
-            ptrLookupDelay = Duration.ofSeconds(5),
-        )
-        val service = ReverseDnsLookupService(reverseDnsResolver, lookupTimeout = Duration.ofSeconds(10))
-        var result: ReverseDnsLookupResult? = null
-        var interrupted = false
-        val caller = thread {
-            result = service.lookupHostNames("1.2.3.4")
-            interrupted = Thread.currentThread().isInterrupted
+                shouldThrow<ReverseDnsLookupCapacityException> {
+                    reverseDnsLookupService.lookupHostNames("5.6.7.8")
+                }
+            } finally {
+                releasePtrLookup.countDown()
+                busyLookup.join()
+                reverseDnsLookupService.destroy()
+            }
         }
-        Thread.sleep(200)
-        caller.interrupt()
-        caller.join(5_000)
 
-        result shouldBe ReverseDnsLookupResult()
-        interrupted shouldBe true
-        service.destroy()
-    }
-})
+        "lookupHostNames returns what is known when a lookup fails" {
+            val failingResolver = object : ReverseDnsResolver {
+                override fun lookupPtrRecords(ipAddress: String) = listOf("host.example.")
+                override fun lookupAddresses(hostName: String): List<String> =
+                    throw IllegalStateException("resolver broke")
+            }
+
+            val result = ReverseDnsLookupService(failingResolver).lookupHostNames("1.2.3.4")
+
+            result shouldBe ReverseDnsLookupResult(unverifiedHostNames = listOf("host.example"))
+        }
+
+        "lookupHostNames keeps the interrupt of the calling thread" {
+            val reverseDnsResolver = LookupServiceFakeReverseDnsResolver(
+                ptrRecordsByIpAddress = mapOf("1.2.3.4" to listOf("slow.example.")),
+                ptrLookupDelay = Duration.ofSeconds(5),
+            )
+            val service = ReverseDnsLookupService(reverseDnsResolver, lookupTimeout = Duration.ofSeconds(10))
+            var result: ReverseDnsLookupResult? = null
+            var interrupted = false
+            val caller = thread {
+                result = service.lookupHostNames("1.2.3.4")
+                interrupted = Thread.currentThread().isInterrupted
+            }
+            Thread.sleep(200)
+            caller.interrupt()
+            caller.join(5_000)
+
+            result shouldBe ReverseDnsLookupResult()
+            interrupted shouldBe true
+            service.destroy()
+        }
+    })
 
 private class LookupServiceFakeReverseDnsResolver(
     private val ptrRecordsByIpAddress: Map<String, List<String>> = emptyMap(),

@@ -57,7 +57,8 @@ tasks.register("resolveAndLockAll") {
 
 // Overrides of Spring Boot managed versions to pick up security fixes ahead of a Boot release (reported by Snyk).
 // Remove an override once the Boot-managed version is at or above it.
-extra["jackson-2-bom.version"] = "2.23.0" // Jackson 2 (com.fasterxml.jackson), keep in sync with the pins for metrics-lib below
+// Jackson 2 (com.fasterxml.jackson), keep in sync with the pins for metrics-lib below
+extra["jackson-2-bom.version"] = "2.23.0"
 
 dependencies {
     // Kotlin
@@ -110,7 +111,8 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.23")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.23.0")
     implementation("com.fasterxml.jackson.core:jackson-core:2.23.0")
-    implementation("org.slf4j:slf4j-api") // SLF4J 2 (Boot-managed): required by Logback 1.5; compatible with metrics-lib
+    // SLF4J 2 (Boot-managed): required by Logback 1.5; compatible with metrics-lib
+    implementation("org.slf4j:slf4j-api")
     implementation("org.tukaani:xz:1.12")
 
     // Testing JUnit and Kotest (https://kotest.io/)
@@ -166,9 +168,12 @@ abstract class DownloadIpLookupDatabases : DefaultTask() {
         val version = releaseVersion.get()
         require(Regex("""\d{4}-\d{2}""").matches(version)) { "Invalid ipLookupDataVersion '$version'" }
         val releaseUrl = "${baseUrl.get().trimEnd('/')}/$version"
-        val checksums = fetch("$releaseUrl/SHA256SUMS").decodeToString().lines()
-            .filter { it.isNotBlank() }
-            .associate { line -> line.trim().split(Regex("""\s+\*?""")).let { it[1] to it[0].lowercase() } }
+        val checksums =
+            fetch("$releaseUrl/SHA256SUMS")
+                .decodeToString()
+                .lines()
+                .filter { it.isNotBlank() }
+                .associate { line -> line.trim().split(Regex("""\s+\*?""")).let { it[1] to it[0].lowercase() } }
         val outputDir = outputDirectory.get().asFile
         outputDir.deleteRecursively()
         val targetDir = outputDir.resolve("ip-lookup").apply { mkdirs() }
@@ -178,8 +183,11 @@ abstract class DownloadIpLookupDatabases : DefaultTask() {
         ).forEach { (asset, target) ->
             val bytes = fetch("$releaseUrl/$asset")
             val expected = checksums[asset] ?: throw GradleException("$asset is missing in $releaseUrl/SHA256SUMS")
-            val actual = MessageDigest.getInstance("SHA-256").digest(bytes)
-                .joinToString("") { "%02x".format(it) }
+            val actual =
+                MessageDigest
+                    .getInstance("SHA-256")
+                    .digest(bytes)
+                    .joinToString("") { "%02x".format(it) }
             if (actual != expected) throw GradleException("SHA-256 mismatch for $releaseUrl/$asset")
             GZIPInputStream(bytes.inputStream()).use { input ->
                 targetDir.resolve(target).outputStream().use { input.copyTo(it) }
@@ -198,18 +206,23 @@ abstract class DownloadIpLookupDatabases : DefaultTask() {
     }
 }
 val ipLookupResources = layout.buildDirectory.dir("generated/ip-lookup-resources")
-val downloadIpLookupDatabases = tasks.register<DownloadIpLookupDatabases>("downloadIpLookupDatabases") {
-    releaseVersion = providers.gradleProperty("ipLookupDataVersion")
-    baseUrl = providers.gradleProperty("ipLookupDataUrl")
-        .orElse("https://github.com/TorMap/ip-lookup-data/releases/download")
-    outputDirectory = ipLookupResources
-}
+val downloadIpLookupDatabases =
+    tasks.register<DownloadIpLookupDatabases>("downloadIpLookupDatabases") {
+        releaseVersion = providers.gradleProperty("ipLookupDataVersion")
+        baseUrl =
+            providers
+                .gradleProperty("ipLookupDataUrl")
+                .orElse("https://github.com/TorMap/ip-lookup-data/releases/download")
+        outputDirectory = ipLookupResources
+    }
 sourceSets.main {
     resources.srcDir(downloadIpLookupDatabases)
 }
 tasks.processResources {
     // The Lite map draws the same country borders and colors as the frontend, so the files are shared instead of copied
-    from(files("../frontend/src/resources/world.geo.json", "../frontend/src/resources/country-meta.json")) { into("lite") }
+    from(files("../frontend/src/resources/world.geo.json", "../frontend/src/resources/country-meta.json")) {
+        into("lite")
+    }
     // Earlier builds extracted the databases into src/main/resources, which would now collide with the generated ones
     val legacyIpLookupDir = file("src/main/resources/ip-lookup")
     doFirst {
@@ -252,18 +265,24 @@ tasks.bootRun {
 tasks.register<Exec>("snykTest") {
     group = "verification"
     workingDir = projectDir
-    val extraArgs = providers.gradleProperty("snykArgs").map { it.split(" ").filter(String::isNotBlank) }.orElse(emptyList())
+    val extraArgs =
+        providers
+            .gradleProperty("snykArgs")
+            .map {
+                it.split(" ").filter(String::isNotBlank)
+            }.orElse(emptyList())
     commandLine(listOf("snyk", "test", "--severity-threshold=high") + extraArgs.get())
 }
 
 // Mount point for the downloaded descriptors. Jib cannot set file ownership, so the empty directory is world-writable:
 // a fresh (named or anonymous) volume mounted there inherits this, and the non-root container user can write to it.
 val jibExtraDir = layout.buildDirectory.dir("jib-extra")
-val prepareJibExtraDirectories = tasks.register("prepareJibExtraDirectories") {
-    val dataDir = jibExtraDir.map { it.dir("tormap-data").asFile }
-    outputs.dir(jibExtraDir)
-    doLast { dataDir.get().mkdirs() }
-}
+val prepareJibExtraDirectories =
+    tasks.register("prepareJibExtraDirectories") {
+        val dataDir = jibExtraDir.map { it.dir("tormap-data").asFile }
+        outputs.dir(jibExtraDir)
+        doLast { dataDir.get().mkdirs() }
+    }
 tasks.matching { it.name.startsWith("jib") }.configureEach { dependsOn(prepareJibExtraDirectories) }
 
 // Configure docker build and push
@@ -309,4 +328,46 @@ jib {
             }
         }
     }
+}
+
+// Kotlin code style (https://pinterest.github.io/ktlint/), part of `check`. ./gradlew ktlintFormat fixes most findings.
+val ktlint: Configuration by configurations.creating {
+    // Spring's dependency management would raise ktlint's embedded Kotlin compiler to the project's Kotlin version,
+    // which ktlint can't run with. Keep the versions ktlint asks for.
+    resolutionStrategy.eachDependency {
+        requested.version?.let { useVersion(it) }
+    }
+}
+
+dependencies {
+    ktlint("com.pinterest.ktlint:ktlint-cli:1.8.0") {
+        attributes {
+            attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
+        }
+    }
+}
+
+val ktlintSources = listOf("src/**/*.kt", "*.kts", "!**/build/**")
+
+val ktlintCheck = tasks.register<JavaExec>("ktlintCheck") {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = "Checks the Kotlin code style with ktlint"
+    classpath = ktlint
+    mainClass.set("com.pinterest.ktlint.Main")
+    // ktlint's embedded Kotlin compiler still uses sun.misc.Unsafe
+    jvmArgs("--sun-misc-unsafe-memory-access=allow")
+    args(ktlintSources)
+}
+
+tasks.check {
+    dependsOn(ktlintCheck)
+}
+
+tasks.register<JavaExec>("ktlintFormat") {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
+    description = "Fixes the Kotlin code style with ktlint where it can"
+    classpath = ktlint
+    mainClass.set("com.pinterest.ktlint.Main")
+    jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED", "--sun-misc-unsafe-memory-access=allow")
+    args(listOf("--format") + ktlintSources)
 }

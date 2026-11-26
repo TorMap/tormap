@@ -13,25 +13,25 @@ import java.math.RoundingMode
 import java.net.InetAddress
 
 @Service
-class IpLookupService(
-    ipLookupConfig: IpLookupConfig,
-) {
+class IpLookupService(ipLookupConfig: IpLookupConfig) {
     private val logger = logger()
     private var dbipLocationDB =
         maxmindTypeDatabaseReader(
             javaClass.getResource(ipLookupConfig.locationDatabaseFile)!!.path,
-            ipLookupConfig.shouldCache
+            ipLookupConfig.shouldCache,
         )
     private var autonomousSystemDB =
         maxmindTypeDatabaseReader(
             javaClass.getResource(ipLookupConfig.autonomousSystemDatabaseFile)!!.path,
-            ipLookupConfig.shouldCache
+            ipLookupConfig.shouldCache,
         )
 
     fun lookupLocation(ipAddress: String): Location? = try {
         if (isValidPublicIPAddress(ipAddress)) {
             Location(dbipLocationDB.city(InetAddress.getByName(ipAddress)))
-        } else null
+        } else {
+            null
+        }
     } catch (exception: Exception) {
         logger.debug("Location lookup for IP {} failed! {}: {}", ipAddress, exception.javaClass, exception.message)
         null
@@ -40,13 +40,15 @@ class IpLookupService(
     fun lookupAutonomousSystem(ipAddress: String): AsnResponse? = try {
         if (isValidPublicIPAddress(ipAddress)) {
             autonomousSystemDB.asn(InetAddress.getByName(ipAddress))
-        } else null
+        } else {
+            null
+        }
     } catch (exception: Exception) {
         logger.debug(
             "Autonomous System lookup for IP {} failed! {}: {}",
             ipAddress,
             exception.javaClass,
-            exception.message
+            exception.message,
         )
         null
     }
@@ -62,7 +64,9 @@ class IpLookupService(
         val firstOctet = ipParts[0].toInt()
 
         when (firstOctet) {
-            in 10..10 -> return true // 10.0.0.0 to 10.255.255.255
+            in 10..10 -> return true
+
+            // 10.0.0.0 to 10.255.255.255
             in 172..172 -> {
                 val secondOctet = ipParts[1].toInt()
                 if (secondOctet in 16..31) {
@@ -80,11 +84,11 @@ class IpLookupService(
         return false
     }
 
-    private fun maxmindTypeDatabaseReader(databaseFilePath: String, shouldCache: Boolean) =
-        if (shouldCache)
-            DatabaseReader.Builder(File(databaseFilePath)).withCache(CHMCache()).build()
-        else
-            DatabaseReader.Builder(File(databaseFilePath)).build()
+    private fun maxmindTypeDatabaseReader(databaseFilePath: String, shouldCache: Boolean) = if (shouldCache) {
+        DatabaseReader.Builder(File(databaseFilePath)).withCache(CHMCache()).build()
+    } else {
+        DatabaseReader.Builder(File(databaseFilePath)).build()
+    }
 }
 
 class Location(maxMindCityResponse: CityResponse) {
@@ -106,7 +110,7 @@ class Location(maxMindCityResponse: CityResponse) {
         val locationIncomplete =
             this.countryCode == "-" || (this.latitude == BigDecimal.ZERO && this.longitude == BigDecimal.ZERO)
         if (locationIncomplete) {
-            throw LocationIncompleteException("latitude=${latitude} longitude=${longitude} countryCode=${countryCode}")
+            throw LocationIncompleteException("latitude=$latitude longitude=$longitude countryCode=$countryCode")
         }
     }
 

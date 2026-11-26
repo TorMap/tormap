@@ -12,11 +12,11 @@ import org.tormap.database.repository.RelayLocationRepositoryImpl
 import org.torproject.descriptor.Descriptor
 import org.torproject.descriptor.DescriptorParseException
 import org.torproject.descriptor.DescriptorSourceFactory
+import org.torproject.descriptor.NetworkStatusEntry
+import org.torproject.descriptor.RelayNetworkStatusConsensus
 import org.torproject.descriptor.ServerDescriptor
 import org.torproject.descriptor.UnparseableDescriptor
 import java.io.File
-import org.torproject.descriptor.NetworkStatusEntry
-import org.torproject.descriptor.RelayNetworkStatusConsensus
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.SortedMap
@@ -64,7 +64,7 @@ class DescriptorProcessingServiceTest(
                 entry('A', setOf("Running", "Valid", "Guard"), 4000),
                 entry('B', setOf("Running", "Valid", "Guard", "Exit"), 4000),
                 entry('C', setOf("Running", "Valid"), 4000),
-            )
+            ),
         )
         result.error shouldBe null
         val byLetter = relayLocationRepository.findAll().associateBy { it.fingerprint[0] }
@@ -88,7 +88,7 @@ class DescriptorProcessingServiceTest(
             consensus(
                 entry('A', setOf("Running", "Valid", "Guard"), 6000),
                 entry('B', setOf("Running", "Valid"), 100),
-            )
+            ),
         )
 
         val byLetter = relayLocationRepository.findAll().associateBy { it.fingerprint[0] }
@@ -104,7 +104,11 @@ class DescriptorProcessingServiceTest(
         relayLocationRepository.findAll().single().consensusWeight shouldBe 4000
     }
 
-    fun serverDescriptor(nickname: String, published: LocalDate, familyEntries: List<String>? = null): ServerDescriptor {
+    fun serverDescriptor(
+        nickname: String,
+        published: LocalDate,
+        familyEntries: List<String>? = null,
+    ): ServerDescriptor {
         val descriptor = mockk<ServerDescriptor>(relaxed = true)
         every { descriptor.fingerprint } returns "F".repeat(40)
         every { descriptor.nickname } returns nickname
@@ -128,7 +132,8 @@ class DescriptorProcessingServiceTest(
 
     "server descriptors processed again fill the missing family keys of the same day" {
         val withoutFamilyCerts = descriptorWithFamilyCerts.replace(
-            Regex("family-cert\n-----BEGIN FAMILY CERT-----\n[^-]*-----END FAMILY CERT-----\n"), ""
+            Regex("family-cert\n-----BEGIN FAMILY CERT-----\n[^-]*-----END FAMILY CERT-----\n"),
+            "",
         )
         descriptorProcessingService.processDescriptor(parseServerDescriptor(withoutFamilyCerts))
         relayDetailsRepository.findAll().single().familyKeys.shouldBeNull()
@@ -143,7 +148,7 @@ class DescriptorProcessingServiceTest(
 
     "server descriptors store the details of the relay per month" {
         val result = descriptorProcessingService.processDescriptor(
-            serverDescriptor("first", day, listOf("\$${"A".repeat(40)}", "friend"))
+            serverDescriptor("first", day, listOf("\$${"A".repeat(40)}", "friend")),
         )
 
         result.yearMonth shouldBe "2024-03"

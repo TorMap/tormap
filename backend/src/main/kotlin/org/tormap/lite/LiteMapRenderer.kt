@@ -25,10 +25,7 @@ import kotlin.math.sqrt
  * server.
  */
 @Component
-class LiteMapRenderer(
-    private val worldBorders: WorldBorders,
-    private val countryMeta: CountryMeta,
-) {
+class LiteMapRenderer(private val worldBorders: WorldBorders, private val countryMeta: CountryMeta) {
     companion object {
         // Colors of the frontend: map background, offline borders and default relay type colors
         private val WATER = Color(0x2c353c)
@@ -39,8 +36,10 @@ class LiteMapRenderer(
             LiteRelayType.Guard to Color(0xffd371),
             LiteRelayType.Other to Color(0xb78aff),
         )
+
         // Relay markers while families or autonomous systems are shown
         private val SINGLE_COLOR = Color(0x989898)
+
         // Leaflet's default color of paths, used for the outline of countries with relays
         private val LEAFLET_BLUE = Color(0x3388ff)
 
@@ -59,7 +58,8 @@ class LiteMapRenderer(
 
         /** The radius of a circle for a number of relays, like calcRadiusForValue() */
         fun radiusForCount(value: Int): Double {
-            fun mapRange(value: Int, x1: Int, y1: Int, x2: Int, y2: Int) = (value - x1) * (y2 - x2).toDouble() / (y1 - x1) + x2
+            fun mapRange(value: Int, x1: Int, y1: Int, x2: Int, y2: Int) =
+                (value - x1) * (y2 - x2).toDouble() / (y1 - x1) + x2
             return when {
                 value < 10 -> 10.0
                 value < 100 -> mapRange(value, 10, 100, 10, 50)
@@ -79,6 +79,7 @@ class LiteMapRenderer(
         fun usageColor(users: Int, maxUsers: Int): Color {
             val share = if (maxUsers > 0) log10(maxOf(users, 0) + 1.0) / log10(maxUsers + 1.0) else 0.0
             val t = share.coerceIn(0.0, 1.0)
+
             // The frontend rounds hue, saturation and lightness to whole numbers
             fun mix(low: Double, high: Double) = Math.round(low + (high - low) * t).toDouble()
             return hsl(
@@ -121,12 +122,20 @@ class LiteMapRenderer(
             if (view.heatMap) graphics.drawImage(LiteHeatmap.render(view, filtered), 0, 0, null)
             drawCountriesWithRelays(graphics, view, filtered)
             if (Grouping.Coordinates in view.groupings) drawRelayCounts(graphics, view, filtered)
-            if (Grouping.Country in view.groupings) drawCountryMarkers(graphics, view, filtered) else drawRelayMarkers(graphics, view, filtered)
+            if (Grouping.Country in
+                view.groupings
+            ) {
+                drawCountryMarkers(graphics, view, filtered)
+            } else {
+                drawRelayMarkers(graphics, view, filtered)
+            }
             if (Grouping.Family in view.groupings) {
                 drawGroups(graphics, view, filtered, view.selectedFamily?.toLong(), ::familyColor) { it.familyId }
             }
             if (Grouping.AutonomousSystem in view.groupings) {
-                drawGroups(graphics, view, filtered, view.selectedAutonomousSystem?.toLong(), ::autonomousSystemColor) { it.asNumber?.toLong() }
+                drawGroups(graphics, view, filtered, view.selectedAutonomousSystem?.toLong(), ::autonomousSystemColor) {
+                    it.asNumber?.toLong()
+                }
             }
         } finally {
             graphics.dispose()
@@ -165,7 +174,9 @@ class LiteMapRenderer(
     private fun drawCountriesWithRelays(graphics: Graphics2D, view: LiteView, relays: List<RelayLocationDto>) {
         if (Grouping.Country !in view.groupings) return
         val countriesWithRelays = relays.map { it.country }.toSet()
-        visibleCountries(view).filter { (country, _) -> country.isoCode in countriesWithRelays }.forEach { (country, shape) ->
+        visibleCountries(view).filter { (country, _) ->
+            country.isoCode in countriesWithRelays
+        }.forEach { (country, shape) ->
             val alpha = if (country.isoCode == view.selectedCountry) .7f else .3f
             graphics.color = Color(1f, 1f, 1f, alpha)
             graphics.fill(shape)
@@ -195,15 +206,32 @@ class LiteMapRenderer(
     private fun drawRelayMarkers(graphics: Graphics2D, view: LiteView, relays: List<RelayLocationDto>) {
         val singleColor = Grouping.Family in view.groupings || Grouping.AutonomousSystem in view.groupings
         val locations = LiteAggregation.byLocation(relays)
-        val weights = if (view.sizeByWeight) locations.mapValues { (_, relaysAtLocation) -> relaysAtLocation.sumOf { it.consensusWeight ?: 0 } } else emptyMap()
+        val weights = if (view.sizeByWeight) {
+            locations.mapValues { (_, relaysAtLocation) ->
+                relaysAtLocation.sumOf {
+                    it.consensusWeight
+                        ?: 0
+                }
+            }
+        } else {
+            emptyMap()
+        }
         // Without any weight, e.g. for days that were not reprocessed yet, all markers keep their default size
         val maxWeight = weights.values.maxOrNull() ?: 0
         locations.entries
-            .map { (location, relaysAtLocation) -> Triple(location, relaysAtLocation.minOf { LiteRelayType.of(it.flags) }, weights[location]) }
+            .map { (location, relaysAtLocation) ->
+                Triple(location, relaysAtLocation.minOf { LiteRelayType.of(it.flags) }, weights[location])
+            }
             // Draw the more important types last, so they are on top
             .sortedByDescending { it.second }
             .forEach { (location, type, weight) ->
-                val radius = if (maxWeight > 0 && weight != null) radiusForWeight(weight, maxWeight) else DEFAULT_MARKER_RADIUS
+                val radius = if (maxWeight > 0 &&
+                    weight != null
+                ) {
+                    radiusForWeight(weight, maxWeight)
+                } else {
+                    DEFAULT_MARKER_RADIUS
+                }
                 val color = if (singleColor) SINGLE_COLOR else RELAY_TYPE_COLORS.getValue(type)
                 drawCircle(graphics, view, location, radius, color, MARKER_STROKE, GROUP_FILL_ALPHA)
             }
@@ -216,7 +244,15 @@ class LiteMapRenderer(
         relays.forEach { relay ->
             val selected = view.selectedCountry == null || view.selectedCountry == relay.country
             val color = hsl(countryMeta.mapColor(relay.country) * 360.0 / 9, if (selected) .9 else 0.0, .6)
-            drawCircle(graphics, view, relay.lat.toDouble() to relay.long.toDouble(), DEFAULT_MARKER_RADIUS, color, MARKER_STROKE, GROUP_FILL_ALPHA)
+            drawCircle(
+                graphics,
+                view,
+                relay.lat.toDouble() to relay.long.toDouble(),
+                DEFAULT_MARKER_RADIUS,
+                color,
+                MARKER_STROKE,
+                GROUP_FILL_ALPHA,
+            )
         }
     }
 
@@ -226,7 +262,15 @@ class LiteMapRenderer(
     private fun drawRelayCounts(graphics: Graphics2D, view: LiteView, relays: List<RelayLocationDto>) {
         LiteAggregation.byLocation(relays).forEach { (location, relaysAtLocation) ->
             if (relaysAtLocation.size < 4) return@forEach
-            drawCircle(graphics, view, location, radiusForCount(relaysAtLocation.size), Color.WHITE, .3f, GROUP_FILL_ALPHA)
+            drawCircle(
+                graphics,
+                view,
+                location,
+                radiusForCount(relaysAtLocation.size),
+                Color.WHITE,
+                .3f,
+                GROUP_FILL_ALPHA,
+            )
         }
     }
 
@@ -243,14 +287,34 @@ class LiteMapRenderer(
         groupOf: (RelayLocationDto) -> Long?,
     ) {
         if (selectedId != null) {
-            LiteAggregation.byLocation(relays.filter { groupOf(it) == selectedId }).forEach { (location, relaysAtLocation) ->
-                drawCircle(graphics, view, location, radiusForCount(relaysAtLocation.size), color(selectedId), 1f, GROUP_FILL_ALPHA)
+            LiteAggregation.byLocation(
+                relays.filter {
+                    groupOf(it) == selectedId
+                },
+            ).forEach { (location, relaysAtLocation) ->
+                drawCircle(
+                    graphics,
+                    view,
+                    location,
+                    radiusForCount(relaysAtLocation.size),
+                    color(selectedId),
+                    1f,
+                    GROUP_FILL_ALPHA,
+                )
             }
             return
         }
         LiteAggregation.groupsByLocation(relays, groupOf).forEach { (location, groups) ->
             groups.forEach { group ->
-                drawCircle(graphics, view, location, radiusForCount(group.relays.size + group.padding), color(group.groupId), 1f, GROUP_FILL_ALPHA)
+                drawCircle(
+                    graphics,
+                    view,
+                    location,
+                    radiusForCount(group.relays.size + group.padding),
+                    color(group.groupId),
+                    1f,
+                    GROUP_FILL_ALPHA,
+                )
             }
         }
     }

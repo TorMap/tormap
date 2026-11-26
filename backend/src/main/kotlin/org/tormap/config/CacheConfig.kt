@@ -32,29 +32,29 @@ class CacheConfig {
         registerCustomCache(
             RELAY_LOCATION_DISTINCT_DAYS,
             // 1 entry ~= 250–300 KB for ~6,700 days (2007-10 to 2026-05)
-            Caffeine.newBuilder().maximumSize(1).recordStats().build()
+            Caffeine.newBuilder().maximumSize(1).recordStats().build(),
         )
         registerCustomCache(
             RELAY_DAILY_COUNTS,
             // 1 entry ~= 400 KB for ~6,700 days (4 numbers per day)
-            Caffeine.newBuilder().maximumSize(1).recordStats().build()
+            Caffeine.newBuilder().maximumSize(1).recordStats().build(),
         )
         registerCustomCache(
             RELAY_LOCATIONS_PER_DAY,
             // Relay locations of a day for TorMap Lite and the old frontend endpoint. Filled on request only.
             // 1 entry ~= 2.5 MB of memory -> 10 entries ~= 25 MB of memory
-            Caffeine.newBuilder().maximumSize(10).recordStats().build()
+            Caffeine.newBuilder().maximumSize(10).recordStats().build(),
         )
         registerCustomCache(
             API_V1_RELAYS_PER_DAY,
             // Relays of a day for the public API v1 (map, CLI and other clients), warmed up by CacheService after
             // each import. 1 entry ~= 3.5 MB of memory -> 40 entries ~= 140 MB of memory
-            Caffeine.newBuilder().maximumSize(40).recordStats().build()
+            Caffeine.newBuilder().maximumSize(40).recordStats().build(),
         )
         registerCustomCache(
             COUNTRY_USAGE_PER_DAY,
             // 1 entry ~= 15 KB for ~250 countries -> 400 entries ~= 6 MB of memory
-            Caffeine.newBuilder().maximumSize(400).recordStats().build()
+            Caffeine.newBuilder().maximumSize(400).recordStats().build(),
         )
         registerCustomCache(
             REVERSE_DNS_LOOKUPS,
@@ -64,7 +64,7 @@ class CacheConfig {
                 // 6h TTL balances DNS freshness for relay monitoring with cache efficiency
                 .expireAfterWrite(Duration.ofHours(6))
                 .recordStats()
-                .build()
+                .build(),
         )
         registerCustomCache(
             AUTONOMOUS_SYSTEMS_PER_MONTH,
@@ -74,7 +74,7 @@ class CacheConfig {
                 // New relays get their autonomous system in the background, so the list is refreshed after a while
                 .expireAfterWrite(Duration.ofHours(1))
                 .recordStats()
-                .build()
+                .build(),
         )
         registerCustomCache(
             API_V1_FAMILIES_PER_MONTH,
@@ -84,7 +84,7 @@ class CacheConfig {
                 // Families are computed in the background after new descriptors arrived
                 .expireAfterWrite(Duration.ofHours(1))
                 .recordStats()
-                .build()
+                .build(),
         )
         registerCustomCache(
             LITE_MAP_IMAGES,
@@ -94,7 +94,7 @@ class CacheConfig {
                 // Days are reprocessed when new descriptors arrive, so images are redrawn after a while
                 .expireAfterWrite(Duration.ofHours(1))
                 .recordStats()
-                .build()
+                .build(),
         )
     }
 }

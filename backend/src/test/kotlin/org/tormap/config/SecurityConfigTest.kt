@@ -50,5 +50,4 @@ class SecurityConfigTest(
             "/v1/families/*",
         )
     }
-
 })

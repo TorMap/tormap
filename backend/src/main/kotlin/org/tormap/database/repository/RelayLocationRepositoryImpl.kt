@@ -8,7 +8,6 @@ import org.tormap.adapter.dto.RelayLocationDto
 import org.tormap.adapter.dto.v1.RelayV1Dto
 import java.time.LocalDate
 
-
 /**
  * Repository to interact with DB
  */
@@ -17,22 +16,24 @@ interface RelayLocationRepositoryImpl : RelayLocationRepository {
     fun findDistinctDays(): Set<LocalDate>
 
     @Query(
-        "SELECT new org.tormap.adapter.dto.RelayLocationDto(g.latitude, g.longitude, g.countryCode, g.flags, n.id, n.familyId, n.nickname, g.consensusWeight, n.autonomousSystemNumber) FROM RelayLocation g " +
-                "LEFT JOIN FETCH RelayDetails n " +
-                "ON g.fingerprint = n.fingerprint " +
-                "AND function('TO_CHAR', g.day, 'YYYY-MM') = n.month " +
-                "WHERE g.day = :day"
+        "SELECT new org.tormap.adapter.dto.RelayLocationDto(g.latitude, g.longitude, g.countryCode, g.flags, n.id, " +
+            "n.familyId, n.nickname, g.consensusWeight, n.autonomousSystemNumber) FROM RelayLocation g " +
+            "LEFT JOIN FETCH RelayDetails n " +
+            "ON g.fingerprint = n.fingerprint " +
+            "AND function('TO_CHAR', g.day, 'YYYY-MM') = n.month " +
+            "WHERE g.day = :day",
     )
     fun findAllUsingDay(day: LocalDate): List<RelayLocationDto>
 
     @Query(
-        "SELECT new org.tormap.adapter.dto.v1.RelayV1Dto(g.fingerprint, n.nickname, g.countryCode, g.latitude, g.longitude, g.flags, g.consensusWeight, n.autonomousSystemNumber, n.familyId) FROM RelayLocation g " +
-                "LEFT JOIN FETCH RelayDetails n " +
-                "ON g.fingerprint = n.fingerprint " +
-                "AND function('TO_CHAR', g.day, 'YYYY-MM') = n.month " +
-                "WHERE g.day = :day " +
-                // A stable order keeps the ETag of a day the same when the cache is filled again
-                "ORDER BY g.fingerprint"
+        "SELECT new org.tormap.adapter.dto.v1.RelayV1Dto(g.fingerprint, n.nickname, g.countryCode, g.latitude, " +
+            "g.longitude, g.flags, g.consensusWeight, n.autonomousSystemNumber, n.familyId) FROM RelayLocation g " +
+            "LEFT JOIN FETCH RelayDetails n " +
+            "ON g.fingerprint = n.fingerprint " +
+            "AND function('TO_CHAR', g.day, 'YYYY-MM') = n.month " +
+            "WHERE g.day = :day " +
+            // A stable order keeps the ETag of a day the same when the cache is filled again
+            "ORDER BY g.fingerprint",
     )
     fun findAllV1UsingDay(day: LocalDate): List<RelayV1Dto>
 
@@ -43,12 +44,12 @@ interface RelayLocationRepositoryImpl : RelayLocationRepository {
      */
     @Query(
         "SELECT new org.tormap.adapter.dto.DailyRelayCountDto(" +
-                "g.day, " +
-                "count(g), " +
-                "sum(case when concat(', ', g.flags, ', ') like '%, 5, %' then 1 else 0 end), " +
-                "sum(case when concat(', ', g.flags, ', ') like '%, 5, %' then 0 " +
-                "when concat(', ', g.flags, ', ') like '%, 7, %' then 1 else 0 end)) " +
-                "FROM RelayLocation g GROUP BY g.day ORDER BY g.day"
+            "g.day, " +
+            "count(g), " +
+            "sum(case when concat(', ', g.flags, ', ') like '%, 5, %' then 1 else 0 end), " +
+            "sum(case when concat(', ', g.flags, ', ') like '%, 5, %' then 0 " +
+            "when concat(', ', g.flags, ', ') like '%, 7, %' then 1 else 0 end)) " +
+            "FROM RelayLocation g GROUP BY g.day ORDER BY g.day",
     )
     fun findDailyRelayCounts(): List<DailyRelayCountDto>
 
@@ -68,13 +69,13 @@ interface RelayLocationRepositoryImpl : RelayLocationRepository {
     @Query(
         nativeQuery = true,
         value = "UPDATE relay_location r " +
-                "SET consensus_weight = v.consensus_weight, guard_weight = NULLIF(v.guard_weight, -1) " +
-                "FROM unnest(" +
-                "string_to_array(:fingerprints, ','), " +
-                "CAST(string_to_array(:consensusWeights, ',') AS bigint[]), " +
-                "CAST(string_to_array(:guardWeights, ',') AS bigint[])" +
-                ") AS v(fingerprint, consensus_weight, guard_weight) " +
-                "WHERE r.day = :day AND r.fingerprint = v.fingerprint AND r.consensus_weight IS NULL"
+            "SET consensus_weight = v.consensus_weight, guard_weight = NULLIF(v.guard_weight, -1) " +
+            "FROM unnest(" +
+            "string_to_array(:fingerprints, ','), " +
+            "CAST(string_to_array(:consensusWeights, ',') AS bigint[]), " +
+            "CAST(string_to_array(:guardWeights, ',') AS bigint[])" +
+            ") AS v(fingerprint, consensus_weight, guard_weight) " +
+            "WHERE r.day = :day AND r.fingerprint = v.fingerprint AND r.consensus_weight IS NULL",
     )
     fun fillMissingConsensusWeights(
         day: LocalDate,

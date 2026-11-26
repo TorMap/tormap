@@ -11,11 +11,10 @@ import org.tormap.adapter.dto.v1.FamilyMemberRow
 import org.tormap.adapter.dto.v1.RelayMonthV1Dto
 import org.tormap.database.entity.FIND_FAMILY_IDENTIFIERS_QUERY
 
-
 interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
     @Query(
         "SELECT DISTINCT new org.tormap.database.repository.MonthFamilyMembersCount(month, count(familyId)) " +
-            "FROM RelayDetails GROUP BY month ORDER BY month"
+            "FROM RelayDetails GROUP BY month ORDER BY month",
     )
     fun findDistinctMonthFamilyMemberCount(): List<MonthFamilyMembersCount>
 
@@ -25,7 +24,7 @@ interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
     @Query(
         "SELECT new org.tormap.adapter.dto.RelayIdentifiersDto(id, fingerprint, nickname) " +
             "FROM RelayDetails " +
-            "WHERE id in :ids"
+            "WHERE id in :ids",
     )
     fun findRelayIdentifiers(ids: List<Long>): List<RelayIdentifiersDto>
 
@@ -39,13 +38,14 @@ interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
         "SELECT new org.tormap.adapter.dto.AutonomousSystemDto(autonomousSystemNumber, max(autonomousSystemName)) " +
             "FROM RelayDetails " +
             "WHERE month = :month AND autonomousSystemNumber IS NOT NULL " +
-            "GROUP BY autonomousSystemNumber"
+            "GROUP BY autonomousSystemNumber",
     )
     fun findAutonomousSystemsByMonth(month: String): List<AutonomousSystemDto>
 
     @Query(
-        "SELECT new org.tormap.adapter.dto.v1.FamilyMemberRow(familyId, fingerprint, nickname, autonomousSystemNumber, autonomousSystemName) " +
-            "FROM RelayDetails WHERE month = :month AND familyId IS NOT NULL"
+        "SELECT new org.tormap.adapter.dto.v1.FamilyMemberRow(" +
+            "familyId, fingerprint, nickname, autonomousSystemNumber, autonomousSystemName) " +
+            "FROM RelayDetails WHERE month = :month AND familyId IS NOT NULL",
     )
     fun findFamilyMembersByMonth(month: String): List<FamilyMemberRow>
 
@@ -53,7 +53,7 @@ interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
     @Query(
         "SELECT new org.tormap.adapter.dto.v1.RelayMonthV1Dto(month, day, nickname, address, autonomousSystemNumber, " +
             "autonomousSystemName, platform, contact, bandwidthObserved, familyId) " +
-            "FROM RelayDetails WHERE fingerprint = :fingerprint ORDER BY month"
+            "FROM RelayDetails WHERE fingerprint = :fingerprint ORDER BY month",
     )
     fun findMonthsByFingerprint(fingerprint: String): List<RelayMonthV1Dto>
 
@@ -63,7 +63,4 @@ interface RelayDetailsRepositoryImpl : RelayDetailsRepository {
     fun clearFamiliesFromMonth(month: String): Int
 }
 
-class MonthFamilyMembersCount(
-    val month: String,
-    val count: Long,
-)
+class MonthFamilyMembersCount(val month: String, val count: Long)

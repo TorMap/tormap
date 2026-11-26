@@ -9,94 +9,95 @@ import org.tormap.adapter.controller.exception.RelayNotFoundException
 import org.tormap.database.entity.RelayDetails
 import org.tormap.mockRelayDetails
 
-class RelayDetailsQueryServiceTest : StringSpec({
-    "getRelay enriches relay details with confirmed family members and reverse DNS names" {
-        val relay = mockRelayDetails('A').apply {
-            id = 1L
-            familyId = 11L
-            address = "1.2.3.4"
-        }
-        val familyMember = mockRelayDetails('B').apply {
-            id = 2L
-            familyId = 11L
-        }
+class RelayDetailsQueryServiceTest :
+    StringSpec({
+        "getRelay enriches relay details with confirmed family members and reverse DNS names" {
+            val relay = mockRelayDetails('A').apply {
+                id = 1L
+                familyId = 11L
+                address = "1.2.3.4"
+            }
+            val familyMember = mockRelayDetails('B').apply {
+                id = 2L
+                familyId = 11L
+            }
 
-        val relayDetailsQueryService = RelayDetailsQueryService(
-            relayDetailsLookup = FakeRelayDetailsLookup(
-                relaysById = mapOf(1L to relay),
-                relaysByFamilyId = mapOf(11L to listOf(relay, familyMember)),
-            ),
-            reverseDnsLookupService = ReverseDnsLookupService(
-                reverseDnsResolver = QueryServiceFakeReverseDnsResolver(
-                    ptrRecordsByIpAddress = mapOf(
-                        "1.2.3.4" to listOf("verified.example.", "unverified.example.")
+            val relayDetailsQueryService = RelayDetailsQueryService(
+                relayDetailsLookup = FakeRelayDetailsLookup(
+                    relaysById = mapOf(1L to relay),
+                    relaysByFamilyId = mapOf(11L to listOf(relay, familyMember)),
+                ),
+                reverseDnsLookupService = ReverseDnsLookupService(
+                    reverseDnsResolver = QueryServiceFakeReverseDnsResolver(
+                        ptrRecordsByIpAddress = mapOf(
+                            "1.2.3.4" to listOf("verified.example.", "unverified.example."),
+                        ),
+                        addressesByHostName = mapOf(
+                            "verified.example" to listOf("1.2.3.4"),
+                            "unverified.example" to listOf("5.6.7.8"),
+                        ),
                     ),
-                    addressesByHostName = mapOf(
-                        "verified.example" to listOf("1.2.3.4"),
-                        "unverified.example" to listOf("5.6.7.8"),
-                    ),
-                )
-            ),
-        )
+                ),
+            )
 
-        val response = relayDetailsQueryService.getRelay(1L)
+            val response = relayDetailsQueryService.getRelay(1L)
 
-        response.id shouldBe 1L
-        response.confirmedFamilyMembers.map { it.id } shouldBe listOf(2L)
-        response.confirmedFamilyMembers.map { it.nickname } shouldBe listOf(familyMember.nickname)
-        response.verifiedHostNames shouldBe listOf("verified.example")
-        response.unverifiedHostNames shouldBe listOf("unverified.example")
-    }
-
-    "getRelay returns empty confirmed family members when relay has no family" {
-        val relay = mockRelayDetails('A').apply {
-            id = 1L
-            familyId = null
-            address = "1.2.3.4"
+            response.id shouldBe 1L
+            response.confirmedFamilyMembers.map { it.id } shouldBe listOf(2L)
+            response.confirmedFamilyMembers.map { it.nickname } shouldBe listOf(familyMember.nickname)
+            response.verifiedHostNames shouldBe listOf("verified.example")
+            response.unverifiedHostNames shouldBe listOf("unverified.example")
         }
 
-        val relayDetailsQueryService = RelayDetailsQueryService(
-            relayDetailsLookup = FakeRelayDetailsLookup(relaysById = mapOf(1L to relay)),
-            reverseDnsLookupService = ReverseDnsLookupService(QueryServiceFakeReverseDnsResolver()),
-        )
+        "getRelay returns empty confirmed family members when relay has no family" {
+            val relay = mockRelayDetails('A').apply {
+                id = 1L
+                familyId = null
+                address = "1.2.3.4"
+            }
 
-        val response = relayDetailsQueryService.getRelay(1L)
+            val relayDetailsQueryService = RelayDetailsQueryService(
+                relayDetailsLookup = FakeRelayDetailsLookup(relaysById = mapOf(1L to relay)),
+                reverseDnsLookupService = ReverseDnsLookupService(QueryServiceFakeReverseDnsResolver()),
+            )
 
-        response.confirmedFamilyMembers shouldBe emptyList()
-    }
+            val response = relayDetailsQueryService.getRelay(1L)
 
-    "getRelay returns empty reverse DNS names when all lookup slots are busy" {
-        val relay = mockRelayDetails('A').apply {
-            id = 1L
-            familyId = null
-            address = "1.2.3.4"
-        }
-        val reverseDnsLookupService = mockk<ReverseDnsLookupService> {
-            every { lookupHostNames("1.2.3.4") } throws ReverseDnsLookupCapacityException()
+            response.confirmedFamilyMembers shouldBe emptyList()
         }
 
-        val relayDetailsQueryService = RelayDetailsQueryService(
-            relayDetailsLookup = FakeRelayDetailsLookup(relaysById = mapOf(1L to relay)),
-            reverseDnsLookupService = reverseDnsLookupService,
-        )
+        "getRelay returns empty reverse DNS names when all lookup slots are busy" {
+            val relay = mockRelayDetails('A').apply {
+                id = 1L
+                familyId = null
+                address = "1.2.3.4"
+            }
+            val reverseDnsLookupService = mockk<ReverseDnsLookupService> {
+                every { lookupHostNames("1.2.3.4") } throws ReverseDnsLookupCapacityException()
+            }
 
-        val response = relayDetailsQueryService.getRelay(1L)
+            val relayDetailsQueryService = RelayDetailsQueryService(
+                relayDetailsLookup = FakeRelayDetailsLookup(relaysById = mapOf(1L to relay)),
+                reverseDnsLookupService = reverseDnsLookupService,
+            )
 
-        response.verifiedHostNames shouldBe emptyList()
-        response.unverifiedHostNames shouldBe emptyList()
-    }
+            val response = relayDetailsQueryService.getRelay(1L)
 
-    "getRelay throws when relay does not exist" {
-        val relayDetailsQueryService = RelayDetailsQueryService(
-            relayDetailsLookup = FakeRelayDetailsLookup(),
-            reverseDnsLookupService = ReverseDnsLookupService(QueryServiceFakeReverseDnsResolver()),
-        )
-
-        shouldThrow<RelayNotFoundException> {
-            relayDetailsQueryService.getRelay(99L)
+            response.verifiedHostNames shouldBe emptyList()
+            response.unverifiedHostNames shouldBe emptyList()
         }
-    }
-})
+
+        "getRelay throws when relay does not exist" {
+            val relayDetailsQueryService = RelayDetailsQueryService(
+                relayDetailsLookup = FakeRelayDetailsLookup(),
+                reverseDnsLookupService = ReverseDnsLookupService(QueryServiceFakeReverseDnsResolver()),
+            )
+
+            shouldThrow<RelayNotFoundException> {
+                relayDetailsQueryService.getRelay(99L)
+            }
+        }
+    })
 
 private class FakeRelayDetailsLookup(
     private val relaysById: Map<Long, RelayDetails> = emptyMap(),

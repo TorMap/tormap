@@ -2,9 +2,9 @@ package org.tormap.config
 
 import io.micrometer.core.instrument.config.MeterFilter
 import io.micrometer.registry.otlp.OtlpMeterRegistry
-import org.springframework.boot.micrometer.metrics.autoconfigure.MeterRegistryCustomizer
-import org.springframework.boot.SpringApplication
 import org.springframework.boot.EnvironmentPostProcessor
+import org.springframework.boot.SpringApplication
+import org.springframework.boot.micrometer.metrics.autoconfigure.MeterRegistryCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.ConfigurableEnvironment
@@ -18,7 +18,7 @@ class NewRelicMetricsEnvironmentPostProcessor : EnvironmentPostProcessor {
     override fun postProcessEnvironment(environment: ConfigurableEnvironment, application: SpringApplication) {
         if (!environment.getProperty(ENV_INGEST_KEY).isNullOrBlank()) {
             environment.propertySources.addFirst(
-                MapPropertySource("newRelicMetrics", mapOf("management.otlp.metrics.export.enabled" to "true"))
+                MapPropertySource("newRelicMetrics", mapOf("management.otlp.metrics.export.enabled" to "true")),
             )
         }
     }

@@ -29,7 +29,9 @@ object UserStatsCsvParser {
         lines.mapNotNull { line ->
             when (val parsed = parseLine(line)) {
                 is ParsedLine.Row -> parsed.row
+
                 ParsedLine.Ignored -> null
+
                 ParsedLine.Malformed -> {
                     onMalformedLine()
                     null
@@ -59,7 +61,7 @@ object UserStatsCsvParser {
                     lower = columns[3].takeIf { it.isNotEmpty() }?.toInt()?.takeIf { it >= 0 },
                     upper = columns[4].takeIf { it.isNotEmpty() }?.toInt()?.takeIf { it >= 0 },
                     frac = frac,
-                )
+                ),
             )
         } catch (exception: Exception) {
             ParsedLine.Malformed

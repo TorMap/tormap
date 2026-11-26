@@ -1,16 +1,16 @@
 package org.tormap.config
 
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.CacheControl
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
-import org.springframework.http.CacheControl
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.time.Duration
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 
 @Configuration
 class HttpCachingConfig(
@@ -29,13 +29,14 @@ class HttpCachingConfig(
                 // Root endpoint ("/") intentionally uses Cache-Control: no-store.
                 val isPublicApi = path.startsWith("/relay/") || path.startsWith("/v1/") || path.startsWith("/lite/")
                 val isActuator = path.startsWith("/actuator")
-                val isDocs = path.startsWith("/openapi") || path.startsWith("/v3/api-docs") || path.startsWith("/swagger")
+                val isDocs =
+                    path.startsWith("/openapi") || path.startsWith("/v3/api-docs") || path.startsWith("/swagger")
 
                 if (!isPublicApi || isActuator || isDocs) return true
 
                 response.setHeader(
                     HttpHeaders.CACHE_CONTROL,
-                    CacheControl.maxAge(Duration.ofSeconds(publicCacheMaxAgeSeconds)).cachePublic().headerValue
+                    CacheControl.maxAge(Duration.ofSeconds(publicCacheMaxAgeSeconds)).cachePublic().headerValue,
                 )
                 // Useful for CDNs/proxies to vary correctly.
                 response.setHeader(HttpHeaders.VARY, "Origin, Accept-Encoding")

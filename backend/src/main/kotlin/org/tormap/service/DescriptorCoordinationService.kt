@@ -13,7 +13,6 @@ import org.torproject.descriptor.DescriptorCollector
 import org.torproject.descriptor.index.DescriptorIndexCollector
 import java.io.File
 
-
 /**
  * This service coordinates the collection and processing of Tor descriptors provided by the TorProject.
  * Descriptors are downloaded from a remote collector endpoint: [https://metrics.torproject.org/collector/]
@@ -45,10 +44,7 @@ class DescriptorCoordinationService(
         }
     }
 
-    private fun collectDescriptorsFromRemoteServer(
-        apiPath: String,
-        shouldDeleteLocalFilesNotFoundOnRemote: Boolean
-    ) =
+    private fun collectDescriptorsFromRemoteServer(apiPath: String, shouldDeleteLocalFilesNotFoundOnRemote: Boolean) =
         descriptorCollector.collectDescriptors(
             descriptorConfig.apiBaseURL,
             arrayOf(apiPath),
@@ -89,7 +85,7 @@ class DescriptorCoordinationService(
         descriptorType: DescriptorType,
         it: File,
         errorCount: Int,
-        processedMonthsFromFile: MutableSet<String>
+        processedMonthsFromFile: MutableSet<String>,
     ) {
         flushRelayRepository(descriptorType)
         saveProcessedFileReference(it, descriptorType, errorCount)

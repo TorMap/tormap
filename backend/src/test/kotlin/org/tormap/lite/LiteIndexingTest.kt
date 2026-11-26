@@ -9,13 +9,14 @@ import org.tormap.adapter.dto.RelayLocationDto
 import java.math.BigDecimal
 import java.time.LocalDate
 
-class LiteIndexingTest : StringSpec({
-    "without indexing nothing may be crawled" {
-        LiteIndexing.robotsTxt(null) shouldBe "User-agent: *\nDisallow: /\n"
-    }
+class LiteIndexingTest :
+    StringSpec({
+        "without indexing nothing may be crawled" {
+            LiteIndexing.robotsTxt(null) shouldBe "User-agent: *\nDisallow: /\n"
+        }
 
-    "with indexing only the start page, the autonomous system pages and the sitemap may be crawled" {
-        LiteIndexing.robotsTxt("https://api.example.org") shouldBe """
+        "with indexing only the start page, the autonomous system pages and the sitemap may be crawled" {
+            LiteIndexing.robotsTxt("https://api.example.org") shouldBe """
             User-agent: *
             Allow: /lite/$
             Allow: /lite/as/
@@ -25,34 +26,45 @@ class LiteIndexingTest : StringSpec({
 
             Sitemap: https://api.example.org/lite/sitemap.xml
 
-        """.trimIndent()
-    }
+            """.trimIndent()
+        }
 
-    "indexing needs a valid public URL, which loses its trailing slash" {
-        LiteIndexing.indexedUrl(true, " https://api.example.org/ ") shouldBe "https://api.example.org"
-        LiteIndexing.indexedUrl(false, "https://api.example.org") shouldBe null
-        LiteIndexing.indexedUrl(false, "") shouldBe null
-        shouldThrow<IllegalStateException> { LiteIndexing.indexedUrl(true, "") }
-        shouldThrow<IllegalStateException> { LiteIndexing.indexedUrl(true, null) }
-        shouldThrow<IllegalArgumentException> { LiteIndexing.indexedUrl(true, "https://api.example.org/\"><x") }
-        shouldThrow<IllegalArgumentException> { LiteIndexing.indexedUrl(true, "javascript:alert(1)") }
-    }
+        "indexing needs a valid public URL, which loses its trailing slash" {
+            LiteIndexing.indexedUrl(true, " https://api.example.org/ ") shouldBe "https://api.example.org"
+            LiteIndexing.indexedUrl(false, "https://api.example.org") shouldBe null
+            LiteIndexing.indexedUrl(false, "") shouldBe null
+            shouldThrow<IllegalStateException> { LiteIndexing.indexedUrl(true, "") }
+            shouldThrow<IllegalStateException> { LiteIndexing.indexedUrl(true, null) }
+            shouldThrow<IllegalArgumentException> { LiteIndexing.indexedUrl(true, "https://api.example.org/\"><x") }
+            shouldThrow<IllegalArgumentException> { LiteIndexing.indexedUrl(true, "javascript:alert(1)") }
+        }
 
-    "the sitemap lists the start page and each autonomous system once" {
-        val xml = LiteIndexing.sitemapXml("https://api.example.org", LocalDate.parse("2026-11-11"), listOf(24940, 3, 24940))
-        xml shouldContain "<url><loc>https://api.example.org/lite/</loc><lastmod>2026-11-11</lastmod></url>"
-        xml shouldContain "<loc>https://api.example.org/lite/as/3</loc>"
-        Regex("/lite/as/24940<").findAll(xml).count() shouldBe 1
-    }
+        "the sitemap lists the start page and each autonomous system once" {
+            val xml = LiteIndexing.sitemapXml(
+                "https://api.example.org",
+                LocalDate.parse("2026-11-11"),
+                listOf(24940, 3, 24940),
+            )
+            xml shouldContain "<url><loc>https://api.example.org/lite/</loc><lastmod>2026-11-11</lastmod></url>"
+            xml shouldContain "<loc>https://api.example.org/lite/as/3</loc>"
+            Regex("/lite/as/24940<").findAll(xml).count() shouldBe 1
+        }
 
-    "an autonomous system page with relays links its canonical URL, one without relays is not indexed" {
-        val view = LiteView.parse(emptyMap())
-        val relay = RelayLocationDto(BigDecimal.ONE, BigDecimal.ONE, "DE", null, 1, null, "relay", 100, 3320)
-        val canonical = "https://api.example.org/lite/as/3320"
-        val withRelays = LiteRelayPages.renderAutonomousSystem(3320, "Example", listOf(relay), view, "https://example.org", canonical)
-        withRelays shouldContain "<link rel=\"canonical\" href=\"$canonical\">"
-        withRelays shouldNotContain "noindex"
-        LiteRelayPages.renderAutonomousSystem(3320, null, emptyList(), view, "https://example.org") shouldContain
-            "<meta name=\"robots\" content=\"noindex\">"
-    }
-})
+        "an autonomous system page with relays links its canonical URL, one without relays is not indexed" {
+            val view = LiteView.parse(emptyMap())
+            val relay = RelayLocationDto(BigDecimal.ONE, BigDecimal.ONE, "DE", null, 1, null, "relay", 100, 3320)
+            val canonical = "https://api.example.org/lite/as/3320"
+            val withRelays = LiteRelayPages.renderAutonomousSystem(
+                3320,
+                "Example",
+                listOf(relay),
+                view,
+                "https://example.org",
+                canonical,
+            )
+            withRelays shouldContain "<link rel=\"canonical\" href=\"$canonical\">"
+            withRelays shouldNotContain "noindex"
+            LiteRelayPages.renderAutonomousSystem(3320, null, emptyList(), view, "https://example.org") shouldContain
+                "<meta name=\"robots\" content=\"noindex\">"
+        }
+    })

@@ -41,19 +41,17 @@ class CountryUsageService(
      * Downloads and stores the estimates that are not stored yet. Failures are logged and retried by the next run.
      * @return the number of stored rows
      */
-    fun refresh(): Int {
-        return try {
-            val latestDay = countryUsageRepository.findLatestDay()
-            val storedRows = download(buildUri(latestDay?.minusDays(config.refreshOverlapDays)))
-            if (storedRows > 0) {
-                cacheManager.getCache(CacheConfig.COUNTRY_USAGE_PER_DAY)?.clear()
-            }
-            logger.info("Imported {} country usage rows", storedRows)
-            storedRows
-        } catch (exception: Exception) {
-            logger.error("Could not import country usage from Tor Metrics! {}", exception.message)
-            0
+    fun refresh(): Int = try {
+        val latestDay = countryUsageRepository.findLatestDay()
+        val storedRows = download(buildUri(latestDay?.minusDays(config.refreshOverlapDays)))
+        if (storedRows > 0) {
+            cacheManager.getCache(CacheConfig.COUNTRY_USAGE_PER_DAY)?.clear()
         }
+        logger.info("Imported {} country usage rows", storedRows)
+        storedRows
+    } catch (exception: Exception) {
+        logger.error("Could not import country usage from Tor Metrics! {}", exception.message)
+        0
     }
 
     private fun buildUri(start: LocalDate?): URI {

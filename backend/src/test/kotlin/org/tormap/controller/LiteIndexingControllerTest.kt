@@ -14,38 +14,39 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 @SpringBootTest(properties = ["app.lite.search-indexing=true", "app.public-url=https://api.example.org/"])
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class LiteIndexingControllerTest(
-    private val mockMvc: MockMvc,
-) : StringSpec({
-    "robots.txt allows the indexable Lite pages and names the sitemap" {
-        val robots = mockMvc.perform(get("/robots.txt")).andReturn().response.contentAsString
-        robots shouldContain "Allow: /lite/$"
-        robots shouldContain "Sitemap: https://api.example.org/lite/sitemap.xml"
-    }
+class LiteIndexingControllerTest(private val mockMvc: MockMvc) :
+    StringSpec({
+        "robots.txt allows the indexable Lite pages and names the sitemap" {
+            val robots = mockMvc.perform(get("/robots.txt")).andReturn().response.contentAsString
+            robots shouldContain "Allow: /lite/$"
+            robots shouldContain "Sitemap: https://api.example.org/lite/sitemap.xml"
+        }
 
-    "the sitemap is XML with the start page" {
-        val response = mockMvc.perform(get("/lite/sitemap.xml")).andReturn().response
-        response.status shouldBe 200
-        response.contentType shouldStartWith "application/xml"
-        response.contentAsString shouldContain "<loc>https://api.example.org/lite/</loc>"
-    }
+        "the sitemap is XML with the start page" {
+            val response = mockMvc.perform(get("/lite/sitemap.xml")).andReturn().response
+            response.status shouldBe 200
+            response.contentType shouldStartWith "application/xml"
+            response.contentAsString shouldContain "<loc>https://api.example.org/lite/</loc>"
+        }
 
-    "only pages without a query string have a canonical link" {
-        mockMvc.perform(get("/lite/")).andReturn().response.contentAsString shouldContain
-            "<link rel=\"canonical\" href=\"https://api.example.org/lite/\">"
-        mockMvc.perform(get("/lite/?zoom=4")).andReturn().response.contentAsString shouldNotContain "rel=\"canonical\""
-        mockMvc.perform(get("/lite/as/3320?zoom=4")).andReturn().response.contentAsString shouldNotContain "rel=\"canonical\""
-    }
+        "only pages without a query string have a canonical link" {
+            mockMvc.perform(get("/lite/")).andReturn().response.contentAsString shouldContain
+                "<link rel=\"canonical\" href=\"https://api.example.org/lite/\">"
+            mockMvc.perform(get("/lite/?zoom=4")).andReturn().response.contentAsString shouldNotContain
+                "rel=\"canonical\""
+            mockMvc.perform(get("/lite/as/3320?zoom=4")).andReturn().response.contentAsString shouldNotContain
+                "rel=\"canonical\""
+        }
 
-    "autonomous system pages without relays are not indexable" {
-        val html = mockMvc.perform(get("/lite/as/2147483647")).andReturn().response.contentAsString
-        html shouldNotContain "rel=\"canonical\""
-        html shouldContain "<meta name=\"robots\" content=\"noindex\">"
-    }
+        "autonomous system pages without relays are not indexable" {
+            val html = mockMvc.perform(get("/lite/as/2147483647")).andReturn().response.contentAsString
+            html shouldNotContain "rel=\"canonical\""
+            html shouldContain "<meta name=\"robots\" content=\"noindex\">"
+        }
 
-    "autonomous system pages have a descriptive title and description" {
-        val html = mockMvc.perform(get("/lite/as/3320")).andReturn().response.contentAsString
-        html shouldContain "<title>Tor relays in Autonomous system (AS3320) - TorMap Lite</title>"
-        html shouldContain "<meta name=\"description\" content=\"0 Tor relays in Autonomous system (AS3320) on"
-    }
-})
+        "autonomous system pages have a descriptive title and description" {
+            val html = mockMvc.perform(get("/lite/as/3320")).andReturn().response.contentAsString
+            html shouldContain "<title>Tor relays in Autonomous system (AS3320) - TorMap Lite</title>"
+            html shouldContain "<meta name=\"description\" content=\"0 Tor relays in Autonomous system (AS3320) on"
+        }
+    })

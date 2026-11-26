@@ -25,5 +25,4 @@ class IdGenerationTest(
         second.id!! shouldBe first.id!! + 1
         jdbcTemplate.queryForObject("SELECT last_value FROM hibernate_sequence", Long::class.java) shouldBe second.id
     }
-
 })

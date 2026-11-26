@@ -6,15 +6,18 @@ package org.tormap.cli
  */
 object Fields {
     /** RelayV1Dto, the relays of a day */
-    val RELAY = listOf("fingerprint", "nickname", "country", "flags", "consensusWeight", "autonomousSystemNumber", "familyId", "lat", "long")
+    val RELAY = listOf(
+        "fingerprint", "nickname", "country", "flags", "consensusWeight", "autonomousSystemNumber", "familyId", "lat",
+        "long",
+    )
 
     /** RelayDetailsV1Dto */
     val RELAY_DETAILS = listOf(
         "fingerprint", "nickname", "month", "day", "address", "autonomousSystemNumber", "autonomousSystemName",
         "platform", "protocols", "contact", "uptime", "bandwidthRate", "bandwidthBurst", "bandwidthObserved",
         "hibernating", "allowSingleHopExits", "cachesExtraInfo", "hiddenServiceDir", "tunnelledDirServer",
-        "linkProtocolVersions", "circuitProtocolVersions", "familyEntries", "familyKeys", "familyId", "confirmedFamilyMembers",
-        "verifiedHostNames", "unverifiedHostNames",
+        "linkProtocolVersions", "circuitProtocolVersions", "familyEntries", "familyKeys", "familyId",
+        "confirmedFamilyMembers", "verifiedHostNames", "unverifiedHostNames",
     )
 
     /** RelayMonthV1Dto, the history of a relay */
@@ -24,7 +27,8 @@ object Fields {
     )
 
     /** The history columns shown in a terminal table */
-    val RELAY_MONTH_TABLE = listOf("month", "nickname", "address", "autonomousSystemNumber", "platform", "bandwidthObserved")
+    val RELAY_MONTH_TABLE =
+        listOf("month", "nickname", "address", "autonomousSystemNumber", "platform", "bandwidthObserved")
 
     /** RelayIdentifiersV1Dto, members of a family */
     val FAMILY_MEMBER = listOf("fingerprint", "nickname")

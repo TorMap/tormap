@@ -29,7 +29,13 @@ fun runCli(args: Array<String>, rawStdout: PrintStream, rawStderr: PrintStream, 
     val stdout = TerminalSafePrintStream.wrap(rawStdout)
     val stderr = TerminalSafePrintStream.wrap(rawStderr)
     val command = Tormap(stdout, stderr, env).subcommands(
-        Days(), Relays(), Relay(), Family(), AutonomousSystems(), Stats(), Usage(),
+        Days(),
+        Relays(),
+        Relay(),
+        Family(),
+        AutonomousSystems(),
+        Stats(),
+        Usage(),
         CompletionCommand(name = "completion", help = "Print a shell completion script for bash, zsh or fish."),
     )
     command.context {
@@ -51,7 +57,11 @@ fun runCli(args: Array<String>, rawStdout: PrintStream, rawStderr: PrintStream, 
         stderr.println("tormap: ${sanitize(error.message.orEmpty())}")
         ExitCode.NOT_FOUND
     } catch (error: Ambiguous) {
-        stderr.println(sanitize("tormap: ${error.matches.size} relays are named '${error.query}' on ${error.day}. Use one of these fingerprints:"))
+        stderr.println(
+            sanitize(
+                "tormap: ${error.matches.size} relays are named '${error.query}' on ${error.day}. Use one of these fingerprints:",
+            ),
+        )
         error.matches.forEach { stderr.println(sanitize("  ${it.text("fingerprint")}  ${it.text("country")}")) }
         ExitCode.AMBIGUOUS
     } catch (error: CheckFailed) {
@@ -69,7 +79,8 @@ fun runCli(args: Array<String>, rawStdout: PrintStream, rawStderr: PrintStream, 
     }
 }
 
-private val GLOBAL_OPTIONS_WITH_VALUE = setOf("--api-url", "--proxy", "--format", "-f", "--output", "-o", "--cache-dir", "--timeout")
+private val GLOBAL_OPTIONS_WITH_VALUE =
+    setOf("--api-url", "--proxy", "--format", "-f", "--output", "-o", "--cache-dir", "--timeout")
 private val GLOBAL_FLAGS = setOf("--no-cache", "--quiet", "-q")
 
 /**
@@ -88,12 +99,16 @@ internal fun hoistGlobalOptions(args: Array<String>): Array<String> {
                 rest += args.drop(index)
                 break
             }
+
             arg in GLOBAL_FLAGS -> global += arg
+
             name in GLOBAL_OPTIONS_WITH_VALUE && arg.contains("=") -> global += arg
+
             arg in GLOBAL_OPTIONS_WITH_VALUE && index + 1 < args.size -> {
                 global += arg
                 global += args[++index]
             }
+
             else -> rest += arg
         }
         index++
