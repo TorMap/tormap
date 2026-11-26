@@ -23,7 +23,9 @@ class LiteTimeline(val days: List<LocalDate>, counts: List<DailyRelayCountDto>) 
     /** A day with an unusual number of relays */
     class Outlier(val day: LocalDate, val relayCount: Long, val changePercent: Int)
 
-    private val totals: List<Long?> = counts.associate { it.day to it.total }.let { totalByDay -> days.map { totalByDay[it] } }
+    private val totals: List<Long?> = counts.associate {
+        it.day to it.total
+    }.let { totalByDay -> days.map { totalByDay[it] } }
 
     /** Whether there is anything to draw */
     val isShown = days.size >= 2 && totals.any { it != null }
@@ -99,6 +101,7 @@ class LiteTimeline(val days: List<LocalDate>, counts: List<DailyRelayCountDto>) 
         const val HEIGHT = 64
         private const val PADDING = 6
         private val BACKGROUND = Color(0x2c353c)
+
         // The colors of MUI's dark theme that the JavaScript timeline uses: primary, secondary text and warning
         private val LINE = Color(0x90caf9)
         private val SELECTED = Color(0xb3b3b3)

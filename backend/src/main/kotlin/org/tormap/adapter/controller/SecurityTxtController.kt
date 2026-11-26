@@ -36,9 +36,8 @@ class SecurityTxtController {
     }
 
     @GetMapping(path = [PATH])
-    fun securityTxt(): ResponseEntity<String> =
-        ResponseEntity.ok()
-            .contentType(MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
-            .cacheControl(CacheControl.maxAge(Duration.ofDays(1)).cachePublic())
-            .body(securityTxt(Instant.now()))
+    fun securityTxt(): ResponseEntity<String> = ResponseEntity.ok()
+        .contentType(MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
+        .cacheControl(CacheControl.maxAge(Duration.ofDays(1)).cachePublic())
+        .body(securityTxt(Instant.now()))
 }

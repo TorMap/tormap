@@ -16,39 +16,40 @@ import javax.sql.DataSource
  */
 @SpringBootTest
 @ActiveProfiles("test")
-class RelayDetailsIndexUsageTest(
-    private val dataSource: DataSource,
-) : StringSpec({
+class RelayDetailsIndexUsageTest(private val dataSource: DataSource) :
+    StringSpec({
 
-    fun planOf(sql: String, vararg values: String = arrayOf("2024-03", "A".repeat(40))): String = dataSource.connection.use { connection ->
-        connection.autoCommit = false
-        try {
-            connection.createStatement().use { it.execute("SET LOCAL enable_seqscan = off") }
-            connection.prepareStatement("EXPLAIN $sql").use { statement ->
-                values.forEachIndexed { index, value -> statement.setString(index + 1, value) }
-                statement.executeQuery().use { result ->
-                    generateSequence { if (result.next()) result.getString(1) else null }.joinToString("\n")
+        fun planOf(sql: String, vararg values: String = arrayOf("2024-03", "A".repeat(40))): String =
+            dataSource.connection.use { connection ->
+                connection.autoCommit = false
+                try {
+                    connection.createStatement().use { it.execute("SET LOCAL enable_seqscan = off") }
+                    connection.prepareStatement("EXPLAIN $sql").use { statement ->
+                        values.forEachIndexed { index, value -> statement.setString(index + 1, value) }
+                        statement.executeQuery().use { result ->
+                            generateSequence { if (result.next()) result.getString(1) else null }.joinToString("\n")
+                        }
+                    }
+                } finally {
+                    connection.rollback()
                 }
             }
-        } finally {
-            connection.rollback()
+
+        "the lookup by month and fingerprint uses the unique index" {
+            val plan = planOf("SELECT id FROM relay_details WHERE month = ? AND fingerprint = ?")
+            plan shouldContain "Index"
+            plan shouldNotContain "Seq Scan"
         }
-    }
 
-    "the lookup by month and fingerprint uses the unique index" {
-        val plan = planOf("SELECT id FROM relay_details WHERE month = ? AND fingerprint = ?")
-        plan shouldContain "Index"
-        plan shouldNotContain "Seq Scan"
-    }
+        // The relay history (/v1/relays/{fingerprint}/months) has no month. Postgres 18 skips through the months of the index.
+        "the lookup by fingerprint alone uses the unique index" {
+            val plan = planOf("SELECT month FROM relay_details WHERE fingerprint = ?", "A".repeat(40))
+            plan shouldContain "Index"
+            plan shouldNotContain "Seq Scan"
+        }
 
-    // The relay history (/v1/relays/{fingerprint}/months) has no month. Postgres 18 skips through the months of the index.
-    "the lookup by fingerprint alone uses the unique index" {
-        val plan = planOf("SELECT month FROM relay_details WHERE fingerprint = ?", "A".repeat(40))
-        plan shouldContain "Index"
-        plan shouldNotContain "Seq Scan"
-    }
-
-    "values bound as text can not use the index" {
-        planOf("SELECT id FROM relay_details WHERE month = ?::text AND fingerprint = ?::text") shouldContain "Seq Scan"
-    }
-})
+        "values bound as text can not use the index" {
+            planOf("SELECT id FROM relay_details WHERE month = ?::text AND fingerprint = ?::text") shouldContain
+                "Seq Scan"
+        }
+    })

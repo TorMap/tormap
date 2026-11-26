@@ -14,6 +14,7 @@ class FakeApi : AutoCloseable {
     val routes = mutableMapOf<String, Pair<Int, String>>()
     val requests = CopyOnWriteArrayList<String>()
     val userAgents = CopyOnWriteArrayList<String>()
+
     /** ETags per path. A request with a matching If-None-Match gets 304 Not Modified. */
     val eTags = mutableMapOf<String, String>()
     val ifNoneMatch = CopyOnWriteArrayList<String?>()
@@ -32,7 +33,13 @@ class FakeApi : AutoCloseable {
                 return@createContext
             }
             val gzip = exchange.requestHeaders.getFirst("Accept-Encoding")?.contains("gzip") == true
-            val bytes = if (gzip) ByteArrayOutputStream().also { GZIPOutputStream(it).use { out -> out.write(body.toByteArray()) } }.toByteArray() else body.toByteArray()
+            val bytes = if (gzip) {
+                ByteArrayOutputStream().also {
+                    GZIPOutputStream(it).use { out -> out.write(body.toByteArray()) }
+                }.toByteArray()
+            } else {
+                body.toByteArray()
+            }
             if (gzip) exchange.responseHeaders.add("Content-Encoding", "gzip")
             if (status in 300..399) exchange.responseHeaders.add("Location", "http://example.com/")
             exchange.responseHeaders.add("Content-Type", "application/json")

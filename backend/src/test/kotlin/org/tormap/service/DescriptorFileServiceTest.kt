@@ -92,7 +92,7 @@ class DescriptorFileServiceTest(
                 ProcessedFile(DescriptorFileId(DescriptorType.RECENT_RELAY_CONSENSUS, "old-recent"), old),
                 ProcessedFile(DescriptorFileId(DescriptorType.RECENT_RELAY_SERVER, "fresh-recent"), fresh),
                 ProcessedFile(DescriptorFileId(DescriptorType.ARCHIVE_RELAY_SERVER, "old-archive"), old),
-            )
+            ),
         )
 
         service.deleteRecentFileReferences()
@@ -111,5 +111,4 @@ class DescriptorFileServiceTest(
         (id == DescriptorFileId(DescriptorType.RECENT_RELAY_SERVER, "b")) shouldBe false
         id.equals("a") shouldBe false
     }
-
 })

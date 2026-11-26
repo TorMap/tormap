@@ -50,9 +50,6 @@ class RelayDetailsV1Dto(@Schema(hidden = true) details: RelayDetailsDto) {
 /**
  * A relay identified by fingerprint, with its nickname, in the public API v1
  */
-class RelayIdentifiersV1Dto(
-    val fingerprint: String,
-    val nickname: String,
-) {
+class RelayIdentifiersV1Dto(val fingerprint: String, val nickname: String) {
     constructor(identifiers: RelayIdentifiersDto) : this(identifiers.fingerprint, identifiers.nickname)
 }

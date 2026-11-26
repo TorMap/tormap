@@ -55,18 +55,21 @@ object LiteAggregation {
      */
     fun normalized(view: LiteView, relays: List<RelayLocationDto>): LiteView = view.copy(
         selectedFamily = view.selectedFamily?.takeIf { id -> relays.any { it.familyId == id } },
-        selectedAutonomousSystem = view.selectedAutonomousSystem?.takeIf { number -> relays.any { it.asNumber == number } },
+        selectedAutonomousSystem = view.selectedAutonomousSystem?.takeIf { number ->
+            relays.any { it.asNumber == number }
+        },
         selectedCountry = view.selectedCountry?.takeIf { country -> relays.any { it.country == country } },
     )
 
     /**
      * Returns the relays of the selected country, family and autonomous system, like buildFilteredRelays()
      */
-    fun selectedRelays(relays: List<RelayLocationDto>, view: LiteView): List<RelayLocationDto> = relays.filter { relay ->
-        (view.selectedCountry == null || relay.country == view.selectedCountry) &&
-            (view.selectedFamily == null || relay.familyId == view.selectedFamily) &&
-            (view.selectedAutonomousSystem == null || relay.asNumber == view.selectedAutonomousSystem)
-    }
+    fun selectedRelays(relays: List<RelayLocationDto>, view: LiteView): List<RelayLocationDto> =
+        relays.filter { relay ->
+            (view.selectedCountry == null || relay.country == view.selectedCountry) &&
+                (view.selectedFamily == null || relay.familyId == view.selectedFamily) &&
+                (view.selectedAutonomousSystem == null || relay.asNumber == view.selectedAutonomousSystem)
+        }
 
     /**
      * Counts the relays by type and their groups, like buildStatistics()
@@ -107,7 +110,13 @@ object LiteAggregation {
         // The same padding as the frontend: a group gets its own size and the sizes of all smaller groups except the
         // smallest, the smallest group gets none
         groups.mapIndexed { index, (groupId, groupRelays) ->
-            val padding = if (index < groups.lastIndex) groups.subList(index, groups.lastIndex).sumOf { it.value.size } else 0
+            val padding = if (index <
+                groups.lastIndex
+            ) {
+                groups.subList(index, groups.lastIndex).sumOf { it.value.size }
+            } else {
+                0
+            }
             GroupAtLocation(groupId, groupRelays, padding)
         }
     }.filterValues { it.isNotEmpty() }
@@ -115,9 +124,12 @@ object LiteAggregation {
     /**
      * Returns the groups with the most relays, e.g. for a ranking below the map
      */
-    fun largestGroups(relays: List<RelayLocationDto>, groupOf: (RelayLocationDto) -> Any?, limit: Int): List<Pair<Any, Int>> =
-        relays.mapNotNull(groupOf).groupingBy { it }.eachCount().entries
-            .sortedByDescending { it.value }
-            .take(limit)
-            .map { it.key to it.value }
+    fun largestGroups(
+        relays: List<RelayLocationDto>,
+        groupOf: (RelayLocationDto) -> Any?,
+        limit: Int,
+    ): List<Pair<Any, Int>> = relays.mapNotNull(groupOf).groupingBy { it }.eachCount().entries
+        .sortedByDescending { it.value }
+        .take(limit)
+        .map { it.key to it.value }
 }

@@ -13,131 +13,134 @@ import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
-class CoalesceServiceTest : StringSpec({
-    val executor = Executors.newCachedThreadPool()
-    val coalesceService = CoalesceService(executor)
+class CoalesceServiceTest :
+    StringSpec({
+        val executor = Executors.newCachedThreadPool()
+        val coalesceService = CoalesceService(executor)
 
-    afterSpec { executor.shutdownNow() }
+        afterSpec { executor.shutdownNow() }
 
-    "reruns once when submit is called while a key is running" {
-        val started = CountDownLatch(1)
-        val release = CountDownLatch(1)
-        val runs = AtomicInteger(0)
+        "reruns once when submit is called while a key is running" {
+            val started = CountDownLatch(1)
+            val release = CountDownLatch(1)
+            val runs = AtomicInteger(0)
 
-        val task: () -> Unit = {
-            val run = runs.incrementAndGet()
-            if (run == 1) {
-                started.countDown()
-                release.await(5, TimeUnit.SECONDS)
-            }
-        }
-
-        val first = coalesceService.submitAsync("coalesce-rerun", task)
-
-        started.await(5, TimeUnit.SECONDS) shouldBe true
-        val second = coalesceService.submitAsync("coalesce-rerun", task)
-        second.isDone shouldBe false
-        release.countDown()
-
-        first.get(5, TimeUnit.SECONDS)
-        second.get(5, TimeUnit.SECONDS)
-        runs.get() shouldBe 2
-    }
-
-    "never runs the same key concurrently even under repeated submissions" {
-        val started = CountDownLatch(1)
-        val release = CountDownLatch(1)
-        val active = AtomicInteger(0)
-        val maxActive = AtomicInteger(0)
-        val runs = AtomicInteger(0)
-
-        val task: () -> Unit = {
-            val current = active.incrementAndGet()
-            try {
-                maxActive.accumulateAndGet(current, ::maxOf)
+            val task: () -> Unit = {
                 val run = runs.incrementAndGet()
                 if (run == 1) {
                     started.countDown()
                     release.await(5, TimeUnit.SECONDS)
                 }
-            } finally {
-                active.decrementAndGet()
             }
+
+            val first = coalesceService.submitAsync("coalesce-rerun", task)
+
+            started.await(5, TimeUnit.SECONDS) shouldBe true
+            val second = coalesceService.submitAsync("coalesce-rerun", task)
+            second.isDone shouldBe false
+            release.countDown()
+
+            first.get(5, TimeUnit.SECONDS)
+            second.get(5, TimeUnit.SECONDS)
+            runs.get() shouldBe 2
         }
 
-        val first = coalesceService.submitAsync("coalesce-serial", task)
+        "never runs the same key concurrently even under repeated submissions" {
+            val started = CountDownLatch(1)
+            val release = CountDownLatch(1)
+            val active = AtomicInteger(0)
+            val maxActive = AtomicInteger(0)
+            val runs = AtomicInteger(0)
 
-        started.await(5, TimeUnit.SECONDS) shouldBe true
-        val queued = List(10) { coalesceService.submitAsync("coalesce-serial", task) }
-        queued.forEach { it shouldBeSameInstanceAs queued.first() }
-        release.countDown()
+            val task: () -> Unit = {
+                val current = active.incrementAndGet()
+                try {
+                    maxActive.accumulateAndGet(current, ::maxOf)
+                    val run = runs.incrementAndGet()
+                    if (run == 1) {
+                        started.countDown()
+                        release.await(5, TimeUnit.SECONDS)
+                    }
+                } finally {
+                    active.decrementAndGet()
+                }
+            }
 
-        first.get(5, TimeUnit.SECONDS)
-        queued.first().get(5, TimeUnit.SECONDS)
-        maxActive.get() shouldBe 1
-        runs.get() shouldBe 2
-    }
+            val first = coalesceService.submitAsync("coalesce-serial", task)
 
-    "runs the latest submitted task for the queued rerun" {
-        val started = CountDownLatch(1)
-        val release = CountDownLatch(1)
-        val executed = mutableListOf<String>()
+            started.await(5, TimeUnit.SECONDS) shouldBe true
+            val queued = List(10) { coalesceService.submitAsync("coalesce-serial", task) }
+            queued.forEach { it shouldBeSameInstanceAs queued.first() }
+            release.countDown()
 
-        val first = coalesceService.submitAsync("coalesce-latest") {
-            synchronized(executed) { executed += "first" }
-            started.countDown()
-            release.await(5, TimeUnit.SECONDS)
+            first.get(5, TimeUnit.SECONDS)
+            queued.first().get(5, TimeUnit.SECONDS)
+            maxActive.get() shouldBe 1
+            runs.get() shouldBe 2
         }
-        started.await(5, TimeUnit.SECONDS) shouldBe true
-        coalesceService.submitAsync("coalesce-latest") { synchronized(executed) { executed += "stale" } }
-        val latest = coalesceService.submitAsync("coalesce-latest") { synchronized(executed) { executed += "latest" } }
-        release.countDown()
 
-        first.get(5, TimeUnit.SECONDS)
-        latest.get(5, TimeUnit.SECONDS)
-        synchronized(executed) { executed.toList() } shouldBe listOf("first", "latest")
-    }
+        "runs the latest submitted task for the queued rerun" {
+            val started = CountDownLatch(1)
+            val release = CountDownLatch(1)
+            val executed = mutableListOf<String>()
 
-    "still runs a queued rerun after the running task fails" {
-        val started = CountDownLatch(1)
-        val release = CountDownLatch(1)
-        val rerun = AtomicInteger(0)
+            val first = coalesceService.submitAsync("coalesce-latest") {
+                synchronized(executed) { executed += "first" }
+                started.countDown()
+                release.await(5, TimeUnit.SECONDS)
+            }
+            started.await(5, TimeUnit.SECONDS) shouldBe true
+            coalesceService.submitAsync("coalesce-latest") { synchronized(executed) { executed += "stale" } }
+            val latest = coalesceService.submitAsync("coalesce-latest") {
+                synchronized(executed) { executed += "latest" }
+            }
+            release.countDown()
 
-        val first = coalesceService.submitAsync("coalesce-failure") {
-            started.countDown()
-            release.await(5, TimeUnit.SECONDS)
-            throw IllegalStateException("boom")
+            first.get(5, TimeUnit.SECONDS)
+            latest.get(5, TimeUnit.SECONDS)
+            synchronized(executed) { executed.toList() } shouldBe listOf("first", "latest")
         }
-        started.await(5, TimeUnit.SECONDS) shouldBe true
-        val second = coalesceService.submitAsync("coalesce-failure") { rerun.incrementAndGet() }
-        release.countDown()
 
-        val exception = shouldThrow<ExecutionException> { first.get(5, TimeUnit.SECONDS) }
-        (exception.cause is IllegalStateException) shouldBe true
-        second.get(5, TimeUnit.SECONDS)
-        rerun.get() shouldBe 1
-        coalesceService.hasStateForKey("coalesce-failure") shouldBe false
-    }
+        "still runs a queued rerun after the running task fails" {
+            val started = CountDownLatch(1)
+            val release = CountDownLatch(1)
+            val rerun = AtomicInteger(0)
 
-    "releases the key when a task throws an Error" {
-        val failed = coalesceService.submitAsync("coalesce-error") { throw AssertionError("fatal") }
-        shouldThrow<ExecutionException> { failed.get(5, TimeUnit.SECONDS) }
+            val first = coalesceService.submitAsync("coalesce-failure") {
+                started.countDown()
+                release.await(5, TimeUnit.SECONDS)
+                throw IllegalStateException("boom")
+            }
+            started.await(5, TimeUnit.SECONDS) shouldBe true
+            val second = coalesceService.submitAsync("coalesce-failure") { rerun.incrementAndGet() }
+            release.countDown()
 
-        coalesceService.submitAsync("coalesce-error") {}.get(5, TimeUnit.SECONDS)
-        coalesceService.hasStateForKey("coalesce-error") shouldBe false
-    }
+            val exception = shouldThrow<ExecutionException> { first.get(5, TimeUnit.SECONDS) }
+            (exception.cause is IllegalStateException) shouldBe true
+            second.get(5, TimeUnit.SECONDS)
+            rerun.get() shouldBe 1
+            coalesceService.hasStateForKey("coalesce-failure") shouldBe false
+        }
 
-    "fails the future and releases the key when the executor rejects the task" {
-        val rejecting = CoalesceService(Executor { throw RejectedExecutionException("shut down") })
+        "releases the key when a task throws an Error" {
+            val failed = coalesceService.submitAsync("coalesce-error") { throw AssertionError("fatal") }
+            shouldThrow<ExecutionException> { failed.get(5, TimeUnit.SECONDS) }
 
-        val future: CompletableFuture<Void> = rejecting.submitAsync("coalesce-rejected") {}
+            coalesceService.submitAsync("coalesce-error") {}.get(5, TimeUnit.SECONDS)
+            coalesceService.hasStateForKey("coalesce-error") shouldBe false
+        }
 
-        shouldThrow<ExecutionException> { future.get(5, TimeUnit.SECONDS) }
-        rejecting.hasStateForKey("coalesce-rejected") shouldBe false
-    }
+        "fails the future and releases the key when the executor rejects the task" {
+            val rejecting = CoalesceService(Executor { throw RejectedExecutionException("shut down") })
 
-    "removes key state after task completion" {
-        coalesceService.submitAsync("coalesce-cleanup") {}.get(5, TimeUnit.SECONDS)
-        coalesceService.hasStateForKey("coalesce-cleanup") shouldBe false
-    }
-})
+            val future: CompletableFuture<Void> = rejecting.submitAsync("coalesce-rejected") {}
+
+            shouldThrow<ExecutionException> { future.get(5, TimeUnit.SECONDS) }
+            rejecting.hasStateForKey("coalesce-rejected") shouldBe false
+        }
+
+        "removes key state after task completion" {
+            coalesceService.submitAsync("coalesce-cleanup") {}.get(5, TimeUnit.SECONDS)
+            coalesceService.hasStateForKey("coalesce-cleanup") shouldBe false
+        }
+    })

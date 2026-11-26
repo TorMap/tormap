@@ -24,9 +24,8 @@ class RobotsTxtController(
     private val body = LiteIndexing.robotsTxt(LiteIndexing.indexedUrl(searchIndexing, publicUrl))
 
     @GetMapping(path = ["/robots.txt"])
-    fun robotsTxt(): ResponseEntity<String> =
-        ResponseEntity.ok()
-            .contentType(MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
-            .cacheControl(CacheControl.maxAge(Duration.ofDays(1)).cachePublic())
-            .body(body)
+    fun robotsTxt(): ResponseEntity<String> = ResponseEntity.ok()
+        .contentType(MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8))
+        .cacheControl(CacheControl.maxAge(Duration.ofDays(1)).cachePublic())
+        .body(body)
 }

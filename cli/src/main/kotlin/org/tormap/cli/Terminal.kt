@@ -25,7 +25,9 @@ fun isVisible(codePoint: Int): Boolean = when (Character.getType(codePoint).toBy
     Character.END_PUNCTUATION, Character.INITIAL_QUOTE_PUNCTUATION, Character.FINAL_QUOTE_PUNCTUATION,
     Character.OTHER_PUNCTUATION,
     Character.MATH_SYMBOL, Character.CURRENCY_SYMBOL, Character.MODIFIER_SYMBOL, Character.OTHER_SYMBOL,
-    Character.SPACE_SEPARATOR -> true
+    Character.SPACE_SEPARATOR,
+    -> true
+
     else -> false
 }
 
@@ -45,7 +47,8 @@ const val REPLACEMENT = '?'
 class TerminalSafePrintStream private constructor(filter: Filter) : PrintStream(filter, true, Charsets.UTF_8) {
     companion object {
         /** [target] wrapped, unless it already is one. */
-        fun wrap(target: PrintStream): PrintStream = target as? TerminalSafePrintStream ?: TerminalSafePrintStream(Filter(target))
+        fun wrap(target: PrintStream): PrintStream =
+            target as? TerminalSafePrintStream ?: TerminalSafePrintStream(Filter(target))
     }
 
     /** Decodes the UTF-8 bytes this PrintStream writes, filters the code points, and prints them to the target. */
@@ -55,11 +58,14 @@ class TerminalSafePrintStream private constructor(filter: Filter) : PrintStream(
             .onMalformedInput(CodingErrorAction.REPLACE)
             .onUnmappableCharacter(CodingErrorAction.REPLACE)
             .replaceWith(REPLACEMENT.toString())
+
         // Bytes of a character split between two writes wait here for the rest
         private val bytes = ByteBuffer.allocate(8192)
         private val chars = CharBuffer.allocate(8192)
+
         // A high surrogate at the end of a decoded chunk, waiting for its low surrogate
         private var pendingHighSurrogate: Char? = null
+
         // A carriage return, waiting to see whether a line feed follows
         private var pendingCarriageReturn = false
 
@@ -118,7 +124,11 @@ class TerminalSafePrintStream private constructor(filter: Filter) : PrintStream(
             }
             when {
                 codePoint == '\r'.code -> pendingCarriageReturn = true
-                codePoint == '\n'.code || codePoint == '\t'.code || isVisible(codePoint) -> text.appendCodePoint(codePoint)
+
+                codePoint == '\n'.code || codePoint == '\t'.code || isVisible(
+                    codePoint,
+                ) -> text.appendCodePoint(codePoint)
+
                 else -> text.append(REPLACEMENT)
             }
         }

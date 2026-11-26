@@ -21,11 +21,12 @@ import java.util.Base64
  * @return sorted family keys like `ed25519:<unpadded base64 of the family public key>`
  */
 fun ServerDescriptor.verifiedFamilyKeys(): List<String> {
-    val masterKey = masterKeyEd25519?.let { decodeBase64OrNull(it) }?.takeIf { it.size == KEY_LENGTH } ?: return emptyList()
+    val masterKey =
+        masterKeyEd25519?.let { decodeBase64OrNull(it) }?.takeIf { it.size == KEY_LENGTH } ?: return emptyList()
     return familyCerts
         .mapNotNull { cryptoBlock ->
             val certificate = decodeBase64OrNull(
-                cryptoBlock.lines().filterNot { it.startsWith("-----") }.joinToString("")
+                cryptoBlock.lines().filterNot { it.startsWith("-----") }.joinToString(""),
             ) ?: return@mapNotNull null
             verifyFamilyCert(certificate, masterKey, publishedMillis)
         }
@@ -52,11 +53,11 @@ fun verifyFamilyCert(certificate: ByteArray, relayIdentityKey: ByteArray, publis
     val certifiedKey = ByteArray(KEY_LENGTH).also { buffer.get(it) }
     val extensionCount = buffer.get().toInt() and 0xFF
     if (
-        version != 1
-        || certType != CERT_TYPE_FAMILY_V_IDENTITY
-        || certifiedKeyType != CERTIFIED_KEY_TYPE_ED25519
-        || !certifiedKey.contentEquals(relayIdentityKey)
-        || expirationHours * MILLIS_PER_HOUR < publishedMillis
+        version != 1 ||
+        certType != CERT_TYPE_FAMILY_V_IDENTITY ||
+        certifiedKeyType != CERTIFIED_KEY_TYPE_ED25519 ||
+        !certifiedKey.contentEquals(relayIdentityKey) ||
+        expirationHours * MILLIS_PER_HOUR < publishedMillis
     ) {
         return null
     }
@@ -71,7 +72,9 @@ fun verifyFamilyCert(certificate: ByteArray, relayIdentityKey: ByteArray, publis
         val data = ByteArray(length).also { buffer.get(it) }
         when {
             type == EXTENSION_TYPE_SIGNED_WITH_ED25519_KEY && length == KEY_LENGTH -> signingKey = data
+
             type == EXTENSION_TYPE_SIGNED_WITH_ED25519_KEY -> return null
+
             // Unknown extensions that affect validation must not be ignored
             (flags and EXTENSION_FLAG_AFFECTS_VALIDATION) != 0 -> return null
         }

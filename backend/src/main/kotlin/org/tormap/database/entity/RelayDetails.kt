@@ -1,12 +1,19 @@
 package org.tormap.database.entity
 
+import jakarta.persistence.Column
+import jakarta.persistence.ColumnResult
+import jakarta.persistence.ConstructorResult
+import jakarta.persistence.Entity
+import jakarta.persistence.Index
+import jakarta.persistence.NamedNativeQuery
+import jakarta.persistence.SqlResultSetMapping
+import jakarta.persistence.Table
 import org.tormap.adapter.dto.RelayFamilyIdentifiersDto
 import org.tormap.util.jointToCommaSeparated
 import org.tormap.util.stripLengthForDB
 import org.tormap.util.verifiedFamilyKeys
 import org.torproject.descriptor.ServerDescriptor
 import java.time.LocalDate
-import jakarta.persistence.*
 
 const val FIND_FAMILY_IDENTIFIERS_QUERY = "findFamilyIdentifiers"
 
@@ -20,7 +27,7 @@ const val FIND_FAMILY_IDENTIFIERS_QUERY = "findFamilyIdentifiers"
     indexes = [
         Index(columnList = "month, fingerprint", unique = true),
         Index(columnList = "familyId"),
-    ]
+    ],
 )
 @SqlResultSetMapping(
     name = FIND_FAMILY_IDENTIFIERS_QUERY,
@@ -32,9 +39,9 @@ const val FIND_FAMILY_IDENTIFIERS_QUERY = "findFamilyIdentifiers"
                 ColumnResult(name = "memberCount", type = Long::class),
                 ColumnResult(name = "nicknames", type = String::class),
                 ColumnResult(name = "autonomousSystems", type = String::class),
-            ]
-        )
-    ]
+            ],
+        ),
+    ],
 )
 @NamedNativeQuery(
     name = FIND_FAMILY_IDENTIFIERS_QUERY,
@@ -47,7 +54,7 @@ const val FIND_FAMILY_IDENTIFIERS_QUERY = "findFamilyIdentifiers"
         "WHERE family_id in :familyIds " +
         "GROUP BY family_id",
     resultClass = RelayFamilyIdentifiersDto::class,
-    resultSetMapping = FIND_FAMILY_IDENTIFIERS_QUERY
+    resultSetMapping = FIND_FAMILY_IDENTIFIERS_QUERY,
 )
 class RelayDetails(
     @Column(length = 7, columnDefinition = "bpchar(7)")

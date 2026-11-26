@@ -1,14 +1,14 @@
 package org.tormap.config
 
 import io.kotest.core.spec.style.StringSpec
-import jakarta.servlet.http.Cookie
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldStartWith
+import jakarta.servlet.http.Cookie
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -32,7 +32,16 @@ class SecurityRulesTest(
     fun statusOf(path: String) = mockMvc.perform(get(path)).andReturn().response.status
 
     "public paths are not rejected by security" {
-        listOf("/", "/error", "/favicon.ico", "/robots.txt", "/.well-known/security.txt", "/static/missing.txt", "/relay/missing", "/relay/country-usage/day/2024-01-01").forEach { path ->
+        listOf(
+            "/",
+            "/error",
+            "/favicon.ico",
+            "/robots.txt",
+            "/.well-known/security.txt",
+            "/static/missing.txt",
+            "/relay/missing",
+            "/relay/country-usage/day/2024-01-01",
+        ).forEach { path ->
             statusOf(path) shouldNotBe 401
             statusOf(path) shouldNotBe 403
         }
@@ -53,7 +62,8 @@ class SecurityRulesTest(
     }
 
     "actuator asks browsers for HTTP Basic credentials" {
-        mockMvc.perform(get("/actuator/health")).andReturn().response.getHeader("WWW-Authenticate") shouldStartWith "Basic"
+        mockMvc.perform(get("/actuator/health")).andReturn().response.getHeader("WWW-Authenticate") shouldStartWith
+            "Basic"
     }
 
     "actuator rejects unsafe methods without CSRF token before authentication" {
@@ -64,7 +74,7 @@ class SecurityRulesTest(
         val status = mockMvc.perform(
             post("/actuator/loggers/ROOT")
                 .cookie(Cookie("XSRF-TOKEN", "token"))
-                .header("X-XSRF-TOKEN", "token")
+                .header("X-XSRF-TOKEN", "token"),
         ).andReturn().response.status
         status shouldBe 401
     }
@@ -102,7 +112,8 @@ class SecurityRulesTest(
     }
 
     "content security policy is sent by default" {
-        mockMvc.perform(get("/")).andReturn().response.getHeader("Content-Security-Policy") shouldBe SecurityConfig.DEFAULT_CONTENT_SECURITY_POLICY
+        mockMvc.perform(get("/")).andReturn().response.getHeader("Content-Security-Policy") shouldBe
+            SecurityConfig.DEFAULT_CONTENT_SECURITY_POLICY
         SecurityConfig.DEFAULT_CONTENT_SECURITY_POLICY shouldStartWith "default-src 'none';"
         SecurityConfig.DEFAULT_CONTENT_SECURITY_POLICY shouldContain "form-action 'none'"
     }
@@ -126,10 +137,9 @@ class SecurityRulesTest(
         val response = mockMvc.perform(
             options("/relay/location/days")
                 .header("Origin", origin)
-                .header("Access-Control-Request-Method", "GET")
+                .header("Access-Control-Request-Method", "GET"),
         ).andReturn().response
         response.status shouldBe 200
         response.getHeader("Access-Control-Allow-Origin") shouldBe origin
     }
-
 })

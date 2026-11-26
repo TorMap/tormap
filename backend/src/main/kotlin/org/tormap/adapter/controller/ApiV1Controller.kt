@@ -59,7 +59,11 @@ class ApiV1Controller(
     fun getDays(): List<LocalDate> = relayLocationController.getDays().sorted()
 
     // Answers If-None-Match with 304 Not Modified, so clients can revalidate a cached day without downloading it again
-    @Operation(summary = "Returns all relays of a day with fingerprint, nickname, country, location, flags, consensus weight, autonomous system and family.")
+    @Operation(
+        summary =
+        "Returns all relays of a day with fingerprint, nickname, country, location, flags, consensus weight, " +
+            "autonomous system and family.",
+    )
     @GetMapping("days/{day}/relays")
     fun getRelaysOfDay(@PathVariable day: String): ResponseEntity<List<RelayV1Dto>> {
         val relaysOfDay = apiV1RelaysOfDayService.getRelaysOfDay(parseDay(day))
@@ -68,7 +72,11 @@ class ApiV1Controller(
 
     // The fingerprint is the relay's identity in Tor and stays the same across months, unlike the internal details ID.
     // The lookup uses the unique (month, fingerprint) index, also when no month is given (see RelayDetailsIndexUsageTest).
-    @Operation(summary = "Returns the details of a relay by its fingerprint, for the given month (like 2024-05) or the latest month with data.")
+    @Operation(
+        summary =
+        "Returns the details of a relay by its fingerprint, for the given month (like 2024-05) or the latest " +
+            "month with data.",
+    )
     @GetMapping("relays/{fingerprint}")
     fun getRelay(
         @PathVariable fingerprint: String,
@@ -83,10 +91,15 @@ class ApiV1Controller(
         return RelayDetailsV1Dto(relayDetailsQueryService.getRelay(details.id!!))
     }
 
-    @Operation(summary = "Returns every month in which the relay published a server descriptor, oldest first, with its nickname, address, autonomous system, platform, contact, observed bandwidth and family in that month.")
+    @Operation(
+        summary = "Returns every month in which the relay published a server descriptor, oldest first, with its " +
+            "nickname, address, autonomous system, platform, contact, observed bandwidth and family in that month.",
+    )
     @GetMapping("relays/{fingerprint}/months")
     fun getRelayMonths(@PathVariable fingerprint: String): List<RelayMonthV1Dto> =
-        relayDetailsRepositoryImpl.findMonthsByFingerprint(parseFingerprint(fingerprint)).ifEmpty { throw RelayNotFoundException() }
+        relayDetailsRepositoryImpl.findMonthsByFingerprint(parseFingerprint(fingerprint)).ifEmpty {
+            throw RelayNotFoundException()
+        }
 
     // Months without families are not cached, so requests for made-up months can not evict real ones
     @Cacheable(CacheConfig.API_V1_FAMILIES_PER_MONTH, key = "#month", unless = "#result.isEmpty()")
@@ -102,7 +115,9 @@ class ApiV1Controller(
                         .map { RelayIdentifiersV1Dto(it.fingerprint, it.nickname) }
                         .sortedWith(compareBy({ it.nickname.lowercase() }, { it.fingerprint })),
                     autonomousSystems = members
-                        .mapNotNull { member -> member.autonomousSystemNumber?.let { AutonomousSystemDto(it, member.autonomousSystemName) } }
+                        .mapNotNull { member ->
+                            member.autonomousSystemNumber?.let { AutonomousSystemDto(it, member.autonomousSystemName) }
+                        }
                         .distinctBy { it.number }
                         .sortedBy { it.number },
                 )
@@ -121,7 +136,11 @@ class ApiV1Controller(
     fun getAutonomousSystems(@PathVariable month: String): List<AutonomousSystemDto> =
         relayDetailsController.getAutonomousSystems(month)
 
-    @Operation(summary = "Returns the number of relays (total, exit, guard, other) per day, optionally limited to a range of days.")
+    @Operation(
+        summary =
+        "Returns the number of relays (total, exit, guard, other) per day, optionally limited to a range of " +
+            "days.",
+    )
     @GetMapping("statistics/daily-counts")
     fun getDailyCounts(
         @RequestParam(required = false) from: String?,
@@ -135,8 +154,7 @@ class ApiV1Controller(
 
     @Operation(summary = "Returns the estimated number of Tor users per country for a day. Source: Tor Metrics.")
     @GetMapping("country-usage/{day}")
-    fun getCountryUsage(@PathVariable day: String): List<CountryUsageDto> =
-        countryUsageController.getDay(parseDay(day))
+    fun getCountryUsage(@PathVariable day: String): List<CountryUsageDto> = countryUsageController.getDay(parseDay(day))
 
     // Path and query values are untrusted: malformed values are client errors, and padded years like +0002024 are
     // rejected because they would parse to the same date but create more cache keys

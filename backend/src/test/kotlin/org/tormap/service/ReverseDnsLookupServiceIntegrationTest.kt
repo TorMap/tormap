@@ -108,8 +108,10 @@ class ReverseDnsLookupServiceIntegrationTest(
 class ControllableReverseDnsResolver : ReverseDnsResolver {
     @Volatile
     private var ptrRecords: List<String> = emptyList()
+
     @Volatile
     private var addresses: Map<String, List<String>> = emptyMap()
+
     @Volatile
     private var delayMs: Long = 0
 

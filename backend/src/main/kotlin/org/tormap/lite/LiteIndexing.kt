@@ -58,7 +58,9 @@ object LiteIndexing {
         append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n")
         append("<url><loc>${escapeHtml(publicUrl + LitePage.PATH)}</loc>$lastModified</url>\n")
         autonomousSystems.distinct().sorted().forEach {
-            append("<url><loc>${escapeHtml("$publicUrl${LitePage.AUTONOMOUS_SYSTEM_PATH}$it")}</loc>$lastModified</url>\n")
+            append(
+                "<url><loc>${escapeHtml("$publicUrl${LitePage.AUTONOMOUS_SYSTEM_PATH}$it")}</loc>$lastModified</url>\n",
+            )
         }
         append("</urlset>\n")
     }

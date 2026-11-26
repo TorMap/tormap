@@ -11,11 +11,12 @@ import org.tormap.database.repository.RelayLocationRepositoryImpl
 
 @RestController
 @RequestMapping("relay/statistics/")
-class RelayStatisticsController(
-    val relayLocationRepositoryImpl: RelayLocationRepositoryImpl,
-) {
+class RelayStatisticsController(val relayLocationRepositoryImpl: RelayLocationRepositoryImpl) {
     @Cacheable(CacheConfig.RELAY_DAILY_COUNTS, key = "T(org.tormap.config.CacheConfig).RELAY_DAILY_COUNTS_KEY")
-    @Operation(summary = "Returns the number of relays (total, exit, guard, other) for every day with relay locations, ordered by day.")
+    @Operation(
+        summary = "Returns the number of relays (total, exit, guard, other) for every day with relay locations, " +
+            "ordered by day.",
+    )
     @GetMapping("daily-counts")
     fun getDailyCounts(): List<DailyRelayCountDto> = relayLocationRepositoryImpl.findDailyRelayCounts()
 }

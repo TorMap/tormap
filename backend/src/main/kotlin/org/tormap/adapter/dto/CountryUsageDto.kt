@@ -21,10 +21,4 @@ class CountryUsageRow(
  * @param upper the upper bound of the estimate, null if Tor Metrics has none
  * @param frac the percentage of the network that contributed to the estimate of the day, low values are less reliable
  */
-class CountryUsageDto(
-    val country: String,
-    val users: Int,
-    val lower: Int?,
-    val upper: Int?,
-    val frac: Int,
-)
+class CountryUsageDto(val country: String, val users: Int, val lower: Int?, val upper: Int?, val frac: Int)

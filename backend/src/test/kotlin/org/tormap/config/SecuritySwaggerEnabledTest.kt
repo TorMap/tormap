@@ -2,8 +2,8 @@ package org.tormap.config
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldNotBe
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -12,14 +12,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test", "dev")
-class SecuritySwaggerEnabledTest(
-    private val mockMvc: MockMvc,
-) : StringSpec({
+class SecuritySwaggerEnabledTest(private val mockMvc: MockMvc) :
+    StringSpec({
 
-    "swagger and openapi are public in the dev profile" {
-        listOf("/openapi", "/swagger", "/swagger-ui/index.html").forEach { path ->
-            mockMvc.perform(get(path)).andReturn().response.status shouldNotBe 401
+        "swagger and openapi are public in the dev profile" {
+            listOf("/openapi", "/swagger", "/swagger-ui/index.html").forEach { path ->
+                mockMvc.perform(get(path)).andReturn().response.status shouldNotBe 401
+            }
         }
-    }
-
-})
+    })

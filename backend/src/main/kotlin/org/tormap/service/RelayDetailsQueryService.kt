@@ -14,12 +14,11 @@ interface RelayDetailsLookup {
 }
 
 @Component
-class RelayDetailsRepositoryLookup(
-    private val relayDetailsRepository: RelayDetailsRepository,
-) : RelayDetailsLookup {
+class RelayDetailsRepositoryLookup(private val relayDetailsRepository: RelayDetailsRepository) : RelayDetailsLookup {
     override fun findById(id: Long): RelayDetails? = relayDetailsRepository.findById(id).orElse(null)
 
-    override fun findAllByFamilyId(familyId: Long): List<RelayDetails> = relayDetailsRepository.findAllByFamilyId(familyId)
+    override fun findAllByFamilyId(familyId: Long): List<RelayDetails> =
+        relayDetailsRepository.findAllByFamilyId(familyId)
 }
 
 @Service

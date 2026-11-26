@@ -43,7 +43,11 @@ class RequestBodyLimitConfig(
  */
 class RequestBodyLimitFilter(private val maxBodyBytes: Long) : OncePerRequestFilter() {
 
-    override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+    override fun doFilterInternal(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain,
+    ) {
         if (request.contentLengthLong > maxBodyBytes) {
             response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE)
             return
@@ -74,7 +78,13 @@ class RequestBodyLimitFilter(private val maxBodyBytes: Long) : OncePerRequestFil
 
         override fun read(): Int = delegate.read().also { if (it != -1) count(1) }
 
-        override fun read(b: ByteArray, off: Int, len: Int): Int = delegate.read(b, off, len).also { if (it > 0) count(it) }
+        override fun read(b: ByteArray, off: Int, len: Int): Int = delegate.read(b, off, len).also {
+            if (it >
+                0
+            ) {
+                count(it)
+            }
+        }
 
         override fun isFinished() = delegate.isFinished
 

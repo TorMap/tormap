@@ -5,11 +5,11 @@ import org.tormap.database.entity.RelayDetails
 import org.tormap.database.entity.RelayLocation
 import org.tormap.database.repository.RelayDetailsRepository
 import org.tormap.database.repository.RelayLocationRepositoryImpl
-import org.tormap.util.logger
 import org.tormap.util.PathSelection
 import org.tormap.util.jointToCommaSeparated
-import org.tormap.util.verifiedFamilyKeys
+import org.tormap.util.logger
 import org.tormap.util.millisSinceEpochToLocalDate
+import org.tormap.util.verifiedFamilyKeys
 import org.torproject.descriptor.Descriptor
 import org.torproject.descriptor.RelayNetworkStatusConsensus
 import org.torproject.descriptor.ServerDescriptor
@@ -27,16 +27,26 @@ class DescriptorProcessingService(
         return try {
             return when (descriptor) {
                 is RelayNetworkStatusConsensus -> processRelayConsensusDescriptor(descriptor)
+
                 is ServerDescriptor -> processServerDescriptor(descriptor)
+
                 is UnparseableDescriptor -> {
-                    logger.debug("Unparsable descriptor in file {}: {}", descriptor.descriptorFile.name, descriptor.descriptorParseException.message)
+                    logger.debug(
+                        "Unparsable descriptor in file {}: {}",
+                        descriptor.descriptorFile.name,
+                        descriptor.descriptorParseException.message,
+                    )
                     ProcessedDescriptorInfo()
                 }
 
                 else -> throw Exception("Descriptor type ${descriptor.javaClass.name} is not yet supported!")
             }
         } catch (exception: Exception) {
-            logger.error("Could not process descriptor part of {}! {}", descriptor.descriptorFile.name, exception.message)
+            logger.error(
+                "Could not process descriptor part of {}! {}",
+                descriptor.descriptorFile.name,
+                exception.message,
+            )
             ProcessedDescriptorInfo(error = exception.message)
         }
     }
@@ -55,12 +65,16 @@ class DescriptorProcessingService(
         descriptor.statusEntries.forEach {
             val networkStatusEntry = it.value
             if (existingFingerprintsForDay.contains(networkStatusEntry.fingerprint)) {
-                if (fingerprintsWithoutWeightForDay.contains(networkStatusEntry.fingerprint)
-                    && networkStatusEntry.bandwidth >= 0
+                if (fingerprintsWithoutWeightForDay.contains(networkStatusEntry.fingerprint) &&
+                    networkStatusEntry.bandwidth >= 0
                 ) {
                     missingWeights[networkStatusEntry.fingerprint] = Pair(
                         networkStatusEntry.bandwidth,
-                        PathSelection.guardWeight(networkStatusEntry.bandwidth, networkStatusEntry.flags, bandwidthWeights),
+                        PathSelection.guardWeight(
+                            networkStatusEntry.bandwidth,
+                            networkStatusEntry.flags,
+                            bandwidthWeights,
+                        ),
                     )
                 }
                 return@forEach
@@ -75,7 +89,7 @@ class DescriptorProcessingService(
                         location.longitude,
                         location.countryCode,
                         bandwidthWeights,
-                    )
+                    ),
                 )
             }
         }
@@ -106,7 +120,7 @@ class DescriptorProcessingService(
                     autonomousSystem?.autonomousSystemOrganization(),
                     autonomousSystem?.autonomousSystemNumber()?.toInt(),
                     existingRelay?.id,
-                )
+                ),
             )
         } else if (existingRelay.day == descriptorDay && existingRelay.familyKeys == null) {
             // Fills the family keys of relays stored before TorMap read family-cert entries, when descriptors are
@@ -120,7 +134,4 @@ class DescriptorProcessingService(
     }
 }
 
-class ProcessedDescriptorInfo(
-    var yearMonth: String? = null,
-    var error: String? = null,
-)
+class ProcessedDescriptorInfo(var yearMonth: String? = null, var error: String? = null)

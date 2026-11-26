@@ -8,13 +8,12 @@ import org.tormap.config.value.IpLookupConfig
 
 @SpringBootTest
 @ActiveProfiles("test")
-class TorMapBackendTest(
-    private val ipLookupConfig: IpLookupConfig,
-) : StringSpec({
-    "context loads" {}
+class TorMapBackendTest(private val ipLookupConfig: IpLookupConfig) :
+    StringSpec({
+        "context loads" {}
 
-    "ip-lookup files exist" {
-        javaClass.getResource(ipLookupConfig.locationDatabaseFile) shouldNotBe null
-        javaClass.getResource(ipLookupConfig.autonomousSystemDatabaseFile) shouldNotBe null
-    }
-})
+        "ip-lookup files exist" {
+            javaClass.getResource(ipLookupConfig.locationDatabaseFile) shouldNotBe null
+            javaClass.getResource(ipLookupConfig.autonomousSystemDatabaseFile) shouldNotBe null
+        }
+    })

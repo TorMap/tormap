@@ -29,7 +29,7 @@ class RelayLocationRepositoryTest(
                 mockRelayLocation(secondDayOfYear, 'A'),
                 mockRelayLocation(firstDayOfYear, 'B'),
                 mockRelayLocation(secondDayOfYear, 'C'),
-            )
+            ),
         )
         relayLocationRepository.findDistinctDays() shouldBe setOf(firstDayOfYear, secondDayOfYear)
     }
@@ -37,9 +37,12 @@ class RelayLocationRepositoryTest(
     "consensus and guard weights are stored and returned with the relay location" {
         relayLocationRepository.save(
             mockRelayLocation(
-                firstDayOfYear, 'A', setOf(TorRelayFlag.Running, TorRelayFlag.Valid, TorRelayFlag.Guard),
-                consensusWeight = 2000, bandwidthWeights = mapOf("Wgg" to 5000),
-            )
+                firstDayOfYear,
+                'A',
+                setOf(TorRelayFlag.Running, TorRelayFlag.Valid, TorRelayFlag.Guard),
+                consensusWeight = 2000,
+                bandwidthWeights = mapOf("Wgg" to 5000),
+            ),
         )
         val stored = relayLocationRepository.findAll().single()
         stored.consensusWeight shouldBe 2000
@@ -63,7 +66,7 @@ class RelayLocationRepositoryTest(
                 mockRelayLocation(firstDayOfYear, 'B', consensusWeight = 7),
                 mockRelayLocation(firstDayOfYear, 'C'),
                 mockRelayLocation(secondDayOfYear, 'A'),
-            )
+            ),
         )
         val updated = relayLocationRepository.fillMissingConsensusWeights(
             firstDayOfYear,
@@ -99,7 +102,7 @@ class RelayLocationRepositoryTest(
                 mockRelayLocation(firstDayOfYear, 'D', setOf(TorRelayFlag.Running, TorRelayFlag.Fast)),
                 mockRelayLocation(firstDayOfYear, 'E'),
                 mockRelayLocation(secondDayOfYear, 'A', setOf(TorRelayFlag.Guard)),
-            )
+            ),
         )
         val counts = relayLocationRepository.findDailyRelayCounts()
         counts.map { it.day } shouldBe listOf(firstDayOfYear, secondDayOfYear)
@@ -123,17 +126,19 @@ class RelayLocationRepositoryTest(
             listOf(
                 mockRelayLocation(firstDayOfYear, 'A'),
                 mockRelayLocation(secondDayOfYear, 'B'),
-            )
+            ),
         )
         relayLocationRepository.findAllUsingDay(firstDayOfYear).size shouldBe 1
     }
 
     "findAllUsingDay includes the autonomous system of the relay details of the month" {
         relayLocationRepository.save(mockRelayLocation(firstDayOfYear, 'A'))
-        relayDetailsRepository.save(mockRelayDetails('A').apply {
-            month = "2023-01"
-            autonomousSystemNumber = 24940
-        })
+        relayDetailsRepository.save(
+            mockRelayDetails('A').apply {
+                month = "2023-01"
+                autonomousSystemNumber = 24940
+            },
+        )
         relayLocationRepository.findAllUsingDay(firstDayOfYear).single().asNumber shouldBe 24940
     }
 })

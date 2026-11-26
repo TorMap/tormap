@@ -53,12 +53,7 @@ class CoalesceService(
 
     internal fun hasStateForKey(key: String): Boolean = slots.containsKey(key)
 
-    private fun startLoop(
-        key: String,
-        slot: Slot,
-        task: () -> Unit,
-        future: CompletableFuture<Void>,
-    ) {
+    private fun startLoop(key: String, slot: Slot, task: () -> Unit, future: CompletableFuture<Void>) {
         try {
             coalesceExecutor.execute { runLoop(key, slot, task, future) }
         } catch (ex: Throwable) {
@@ -72,12 +67,7 @@ class CoalesceService(
         }
     }
 
-    private fun runLoop(
-        key: String,
-        slot: Slot,
-        initialTask: () -> Unit,
-        initialFuture: CompletableFuture<Void>,
-    ) {
+    private fun runLoop(key: String, slot: Slot, initialTask: () -> Unit, initialFuture: CompletableFuture<Void>) {
         var task = initialTask
         var future = initialFuture
 

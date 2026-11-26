@@ -36,7 +36,7 @@ import java.time.LocalDate
         "springdoc.swagger-ui.enabled=true",
         "springdoc.paths-to-match=/v1/**",
         "springdoc.writer-with-order-by-keys=true",
-    ]
+    ],
 )
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -68,12 +68,20 @@ class ApiV1OpenApiSpecTest(
         val schemas = mapper.readTree(generatedSpec()).get("components").get("schemas")
         fun specFields(schema: String) = schemas.get(schema).get("properties").propertyNames().toSet()
         fun responseFields(path: String, node: (tools.jackson.databind.JsonNode) -> tools.jackson.databind.JsonNode) =
-            node(mapper.readTree(mockMvc.perform(get(path)).andReturn().response.contentAsString)).propertyNames().toSet()
+            node(
+                mapper.readTree(mockMvc.perform(get(path)).andReturn().response.contentAsString),
+            ).propertyNames().toSet()
 
         relayDetailsRepository.deleteAll()
         relayLocationRepository.deleteAll()
         relayLocationRepository.save(mockRelayLocation(LocalDate.of(2024, 3, 5), 'A', setOf(TorRelayFlag.Exit)))
-        relayDetailsRepository.save(mockRelayDetails('A').apply { month = "2024-03"; address = "127.0.0.1"; familyId = 7 })
+        relayDetailsRepository.save(
+            mockRelayDetails('A').apply {
+                month = "2024-03"
+                address = "127.0.0.1"
+                familyId = 7
+            },
+        )
 
         responseFields("/v1/days/2024-03-05/relays") { it.get(0) } shouldBe specFields("RelayV1Dto")
         responseFields("/v1/relays/${"A".repeat(40)}?month=2024-03") { it } shouldBe specFields("RelayDetailsV1Dto")
@@ -93,7 +101,7 @@ class ApiV1OpenApiSpecTest(
         val committed = if (Files.exists(specFile)) Files.readString(specFile) else ""
         withClue(
             "api/openapi-v1.json is out of date. If the API change is intended (only additions within v1), run " +
-                    "UPDATE_OPENAPI_SPEC=true ./gradlew test --tests 'org.tormap.api.ApiV1OpenApiSpecTest' and commit the file."
+                "UPDATE_OPENAPI_SPEC=true ./gradlew test --tests 'org.tormap.api.ApiV1OpenApiSpecTest' and commit the file.",
         ) {
             committed shouldBe generated
         }

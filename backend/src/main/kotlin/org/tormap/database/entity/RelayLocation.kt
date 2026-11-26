@@ -1,13 +1,13 @@
 package org.tormap.database.entity
 
-import org.tormap.util.PathSelection
-import org.torproject.descriptor.NetworkStatusEntry
-import java.math.BigDecimal
-import java.time.LocalDate
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Index
 import jakarta.persistence.Table
+import org.tormap.util.PathSelection
+import org.torproject.descriptor.NetworkStatusEntry
+import java.math.BigDecimal
+import java.time.LocalDate
 
 /**
  * This entity is used to store relevant information about a [NetworkStatusEntry]
@@ -18,7 +18,7 @@ import jakarta.persistence.Table
     indexes = [
         Index(columnList = "day, fingerprint", unique = true),
         Index(columnList = "day"),
-    ]
+    ],
 )
 class RelayLocation(
     networkStatusEntry: NetworkStatusEntry,
@@ -33,7 +33,7 @@ class RelayLocation(
      * The `bandwidth-weights` of the consensus the entry is part of. They are only used to compute [guardWeight].
      */
     bandwidthWeights: Map<String, Int>? = null,
-): AbstractBaseEntity<Long>() {
+) : AbstractBaseEntity<Long>() {
     @Column(length = 40, columnDefinition = "bpchar(40)")
     var fingerprint: String = networkStatusEntry.fingerprint
 
@@ -74,7 +74,9 @@ enum class TorRelayFlag {
     Authority, // if the router is a directory authority
     V2Dir, // if the router implements the v2 directory protocol or higher
     HSDir, // if the router is considered a v2 hidden service directory
-    NoEdConsensus, // if any Ed25519 key in the router's descriptor or micro descriptor does not reflect authority consensus
+
+    // if any Ed25519 key in the router's descriptor or micro descriptor does not reflect authority consensus
+    NoEdConsensus,
     StaleDesc, // if the router should upload a new descriptor because the old one is too old
     Sybil, // If more than 2 relays run on the same IP
     BadExit, // if the router is believed to be useless as an exit node

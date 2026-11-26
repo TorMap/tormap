@@ -12,7 +12,8 @@ import kotlin.math.round
 enum class LiteRelayType(val parameter: String, val label: String) {
     Exit("exit", "Exit"),
     Guard("guard", "Guard"),
-    Other("other", "Other");
+    Other("other", "Other"),
+    ;
 
     companion object {
         /**
@@ -162,7 +163,8 @@ data class LiteView(
     }
 
     // All names and values are dates, numbers or enum names, so they need no URL encoding
-    private fun format(parameters: List<Pair<String, String>>) = parameters.joinToString("&") { (name, value) -> "$name=$value" }
+    private fun format(parameters: List<Pair<String, String>>) =
+        parameters.joinToString("&") { (name, value) -> "$name=$value" }
 
     /**
      * The same view in the JavaScript map, which keeps its permalink in the URL hash
@@ -193,7 +195,8 @@ data class LiteView(
             fun number(name: String, min: Double, max: Double) =
                 first(name)?.toDoubleOrNull()?.takeIf { it.isFinite() && it in min..max }
 
-            val zoom = number("zoom", MIN_ZOOM.toDouble(), MAX_ZOOM.toDouble())?.let { round(it).toInt() } ?: DEFAULT_ZOOM
+            val zoom =
+                number("zoom", MIN_ZOOM.toDouble(), MAX_ZOOM.toDouble())?.let { round(it).toInt() } ?: DEFAULT_ZOOM
             val latitude = number("lat", -90.0, 90.0)
             val longitude = number("lng", -180.0, 180.0)
             val size = MapSize.entries.find { it.parameter == first("size") } ?: MapSize.Large
@@ -221,7 +224,13 @@ data class LiteView(
             val topRelayCount = first("top")?.toIntOrNull()?.takeIf { sizeByWeight && it in TOP_RELAY_COUNTS }
             // Latitude and longitude are only used as a pair
             val (centerLatitude, centerLongitude) =
-                if (latitude != null && longitude != null) latitude to longitude else DEFAULT_LATITUDE to DEFAULT_LONGITUDE
+                if (latitude != null &&
+                    longitude != null
+                ) {
+                    latitude to longitude
+                } else {
+                    DEFAULT_LATITUDE to DEFAULT_LONGITUDE
+                }
             return LiteView(
                 day = day,
                 zoom = zoom,

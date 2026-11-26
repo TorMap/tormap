@@ -1,11 +1,11 @@
 package org.tormap.database.entity
 
-import java.io.Serializable
-import java.time.LocalDateTime
 import jakarta.persistence.Embeddable
 import jakarta.persistence.EmbeddedId
 import jakarta.persistence.Entity
 import jakarta.persistence.Enumerated
+import java.io.Serializable
+import java.time.LocalDateTime
 
 /**
  * This entity is used to record which descriptors files have been processed

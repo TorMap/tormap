@@ -18,7 +18,8 @@ import java.util.stream.Stream
  * Registered in META-INF/services, which native-image includes from the classpath as well.
  */
 class LocalDnsResolverProvider : InetAddressResolverProvider() {
-    override fun get(configuration: Configuration): InetAddressResolver = LocalDnsResolver(configuration.builtinResolver())
+    override fun get(configuration: Configuration): InetAddressResolver =
+        LocalDnsResolver(configuration.builtinResolver())
 
     override fun name() = "tormap-cli"
 }

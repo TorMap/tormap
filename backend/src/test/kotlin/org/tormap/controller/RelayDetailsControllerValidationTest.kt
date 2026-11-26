@@ -1,9 +1,9 @@
 package org.tormap.controller
 
-import tools.jackson.databind.ObjectMapper
 import io.kotest.core.spec.style.StringSpec
 import org.hamcrest.Matchers.containsString
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
@@ -11,88 +11,110 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.tormap.adapter.controller.RelayDetailsController
+import tools.jackson.databind.ObjectMapper
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class RelayDetailsControllerValidationTest(
-    private val mockMvc: MockMvc,
-    private val objectMapper: ObjectMapper,
-) : StringSpec({
+class RelayDetailsControllerValidationTest(private val mockMvc: MockMvc, private val objectMapper: ObjectMapper) :
+    StringSpec({
 
-    "family identifiers - valid list returns 200" {
-        val payload = listOf(1L)
-        mockMvc.perform(
-            post("/relay/details/family/identifiers")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(payload))
-        )
-            .andExpect(status().isOk)
-    }
+        "family identifiers - valid list returns 200" {
+            val payload = listOf(1L)
+            mockMvc.perform(
+                post("/relay/details/family/identifiers")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(payload)),
+            )
+                .andExpect(status().isOk)
+        }
 
-    "family identifiers - empty list returns 400 with size error" {
-        val payload: List<Long> = emptyList()
-        mockMvc.perform(
-            post("/relay/details/family/identifiers")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(payload))
-        )
-            .andExpect(status().isBadRequest)
-            .andExpect(content().string(containsString("size must be between 1 and ${RelayDetailsController.MAXIMUM_EXPECTED_FAMILIES_PER_MONTH}")))
-    }
+        "family identifiers - empty list returns 400 with size error" {
+            val payload: List<Long> = emptyList()
+            mockMvc.perform(
+                post("/relay/details/family/identifiers")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(payload)),
+            )
+                .andExpect(status().isBadRequest)
+                .andExpect(
+                    content().string(
+                        containsString(
+                            "size must be between 1 and ${RelayDetailsController.MAXIMUM_EXPECTED_FAMILIES_PER_MONTH}",
+                        ),
+                    ),
+                )
+        }
 
-    "family identifiers - too large list returns 400 with size error" {
-        val payload = (1L..RelayDetailsController.MAXIMUM_EXPECTED_FAMILIES_PER_MONTH + 1).toList()
-        mockMvc.perform(
-            post("/relay/details/family/identifiers")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(payload))
-        )
-            .andExpect(status().isBadRequest)
-            .andExpect(content().string(containsString("size must be between 1 and ${RelayDetailsController.MAXIMUM_EXPECTED_FAMILIES_PER_MONTH}")))
-    }
+        "family identifiers - too large list returns 400 with size error" {
+            val payload = (1L..RelayDetailsController.MAXIMUM_EXPECTED_FAMILIES_PER_MONTH + 1).toList()
+            mockMvc.perform(
+                post("/relay/details/family/identifiers")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(payload)),
+            )
+                .andExpect(status().isBadRequest)
+                .andExpect(
+                    content().string(
+                        containsString(
+                            "size must be between 1 and ${RelayDetailsController.MAXIMUM_EXPECTED_FAMILIES_PER_MONTH}",
+                        ),
+                    ),
+                )
+        }
 
-    "relay identifiers - empty list returns 400 with size error" {
-        val payload: List<Long> = emptyList()
-        mockMvc.perform(
-            post("/relay/details/relay/identifiers")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(payload))
-        )
-            .andExpect(status().isBadRequest)
-            .andExpect(content().string(containsString("size must be between 1 and ${RelayDetailsController.MAXIMUM_EXPECTED_RELAYS_PER_DAY}")))
-    }
+        "relay identifiers - empty list returns 400 with size error" {
+            val payload: List<Long> = emptyList()
+            mockMvc.perform(
+                post("/relay/details/relay/identifiers")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(payload)),
+            )
+                .andExpect(status().isBadRequest)
+                .andExpect(
+                    content().string(
+                        containsString(
+                            "size must be between 1 and ${RelayDetailsController.MAXIMUM_EXPECTED_RELAYS_PER_DAY}",
+                        ),
+                    ),
+                )
+        }
 
-    "relay identifiers - too large list returns 400 with size error" {
-        val payload = (1L..RelayDetailsController.MAXIMUM_EXPECTED_RELAYS_PER_DAY + 1).toList()
-        mockMvc.perform(
-            post("/relay/details/relay/identifiers")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(payload))
-        )
-            .andExpect(status().isBadRequest)
-            .andExpect(content().string(containsString("size must be between 1 and ${RelayDetailsController.MAXIMUM_EXPECTED_RELAYS_PER_DAY}")))
-    }
+        "relay identifiers - too large list returns 400 with size error" {
+            val payload = (1L..RelayDetailsController.MAXIMUM_EXPECTED_RELAYS_PER_DAY + 1).toList()
+            mockMvc.perform(
+                post("/relay/details/relay/identifiers")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(payload)),
+            )
+                .andExpect(status().isBadRequest)
+                .andExpect(
+                    content().string(
+                        containsString(
+                            "size must be between 1 and ${RelayDetailsController.MAXIMUM_EXPECTED_RELAYS_PER_DAY}",
+                        ),
+                    ),
+                )
+        }
 
-    "autonomous systems - valid month returns 200" {
-        mockMvc.perform(get("/relay/details/autonomous-systems/2023-01"))
-            .andExpect(status().isOk)
-    }
+        "autonomous systems - valid month returns 200" {
+            mockMvc.perform(get("/relay/details/autonomous-systems/2023-01"))
+                .andExpect(status().isOk)
+        }
 
-    "autonomous systems - malformed month returns 400" {
-        mockMvc.perform(get("/relay/details/autonomous-systems/2023-13"))
-            .andExpect(status().isBadRequest)
-    }
+        "autonomous systems - malformed month returns 400" {
+            mockMvc.perform(get("/relay/details/autonomous-systems/2023-13"))
+                .andExpect(status().isBadRequest)
+        }
 
-    "autonomous systems - a padded month is a bad request, so it can not fill the cache with copies" {
-        mockMvc.perform(get("/relay/details/autonomous-systems/+002024-05")).andExpect(status().isBadRequest)
-    }
+        "autonomous systems - a padded month is a bad request, so it can not fill the cache with copies" {
+            mockMvc.perform(get("/relay/details/autonomous-systems/+002024-05")).andExpect(status().isBadRequest)
+        }
 
-    "autonomous systems - a month without autonomous systems returns an empty list" {
-        mockMvc.perform(get("/relay/details/autonomous-systems/2001-01"))
-            .andExpect(status().isOk)
-            .andExpect(content().json("[]"))
-    }
-})
+        "autonomous systems - a month without autonomous systems returns an empty list" {
+            mockMvc.perform(get("/relay/details/autonomous-systems/2001-01"))
+                .andExpect(status().isOk)
+                .andExpect(content().json("[]"))
+        }
+    })

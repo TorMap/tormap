@@ -15,29 +15,27 @@ import org.springframework.test.context.ActiveProfiles
     properties = [
         "NEW_RELIC_INGEST_KEY=test-key",
         "management.otlp.metrics.export.url=http://127.0.0.1:9/v1/metrics",
-    ]
+    ],
 )
 @ActiveProfiles("test")
-class NewRelicMetricsEnabledTest(
-    private val context: ApplicationContext,
-) : StringSpec({
-    "OTLP registry is created when NEW_RELIC_INGEST_KEY is set" {
-        context.getBeansOfType(OtlpMeterRegistry::class.java).size shouldBe 1
-    }
+class NewRelicMetricsEnabledTest(private val context: ApplicationContext) :
+    StringSpec({
+        "OTLP registry is created when NEW_RELIC_INGEST_KEY is set" {
+            context.getBeansOfType(OtlpMeterRegistry::class.java).size shouldBe 1
+        }
 
-    "OTLP export carries the configured resource attributes" {
-        val attributes = context.getBean(OtlpConfig::class.java).resourceAttributes()
-        attributes shouldContain ("service.name" to "TorMap")
-        attributes shouldContainKey "host.name"
-    }
-})
+        "OTLP export carries the configured resource attributes" {
+            val attributes = context.getBean(OtlpConfig::class.java).resourceAttributes()
+            attributes shouldContain ("service.name" to "TorMap")
+            attributes shouldContainKey "host.name"
+        }
+    })
 
 @SpringBootTest
 @ActiveProfiles("test")
-class NewRelicMetricsDisabledTest(
-    private val context: ApplicationContext,
-) : StringSpec({
-    "no OTLP registry without NEW_RELIC_INGEST_KEY" {
-        context.getBeansOfType(OtlpMeterRegistry::class.java).size shouldBe 0
-    }
-})
+class NewRelicMetricsDisabledTest(private val context: ApplicationContext) :
+    StringSpec({
+        "no OTLP registry without NEW_RELIC_INGEST_KEY" {
+            context.getBeansOfType(OtlpMeterRegistry::class.java).size shouldBe 0
+        }
+    })

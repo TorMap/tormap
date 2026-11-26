@@ -48,7 +48,9 @@ class RelayDetailsUpdateService(
                     }
                 }
                 relayDetailsRepositoryImpl.saveAllAndFlush(relaysWithoutAutonomousSystem)
-                logger.info("Determined the AS of $changedRelaysCount / ${relaysWithoutAutonomousSystem.size} relays for month $month")
+                logger.info(
+                    "Determined the AS of $changedRelaysCount / ${relaysWithoutAutonomousSystem.size} relays for month $month",
+                )
             }
         }
     }
@@ -80,7 +82,6 @@ class RelayDetailsUpdateService(
         }
     }
 
-
     /**
      * Updates [RelayDetails.familyId] for all entities of the requested [months] asynchronously.
      * @return a future that completes once the families of all [months] are computed (also if some failed)
@@ -105,12 +106,16 @@ class RelayDetailsUpdateService(
     private fun computeFamiliesForMonth(month: String) {
         val requestingRelays = relayDetailsRepositoryImpl.findAllWithFamilyDeclarationByMonth(month)
         val result = computeRelayFamilies(requestingRelays) { relay, familyEntry ->
-            logger.debug("Format of alleged family member $familyEntry for requestingRelay ${relay.fingerprint} not supported!")
+            logger.debug(
+                "Format of alleged family member $familyEntry for requestingRelay ${relay.fingerprint} not supported!",
+            )
         }
         relayDetailsRepositoryImpl.clearFamiliesFromMonth(month)
         saveFamilies(result.families)
         val totalFamilyConnectionCount = result.confirmedConnectionCount + result.rejectedConnectionCount
-        logger.info("Finished families for month $month. Rejected ${result.rejectedConnectionCount} / $totalFamilyConnectionCount family line connections. ${result.relaysWithFamilyKeyCount} relays have family certificates. Found ${result.families.size} different families.")
+        logger.info(
+            "Finished families for month $month. Rejected ${result.rejectedConnectionCount} / $totalFamilyConnectionCount family line connections. ${result.relaysWithFamilyKeyCount} relays have family certificates. Found ${result.families.size} different families.",
+        )
     }
 
     /**

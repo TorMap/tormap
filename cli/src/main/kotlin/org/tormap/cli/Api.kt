@@ -40,7 +40,8 @@ class ApiClient(
         private val FINGERPRINT = Regex("^[0-9A-F]{40}$")
         private val DAY = Regex("^\\d{4}-\\d{2}-\\d{2}$")
 
-        private fun isDay(value: String) = DAY.matches(value) && runCatching { java.time.LocalDate.parse(value) }.isSuccess
+        private fun isDay(value: String) =
+            DAY.matches(value) && runCatching { java.time.LocalDate.parse(value) }.isSuccess
 
         /** Parses `socks5h://host:port`, `socks5://host:port` or `http://host:port`. */
         fun parseProxy(value: String): Proxy {
@@ -79,9 +80,12 @@ class ApiClient(
 
     /** The days with data. They are checked, because they become paths, cache lifetimes and dates in the commands. */
     fun days(): List<String> {
-        val days = getCached("v1/days", ResponseCache.SHORT) as? JsonArray ?: throw ApiException("The API returned an invalid list of days.")
+        val days =
+            getCached("v1/days", ResponseCache.SHORT) as? JsonArray
+                ?: throw ApiException("The API returned an invalid list of days.")
         return days.map { element ->
-            (element as? JsonPrimitive)?.content?.takeIf(::isDay) ?: throw ApiException("The API returned an invalid day.")
+            (element as? JsonPrimitive)?.content?.takeIf(::isDay)
+                ?: throw ApiException("The API returned an invalid day.")
         }
     }
 
@@ -95,7 +99,10 @@ class ApiClient(
         // The fingerprint can come from a list of relays the API returned
         if (!FINGERPRINT.matches(fingerprint)) throw ApiException("The API returned an invalid fingerprint.")
         val query = month?.let { "?month=${encode(it)}" }.orEmpty()
-        return get("v1/relays/$fingerprint$query")?.let { it as? JsonObject ?: throw unexpected("v1/relays/$fingerprint") }
+        return get("v1/relays/$fingerprint$query")?.let {
+            it as? JsonObject
+                ?: throw unexpected("v1/relays/$fingerprint")
+        }
     }
 
     /** Every month with details of the relay, oldest first. Empty if the relay was never seen. */
@@ -106,14 +113,18 @@ class ApiClient(
 
     fun family(id: Long): JsonArray = get("v1/families/$id")?.objects("v1/families/$id") ?: JsonArray(emptyList())
 
-    fun autonomousSystems(month: String): JsonArray = required("v1/autonomous-systems/${encode(month)}").objects("v1/autonomous-systems/$month")
+    fun autonomousSystems(month: String): JsonArray =
+        required("v1/autonomous-systems/${encode(month)}").objects("v1/autonomous-systems/$month")
 
     fun dailyCounts(from: String?, to: String?): JsonArray {
         val query = listOfNotNull(from?.let { "from=${encode(it)}" }, to?.let { "to=${encode(it)}" }).joinToString("&")
-        return required("v1/statistics/daily-counts" + if (query.isEmpty()) "" else "?$query").objects("v1/statistics/daily-counts")
+        return required(
+            "v1/statistics/daily-counts" + if (query.isEmpty()) "" else "?$query",
+        ).objects("v1/statistics/daily-counts")
     }
 
-    fun countryUsage(day: String): JsonArray = required("v1/country-usage/${encode(day)}").objects("v1/country-usage/$day")
+    fun countryUsage(day: String): JsonArray =
+        required("v1/country-usage/${encode(day)}").objects("v1/country-usage/$day")
 
     /** A list of objects, as every list endpoint returns. Anything else is an error instead of a crash in the commands. */
     private fun JsonElement.objects(path: String): JsonArray =
@@ -143,7 +154,8 @@ class ApiClient(
 
     private fun required(path: String): JsonElement = get(path) ?: throw notFound(path)
 
-    private fun notFound(path: String) = ApiException("The API returned 404 for /$path. Does ${baseUri.host} run TorMap 4.3 or newer?")
+    private fun notFound(path: String) =
+        ApiException("The API returned 404 for /$path. Does ${baseUri.host} run TorMap 4.3 or newer?")
 
     private fun parse(body: String, path: String): JsonElement = try {
         json.parseToJsonElement(body)
@@ -182,7 +194,9 @@ class ApiClient(
             val status = try {
                 connection.responseCode
             } catch (exception: IOException) {
-                throw ApiException("Can not reach ${baseUri.host}${viaProxy()}: ${exception.message ?: exception.javaClass.simpleName}")
+                throw ApiException(
+                    "Can not reach ${baseUri.host}${viaProxy()}: ${exception.message ?: exception.javaClass.simpleName}",
+                )
             }
             return when {
                 status == 200 -> {
@@ -190,15 +204,24 @@ class ApiClient(
                         readBody(connection, connection.inputStream)
                     } catch (exception: IOException) {
                         // E.g. a timeout or reset during the download, or a body that is not the gzip it claims to be
-                        throw ApiException("Can not read the response of ${baseUri.host}${viaProxy()}: ${exception.message ?: exception.javaClass.simpleName}")
+                        throw ApiException(
+                            "Can not read the response of ${baseUri.host}${viaProxy()}: ${exception.message ?: exception.javaClass.simpleName}",
+                        )
                     }
                     Response(status, body, connection.getHeaderField("ETag"))
                 }
+
                 status == 304 && ifNoneMatch != null -> Response(status, null, null)
+
                 status == 404 -> Response(status, null, null)
+
                 status == 400 -> throw ApiException("The API rejected the request: ${errorMessage(connection)}")
+
                 // Backends without API v1 deny unknown paths
-                status == 403 -> throw ApiException("The API returned HTTP 403 for /$path. Does ${baseUri.host} run TorMap 4.3 or newer?")
+                status == 403 -> throw ApiException(
+                    "The API returned HTTP 403 for /$path. Does ${baseUri.host} run TorMap 4.3 or newer?",
+                )
+
                 else -> throw ApiException("The API returned HTTP $status for /$path.")
             }
         } finally {
@@ -214,15 +237,29 @@ class ApiClient(
 
     private fun errorMessage(connection: HttpURLConnection): String {
         val body = connection.errorStream?.let { stream -> runCatching { readBody(connection, stream) }.getOrNull() }
-        val message = body?.let { runCatching { json.parseToJsonElement(it).jsonObject["message"]?.jsonPrimitive?.content }.getOrNull() }
+        val message = body?.let {
+            runCatching { json.parseToJsonElement(it).jsonObject["message"]?.jsonPrimitive?.content }.getOrNull()
+        }
         return message?.takeIf { it.isNotBlank() } ?: "bad request"
     }
 
     private fun readBody(connection: HttpURLConnection, stream: InputStream): String {
-        val decoded = if (connection.contentEncoding.equals("gzip", ignoreCase = true)) GZIPInputStream(stream) else stream
+        val decoded = if (connection.contentEncoding.equals(
+                "gzip",
+                ignoreCase = true,
+            )
+        ) {
+            GZIPInputStream(stream)
+        } else {
+            stream
+        }
         decoded.use { input ->
             val bytes = input.readNBytes((MAX_RESPONSE_BYTES + 1).toInt())
-            if (bytes.size > MAX_RESPONSE_BYTES) throw ApiException("The API response is larger than ${MAX_RESPONSE_BYTES / 1024 / 1024} MB.")
+            if (bytes.size >
+                MAX_RESPONSE_BYTES
+            ) {
+                throw ApiException("The API response is larger than ${MAX_RESPONSE_BYTES / 1024 / 1024} MB.")
+            }
             return String(bytes, StandardCharsets.UTF_8)
         }
     }

@@ -47,7 +47,9 @@ class ApiV1ControllerTest(
     }
 
     fun saveRelayA(familyId: Long? = null, familyKeys: String? = null): Long {
-        relayLocationRepository.save(mockRelayLocation(day, 'A', setOf(TorRelayFlag.Exit, TorRelayFlag.Guard), consensusWeight = 42))
+        relayLocationRepository.save(
+            mockRelayLocation(day, 'A', setOf(TorRelayFlag.Exit, TorRelayFlag.Guard), consensusWeight = 42),
+        )
         val details = mockRelayDetails('A').apply {
             month = "2024-03"
             // A loopback address keeps reverse DNS lookups local
@@ -164,9 +166,16 @@ class ApiV1ControllerTest(
 
     "lists the months of a relay, oldest first" {
         saveRelayA(familyId = 7)
-        relayDetailsRepository.save(mockRelayDetails('A').apply {
-            month = "2024-01"; this.day = LocalDate.of(2024, 1, 20); nickname = "OldName"; address = "192.0.2.1"; platform = "Tor 0.4.7"
-        })
+        relayDetailsRepository.save(
+            mockRelayDetails('A').apply {
+                month = "2024-01"
+                this.day = LocalDate.of(2024, 1, 20)
+                nickname = "OldName"
+                address = "192.0.2.1"
+                platform =
+                    "Tor 0.4.7"
+            },
+        )
         relayDetailsRepository.save(mockRelayDetails('B').apply { month = "2024-02" })
         mockMvc.perform(get("/v1/relays/${fingerprintA.lowercase()}/months"))
             .andExpect(status().isOk)
@@ -185,7 +194,7 @@ class ApiV1ControllerTest(
     }
 
     "the months of an unknown relay are not found, a malformed fingerprint is a bad request" {
-        mockMvc.perform(get("/v1/relays/${fingerprintA}/months")).andExpect(status().isNotFound)
+        mockMvc.perform(get("/v1/relays/$fingerprintA/months")).andExpect(status().isNotFound)
         mockMvc.perform(get("/v1/relays/abc/months")).andExpect(status().isBadRequest)
     }
 
@@ -202,12 +211,27 @@ class ApiV1ControllerTest(
 
     "lists the families of a month with their members and autonomous systems" {
         saveRelayA(familyId = 7)
-        relayDetailsRepository.save(mockRelayDetails('B').apply {
-            month = "2024-03"; familyId = 7; autonomousSystemNumber = 24940; autonomousSystemName = "Hetzner"
-        })
-        relayDetailsRepository.save(mockRelayDetails('C').apply { month = "2024-03"; familyId = 9 })
+        relayDetailsRepository.save(
+            mockRelayDetails('B').apply {
+                month = "2024-03"
+                familyId = 7
+                autonomousSystemNumber = 24940
+                autonomousSystemName = "Hetzner"
+            },
+        )
+        relayDetailsRepository.save(
+            mockRelayDetails('C').apply {
+                month = "2024-03"
+                familyId = 9
+            },
+        )
         relayDetailsRepository.save(mockRelayDetails('D').apply { month = "2024-03" })
-        relayDetailsRepository.save(mockRelayDetails('E').apply { month = "2024-04"; familyId = 11 })
+        relayDetailsRepository.save(
+            mockRelayDetails('E').apply {
+                month = "2024-04"
+                familyId = 11
+            },
+        )
         mockMvc.perform(get("/v1/families").param("month", "2024-03"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.length()").value(2))

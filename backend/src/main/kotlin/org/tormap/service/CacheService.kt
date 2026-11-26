@@ -9,7 +9,6 @@ import org.tormap.util.logger
 import java.time.YearMonth
 import java.util.concurrent.CompletableFuture
 
-
 @Service
 class CacheService(
     private val cacheManager: CacheManager,
@@ -18,24 +17,21 @@ class CacheService(
 ) {
     private val logger = logger()
 
-    fun cacheRelayLocationDistinctDays(): CompletableFuture<Void> {
-        return coalesceService.submitAsync("cacheRelayLocationDistinctDays") {
+    fun cacheRelayLocationDistinctDays(): CompletableFuture<Void> =
+        coalesceService.submitAsync("cacheRelayLocationDistinctDays") {
             logger.info("Caching distinct relay location days")
             cacheManager.getCache(CacheConfig.RELAY_LOCATION_DISTINCT_DAYS)?.put(
                 CacheConfig.RELAY_LOCATION_DISTINCT_DAYS_KEY,
-                relayLocationRepositoryImpl.findDistinctDays()
+                relayLocationRepositoryImpl.findDistinctDays(),
             )
         }
-    }
 
-    fun cacheRelayDailyCounts(): CompletableFuture<Void> {
-        return coalesceService.submitAsync("cacheRelayDailyCounts") {
-            logger.info("Caching daily relay counts")
-            cacheManager.getCache(CacheConfig.RELAY_DAILY_COUNTS)?.put(
-                CacheConfig.RELAY_DAILY_COUNTS_KEY,
-                relayLocationRepositoryImpl.findDailyRelayCounts()
-            )
-        }
+    fun cacheRelayDailyCounts(): CompletableFuture<Void> = coalesceService.submitAsync("cacheRelayDailyCounts") {
+        logger.info("Caching daily relay counts")
+        cacheManager.getCache(CacheConfig.RELAY_DAILY_COUNTS)?.put(
+            CacheConfig.RELAY_DAILY_COUNTS_KEY,
+            relayLocationRepositoryImpl.findDailyRelayCounts(),
+        )
     }
 
     fun cacheRelayLocationsPerDay(months: Set<String>): CompletableFuture<Void> {

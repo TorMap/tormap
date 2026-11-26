@@ -14,16 +14,14 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.tormap.adapter.controller.exception.RelayNotFoundException
+import org.tormap.adapter.dto.RelayLocationDto
 import org.tormap.config.CacheConfig
 import org.tormap.database.repository.RelayDetailsRepository
-import org.tormap.adapter.dto.RelayLocationDto
 import org.tormap.lite.ClickMode
 import org.tormap.lite.CountryMeta
 import org.tormap.lite.Grouping
 import org.tormap.lite.LiteAggregation
 import org.tormap.lite.LiteIndexing
-import org.tormap.lite.Ranking
-import org.tormap.lite.RankingRow
 import org.tormap.lite.LiteMapRenderer
 import org.tormap.lite.LitePage
 import org.tormap.lite.LitePageModel
@@ -31,6 +29,8 @@ import org.tormap.lite.LiteRelayPages
 import org.tormap.lite.LiteRelays
 import org.tormap.lite.LiteTimeline
 import org.tormap.lite.LiteView
+import org.tormap.lite.Ranking
+import org.tormap.lite.RankingRow
 import org.tormap.service.RelayDetailsQueryService
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
@@ -87,20 +87,37 @@ class LiteController(
         val mapY = parameters.getFirst("map.y")?.toIntOrNull()
         val timelineX = parameters.getFirst("timeline.x")?.toIntOrNull()
         if (action == null && timelineX != null) {
-            return redirect("${LitePage.PATH}?${view.withDay(timeline(days).dayAt(timelineX, view.size.width) ?: day).toQuery()}")
+            return redirect(
+                "${LitePage.PATH}?${view.withDay(timeline(days).dayAt(timelineX, view.size.width) ?: day).toQuery()}",
+            )
         }
         if (action != null || (mapX != null && mapY != null)) {
             val next = when (action) {
                 "previous" -> view.withDay(day?.let { current -> days.lastOrNull { it < current } } ?: day)
+
                 "next" -> view.withDay(day?.let { current -> days.firstOrNull { it > current } } ?: day)
+
                 "latest" -> view.withDay(days.lastOrNull())
+
                 "in" -> view.zoomedBy(1)
+
                 "out" -> view.zoomedBy(-1)
+
                 "north" -> view.panned(0.0, -PAN_FRACTION)
+
                 "south" -> view.panned(0.0, PAN_FRACTION)
+
                 "west" -> view.panned(-PAN_FRACTION, 0.0)
+
                 "east" -> view.panned(PAN_FRACTION, 0.0)
-                else -> if (mapX != null && mapY != null && view.clickMode == ClickMode.Zoom) view.zoomedInAt(mapX, mapY) else view
+
+                else -> if (mapX != null && mapY != null &&
+                    view.clickMode == ClickMode.Zoom
+                ) {
+                    view.zoomedInAt(mapX, mapY)
+                } else {
+                    view
+                }
             }
             // A click that lists relays keeps the view and adds the clicked pixel, the list follows below the map
             val pick = if (action == null && mapX != null && mapY != null && view.clickMode == ClickMode.List) {
@@ -131,7 +148,13 @@ class LiteController(
             totalRelayCount = relays.size,
             notice = notice,
             fullVersionUrl = fullVersionUrl(),
-            pickedRelays = if (pickX != null && pickY != null) LiteRelays.near(filtered, shownView, pickX, pickY) else null,
+            pickedRelays = if (pickX != null &&
+                pickY != null
+            ) {
+                LiteRelays.near(filtered, shownView, pickX, pickY)
+            } else {
+                null
+            },
             statistics = LiteAggregation.statistics(filtered, shownView),
             rankings = rankings(filtered, shownView),
             timeline = timeline(days),
@@ -155,7 +178,10 @@ class LiteController(
     }
 
     @GetMapping("${LitePage.FAMILY_PATH}{id}")
-    fun family(@PathVariable id: Long, @RequestParam parameters: MultiValueMap<String, String>): ResponseEntity<String> {
+    fun family(
+        @PathVariable id: Long,
+        @RequestParam parameters: MultiValueMap<String, String>,
+    ): ResponseEntity<String> {
         val view = resolvedView(parameters)
         val members = relayDetailsRepository.findAllByFamilyId(id)
         if (members.isEmpty()) return notFound("There is no family with the ID $id.", view)
@@ -163,7 +189,10 @@ class LiteController(
     }
 
     @GetMapping("${LitePage.AUTONOMOUS_SYSTEM_PATH}{number}")
-    fun autonomousSystem(@PathVariable number: Int, @RequestParam parameters: MultiValueMap<String, String>): ResponseEntity<String> {
+    fun autonomousSystem(
+        @PathVariable number: Int,
+        @RequestParam parameters: MultiValueMap<String, String>,
+    ): ResponseEntity<String> {
         val view = resolvedView(parameters)
         val relays = LiteAggregation.filterRelays(relaysOf(view.day), view).filter { it.asNumber == number }
         // The name is taken from the details of one relay instead of grouping all relays of the month
@@ -195,7 +224,9 @@ class LiteController(
         val day = view.day
         // A fingerprint is looked up once in the relay details of the day's month
         val detailsIds = if (day != null && LiteRelays.isFingerprint(query)) {
-            setOfNotNull(relayDetailsRepository.findByMonthAndFingerprint(YearMonth.from(day).toString(), query.uppercase())?.id)
+            setOfNotNull(
+                relayDetailsRepository.findByMonthAndFingerprint(YearMonth.from(day).toString(), query.uppercase())?.id,
+            )
         } else {
             emptySet()
         }
@@ -236,7 +267,10 @@ class LiteController(
 
     private fun <T> withRenderPermit(render: () -> T): T {
         if (!renderPermits.tryAcquire(RENDER_WAIT_SECONDS, TimeUnit.SECONDS)) {
-            throw ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Too many map images are being drawn. Please try again.")
+            throw ResponseStatusException(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "Too many map images are being drawn. Please try again.",
+            )
         }
         try {
             return render()
@@ -258,19 +292,52 @@ class LiteController(
         val query = view.toQuery()
         val rankings = mutableListOf<Ranking>()
         if (Grouping.Family in view.groupings) {
-            rankings += Ranking("Largest families", LiteAggregation.largestGroups(relays, { it.familyId }, RANKING_SIZE).map { (id, count) ->
-                RankingRow("Family $id", count, view.copy(selectedFamily = id as Long), "${LitePage.FAMILY_PATH}$id?$query")
-            })
+            rankings +=
+                Ranking(
+                    "Largest families",
+                    LiteAggregation.largestGroups(relays, {
+                        it.familyId
+                    }, RANKING_SIZE).map { (id, count) ->
+                        RankingRow(
+                            "Family $id",
+                            count,
+                            view.copy(selectedFamily = id as Long),
+                            "${LitePage.FAMILY_PATH}$id?$query",
+                        )
+                    },
+                )
         }
         if (Grouping.AutonomousSystem in view.groupings) {
-            rankings += Ranking("Largest autonomous systems", LiteAggregation.largestGroups(relays, { it.asNumber }, RANKING_SIZE).map { (number, count) ->
-                RankingRow("AS$number", count, view.copy(selectedAutonomousSystem = number as Int), "${LitePage.AUTONOMOUS_SYSTEM_PATH}$number?$query")
-            })
+            rankings +=
+                Ranking(
+                    "Largest autonomous systems",
+                    LiteAggregation.largestGroups(relays, {
+                        it.asNumber
+                    }, RANKING_SIZE).map { (number, count) ->
+                        RankingRow(
+                            "AS$number",
+                            count,
+                            view.copy(selectedAutonomousSystem = number as Int),
+                            "${LitePage.AUTONOMOUS_SYSTEM_PATH}$number?$query",
+                        )
+                    },
+                )
         }
         if (Grouping.Country in view.groupings) {
-            rankings += Ranking("Countries with the most relays", LiteAggregation.largestGroups(relays, { it.country }, RANKING_SIZE).map { (country, count) ->
-                RankingRow(countryMeta.name(country as String), count, view.copy(selectedCountry = country), null)
-            })
+            rankings +=
+                Ranking(
+                    "Countries with the most relays",
+                    LiteAggregation.largestGroups(relays, {
+                        it.country
+                    }, RANKING_SIZE).map { (country, count) ->
+                        RankingRow(
+                            countryMeta.name(country as String),
+                            count,
+                            view.copy(selectedCountry = country),
+                            null,
+                        )
+                    },
+                )
         }
         return rankings
     }
@@ -283,9 +350,10 @@ class LiteController(
 
     private fun fullVersionUrl() = fullVersionUrl.trimEnd('/')
 
-    private fun html(body: String, status: HttpStatus = HttpStatus.OK): ResponseEntity<String> = ResponseEntity.status(status)
-        .contentType(MediaType(MediaType.TEXT_HTML, StandardCharsets.UTF_8))
-        .body(body)
+    private fun html(body: String, status: HttpStatus = HttpStatus.OK): ResponseEntity<String> =
+        ResponseEntity.status(status)
+            .contentType(MediaType(MediaType.TEXT_HTML, StandardCharsets.UTF_8))
+            .body(body)
 
     private fun notFound(message: String, view: LiteView) =
         html(LiteRelayPages.renderNotFound(message, view, fullVersionUrl()), HttpStatus.NOT_FOUND)

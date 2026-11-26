@@ -52,6 +52,7 @@ object LitePage {
     const val SEARCH_PATH = "/lite/search"
     private const val STYLESHEET_PATH = "/static/lite/lite.css"
     private const val USAGE_RANKING_SIZE = 10
+
     // Like the frontend, estimates based on fewer relays get a note
     private const val LOW_ESTIMATE_FRACTION = 30
 
@@ -61,7 +62,17 @@ object LitePage {
             "World map of the ${model.totalRelayCount} Tor relays on $it, grouped by family, autonomous system or " +
                 "country. TorMap Lite works without JavaScript and covers every day since ${model.firstDay ?: it}."
         }
-        return layout("TorMap Lite" + (view.day?.let { " - $it" } ?: ""), view, model.fullVersionUrl, description, canonicalUrl) {
+        return layout(
+            "TorMap Lite" + (
+                view.day?.let {
+                    " - $it"
+                } ?: ""
+                ),
+            view,
+            model.fullVersionUrl,
+            description,
+            canonicalUrl,
+        ) {
             model.notice?.let { tag("p", it, "class" to "notice", "role" to "status") }
             tag("form", "method" to "get", "action" to PATH) {
                 dayControls(model)
@@ -153,7 +164,15 @@ object LitePage {
         val query = view.toQuery()
         val listed = relays.take(LiteRelays.MAX_LISTED_RELAYS)
         tag("p", "class" to "summary") {
-            text(if (listed.size < relays.size) "The first ${listed.size} of ${relays.size} relays:" else "${relays.size} relays:")
+            text(
+                if (listed.size <
+                    relays.size
+                ) {
+                    "The first ${listed.size} of ${relays.size} relays:"
+                } else {
+                    "${relays.size} relays:"
+                },
+            )
         }
         tag("div", "class" to "table") {
             tag("table") {
@@ -170,8 +189,13 @@ object LitePage {
                         tag("tr") {
                             tag("td") {
                                 val nickname = relay.nickname ?: "Unknown"
-                                if (relay.detailsId != null) tag("a", nickname, "href" to "$RELAY_PATH${relay.detailsId}?$query")
-                                else text(nickname)
+                                if (relay.detailsId !=
+                                    null
+                                ) {
+                                    tag("a", nickname, "href" to "$RELAY_PATH${relay.detailsId}?$query")
+                                } else {
+                                    text(nickname)
+                                }
                             }
                             tag("td") {
                                 tag("span", "class" to "swatch swatch-${type.parameter}", "aria-hidden" to "true")
@@ -213,7 +237,13 @@ object LitePage {
         }
     }
 
-    fun Html.backToMap(view: LiteView) = tag("p") { tag("a", "\u2190 Back to the map", "href" to "$PATH?${view.toQuery()}") }
+    fun Html.backToMap(view: LiteView) = tag("p") {
+        tag(
+            "a",
+            "\u2190 Back to the map",
+            "href" to "$PATH?${view.toQuery()}",
+        )
+    }
 
     private fun Html.dayControls(model: LitePageModel) {
         tag("fieldset", "class" to "day") {
@@ -229,9 +259,30 @@ object LitePage {
             )
             // The first submit button of the form is the one used when pressing enter in the date field
             tag("button", "Show", "type" to "submit")
-            tag("button", "‹ Previous day", "type" to "submit", "name" to "go", "value" to "previous", "disabled" to !model.hasPreviousDay)
-            tag("button", "Next day ›", "type" to "submit", "name" to "go", "value" to "next", "disabled" to !model.hasNextDay)
-            tag("button", "Latest day", "type" to "submit", "name" to "go", "value" to "latest", "disabled" to !model.hasNextDay)
+            tag(
+                "button",
+                "‹ Previous day",
+                "type" to "submit",
+                "name" to "go",
+                "value" to "previous",
+                "disabled" to !model.hasPreviousDay,
+            )
+            tag(
+                "button",
+                "Next day ›",
+                "type" to "submit",
+                "name" to "go",
+                "value" to "next",
+                "disabled" to !model.hasNextDay,
+            )
+            tag(
+                "button",
+                "Latest day",
+                "type" to "submit",
+                "name" to "go",
+                "value" to "latest",
+                "disabled" to !model.hasNextDay,
+            )
         }
     }
 
@@ -258,7 +309,13 @@ object LitePage {
                 timeline.outliers.asReversed().forEach { outlier ->
                     tag("li") {
                         tag("a", outlier.day.toString(), "href" to "$PATH?${view.withDay(outlier.day).toQuery()}")
-                        val change = if (outlier.changePercent > 0) "+${outlier.changePercent}" else outlier.changePercent.toString()
+                        val change = if (outlier.changePercent >
+                            0
+                        ) {
+                            "+${outlier.changePercent}"
+                        } else {
+                            outlier.changePercent.toString()
+                        }
                         text(": ${outlier.relayCount} relays ($change% compared to the surrounding days)")
                     }
                 }
@@ -283,8 +340,16 @@ object LitePage {
         }
     }
 
-    private fun Html.mapButton(action: String, symbol: String, label: String, disabled: Boolean = false) =
-        tag("button", symbol, "type" to "submit", "name" to "go", "value" to action, "title" to label, "aria-label" to label, "disabled" to disabled)
+    private fun Html.mapButton(action: String, symbol: String, label: String, disabled: Boolean = false) = tag(
+        "button",
+        symbol,
+        "type" to "submit",
+        "name" to "go",
+        "value" to action,
+        "title" to label,
+        "aria-label" to label,
+        "disabled" to disabled,
+    )
 
     private fun Html.map(model: LitePageModel) {
         val view = model.view
@@ -302,7 +367,8 @@ object LitePage {
             )
         }
         tag("p", "class" to "summary") {
-            text("Showing ${model.shownRelayCount} of ${model.totalRelayCount} relays on $dayText, zoom level ${view.zoom}. ${clickHint(view)}")
+            val shown = "Showing ${model.shownRelayCount} of ${model.totalRelayCount} relays on $dayText"
+            text("$shown, zoom level ${view.zoom}. ${clickHint(view)}")
         }
     }
 
@@ -362,12 +428,23 @@ object LitePage {
                         ranking.rows.forEach { row ->
                             tag("tr") {
                                 tag("td") {
-                                    if (row.detailsPath != null) tag("a", row.label, "href" to row.detailsPath) else text(row.label)
+                                    if (row.detailsPath !=
+                                        null
+                                    ) {
+                                        tag("a", row.label, "href" to row.detailsPath)
+                                    } else {
+                                        text(row.label)
+                                    }
                                 }
                                 tag("td", row.relayCount.toString())
                                 tag("td") {
-                                    if (row.selectView != view) tag("a", "Select on map", "href" to "$PATH?${row.selectView.toQuery()}")
-                                    else text("Selected")
+                                    if (row.selectView !=
+                                        view
+                                    ) {
+                                        tag("a", "Select on map", "href" to "$PATH?${row.selectView.toQuery()}")
+                                    } else {
+                                        text("Selected")
+                                    }
                                 }
                             }
                         }
@@ -401,14 +478,31 @@ object LitePage {
             tag("div", "class" to "table") {
                 tag("table") {
                     tag("thead") {
-                        tag("tr") { listOf("Country", "Estimated users", "Probably between").forEach { tag("th", it, "scope" to "col") } }
+                        tag("tr") {
+                            listOf("Country", "Estimated users", "Probably between").forEach {
+                                tag(
+                                    "th",
+                                    it,
+                                    "scope" to "col",
+                                )
+                            }
+                        }
                     }
                     tag("tbody") {
                         usage.sortedByDescending { it.users }.take(USAGE_RANKING_SIZE).forEach { entry ->
                             tag("tr") {
                                 tag("td", countryNames(entry.country))
                                 tag("td", formatNumber(entry.users))
-                                tag("td", if (entry.lower != null && entry.upper != null) "${formatNumber(entry.lower)} and ${formatNumber(entry.upper)}" else "")
+                                tag(
+                                    "td",
+                                    if (entry.lower != null &&
+                                        entry.upper != null
+                                    ) {
+                                        "${formatNumber(entry.lower)} and ${formatNumber(entry.upper)}"
+                                    } else {
+                                        ""
+                                    },
+                                )
                             }
                         }
                     }
@@ -455,7 +549,12 @@ object LitePage {
                     tag("select", "name" to "top") {
                         tag("option", "All relays", "value" to "", "selected" to (view.topRelayCount == null))
                         LiteView.TOP_RELAY_COUNTS.forEach { count ->
-                            tag("option", "$count relays", "value" to count, "selected" to (view.topRelayCount == count))
+                            tag(
+                                "option",
+                                "$count relays",
+                                "value" to count,
+                                "selected" to (view.topRelayCount == count),
+                            )
                         }
                     }
                 }
@@ -470,7 +569,13 @@ object LitePage {
                 tag("legend", "Click on the map")
                 ClickMode.entries.forEach { mode ->
                     tag("label") {
-                        tag("input", "type" to "radio", "name" to "click", "value" to mode.parameter, "checked" to (mode == view.clickMode))
+                        tag(
+                            "input",
+                            "type" to "radio",
+                            "name" to "click",
+                            "value" to mode.parameter,
+                            "checked" to (mode == view.clickMode),
+                        )
                         text(" ${mode.label}")
                     }
                 }
@@ -479,7 +584,13 @@ object LitePage {
                 tag("legend", "Map size")
                 MapSize.entries.forEach { size ->
                     tag("label") {
-                        tag("input", "type" to "radio", "name" to "size", "value" to size.parameter, "checked" to (size == view.size))
+                        tag(
+                            "input",
+                            "type" to "radio",
+                            "name" to "size",
+                            "value" to size.parameter,
+                            "checked" to (size == view.size),
+                        )
                         text(" ${size.label} (${size.width} × ${size.height})")
                     }
                 }

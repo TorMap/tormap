@@ -46,7 +46,7 @@ class RelayDetailsUpdateServiceIntegrationTest(
                 relay('D', "\$${fingerprint('E')}, not a valid entry!"),
                 relay('E', "\$${fingerprint('D')}"),
                 relay('F', null),
-            )
+            ),
         )
 
         relayDetailsUpdateService.computeFamilies(setOf(month)).get(30, TimeUnit.SECONDS)
@@ -67,7 +67,7 @@ class RelayDetailsUpdateServiceIntegrationTest(
                 relay('A', "\$${fingerprint('B')}"),
                 relay('B', "\$${fingerprint('A')}, \$${fingerprint('C')}"),
                 relay('C', "\$${fingerprint('B')}"),
-            )
+            ),
         )
 
         relayDetailsUpdateService.computeFamilies(setOf(month)).get(30, TimeUnit.SECONDS)
@@ -106,7 +106,7 @@ class RelayDetailsUpdateServiceIntegrationTest(
                 relay('A', null, address = "94.130.58.99"),
                 // Private addresses have no autonomous system
                 relay('B', null, address = "10.0.0.1"),
-            )
+            ),
         )
 
         relayDetailsUpdateService.lookupAllMissingAutonomousSystems()

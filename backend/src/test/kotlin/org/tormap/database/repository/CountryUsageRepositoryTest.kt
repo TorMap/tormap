@@ -30,7 +30,7 @@ class CountryUsageRepositoryTest(
                 CountryUsageRow(day, "FR", 20, null, null, 70),
                 CountryUsageRow(day, "DE", 10, 5, 15, 70),
                 CountryUsageRow(day.plusDays(1), "DE", 11, 6, 16, 71),
-            )
+            ),
         )
         val rows = countryUsageRepository.findAllByDay(day)
         rows.map { it.country } shouldBe listOf("DE", "FR")
