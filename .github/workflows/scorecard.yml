@@ -1,0 +1,50 @@
+name: scorecard
+
+# OpenSSF Scorecard checks the repository's supply-chain practices (branch protection, pinned dependencies, token
+# permissions, signed releases and more) and publishes the score (https://scorecard.dev/viewer/?uri=github.com/TorMap/tormap).
+# Findings go to Code scanning (category "scorecard"). With publish_results the job may only use the allowed actions:
+# no run steps, env, defaults, containers or services (https://github.com/ossf/scorecard-action#workflow-restrictions).
+
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '30 4 * * 1' # weekly, checks also look at settings and releases that change without a push
+  # Re-check after a change to branch protection
+  branch_protection_rule:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  analysis:
+    if: github.event.repository.default_branch == github.ref_name
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      # Upload the results to Code scanning
+      security-events: write
+      # Sign the published results (OIDC)
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Run analysis
+        uses: ossf/scorecard-action@23f22cd43608bae7a1f1fa2603d7314dee9538a5 # v2.6.0
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+
+      - name: Upload to Code scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        with:
+          sarif_file: results.sarif
+          category: scorecard
