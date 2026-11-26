@@ -58,7 +58,7 @@ dependencies {
     implementation("tools.jackson.module:jackson-module-kotlin")
 
     // Postgres Database
-    implementation("org.postgresql:postgresql:42.7.14")
+    implementation("org.postgresql:postgresql:42.7.15")
 
     // In-memory caching with Caffeine https://github.com/ben-manes/caffeine (version managed by Spring Boot)
     implementation("com.github.ben-manes.caffeine:caffeine")
