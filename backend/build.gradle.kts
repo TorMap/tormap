@@ -16,7 +16,7 @@ buildscript {
         classpath(platform("com.fasterxml.jackson:jackson-bom:2.23.0"))
         constraints {
             classpath("com.google.guava:guava:33.8.0-jre")
-            classpath("org.apache.commons:commons-lang3:3.21.0")
+            classpath("org.apache.commons:commons-lang3:3.22.0")
         }
     }
 }
