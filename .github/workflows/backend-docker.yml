@@ -7,7 +7,8 @@ name: backend_docker
 # - publish (pushes only, environment docker-hub): serves that storage from a local registry again and copies exactly
 #   that image (same digest) to Docker Hub. On v* tags it pushes :<version>, :<major> and :latest and attests the
 #   build provenance (`gh attestation verify oci://docker.io/tormap/backend@<digest> --repo TorMap/tormap`); on
-#   master it pushes :edge.
+#   master it pushes :edge. The build job also lists the image contents in a CycloneDX SBOM (Syft), which the publish
+#   job attests on v* tags (`gh attestation verify oci://... --predicate-type https://cyclonedx.org/bom`).
 on:
   push:
     tags:
@@ -92,10 +93,23 @@ jobs:
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
           echo "Image digest: $digest" >> "$GITHUB_STEP_SUMMARY"
 
+      # Syft's own image, pinned by digest (Renovate bumps it), reads the image from the job's registry
+      - name: Create the SBOM
+        env:
+          SYFT_REGISTRY_INSECURE_USE_HTTP: 'true'
+        run: >
+          docker run --rm --network host --env SYFT_REGISTRY_INSECURE_USE_HTTP
+          --volume "$PWD:/work" --workdir /work
+          anchore/syft:v1.57.2@sha256:e97e20b6e6d1699c60296b66ab337941724f9bd06ac279d893eda89601fc4b2a
+          registry:localhost:5000/tormap/backend:build --platform linux/amd64
+          --output cyclonedx-json=backend-sbom.cdx.json
+
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: backend-image
-          path: backend-image-registry.tar
+          path: |
+            backend-image-registry.tar
+            backend-sbom.cdx.json
           if-no-files-found: error
           retention-days: 7
 
@@ -107,7 +121,7 @@ jobs:
     environment: docker-hub
     permissions:
       contents: read
-      # Build provenance on release tags
+      # Build provenance and SBOM attestations on release tags
       id-token: write
       attestations: write
     steps:
@@ -162,4 +176,13 @@ jobs:
         with:
           subject-name: index.docker.io/tormap/backend
           subject-digest: ${{ needs.build.outputs.digest }}
+          push-to-registry: true
+
+      - name: Attest the SBOM
+        if: github.ref_type == 'tag'
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+        with:
+          subject-name: index.docker.io/tormap/backend
+          subject-digest: ${{ needs.build.outputs.digest }}
+          sbom-path: backend-sbom.cdx.json
           push-to-registry: true

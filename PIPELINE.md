@@ -23,7 +23,7 @@ pull request ──► required checks ──► review and merge to master ─�
 | `scorecard.yml` | master, weekly | OpenSSF Scorecard of the repository's supply-chain practices | None | Public score, Code scanning results |
 | `fuzzing.yml` | Daily (master) | Jazzer fuzzing of the backend parsers with ClusterFuzzLite, see `.clusterfuzzlite/` | None | Issues labeled `fuzzing` for crashes |
 | `release.yml` | Manual (master) | Version bump commit, `vX.Y.Z` tag, draft release | Release GitHub App (env `release`) | Tag, draft release |
-| `backend-docker.yml` | PR, master, `v*` tags | Build the image without secrets, then push exactly that digest and attest it | Docker Hub (env `docker-hub`), push job only | `tormap/backend` |
+| `backend-docker.yml` | PR, master, `v*` tags | Build the image and its SBOM without secrets, then push exactly that digest and attest both | Docker Hub (env `docker-hub`), push job only | `tormap/backend` |
 | `frontend-docker.yml` | master, `v*` tags | Build and push the image | Docker Hub (env `docker-hub`) | `tormap/frontend` |
 | `cli-native.yml` | PR, master, `v*` tags | Native binaries, end-to-end test, image | Docker Hub (env `docker-hub`) | CLI binaries on the release, `tormap/cli` |
 
