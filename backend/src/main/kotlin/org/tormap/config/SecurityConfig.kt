@@ -17,6 +17,9 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler
+import org.springframework.security.web.header.writers.CrossOriginEmbedderPolicyHeaderWriter
+import org.springframework.security.web.header.writers.CrossOriginOpenerPolicyHeaderWriter
+import org.springframework.security.web.header.writers.CrossOriginResourcePolicyHeaderWriter
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter
 import org.springframework.web.cors.CorsConfiguration
@@ -54,6 +57,11 @@ class SecurityConfig(
             "default-src 'none'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'"
         internal const val LITE_CONTENT_SECURITY_POLICY =
             "default-src 'none'; img-src 'self'; style-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"
+
+        // No page uses these browser features, so no page (or embedded content) may ask for them
+        internal const val PERMISSIONS_POLICY =
+            "camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), serial=(), hid=(), " +
+                "midi=(), display-capture=(), browsing-topics=()"
     }
 
     @Bean
@@ -218,6 +226,18 @@ class SecurityConfig(
                 headers.frameOptions { it.deny() }
                 headers.referrerPolicy {
                     it.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER)
+                }
+                headers.permissionsPolicyHeader { it.policy(PERMISSIONS_POLICY) }
+                // Isolate the Lite pages from other windows and keep their images and styles from loading into other
+                // sites. Same-site, so tormap.org may still embed them; the API's CORS requests are not affected.
+                headers.crossOriginOpenerPolicy {
+                    it.policy(CrossOriginOpenerPolicyHeaderWriter.CrossOriginOpenerPolicy.SAME_ORIGIN)
+                }
+                headers.crossOriginEmbedderPolicy {
+                    it.policy(CrossOriginEmbedderPolicyHeaderWriter.CrossOriginEmbedderPolicy.REQUIRE_CORP)
+                }
+                headers.crossOriginResourcePolicy {
+                    it.policy(CrossOriginResourcePolicyHeaderWriter.CrossOriginResourcePolicy.SAME_SITE)
                 }
                 if (contentSecurityPolicy != null) {
                     headers.contentSecurityPolicy { it.policyDirectives(contentSecurityPolicy) }
