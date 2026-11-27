@@ -45,6 +45,9 @@ The published Docker images are scanned weekly with [Grype](https://github.com/a
 (`.github/workflows/image-scan.yml`, configuration in `.grype.yaml`) for vulnerabilities with a fix available, in OS
 packages and bundled libraries. Results go to Code scanning and the job log.
 
+A weekly [ZAP](https://www.zaproxy.org/) baseline scan (`.github/workflows/zap.yml`, passive only) checks the HTTP
+responses of the backend image with test data, never the production site. Findings are in the job summary.
+
 [Snyk](https://snyk.io/) is used for dependency scanning (SCA). Pull requests are checked by the Snyk GitHub
 integration (PR status checks, configured in Snyk, no CI workflow involved). Snyk Code (SAST) is not used, because the
 free plan's monthly test quota is too small for the number of pull requests. Run the dependency scan locally when

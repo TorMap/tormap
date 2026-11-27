@@ -1,0 +1,2 @@
+# ZAP baseline rule overrides for .github/workflows/zap.yml, one per line: <rule id><TAB><IGNORE|INFO|WARN|FAIL><TAB><reason>
+# Rule ids: https://www.zaproxy.org/docs/alerts/
