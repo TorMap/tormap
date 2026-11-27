@@ -1,0 +1,108 @@
+name: zap
+
+# OWASP ZAP baseline scan (passive only: spiders and checks responses, sends no attacks) of the backend as it ships:
+# the published tormap/backend:edge image (master, so a fix is checked before it is released) with its production
+# configuration, a throwaway database and the CLI end-to-end fixture, so the API and the Lite pages have data. Never
+# runs against tormap.org or api.tormap.org.
+# Findings don't fail the job: they are listed in the job summary and, one line per instance, in the job log, with
+# the full report in the "zap-report" artifact. Rules to ignore go in .zap/rules.tsv with a reason.
+# https://www.zaproxy.org/docs/docker/baseline-scan/
+
+on:
+  schedule:
+    - cron: '15 6 * * 1' # weekly, after the image scan
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - .github/workflows/zap.yml
+      - .zap/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:18.7-alpine@sha256:0115267ab5a509022df9319c77be365cef335adb71556c75f60f5360ee247e71
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Start the backend
+        # Scheduled jobs off: no descriptor downloads, the fixture is the only data
+        run: |
+          docker run -d --name backend --network host \
+            -e SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/postgres \
+            -e SPRING_DATASOURCE_USERNAME=postgres \
+            -e SPRING_DATASOURCE_PASSWORD=postgres \
+            -e TORMAP_SCHEDULING_ENABLED=false \
+            tormap/backend:edge
+          for _ in $(seq 1 60); do
+            if curl -sf -o /dev/null http://localhost:8080/; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::The backend did not start within 5 minutes"
+          docker logs --tail 100 backend
+          exit 1
+
+      - name: Load the fixture
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: docker exec -i "$POSTGRES_CONTAINER" psql -U postgres -v ON_ERROR_STOP=1 < cli/e2e/fixture.sql
+
+      # ZAP's own image, pinned by digest (Renovate bumps it). -I: warnings don't fail the step.
+      - name: Scan
+        run: |
+          mkdir -p zap-wrk
+          cp .zap/rules.tsv zap-wrk/
+          chmod -R a+rwX zap-wrk
+          for entry in root:/ lite:/lite/; do
+            name="${entry%%:*}"
+            target="${entry#*:}"
+            docker run --rm --network host --volume "$PWD/zap-wrk:/zap/wrk" \
+              zaproxy/zap-stable:2.17.0@sha256:9624669db72f54d86c4b46a7064518bd9bf79d8c61a4c31befa9923489f328af \
+              zap-baseline.py -t "http://localhost:8080$target" -c rules.tsv -I -s \
+              -J "zap-$name.json" -w "zap-$name.md"
+            cat "zap-wrk/zap-$name.md" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      # One line per alert instance, for agents without artifact access
+      - name: List findings
+        run: |
+          jq -r '.site[].alerts[] | . as $a | .instances[]
+            | "\($a.pluginid)\t\($a.alert)\t\(.method) \(.uri)\tparam=\(.param)\tevidence=\(.evidence[0:120])"' \
+            zap-wrk/zap-*.json | sort -u
+
+      - name: Upload the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: zap-report
+          path: zap-wrk/zap-*
+          retention-days: 30
+
+      - name: Backend log
+        if: failure()
+        run: docker logs --tail 200 backend

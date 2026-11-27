@@ -1,0 +1,4 @@
+# ZAP baseline rule overrides for .github/workflows/zap.yml, one per line: <rule id><TAB><IGNORE|INFO|WARN|FAIL><TAB><reason>
+# Rule ids: https://www.zaproxy.org/docs/alerts/
+10031	IGNORE	Lite query values are parsed into typed values (date, bounded numbers, enums) and escaped before they are written to attributes
+10049	IGNORE	Caching is set on purpose per path (HttpCachingConfig): no-store for /, public max-age for Lite pages and static files

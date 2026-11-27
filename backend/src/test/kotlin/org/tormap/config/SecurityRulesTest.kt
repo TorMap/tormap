@@ -118,6 +118,16 @@ class SecurityRulesTest(
         SecurityConfig.DEFAULT_CONTENT_SECURITY_POLICY shouldContain "form-action 'none'"
     }
 
+    "permissions and cross-origin policies are sent" {
+        listOf("/", "/lite/", "/v1/days").forEach { path ->
+            val response = mockMvc.perform(get(path)).andReturn().response
+            response.getHeader("Permissions-Policy") shouldBe SecurityConfig.PERMISSIONS_POLICY
+            response.getHeader("Cross-Origin-Opener-Policy") shouldBe "same-origin"
+            response.getHeader("Cross-Origin-Embedder-Policy") shouldBe "require-corp"
+            response.getHeader("Cross-Origin-Resource-Policy") shouldBe "same-site"
+        }
+    }
+
     "security.txt is public and plain text" {
         val response = mockMvc.perform(get("/.well-known/security.txt")).andReturn().response
         response.status shouldBe 200
