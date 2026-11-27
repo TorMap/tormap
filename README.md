@@ -17,6 +17,7 @@
     <a href="https://github.com/TorMap/tormap/actions/workflows/backend-test.yml"><img src="https://img.shields.io/github/actions/workflow/status/TorMap/tormap/backend-test.yml?branch=master&label=backend" alt="Backend tests"></a>
     <a href="https://github.com/TorMap/tormap/actions/workflows/frontend-push.yml"><img src="https://img.shields.io/github/actions/workflow/status/TorMap/tormap/frontend-push.yml?branch=master&label=frontend" alt="Frontend build"></a>
     <a href="https://scorecard.dev/viewer/?uri=github.com/TorMap/tormap"><img src="https://api.scorecard.dev/projects/github.com/TorMap/tormap/badge" alt="OpenSSF Scorecard"></a>
+    <a href="https://www.bestpractices.dev/projects/17152"><img src="https://www.bestpractices.dev/projects/17152/badge" alt="OpenSSF Best Practices"></a>
   </p>
 </div>
 
@@ -51,7 +52,8 @@ and [CLI](cli/README.md).
 
 Bug reports, ideas and pull requests are welcome in the [issues](https://github.com/TorMap/tormap/issues).
 Please keep pull requests small and use [Conventional Commit](https://www.conventionalcommits.org/) titles, see
-[AGENTS.md](AGENTS.md) for the project rules. To report a vulnerability, follow [SECURITY.md](SECURITY.md) instead.
+[AGENTS.md](AGENTS.md) for the project rules. To report a vulnerability, follow [SECURITY.md](SECURITY.md) instead. The project follows a
+[Code of Conduct](CODE_OF_CONDUCT.md), its [governance](GOVERNANCE.md) and [roadmap](ROADMAP.md) are documented.
 
 ## Releases
 
