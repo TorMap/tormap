@@ -1,8 +1,9 @@
 name: image scan
 
-# Grype scans the published Docker images (:latest, what operators run) weekly for known vulnerabilities in OS
-# packages and bundled libraries, so a new advisory for a running image is noticed between releases. Only findings
-# with a fix available are reported. Results go to Code scanning (SARIF, one category per image) and to the job log
+# Grype scans the published Docker images weekly for known vulnerabilities in OS packages and bundled libraries:
+# :latest (the release operators run), so a new advisory for a running image is noticed between releases, and :edge
+# (master), which shows whether master already has the fix and only a release is missing. Only findings
+# with a fix available are reported. Results go to Code scanning (SARIF, one category per image and tag) and to the job log
 # (one line per finding), so agents without Code scanning API access can read them too. Findings don't fail the job.
 # A fix ships by updating the dependency or base image and releasing; images are rebuilt only on release.
 # https://github.com/anchore/grype Configuration: .grype.yaml
@@ -38,6 +39,9 @@ jobs:
           - backend
           - frontend
           - cli
+        tag:
+          - latest
+          - edge
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -46,7 +50,7 @@ jobs:
       # Grype's own image, pinned by digest (Renovate bumps it). It reads the image straight from the registry.
       - name: Scan
         env:
-          IMAGE: tormap/${{ matrix.image }}:latest
+          IMAGE: tormap/${{ matrix.image }}:${{ matrix.tag }}
         run: >
           docker run --rm --volume "$PWD:/work" --workdir /work
           anchore/grype:v0.122.1@sha256:661583704a253c0448ed63998b5ea2cd9d5a76ee71eedc4aed439b8ce3e93a1c
@@ -54,7 +58,7 @@ jobs:
 
       - name: List findings
         env:
-          IMAGE: tormap/${{ matrix.image }}:latest
+          IMAGE: tormap/${{ matrix.image }}:${{ matrix.tag }}
         run: |
           echo "Fixable findings in $IMAGE: $(jq '[.runs[].results[]] | length' grype.sarif)"
           jq -r '.runs[] | (.tool.driver.rules // []) as $rules | .results[] | .ruleId as $id
@@ -69,4 +73,4 @@ jobs:
         uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
         with:
           sarif_file: grype.sarif
-          category: grype-${{ matrix.image }}
+          category: grype-${{ matrix.image }}-${{ matrix.tag }}
