@@ -34,12 +34,12 @@
     },
     {
       "customType": "regex",
-      "description": "Grype image run by the image scan workflow (in a run step, which the github-actions manager does not read)",
+      "description": "Grype and Syft images run in workflow steps, which the github-actions manager does not read",
       "managerFilePatterns": [
-        "/^\\.github/workflows/image-scan\\.yml$/"
+        "/^\\.github/workflows/(image-scan|backend-docker)\\.yml$/"
       ],
       "matchStrings": [
-        "(?<depName>anchore/grype):(?<currentValue>v[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]{64})"
+        "(?<depName>anchore/(?:grype|syft)):(?<currentValue>v[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]{64})"
       ],
       "datasourceTemplate": "docker"
     }
