@@ -104,6 +104,16 @@ val nativeCompile by tasks.registering(Exec::class) {
         it.split(" ").filter(String::isNotBlank)
     }
     inputs.property("nativeImageOptions", extraOptions)
+    // The usual C toolchain variables, passed on to native-image: CC is the C compiler it uses for its C queries and
+    // to link the binary, CFLAGS go to the C compiler, LDFLAGS are appended to the link command
+    fun flags(name: String) =
+        providers.environmentVariable(name).orElse("").map { it.split(" ").filter(String::isNotBlank) }
+    val cc = providers.environmentVariable("CC").orElse("")
+    val cflags = flags("CFLAGS")
+    val ldflags = flags("LDFLAGS")
+    inputs.property("CC", cc)
+    inputs.property("CFLAGS", cflags)
+    inputs.property("LDFLAGS", ldflags)
 
     doFirst {
         outputDirectory.get().asFile.mkdirs()
@@ -112,6 +122,9 @@ val nativeCompile by tasks.registering(Exec::class) {
         val binary = outputDirectory.get().file("tormap").asFile
         // Links zlib in, so the binary only needs glibc (from the build machine's version on)
         val linkOptions = if (linux) listOf("--static-nolibc") else emptyList()
+        val toolchainOptions = listOfNotNull(cc.get().ifBlank { null }?.let { "--native-compiler-path=$it" }) +
+            cflags.get().map { "--native-compiler-options=$it" } +
+            ldflags.get().map { "-H:NativeLinkerOption=$it" }
         commandLine(
             listOf(
                 nativeImage.get(),
@@ -122,7 +135,8 @@ val nativeCompile by tasks.registering(Exec::class) {
                 "-Os",
                 // Runs on every CPU of the architecture, not only on recent ones (the default is x86-64-v3)
                 "-march=compatibility",
-            ) + linkOptions + listOf("-o", binary.absolutePath, "-cp", classpath.joinToString(File.pathSeparator)) +
+            ) + linkOptions + toolchainOptions +
+                listOf("-o", binary.absolutePath, "-cp", classpath.joinToString(File.pathSeparator)) +
                 extraOptions.get() + "org.tormap.cli.MainKt",
         )
     }
