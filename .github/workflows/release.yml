@@ -76,6 +76,12 @@ jobs:
     permissions:
       contents: read # everything that writes uses the app token
     steps:
+      # Runtime monitoring of this secret-holding job (egress audit, file integrity), see PIPELINE.md
+      - name: Harden the runner
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
+
       - name: Create a token of the release app
         # Valid for an hour, limited to this repository and its contents, revoked when the job ends
         id: app_token
