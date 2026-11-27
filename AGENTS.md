@@ -20,7 +20,7 @@ Rules for AI coding agents (and a quick reference for humans) working in this re
 
 ## Pull requests
 - Conventional Commit titles, e.g. `fix(frontend): ...`. The title becomes the release note line.
-- Set labels when opening the PR; they group the release notes: `breaking` (incompatible API or behavior), `deployment` (operators must act: env var, volume ownership, JDK or image change), `security` (fixes a vulnerability), `enhancement`, `bug`, `documentation`, plus `backend` and/or `frontend`.
+- Always set the labels yourself when opening the PR (don't leave them to the maintainer); they group the release notes: `breaking` (incompatible API or behavior), `deployment` (operators must act: env var, volume ownership, JDK or image change), `security` (fixes a vulnerability), `enhancement`, `bug`, `documentation`, plus `backend` and/or `frontend`.
 - If operators must act, add a short "Deployment notes" section to the description.
 - Keep PRs small: each one leaves the project working and mergeable on its own.
 
