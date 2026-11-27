@@ -3,8 +3,8 @@ name: zap
 # OWASP ZAP baseline scan (passive only: spiders and checks responses, sends no attacks) of the backend as it ships:
 # the published tormap/backend:edge image (master) with its production configuration, a throwaway database and the
 # CLI end-to-end fixture, so the API and the Lite pages have data. Never runs against tormap.org or api.tormap.org.
-# Findings don't fail the job: they are listed in the job log and the job summary, with the full report in the
-# "zap-report" artifact. Rules to ignore go in .zap/rules.tsv with a reason.
+# Findings don't fail the job: they are listed in the job summary and, one line per instance, in the job log, with
+# the full report in the "zap-report" artifact. Rules to ignore go in .zap/rules.tsv with a reason.
 # https://www.zaproxy.org/docs/docker/baseline-scan/
 
 on:
@@ -86,6 +86,13 @@ jobs:
               -J "zap-$name.json" -w "zap-$name.md"
             cat "zap-wrk/zap-$name.md" >> "$GITHUB_STEP_SUMMARY"
           done
+
+      # One line per alert instance, for agents without artifact access
+      - name: List findings
+        run: |
+          jq -r '.site[].alerts[] | . as $a | .instances[]
+            | "\($a.pluginid)\t\($a.alert)\t\(.method) \(.uri)\tparam=\(.param)\tevidence=\(.evidence[0:120])"' \
+            zap-wrk/zap-*.json | sort -u
 
       - name: Upload the report
         if: ${{ !cancelled() }}
