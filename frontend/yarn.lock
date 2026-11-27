@@ -1068,12 +1068,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:26.6.6":
-  version: 26.6.6
-  resolution: "@types/node@npm:26.6.6"
+"@types/node@npm:26.6.7":
+  version: 26.6.7
+  resolution: "@types/node@npm:26.6.7"
   dependencies:
     undici-types: "npm:~8.9.0"
-  checksum: 10/07c6c6fc1f5cc89c700ac9ebcebd42b000fef234bf0b80e9461a8f077105f15faf16df95b83745e0c0e37338d1fbc28cb402ef27b5787fd7a57b492c926ff7ae
+  checksum: 10/6990282cd7f25609da26bca026f9ab62c94bf67b82c38b81608a8d6b34d51b7e91a95831b0dc55fa9c9d8066bc3b0def95308b1a61a275e6dd228ef82689bc44
   languageName: node
   linkType: hard
 
@@ -4275,7 +4275,7 @@ __metadata:
     "@mui/x-date-pickers": "npm:9.18.0"
     "@types/geojson": "npm:7946.0.16"
     "@types/leaflet": "npm:1.9.22"
-    "@types/node": "npm:26.6.6"
+    "@types/node": "npm:26.6.7"
     "@types/react": "npm:19.3.1"
     "@types/react-dom": "npm:19.3.0"
     "@vitejs/plugin-react": "npm:6.3.0"
