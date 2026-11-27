@@ -206,6 +206,25 @@ Relay data is public by design, so confidentiality of relay data is not an asset
 | **Medium**   | DoS that needs sustained traffic, a relay, or a non-default but plausible deployment; secret exposure that needs another flaw.    |
 | **Low**      | Defense in depth, hardening gaps, issues that need Collector compromise or admin access, or have only cosmetic impact.          |
 
+## Assurance case
+
+Why the controls above are enough for the threats in this model:
+
+- **Threats and boundaries are known:** every entry point is listed in [Trust boundaries](#trust-boundaries-and-entry-points)
+  with the code that handles it, and each [threat scenario](#threat-scenarios) maps to controls in
+  [Existing controls](#existing-controls).
+- **Secure design principles:** least privilege (no accounts, a single admin role that is off without a password,
+  non-root containers, least-privilege workflow permissions), fail-safe defaults (deny-by-default filter chains,
+  actuator unreachable by default, secure settings outside the `dev` profile), complete mediation (all requests pass
+  `SecurityConfig`, pinned by `SecurityRulesTest`), economy of mechanism (read-only public API, few dependencies,
+  hand-written service worker), and bounded resources on every untrusted input (sizes, caches, timeouts, threads).
+- **Common weaknesses are countered:** injection by bound parameters only; XSS by text-only rendering, escaping in
+  `Html` and strict CSPs; SSRF and path traversal by fixed hosts and validated index paths; DoS by input, response and
+  cache limits; supply-chain attacks by the rules in [PIPELINE.md](PIPELINE.md). The backend and TorMap Lite follow
+  the OWASP ASVS.
+- **Verified continuously:** tests for the security rules and parsers, CodeQL, Semgrep and zizmor on every pull
+  request, daily fuzzing of the descriptor parsers, dependency and image scanning, and this checklist in reviews.
+
 ## Review checklist for changes
 
 - New endpoint: add it to `SecurityConfig` explicitly, extend `SecurityRulesTest`, bound input sizes (the raw request body
