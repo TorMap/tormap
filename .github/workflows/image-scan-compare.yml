@@ -1,0 +1,106 @@
+name: image scan comparison
+
+# Temporary: scans the published images with Trivy and Grype side by side to choose one scanner.
+# Not meant to be merged.
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - .github/workflows/image-scan-compare.yml
+
+permissions: {}
+
+env:
+  GRYPE_VERSION: 0.110.0
+  GRYPE_SHA256: aaa98d27d2d7efd9317c6a1ad6d9b15f3e65bab320e7d03bde41e251387bb71c
+  TRIVY_VERSION: 0.70.0
+  TRIVY_SHA256: 8b4376d5d6befe5c24d503f10ff136d9e0c49f9127a4279fd110b727929a5aa9
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - tormap/backend:latest
+          - tormap/frontend:latest
+          - tormap/cli:latest
+    steps:
+      - name: Install scanners
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/bin"
+          cd "$RUNNER_TEMP"
+          curl -sSfL -o grype.tgz "https://github.com/anchore/grype/releases/download/v${GRYPE_VERSION}/grype_${GRYPE_VERSION}_linux_amd64.tar.gz"
+          echo "${GRYPE_SHA256}  grype.tgz" | sha256sum -c -
+          curl -sSfL -o trivy.tgz "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          echo "${TRIVY_SHA256}  trivy.tgz" | sha256sum -c -
+          tar -xzf grype.tgz -C bin grype
+          tar -xzf trivy.tgz -C bin trivy
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
+      - name: Pull image
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: docker pull --quiet "$IMAGE"
+
+      - name: Scan with Trivy
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: |
+          start=$(date +%s)
+          trivy image --quiet --scanners vuln --format json --output trivy.json "$IMAGE"
+          echo "TRIVY_SECONDS=$(( $(date +%s) - start ))" >> "$GITHUB_ENV"
+
+      - name: Scan with Grype
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: |
+          start=$(date +%s)
+          grype --quiet --output json --file grype.json "docker:$IMAGE"
+          echo "GRYPE_SECONDS=$(( $(date +%s) - start ))" >> "$GITHUB_ENV"
+
+      - name: Compare
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: |
+          set -euo pipefail
+          # One line per finding: id<TAB>package<TAB>installed<TAB>severity<TAB>fixed
+          jq -r '.Results[]? | .Target as $t | .Vulnerabilities[]? |
+            [.VulnerabilityID, .PkgName, .InstalledVersion, .Severity, (.FixedVersion // "")] | @tsv' trivy.json | sort -u > trivy.tsv
+          jq -r '.matches[] | [.vulnerability.id, .artifact.name, .artifact.version,
+            (.vulnerability.severity | ascii_upcase), ((.vulnerability.fix.versions // []) | join(","))] | @tsv' grype.json | sort -u > grype.tsv
+          # Grype lists GHSA ids where Trivy uses the CVE; map GHSA to CVE via relatedVulnerabilities
+          jq -r '.matches[] | .vulnerability.id as $id | .artifact.name as $p |
+            ([.relatedVulnerabilities[]?.id | select(startswith("CVE-"))] | first) // $id | [., $p] | @tsv' grype.json | sort -u > grype-keys.tsv
+          cut -f1,2 trivy.tsv | sort -u > trivy-keys.tsv
+          {
+            echo "## $IMAGE"
+            echo
+            echo "| | Trivy | Grype |"
+            echo "|---|---|---|"
+            echo "| Seconds | $TRIVY_SECONDS | $GRYPE_SECONDS |"
+            echo "| Findings (id + package) | $(wc -l < trivy-keys.tsv) | $(wc -l < grype-keys.tsv) |"
+            for s in CRITICAL HIGH MEDIUM LOW; do
+              echo "| $s | $(awk -F'\t' -v s=$s '$4==s' trivy.tsv | wc -l) | $(awk -F'\t' -v s=$s '$4==s' grype.tsv | wc -l) |"
+            done
+            echo
+            echo "Only Trivy:"
+            echo '```'
+            comm -23 trivy-keys.tsv grype-keys.tsv
+            echo '```'
+            echo "Only Grype:"
+            echo '```'
+            comm -13 trivy-keys.tsv grype-keys.tsv
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "== Trivy"; cat trivy.tsv
+          echo "== Grype"; cat grype.tsv
+          echo "== Only Trivy"; comm -23 trivy-keys.tsv grype-keys.tsv
+          echo "== Only Grype"; comm -13 trivy-keys.tsv grype-keys.tsv
