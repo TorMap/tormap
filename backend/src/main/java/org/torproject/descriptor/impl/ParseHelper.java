@@ -443,9 +443,12 @@ public class ParseHelper {
           + "identity-ed25519 crypto block '" + identityEd25519CryptoBlock
           + "'.");
     }
+    // Local patch: the end index is relative to the block without newlines.
+    // Upstream used the length with newlines, which fails with a
+    // StringIndexOutOfBoundsException on a block with many short lines.
     String identityEd25519Base64 = identityEd25519CryptoBlockNoNewlines
         .substring(beginEd25519CertLine.length(),
-        identityEd25519CryptoBlock.length()
+        identityEd25519CryptoBlockNoNewlines.length()
         - endEd25519CertLine.length()).replaceAll("=", "");
     byte[] identityEd25519 = Base64.decodeBase64(identityEd25519Base64);
     if (identityEd25519.length < 40) {
@@ -466,14 +469,18 @@ public class ParseHelper {
           + "master-key-ed25519): " + identityEd25519[39]);
     } else {
       int extensionStart = 40;
-      for (int i = 0; i < (int) identityEd25519[39]; i++) {
+      // Local patch: the extension count and length are unsigned, upstream
+      // reads them as signed bytes and fails with an
+      // ArrayIndexOutOfBoundsException on lengths from 0x80 00 on
+      int extensionCount = identityEd25519[39] & 0xFF;
+      for (int i = 0; i < extensionCount; i++) {
         if (identityEd25519.length < extensionStart + 4) {
           throw new DescriptorParseException("Invalid extension with id "
               + i + " in identity-ed25519.");
         }
-        int extensionLength = identityEd25519[extensionStart];
+        int extensionLength = identityEd25519[extensionStart] & 0xFF;
         extensionLength <<= 8;
-        extensionLength += identityEd25519[extensionStart + 1];
+        extensionLength += identityEd25519[extensionStart + 1] & 0xFF;
         int extensionType = identityEd25519[extensionStart + 2];
         if (extensionLength == 32 && extensionType == 4) {
           if (identityEd25519.length < extensionStart + 4 + 32) {

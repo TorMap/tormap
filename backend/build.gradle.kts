@@ -237,6 +237,29 @@ tasks.processResources {
     }
 }
 
+// Fuzz targets for Jazzer in src/fuzz, built and run on a schedule by ClusterFuzzLite (see .clusterfuzzlite/).
+// The Jazzer API jar comes with the fuzzing image (-PjazzerApi=<path>), so it is not a project dependency.
+val fuzz: SourceSet by sourceSets.creating {
+    // Only the classes: the resources include the IP lookup databases, which the fuzz targets don't need
+    compileClasspath += sourceSets.main.get().output.classesDirs
+    runtimeClasspath += sourceSets.main.get().output.classesDirs
+}
+configurations[fuzz.implementationConfigurationName].extendsFrom(configurations.implementation.get())
+configurations[fuzz.runtimeOnlyConfigurationName].extendsFrom(configurations.runtimeOnly.get())
+providers.gradleProperty("jazzerApi").orNull?.let { dependencies.add(fuzz.compileOnlyConfigurationName, files(it)) }
+
+val fuzzJar = tasks.register<Jar>("fuzzJar") {
+    archiveFileName = "tormap-fuzz.jar"
+    from(fuzz.output, sourceSets.main.get().output.classesDirs)
+}
+
+tasks.register<Sync>("installFuzzTargets") {
+    description = "Copies the fuzz targets with their runtime classpath to build/fuzz, see .clusterfuzzlite/build.sh"
+    doFirst { require(providers.gradleProperty("jazzerApi").isPresent) { "Run with -PjazzerApi=<jazzer API jar>" } }
+    from(fuzzJar, configurations[fuzz.runtimeClasspathConfigurationName])
+    into(layout.buildDirectory.dir("fuzz"))
+}
+
 // Configure tests
 tasks.withType<Test> {
     useJUnitPlatform()

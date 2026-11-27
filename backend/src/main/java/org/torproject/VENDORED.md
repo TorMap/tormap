@@ -48,3 +48,8 @@ Keep this list current. Re-apply each patch after copying a new upstream release
    separate commits.
 4. Parse a few days of recent consensuses and server descriptors with the old and new version and compare the fields
    TorMap stores (see `RelayDetails` and `RelayLocation`).
+7. `impl/ParseHelper`: in `identity-ed25519` crypto blocks, read the extension count and lengths as unsigned bytes and
+   cut the base64 out of the block without newlines. Upstream fails with an `IndexOutOfBoundsException` on extension
+   lengths from `0x8000` on and on blocks with many short lines. Found by fuzzing, see `IdentityEd25519CryptoBlockTest`.
+8. `impl/DescriptorParserImpl`: turn a `RuntimeException` while parsing one descriptor into an unparseable descriptor.
+   Upstream rethrows it, which makes `DescriptorReaderImpl` stop reading all remaining files and tarballs.

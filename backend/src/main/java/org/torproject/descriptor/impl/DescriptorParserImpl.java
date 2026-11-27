@@ -260,6 +260,13 @@ public class DescriptorParserImpl implements DescriptorParser {
       if (null != e.getCause()
           && e.getCause() instanceof DescriptorParseException) {
         throw (DescriptorParseException) e.getCause();
+      } else if (e.getCause() instanceof RuntimeException) {
+        // Local patch: a parser bug for one descriptor makes it unparseable.
+        // Upstream rethrows it, which stops DescriptorReaderImpl from reading
+        // all remaining files and tarballs.
+        throw new DescriptorParseException("Bug: unexpected exception while "
+            + "parsing a descriptor: " + e.getCause(),
+            (RuntimeException) e.getCause());
       } else {
         throw new RuntimeException(e);
       }

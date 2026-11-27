@@ -20,6 +20,7 @@ pull request ──► required checks ──► review and merge to master ─�
 | `frontend-push.yml` | master | Build, test, deploy | Firebase (env `firebase-live`) | tormap.org |
 | `codeql.yml`, `semgrep.yml`, `zizmor.yml` | PR, master, weekly | SAST of code and workflows | None | Code scanning results |
 | `scorecard.yml` | master, weekly | OpenSSF Scorecard of the repository's supply-chain practices | None | Public score, Code scanning results |
+| `fuzzing.yml` | Daily (master) | Jazzer fuzzing of the backend parsers with ClusterFuzzLite, see `.clusterfuzzlite/` | None | Issues labeled `fuzzing` for crashes |
 | `release.yml` | Manual (master) | Version bump commit, `vX.Y.Z` tag, draft release | Release GitHub App (env `release`) | Tag, draft release |
 | `backend-docker.yml` | PR, master, `v*` tags | Build the image without secrets, then push exactly that digest and attest it | Docker Hub (env `docker-hub`), push job only | `tormap/backend` |
 | `frontend-docker.yml` | master, `v*` tags | Build and push the image | Docker Hub (env `docker-hub`) | `tormap/frontend` |
