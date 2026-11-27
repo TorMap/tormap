@@ -18,6 +18,12 @@ the open, in issues and pull requests.
   declining a change are given there.
 - Contributors who make repeated, significant contributions can be invited as maintainers, with the same rules.
 
+## Continuity
+
+A second member of the GitHub organization can approve the release workflow. If the maintainer stops supporting the
+project, that member can triage issues, merge pull requests and publish releases within a week, and can recover full
+access to all project accounts after a safety delay.
+
 ## Changes to this document
 
 Changes to governance are made by pull request like any other change.
