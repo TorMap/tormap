@@ -27,6 +27,10 @@ pull request ──► required checks ──► review and merge to master ─�
 | `frontend-docker.yml` | master, `v*` tags | Build and push the image | Docker Hub (env `docker-hub`) | `tormap/frontend` |
 | `cli-native.yml` | PR, master, `v*` tags | Native binaries, end-to-end test, image | Docker Hub (env `docker-hub`) | CLI binaries on the release, `tormap/cli` |
 
+Jobs that hold secrets start with [Harden-Runner](https://github.com/step-security/harden-runner) in audit mode: it
+records each outbound connection and changes to source files during the job and reports them to StepSecurity
+(insights linked from the job summary), without blocking anything yet.
+
 Outside Actions: Renovate opens dependency PRs; the Snyk and Socket GitHub integrations and GitGuardian check PRs;
 GitHub secret scanning with push protection checks every push.
 
