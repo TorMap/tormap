@@ -150,7 +150,8 @@ Relay data is public by design, so confidentiality of relay data is not an asset
   8 dedicated threads with a 2 s deadline per IP. Names not verified by then are returned as unverified. When all
   threads are busy, the request gets no host names and the result is not cached.
 - Backend container runs as non-root `1000:1000` from a digest-pinned base image. The frontend image (static files only)
-  is based on the digest-pinned `nginxinc/nginx-unprivileged`, runs as non-root `101` and listens on port 8080.
+  is based on the digest-pinned official `nginx` Alpine image, runs as non-root `101` (`frontend/nginx-main.conf`) and
+  listens on port 8080.
 - The frontend's service worker (`frontend/src/service-worker/`, served as `/sw.js`) is hand-written without third-party
   code. It answers same-origin GET requests for files of its own build, each checked against the SHA-256 that the
   build recorded, and keeps public relay data for offline use: only 200 JSON answers to GET requests on fixed backend
