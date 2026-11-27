@@ -43,17 +43,14 @@ jobs:
         with:
           persist-credentials: false
 
+      # Grype's own image, pinned by digest (Renovate bumps it). It reads the image straight from the registry.
       - name: Scan
-        id: scan
-        uses: anchore/scan-action@11983a512817154c80a9db660c1a184be7513ed6 # v7.4.3
-        with:
-          image: tormap/${{ matrix.image }}:latest
-          only-fixed: true
-          fail-build: false
-          severity-cutoff: high
-          output-format: sarif
-          output-file: grype.sarif
-          config: .grype.yaml
+        env:
+          IMAGE: tormap/${{ matrix.image }}:latest
+        run: >
+          docker run --rm --volume "$PWD:/work" --workdir /work
+          anchore/grype:v0.122.1@sha256:661583704a253c0448ed63998b5ea2cd9d5a76ee71eedc4aed439b8ce3e93a1c
+          "registry:$IMAGE" --config .grype.yaml --only-fixed --output sarif --file grype.sarif
 
       - name: List findings
         env:

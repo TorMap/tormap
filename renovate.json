@@ -31,6 +31,17 @@
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "TorMap/ip-lookup-data",
       "versioningTemplate": "regex:^(?<major>\\d{4})-(?<minor>\\d{2})$"
+    },
+    {
+      "customType": "regex",
+      "description": "Grype image run by the image scan workflow (in a run step, which the github-actions manager does not read)",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/image-scan\\.yml$/"
+      ],
+      "matchStrings": [
+        "(?<depName>anchore/grype):(?<currentValue>v[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]{64})"
+      ],
+      "datasourceTemplate": "docker"
     }
   ],
   "packageRules": [
