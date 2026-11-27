@@ -64,6 +64,8 @@ tasks.register("resolveAndLockAll") {
 // Remove an override once the Boot-managed version is at or above it.
 // Jackson 2 (com.fasterxml.jackson), keep in sync with the pins for metrics-lib below
 extra["jackson-2-bom.version"] = "2.23.0"
+// Tomcat (Spring Boot 4.2.0 manages 11.0.27)
+extra["tomcat.version"] = "11.0.29"
 
 dependencies {
     // Kotlin
