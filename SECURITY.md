@@ -41,7 +41,7 @@ the repository's Code scanning alerts:
 - [zizmor](https://docs.zizmor.sh/) (`.github/workflows/zizmor.yml`): GitHub Actions workflows and actions. Findings
   fail the check and are listed in the job log.
 
-The published Docker images are scanned weekly with [Grype](https://github.com/anchore/grype)
+The published Docker images (`:latest` and `:edge`) are scanned weekly with [Grype](https://github.com/anchore/grype)
 (`.github/workflows/image-scan.yml`, configuration in `.grype.yaml`) for vulnerabilities with a fix available, in OS
 packages and bundled libraries. Results go to Code scanning and the job log.
 

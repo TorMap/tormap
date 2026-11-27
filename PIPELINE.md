@@ -19,7 +19,7 @@ pull request ──► required checks ──► review and merge to master ─�
 | `frontend-pull-request.yml` | PR | Build and test (Yarn), preview deploy | `OSM_TOKEN`, Firebase | Firebase preview channel |
 | `frontend-push.yml` | master | Build, test, deploy | Firebase (env `firebase-live`) | tormap.org |
 | `codeql.yml`, `semgrep.yml`, `zizmor.yml` | PR, master, weekly | SAST of code and workflows | None | Code scanning results |
-| `image-scan.yml` | Weekly | Grype scan of the published `:latest` images for fixable vulnerabilities | None | Code scanning results |
+| `image-scan.yml` | Weekly | Grype scan of the published `:latest` and `:edge` images for fixable vulnerabilities | None | Code scanning results |
 | `zap.yml` | Weekly | ZAP baseline (passive) scan of the `:edge` backend image with test data, never production | None | Job summary, `zap-report` artifact |
 | `scorecard.yml` | master, weekly | OpenSSF Scorecard of the repository's supply-chain practices | None | Public score, Code scanning results |
 | `fuzzing.yml` | Daily (master) | Jazzer fuzzing of the backend parsers with ClusterFuzzLite, see `.clusterfuzzlite/` | None | Issues labeled `fuzzing` for crashes |
