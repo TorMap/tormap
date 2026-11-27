@@ -1,0 +1,75 @@
+name: image scan
+
+# Grype scans the published Docker images (:latest, what operators run) weekly for known vulnerabilities in OS
+# packages and bundled libraries, so a new advisory for a running image is noticed between releases. Only findings
+# with a fix available are reported. Results go to Code scanning (SARIF, one category per image) and to the job log
+# (one line per finding), so agents without Code scanning API access can read them too. Findings don't fail the job.
+# A fix ships by updating the dependency or base image and releasing; images are rebuilt only on release.
+# https://github.com/anchore/grype Configuration: .grype.yaml
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # weekly, new advisories appear without changes here
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - .github/workflows/image-scan.yml
+      - .grype.yaml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  grype:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - backend
+          - frontend
+          - cli
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Scan
+        id: scan
+        uses: anchore/scan-action@11983a512817154c80a9db660c1a184be7513ed6 # v7.4.3
+        with:
+          image: tormap/${{ matrix.image }}:latest
+          only-fixed: true
+          fail-build: false
+          severity-cutoff: high
+          output-format: sarif
+          output-file: grype.sarif
+          config: .grype.yaml
+
+      - name: List findings
+        env:
+          IMAGE: tormap/${{ matrix.image }}:latest
+        run: |
+          echo "Fixable findings in $IMAGE: $(jq '[.runs[].results[]] | length' grype.sarif)"
+          jq -r '.runs[] | (.tool.driver.rules // []) as $rules | .results[] | .ruleId as $id
+            | ($rules[] | select(.id == $id) | .properties["security-severity"] // "") as $score
+            | "\($score)\t\($id)"' grype.sarif | sort -rn
+
+      # Pull requests from forks get a read-only token, their findings are in the job log
+      - name: Upload to Code scanning
+        if: >
+          !cancelled() && hashFiles('grype.sarif') != '' &&
+          (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        with:
+          sarif_file: grype.sarif
+          category: grype-${{ matrix.image }}

@@ -1,0 +1,13 @@
+# Grype configuration for .github/workflows/image-scan.yml. https://github.com/anchore/grype#configuration
+# To ignore a finding that doesn't apply, add it with a comment saying why, e.g.:
+# ignore:
+#   # Only affects a feature TorMap doesn't use
+#   - vulnerability: CVE-0000-00000
+#     package:
+#       name: example
+
+# Report each finding by its CVE id, as the other scanners do
+by-cve: true
+
+# Don't send update checks
+check-for-app-update: false

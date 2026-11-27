@@ -41,6 +41,10 @@ the repository's Code scanning alerts:
 - [zizmor](https://docs.zizmor.sh/) (`.github/workflows/zizmor.yml`): GitHub Actions workflows and actions. Findings
   fail the check and are listed in the job log.
 
+The published Docker images are scanned weekly with [Grype](https://github.com/anchore/grype)
+(`.github/workflows/image-scan.yml`, configuration in `.grype.yaml`) for vulnerabilities with a fix available, in OS
+packages and bundled libraries. Results go to Code scanning and the job log.
+
 [Snyk](https://snyk.io/) is used for dependency scanning (SCA). Pull requests are checked by the Snyk GitHub
 integration (PR status checks, configured in Snyk, no CI workflow involved). Snyk Code (SAST) is not used, because the
 free plan's monthly test quota is too small for the number of pull requests. Run the dependency scan locally when
