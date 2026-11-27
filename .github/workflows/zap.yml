@@ -2,7 +2,8 @@ name: zap
 
 # OWASP ZAP baseline scan (passive only: spiders and checks responses, sends no attacks) of the backend as it ships:
 # the published tormap/backend:edge image (master, so a fix is checked before it is released) with its production
-# configuration, a throwaway database and the CLI end-to-end fixture, so the API and the Lite pages have data. Never runs against tormap.org or api.tormap.org.
+# configuration, a throwaway database and the CLI end-to-end fixture, so the API and the Lite pages have data. Never
+# runs against tormap.org or api.tormap.org.
 # Findings don't fail the job: they are listed in the job summary and, one line per instance, in the job log, with
 # the full report in the "zap-report" artifact. Rules to ignore go in .zap/rules.tsv with a reason.
 # https://www.zaproxy.org/docs/docker/baseline-scan/
