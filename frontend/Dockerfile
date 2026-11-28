@@ -8,11 +8,11 @@ RUN YARN="node $(sed -n 's/^yarnPath: *//p' .yarnrc.yml)" \
     && $YARN install --immutable \
     && $YARN run build
 
-# Serve the static assets with the official nginx image (rebuilt upstream for every Alpine fix, so Renovate's digest
-# updates bring the patches) as the unprivileged user nginx (101). nginx-main.conf drops the `user` directive and
-# moves the PID file and temporary files to /tmp, so it needs no root and listens on 8080.
+# Serve the static assets with the official nginx image (Renovate bumps it with each nginx release) as the
+# unprivileged user nginx (101). nginx-main.conf drops the `user` directive and moves the PID file and temporary files
+# to /tmp, so it needs no root and listens on 8080.
 FROM nginx:1.31.10-alpine@sha256:7fc0fb4af7bf006aeb31aea88069976060f8f0a0a86b667126742cc17f4e31ae AS production
-# Alpine fixes published since the base image was last rebuilt (images are only built on release)
+# Alpine fixes published since the base image was built (images are only built on release)
 RUN apk upgrade --no-cache
 COPY nginx-main.conf /etc/nginx/nginx.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
