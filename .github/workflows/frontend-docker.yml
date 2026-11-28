@@ -48,8 +48,8 @@ jobs:
           grep -q 'id="root"' index.html
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/missing)" = 404
           # The nginx master process must not run as root
-          docker top frontend -o user,args
-          if docker top frontend -o user,args | grep 'nginx: master' | grep -qw root; then
+          docker top frontend -o pid,user,args
+          if docker top frontend -o pid,user,args | grep 'nginx: master' | grep -qw root; then
             echo "::error::nginx runs as root"
             exit 1
           fi
