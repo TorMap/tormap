@@ -25,7 +25,7 @@ pull request ──► required checks ──► review and merge to master ─�
 | `fuzzing.yml` | Daily (master) | Jazzer fuzzing of the backend parsers with ClusterFuzzLite, see `.clusterfuzzlite/` | None | Issues labeled `fuzzing` for crashes |
 | `release.yml` | Manual (master) | Version bump commit, `vX.Y.Z` tag, draft release | Release GitHub App (env `release`) | Tag, draft release |
 | `backend-docker.yml` | PR, master, `v*` tags | Build the image and its SBOM without secrets, then push exactly that digest and attest both | Docker Hub (env `docker-hub`), push job only | `tormap/backend` |
-| `frontend-docker.yml` | master, `v*` tags | Build and push the image | Docker Hub (env `docker-hub`) | `tormap/frontend` |
+| `frontend-docker.yml` | PR, master, `v*` tags | PR: build, smoke test and Grype scan without secrets; push: build and push the image | Docker Hub (env `docker-hub`), push job only | `tormap/frontend` |
 | `cli-native.yml` | PR, master, `v*` tags | Native binaries, end-to-end test, image | Docker Hub (env `docker-hub`) | CLI binaries on the release, `tormap/cli` |
 
 Jobs that hold secrets start with [Harden-Runner](https://github.com/step-security/harden-runner) in audit mode: it

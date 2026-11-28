@@ -8,12 +8,16 @@ RUN YARN="node $(sed -n 's/^yarnPath: *//p' .yarnrc.yml)" \
     && $YARN install --immutable \
     && $YARN run build
 
-# Bundle static assets with nginx. The unprivileged image runs as a non-root user (101) and therefore listens on 8080.
-FROM nginxinc/nginx-unprivileged:1.31.7-alpine@sha256:b5047b9b76845eac124358373c6852377c52e4b05834a47647e955dd91cb8f1e AS production
-# Copy built assets from `builder` image
-COPY --from=builder /app/build /usr/share/nginx/html
-# Add your nginx.conf
+# Serve the static assets with the official nginx image (Renovate bumps it with each nginx release) as the
+# unprivileged user nginx (101). nginx-main.conf drops the `user` directive and moves the PID file and temporary files
+# to /tmp, so it needs no root and listens on 8080.
+FROM nginx:1.31.10-alpine@sha256:7fc0fb4af7bf006aeb31aea88069976060f8f0a0a86b667126742cc17f4e31ae AS production
+# Alpine fixes published since the base image was built (images are only built on release)
+RUN apk upgrade --no-cache
+COPY nginx-main.conf /etc/nginx/nginx.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY security-headers.conf /etc/nginx/snippets/security-headers.conf
+COPY --from=builder /app/build /usr/share/nginx/html
+USER 101
 EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]

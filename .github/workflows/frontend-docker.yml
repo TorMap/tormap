@@ -1,6 +1,13 @@
 name: frontend_docker
 
+# - test (pull requests): builds the image for linux/amd64 without any secret, checks that it serves the app with the
+#   security headers as non-root, and lists Grype's fixable findings in the job log.
+# - frontend_docker (pushes): builds amd64 and arm64 and pushes to Docker Hub (environment docker-hub).
 on:
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-docker.yml'
   push:
     tags:
       - 'v*'
@@ -13,7 +20,53 @@ on:
 permissions: {}
 
 jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Build the image
+        run: docker build --tag tormap/frontend:test frontend
+
+      - name: Check the running image
+        run: |
+          docker run -d --name frontend -p 8080:8080 tormap/frontend:test
+          for _ in $(seq 1 30); do
+            curl -sf -o /dev/null http://localhost:8080/ && break
+            sleep 1
+          done
+          curl -sf -D headers.txt -o index.html http://localhost:8080/
+          cat headers.txt
+          grep -qi '^content-security-policy:' headers.txt
+          grep -qi '^x-content-type-options: nosniff' headers.txt
+          grep -q 'id="root"' index.html
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/missing)" = 404
+          # The nginx master process must not run as root
+          docker top frontend -o pid,user,args
+          if docker top frontend -o pid,user,args | grep 'nginx: master' | grep -qw root; then
+            echo "::error::nginx runs as root"
+            exit 1
+          fi
+
+      - name: Container log
+        if: failure()
+        run: docker logs frontend
+
+      # Same scanner and settings as the weekly image scan
+      - name: Scan with Grype
+        run: >
+          docker run --rm --volume /var/run/docker.sock:/var/run/docker.sock --volume "$PWD:/work" --workdir /work
+          anchore/grype:v0.122.1@sha256:661583704a253c0448ed63998b5ea2cd9d5a76ee71eedc4aed439b8ce3e93a1c
+          docker:tormap/frontend:test --config .grype.yaml --only-fixed
+
   frontend_docker:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     # Holds the Docker Hub secrets; its deployment rules allow only master and v* tags
     environment: docker-hub
